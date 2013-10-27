@@ -1,0 +1,4 @@
+- Make separate map view/minimap/navigation part that doesn't scan
+- Make "big" map output size configurable
+- Only save coverage in bitfield instead of actual height values?
+- Use electrical charge
