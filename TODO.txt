@@ -1,4 +1,4 @@
-- Make separate map view/minimap/navigation part that doesn't scan
 - Make "big" map output size configurable
-- Only save coverage in bitfield instead of actual height values?
 - Use electrical charge
+- Find a way to see progress for other scan types than altimetry on the minimap
+- Fix all the bugs

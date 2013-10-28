@@ -28,12 +28,17 @@ public class SCANcontroller : ScenarioModule
 	public static int minScanAlt = 5000;
 	public static int maxScanAlt = 500000;
 
+	public int colours = 0;
+
 	public override void OnLoad(ConfigNode node) {
+		colours = Convert.ToInt32(node.GetValue("colours"));
 		ConfigNode node_vessels = node.GetNode("Scanners");
 		if(node_vessels != null) {
 			print("SCANsat Controller: Loading " + node_vessels.CountValues.ToString() + " known vessels");
-			foreach(string id in node_vessels.GetValues("guid")) {
-				knownVessels.Add(new Guid(id));
+			foreach(ConfigNode node_vessel in node_vessels.GetNodes("Vessel")) {
+				Guid id = new Guid(node_vessel.GetValue("guid"));
+				int sensors = Convert.ToInt32(node_vessel.GetValue("sensors"));
+				knownVessels[id] = (SCANdata.SCANtype)sensors;
 			}
 		}
 		ConfigNode node_progress = node.GetNode("Progress");
@@ -54,9 +59,13 @@ public class SCANcontroller : ScenarioModule
 	}
 
 	public override void OnSave(ConfigNode node) {
+		node.AddValue("colours", colours);
 		ConfigNode node_vessels = new ConfigNode("Scanners");
-		foreach(Guid id in knownVessels) {
-			node_vessels.AddValue("guid", id.ToString());
+		foreach(Guid id in knownVessels.Keys) {
+			ConfigNode node_vessel = new ConfigNode("Vessel");
+			node_vessel.AddValue("guid", id.ToString());
+			node_vessel.AddValue("sensors", (int)knownVessels[id]);
+			node_vessels.AddNode(node_vessel);
 		}
 		node.AddNode(node_vessels);
 		ConfigNode node_progress = new ConfigNode("Progress");
@@ -70,17 +79,31 @@ public class SCANcontroller : ScenarioModule
 		node.AddNode(node_progress);
 	}
 
-	protected HashSet<Guid> knownVessels = new HashSet<Guid>();
-	public void registerVesselID(Guid id) {
-		knownVessels.Add(id);
+	protected Dictionary<Guid, SCANdata.SCANtype> knownVessels = new Dictionary<Guid, SCANdata.SCANtype>();
+	public void registerVesselID(Guid id, SCANdata.SCANtype sensor) {
+		if(!knownVessels.ContainsKey(id)) knownVessels[id] = sensor;
+		else knownVessels[id] |= sensor;
 	}
 
-	public void unregisterVesselID(Guid id) {
-		knownVessels.Remove(id);
+	public void unregisterVesselID(Guid id, SCANdata.SCANtype sensor) {
+		if(!knownVessels.ContainsKey(id)) return;
+		knownVessels[id] = knownVessels[id] & ~sensor;
+		if(knownVessels[id] == 0) knownVessels.Remove(id);
+	}
+
+	public bool isVesselKnown(Guid id, SCANdata.SCANtype sensor) {
+		if(!knownVessels.ContainsKey(id)) return false;
+		return (knownVessels[id] & sensor) != 0;
 	}
 
 	public bool isVesselKnown(Guid id) {
-		return knownVessels.Contains(id);
+		if(!knownVessels.ContainsKey(id)) return false;
+		return knownVessels[id] != 0;
+	}
+
+	public SCANdata.SCANtype activeSensorsOnVessel(Guid id) {
+		if(!knownVessels.ContainsKey(id)) return 0;
+		return knownVessels[id];
 	}
 
 	protected Dictionary<string, SCANdata> body_data = new Dictionary<string, SCANdata>();
@@ -92,24 +115,41 @@ public class SCANcontroller : ScenarioModule
 		return body_data[name];
 	}
 	public SCANdata getData(CelestialBody body) {
-		return getData(body.name);
+		SCANdata data = getData(body.name);
+		data.body = body;
+		return data;
 	}
 
-	public void registerPass(CelestialBody body, float lon, float lat) {
-		getData(body).registerPass(body, lon, lat);
+	public void registerPass(CelestialBody body, float lon, float lat, SCANdata.SCANtype type) {
+		getData(body).registerPass(lon, lat, type);
 	}
 
 	public void scanFromAllVessels() {
 		foreach(Vessel v in FlightGlobals.Vessels) {
 			if(v == null) continue;
-			if(v.Landed) continue;
 			if(!isVesselKnown(v.id)) continue;
-			if(v.altitude < minScanAlt || v.altitude > maxScanAlt) continue;
-
+			SCANdata.SCANtype sensors = knownVessels[v.id];
 			SCANdata data = getData(v.mainBody);
+			if(v.terrainAltitude < 2000 && ((int)sensors & (int)SCANdata.SCANtype.AnomalyDetail) != 0) {
+				for(int x=-1; x<=1; x++) {
+					for(int y=-1; y<=1; y++) {
+						data.registerPass((int)v.longitude + x, (int)v.latitude + y, SCANdata.SCANtype.AnomalyDetail | SCANdata.SCANtype.Anomaly);
+					}
+				}
+			}
+			sensors = sensors & ~SCANdata.SCANtype.AnomalyDetail;
+			SCANdata.SCANtype hires = 0;
+			if((sensors & SCANdata.SCANtype.AltimetryHiRes) != 0) {
+				sensors = sensors & ~SCANdata.SCANtype.AltimetryHiRes;
+				hires = SCANdata.SCANtype.AltimetryHiRes;
+			}
+			if(v.altitude < minScanAlt || v.altitude > maxScanAlt) continue;
 			for(int x=-5; x<=5; x++) {
-				for(int y=-5; y<=5; y+=1) {
-					data.registerPass(v.mainBody, (int)v.longitude + x, (int)v.latitude + y);
+				for(int y=-5; y<=5; y++) {
+					data.registerPass((int)v.longitude + x, (int)v.latitude + y, sensors);
+					if(hires != 0 && Math.Abs(x) <= 3 && Math.Abs(y) <= 3) {
+						data.registerPass((int)v.longitude + x, (int)v.latitude + y, hires);
+					}
 				}
 			}
 		}
