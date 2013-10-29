@@ -124,7 +124,13 @@ public class SCANcontroller : ScenarioModule
 		getData(body).registerPass(lon, lat, type);
 	}
 
+	protected static int last_scan_frame;
 	public void scanFromAllVessels() {
+		if(last_scan_frame != Time.frameCount) {
+			last_scan_frame = Time.frameCount;
+		} else {
+			return;
+		}
 		foreach(Vessel v in FlightGlobals.Vessels) {
 			if(v == null) continue;
 			if(!isVesselKnown(v.id)) continue;
@@ -147,12 +153,11 @@ public class SCANcontroller : ScenarioModule
 			for(int x=-5; x<=5; x++) {
 				for(int y=-5; y<=5; y++) {
 					data.registerPass((int)v.longitude + x, (int)v.latitude + y, sensors);
-					if(hires != 0 && Math.Abs(x) <= 3 && Math.Abs(y) <= 3) {
+					if(hires != 0 && Math.Abs(x) < 3 && Math.Abs(y) < 3) {
 						data.registerPass((int)v.longitude + x, (int)v.latitude + y, hires);
 					}
 				}
 			}
 		}
 	}
-
 }

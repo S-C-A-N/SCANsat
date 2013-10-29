@@ -1,4 +1,5 @@
 - Make "big" map output size configurable
 - Use electrical charge
 - Find a way to see progress for other scan types than altimetry on the minimap
+- Scanning a planet, discovering anomalies etc. should give science
 - Fix all the bugs

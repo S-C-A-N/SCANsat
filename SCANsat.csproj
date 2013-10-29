@@ -50,6 +50,8 @@
     <Compile Include="SCANdata.cs" />
     <Compile Include="CLZF2.cs" />
     <Compile Include="SCANsat.cs" />
+    <Compile Include="SCANui.cs" />
+    <Compile Include="SCANmap.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
