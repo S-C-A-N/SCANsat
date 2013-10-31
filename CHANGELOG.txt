@@ -1,0 +1,45 @@
+Build 2 - 20013-10-30
+---------------------
+
+Names in () are forum names of people who suggested the feature/found the bug.
+
+- BTDT scanner now correctly works when the vessel is below 2000m above ground,
+  instead of when the anomaly is below 2000m above sea level. (DMagic)
+
+- Main UI now correctly shows the altitude of the vessel above ground, instead 
+  of the terrain elevation above sea level below the vessel.
+  
+- Big map mouseover text now displays latitude and longitude in the correct 
+  order. (DMagic)
+  
+- Geographical coordinates are now displayed in DMS. (Sochin, GhostChaser)
+
+- Left-clicking inside the zoom box now zooms back out. (OrtwinS)
+
+- Big map now shows a projection of the active vessel's current orbit from one
+  orbital period in the past to one orbital period in the future. (Sochin)
+  
+- Big map now shows predicted equatorial crossings for the next few dozen orbits.
+
+- Big map can now be rendered using the Kavrayskiy VII projection. (OrtwinS)
+
+- Big map can now be rendered using a Polar Orthographic projection. (OrtwinS)
+
+- A red scanning line indicates big map rendering progress. (Thourion)
+
+- When using greyscale, text labels are displayed in cyan and orange. (sharpspoonful)
+
+- Text labels on maps now have a black outline. (OrtwinS)
+
+- The UI doesn't go AWOL anymore if you switch vessels in map view. (Tutman, DMagic)
+
+- The small map doesn't paint elevations <-1500m red in greyscale mode anymore.
+
+- Areas not covered by all active sensors on your active vessel now appear
+  darker on the small map. 
+
+- There's a switchable dot line grid on the big map. (OrtwinS)
+
+- Map markers can be toggled in big map. (DMagic, OrtwinS)
+
+- The zoom box acquired a close button. (Ralathon, DMagic, OrtwinS)

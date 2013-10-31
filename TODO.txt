@@ -1,5 +1,26 @@
+BEFORE NEXT BUILD:
+-
+
+MUST FIX BEFORE RELEASE:
 - Make "big" map output size configurable
 - Use electrical charge
-- Find a way to see progress for other scan types than altimetry on the minimap
 - Scanning a planet, discovering anomalies etc. should give science
+- science ... based upon the percentage of mapped terrain? A few points for every 10% for example, slowly increasing since 0->10% isn't as much of an achievement than 70->80 is (OrtwinS, Draft, BananaDealer)
+- science for detected anomalies etc. (BananaDealer)
+- proper integration into tech tree
 - Fix all the bugs
+
+MINE:
+- Find a way to see progress for other scan types than altimetry on the minimap
+- add more anomalies, e.g. "highest elevation"
+
+OTHERS:
+- Icons instead of lame text based markers (Sochin)
+- Can we get a table/list of detected anomalies? That would be excellent, even if it's only from a text file in the data directory. (Free Trader Beowulf)
+- Different colors for temporary textures of the parts (Ralathon)
+- visible band scanner for pretty pictures (Nertea) 
+   - planet texture overlaid with greyscale elevation map?
+- overlaying the planets in the stock map view with your generated images, showing them as a solid colour if they haven't been mapped? (pizzaoverhead)
+- Adjust action group function name, all sensors now say: 'start/stop RADAR scan' (OrtwinS)
+- make image export configurable (MOARdV)
+- show map markers in zoom window (OrtwinS)

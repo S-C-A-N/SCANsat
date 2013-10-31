@@ -28,10 +28,23 @@ public class SCANcontroller : ScenarioModule
 	public static int minScanAlt = 5000;
 	public static int maxScanAlt = 500000;
 
+	[KSPField(isPersistant = true)]
 	public int colours = 0;
 
+	[KSPField(isPersistant = true)]
+	public bool map_markers = true;
+
+	[KSPField(isPersistant = true)]
+	public bool map_orbit = true;
+
+	[KSPField(isPersistant = true)]
+	public bool map_grid = true;
+
+	[KSPField(isPersistant = true)]
+	public int projection = 0;
+
 	public override void OnLoad(ConfigNode node) {
-		colours = Convert.ToInt32(node.GetValue("colours"));
+		//colours = Convert.ToInt32(node.GetValue("colours"));
 		ConfigNode node_vessels = node.GetNode("Scanners");
 		if(node_vessels != null) {
 			print("SCANsat Controller: Loading " + node_vessels.CountValues.ToString() + " known vessels");
@@ -59,7 +72,7 @@ public class SCANcontroller : ScenarioModule
 	}
 
 	public override void OnSave(ConfigNode node) {
-		node.AddValue("colours", colours);
+		//node.AddValue("colours", colours);
 		ConfigNode node_vessels = new ConfigNode("Scanners");
 		foreach(Guid id in knownVessels.Keys) {
 			ConfigNode node_vessel = new ConfigNode("Vessel");
@@ -136,7 +149,7 @@ public class SCANcontroller : ScenarioModule
 			if(!isVesselKnown(v.id)) continue;
 			SCANdata.SCANtype sensors = knownVessels[v.id];
 			SCANdata data = getData(v.mainBody);
-			if(v.terrainAltitude < 2000 && ((int)sensors & (int)SCANdata.SCANtype.AnomalyDetail) != 0) {
+			if(v.heightFromTerrain < 2000 && v.heightFromTerrain >= 0 && ((int)sensors & (int)SCANdata.SCANtype.AnomalyDetail) != 0) {
 				for(int x=-1; x<=1; x++) {
 					for(int y=-1; y<=1; y++) {
 						data.registerPass((int)v.longitude + x, (int)v.latitude + y, SCANdata.SCANtype.AnomalyDetail | SCANdata.SCANtype.Anomaly);

@@ -31,7 +31,7 @@ public class SCANdata
 		Everything = 255		// everything
 	}
 
-	public void registerPass(float lon, float lat, SCANtype type) {
+	public void registerPass(double lon, double lat, SCANtype type) {
 		// fudging coordinates a bit because KSP may return them unclipped
 		int ilon = ((int)(lon + 360 + 180)) % 360;
 		int ilat = ((int)(lat + 180 + 90)) % 180;
@@ -40,25 +40,32 @@ public class SCANdata
 		updateSerial += 1;
 	}
 
-	public bool isCovered(float lon, float lat, SCANtype type) {
+	public bool isCovered(double lon, double lat, SCANtype type) {
 		int ilon = ((int)(lon + 360 + 180)) % 360;
 		int ilat = ((int)(lat + 180 + 90)) % 180;
 		if(ilon < 0 || ilat < 0 || ilon >= 360 || ilat >= 180) return false;
 		return (coverage[ilon, ilat] & (byte)type) != 0;
 	}
 
+	public bool isCoveredByAll(double lon, double lat, SCANtype type) {
+		int ilon = ((int)(lon + 360 + 180)) % 360;
+		int ilat = ((int)(lat + 180 + 90)) % 180;
+		if(ilon < 0 || ilat < 0 || ilon >= 360 || ilat >= 180) return false;
+		return (coverage[ilon, ilat] & (byte)type) == (byte)type;
+	}
+
 	public class SCANanomaly {
 		public SCANanomaly(string s, double lon, double lat) {
 			name = s;
-			longitude = (float)lon;
-			latitude = (float)lat;
+			longitude = lon;
+			latitude = lat;
 			known = false;
 		}
 		public bool known;
 		public bool detail;
 		public string name;
-		public float longitude;
-		public float latitude;
+		public double longitude;
+		public double latitude;
 	}
 	SCANanomaly[] anomalies;
 	public SCANanomaly[] getAnomalies() {
@@ -122,44 +129,44 @@ public class SCANdata
 	}
 
 	protected Color[] redline;
-	public void updateImages() {
+	public void updateImages(SCANtype type) {
 		if(redline == null) {
 			redline = new Color[360];
 			for(int i=0; i<360; i++) redline[i] = Color.red;
 		}
-		drawHeightScanline();
+		drawHeightScanline(type);
 		if(scanline < 179) {
 			map_small.SetPixels(0, scanline + 1, 360, 1, redline);
 		}
 		map_small.Apply();
 	}
 
-	public float getElevation(float lon, float lat) {
+	public double getElevation(double lon, double lat) {
 		if(body.pqsController == null) return 0;
 		int ilon = ((int)(lon + 360 + 180)) % 360;
 		int ilat = ((int)(lat + 180 + 90)) % 180;
-		float rlon = Mathf.Deg2Rad * lon;
-		float rlat = Mathf.Deg2Rad * lat;
+		double rlon = Mathf.Deg2Rad * lon;
+		double rlat = Mathf.Deg2Rad * lat;
 		Vector3d rad = new Vector3d(Math.Cos(rlat) * Math.Cos(rlon), Math.Sin(rlat), Math.Cos(rlat) * Math.Sin(rlon));
-		return (float)Math.Round(body.pqsController.GetSurfaceHeight(rad) - body.pqsController.radius, 1);
+		return Math.Round(body.pqsController.GetSurfaceHeight(rad) - body.pqsController.radius, 1);
 	}
 
-	public int getBiomeIndex(float lon, float lat) {
+	public int getBiomeIndex(double lon, double lat) {
 		// It could be so easy, if this function didn't print debug messages to the screen...
 		// return body.BiomeMap.GetAtt(Mathf.Deg2Rad * lat, Mathf.Deg2Rad * lon).name;
 		if(body.BiomeMap == null) return -1;
 		if(body.BiomeMap.Map == null) return -1;
-		float u = ((lon + 360 + 180 + 90)) % 360;
-		float v = ((lat + 180 + 90)) % 180;
+		double u = ((lon + 360 + 180 + 90)) % 360;
+		double v = ((lat + 180 + 90)) % 180;
 		if(u < 0 || v < 0 || u >= 360 || v >= 180) return -1;
 		u /= 360f; v /= 180f;
-		Color c = body.BiomeMap.Map.GetPixelBilinear(u, v);
-		float maxdiff = 12345;
+		Color c = body.BiomeMap.Map.GetPixelBilinear((float)u, (float)v);
+		double maxdiff = 12345;
 		int index = -1;
 		for(int i=0; i<body.BiomeMap.Attributes.Length; ++i) {
 			CBAttributeMap.MapAttribute x = body.BiomeMap.Attributes[i];
 			Color d = x.mapColor;
-			float diff = ((Vector4)d - (Vector4)c).sqrMagnitude;
+			double diff = ((Vector4)d - (Vector4)c).sqrMagnitude;
 			if(diff < maxdiff) {
 				index = i;
 				maxdiff = diff;
@@ -168,14 +175,14 @@ public class SCANdata
 		return index;
 	}
 	
-	public float getBiomeIndexFraction(float lon, float lat) {
+	public double getBiomeIndexFraction(double lon, double lat) {
 		if(body.BiomeMap == null) return 0f;
 		return getBiomeIndex(lon, lat) * 1.0f / body.BiomeMap.Attributes.Length;
 	}
 
-	public CBAttributeMap.MapAttribute getBiome(float lon, float lat) {
+	public CBAttributeMap.MapAttribute getBiome(double lon, double lat) {
 		// It could be so easy, if this function didn't print debug messages to the screen...
-		// return body.BiomeMap.GetAtt(Mathf.Deg2Rad * lat, Mathf.Deg2Rad * lon).name;
+		// return body.BiomeMap.GetAtt(Mathf.Deg2Rad * lat, Mathf.Deg2Rad * lon);
 		if(body.BiomeMap == null) return null;
 		if(body.BiomeMap.Map == null) return body.BiomeMap.defaultAttribute;
 		int i = getBiomeIndex(lon, lat);
@@ -183,7 +190,7 @@ public class SCANdata
 		return body.BiomeMap.Attributes[i];
 	}
 	
-	public string getBiomeName(float lon, float lat) {
+	public string getBiomeName(double lon, double lat) {
 		CBAttributeMap.MapAttribute a = getBiome(lon, lat);
 		if(a == null) return "unknown";
 		return a.name;
@@ -191,7 +198,7 @@ public class SCANdata
 
 	protected int scanline = 0;
 	protected int scanstep = 0;
-	public void drawHeightScanline() {
+	public void drawHeightScanline(SCANtype type) {
 		Color[] cols_height_map_small = map_small.GetPixels(0, scanline, 360, 1);
 		for(int ilon=0; ilon<360; ilon+=1) {
 			int scheme = 0;
@@ -203,8 +210,8 @@ public class SCANdata
 					continue;
 				} else {
 					// convert to radial vector
-					float rlon = Mathf.Deg2Rad * (ilon - 180);
-					float rlat = Mathf.Deg2Rad * (scanline - 90);
+					double rlon = Mathf.Deg2Rad * (ilon - 180);
+					double rlat = Mathf.Deg2Rad * (scanline - 90);
 					Vector3d rad = new Vector3d(Math.Cos(rlat) * Math.Cos(rlon), Math.Sin(rlat), Math.Cos(rlat) * Math.Sin(rlon));
 					// query terrain controller for elevation at this point
 					val = (float)Math.Round(body.pqsController.GetSurfaceHeight(rad) - body.pqsController.radius, 1);
@@ -224,9 +231,12 @@ public class SCANdata
 					c = Color.white;
 				}
 			}
-			if(c != Color.black) {
-				cols_height_map_small[ilon] = c;
+			if(type != SCANtype.Nothing) {
+				if(!isCoveredByAll(ilon - 180, scanline - 90, type)) {
+					c = Color.Lerp(c, Color.black, 0.5f);
+				}
 			}
+			cols_height_map_small[ilon] = c;
 		}
 		map_small.SetPixels(0, scanline, 360, 1, cols_height_map_small);
 		scanline = scanline + 1;

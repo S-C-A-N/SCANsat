@@ -5,7 +5,7 @@ public class SCANmap {
 	private static Color[] heightGradient = {XKCDColors.ArmyGreen, XKCDColors.Yellow, XKCDColors.Red, XKCDColors.Magenta, XKCDColors.White, XKCDColors.White};
 	public static Color heightToColor(float val, int scheme) {
 		if(scheme == 1 || SCANcontroller.controller.colours == 1) {
-			return Color.Lerp(Color.black, Color.white, Mathf.Clamp(val+1500f, 0, 9000)/9000f);
+			return Color.Lerp(Color.black, Color.white, Mathf.Clamp((val+1500f)/9000f, 0, 1));
 		}
 		Color c = Color.black;
 		if(val <= 0) {
@@ -17,14 +17,29 @@ public class SCANmap {
 		}
 		return c;
 	}
+	
+	public enum MapProjection {
+		Rectangular = 0,
+		KavrayskiyVII = 1,
+		Polar = 2,
+	}
 
-	public float mapscale, lon_offset, lat_offset;
+	private static string [] getProjectionNames() {
+		MapProjection[] v = (MapProjection[])Enum.GetValues(typeof(MapProjection));
+		string[] r = new string[v.Length];
+		for(int i=0; i<v.Length; ++i) r[i] = v[i].ToString();
+		return r;
+	}
+	public static string[] projectionNames = getProjectionNames();
+
+	public double mapscale, lon_offset, lat_offset;
 	public int mapwidth, mapheight;
 	public int mapmode = 0;
+	public MapProjection projection = MapProjection.Rectangular;
 
 	protected int mapstep;
 	protected bool mapsaved;
-	protected float[] mapline;
+	protected double[] mapline;
 	protected CelestialBody body;
 
 	public Texture2D map;
@@ -47,16 +62,118 @@ public class SCANmap {
 		}
 	}
 
-	public void centerAround(float lon, float lat) {
+	public void centerAround(double lon, double lat) {
 		lon_offset = 180 + lon - (mapwidth / mapscale) / 2;
 		lat_offset = 90 + lat - (mapheight / mapscale) / 2;
 	}
+
+	public void setProjection(MapProjection p) {
+		if(projection == p) return;
+		projection = p;
+		resetMap();
+	}
+
+	public double projectLongitude(double lon, double lat) {
+		lon = (lon + 3600 + 180) % 360 - 180;
+		lat = (lat + 1800 + 90) % 180 - 90;
+		switch(projection) {
+		case MapProjection.KavrayskiyVII:
+			lon = Mathf.Deg2Rad * lon;
+			lat = Mathf.Deg2Rad * lat;
+			lon = (3.0f * lon / 2.0f / Math.PI) * Math.Sqrt(Math.PI * Math.PI / 3.0f - lat * lat);
+			return Mathf.Rad2Deg * lon;
+		case MapProjection.Polar:
+			lon = Mathf.Deg2Rad * lon;
+			lat = Mathf.Deg2Rad * lat;
+			if(lat < 0) {
+				lon = 1.3 * Math.Cos(lat) * Math.Sin(lon) - Math.PI/2;
+			} else {
+				lon = 1.3 * Math.Cos(lat) * Math.Sin(lon) + Math.PI/2;
+			}
+			return Mathf.Rad2Deg * lon;
+		default:
+			return lon;
+		}
+	}
+
+	public double projectLatitude(double lon, double lat) {
+		lon = (lon + 3600 + 180) % 360 - 180;
+		lat = (lat + 1800 + 90) % 180 - 90;
+		switch(projection) {
+		case MapProjection.Polar:
+			lon = Mathf.Deg2Rad * lon;
+			lat = Mathf.Deg2Rad * lat;
+			if(lat < 0) {
+				lat = 1.3 * Math.Cos(lat) * Math.Cos(lon);
+			} else {
+				lat = -1.3 * Math.Cos(lat) * Math.Cos(lon);
+			}
+			return Mathf.Rad2Deg * lat;
+		default:
+			return lat;
+		}
+	}
+
+	public double unprojectLongitude(double lon, double lat) {
+		lon = (lon + 3600 + 180) % 360 - 180;
+		lat = (lat + 1800 + 90) % 180 - 90;
+		switch(projection) {
+		case MapProjection.KavrayskiyVII:
+			lon = Mathf.Deg2Rad * lon;
+			lat = Mathf.Deg2Rad * lat;
+			lon = lon / Math.Sqrt(Mathf.PI * Math.PI / 3.0f - lat * lat) * 2.0f * Math.PI /3.0f;
+			return Mathf.Rad2Deg * lon;
+		case MapProjection.Polar:
+			lon = Mathf.Deg2Rad * lon;
+			lat = Mathf.Deg2Rad * lat;
+			double lat0 = Math.PI / 2;
+			if(lon < 0) {
+				lon += Math.PI / 2;
+				lat0 = -Math.PI / 2;
+			} else {
+				lon -= Math.PI / 2;
+			}
+			lon /= 1.3; lat /= 1.3;
+			double p = Math.Sqrt(lon * lon + lat * lat);
+			double c = Math.Asin(p);
+			lon = Math.Atan2((lon * Math.Sin(c)), (p * Math.Cos(lat0) * Math.Cos(c) - lat * Math.Sin(lat0) * Math.Sin(c)));
+			return Mathf.Rad2Deg * lon;
+		default:
+			return lon;
+		}
+	}
+
+	public double unprojectLatitude(double lon, double lat) {
+		lon = (lon + 3600 + 180) % 360 - 180;
+		lat = (lat + 1800 + 90) % 180 - 90;
+		switch(projection) {
+		case MapProjection.Polar:
+			lon = Mathf.Deg2Rad * lon;
+			lat = Mathf.Deg2Rad * lat;
+			double lat0 = Math.PI / 2;
+			if(lon < 0) {
+				lon += Math.PI / 2;
+				lat0 = -Math.PI / 2;
+			} else {
+				lon -= Math.PI / 2;
+			}
+			lon /= 1.3; lat /= 1.3;
+			double p = Math.Sqrt(lon * lon + lat * lat);
+			double c = Math.Asin(p);
+			lat = Math.Asin(Math.Cos(c) * Math.Sin(lat0) + (lat * Math.Sin(c) * Math.Cos(lat0))/(p));
+			return Mathf.Rad2Deg * lat;
+		default:
+			return lat;
+		}
+	}
+
+	protected Color[] redline;
 
 	public Texture2D getPartialMap() {
 		SCANdata data = SCANcontroller.controller.getData(body);
 		Color[] pix;
 		if(map == null) {
-			map = new Texture2D(mapwidth, mapheight, TextureFormat.RGB24, false);
+			map = new Texture2D(mapwidth, mapheight, TextureFormat.ARGB32, false);
 			pix = map.GetPixels();
 			for(int i=0; i<pix.Length; ++i) pix[i] = Color.grey;
 			map.SetPixels(pix);
@@ -68,22 +185,38 @@ public class SCANmap {
 				else if(mapmode == 1) mode = "slope";
 				else if(mapmode == 2) mode = "biome";
 				if(SCANcontroller.controller.colours == 1) mode += "-grey";
-				string filename = body.name + "_" + mode + "_" + map.width.ToString() + "x" + map.height.ToString() + ".png";
+				string filename = body.name + "_" + mode + "_" + map.width.ToString() + "x" + map.height.ToString();
+				if(projection != MapProjection.Rectangular) filename += "_" + projection.ToString();
+				filename += ".png";
 				KSP.IO.File.WriteAllBytes<SCANdata>(map.EncodeToPNG(), filename, null);
 				mapsaved = true;
 			}
 			return map;
 		}
+		if(redline == null || redline.Length != map.width) {
+			redline = new Color[map.width];
+			for(int i=0; i<redline.Length; ++i) redline[i] = Color.red;
+		}
+		if(mapstep < map.height - 1) {
+			map.SetPixels(0, mapstep + 1, map.width, 1, redline);
+		}
 		if(mapstep <= 0) {
 			mapstep = 0;
-			mapline = new float[map.width];
+			mapline = new double[map.width];
 		}
 		pix = map.GetPixels(0, mapstep, map.width, 1);
-		float lat = (mapstep * 1.0f / mapscale) - 90f + lat_offset;
 		for(int i=0; i<map.width; i++) {
 			int scheme = 0;
-			float lon = (i * 1.0f / mapscale) - 180f + lon_offset;
+			double lat = (mapstep * 1.0f / mapscale) - 90f + lat_offset;
+			double lon = (i * 1.0f / mapscale) - 180f + lon_offset;
+			double la = lat, lo = lon;
+			lat = unprojectLatitude(lo, la);
+			lon = unprojectLongitude(lo, la);
 			pix[i] = Color.grey;
+			if(double.IsNaN(lat) || double.IsNaN(lon) || lat < -90 || lat > 90 || lon < -180 || lon > 180) {
+				pix[i] = Color.clear;
+				continue;
+			}
 			if(mapmode == 0) {
 				if(!data.isCovered(lon, lat, SCANdata.SCANtype.Altimetry)) continue;
 				if(body.pqsController == null) {
@@ -93,11 +226,11 @@ public class SCANmap {
 				float val;
 				if(data.isCovered(lon, lat, SCANdata.SCANtype.AltimetryHiRes)) {
 					// high resolution gets a coloured pixel for the actual position
-					val = data.getElevation(lon, lat);
+					val = (float)data.getElevation(lon, lat);
 					pix[i] = heightToColor(val, scheme);
 				} else {
 					// basic altimetry gets forced greyscale with lower resolution
-					val = data.getElevation(((int)(lon*5))/5, ((int)(lat*5))/5);
+					val = (float)data.getElevation(((int)(lon*5))/5, ((int)(lat*5))/5);
 					pix[i] = heightToColor(val, 1);
 				}
 				/* draw height lines - works, but mostly useless...
@@ -116,17 +249,17 @@ public class SCANmap {
 					pix[i] = Color.Lerp(Color.black, Color.white, UnityEngine.Random.value);
 					continue;
 				}
-				float val = data.getElevation(lon, lat);
+				float val = (float)data.getElevation(lon, lat);
 				if(mapstep == 0) {
 					pix[i] = Color.grey;
 				} else {
 					// This doesn't actually calculate the slope per se, but it's faster
 					// than asking for yet more elevation data. Please don't use this
 					// code to operate nuclear power plants or rockets.
-					float v1 = mapline[i];
+					double v1 = mapline[i];
 					if(i > 0) v1 = Math.Max(v1, mapline[i - 1]);
 					if(i < mapline.Length - 1) v1 = Math.Max(v1, mapline[i + 1]);
-					float v = Mathf.Clamp(Math.Abs(val - v1) / 1000f, 0, 2f);
+					float v = Mathf.Clamp((float)Math.Abs(val - v1) / 1000f, 0, 2f);
 					if(SCANcontroller.controller.colours == 1) {
 						pix[i] = Color.Lerp(Color.black, Color.white, v / 2f);
 					} else {
@@ -151,18 +284,18 @@ public class SCANmap {
 				u /= 360f; v /= 180f;
 				pix[i] = body.BiomeMap.Map.GetPixelBilinear(u, v);
 				*/
-				float bio = data.getBiomeIndexFraction(lon, lat);
+				double bio = data.getBiomeIndexFraction(lon, lat);
 				Color biome = Color.grey;
 				if(SCANcontroller.controller.colours == 1) {
 					if((i > 0 && mapline[i - 1] != bio) || (mapstep > 0 && mapline[i] != bio)) {
 						biome = Color.white;
 					} else {
-						biome = Color.Lerp(Color.black, Color.white, bio);
+						biome = Color.Lerp(Color.black, Color.white, (float)bio);
 					}
 				} else {
 					Color elevation = Color.gray;
 					if(data.isCovered(lon, lat, SCANdata.SCANtype.Altimetry)) {
-						float val = data.getElevation(lon, lat);
+						float val = (float)data.getElevation(lon, lat);
 						elevation = Color.Lerp(Color.black, Color.white, Mathf.Clamp(val+1500f, 0, 9000)/9000f);
 					}
 					Color bio1 = XKCDColors.CamoGreen;
@@ -170,7 +303,7 @@ public class SCANmap {
 					if((i > 0 && mapline[i - 1] != bio) || (mapstep > 0 && mapline[i] != bio)) {
 						biome = Color.Lerp(XKCDColors.Puce, elevation, 0.5f);
 					} else {
-						biome = Color.Lerp(Color.Lerp(bio1, bio2, bio), elevation, 0.5f);
+						biome = Color.Lerp(Color.Lerp(bio1, bio2, (float)bio), elevation, 0.5f);
 					}
 				}
 

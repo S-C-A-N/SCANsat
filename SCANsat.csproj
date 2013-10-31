@@ -24,6 +24,7 @@
         <Command type="AfterBuild" command="xcopy &quot;${TargetFile}&quot; &quot;D:\Kerbal Space Program\GameData\SCANsat&quot; /y" externalConsole="True" />
         <Command type="AfterBuild" command="xcopy &quot;${ProjectDir}\LICENSE.txt&quot; &quot;D:\Kerbal Space Program\GameData\SCANsat&quot; /y" externalConsole="True" />
         <Command type="AfterBuild" command="xcopy &quot;${ProjectDir}\README.txt&quot; &quot;D:\Kerbal Space Program\GameData\SCANsat&quot; /y" externalConsole="True" />
+        <Command type="AfterBuild" command="xcopy &quot;${ProjectDir}\CHANGELOG.txt&quot; &quot;D:\Kerbal Space Program\GameData\SCANsat&quot; /y" externalConsole="True" />
       </CustomCommands>
     </CustomCommands>
   </PropertyGroup>
@@ -58,5 +59,6 @@
     <None Include="TODO.txt" />
     <None Include="LICENSE.txt" />
     <None Include="README.txt" />
+    <None Include="CHANGELOG.txt" />
   </ItemGroup>
 </Project>
