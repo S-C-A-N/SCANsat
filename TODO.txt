@@ -1,26 +1,34 @@
 BEFORE NEXT BUILD:
--
+
 
 MUST FIX BEFORE RELEASE:
-- Make "big" map output size configurable
-- Use electrical charge
 - Scanning a planet, discovering anomalies etc. should give science
 - science ... based upon the percentage of mapped terrain? A few points for every 10% for example, slowly increasing since 0->10% isn't as much of an achievement than 70->80 is (OrtwinS, Draft, BananaDealer)
+- science based on how often the satellite setup can update data?
 - science for detected anomalies etc. (BananaDealer)
 - proper integration into tech tree
+- zoom box goes out of range at poles
 - Fix all the bugs
 
 MINE:
-- Find a way to see progress for other scan types than altimetry on the minimap
 - add more anomalies, e.g. "highest elevation"
+- detect strongly localized biomes and indicate on map (e.g. craters, badlands)
+- cache bigmap height values
+- zoom box should only work if the area can be seen from a relevant sensor in orbit
+- vessel switching via list in small window
+- make anomaly detection use an optical sensor that only works during day
+- optionally display ground track for moons that have an active sensor in orbit?
 
 OTHERS:
-- Icons instead of lame text based markers (Sochin)
 - Can we get a table/list of detected anomalies? That would be excellent, even if it's only from a text file in the data directory. (Free Trader Beowulf)
 - Different colors for temporary textures of the parts (Ralathon)
 - visible band scanner for pretty pictures (Nertea) 
    - planet texture overlaid with greyscale elevation map?
+   - should only work when the area is receiving sunlight?
 - overlaying the planets in the stock map view with your generated images, showing them as a solid colour if they haven't been mapped? (pizzaoverhead)
 - Adjust action group function name, all sensors now say: 'start/stop RADAR scan' (OrtwinS)
-- make image export configurable (MOARdV)
-- show map markers in zoom window (OrtwinS)
+- Would be nice one day to be able to zoom in on a particular grid and have a small 3d window preview that you can rotate around to get a real sense of a place to land (sirkut)
+- configurable raw data export (drtedastro) http://forum.kerbalspaceprogram.com/threads/55832-PLUGIN-PARTS-WIP-SCANsat-terrain-mapping?p=746489&viewfull=1#post746489
+- I know that it's common in flight sims to have some kind of mapping app that takes data output from the sim to plot your location, like a GPS map. (DMagic)
+- Is there a way to adjust the "sea level". My wife likes a pink Mun, but I'd like to tone it down a bit. (DarthJazno)
+- RWR (Radar warning receiver) .. The "map" could look like that real RWR: http://upload.wikimedia.org/wikipedia/en/f/fc/Rwr_example.gif (Nostromo)

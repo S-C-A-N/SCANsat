@@ -24,7 +24,7 @@ public class SCANdata
 		AltimetryLoRes = 1,		// low resolution altimetry (limited zoom)
 		AltimetryHiRes = 2,		// high resolution altimetry (unlimited zoom)
 		Altimetry = 3,			// both (setting) or either (testing) altimetry
-		Slope = 4,				// slope data
+		//Slope = 4,			// slope data
 		Biome = 8,				// biome data
 		Anomaly = 16,			// anomalies (position of anomaly)
 		AnomalyDetail = 32,		// anomaly detail (name of anomaly, etc.)

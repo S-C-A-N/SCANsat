@@ -43,8 +43,16 @@ public class SCANcontroller : ScenarioModule
 	[KSPField(isPersistant = true)]
 	public int projection = 0;
 
+	[KSPField(isPersistant = true)]
+	public int map_width = 0;
+
+	[KSPField(isPersistant = true)]
+	public int map_x = 100;
+
+	[KSPField(isPersistant = true)]
+	public int map_y = 50;
+
 	public override void OnLoad(ConfigNode node) {
-		//colours = Convert.ToInt32(node.GetValue("colours"));
 		ConfigNode node_vessels = node.GetNode("Scanners");
 		if(node_vessels != null) {
 			print("SCANsat Controller: Loading " + node_vessels.CountValues.ToString() + " known vessels");
@@ -72,7 +80,6 @@ public class SCANcontroller : ScenarioModule
 	}
 
 	public override void OnSave(ConfigNode node) {
-		//node.AddValue("colours", colours);
 		ConfigNode node_vessels = new ConfigNode("Scanners");
 		foreach(Guid id in knownVessels.Keys) {
 			ConfigNode node_vessel = new ConfigNode("Vessel");
@@ -114,6 +121,11 @@ public class SCANcontroller : ScenarioModule
 		return knownVessels[id] != 0;
 	}
 
+	public bool isVesselKnown(Vessel v) {
+		if(v.vesselType == VesselType.Debris) return false;
+		return isVesselKnown(v.id);
+	}
+
 	public SCANdata.SCANtype activeSensorsOnVessel(Guid id) {
 		if(!knownVessels.ContainsKey(id)) return 0;
 		return knownVessels[id];
@@ -146,7 +158,7 @@ public class SCANcontroller : ScenarioModule
 		}
 		foreach(Vessel v in FlightGlobals.Vessels) {
 			if(v == null) continue;
-			if(!isVesselKnown(v.id)) continue;
+			if(!isVesselKnown(v)) continue;
 			SCANdata.SCANtype sensors = knownVessels[v.id];
 			SCANdata data = getData(v.mainBody);
 			if(v.heightFromTerrain < 2000 && v.heightFromTerrain >= 0 && ((int)sensors & (int)SCANdata.SCANtype.AnomalyDetail) != 0) {

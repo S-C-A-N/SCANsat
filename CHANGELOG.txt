@@ -1,7 +1,57 @@
-Build 2 - 20013-10-30
----------------------
-
 Names in () are forum names of people who suggested the feature/found the bug.
+
+Build 3 - 2013-11-02
+--------------------
+
+- Map overlays are rendered in a more efficient way. (DMagic, OrtwinS)
+
+- The polar orthographic projection doesn't choke on the antimeridian 
+  anymore. (DMagic)
+
+- Greyscale mode changes more colors to barrier free colors.
+
+- The big map is now resizable and its size and position are saved in the 
+  persistance file.
+
+- Map markers now use the stock KSP icons, if applicable. (Sochin)
+
+- More text has black outlines now to make it more readable.
+
+- Map markers and the ground track are now visible in the zoom box. (Ortwins)
+
+- Polar projection now displays handy S and N markers. (Thourion, OrtwinS)
+
+- All parts now consume electrical charge. The amounts are not finalized yet
+  but can be configured in the part.cfg files.
+
+- Slope detection has been folded into altimetry. (OrtwinS)
+
+- Existing slope sensors have become broken, and a small explosive charge has
+  been activated remotely for your convenience. You can trigger it via the
+  right-click menu to get rid of the part on existing vessels.
+
+- If there are maneuver nodes on the active orbit during the time span for 
+  which the ground track is rendered, the first maneuver node's position will
+  be indicated on the ground track along with the ground track for one period
+  of the resulting orbit.
+
+- The GUI style should not flip between Unity and KSP style. (BananaDealer)
+
+- Rendered maps are not exported automatically anymore. Instead, there's a
+  button in the big map window that exports the current map without any of
+  the overlays. Exported images are still saved in the same location. (MOARdV)
+
+- Flags are now visible on the map.
+
+- Double clicking a ship name in the small window now switches to that ship.
+
+- The vessel list in the small window can now be toggled, and the window can
+  be minimized to an icon only. (OrtwinS)
+  
+  
+
+Build 2 - 2013-10-31
+--------------------
 
 - BTDT scanner now correctly works when the vessel is below 2000m above ground,
   instead of when the anomaly is below 2000m above sea level. (DMagic)

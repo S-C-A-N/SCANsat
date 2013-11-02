@@ -62,6 +62,20 @@ public class SCANmap {
 		}
 	}
 
+	public void setWidth(int w) {
+		if(w == 0) {
+			w = 360 * (int)(Screen.width / 360);
+			if(w > 360 * 4) w = 360 * 4;
+		}
+		if(w < 360) w = 360;
+		if(mapwidth == w) return;
+		mapwidth = w;
+		mapscale = mapwidth / 360f;
+		mapheight = (int)(w / 2);
+		map = null;
+		resetMap();
+	}
+
 	public void centerAround(double lon, double lat) {
 		lon_offset = 180 + lon - (mapwidth / mapscale) / 2;
 		lat_offset = 90 + lat - (mapheight / mapscale) / 2;
@@ -121,7 +135,7 @@ public class SCANmap {
 		case MapProjection.KavrayskiyVII:
 			lon = Mathf.Deg2Rad * lon;
 			lat = Mathf.Deg2Rad * lat;
-			lon = lon / Math.Sqrt(Mathf.PI * Math.PI / 3.0f - lat * lat) * 2.0f * Math.PI /3.0f;
+			lon = lon / Math.Sqrt(Mathf.PI * Math.PI / 3.0f - lat * lat) * 2.0f * Math.PI / 3.0f;
 			return Mathf.Rad2Deg * lon;
 		case MapProjection.Polar:
 			lon = Mathf.Deg2Rad * lon;
@@ -133,11 +147,14 @@ public class SCANmap {
 			} else {
 				lon -= Math.PI / 2;
 			}
-			lon /= 1.3; lat /= 1.3;
+			lon /= 1.3;
+			lat /= 1.3;
 			double p = Math.Sqrt(lon * lon + lat * lat);
 			double c = Math.Asin(p);
 			lon = Math.Atan2((lon * Math.Sin(c)), (p * Math.Cos(lat0) * Math.Cos(c) - lat * Math.Sin(lat0) * Math.Sin(c)));
-			return Mathf.Rad2Deg * lon;
+			lon = (Mathf.Rad2Deg * lon + 180) % 360 - 180;
+			if(lon <= -180) lon = -180;
+			return lon;
 		default:
 			return lon;
 		}
@@ -157,14 +174,41 @@ public class SCANmap {
 			} else {
 				lon -= Math.PI / 2;
 			}
-			lon /= 1.3; lat /= 1.3;
+			lon /= 1.3;
+			lat /= 1.3;
 			double p = Math.Sqrt(lon * lon + lat * lat);
 			double c = Math.Asin(p);
-			lat = Math.Asin(Math.Cos(c) * Math.Sin(lat0) + (lat * Math.Sin(c) * Math.Cos(lat0))/(p));
+			lat = Math.Asin(Math.Cos(c) * Math.Sin(lat0) + (lat * Math.Sin(c) * Math.Cos(lat0)) / (p));
 			return Mathf.Rad2Deg * lat;
 		default:
 			return lat;
 		}
+	}
+
+	public double scaleLatitude(double lat) {
+		lat -= lat_offset;
+		lat *= 180f / (mapheight / mapscale);
+		return lat;
+	}
+
+	public double scaleLongitude(double lon) {
+		lon -= lon_offset;
+		lon *= 360f / (mapwidth / mapscale);
+		return lon;
+	}
+
+	public void exportPNG() {
+		string mode = "unknown";
+		if(mapmode == 0) mode = "elevation";
+		else if(mapmode == 1) mode = "slope";
+		else if(mapmode == 2) mode = "biome";
+		if(SCANcontroller.controller.colours == 1) mode += "-grey";
+		string filename = body.name + "_" + mode + "_" + map.width.ToString() + "x" + map.height.ToString();
+		if(projection != MapProjection.Rectangular) filename += "_" + projection.ToString();
+		filename += ".png";
+		KSP.IO.File.WriteAllBytes<SCANdata>(map.EncodeToPNG(), filename, null);
+		mapsaved = true;
+		ScreenMessages.PostScreenMessage("Map saved: " + filename, 5, ScreenMessageStyle.UPPER_CENTER);
 	}
 
 	protected Color[] redline;
@@ -175,22 +219,9 @@ public class SCANmap {
 		if(map == null) {
 			map = new Texture2D(mapwidth, mapheight, TextureFormat.ARGB32, false);
 			pix = map.GetPixels();
-			for(int i=0; i<pix.Length; ++i) pix[i] = Color.grey;
+			for(int i=0; i<pix.Length; ++i) pix[i] = Color.clear;
 			map.SetPixels(pix);
 		} else if(mapstep >= map.height) {
-			if(!mapsaved) {
-				// if we just finished rendering a map, save it to our PluginData folder
-				string mode = "unknown";
-				if(mapmode == 0) mode = "elevation";
-				else if(mapmode == 1) mode = "slope";
-				else if(mapmode == 2) mode = "biome";
-				if(SCANcontroller.controller.colours == 1) mode += "-grey";
-				string filename = body.name + "_" + mode + "_" + map.width.ToString() + "x" + map.height.ToString();
-				if(projection != MapProjection.Rectangular) filename += "_" + projection.ToString();
-				filename += ".png";
-				KSP.IO.File.WriteAllBytes<SCANdata>(map.EncodeToPNG(), filename, null);
-				mapsaved = true;
-			}
 			return map;
 		}
 		if(redline == null || redline.Length != map.width) {
@@ -244,12 +275,17 @@ public class SCANmap {
 				*/
 				mapline[i] = val;
 			} else if(mapmode == 1) {
-				if(!data.isCovered(lon, lat, SCANdata.SCANtype.Slope)) continue;
+				if(!data.isCovered(lon, lat, SCANdata.SCANtype.Altimetry)) continue;
 				if(body.pqsController == null) {
 					pix[i] = Color.Lerp(Color.black, Color.white, UnityEngine.Random.value);
 					continue;
 				}
-				float val = (float)data.getElevation(lon, lat);
+				float val;
+				if(data.isCovered(lon, lat, SCANdata.SCANtype.AltimetryHiRes)) {
+					val = (float)data.getElevation(lon, lat);
+				} else {
+					val = (float)data.getElevation(((int)(lon*5))/5, ((int)(lat*5))/5);
+				}
 				if(mapstep == 0) {
 					pix[i] = Color.grey;
 				} else {
@@ -312,8 +348,8 @@ public class SCANmap {
 			}
 		}
 		map.SetPixels(0, mapstep, map.width, 1, pix);
-		map.Apply();
 		mapstep++;
+		if(mapstep % 10 == 0 || mapstep >= map.height) map.Apply();
 		return map;
 	}
 

@@ -25,12 +25,14 @@ public class SCANsat : PartModule
 	[KSPField]
 	public int sensorType;
 
+	[KSPField]
+	public float power;
+
 	[KSPField(isPersistant = true)]
 	protected bool scanning = false;
 
 	[KSPEvent(guiActive = true, guiName = "Start RADAR Scan", active = true)]
 	public void startScan() {
-		print("Starting RADAR scan, sensor type = " + sensorType.ToString());
 		scanning = true;
 		if(sensorType > 0) {
 			SCANcontroller.controller.registerVesselID(vessel.id, (SCANdata.SCANtype)sensorType);
@@ -43,6 +45,11 @@ public class SCANsat : PartModule
 		if(sensorType > 0) {
 			SCANcontroller.controller.unregisterVesselID(vessel.id, (SCANdata.SCANtype)sensorType);
 		}
+	}
+
+	[KSPEvent(guiActive = false, guiName = "Trigger Explosive Charge", active = false)]
+	public void explode() {
+		part.explode();
 	}
 
 	[KSPAction("Start RADAR Scan")]
@@ -62,6 +69,13 @@ public class SCANsat : PartModule
 	}
 
 	public override void OnUpdate() {
+		if(sensorType < 0) {
+			Events["startScan"].active = false;
+			Events["stopScan"].active = false;
+			Events["explode"].active = true;
+			Events["explode"].guiActive = true;
+			return;
+		}
 		if(!initialized) {
 			if(sensorType == 0) {
 				Events["startScan"].guiName = "Open Map";
@@ -74,7 +88,23 @@ public class SCANsat : PartModule
 		}
 		Events["startScan"].active = !scanning;
 		Events["stopScan"].active = scanning;
+		if(scanning) {
+			float p = power * TimeWarp.deltaTime;
+			float e = part.RequestResource("ElectricCharge", p);
+			if(e < p) {
+				stopScan();
+				scanning = true;
+			} else {
+				startScan();
+			}
+		}
 		SCANcontroller.controller.scanFromAllVessels();
 		if(scanning && vessel == FlightGlobals.ActiveVessel) SCANui.gui_ping();
+	}
+
+	public override string GetInfo() {
+		string str = base.GetInfo();
+		str += "Power usage: " + power.ToString("F1") + "/s\n";
+		return str;
 	}
 }
