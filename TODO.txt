@@ -1,25 +1,25 @@
 BEFORE NEXT BUILD:
 
-
 MUST FIX BEFORE RELEASE:
-- Scanning a planet, discovering anomalies etc. should give science
-- science ... based upon the percentage of mapped terrain? A few points for every 10% for example, slowly increasing since 0->10% isn't as much of an achievement than 70->80 is (OrtwinS, Draft, BananaDealer)
-- science based on how often the satellite setup can update data?
-- science for detected anomalies etc. (BananaDealer)
-- proper integration into tech tree
-- zoom box goes out of range at poles
-- Fix all the bugs
 
 MINE:
 - add more anomalies, e.g. "highest elevation"
 - detect strongly localized biomes and indicate on map (e.g. craters, badlands)
-- cache bigmap height values
+- cache bigmap height values?
 - zoom box should only work if the area can be seen from a relevant sensor in orbit
-- vessel switching via list in small window
 - make anomaly detection use an optical sensor that only works during day
 - optionally display ground track for moons that have an active sensor in orbit?
+- api for other mods to hook SCANsat up with data
+- 100k time warp makes sensors flicker (electricity calculation fails)
+- show exit symbol on ground track for active orbit
+- kill time warp at critical altitudes if altimetry sensor on board, OR within view of enough satellites
+- zoom box wonky at poles (ground track)
+- find that one exception that must be printed somewhere (might not be SCANsat after all...)
+- science value scanner (show biome map by amount of remaining science)
+- science based on how often the satellite setup can update data?
 
 OTHERS:
+- science for detected anomalies etc. (BananaDealer)
 - Can we get a table/list of detected anomalies? That would be excellent, even if it's only from a text file in the data directory. (Free Trader Beowulf)
 - Different colors for temporary textures of the parts (Ralathon)
 - visible band scanner for pretty pictures (Nertea) 
@@ -32,3 +32,11 @@ OTHERS:
 - I know that it's common in flight sims to have some kind of mapping app that takes data output from the sim to plot your location, like a GPS map. (DMagic)
 - Is there a way to adjust the "sea level". My wife likes a pink Mun, but I'd like to tone it down a bit. (DarthJazno)
 - RWR (Radar warning receiver) .. The "map" could look like that real RWR: http://upload.wikimedia.org/wikipedia/en/f/fc/Rwr_example.gif (Nostromo)
+- A few things I would like to see is the anomalies and other markers on the small map and the zoomed in pop up window available from the small map as well. (DwellerBenthos)
+- a Marker addition from the big map for custom points with a small note. (Thourion)
+   - make somehow usable as target?
+- Maybe use Figaro if installed? (OrtwinS)
+- Kethane data on map? (brienne) (should not be handled by SCANsat itself)
+- SSTV receiver (KhaosCorp)  (should probably be a separate mod...)
+- the removal of the auto-render of the big map when you stop resizing it, reduces the jiggle-lag time if you just want to temp narrow it a bit for example (Thourion)
+- Are you sure button for Forget Map (Geschosskopf)

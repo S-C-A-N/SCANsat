@@ -1,5 +1,89 @@
 Names in () are forum names of people who suggested the feature/found the bug.
 
+Build 4 - 2013-11-03
+--------------------
+
+- Ground track should not fail anymore on certain escape trajectories.
+
+- The SAR sensor has been replaced with a multispectral sensor, and the
+  high resolution altimetry sensor has been replaced with a SAR sensor.
+  (Naming change that doesn't affect gameplay.)
+
+- All sensors had their minimum, maximum, and optimal altitudes as well
+  as their fields of view adjusted slightly. These parameters are now
+  configurable in the part.cfg files.
+  
+- A sensor's field of view degrades linearly below the optimal altitude, 
+  and remains constant between optimal and maximum altitude. Parameters
+  are scaled based on planet radius and SoI size, so you can still map
+  Gilly.
+  
+- The sensor changes affect the save format. Existing saves should still
+  work, but sensors will use a default set of parameters until the vessels
+  they're on become active for the first time after the update.
+ 
+- To balance the now greater need to set up a reasonable orbit for mapping,
+  the temporal resolution of the scanning process is now adaptive and 
+  will increase during time warp to reduce spottiness of the resulting
+  tracks.
+
+- Turning off sensors no longer closes the SCANsat UI, but the small map
+  and vessel list as well as map overlays are only displayed when some 
+  device on board can provide that information.
+  
+- If you run out of power, the minimap shows static and a lot less
+  information is displayed in most windows. (OrtwinS)
+
+- Flags on the big map have their own toggle button now. (Thourion)
+
+- The minimap shows the area covered by the active sensors on your current
+  vessel as a percentage.
+ 
+- The "Forget Map" button has been relocated to a new settings window.
+  A new button "Reset all data" is also available that resets all data
+  for all celestials.
+ 
+- The anomaly marker and the close widget character are now configurable
+  in the new settings window. (drtedastro)
+
+- Scanning can be restricted to the SoI your current vessel is in with the
+  "Scan all active celestials" option in the new settings window. 
+  
+- Scanning can also be disabled for individual celestials. For your
+  convenience, completion is shown as a percentage for each celestial.
+  (Includes Altimetry, Biome, and Anomaly scans.)
+  
+- The temporal resolution of scanning while time warp is active can be
+  configured in the new settings window. Higher resolution means more
+  locations along a satellite's orbit are sampled. 
+  
+- Some sensors had experimental instrument readouts added that can be
+  enabled via a button. Vessels equipped with a MapTraq device can also
+  access some of this information if it has previously been recorded.
+  The BTDT's instrument display reacts to the scroll wheel, although 
+  that's only really relevant at the KSC...
+
+- If a part has an animation set via the animationName property, the
+  plugin will attempt to play it for activation and deactivation of the
+  part. 
+
+- Dragging the minimized main window doesn't maximize it anymore. (Thourion)
+
+- If the main window is minimized or maximized close to the edge of the 
+  screen, it will try to stay at that edge. (Thourion)
+
+- A colour legend is available for height maps. (OrtwinS)
+
+- Parts have been moved around in the tech tree a bit.
+
+- Science data can now be collected from parts for applicable fields, based
+  on how much terrain of the planet the vessel is currently in orbit around 
+  has been covered. This science data must be transmitted using a suitable
+  communications device like other science experiments; however, recovery is
+  not possible at this time. (OrtinS, Draft, BananaDealer)
+
+
+
 Build 3 - 2013-11-02
 --------------------
 

@@ -1,6 +1,9 @@
+namespace SCANsat {
 /*
  * Found here:
  * http://forum.unity3d.com/threads/152579-LZF-compression-and-decompression-for-Unity
+ * 
+ * Only change for SCANsat: Moved to SCANsat namespace.
  * 
  * Original licensing information follows:
  */
@@ -256,4 +259,6 @@ public static class CLZF2
 		} while (iidx < inputLength);
 		return (int)oidx;
 	}
+}
+
 }
