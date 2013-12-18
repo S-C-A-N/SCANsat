@@ -87,7 +87,7 @@ namespace SCANsat
 				cam.enabled = false; // so we can render on demand
 				cam.targetTexture = rt;
 				cam.aspect = width * 1f / height;
-				cam.fov = 90;
+				cam.fieldOfView = 90;
 			}
 
 			Vector3 pos_target = lookat.transform.position;
@@ -101,7 +101,7 @@ namespace SCANsat
 
 			cam.transform.position = pos_cam;
 			cam.transform.LookAt(pos_target, cam_up);
-			cam.far = dist * 3;
+			cam.farClipPlane = dist * 3;
 
 			RenderTexture old = RenderTexture.active;
 			RenderTexture.active = rt;

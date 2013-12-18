@@ -1,6 +1,51 @@
 Names in () are forum names of people who suggested the feature/found the bug.
 
-Build 4 - 2013-11-03
+Build 5 - 2013-12-18
+--------------------
+
+- Update for KSP version 0.23. This version of SCANsat now requires KSP 0.23.
+
+- Fixes for minor incompatibilities with Unity 4.2.2.
+
+- Fixes for science changes in 0.23. Unfortunately, it's still necessary
+  to analyze multiple times to get the full amount of science.
+
+- Removed the deprecated slope scanner part from the distribution. This breaks
+  savefile compatibility for savefiles that still use this part. If this is
+  an issue, simply keep the "Scanner 4" directory from the existing SCANsat
+  installation.
+
+- Replaced models for altimetry and biome sensors with much better ones made 
+  by Milkshakefiend. Original forum thread: 
+  http://forum.kerbalspaceprogram.com/threads/49233-WIP-Parts-from-my-garden-shed-SCANsat-Antennae
+
+  Note: This breaks savegame compatibility in the sense that affected parts
+  look different and may be attached badly. If this is an issue, simply don't
+  overwrite the existing parts when updating, or copy them back after the
+  update.
+
+- Parts with animations can be extended and retracted in the editor.
+  This doesn't affect their state at launch.
+   
+- The big map should not open outside the screen anymore. (SirJodelstein)
+
+- Added a button to reset window positions to settings panel. (Lalwcat)
+
+- Fixed a bug that could sometimes prevent power consumption from being 
+  turned off during high time warp.
+
+- Biome maps now use the proper API function to determine the biome at a 
+  given location, which has been fixed in 0.23 to not spam debug output
+  anymore.
+
+- Action names are configurable in the part config file. Included parts
+  have been updated. (OrtwinS)
+
+- The instruments window got its own close button. (DMagic)
+
+
+
+Build 4 - 2013-11-10
 --------------------
 
 - Ground track should not fail anymore on certain escape trajectories.

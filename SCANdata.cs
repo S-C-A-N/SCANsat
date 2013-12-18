@@ -85,6 +85,7 @@ namespace SCANsat
 			if((type & SCANtype.Anomaly) != SCANtype.Nothing) uncov += coverage_count[4];
 			if((type & SCANtype.AnomalyDetail) != SCANtype.Nothing) uncov += coverage_count[5];
 			return uncov;
+
 		}
 
 		public double getCoveragePercentage(SCANtype type) {
@@ -206,28 +207,18 @@ namespace SCANsat
 		}
 
 		public int getBiomeIndex(double lon, double lat) {
-			// It could be so easy, if this function didn't print debug messages to the screen...
-			// return body.BiomeMap.GetAtt(Mathf.Deg2Rad * lat, Mathf.Deg2Rad * lon).name;
 			if(body.BiomeMap == null) return -1;
 			if(body.BiomeMap.Map == null) return -1;
 			double u = ((lon + 360 + 180 + 90)) % 360;
 			double v = ((lat + 180 + 90)) % 180;
 			if(u < 0 || v < 0 || u >= 360 || v >= 180) return -1;
-			u /= 360f;
-			v /= 180f;
-			Color c = body.BiomeMap.Map.GetPixelBilinear((float)u, (float)v);
-			double maxdiff = 12345;
-			int index = -1;
-			for(int i=0; i<body.BiomeMap.Attributes.Length; ++i) {
-				CBAttributeMap.MapAttribute x = body.BiomeMap.Attributes[i];
-				Color d = x.mapColor;
-				double diff = ((Vector4)d - (Vector4)c).sqrMagnitude;
-				if(diff < maxdiff) {
-					index = i;
-					maxdiff = diff;
+			CBAttributeMap.MapAttribute att = body.BiomeMap.GetAtt(Mathf.Deg2Rad * lat, Mathf.Deg2Rad * lon);
+			for(int i = 0; i < body.BiomeMap.Attributes.Length; ++i) {
+				if(body.BiomeMap.Attributes[i] == att) {
+					return i;
 				}
 			}
-			return index;
+			return -1;
 		}
 
 		public double getBiomeIndexFraction(double lon, double lat) {
@@ -236,8 +227,6 @@ namespace SCANsat
 		}
 
 		public CBAttributeMap.MapAttribute getBiome(double lon, double lat) {
-			// It could be so easy, if this function didn't print debug messages to the screen...
-			// return body.BiomeMap.GetAtt(Mathf.Deg2Rad * lat, Mathf.Deg2Rad * lon);
 			if(body.BiomeMap == null) return null;
 			if(body.BiomeMap.Map == null) return body.BiomeMap.defaultAttribute;
 			int i = getBiomeIndex(lon, lat);

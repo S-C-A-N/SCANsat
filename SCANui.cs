@@ -7,6 +7,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 using UnityEngine;
 
 namespace SCANsat
@@ -235,19 +236,21 @@ namespace SCANsat
 		}
 
 		private static bool readableLabel(string text, Color c) {
-			GUI.color = Color.white;
+			string textpoor = Regex.Replace(text, "<[^>]*>", "");
+			GUI.color = Color.black;
 			style_label.normal.textColor = Color.black;
-			GUILayout.Label(text, style_label);
+			GUILayout.Label(textpoor, style_label);
 			Rect r = GUILayoutUtility.GetLastRect();
 			r.x += 2;
-			GUI.Label(r, text, style_label);
+			GUI.Label(r, textpoor, style_label);
 			r.x -= 1;
 			r.y -= 1;
-			GUI.Label(r, text, style_label);
+			GUI.Label(r, textpoor, style_label);
 			r.y += 2;
-			GUI.Label(r, text, style_label);
+			GUI.Label(r, textpoor, style_label);
 			r.y -= 1;
 			style_label.normal.textColor = c;
+			GUI.color = Color.white;
 			GUI.Label(r, text, style_label);
 			if(!Event.current.isMouse) return false;
 			return r.Contains(Event.current.mousePosition);
@@ -503,7 +506,6 @@ namespace SCANsat
 				style_readout.normal.textColor = c_bad;
 				GUILayout.Label("NO DATA", style_readout);
 			} else {
-
 				if((sensors & SCANdata.SCANtype.Biome) != SCANdata.SCANtype.Nothing) {
 					GUILayout.Label(data.getBiomeName(FlightGlobals.ActiveVessel.longitude, FlightGlobals.ActiveVessel.latitude), style_readout);
 					++parts;
@@ -558,7 +560,13 @@ namespace SCANsat
 					GUILayout.Label("NO DATA", style_readout);
 				}
 			}
+
 			GUILayout.EndVertical();
+
+			Rect r = new Rect(pos_instruments.width - 25, 0, 22, 22);
+			style_button.normal.textColor = cb_vermillion;
+			if(GUI.Button(r, SCANcontroller.controller.closeBox, style_button)) instruments_visible = false;
+
 			GUI.DragWindow();
 		}
 
@@ -645,6 +653,19 @@ namespace SCANsat
 				foreach(SCANdata data in SCANcontroller.controller.body_data.Values) {
 					data.reset();
 				}
+			}
+			GUILayout.EndHorizontal();
+			GUILayout.BeginHorizontal();
+			if(GUILayout.Button("Reset window positions")) {
+				pos_bigmap.x = 0;
+				pos_bigmap.y = 0;
+				SCANcontroller.controller.map_x = 100;
+				SCANcontroller.controller.map_y = 50;
+				SCANcontroller.controller.map_width = 0;
+				pos_infobox.x = 0;
+				pos_infobox.y = 0;
+				pos_instruments.x = -1;
+				pos_instruments.y = 0;
 			}
 			GUILayout.EndHorizontal();
 
@@ -1409,12 +1430,15 @@ namespace SCANsat
 					bigmap.setWidth(SCANcontroller.controller.map_width);
 					pos_bigmap.x = SCANcontroller.controller.map_x;
 					pos_bigmap.y = SCANcontroller.controller.map_y;
+					if(pos_bigmap.x < 0 || pos_bigmap.x >= Screen.width) pos_bigmap.x = 0;
+					if(pos_bigmap.y < 0 || pos_bigmap.y >= Screen.height) pos_bigmap.y = 0;
 				} else {
 					SCANcontroller.controller.map_x = (int)pos_bigmap.x;
 					SCANcontroller.controller.map_y = (int)pos_bigmap.y;
 				}
 				bigmap.setBody(vessel.mainBody);
 				string rendering = "";
+				if(bigmap_dragging) rendering += " ["+bigmap_drag_w+"x"+(bigmap_drag_w/2)+"]";
 				if(!bigmap.isMapComplete()) rendering += " [rendering]";
 				pos_bigmap = GUILayout.Window(47110002, pos_bigmap, gui_bigmap_build, "Map of " + vessel.mainBody.theName + rendering, GUILayout.Width(360), GUILayout.Height(180));
 			}

@@ -238,7 +238,7 @@ namespace SCANsat
 			return sensors;
 		}
 
-		public ScienceData getAvailableScience(Vessel v, SCANdata.SCANtype sensor) {
+		public ScienceData getAvailableScience(Vessel v, SCANdata.SCANtype sensor, bool notZero) {
 			SCANdata data = getData(v.mainBody);
 			ScienceData sd = null;
 			ScienceExperiment se = null;
@@ -276,6 +276,7 @@ namespace SCANsat
 			if(su == null) return null;
 
 			print("[SCANsat] coverage " + coverage.ToString("F1") + ", science cap " + su.scienceCap.ToString("F1") + ", subject value " + su.subjectValue.ToString("F2") + ", science value " + su.scientificValue.ToString("F2") + ", science " + su.science.ToString("F2"));
+			su.scientificValue = 1;
 
 			float science = (float)coverage;
 			if(science > 95) science = 100;
@@ -290,7 +291,9 @@ namespace SCANsat
 
 			print("[SCANsat] result = " + science.ToString("F2"));
 
-			sd = new ScienceData(science, 1f, id, se.experimentTitle + " of " + v.mainBody.theName);
+			if(notZero && science <= 0) science = 0.00001f;
+
+			sd = new ScienceData(science, 1f, 0f, id, se.experimentTitle + " of " + v.mainBody.theName);
 			sd.subjectID = su.id;
 			return sd;
 		}

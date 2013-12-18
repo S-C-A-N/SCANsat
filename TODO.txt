@@ -1,6 +1,7 @@
 BEFORE NEXT BUILD:
 
 MUST FIX BEFORE RELEASE:
+- fix the readme already
 
 MINE:
 - add more anomalies, e.g. "highest elevation"
@@ -10,7 +11,6 @@ MINE:
 - make anomaly detection use an optical sensor that only works during day
 - optionally display ground track for moons that have an active sensor in orbit?
 - api for other mods to hook SCANsat up with data
-- 100k time warp makes sensors flicker (electricity calculation fails)
 - show exit symbol on ground track for active orbit
 - kill time warp at critical altitudes if altimetry sensor on board, OR within view of enough satellites
 - zoom box wonky at poles (ground track)
@@ -19,6 +19,8 @@ MINE:
 - science based on how often the satellite setup can update data?
 
 OTHERS:
+- I cant get the instrument window to show up anymore, debug log doesnt mention anything out of order, i just click the button but no dice. I tried with many already flying ships, along with new ones. (Thourion)
+- Position limits for UI elements, so that the icon never leaves the screen, and maps (big&small) always have a piece of their title-bar in reach (mind the KSP UI itself!).
 - science for detected anomalies etc. (BananaDealer)
 - Can we get a table/list of detected anomalies? That would be excellent, even if it's only from a text file in the data directory. (Free Trader Beowulf)
 - Different colors for temporary textures of the parts (Ralathon)
@@ -26,7 +28,6 @@ OTHERS:
    - planet texture overlaid with greyscale elevation map?
    - should only work when the area is receiving sunlight?
 - overlaying the planets in the stock map view with your generated images, showing them as a solid colour if they haven't been mapped? (pizzaoverhead)
-- Adjust action group function name, all sensors now say: 'start/stop RADAR scan' (OrtwinS)
 - Would be nice one day to be able to zoom in on a particular grid and have a small 3d window preview that you can rotate around to get a real sense of a place to land (sirkut)
 - configurable raw data export (drtedastro) http://forum.kerbalspaceprogram.com/threads/55832-PLUGIN-PARTS-WIP-SCANsat-terrain-mapping?p=746489&viewfull=1#post746489
 - I know that it's common in flight sims to have some kind of mapping app that takes data output from the sim to plot your location, like a GPS map. (DMagic)
@@ -40,3 +41,8 @@ OTHERS:
 - SSTV receiver (KhaosCorp)  (should probably be a separate mod...)
 - the removal of the auto-render of the big map when you stop resizing it, reduces the jiggle-lag time if you just want to temp narrow it a bit for example (Thourion)
 - Are you sure button for Forget Map (Geschosskopf)
+- I would suggest adding something about the effective orbital range of each part to their description though. (DMagic)
+- options for color of text (DMagic)
+- an "inverted" display of sorts? Not as in inverted colors, but a map that greys out mapped areas while making non-mapped areas some other (preferably bright) color. (Hremsfeld)
+- showing the day / night terminator like on some of the world clocks (drtedastro)
+

@@ -24,20 +24,20 @@ namespace SCANsat
 				print("[SCANsat] start: in editor");
 			} else {
 				print("[SCANsat] start: live");
-				if(animationName != null) {
-					Animation[] a = part.FindModelAnimators(animationName);
-					if(a.Length == 0) {
-						print("[SCANsat] animation '" + animationName + "' not found");
-					} else {
-						print("[SCANsat] using animation #1 out of " + a.Length.ToString() + " animations named '" + animationName + "'");
-						anim = a[0];
-						// maybe use this later for advanced animation...
-						Transform modeltransform = part.transform.FindChild("model");
-						foreach(Transform t in modeltransform.GetComponentsInChildren<Transform>()) {
-							print("[SCANsat] transform " + t.name + ": " + t);
-						}
-
+			}
+			if(animationName != null) {
+				Animation[] a = part.FindModelAnimators(animationName);
+				if(a.Length == 0) {
+					print("[SCANsat] animation '" + animationName + "' not found");
+				} else {
+					print("[SCANsat] using animation #1 out of " + a.Length.ToString() + " animations named '" + animationName + "'");
+					anim = a[0];
+					// maybe use this later for advanced animation...
+					Transform modeltransform = part.transform.FindChild("model");
+					foreach(Transform t in modeltransform.GetComponentsInChildren<Transform>()) {
+						//print("[SCANsat] transform " + t.name + ": " + t);
 					}
+
 				}
 			}
 			print("[SCANsat] sensorType: " + sensorType.ToString() + " fov: " + fov.ToString() + " min_alt: " + min_alt.ToString() + " max_alt: " + max_alt.ToString() + " best_alt: " + best_alt.ToString() + " power: " + power.ToString());
@@ -55,6 +55,8 @@ namespace SCANsat
 		public float best_alt;
 		[KSPField]
 		public float power;
+		[KSPField]
+		public string scanName;
 		[KSPField]
 		public string animationName;
 
@@ -76,6 +78,20 @@ namespace SCANsat
 			if(sensorType > 0) {
 				SCANcontroller.controller.unregisterSensor(vessel, (SCANdata.SCANtype)sensorType);
 			}
+			animate(-1);
+		}
+
+		[KSPEvent(guiActiveEditor = true, guiName = "Extend", active = true)]
+		public void editorExtend() {
+			Events["editorExtend"].active = false;
+			Events["editorRetract"].active = true;
+			animate(1);
+		}
+
+		[KSPEvent(guiActiveEditor = true, guiName = "Retract", active = false)]
+		public void editorRetract() {
+			Events["editorExtend"].active = true;
+			Events["editorRetract"].active = false;
 			animate(-1);
 		}
 
@@ -102,7 +118,7 @@ namespace SCANsat
 
 		[KSPEvent(guiActive = true, guiName = "Analyze Data", active = false)]
 		public void analyze() {
-			makeScienceData();
+			makeScienceData(true);
 			ReviewData();
 		}
 
@@ -150,6 +166,15 @@ namespace SCANsat
 				if(sensorType == 0) {
 					Events["startScan"].guiName = "Open Map";
 					Events["stopScan"].guiName = "Close Map";
+					Actions["startScanAction"].guiName = "Open Map";
+					Actions["stopScanAction"].guiName = "Close Map";
+					Actions["toggleScanAction"].guiName = "Toggle Map";
+				} else if(scanName != null) {
+					Events["startScan"].guiName = "Start " + scanName;
+					Events["stopScan"].guiName = "Stop " + scanName;
+					Actions["startScanAction"].guiName = "Start " + scanName;
+					Actions["stopScanAction"].guiName = "Stop " + scanName;
+					Actions["toggleScanAction"].guiName = "Toggle " + scanName;
 				}
 				if(scanning) {
 					startScan();
@@ -171,6 +196,9 @@ namespace SCANsat
 							startScan();
 							powerIsProblem = false;
 						}
+					} else if(powerIsProblem) {
+						startScan();
+						powerIsProblem = false;
 					}
 				} else {
 					stopScan();
@@ -194,10 +222,10 @@ namespace SCANsat
 			return str;
 		}
 
-		public void makeScienceData() {
+		public void makeScienceData(bool notZero) {
 			if(expDialog != null) DestroyImmediate(expDialog);
 			storedData.Clear();
-			ScienceData sd = SCANcontroller.controller.getAvailableScience(vessel, (SCANdata.SCANtype)sensorType);
+			ScienceData sd = SCANcontroller.controller.getAvailableScience(vessel, (SCANdata.SCANtype)sensorType, notZero);
 			if(sd == null) return;
 			storedData.Add(sd);
 		}
@@ -218,7 +246,7 @@ namespace SCANsat
 			foreach(IScienceDataTransmitter t in vessel.FindPartModulesImplementing<IScienceDataTransmitter>()) {
 				if(t.CanTransmit()) {
 					if(!t.IsBusy()) {
-						makeScienceData(); // just to update values...
+						makeScienceData(false); // just to update values...
 						t.TransmitData(storedData);
 						storedData = new List<ScienceData>();
 						break;
@@ -235,11 +263,19 @@ namespace SCANsat
 			}
 		}
 
+		public void ReviewDataItem(ScienceData sd) {
+			expDialog = ExperimentsResultDialog.DisplayResult(new ExperimentResultDialogPage(part, sd, 1f, 0f, false, "", true, false, DumpData, KeepData, TransmitData, null));
+		}
+
 		public void ReviewData() {
 			if(storedData.Count < 1) return;
 			if(expDialog != null) DestroyImmediate(expDialog);
 			ScienceData sd = storedData[0];
-			expDialog = ExperimentsResultDialog.DisplayResult(new ExperimentResultDialogPage(part, sd, 1f, true, true, true, DumpData, KeepData, TransmitData));
+			expDialog = ExperimentsResultDialog.DisplayResult(new ExperimentResultDialogPage(part, sd, 1f, 0f, false, "", true, false, DumpData, KeepData, TransmitData, null));
+		}
+
+		public bool IsRerunnable() {
+			return false;
 		}
 
 		public int GetScienceCount() {

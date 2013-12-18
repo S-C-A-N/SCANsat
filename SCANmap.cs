@@ -380,7 +380,8 @@ namespace SCANsat
 						Color bio1 = XKCDColors.CamoGreen;
 						Color bio2 = XKCDColors.Marigold;
 						if((i > 0 && mapline[i - 1] != bio) || (mapstep > 0 && mapline[i] != bio)) {
-							biome = Color.Lerp(XKCDColors.Puce, elevation, 0.5f);
+							//biome = Color.Lerp(XKCDColors.Puce, elevation, 0.5f);
+							biome = Color.white;
 						} else {
 							biome = Color.Lerp(Color.Lerp(bio1, bio2, (float)bio), elevation, 0.5f);
 						}
