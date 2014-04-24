@@ -440,9 +440,18 @@ namespace SCANsat
 
 				int f = (int)Math.Truncate(fov);
 				int f1 = f + (int)Math.Round(fov - f);
+				
+				double clampLat;
+				double clampLon;
 				for(int x=-f; x<=f1; ++x) {
+					clampLon = lon + x;	// longitude does not need clamping
+					/*if (clampLon < 0  ) clampLon = 0; */
+					/*if (clampLon > 360) clampLon = 360; */
 					for(int y=-f; y<=f1; ++y) {
-						data.registerPass(lon + x, lat + y, sensor.sensor);
+						clampLat = lat + y;
+						if (clampLat > 90) clampLat = 90;
+						if (clampLat < -90) clampLat = -90;
+						data.registerPass(clampLon, clampLat, sensor.sensor);
 					}
 				}
 			}
