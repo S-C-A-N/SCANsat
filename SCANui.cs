@@ -3,12 +3,18 @@
  * SCANsat - User Interface
  * 
  * Copyright (c)2013 damny; see LICENSE.txt for licensing details.
+ * 
+ * Modified by David Grandy <david.grandy@gmail.com>, 2014 to interface with Blizzy78's toolbar
+ * All changes are limited to the SCANui.cs and all are noted
  */
+
+
 
 using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using UnityEngine;
+using Toolbar;
 
 namespace SCANsat
 {
@@ -21,12 +27,12 @@ namespace SCANsat
 		private static Rect pos_instruments = new Rect(-1, 100f, 10f, 10f);
 		private static Rect pos_settings = new Rect(-1, 100f, 0f, 10f);
 		private static Rect rc = new Rect(0, 0, 0, 0);
-		private static bool bigmap_dragging, icon_dragging;
+        private static bool bigmap_dragging; //icon_dragging; //This bool no longer needed because the default infobox code is removed
 		private static float bigmap_drag_w, bigmap_drag_x;
 		private static SCANmap bigmap, spotmap;
 		private static Texture2D overlay_static, test_image;
 		private static bool overlay_static_dirty;
-		private static bool bigmap_visible, instruments_visible, settings_visible;
+		internal static bool bigmap_visible, instruments_visible, settings_visible;
 		private static bool gui_active, notMappingToday;
 		private static int maptraq_frame;
 		private static int gui_frame_ping, gui_frame_draw;
@@ -356,13 +362,13 @@ namespace SCANsat
 					pix[pos++] = c;
 				}
 			}
-
 			test_image.SetPixels(pix);
 			test_image.Apply();
-			return test_image;
+            return test_image;
 		}
 
-		private static int minimode = 2, lastmode = -1;
+        //**** Make minimode public so that the toolbar class can access it
+		internal static int minimode = -2, lastmode = -1;
 		private static Color minicolor = Color.white;
 
 		private static void gui_infobox_build(int wid) {
@@ -372,98 +378,120 @@ namespace SCANsat
 			SCANdata data = SCANcontroller.controller.getData(vessel.mainBody);
 			Rect r;
 
-			if(minimode > 0) {
-				GUILayout.BeginVertical();
+            if (minimode > 0)
+            {
+                GUILayout.BeginVertical();
 
-				if(notMappingToday) {
-					GUILayout.Label(getTestImage());
-				} else {
-					GUILayout.Label(data.map_small);
-				}
-				Rect maprect = GUILayoutUtility.GetLastRect();
-				maprect.width = data.map_small.width;
-				maprect.height = data.map_small.height;
+                if (notMappingToday)
+                {
+                    GUILayout.Label(getTestImage());
+                }
+                else
+                {
+                    GUILayout.Label(data.map_small);
+                }
+                Rect maprect = GUILayoutUtility.GetLastRect();
+                maprect.width = data.map_small.width;
+                maprect.height = data.map_small.height;
 
-				if(infotext != null) {
-					GUILayout.BeginVertical();
-					readableLabel(infotext, Color.white);
-					GUILayout.EndVertical();
-				}
+                if (infotext != null)
+                {
+                    GUILayout.BeginVertical();
+                    readableLabel(infotext, Color.white);
+                    GUILayout.EndVertical();
+                }
 
-				GUILayout.BeginHorizontal(GUILayout.ExpandWidth(true));
-				if(GUILayout.Button("Big Map")) {
-					bigmap_visible = !bigmap_visible;
-					if(!bigmap_visible) spotmap = null;
-				}
-				if(GUILayout.Button("Instruments")) {
-					instruments_visible = !instruments_visible;
-				}
-				if(GUILayout.Button("Settings")) {
-					settings_visible = !settings_visible;
-				}
-				GUILayout.EndHorizontal();
+                GUILayout.BeginHorizontal(GUILayout.ExpandWidth(true));
+                if (GUILayout.Button("Big Map"))
+                {
+                    bigmap_visible = !bigmap_visible;
+                    if (!bigmap_visible) spotmap = null;
+                }
+                if (GUILayout.Button("Instruments"))
+                {
+                    instruments_visible = !instruments_visible;
+                }
+                if (GUILayout.Button("Settings"))
+                {
+                    settings_visible = !settings_visible;
+                }
+                GUILayout.EndHorizontal();
 
-				if(!notMappingToday) {
-					int count = 1;
-					foreach(Vessel v in FlightGlobals.Vessels) {
-						if(v == null) continue;
-						if(SCANcontroller.controller.isVesselKnown(v) || v == FlightGlobals.ActiveVessel) {
-							if(v.mainBody == vessel.mainBody) {
-								float lon = (float)(v.longitude + 360 + 180) % 360 - 180;
-								float lat = (float)(v.latitude + 180 + 90) % 180 - 90;
-								if(minimode == 1) {
-									drawVesselLabel(maprect, null, -1, v);
-									continue;
-								}
-								float alt = v.heightFromTerrain;
-								if(alt < 0) alt = (float)v.altitude;
-								string text = "[" + count.ToString() + "] <b>" + v.vesselName + "</b> (" + lat.ToString("F1") + "," + lon.ToString("F1") + "; " + alt.ToString("N1") + "m)";
-								Color col = XKCDColors.LightGrey;
-								if(v == FlightGlobals.ActiveVessel) col = c_good;
-								GUILayout.BeginHorizontal(GUILayout.ExpandWidth(true));
-								if(readableLabel(text, col)) {
-									if(Event.current.clickCount > 1) {
-										Event.current.Use();
-										FlightGlobals.SetActiveVessel(v);
-										ScreenMessages.PostScreenMessage(v.vesselName, 5, ScreenMessageStyle.UPPER_CENTER);
-									}
-								}
-								GUILayout.EndHorizontal();
-								drawVesselLabel(maprect, null, count, v);
-								count += 1;
-							}
-						}
-					}
-				}
-				GUILayout.EndVertical();
-				r = new Rect(pos_infobox.width - 50, 0, 22, 22);
-				style_button.normal.textColor = cb_yellow;
-				if(minimode == 2) {
-					if(GUI.Button(r, "-", style_button)) minimode = 1;
-				} else {
-					if(GUI.Button(r, "+", style_button)) minimode = 2;
-				}
-				r.x += 25;
-				style_button.normal.textColor = cb_vermillion;
-				if(GUI.Button(r, SCANcontroller.controller.closeBox, style_button)) minimode = (minimode == 0 ? 2 : -minimode);
-			} else {
-				GUILayout.Label("", GUILayout.Width(32), GUILayout.Height(32));
-				r = GUILayoutUtility.GetLastRect();
-				drawOrbitIcon((int)(r.x + r.width / 2), (int)(r.y + r.height / 2), OrbitIcon.Probe, minicolor, 32, true);
-				if(Event.current.isMouse) {
-					if(Event.current.type == EventType.MouseUp) {
-						if(icon_dragging) {
-							icon_dragging = false;
-						} else {
-							if(r.Contains(Event.current.mousePosition)) {
-								minimode = (minimode == 0 ? 2 : -minimode);
-							}
-						}
-					} else if(Event.current.type == EventType.MouseDrag) {
-						icon_dragging = true;
-					}
-				}
-			}
+                if (!notMappingToday)
+                {
+                    int count = 1;
+                    foreach (Vessel v in FlightGlobals.Vessels)
+                    {
+                        if (v == null) continue;
+                        if (SCANcontroller.controller.isVesselKnown(v) || v == FlightGlobals.ActiveVessel)
+                        {
+                            if (v.mainBody == vessel.mainBody)
+                            {
+                                float lon = (float)(v.longitude + 360 + 180) % 360 - 180;
+                                float lat = (float)(v.latitude + 180 + 90) % 180 - 90;
+                                if (minimode == 1)
+                                {
+                                    drawVesselLabel(maprect, null, -1, v);
+                                    continue;
+                                }
+                                float alt = v.heightFromTerrain;
+                                if (alt < 0) alt = (float)v.altitude;
+                                string text = "[" + count.ToString() + "] <b>" + v.vesselName + "</b> (" + lat.ToString("F1") + "," + lon.ToString("F1") + "; " + alt.ToString("N1") + "m)";
+                                Color col = XKCDColors.LightGrey;
+                                if (v == FlightGlobals.ActiveVessel) col = c_good;
+                                GUILayout.BeginHorizontal(GUILayout.ExpandWidth(true));
+                                if (readableLabel(text, col))
+                                {
+                                    if (Event.current.clickCount > 1)
+                                    {
+                                        Event.current.Use();
+                                        FlightGlobals.SetActiveVessel(v);
+                                        ScreenMessages.PostScreenMessage(v.vesselName, 5, ScreenMessageStyle.UPPER_CENTER);
+                                    }
+                                }
+                                GUILayout.EndHorizontal();
+                                drawVesselLabel(maprect, null, count, v);
+                                count += 1;
+                            }
+                        }
+                    }
+                }
+                GUILayout.EndVertical();
+                r = new Rect(pos_infobox.width - 50, 0, 22, 22);
+                style_button.normal.textColor = cb_yellow;
+                if (minimode == 2)
+                {
+                    if (GUI.Button(r, "-", style_button)) minimode = 1;
+                }
+                else
+                {
+                    if (GUI.Button(r, "+", style_button)) minimode = 2;
+                }
+                r.x += 25;
+                style_button.normal.textColor = cb_vermillion;
+                if (GUI.Button(r, SCANcontroller.controller.closeBox, style_button)) minimode = (minimode == 0 ? 2 : -minimode);
+            }
+
+            //**** Remove the old minimized small map window, replaced by toolbar button
+
+            //} else {
+            //    GUILayout.Label("", GUILayout.Width(32), GUILayout.Height(32));
+            //    r = GUILayoutUtility.GetLastRect();
+            //    drawOrbitIcon((int)(r.x + r.width / 2), (int)(r.y + r.height / 2), OrbitIcon.Probe, minicolor, 32, true);
+            //    if(Event.current.isMouse) {
+            //        if(Event.current.type == EventType.MouseUp) {
+            //            if(icon_dragging) {
+            //                icon_dragging = false;
+            //            } else {
+            //                if(r.Contains(Event.current.mousePosition)) {
+            //                    minimode = (minimode == 0 ? 2 : -minimode);
+            //                }
+            //            }
+            //        } else if(Event.current.type == EventType.MouseDrag) {
+            //            icon_dragging = true;
+            //        }
+            //    }
+            //}
 
 			GUI.DragWindow();
 		}
@@ -1415,13 +1443,24 @@ namespace SCANsat
 			}
 
 			Rect old_infobox = new Rect(pos_infobox);
-			pos_infobox = GUILayout.Window(47110001, pos_infobox, gui_infobox_build, title, GUILayout.Width(32), GUILayout.Height(32));
+
+            //**** Remove the old infobox generation code so that the toolbar button can control the small map
+            //pos_infobox = GUILayout.Window(47110001, pos_infobox, gui_infobox_build, title, GUILayout.Width(32), GUILayout.Height(32));
 
 			if(minimode != lastmode && pos_infobox != old_infobox) {
 				snapWindow(ref pos_infobox, old_infobox);
 				lastmode = minimode;
 			}
 
+            //**** Check for minimode version to open the small map - controlled by toolbar button
+            //**** Keep the window onscreen
+
+            if (minimode == 2 || minimode == 1)
+            {
+                if (pos_infobox.x < 0) pos_infobox.x = 0;
+                if (pos_infobox.y < 0) pos_infobox.y = 0;
+                pos_infobox = GUILayout.Window(47110001, pos_infobox, gui_infobox_build, title, GUILayout.Width(32), GUILayout.Height(32));
+            }
 
 			if(bigmap_visible) {
 				if(bigmap == null) {

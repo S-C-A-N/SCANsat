@@ -19,29 +19,37 @@ namespace SCANsat
 		protected List<ScienceData> storedData = new List<ScienceData>();
 		protected ExperimentsResultDialog expDialog = null;
 
-		public override void OnStart(StartState state) {
-			if(state == StartState.Editor) {
-				print("[SCANsat] start: in editor");
-			} else {
-				print("[SCANsat] start: live");
-			}
-			if(animationName != null) {
-				Animation[] a = part.FindModelAnimators(animationName);
-				if(a.Length == 0) {
-					print("[SCANsat] animation '" + animationName + "' not found");
-				} else {
-					print("[SCANsat] using animation #1 out of " + a.Length.ToString() + " animations named '" + animationName + "'");
-					anim = a[0];
-					// maybe use this later for advanced animation...
-					Transform modeltransform = part.transform.FindChild("model");
-					foreach(Transform t in modeltransform.GetComponentsInChildren<Transform>()) {
-						//print("[SCANsat] transform " + t.name + ": " + t);
-					}
-
-				}
-			}
-			print("[SCANsat] sensorType: " + sensorType.ToString() + " fov: " + fov.ToString() + " min_alt: " + min_alt.ToString() + " max_alt: " + max_alt.ToString() + " best_alt: " + best_alt.ToString() + " power: " + power.ToString());
-		}
+        public override void OnStart(StartState state)
+        {
+            if (state == StartState.Editor)
+            {
+                print("[SCANsat] start: in editor");
+            }
+            else
+            {
+                print("[SCANsat] start: live");
+            }
+            if (animationName != null)
+            {
+                Animation[] a = part.FindModelAnimators(animationName);
+                if (a.Length == 0)
+                {
+                    print("[SCANsat] animation '" + animationName + "' not found");
+                }
+                else
+                {
+                    print("[SCANsat] using animation #1 out of " + a.Length.ToString() + " animations named '" + animationName + "'");
+                    anim = a[0];
+                    // maybe use this later for advanced animation...
+                    Transform modeltransform = part.transform.FindChild("model");
+                    foreach (Transform t in modeltransform.GetComponentsInChildren<Transform>())
+                    {
+                        //print("[SCANsat] transform " + t.name + ": " + t);
+                    }
+                }
+            }
+            print("[SCANsat] sensorType: " + sensorType.ToString() + " fov: " + fov.ToString() + " min_alt: " + min_alt.ToString() + " max_alt: " + max_alt.ToString() + " best_alt: " + best_alt.ToString() + " power: " + power.ToString());
+        }
 
 		[KSPField]
 		public int sensorType;
