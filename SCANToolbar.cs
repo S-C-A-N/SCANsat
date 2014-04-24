@@ -82,16 +82,15 @@ namespace SCANsat
         private void createMenu(IButton menu)
         {
             PopupMenuDrawable list = new PopupMenuDrawable();
-            IButton smallMap = list.AddOption("Small Map");
-            IButton bigMap = list.AddOption("Big Map");
-            IButton instrument = list.AddOption("Instruments");
-            IButton settings = list.AddOption("Settings");
-            smallMap.OnClick += (e2) => SCANui.minimode = (SCANui.minimode == 0 ? 2 : -SCANui.minimode);
-            bigMap.OnClick += (e2) => SCANui.bigmap_visible = !SCANui.bigmap_visible;
-            instrument.OnClick += (e2) => SCANui.instruments_visible = !SCANui.instruments_visible;
-            settings.OnClick += (e2) => SCANui.settings_visible = !SCANui.settings_visible;
-
-            list.OnAnyOptionClicked += () => destroyMenu(menu);
+            IButton smallMap 	= list.AddOption("Small Map");
+            IButton bigMap 		= list.AddOption("Big Map");
+            IButton instrument 	= list.AddOption("Instruments");
+            IButton settings 	= list.AddOption("Settings");
+            smallMap.OnClick 		+= (e2) => SCANui.minimode 				= (SCANui.minimode == 0 ? 2 : -SCANui.minimode);
+            bigMap.OnClick 			+= (e2) => SCANui.bigmap_visible 		= !SCANui.bigmap_visible;
+            instrument.OnClick 		+= (e2) => SCANui.instruments_visible 	= !SCANui.instruments_visible;
+            settings.OnClick 		+= (e2) => SCANui.settings_visible 		= !SCANui.settings_visible;
+            list.OnAnyOptionClicked += (  ) => destroyMenu(menu);
             menu.Drawable = list;
         }
 
