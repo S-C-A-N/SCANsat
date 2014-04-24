@@ -43,6 +43,9 @@
     <Reference Include="UnityEngine">
       <HintPath>..\..\..\KSP_Data\Managed\UnityEngine.dll</HintPath>
     </Reference>
+    <Reference Include="aaa_Toolbar">
+      <HintPath>..\..\000_Toolbar\Toolbar.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -53,7 +56,7 @@
     <Compile Include="SCANui.cs" />
     <Compile Include="SCANmap.cs" />
     <Compile Include="RemoteView.cs" />
-    <Compile Include="SCANcolor.cs" />
+    <Compile Include="SCANToolbar.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
@@ -61,5 +64,6 @@
     <None Include="LICENSE.txt" />
     <None Include="README.txt" />
     <None Include="CHANGELOG.txt" />
+    <None Include="SCANcolor.cs" />
   </ItemGroup>
 </Project>
