@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -20,14 +20,6 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <ConsolePause>false</ConsolePause>
-    <CustomCommands>
-      <CustomCommands>
-        <Command type="AfterBuild" command="xcopy &quot;${TargetFile}&quot; &quot;D:\Kerbal Space Program\GameData\SCANsat&quot; /y" externalConsole="True" />
-        <Command type="AfterBuild" command="xcopy &quot;${ProjectDir}\LICENSE.txt&quot; &quot;D:\Kerbal Space Program\GameData\SCANsat&quot; /y" externalConsole="True" />
-        <Command type="AfterBuild" command="xcopy &quot;${ProjectDir}\README.txt&quot; &quot;D:\Kerbal Space Program\GameData\SCANsat&quot; /y" externalConsole="True" />
-        <Command type="AfterBuild" command="xcopy &quot;${ProjectDir}\CHANGELOG.txt&quot; &quot;D:\Kerbal Space Program\GameData\SCANsat&quot; /y" externalConsole="True" />
-      </CustomCommands>
-    </CustomCommands>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <Optimize>true</Optimize>
@@ -35,17 +27,21 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <ConsolePause>false</ConsolePause>
+    <DebugType>none</DebugType>
+    <CustomCommands>
+      <CustomCommands>
+        <Command type="AfterBuild" command="cp SCANsat.dll &quot;/media/ssd/steam/SteamApps/common/Kerbal Space Program/GameData/SCANsat&quot;" workingdir="${ProjectDir}/build" />
+        <Command type="AfterBuild" command="rm -rf build" workingdir="${ProjectDir}" />
+      </CustomCommands>
+    </CustomCommands>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Assembly-CSharp">
-      <HintPath>..\..\..\KSP Science\KSP Dev Build\Kerbal Space Program\KSP_Data\Managed\Assembly-CSharp.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
-    <Reference Include="Toolbar">
-      <HintPath>..\..\..\KSP Science\KSP Dev Build\Kerbal Space Program\GameData\000_Toolbar\Toolbar.dll</HintPath>
+    <Reference Include="Assembly-CSharp">
+      <HintPath>..\..\..\KSP_Data\Managed\Assembly-CSharp.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine">
-      <HintPath>..\..\..\KSP Science\KSP Dev Build\Kerbal Space Program\KSP_Data\Managed\UnityEngine.dll</HintPath>
+      <HintPath>..\..\..\KSP_Data\Managed\UnityEngine.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
@@ -54,10 +50,10 @@
     <Compile Include="SCANdata.cs" />
     <Compile Include="CLZF2.cs" />
     <Compile Include="SCANsat.cs" />
-    <Compile Include="SCANToolbar.cs" />
     <Compile Include="SCANui.cs" />
     <Compile Include="SCANmap.cs" />
     <Compile Include="RemoteView.cs" />
+    <Compile Include="SCANcolor.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
