@@ -17,13 +17,13 @@ using Toolbar;
 namespace SCANsat
 {
 	[KSPAddon(KSPAddon.Startup.Flight, false)]
-    class SCANToolbar : MonoBehaviour
+    class SCANtoolbar : MonoBehaviour
     {
 		private IButton SCANButton;
 		private IButton MapButton;
 		private IButton SmallButton;
 
-		internal SCANToolbar ()
+		internal SCANtoolbar ()
         {
 			SCANButton = ToolbarManager.Instance.add ("SCANsat" , "UIMenu");           
 			SCANButton.TexturePath = "SCANsat/SCANsat_Icon";

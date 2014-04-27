@@ -53,8 +53,8 @@
     <Compile Include="SCANui.cs" />
     <Compile Include="SCANmap.cs" />
     <Compile Include="RemoteView.cs" />
-    <Compile Include="SCANToolbar.cs" />
     <Compile Include="SCANquickload.cs" />
+    <Compile Include="SCANtoolbar.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
