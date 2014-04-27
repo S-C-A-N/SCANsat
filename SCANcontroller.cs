@@ -1,8 +1,13 @@
 /* 
- * Scientific Committee on Advanced Navigation S.C.A.N. Satellite
+ * [Scientific Committee on Advanced Navigation]
+ * 			S.C.A.N. Satellite
+ *
  * SCANcontroller - scenario module that handles all scanning
  * 
- * Copyright (c)2013 damny; see LICENSE.txt for licensing details.
+ * Copyright (c)2013 damny;
+ * Copyright (c)2014 David Grandy <david.grandy@gmail.com>;
+ * Copyright (c)2014 technogeeky <technogeeky@gmail.com>;
+ * Copyright (c)2014 (Your Name Here) <your email here>; see LICENSE.txt for licensing details.
  */
 
 using System;
@@ -26,7 +31,6 @@ namespace SCANsat
 			}
 			private set { }
 		}
-
 		public static int minScanAlt = 5000;
 		public static int maxScanAlt = 500000;
 		[KSPField(isPersistant = true)]
@@ -428,9 +432,9 @@ namespace SCANsat
 				sensor.inRange = true;
 
 				double fov = sensor.fov;
-				double ba = Math.Min(sensor.best_alt, soi_radius);
-				if(alt < ba) fov = (alt / ba) * fov;
-				else sensor.bestRange = true;
+				//double ba = Math.Min(sensor.best_alt, soi_radius);
+				//if(alt < ba) fov = (alt / ba) * fov;
+				//else sensor.bestRange = true;
 
 				double surfscale = 600000d/v.mainBody.Radius;
 				if(surfscale < 1) surfscale = 1;
