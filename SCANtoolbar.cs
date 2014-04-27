@@ -25,41 +25,42 @@ namespace SCANsat
 
 		internal SCANtoolbar ()
         {
-			SCANButton = ToolbarManager.Instance.add ("SCANsat" , "UIMenu");           
-			SCANButton.TexturePath = "SCANsat/SCANsat_Icon";
-			SCANButton.ToolTip = "SCANsat";
-			SCANButton.OnClick += (e) => toggleMenu (SCANButton);
+			if (!ToolbarManager.ToolbarAvailable) return; // bail if we don't have a toolbar
 
-			MapButton = ToolbarManager.Instance.add ("SCANsat" , "BigMap");
-			//Map texture from SCANsat map created from in-game biome map of Kerbin
-			MapButton.TexturePath = "SCANsat/SCANsat_Map_Icon";
-			MapButton.ToolTip = "SCANsat Big Map";
-			MapButton.OnClick += (e) => SCANui.bigmap_visible = !SCANui.bigmap_visible;
+			SCANButton	= ToolbarManager.Instance.add ("SCANsat" , "UIMenu");
+			MapButton 	= ToolbarManager.Instance.add ("SCANsat" , "BigMap");
+			SmallButton 	= ToolbarManager.Instance.add ("SCANsat" , "SmallMap");
 
-			SmallButton = ToolbarManager.Instance.add ("SCANsat" , "SmallMap");
-			//The toolbar icon texture was pulled out of the unity package and edited by me to match the old SCANsat color scheme
-			SmallButton.TexturePath = "SCANsat/SCANsat_SmallMap_Icon";
+			SCANButton.TexturePath 	= "SCANsat/SCANsat_Icon"; // S.C.A.N
+			MapButton.TexturePath 	= "SCANsat/SCANsat_Map_Icon"; // from in-game biome map of Kerbin
+			SmallButton.TexturePath 	= "SCANsat/SCANsat_SmallMap_Icon"; // from unity, edited by DG
+
+
+			SCANButton.ToolTip 	= "SCANsat";
+			MapButton.ToolTip 	= "SCANsat Big Map";
 			SmallButton.ToolTip = "SCANsat Small Map";
+
+			SCANButton.OnClick 	+= (e) => toggleMenu (SCANButton);
+			MapButton.OnClick 	+= (e) => SCANui.bigmap_visible = !SCANui.bigmap_visible;
 			SmallButton.OnClick += (e) => SCANui.minimode = (SCANui.minimode == 0 ? 2 : -SCANui.minimode);
         }
 
 		private void LateUpdate ()
         {
-			buttonVisible (FlightGlobals.ActiveVessel.FindPartModulesImplementing<SCANsat> ().Count > 0);
+			if (ToolbarManager.ToolbarAvailable) buttonVisible (FlightGlobals.ActiveVessel.FindPartModulesImplementing<SCANsat> ().Count > 0);
         }
 
 		private void buttonVisible ( bool active )
         {
-			if (SCANButton.Visible != active)
-				SCANButton.Visible = active;
-			if (MapButton.Visible != active)
-				MapButton.Visible = active;
-			if (SmallButton.Visible != active)
-				SmallButton.Visible = active;
+			if (!ToolbarManager.ToolbarAvailable) return; // bail if we don't have a toolbar
+			if (SCANButton.Visible != active) 	SCANButton.Visible = active;
+			if (MapButton.Visible != active) 	MapButton.Visible = active;
+			if (SmallButton.Visible != active)	SmallButton.Visible = active;
         }
 
 		private void toggleMenu ( IButton menu )
         {
+			if (!ToolbarManager.ToolbarAvailable) return; // bail if we don't have a toolbar
 			if (menu.Drawable == null)
 				createMenu (menu);
 			else
@@ -68,6 +69,8 @@ namespace SCANsat
 
 		private void createMenu ( IButton menu )
         {
+			if (!ToolbarManager.ToolbarAvailable) return; // bail if we don't have a toolbar
+
 			PopupMenuDrawable list = new PopupMenuDrawable ();
 			IButton smallMap = list.AddOption ("Small Map");
 			IButton bigMap = list.AddOption ("Big Map");
@@ -83,12 +86,14 @@ namespace SCANsat
 
 		private void destroyMenu ( IButton menu )
         {
+			if (!ToolbarManager.ToolbarAvailable) return; // bail if we don't have a toolbar
 			((PopupMenuDrawable)menu.Drawable).Destroy ();
 			menu.Drawable = null;
         }
 
 		internal void OnDestroy ()
         {
+			if (!ToolbarManager.ToolbarAvailable) return; // bail if we don't have a toolbar
 			SCANButton.Destroy ();
 			MapButton.Destroy ();
 			SmallButton.Destroy ();
