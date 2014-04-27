@@ -27,6 +27,7 @@ namespace SCANsat
 			if (state == StartState.Editor)
             {
 				print ("[SCANsat] start: in editor");
+				Events["editorExtend"].active = !string.IsNullOrEmpty(animationName);
             } else
             {
 				print ("[SCANsat] start: live");
@@ -73,6 +74,8 @@ namespace SCANsat
 
 		[KSPEvent(guiActive = true, guiName = "Start RADAR Scan", active = true)]
 		public void startScan () {
+			if (!scanning && !ToolbarManager.ToolbarAvailable)
+				SCANui.minimode = (SCANui.minimode > 0 ? 2 : -SCANui.minimode);
 			scanning = true;
 			if (sensorType > 0) {
 				SCANcontroller.controller.registerSensor (vessel , (SCANdata.SCANtype)sensorType , fov , min_alt , max_alt , best_alt);
