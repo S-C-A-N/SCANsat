@@ -30,11 +30,13 @@ namespace SCANsat
 				return Color.Lerp (Color.black , Color.white , Mathf.Clamp ((val + 1500f) / 9000f , 0 , 1));
 			}
 			Color c = Color.black;
-			if (val <= 0) {
-				val = (Mathf.Clamp (val , -1500 , 0) + 1500) / 1000f;
+			int sealevel = 0;
+
+			if (val <= sealevel) {
+				val = (Mathf.Clamp (val , -1500 , sealevel) + 1500) / 1000f;
 				c = Color.Lerp (XKCDColors.DarkPurple , XKCDColors.Cerulean , val);
 			} else {
-				val = (heightGradient.Length - 2) * Mathf.Clamp (val , 0 , 7500) / 7500.0f;
+				val = (heightGradient.Length - 2) * Mathf.Clamp (val , sealevel , (sealevel + 7500)) / (sealevel + 7500.0f);
 				c = Color.Lerp (heightGradient [(int)val] , heightGradient [(int)val + 1] , val - (int)val);
 			}
 			return c;
