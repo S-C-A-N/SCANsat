@@ -493,27 +493,6 @@ namespace SCANsat
 					minimode = (minimode == 0 ? 2 : -minimode);
             }
 
-			//**** Remove the old minimized small map window, replaced by toolbar button
-
-			//} else {
-			//    GUILayout.Label("", GUILayout.Width(32), GUILayout.Height(32));
-			//    r = GUILayoutUtility.GetLastRect();
-			//    drawOrbitIcon((int)(r.x + r.width / 2), (int)(r.y + r.height / 2), OrbitIcon.Probe, minicolor, 32, true);
-			//    if(Event.current.isMouse) {
-			//        if(Event.current.type == EventType.MouseUp) {
-			//            if(icon_dragging) {
-			//                icon_dragging = false;
-			//            } else {
-			//                if(r.Contains(Event.current.mousePosition)) {
-			//                    minimode = (minimode == 0 ? 2 : -minimode);
-			//                }
-			//            }
-			//        } else if(Event.current.type == EventType.MouseDrag) {
-			//            icon_dragging = true;
-			//        }
-			//    }
-			//}
-
 			GUI.DragWindow ();
 		}
 
@@ -524,14 +503,10 @@ namespace SCANsat
 			bool top = old.y < dist;
 			bool bottom = (old.y + old.height) > Screen.height - dist;
 
-			if (left)
-				r.x = Math.Max (0 , old.x);
-			if (top)
-				r.y = Math.Max (0 , old.y);
-			if (right)
-				r.x = Math.Min (Screen.width - r.width , old.x + old.width - r.width);
-			if (bottom)
-				r.y = Math.Min (Screen.height - r.height , old.y + old.height - r.height);
+			if (left)		r.x = Math.Max (0 , old.x);
+			if (top) 		r.y = Math.Max (0 , old.y);
+			if (right) 	r.x = Math.Min (Screen.width - r.width , old.x + old.width - r.width);
+			if (bottom) 	r.y = Math.Min (Screen.height - r.height , old.y + old.height - r.height);
 		}
 
 		private static RemoteView anomalyView;
