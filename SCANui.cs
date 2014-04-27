@@ -32,7 +32,7 @@ namespace SCANsat
 		private static SCANmap bigmap, spotmap;
 		private static Texture2D overlay_static, test_image;
 		private static bool overlay_static_dirty;
-		internal static bool bigmap_visible, instruments_visible, settings_visible;
+		public static bool bigmap_visible, instruments_visible, settings_visible;
 		private static bool gui_active, notMappingToday;
 		private static int maptraq_frame;
 		private static int gui_frame_ping, gui_frame_draw;
@@ -383,7 +383,7 @@ namespace SCANsat
 		}
 
 		//**** Make minimode public so that the toolbar class can access it
-		internal static int minimode = -2, lastmode = -1;
+		public static int minimode = -2, lastmode = -1;
 		private static Color minicolor = Color.white;
 
 		private static void gui_infobox_build ( int wid ) {
@@ -1562,23 +1562,21 @@ namespace SCANsat
 			//**** Remove the old infobox generation code so that the toolbar button can control the small map
 			//pos_infobox = GUILayout.Window(47110001, pos_infobox, gui_infobox_build, title, GUILayout.Width(32), GUILayout.Height(32));
 
-			if (minimode != lastmode && pos_infobox != old_infobox) {
-				snapWindow (ref pos_infobox , old_infobox);
-				lastmode = minimode;
-			}
+
 
 			//**** Check for minimode version to open the small map - controlled by toolbar button
 			//**** Keep the window onscreen
 
-			if (minimode == 2 || minimode == 1)
-            {
-				if (pos_infobox.x < 0)
-					pos_infobox.x = 0;
-				if (pos_infobox.y < 0)
-					pos_infobox.y = 0;
+			if (minimode == 2 || minimode == 1)	{
+				if (pos_infobox.x < 0) 	pos_infobox.x = 0;
+				if (pos_infobox.y < 0)	pos_infobox.y = 0;
 				pos_infobox = GUILayout.Window (47110001 , pos_infobox , gui_infobox_build , title , GUILayout.Width (32) , GUILayout.Height (32));
-            }
+            	}
 
+			if (minimode != lastmode && pos_infobox != old_infobox) {
+				snapWindow (ref pos_infobox , old_infobox);
+				lastmode = minimode;
+			}
 			if (bigmap_visible) {
 				if (bigmap == null) {
 					bigmap = new SCANmap ();
