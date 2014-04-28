@@ -5,20 +5,28 @@ The Scientific Committee on Advanced Navigation brings you the
 	---------------------------------------------------------
 	
 THIS IS A WORK IN PROGRESS:
-Generally, expect that it doesn't work, and doesn't progress.
-Install at your own peril.
+Generally, expect that it doesn't work, and doesn't progress. [HUMOR]
+
+Generally this thing works just fine and is a nice addition to KSP.
 
 
 0. Authors and License
 ----------------------
 
-Currently only one author:
-	- damny <df.ksp@erinye.com>
+Currently there is one* author/maintainer:
+	+ technogeeky <technogeeky@gmail.com>
+	- damny <df.ksp@erinye.com>*
+	+ DMagic <david.grandy@gmail.com>**;
+	
+	[*]: damny is M.I.A. and presumed to have better things to do until proven innocent
+			he is also the original (and over 95%) author
+	[**]: has done the other 4.95%, but does not consider himself an active author
+	
 	
 For licensing information, please see the included LICENSE.txt file.
 Source code is available here:
 
-	https://github.com/thatfool/SCAN
+	https://github.com/technogeeky/SCANsat
 	
 	
 1. Installation
