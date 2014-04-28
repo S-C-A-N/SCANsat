@@ -1,4 +1,6 @@
 Copyright (c) 2013 damny <df.ksp@erinye.com>
+Copyright (c) 2014 David Grandy <david.grandy@gmail.com>
+Copyright (c) 2014 technogeeky <technogeeky@gmail.com>
 
 Redistribution and use in source and binary forms, with or without modifica-
 tion, are permitted provided that the following conditions are met:

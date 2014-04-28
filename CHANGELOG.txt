@@ -1,4 +1,36 @@
-Names in () are forum names of people who suggested the feature/found the bug.
+Build 6 - 2014-04-28
+--------------------
+
++ [REQUIRED] Update for KSP version 0.23.5. This version of SCANsat now requires KSP 0.23.5.
+
++ [OPTIONAL] Toolbar support. Built against 1.7.1. TOTALLY OPTIONAL. Though the experience
+	is better and more consistent with the Toolbar. [thanks DMagic!]
+
+- [REMOVED] Removed the old expanding/contracting floating SCANsat button. Replaced instead with
+	either a Toolbar toolbar or with nothing, but maps become visible upon starting a scan. [thanks Dmagic!]
+
+- [REMOVED] Non-animated parts no longer show an 'Extend' option in EDITOR. [... Dmagic is doing all the work!]
+
++ [COMPATABILITY] "Change access modifiers to allow for more control from RPM".
+		Yes, it's in quotes	because I trust Dmagic THAT much.
+													[thanks Dmagic!]
+													
+- [BUGFIX] Scanning high inclinations with wide-enough FOV scanners 
+	(ie, Multi, RADAR, but not SAR) will no longer reveal the opposite polar region. [thanks DMagic!]
+	[example orbit]:  Minmus 250.000x250.000km @ 91.0 degrees
+
++ [HUMOR] This file is different, and so is TODO.txt.
+
++ [dev] Support for changing what you define as 'sea level'. Compiled to be default (ie, 0).
+- [dev] Removed all unused declerations
++ [dev]	switched to unix line endings.
++ [dev] switched to custom, but uniform formatting (for now done by MonoDevelop).
+- [dev] removed windows commands in .csproj and .sln.
++ [dev] added unix commands. I will be happy to have both if I can be shown how.
++ [dev] added debugging and profiling support. Includes dummy executable.
++ [dev] [requires] that the SCANsat.dll be put directly in place (ie, GameData\SCANsat\.)
+			for debugging to work
+
 
 Build 5 - 2013-12-18
 --------------------
