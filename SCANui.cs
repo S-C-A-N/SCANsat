@@ -384,11 +384,11 @@ namespace SCANsat
 
 		//**** Make minimode public so that the toolbar class can access it
 		public static int minimode = -2, lastmode = -1;
-		private static Color minicolor = Color.white;
+		/* FIXME: unused */ //private static Color minicolor = Color.white;
 
 		private static void gui_infobox_build ( int wid ) {
 			GUI.skin = null;
-			bool repainting = Event.current.type == EventType.Repaint;
+			/* FIXME: unused */ //bool repainting = Event.current.type == EventType.Repaint;
 			Vessel vessel = FlightGlobals.ActiveVessel;
 			SCANdata data = SCANcontroller.controller.getData (vessel.mainBody);
 			Rect r;
@@ -1460,13 +1460,13 @@ namespace SCANsat
 				string aoff = "<color=\"grey\">";
 				string aon = "<color=\"" + colorHex (c_good) + "\">";
 				string abad = "<color=\"" + colorHex (c_bad) + "\">";
-				string ano = "<color=\"" + colorHex (c_ugly) + "\">";
+				/* FIXME: unused */ //string ano = "<color=\"" + colorHex (c_ugly) + "\">";
 				string ac = "</color> ";
 				string stat_alo = aon, stat_ahi = aon, stat_biome = aon, stat_ano = aon, stat_btdt = aon;
 
-				minicolor = c_good;
-				if (sensors == 0)
-					minicolor = Color.grey;
+				/* FIXME: unused */ //minicolor = c_good;
+				if (sensors == 0) {}
+					/* FIXME: unused */ //minicolor = Color.grey;
 
 				SCANcontroller.SCANsensor s;
 

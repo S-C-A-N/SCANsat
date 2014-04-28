@@ -5,7 +5,6 @@
  * RemoteView - A camera looking at a GameObject, rendering to a texture.
  *
  * Copyright (c)2013 damny;
- * Copyright (c)2014 David Grandy <david.grandy@gmail.com>;
  * Copyright (c)2014 technogeeky <technogeeky@gmail.com>;
  * Copyright (c)2014 (Your Name Here) <your email here>; see LICENSE.txt for licensing details.
 */
@@ -23,7 +22,7 @@ namespace SCANsat
 		private static Material edgeDetectMaterial, grayscaleMaterial;
 		private static AudioClip tick;
 		private RenderTexture rt;
-		private Rect camRect;
+		/* FIXME: unused */ //private Rect camRect;
 		private int updateFrame, width, height;
 		private List<CrashObjectName> cons;
 		private Bounds bounds;
@@ -68,7 +67,7 @@ namespace SCANsat
 			lookat = focus;
 			width = w;
 			height = h;
-			camRect = new Rect (0 , 0 , width , height);
+			/* FIXME: unused */ //camRect = new Rect (0 , 0 , width , height);
 		}
 
 		public void free () {
@@ -161,7 +160,7 @@ namespace SCANsat
 				}
 				activeCon = activeCon % cons.Count;
 				lookdetail = cons [activeCon];
-				Vector3 pos = cam.WorldToScreenPoint (lookdetail.transform.position);
+				/* FIXME: unused */ //Vector3 pos = cam.WorldToScreenPoint (lookdetail.transform.position);
 				lookvec = lookdetail.transform.position;
 				sname = lookdetail.objectName;
 			}

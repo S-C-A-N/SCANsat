@@ -11,13 +11,16 @@
  * Copyright (c)2014 technogeeky <technogeeky@gmail.com>;
  * Copyright (c)2014 (Your Name Here) <your email here>; see LICENSE.txt for licensing details.
 */
+#if DEBUG
 using KSP;
 using UnityEngine;
 using SCANsat;
 using System.Collections.Generic;
 
+
 [KSPAddon(KSPAddon.Startup.MainMenu, false)]
-    public class Debug_AutoLoadPersistentSaveOnStartup : MonoBehaviour {
+
+public class Debug_AutoLoadPersistentSaveOnStartup : MonoBehaviour {
 
 	public static bool first = true;
 	public static int  vId = 0;
@@ -50,3 +53,5 @@ using System.Collections.Generic;
           }
      }
 }
+
+#endif

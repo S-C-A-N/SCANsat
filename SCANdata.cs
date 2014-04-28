@@ -72,8 +72,8 @@ namespace SCANsat
 		public double getElevation ( double lon , double lat ) {
 			if (body.pqsController == null)
 				return 0;
-			int ilon = ((int)(lon + 360 + 180)) % 360;
-			int ilat = ((int)(lat + 180 + 90)) % 180;
+			/* FIXME: unused */ //int ilon = ((int)(lon + 360 + 180)) % 360;
+			/* FIXME: unused */ //int ilat = ((int)(lat + 180 + 90)) % 180;
 			double rlon = Mathf.Deg2Rad * lon;
 			double rlat = Mathf.Deg2Rad * lat;
 			Vector3d rad = new Vector3d (Math.Cos (rlat) * Math.Cos (rlon) , Math.Sin (rlat) , Math.Cos (rlat) * Math.Sin (rlon));
