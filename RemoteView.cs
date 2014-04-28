@@ -55,10 +55,8 @@ namespace SCANsat
 				switchTime = Time.realtimeSinceStartup;
 				lookdetail = null;
 				bounds = new Bounds ();
-				foreach (Collider c in focus.GetComponentsInChildren<Collider>()) {
-					if (c.bounds != null)
+				foreach (Collider c in focus.GetComponentsInChildren<Collider>())
 						bounds.Encapsulate (c.bounds);
-				}
 				cons = new List<CrashObjectName> ();
 				foreach (CrashObjectName con in focus.GetComponentsInChildren<CrashObjectName>()) {
 					cons.Add (con);
