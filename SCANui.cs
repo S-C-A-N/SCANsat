@@ -106,6 +106,7 @@ namespace SCANsat
 			TargetBottom = 16,
 			ManeuverNode = 17,
 			Station = 18,
+			SpaceObject = 19,
 			Rover = 20,
 			Probe = 21,
 			Base = 22,
@@ -164,6 +165,8 @@ namespace SCANsat
 					return OrbitIcon.Ship;
 				case VesselType.Station:
 					return OrbitIcon.Station;
+				case VesselType.SpaceObject:
+					return OrbitIcon.SpaceObject;
 				case VesselType.Unknown:
 					return OrbitIcon.Mystery;
 				default:
@@ -1010,6 +1013,9 @@ namespace SCANsat
 					if (v.vesselType == VesselType.Flag && SCANcontroller.controller.map_flags) {
 						drawVesselLabel (maprect , map , 0 , v);
 					}
+					if (v.vesselType == VesselType.SpaceObject && SCANcontroller.controller.map_asteroids) {
+						drawVesselLabel (maprect , map , 0 , v);
+					}
 				}
 			}
 			if (SCANcontroller.controller.map_markers) {
@@ -1211,10 +1217,19 @@ namespace SCANsat
 				SCANcontroller.controller.map_flags = !SCANcontroller.controller.map_flags;
 			}
 			GUILayout.EndHorizontal ();
+			GUILayout.BeginHorizontal ();
+
 			style_button.normal.textColor = SCANcontroller.controller.map_orbit ? c_good : Color.white;
 			if (GUILayout.Button ("Orbit" , style_button)) {
 				SCANcontroller.controller.map_orbit = !SCANcontroller.controller.map_orbit;
 			}
+
+			style_button.normal.textColor = SCANcontroller.controller.map_asteroids ? c_good : Color.white;
+			if (GUILayout.Button ("Asteroids" , style_button)) {
+				SCANcontroller.controller.map_asteroids = !SCANcontroller.controller.map_asteroids;
+			}
+			GUILayout.EndHorizontal ();
+
 			style_button.normal.textColor = SCANcontroller.controller.map_grid ? c_good : Color.white;
 			if (GUILayout.Button ("Grid" , style_button)) {
 				SCANcontroller.controller.map_grid = !SCANcontroller.controller.map_grid;

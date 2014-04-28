@@ -42,6 +42,8 @@ namespace SCANsat
 		[KSPField(isPersistant = true)]
 		public bool map_orbit = true;
 		[KSPField(isPersistant = true)]
+		public bool map_asteroids = true;
+		[KSPField(isPersistant = true)]
 		public bool map_grid = true;
 		[KSPField(isPersistant = true)]
 		public int projection = 0;

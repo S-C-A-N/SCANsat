@@ -3,6 +3,9 @@ Build 6 - 2014-04-28
 
 + [REQUIRED] Update for KSP version 0.23.5. This version of SCANsat now requires KSP 0.23.5.
 
++ [ADDED] Added support for showing the vessel icons for Asteroids in orbit around the same
+			mainBody.
+			
 + [OPTIONAL] Toolbar support. Built against 1.7.1. TOTALLY OPTIONAL. Though the experience
 	is better and more consistent with the Toolbar. [thanks DMagic!]
 
