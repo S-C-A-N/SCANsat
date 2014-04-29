@@ -62,3 +62,7 @@ OTHERS:
 - an "inverted" display of sorts? Not as in inverted colors, but a map that greys out mapped areas while making non-mapped areas some other (preferably bright) color. (Hremsfeld)
 
 
+
+See this for fixing Multispectral hard-to-fixness:
+
+http://forum.kerbalspaceprogram.com/threads/55832-PLUGIN-PARTS-0-23-SCANsat-terrain-mapping?p=1105732&viewfull=1#post1105732

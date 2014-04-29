@@ -18,7 +18,6 @@ Global
 		{81775A58-7251-4E16-9923-AC60DC3DAED6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{81775A58-7251-4E16-9923-AC60DC3DAED6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{81775A58-7251-4E16-9923-AC60DC3DAED6}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{81775A58-7251-4E16-9923-AC60DC3DAED6}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(MonoDevelopProperties) = preSolution
 		StartupItem = SCANdebug\SCANdebug.csproj
