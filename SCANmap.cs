@@ -88,7 +88,7 @@ namespace SCANsat
 		protected double[] mapline;
 		protected CelestialBody body;
 		public Texture2D map;
-        protected float[,] big_heightmap; // = new float[mapwidthS, mapheightS];
+        protected float[,,,] big_heightmap; 
 
 		public void setBody ( CelestialBody b ) {
 			if (body == b)
@@ -126,7 +126,7 @@ namespace SCANsat
 			mapwidth = w;
 			mapscale = mapwidth / 360f;
 			mapheight = (int)(w / 2);
-            big_heightmap = new float [mapwidth, mapheight];
+            big_heightmap = new float [mapwidth, mapheight, 3, 2];
 			map = null;
 			resetMap ();
 		}
@@ -331,10 +331,10 @@ namespace SCANsat
 						continue;
 					if (body.pqsController == null) {
 						pix [i] = Color.Lerp (Color.black , Color.white , UnityEngine.Random.value);
-                        big_heightmap[i, mapstep] = 0;
+                        big_heightmap[i, mapstep, SCANcontroller.controller.projection, SCANcontroller.controller.colours] = 0;
 						continue;
 					}
-					float val = big_heightmap[i, mapstep];
+					float val = big_heightmap[i, mapstep, SCANcontroller.controller.projection, SCANcontroller.controller.colours];
                     if (val == 0)
                     {
                         if (val == 0 && data.isCovered(lon, lat, SCANdata.SCANtype.AltimetryHiRes))
@@ -342,14 +342,14 @@ namespace SCANsat
                             // high resolution gets a coloured pixel for the actual position
                             val = (float)data.getElevation(lon, lat);
                             pix[i] = heightToColor(val, scheme);
-                            big_heightmap[i, mapstep] = val;
+                            big_heightmap[i, mapstep, SCANcontroller.controller.projection, SCANcontroller.controller.colours] = val;
                         }
                         else
                         {
                             // basic altimetry gets forced greyscale with lower resolution
                             val = (float)data.getElevation(((int)(lon * 5)) / 5, ((int)(lat * 5)) / 5);
                             pix[i] = heightToColor(val, 1);
-                            big_heightmap[i, mapstep] = val;
+                            big_heightmap[i, mapstep, SCANcontroller.controller.projection, SCANcontroller.controller.colours] = val;
                         }
                     }
                     if (val != 0)
