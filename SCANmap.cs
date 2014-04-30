@@ -88,6 +88,7 @@ namespace SCANsat
 		protected double[] mapline;
 		protected CelestialBody body;
 		public Texture2D map;
+        protected float[,] big_heightmap; // = new float[mapwidthS, mapheightS];
 
 		public void setBody ( CelestialBody b ) {
 			if (body == b)
@@ -125,6 +126,7 @@ namespace SCANsat
 			mapwidth = w;
 			mapscale = mapwidth / 360f;
 			mapheight = (int)(w / 2);
+            big_heightmap = new float [mapwidth, mapheight];
 			map = null;
 			resetMap ();
 		}
@@ -329,18 +331,39 @@ namespace SCANsat
 						continue;
 					if (body.pqsController == null) {
 						pix [i] = Color.Lerp (Color.black , Color.white , UnityEngine.Random.value);
+                        big_heightmap[i, mapstep] = 0;
 						continue;
 					}
-					float val;
-					if (data.isCovered (lon , lat , SCANdata.SCANtype.AltimetryHiRes)) {
-						// high resolution gets a coloured pixel for the actual position
-						val = (float)data.getElevation (lon , lat);
-						pix [i] = heightToColor (val , scheme);
-					} else {
-						// basic altimetry gets forced greyscale with lower resolution
-						val = (float)data.getElevation (((int)(lon * 5)) / 5 , ((int)(lat * 5)) / 5);
-						pix [i] = heightToColor (val , 1);
-					}
+					float val = big_heightmap[i, mapstep];
+                    if (val == 0)
+                    {
+                        if (val == 0 && data.isCovered(lon, lat, SCANdata.SCANtype.AltimetryHiRes))
+                        {
+                            // high resolution gets a coloured pixel for the actual position
+                            val = (float)data.getElevation(lon, lat);
+                            pix[i] = heightToColor(val, scheme);
+                            big_heightmap[i, mapstep] = val;
+                        }
+                        else
+                        {
+                            // basic altimetry gets forced greyscale with lower resolution
+                            val = (float)data.getElevation(((int)(lon * 5)) / 5, ((int)(lat * 5)) / 5);
+                            pix[i] = heightToColor(val, 1);
+                            big_heightmap[i, mapstep] = val;
+                        }
+                    }
+                    if (val != 0)
+                    {
+                        if (data.isCovered(lon, lat, SCANdata.SCANtype.AltimetryHiRes))
+                        {
+                            pix[i] = heightToColor(val, scheme);
+                        }
+                        else if (data.isCovered(lon, lat, SCANdata.SCANtype.AltimetryLoRes))
+                        {
+                            pix[i] = heightToColor(val, 1);
+                        }
+                    }
+                    
 					/* draw height lines - works, but mostly useless...
 				int step = (int)(val / 1000);
 				int step_h = step, step_v = step;
