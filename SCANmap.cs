@@ -88,7 +88,7 @@ namespace SCANsat
 		protected double[] mapline;
 		protected CelestialBody body;
 		public Texture2D map;
-        protected float[,,,] big_heightmap; 
+        protected float[,,] big_heightmap; 
 
 		public void setBody ( CelestialBody b ) {
 			if (body == b)
@@ -126,7 +126,7 @@ namespace SCANsat
 			mapwidth = w;
 			mapscale = mapwidth / 360f;
 			mapheight = (int)(w / 2);
-            big_heightmap = new float [mapwidth, mapheight, 3, 3];
+            big_heightmap = new float [mapwidth, mapheight, 3];
 			map = null;
 			resetMap ();
 		}
@@ -331,10 +331,10 @@ namespace SCANsat
 						continue;
 					if (body.pqsController == null) {
 						pix [i] = Color.Lerp (Color.black , Color.white , UnityEngine.Random.value);
-                        big_heightmap[i, mapstep, SCANcontroller.controller.projection, mapmode] = 0;
+                        //big_heightmap[i, mapstep, SCANcontroller.controller.projection] = 0;
 						continue;
 					}
-					float val = big_heightmap[i, mapstep, SCANcontroller.controller.projection, mapmode];
+					float val = big_heightmap[i, mapstep, SCANcontroller.controller.projection];
                     if (val == 0)
                     {
                         if (data.isCovered(lon, lat, SCANdata.SCANtype.AltimetryHiRes))
@@ -342,14 +342,14 @@ namespace SCANsat
                             // high resolution gets a coloured pixel for the actual position
                             val = (float)data.getElevation(lon, lat);
                             pix[i] = heightToColor(val, scheme);
-                            big_heightmap[i, mapstep, SCANcontroller.controller.projection, mapmode] = val;
+                            big_heightmap[i, mapstep, SCANcontroller.controller.projection] = val;
                         }
                         else
                         {
                             // basic altimetry gets forced greyscale with lower resolution
                             val = (float)data.getElevation(((int)(lon * 5)) / 5, ((int)(lat * 5)) / 5);
                             pix[i] = heightToColor(val, 1);
-                            big_heightmap[i, mapstep, SCANcontroller.controller.projection, mapmode] = val;
+                            big_heightmap[i, mapstep, SCANcontroller.controller.projection] = val;
                         }
                     }
                     else if (val != 0)
@@ -381,12 +381,17 @@ namespace SCANsat
 						pix [i] = Color.Lerp (Color.black , Color.white , UnityEngine.Random.value);
 						continue;
 					}
-					float val;
-					if (data.isCovered (lon , lat , SCANdata.SCANtype.AltimetryHiRes)) {
-						val = (float)data.getElevation (lon , lat);
-					} else {
-						val = (float)data.getElevation (((int)(lon * 5)) / 5 , ((int)(lat * 5)) / 5);
-					}
+                    float val = big_heightmap[i, mapstep, SCANcontroller.controller.projection];
+					if (val == 0)
+                    {
+                        if (data.isCovered (lon , lat , SCANdata.SCANtype.AltimetryHiRes)) {
+						    val = (float)data.getElevation (lon , lat);
+                            big_heightmap[i, mapstep, SCANcontroller.controller.projection] = val;
+					    } else {
+						    val = (float)data.getElevation (((int)(lon * 5)) / 5 , ((int)(lat * 5)) / 5);
+                            big_heightmap[i, mapstep, SCANcontroller.controller.projection] = val;
+					    }
+                    }
 					if (mapstep == 0) {
 						pix [i] = Color.grey;
 					} else {
@@ -435,7 +440,11 @@ namespace SCANsat
 					} else {
 						Color elevation = Color.gray;
 						if (data.isCovered (lon , lat , SCANdata.SCANtype.Altimetry)) {
-							float val = (float)data.getElevation (lon , lat);
+                            float val = big_heightmap[i, mapstep, SCANcontroller.controller.projection];
+							if (val == 0) {
+                                val = (float)data.getElevation (lon , lat);
+                                big_heightmap[i, mapstep, SCANcontroller.controller.projection] = val;
+                            }
 							elevation = Color.Lerp (Color.black , Color.white , Mathf.Clamp (val + 1500f , 0 , 9000) / 9000f);
 						}
 						Color bio1 = XKCDColors.CamoGreen;
