@@ -442,8 +442,16 @@ namespace SCANsat
 						if (data.isCovered (lon , lat , SCANdata.SCANtype.Altimetry)) {
                             float val = big_heightmap[i, mapstep, SCANcontroller.controller.projection];
 							if (val == 0) {
-                                val = (float)data.getElevation (lon , lat);
-                                big_heightmap[i, mapstep, SCANcontroller.controller.projection] = val;
+                                if (data.isCovered(lon, lat, SCANdata.SCANtype.AltimetryHiRes))
+                                {
+                                    val = (float)data.getElevation(lon, lat);
+                                    big_heightmap[i, mapstep, SCANcontroller.controller.projection] = val;
+                                }
+                                else
+                                {
+                                    val = (float)data.getElevation(((int)(lon * 5)) / 5, ((int)(lat * 5)) / 5);
+                                    big_heightmap[i, mapstep, SCANcontroller.controller.projection] = val;
+                                }
                             }
 							elevation = Color.Lerp (Color.black , Color.white , Mathf.Clamp (val + 1500f , 0 , 9000) / 9000f);
 						}
