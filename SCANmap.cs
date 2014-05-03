@@ -88,7 +88,7 @@ namespace SCANsat
 		protected double[] mapline;
 		protected CelestialBody body;
 		public Texture2D map;
-        protected float[,,] big_heightmap; 
+        protected float[,,] big_heightmap;
 
 		public void setBody ( CelestialBody b ) {
 			if (body == b)
@@ -130,6 +130,11 @@ namespace SCANsat
 			map = null;
 			resetMap ();
 		}
+
+        public void heightMapArray (float height, int line, int i)
+        {
+            big_heightmap[i, line, SCANcontroller.controller.projection] = height;
+        }
 
 		public void centerAround ( double lon , double lat ) {
 			lon_offset = 180 + lon - (mapwidth / mapscale) / 2;
@@ -342,14 +347,14 @@ namespace SCANsat
                             // high resolution gets a coloured pixel for the actual position
                             val = (float)data.getElevation(lon, lat);
                             pix[i] = heightToColor(val, scheme);
-                            big_heightmap[i, mapstep, SCANcontroller.controller.projection] = val;
+                            heightMapArray(val, mapstep, i);
                         }
                         else
                         {
                             // basic altimetry gets forced greyscale with lower resolution
                             val = (float)data.getElevation(((int)(lon * 5)) / 5, ((int)(lat * 5)) / 5);
                             pix[i] = heightToColor(val, 1);
-                            big_heightmap[i, mapstep, SCANcontroller.controller.projection] = val;
+                            heightMapArray(val, mapstep, i);
                         }
                     }
                     else if (val != 0)
@@ -386,10 +391,10 @@ namespace SCANsat
                     {
                         if (data.isCovered (lon , lat , SCANdata.SCANtype.AltimetryHiRes)) {
 						    val = (float)data.getElevation (lon , lat);
-                            big_heightmap[i, mapstep, SCANcontroller.controller.projection] = val;
+                            heightMapArray(val, mapstep, i);
 					    } else {
 						    val = (float)data.getElevation (((int)(lon * 5)) / 5 , ((int)(lat * 5)) / 5);
-                            big_heightmap[i, mapstep, SCANcontroller.controller.projection] = val;
+                            heightMapArray(val, mapstep, i);
 					    }
                     }
 					if (mapstep == 0) {
@@ -445,12 +450,12 @@ namespace SCANsat
                                 if (data.isCovered(lon, lat, SCANdata.SCANtype.AltimetryHiRes))
                                 {
                                     val = (float)data.getElevation(lon, lat);
-                                    big_heightmap[i, mapstep, SCANcontroller.controller.projection] = val;
+                                    heightMapArray(val, mapstep, i);
                                 }
                                 else
                                 {
                                     val = (float)data.getElevation(((int)(lon * 5)) / 5, ((int)(lat * 5)) / 5);
-                                    big_heightmap[i, mapstep, SCANcontroller.controller.projection] = val;
+                                    heightMapArray(val, mapstep, i);
                                 }
                             }
 							elevation = Color.Lerp (Color.black , Color.white , Mathf.Clamp (val + 1500f , 0 , 9000) / 9000f);
