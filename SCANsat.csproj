@@ -47,10 +47,6 @@
       <HintPath>..\..\..\KSP_Data\Managed\UnityEngine.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="aaa_Toolbar">
-      <HintPath>..\..\000_Toolbar\Toolbar.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />

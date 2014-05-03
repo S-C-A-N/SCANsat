@@ -12,7 +12,6 @@
  */
 
 using UnityEngine;
-using Toolbar;
 
 namespace SCANsat
 {
