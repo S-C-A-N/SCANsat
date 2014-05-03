@@ -72,6 +72,10 @@ namespace SCANsat
 		[KSPField(isPersistant = true)]
 		protected bool scanning = false;
 
+		public bool scanningNow () {
+			return scanning;
+		}
+
 		[KSPEvent(guiActive = true, guiName = "Start RADAR Scan", active = true)]
 		public void startScan () {
 			if (!scanning && !ToolbarManager.ToolbarAvailable)
