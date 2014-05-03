@@ -5,6 +5,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SCANsat", "SCANsat.csproj",
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SCANdebug", "SCANdebug\SCANdebug.csproj", "{81775A58-7251-4E16-9923-AC60DC3DAED6}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SCANsatRPM", "SCANsatRPM\SCANsatRPM.csproj", "{DCA12670-1880-4F59-829F-CA378AAF4E24}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -18,6 +20,10 @@ Global
 		{81775A58-7251-4E16-9923-AC60DC3DAED6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{81775A58-7251-4E16-9923-AC60DC3DAED6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{81775A58-7251-4E16-9923-AC60DC3DAED6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DCA12670-1880-4F59-829F-CA378AAF4E24}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DCA12670-1880-4F59-829F-CA378AAF4E24}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DCA12670-1880-4F59-829F-CA378AAF4E24}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DCA12670-1880-4F59-829F-CA378AAF4E24}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(MonoDevelopProperties) = preSolution
 		StartupItem = SCANdebug\SCANdebug.csproj
@@ -28,5 +34,12 @@ Global
 		$0.StandardHeader = $2
 		$2.Text = 
 		$2.IncludeInNewFiles = True
+		$0.TextStylePolicy = $3
+		$3.inheritsSet = null
+		$3.scope = text/x-csharp
+		$0.CSharpFormattingPolicy = $4
+		$4.inheritsSet = Mono
+		$4.inheritsScope = text/x-csharp
+		$4.scope = text/x-csharp
 	EndGlobalSection
 EndGlobal
