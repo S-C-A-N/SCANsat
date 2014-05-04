@@ -247,14 +247,40 @@ namespace SCANsat
 			return lon;
 		}
 
+		/* MAP: shared state */
 		public int mapmode = 0; // lots of EXTERNAL refs!
+		public Texture2D map; // refs above: 214,215,216,232, below, and JSISCANsatRPM.
+
+
+		/* MAP: internal state */
 		protected int mapstep; // all refs are below
 		protected bool mapsaved; // all refs are below
 		protected double[] mapline; // all refs are below
 		protected CelestialBody body; // all refs are below
-		public Texture2D map; // refs above: 214,215,216,232 -- rest are below
 		protected Color[] redline; // all refs are below
 
+		/* MAP: nearly trivial functions */
+		public void setBody ( CelestialBody b ) {
+			if (body == b)
+				return;
+			body = b;
+			resetMap ();
+		}
+		public bool isMapComplete () {
+			if (map == null)
+				return false;
+			return mapstep >= map.height;
+		}
+		public void resetMap () {
+			mapstep = 0;
+			mapsaved = false;
+		}
+		public void resetMap ( int mode ) {
+			mapmode = mode;
+			resetMap ();
+		}
+
+		/* MAP: export: PNG file */
 		public void exportPNG () {
 			string mode;
 
@@ -275,13 +301,8 @@ namespace SCANsat
 			mapsaved = true;
 			ScreenMessages.PostScreenMessage ("Map saved: " + filename , 5 , ScreenMessageStyle.UPPER_CENTER);
 		}
-		public void setBody ( CelestialBody b ) {
-			if (body == b)
-				return;
-			body = b;
-			resetMap ();
-		}
 
+		/* MAP: build: map to Texture2D */
 		public Texture2D getPartialMap () {
 			SCANdata data = SCANcontroller.controller.getData (body);
 			Color[] pix;
@@ -431,20 +452,5 @@ namespace SCANsat
 			return map;
 		}
 
-		public bool isMapComplete () {
-			if (map == null)
-				return false;
-			return mapstep >= map.height;
-		}
-
-		public void resetMap () {
-			mapstep = 0;
-			mapsaved = false;
-		}
-
-		public void resetMap ( int mode ) {
-			mapmode = mode;
-			resetMap ();
-		}
 	}
 }
