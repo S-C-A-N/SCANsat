@@ -267,13 +267,15 @@ namespace SCANsat
 		}
 
 		public void exportPNG () {
-			string mode = "unknown";
-			if (mapmode == 0)
-				mode = "elevation";
-			else if (mapmode == 1)
-				mode = "slope";
-			else if (mapmode == 2)
-				mode = "biome";
+			string mode;
+
+			switch (mapmode) {
+				case 0: mode = "elevation"; break;
+				case 1: mode = "slope"; break;
+				case 2: mode = "biome"; break;
+				default: mode = "unknown"; break;
+			}
+			
 			if (SCANcontroller.controller.colours == 1)
 				mode += "-grey";
 			string filename = body.name + "_" + mode + "_" + map.width.ToString () + "x" + map.height.ToString ();
