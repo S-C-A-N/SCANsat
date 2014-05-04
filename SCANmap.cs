@@ -42,10 +42,11 @@ namespace SCANsat
 			return c;
 		}
 
+		/* MAP: legends */
+
 		public static Texture2D legend;
 		private static float legendMin, legendMax;
 		private static int legendScheme;
-
 		public static Texture2D getLegend ( float min , float max , int scheme ) {
 			if (legend != null && legendMin == min && legendMax == max && legendScheme == scheme)
 				return legend;
@@ -63,13 +64,13 @@ namespace SCANsat
 			return legend;
 		}
 
+		/* MAP: projections */
 		public enum MapProjection
 		{
 			Rectangular = 0,
 			KavrayskiyVII = 1,
 			Polar = 2,
 		}
-
 		private static string [] getProjectionNames () {
 			MapProjection[] v = (MapProjection[])Enum.GetValues (typeof(MapProjection));
 			string[] r = new string[v.Length];
@@ -77,62 +78,8 @@ namespace SCANsat
 				r [i] = v [i].ToString ();
 			return r;
 		}
-
 		public static string[] projectionNames = getProjectionNames ();
-		public double mapscale, lon_offset, lat_offset;
-		public int mapwidth, mapheight;
-		public int mapmode = 0;
 		public MapProjection projection = MapProjection.Rectangular;
-		protected int mapstep;
-		protected bool mapsaved;
-		protected double[] mapline;
-		protected CelestialBody body;
-		public Texture2D map;
-
-		public void setBody ( CelestialBody b ) {
-			if (body == b)
-				return;
-			body = b;
-			resetMap ();
-		}
-
-		public void setSize ( int w , int h ) {
-			if (w == 0)
-				w = 360 * (Screen.width / 360);
-			if (w > 360 * 4)
-				w = 360 * 4;
-			mapwidth = w;
-			mapscale = mapwidth / 360f;
-			if (h <= 0)
-				h = (int)(180 * mapscale);
-			mapheight = h;
-			if (map != null) {
-				if (mapwidth != map.width || mapheight != map.height)
-					map = null;
-			}
-		}
-
-		public void setWidth ( int w ) {
-			if (w == 0) {
-				w = 360 * (int)(Screen.width / 360);
-				if (w > 360 * 4)
-					w = 360 * 4;
-			}
-			if (w < 360)
-				w = 360;
-			if (mapwidth == w)
-				return;
-			mapwidth = w;
-			mapscale = mapwidth / 360f;
-			mapheight = (int)(w / 2);
-			map = null;
-			resetMap ();
-		}
-
-		public void centerAround ( double lon , double lat ) {
-			lon_offset = 180 + lon - (mapwidth / mapscale) / 2;
-			lat_offset = 90 + lat - (mapheight / mapscale) / 2;
-		}
 
 		public void setProjection ( MapProjection p ) {
 			if (projection == p)
@@ -140,7 +87,6 @@ namespace SCANsat
 			projection = p;
 			resetMap ();
 		}
-
 		public double projectLongitude ( double lon , double lat ) {
 			lon = (lon + 3600 + 180) % 360 - 180;
 			lat = (lat + 1800 + 90) % 180 - 90;
@@ -163,7 +109,6 @@ namespace SCANsat
 					return lon;
 			}
 		}
-
 		public double projectLatitude ( double lon , double lat ) {
 			lon = (lon + 3600 + 180) % 360 - 180;
 			lat = (lat + 1800 + 90) % 180 - 90;
@@ -181,7 +126,6 @@ namespace SCANsat
 					return lat;
 			}
 		}
-
 		public double unprojectLongitude ( double lon , double lat ) {
 			if (lat > 90) {
 				lat = 180 - lat;
@@ -221,7 +165,6 @@ namespace SCANsat
 					return lon;
 			}
 		}
-
 		public double unprojectLatitude ( double lon , double lat ) {
 			if (lat > 90) {
 				lat = 180 - lat;
@@ -254,17 +197,63 @@ namespace SCANsat
 			}
 		}
 
+
+		/* MAP: scaling, centering (setting origin), translating, etc */
+		public double mapscale, lon_offset, lat_offset;
+		public int mapwidth, mapheight;
+		public void setSize ( int w , int h ) {
+			if (w == 0)
+				w = 360 * (Screen.width / 360);
+			if (w > 360 * 4)
+				w = 360 * 4;
+			mapwidth = w;
+			mapscale = mapwidth / 360f;
+			if (h <= 0)
+				h = (int)(180 * mapscale);
+			mapheight = h;
+			if (map != null) {
+				if (mapwidth != map.width || mapheight != map.height)
+					map = null;
+			}
+		}
+		public void setWidth ( int w ) {
+			if (w == 0) {
+				w = 360 * (int)(Screen.width / 360);
+				if (w > 360 * 4)
+					w = 360 * 4;
+			}
+			if (w < 360)
+				w = 360;
+			if (mapwidth == w)
+				return;
+			mapwidth = w;
+			mapscale = mapwidth / 360f;
+			mapheight = (int)(w / 2);
+			map = null;
+			resetMap ();
+		}
+		public void centerAround ( double lon , double lat ) {
+			lon_offset = 180 + lon - (mapwidth / mapscale) / 2;
+			lat_offset = 90 + lat - (mapheight / mapscale) / 2;
+		}
 		public double scaleLatitude ( double lat ) {
 			lat -= lat_offset;
 			lat *= 180f / (mapheight / mapscale);
 			return lat;
 		}
-
 		public double scaleLongitude ( double lon ) {
 			lon -= lon_offset;
 			lon *= 360f / (mapwidth / mapscale);
 			return lon;
 		}
+
+		public int mapmode = 0; // lots of EXTERNAL refs!
+		protected int mapstep; // all refs are below
+		protected bool mapsaved; // all refs are below
+		protected double[] mapline; // all refs are below
+		protected CelestialBody body; // all refs are below
+		public Texture2D map; // refs above: 214,215,216,232 -- rest are below
+		protected Color[] redline; // all refs are below
 
 		public void exportPNG () {
 			string mode;
@@ -275,7 +264,7 @@ namespace SCANsat
 				case 2: mode = "biome"; break;
 				default: mode = "unknown"; break;
 			}
-			
+
 			if (SCANcontroller.controller.colours == 1)
 				mode += "-grey";
 			string filename = body.name + "_" + mode + "_" + map.width.ToString () + "x" + map.height.ToString ();
@@ -286,8 +275,12 @@ namespace SCANsat
 			mapsaved = true;
 			ScreenMessages.PostScreenMessage ("Map saved: " + filename , 5 , ScreenMessageStyle.UPPER_CENTER);
 		}
-
-		protected Color[] redline;
+		public void setBody ( CelestialBody b ) {
+			if (body == b)
+				return;
+			body = b;
+			resetMap ();
+		}
 
 		public Texture2D getPartialMap () {
 			SCANdata data = SCANcontroller.controller.getData (body);
