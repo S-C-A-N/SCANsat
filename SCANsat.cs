@@ -22,6 +22,7 @@ namespace SCANsat
 		protected List<ScienceData> storedData = new List<ScienceData> ();
 		protected ExperimentsResultDialog expDialog = null;
 
+		/* SAT: KSP entry points */
 		public override void OnStart ( StartState state )
         {
 			if (state == StartState.Editor)
@@ -52,125 +53,6 @@ namespace SCANsat
             }
 			print ("[SCANsat] sensorType: " + sensorType.ToString () + " fov: " + fov.ToString () + " min_alt: " + min_alt.ToString () + " max_alt: " + max_alt.ToString () + " best_alt: " + best_alt.ToString () + " power: " + power.ToString ());
         }
-
-		[KSPField]
-		public int sensorType;
-		[KSPField]
-		public float fov;
-		[KSPField]
-		public float min_alt;
-		[KSPField]
-		public float max_alt;
-		[KSPField]
-		public float best_alt;
-		[KSPField]
-		public float power;
-		[KSPField]
-		public string scanName;
-		[KSPField]
-		public string animationName;
-		[KSPField(isPersistant = true)]
-		protected bool scanning = false;
-
-		public bool scanningNow () {
-			return scanning;
-		}
-
-		[KSPEvent(guiActive = true, guiName = "Start RADAR Scan", active = true)]
-		public void startScan () {
-			if (!scanning && !ToolbarManager.ToolbarAvailable)
-				SCANui.minimode = (SCANui.minimode > 0 ? 2 : -SCANui.minimode);
-			scanning = true;
-			if (sensorType > 0) {
-				SCANcontroller.controller.registerSensor (vessel , (SCANdata.SCANtype)sensorType , fov , min_alt , max_alt , best_alt);
-			}
-			animate (1);
-		}
-
-		[KSPEvent(guiActive = true, guiName = "Stop RADAR Scan", active = true)]
-		public void stopScan () {
-			scanning = false;
-			if (sensorType > 0) {
-				SCANcontroller.controller.unregisterSensor (vessel , (SCANdata.SCANtype)sensorType);
-			}
-			animate (-1);
-		}
-
-		[KSPEvent(guiActiveEditor = true, guiName = "Extend", active = true)]
-		public void editorExtend () {
-			Events ["editorExtend"].active = false;
-			Events ["editorRetract"].active = true;
-			animate (1);
-		}
-
-		[KSPEvent(guiActiveEditor = true, guiName = "Retract", active = false)]
-		public void editorRetract () {
-			Events ["editorExtend"].active = true;
-			Events ["editorRetract"].active = false;
-			animate (-1);
-		}
-
-		public void animate ( float speed ) {
-			if (anim != null && anim [animationName] != null) {
-				anim [animationName].speed = speed;
-				if (anim.IsPlaying (animationName)) {
-					if (anim [animationName].normalizedTime <= 0) {
-						anim [animationName].normalizedTime = 0;
-					} else if (anim [animationName].normalizedTime >= 1 - float.Epsilon) {
-						anim [animationName].normalizedTime = 1;
-					}
-				} else {
-					anim [animationName].wrapMode = WrapMode.ClampForever;
-					anim.Play (animationName);
-				}
-			}
-		}
-
-		[KSPEvent(guiActive = false, guiName = "Trigger Explosive Charge", active = false)]
-		public void explode () {
-			part.explode ();
-		}
-
-		[KSPEvent(guiActive = true, guiName = "Analyze Data", active = false)]
-		public void analyze () {
-			makeScienceData (true);
-			ReviewData ();
-		}
-
-		[KSPAction("Start RADAR Scan")]
-		public void startScanAction ( KSPActionParam param ) {
-			startScan ();
-		}
-
-		[KSPAction("Stop RADAR Scan")]
-		public void stopScanAction ( KSPActionParam param ) {
-			stopScan ();
-		}
-
-		[KSPAction("Toggle RADAR Scan")]
-		public void toggleScanAction ( KSPActionParam param ) {
-			if (scanning)
-				stopScan ();
-			else
-				startScan ();
-		}
-
-		[KSPAction("Analyze Data")]
-		public void analyzeData ( KSPActionParam param ) {
-			if (scanning)
-				analyze ();
-		}
-
-		public void addStatic () {
-			SCANdata data = SCANcontroller.controller.getData (vessel.mainBody.bodyName);
-			Texture2D map = data.map_small;
-			if (map != null) {
-				for (int i=0; i<1000; ++i) {
-					map.SetPixel (UnityEngine.Random.Range (0 , 360) , UnityEngine.Random.Range (0 , 180) , Color.Lerp (Color.black , Color.white , UnityEngine.Random.value));
-				}
-			}
-		}
-
 		public override void OnUpdate () {
 			if (sensorType < 0) {
 				Events ["startScan"].active = false;
@@ -233,13 +115,133 @@ namespace SCANsat
 				}
 			}
 		}
-
 		public override string GetInfo () {
 			string str = base.GetInfo ();
 			str += "Power usage: " + power.ToString ("F1") + "/s\n";
 			return str;
 		}
 
+		/* SAT: KSP fields */
+		[KSPField]
+		public int sensorType;
+		[KSPField]
+		public float fov;
+		[KSPField]
+		public float min_alt;
+		[KSPField]
+		public float max_alt;
+		[KSPField]
+		public float best_alt;
+		[KSPField]
+		public float power;
+		[KSPField]
+		public string scanName;
+		[KSPField]
+		public string animationName;
+
+		/* SCAN: all of these fields and only scanning is persistant */
+		[KSPField(isPersistant = true)]
+		protected bool scanning = false;
+
+		public bool scanningNow () { return scanning; }
+
+		/* SCAN: context (right click) buttons in FLIGHT */
+		[KSPEvent(guiActive = true, guiName = "Start RADAR Scan", active = true)]
+		public void startScan () {
+			if (!scanning && !ToolbarManager.ToolbarAvailable)
+				SCANui.minimode = (SCANui.minimode > 0 ? 2 : -SCANui.minimode);
+			scanning = true;
+			if (sensorType > 0) {
+				SCANcontroller.controller.registerSensor (vessel , (SCANdata.SCANtype)sensorType , fov , min_alt , max_alt , best_alt);
+			}
+			animate (1);
+		}
+		[KSPEvent(guiActive = true, guiName = "Stop RADAR Scan", active = true)]
+		public void stopScan () {
+			scanning = false;
+			if (sensorType > 0) {
+				SCANcontroller.controller.unregisterSensor (vessel , (SCANdata.SCANtype)sensorType);
+			}
+			animate (-1);
+		}
+		[KSPEvent(guiActive = false, guiName = "Trigger Explosive Charge", active = false)]
+		public void explode () {
+			part.explode ();
+		}
+		[KSPEvent(guiActive = true, guiName = "Analyze Data", active = false)]
+		public void analyze () {
+			makeScienceData (true);
+			ReviewData ();
+		}
+
+
+		/* SCAN: context (right click) buttons in EDTIOR */
+		[KSPEvent(guiActiveEditor = true, guiName = "Extend", active = true)]
+		public void editorExtend () {
+			Events ["editorExtend"].active = false;
+			Events ["editorRetract"].active = true;
+			animate (1);
+		}
+		[KSPEvent(guiActiveEditor = true, guiName = "Retract", active = false)]
+		public void editorRetract () {
+			Events ["editorExtend"].active = true;
+			Events ["editorRetract"].active = false;
+			animate (-1);
+		}
+
+		/* SCAN: trivial function to do animation */
+		public void animate ( float speed ) {
+			if (anim != null && anim [animationName] != null) {
+				anim [animationName].speed = speed;
+				if (anim.IsPlaying (animationName)) {
+					if (anim [animationName].normalizedTime <= 0) {
+						anim [animationName].normalizedTime = 0;
+					} else if (anim [animationName].normalizedTime >= 1 - float.Epsilon) {
+						anim [animationName].normalizedTime = 1;
+					}
+				} else {
+					anim [animationName].wrapMode = WrapMode.ClampForever;
+					anim.Play (animationName);
+				}
+			}
+		}
+
+		/* SCAN: actions for ... something ... */
+		[KSPAction("Start RADAR Scan")]
+		public void startScanAction ( KSPActionParam param ) {
+			startScan ();
+		}
+		[KSPAction("Stop RADAR Scan")]
+		public void stopScanAction ( KSPActionParam param ) {
+			stopScan ();
+		}
+		[KSPAction("Toggle RADAR Scan")]
+		public void toggleScanAction ( KSPActionParam param ) {
+			if (scanning)
+				stopScan ();
+			else
+				startScan ();
+		}
+		[KSPAction("Analyze Data")]
+		public void analyzeData ( KSPActionParam param ) {
+			if (scanning)
+				analyze ();
+		}
+
+		/* SCAN: add static (a warning that we're low on electric charge) */
+		public void addStatic () {
+			SCANdata data = SCANcontroller.controller.getData (vessel.mainBody.bodyName);
+			Texture2D map = data.map_small;
+			if (map != null) {
+				for (int i=0; i<1000; ++i) {
+					map.SetPixel (UnityEngine.Random.Range (0 , 360) , UnityEngine.Random.Range (0 , 180) , Color.Lerp (Color.black , Color.white , UnityEngine.Random.value));
+				}
+			}
+		}
+
+
+		/* SCAN: SCIENCE! make, store, transmit, keep
+		 * 	discard, review, count DATA */
 		public void makeScienceData ( bool notZero ) {
 			if (expDialog != null)
 				DestroyImmediate (expDialog);
@@ -249,16 +251,13 @@ namespace SCANsat
 				return;
 			storedData.Add (sd);
 		}
-
 		public ScienceData[] GetData () {
 			return storedData.ToArray ();
 		}
-
 		public void KeepData ( ScienceData data ) {
 			print ("[SCANsat] keeping data");
 			expDialog = null;
 		}
-		
 		public void TransmitData ( ScienceData data ) {
 			print ("[SCANsat] transmitting data");
 			expDialog = null;
@@ -275,7 +274,6 @@ namespace SCANsat
 				}
 			}
 		}
-
 		public void DumpData ( ScienceData data ) {
 			print ("[SCANsat] dumping data");
 			expDialog = null;
@@ -283,11 +281,9 @@ namespace SCANsat
 				storedData.Remove (data);
 			}
 		}
-
 		public void ReviewDataItem ( ScienceData sd ) {
 			expDialog = ExperimentsResultDialog.DisplayResult (new ExperimentResultDialogPage (part , sd , 1f , 0f , false , "" , true , false , DumpData , KeepData , TransmitData , null));
 		}
-
 		public void ReviewData () {
 			if (storedData.Count < 1)
 				return;
@@ -296,11 +292,9 @@ namespace SCANsat
 			ScienceData sd = storedData [0];
 			expDialog = ExperimentsResultDialog.DisplayResult (new ExperimentResultDialogPage (part , sd , 1f , 0f , false , "" , true , false , DumpData , KeepData , TransmitData , null));
 		}
-
 		public bool IsRerunnable () {
 			return false;
 		}
-
 		public int GetScienceCount () {
 			return storedData.Count;
 		}
