@@ -23,12 +23,14 @@ namespace SCANsat
 		Func<double,int> icLAT = (lat) => ((int)(lat + 180 + 90 )) % 180;
 		Func<int,int,bool> badLonLat = (lon,lat) => (lon < 0 || lat < 0 || lon >= 360 || lat >= 180);
 
+		/* MAP: state */
 		protected byte[,] coverage = new byte[360 , 180];
 		protected float[,] heightmap = new float[360 , 180];
 		public CelestialBody body;
 		public Texture2D map_small = new Texture2D (360 , 180 , TextureFormat.RGB24 , false);
 		public bool disabled;
 
+		/* MAP: known types of data */
 		public enum SCANtype
 		{
 			Nothing = 0, 		// no data
@@ -42,20 +44,19 @@ namespace SCANsat
 			Everything = 255	// everything
 		}
 
+		/* DATA: map passes and coverage (passes >= 1)*/
 		public void registerPass ( double lon , double lat , SCANtype type ) {
 			int ilon = icLON(lon);
 			int ilat = icLAT(lat);
 			if (badLonLat(ilon,ilat)) return;
 			coverage [ilon, ilat] |= (byte)type;
 		}
-
 		public bool isCovered ( double lon , double lat , SCANtype type ) {
 			int ilon = icLON(lon);
 			int ilat = icLAT(lat);
 			if (badLonLat(ilon,ilat)) return false;
 			return (coverage [ilon, ilat] & (byte)type) != 0;
 		}
-
 		public bool isCoveredByAll ( double lon , double lat , SCANtype type ) {
 			int ilon = icLON(lon);
 			int ilat = icLAT(lat);
@@ -63,9 +64,9 @@ namespace SCANsat
 			return (coverage [ilon, ilat] & (byte)type) == (byte)type;
 		}
 
+		/* DATA: elevation (called often, probably) */
 		public double getElevation ( double lon , double lat ) {
-			if (body.pqsController == null)
-				return 0;
+			if (body.pqsController == null) return 0;	// FIXME: something == null does not imply sealevel.
 			/* FIXME: unused */ //int ilon = ((int)(lon + 360 + 180)) % 360;
 			/* FIXME: unused */ //int ilat = ((int)(lat + 180 + 90)) % 180;
 			double rlon = Mathf.Deg2Rad * lon;
@@ -155,10 +156,8 @@ namespace SCANsat
 
 		/* DATA: all hail the red line of scanning */
 		protected Color[] redline;
-
 		protected int scanline = 0;
 		protected int scanstep = 0;
-
 		public void drawHeightScanline ( SCANtype type ) {
 			Color[] cols_height_map_small = map_small.GetPixels (0 , scanline , 360 , 1);
 			for (int ilon=0; ilon<360; ilon+=1) {
@@ -301,9 +300,5 @@ namespace SCANsat
 			}
 			map_small.Apply ();
 		}
-
-
-
-
 	}
 }
