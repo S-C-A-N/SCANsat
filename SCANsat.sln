@@ -50,5 +50,16 @@ Global
 		$4.inheritsSet = Mono
 		$4.inheritsScope = text/x-csharp
 		$4.scope = text/x-csharp
+		$0.TextStylePolicy = $5
+		$5.FileWidth = 120
+		$5.TabWidth = 4
+		$5.RemoveTrailingWhitespace = True
+		$5.EolMarker = Windows
+		$5.inheritsSet = Mono
+		$5.inheritsScope = text/plain
+		$5.scope = text/plain
+		$0.TextStylePolicy = $6
+		$6.inheritsSet = null
+		$6.scope = application/octet-stream
 	EndGlobalSection
 EndGlobal

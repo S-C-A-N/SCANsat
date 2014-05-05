@@ -15,21 +15,21 @@
     <None Include="Resources\ScienceDefs.cfg" />
     <None Include="MapTraq\SCANsat.tga" />
     <None Include="MapTraq\model.mu" />
-    <None Include="MapTraq\part.cfg" />
     <None Include="Scanner 1\Normal Map_NRM.tga" />
     <None Include="Scanner 1\Texture Map.tga" />
     <None Include="Scanner 1\model.mu" />
-    <None Include="Scanner 1\part.cfg" />
     <None Include="Scanner 2\Normals_NRM.tga" />
     <None Include="Scanner 2\Tex Map.tga" />
     <None Include="Scanner 2\model.mu" />
-    <None Include="Scanner 2\part.cfg" />
     <None Include="Scanner 8\Normal Map_NRM.tga" />
     <None Include="Scanner 8\Texture Map.tga" />
     <None Include="Scanner 8\model.mu" />
-    <None Include="Scanner 8\part.cfg" />
     <None Include="Scanner 32\SCANsat.tga" />
     <None Include="Scanner 32\model.mu" />
-    <None Include="Scanner 32\part.cfg" />
+    <None Include="Scanner 1\part.cfg.ignore" />
+    <None Include="Scanner 2\part.cfg.ignore" />
+    <None Include="Scanner 32\part.cfg.ignore" />
+    <None Include="Scanner 8\part.cfg.ignore" />
+    <None Include="MapTraq\part.cfg.ignore" />
   </ItemGroup>
 </Project>
