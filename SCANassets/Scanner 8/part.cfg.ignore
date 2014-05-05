@@ -10,7 +10,9 @@ rescaleFactor = 0.25
 
 // attachment rules: [stack, srfAttach, allowStack, allowSrfAttach, allowCollision]
 attachRules = 0,1,0,0,0
-node_attach = 0.0, -0.08, 0.0, 0.0, -1.0, 0.0, 0
+// node_attach = 0.0, -0.08, 0.0, 0.0, -1.0, 0.0, 0 -- this makes it very hard to select
+node_attach = 0.0, -0.09, 0.0, 0.0, -1.0, 0.0, 0
+CoMOffset = 0, 0.0865, 0
 
 TechRequired = advExploration
 entryCost = 0
