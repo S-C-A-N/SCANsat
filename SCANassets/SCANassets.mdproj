@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Default</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ItemType>GenericProject</ItemType>
+    <ProductVersion>10.0.0</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{0B3343ED-6E2B-489D-9F53-4CF850ABF30D}</ProjectGuid>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Default|AnyCPU' ">
+    <OutputPath>.</OutputPath>
+  </PropertyGroup>
+  <ItemGroup>
+    <None Include="Resources\ScienceDefs.cfg" />
+    <None Include="MapTraq\SCANsat.tga" />
+    <None Include="MapTraq\model.mu" />
+    <None Include="MapTraq\part.cfg" />
+    <None Include="Scanner 1\Normal Map_NRM.tga" />
+    <None Include="Scanner 1\Texture Map.tga" />
+    <None Include="Scanner 1\model.mu" />
+    <None Include="Scanner 1\part.cfg" />
+    <None Include="Scanner 2\Normals_NRM.tga" />
+    <None Include="Scanner 2\Tex Map.tga" />
+    <None Include="Scanner 2\model.mu" />
+    <None Include="Scanner 2\part.cfg" />
+    <None Include="Scanner 8\Normal Map_NRM.tga" />
+    <None Include="Scanner 8\Texture Map.tga" />
+    <None Include="Scanner 8\model.mu" />
+    <None Include="Scanner 8\part.cfg" />
+    <None Include="Scanner 32\SCANsat.tga" />
+    <None Include="Scanner 32\model.mu" />
+    <None Include="Scanner 32\part.cfg" />
+  </ItemGroup>
+</Project>
