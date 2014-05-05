@@ -117,7 +117,15 @@ namespace SCANsat
 		}
 		public override string GetInfo () {
 			string str = base.GetInfo ();
-			str += "Power usage: " + power.ToString ("F1") + "/s\n";
+			if (min_alt != 0) {
+			str += "Altitude ( min): " + (min_alt / 1000).ToString ("F0") + " km\n"; }
+			if (best_alt != min_alt) {
+			str += "Altitude (best): " + (best_alt / 1000).ToString ("F0") + " km\n"; }
+			if (max_alt != 0) {
+			str += "Altitude ( max): " + (max_alt / 1000).ToString ("F0") + " km\n"; }
+			if (fov != 0) {
+			str += "FOV: " + fov.ToString("F0") + " °\n"; }
+			str += "Power usage: " + power.ToString ("F1") + " charge/s\n";
 			return str;
 		}
 
