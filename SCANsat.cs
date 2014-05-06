@@ -65,10 +65,11 @@ namespace SCANsat
             //    return;
             //}
             Events ["reviewEvent"].active = storedData.Count > 0;
+            Events ["EVACollect"].active = storedData.Count > 0;
 			Events ["startScan"].active = !scanning;
 			Events ["stopScan"].active = scanning;
             //Events ["analyze"].active = scanning; //** No reason to make sciene analysis dependent on scanning
-			if (scanning) { //&& sensorType >= 0) { //** All extant scanners have sensorType > 0
+			if (scanning) { //&& sensorType >= 0) { //** All extant scanners have sensorType >= 0
 				if (sensorType == 0 || SCANcontroller.controller.isVesselKnown (vessel.id , (SCANdata.SCANtype)sensorType)) {
 					if (TimeWarp.CurrentRate < 1500) { // would need large buffer batteries, just not very smooth
 						float p = power * TimeWarp.deltaTime;
@@ -213,6 +214,17 @@ namespace SCANsat
         [KSPEvent(guiActive = true, guiName = "Review Data", active = false)]
         public void reviewEvent() {
             ReviewData();
+        }
+        //** EVA data collection
+        [KSPEvent(guiActiveUnfocused = true, guiName = "Collect Stored Data", externalToEVAOnly = true, unfocusedRange = 1.5f, active = false)]
+        public void EVACollect()
+        {
+            List<ModuleScienceContainer> EVACont = FlightGlobals.ActiveVessel.FindPartModulesImplementing<ModuleScienceContainer>();
+            if (storedData.Count > 0) {
+                if (EVACont.First().StoreData(new List<IScienceDataContainer>() { this }, false)) {  
+                    DumpData(storedData[0]);
+                }
+            }
         }
 
 
