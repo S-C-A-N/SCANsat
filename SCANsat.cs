@@ -109,6 +109,7 @@ namespace SCANsat
                 Actions["startScanAction"].guiName = "Open Map";
                 Actions["stopScanAction"].guiName = "Close Map";
                 Actions["toggleScanAction"].guiName = "Toggle Map";
+                Events["analyze"].active = false;
             }
             else if (scanName != null)
             {
