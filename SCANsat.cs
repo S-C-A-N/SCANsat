@@ -10,6 +10,7 @@
  */
 using System;
 using System.Collections.Generic;
+using System.Linq; //Needed for the OrderBy() method for data transmission
 using UnityEngine;
 
 namespace SCANsat
@@ -17,7 +18,7 @@ namespace SCANsat
 	public class SCANsat : PartModule, IScienceDataContainer
 	{
 		protected SCANcontroller con = SCANcontroller.controller;
-		protected bool initialized = false, powerIsProblem;
+		protected bool powerIsProblem;  //initialized = false, *Unused now
 		protected Animation anim = null;
 		protected List<ScienceData> storedData = new List<ScienceData> ();
 		protected ExperimentsResultDialog expDialog = null;
@@ -54,54 +55,38 @@ namespace SCANsat
 			print ("[SCANsat] sensorType: " + sensorType.ToString () + " fov: " + fov.ToString () + " min_alt: " + min_alt.ToString () + " max_alt: " + max_alt.ToString () + " best_alt: " + best_alt.ToString () + " power: " + power.ToString ());
         }
 		public override void OnUpdate () {
-			if (sensorType < 0) {
-				Events ["startScan"].active = false;
-				Events ["stopScan"].active = false;
-				Events ["analyze"].active = false;
-				Events ["explode"].active = true;
-				Events ["explode"].guiActive = true;
-				return;
-			}
-			if (!initialized) {
-				if (sensorType == 0) {
-					Events ["startScan"].guiName = "Open Map";
-					Events ["stopScan"].guiName = "Close Map";
-					Actions ["startScanAction"].guiName = "Open Map";
-					Actions ["stopScanAction"].guiName = "Close Map";
-					Actions ["toggleScanAction"].guiName = "Toggle Map";
-				} else if (scanName != null) {
-					Events ["startScan"].guiName = "Start " + scanName;
-					Events ["stopScan"].guiName = "Stop " + scanName;
-					Actions ["startScanAction"].guiName = "Start " + scanName;
-					Actions ["stopScanAction"].guiName = "Stop " + scanName;
-					Actions ["toggleScanAction"].guiName = "Toggle " + scanName;
-				}
-				if (scanning) {
-					startScan ();
-				}
-				initialized = true;
-			}
+            //** No need to include these references to the deprecated slope scanner part
+            //if (sensorType < 0) {
+            //    Events ["startScan"].active = false;
+            //    Events ["stopScan"].active = false;
+            //    Events ["analyze"].active = false;
+            //    Events ["explode"].active = true;
+            //    Events ["explode"].guiActive = true;
+            //    return;
+            //}
+            Events ["reviewEvent"].active = storedData.Count > 0;
+            Events ["EVACollect"].active = storedData.Count > 0;
 			Events ["startScan"].active = !scanning;
 			Events ["stopScan"].active = scanning;
-			Events ["analyze"].active = scanning;
-			if (scanning && sensorType >= 0) {
+            //Events ["analyze"].active = scanning; //** No reason to make sciene analysis dependent on scanning
+			if (scanning) { //&& sensorType >= 0) { //** All extant scanners have sensorType >= 0
 				if (sensorType == 0 || SCANcontroller.controller.isVesselKnown (vessel.id , (SCANdata.SCANtype)sensorType)) {
 					if (TimeWarp.CurrentRate < 1500) { // would need large buffer batteries, just not very smooth
 						float p = power * TimeWarp.deltaTime;
 						float e = part.RequestResource ("ElectricCharge" , p);
 						if (e < p) {
-							stopScan ();
+							unregisterScanner (); //** I'm thinking a dedicated start/stop method should be used for these
 							powerIsProblem = true;
 						} else {
-							startScan ();
+							registerScanner ();
 							powerIsProblem = false;
 						}
 					} else if (powerIsProblem) {
-						startScan ();
+						registerScanner ();
 						powerIsProblem = false;
 					}
 				} else {
-					stopScan ();
+					unregisterScanner ();
 				}
 			}
 			SCANcontroller.controller.scanFromAllVessels ();
@@ -109,12 +94,53 @@ namespace SCANsat
 				SCANui.gui_ping (powerIsProblem);
 				if (powerIsProblem) {
 					addStatic ();
-					startScan ();
+					registerScanner ();
 				} else if (sensorType == 0 && scanning) {
 					SCANui.gui_ping_maptraq ();
 				}
 			}
 		}
+        public override void OnInitialize() //** Maybe this should all just go at the end of OnStart?
+        {
+            if (sensorType == 0)
+            {
+                Events["startScan"].guiName = "Open Map";
+                Events["stopScan"].guiName = "Close Map";
+                Actions["startScanAction"].guiName = "Open Map";
+                Actions["stopScanAction"].guiName = "Close Map";
+                Actions["toggleScanAction"].guiName = "Toggle Map";
+            }
+            else if (scanName != null)
+            {
+                Events["startScan"].guiName = "Start " + scanName;
+                Events["stopScan"].guiName = "Stop " + scanName;
+                Actions["startScanAction"].guiName = "Start " + scanName;
+                Actions["stopScanAction"].guiName = "Stop " + scanName;
+                Actions["toggleScanAction"].guiName = "Toggle " + scanName;
+            }
+            if (scanning) startScan();
+        }
+        //** These are what I use for saving and loading science data
+        public override void OnLoad(ConfigNode node)
+        {
+            if (node.HasNode("ScienceData"))
+            {
+                foreach (ConfigNode storedDataNode in node.GetNodes("ScienceData"))
+                {
+                    ScienceData data = new ScienceData(storedDataNode);
+                    storedData.Add(data);
+                }
+            }
+        }
+        public override void OnSave(ConfigNode node)
+        {
+            node.RemoveNodes("ScienceData"); //** Prevent duplicates
+            foreach (ScienceData SCANData in storedData)
+            {
+                ConfigNode storedDataNode = node.AddNode("ScienceData");
+                SCANData.Save(storedDataNode);
+            }
+        }
 		public override string GetInfo () {
 			string str = base.GetInfo ();
 			if (min_alt != 0) {
@@ -156,31 +182,50 @@ namespace SCANsat
 		/* SCAN: context (right click) buttons in FLIGHT */
 		[KSPEvent(guiActive = true, guiName = "Start RADAR Scan", active = true)]
 		public void startScan () {
-			if (!scanning && !ToolbarManager.ToolbarAvailable)
+			if (!ToolbarManager.ToolbarAvailable)
 				SCANui.minimode = (SCANui.minimode > 0 ? 2 : -SCANui.minimode);
-			scanning = true;
-			if (sensorType > 0) {
-				SCANcontroller.controller.registerSensor (vessel , (SCANdata.SCANtype)sensorType , fov , min_alt , max_alt , best_alt);
-			}
+            registerScanner ();
+            //scanning = true;
+            //if (sensorType > 0) {
+            //    SCANcontroller.controller.registerSensor (vessel , (SCANdata.SCANtype)sensorType , fov , min_alt , max_alt , best_alt);
+            //}
 			animate (1);
 		}
 		[KSPEvent(guiActive = true, guiName = "Stop RADAR Scan", active = true)]
 		public void stopScan () {
-			scanning = false;
-			if (sensorType > 0) {
-				SCANcontroller.controller.unregisterSensor (vessel , (SCANdata.SCANtype)sensorType);
-			}
+            unregisterScanner ();
+            //scanning = false;
+            //if (sensorType > 0) {
+            //    SCANcontroller.controller.unregisterSensor (vessel , (SCANdata.SCANtype)sensorType);
+            //}
 			animate (-1);
 		}
-		[KSPEvent(guiActive = false, guiName = "Trigger Explosive Charge", active = false)]
-		public void explode () {
-			part.explode ();
-		}
-		[KSPEvent(guiActive = true, guiName = "Analyze Data", active = false)]
+        //** No need to include these references to the deprecated slope scanner part
+        //[KSPEvent(guiActive = false, guiName = "Trigger Explosive Charge", active = false)]
+        //public void explode () {
+        //    part.explode ();
+        //}
+		[KSPEvent(guiActive = true, guiName = "Analyze Data", active = true)] //** Always active
 		public void analyze () {
 			makeScienceData (true);
 			ReviewData ();
 		}
+        //** Allows us to review stored science data
+        [KSPEvent(guiActive = true, guiName = "Review Data", active = false)]
+        public void reviewEvent() {
+            ReviewData();
+        }
+        //** EVA data collection
+        [KSPEvent(guiActiveUnfocused = true, guiName = "Collect Stored Data", externalToEVAOnly = true, unfocusedRange = 1.5f, active = false)]
+        public void EVACollect()
+        {
+            List<ModuleScienceContainer> EVACont = FlightGlobals.ActiveVessel.FindPartModulesImplementing<ModuleScienceContainer>();
+            if (storedData.Count > 0) {
+                if (EVACont.First().StoreData(new List<IScienceDataContainer>() { this }, false)) {  
+                    DumpData(storedData[0]);
+                }
+            }
+        }
 
 
 		/* SCAN: context (right click) buttons in EDTIOR */
@@ -232,9 +277,9 @@ namespace SCANsat
 		}
 		[KSPAction("Analyze Data")]
 		public void analyzeData ( KSPActionParam param ) {
-			if (scanning)
+            //if (scanning) ** Always available
 				analyze ();
-		}
+        }
 
 		/* SCAN: add static (a warning that we're low on electric charge) */
 		public void addStatic () {
@@ -246,6 +291,18 @@ namespace SCANsat
 				}
 			}
 		}
+
+        //** Register scanners without going through animations too
+        public void registerScanner() {
+            scanning = true;
+            if (sensorType > 0) 
+                SCANcontroller.controller.registerSensor(vessel, (SCANdata.SCANtype)sensorType, fov, min_alt, max_alt, best_alt);
+        }
+        public void unregisterScanner() {
+            scanning = false;
+            if (sensorType > 0) 
+                SCANcontroller.controller.unregisterSensor (vessel , (SCANdata.SCANtype)sensorType);
+        }
 
 
 		/* SCAN: SCIENCE! make, store, transmit, keep
@@ -266,22 +323,37 @@ namespace SCANsat
 			print ("[SCANsat] keeping data");
 			expDialog = null;
 		}
-		public void TransmitData ( ScienceData data ) {
-			print ("[SCANsat] transmitting data");
-			expDialog = null;
-			if (!storedData.Contains (data))
-				return;
-			foreach (IScienceDataTransmitter t in vessel.FindPartModulesImplementing<IScienceDataTransmitter>()) {
-				if (t.CanTransmit ()) {
-					if (!t.IsBusy ()) {
-						makeScienceData (false); // just to update values...
-						t.TransmitData (storedData);
-						storedData = new List<ScienceData> ();
-						break;
-					}
-				}
-			}
-		}
+        //** This method has issues, nothing happens if all transmitters are busy
+        //public void TransmitData ( ScienceData data ) {
+        //    print ("[SCANsat] transmitting data");
+        //    expDialog = null;
+        //    if (!storedData.Contains (data))
+        //        return;
+        //    foreach (IScienceDataTransmitter t in vessel.FindPartModulesImplementing<IScienceDataTransmitter>()) {
+        //        if (t.CanTransmit ()) {
+        //            if (!t.IsBusy ()) {
+        //                makeScienceData (false); // just to update values...
+        //                t.TransmitData (storedData);
+        //                storedData = new List<ScienceData> ();
+        //                break;
+        //            }
+        //        }
+        //    }
+        //}
+        
+        //** This is closer to the stock method of data transmission
+        public void TransmitData(ScienceData data) {
+            print("[SCANsat] transmitting data");
+            expDialog = null;
+            List<IScienceDataTransmitter> tranList = vessel.FindPartModulesImplementing<IScienceDataTransmitter>();
+            if (tranList.Count > 0 && storedData.Count > 0)
+            {
+                makeScienceData(false);
+                tranList.OrderBy(ScienceUtil.GetTransmitterScore).First().TransmitData(storedData);
+                DumpData(storedData[0]);
+            }
+            else ScreenMessages.PostScreenMessage("No transmitters available on this vessel.", 4f, ScreenMessageStyle.UPPER_LEFT);
+        }
 		public void DumpData ( ScienceData data ) {
 			print ("[SCANsat] dumping data");
 			expDialog = null;
@@ -290,8 +362,9 @@ namespace SCANsat
 			}
 		}
 		public void ReviewDataItem ( ScienceData sd ) {
-			expDialog = ExperimentsResultDialog.DisplayResult (new ExperimentResultDialogPage (part , sd , 1f , 0f , false , "" , true , false , DumpData , KeepData , TransmitData , null));
-		}
+            //expDialog = ExperimentsResultDialog.DisplayResult (new ExperimentResultDialogPage (part , sd , 1f , 0f , false , "" , true , false , DumpData , KeepData , TransmitData , null));
+            ReviewData(); //** Just go directly to the regular method: fairly certain this is never used anyway
+        }
 		public void ReviewData () {
 			if (storedData.Count < 1)
 				return;
@@ -301,7 +374,7 @@ namespace SCANsat
 			expDialog = ExperimentsResultDialog.DisplayResult (new ExperimentResultDialogPage (part , sd , 1f , 0f , false , "" , true , false , DumpData , KeepData , TransmitData , null));
 		}
 		public bool IsRerunnable () {
-			return false;
+			return true; //** true? I don't think it matters, but might gum up other science tracking mods
 		}
 		public int GetScienceCount () {
 			return storedData.Count;
