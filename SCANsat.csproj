@@ -31,7 +31,7 @@
     <CustomCommands>
       <CustomCommands>
         <Command type="AfterBuild" command="cp &quot;${ProjectDir}/CHANGELOG.txt&quot; ." workingdir="${TargetDir}" />
-        <Command type="AfterBuild" command="cp &quot;${ProjectDir}/README.txt&quot; ." workingdir="${TargetDir}" />
+        <Command type="AfterBuild" command="cp &quot;${ProjectDir}/README.md&quot; ." workingdir="${TargetDir}" />
         <Command type="AfterBuild" command="cp &quot;${ProjectDir}/LICENSE.txt&quot; ." workingdir="${TargetDir}" />
         <Command type="AfterBuild" command="cp &quot;${ProjectDir}/TODO.txt&quot; ." workingdir="${TargetDir}" />
         <Command type="AfterBuild" command="for s in &quot;Resources&quot; &quot;MapTraq&quot; &quot;Scanner 1&quot; &quot;Scanner 2&quot; &quot;Scanner 8&quot; &quot;Scanner 32&quot;; do cp -ur &quot;${ProjectDir}/SCANassets/$s&quot; .; done" workingdir="${TargetDir}" externalConsole="true" />
@@ -67,8 +67,8 @@
   <ItemGroup>
     <None Include="TODO.txt" />
     <None Include="LICENSE.txt" />
-    <None Include="README.txt" />
     <None Include="CHANGELOG.txt" />
+    <None Include="README.md" />
   </ItemGroup>
   <ProjectExtensions>
     <MonoDevelop>
