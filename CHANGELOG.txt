@@ -1,4 +1,4 @@
-Build 6 - 2014-04-28
+Build 6 - 2014-05-12
 --------------------
 
 + [REQUIRED] Update for KSP version 0.23.5. This version of SCANsat now requires KSP 0.23.5.
@@ -17,7 +17,8 @@ Build 6 - 2014-04-28
 + [COMPATABILITY] "Change access modifiers to allow for more control from RPM".
 		Yes, it's in quotes	because I trust Dmagic THAT much.
 													[thanks Dmagic!]
-													
++ [ADDED] Big Map Caching. [Thanks!!!1 DMagic!]
+											
 - [BUGFIX] Scanning high inclinations with wide-enough FOV scanners 
 	(ie, Multi, RADAR, but not SAR) will no longer reveal the opposite polar region. [thanks DMagic!]
 	[example orbit]:  Minmus 250.000x250.000km @ 91.0 degrees
