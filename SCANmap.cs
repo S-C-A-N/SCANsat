@@ -82,10 +82,20 @@ namespace SCANsat
 		public MapProjection projection = MapProjection.Rectangular;
 
 		protected float[,,] big_heightmap;
+        protected float[,,] little_big_heightmap;
+        protected int mapType;
+        
 
-        	public void heightMapArray (float height, int line, int i)
+        	public void heightMapArray (float height, int line, int i, int type)
         	{
+                if (type == 0)
+                {
             		big_heightmap[i, line, SCANcontroller.controller.projection] = height;
+                }
+                else if (type == 1)
+                {
+                    little_big_heightmap[i, line, SCANcontroller.controller.projection] = height;
+                }
         	}
 
 
@@ -219,6 +229,7 @@ namespace SCANsat
 			if (h <= 0)
 				h = (int)(180 * mapscale);
 			mapheight = h;
+            little_big_heightmap = new float [mapwidth, mapheight, 3];
 			if (map != null) {
 				if (mapwidth != map.width || mapheight != map.height)
 					map = null;
@@ -284,8 +295,9 @@ namespace SCANsat
 			mapstep = 0;
 			mapsaved = false;
 		}
-		public void resetMap ( int mode ) {
+		public void resetMap ( int mode, int maptype ) {
 			mapmode = mode;
+            mapType = maptype;
 			resetMap ();
 		}
 
@@ -357,7 +369,11 @@ namespace SCANsat
                         //big_heightmap[i, mapstep, SCANcontroller.controller.projection] = 0;
 						continue;
 					}
-					float val = big_heightmap[i, mapstep, SCANcontroller.controller.projection];
+                    float val = 0f;
+                    if (mapType == 0)
+                        val = big_heightmap[i, mapstep, SCANcontroller.controller.projection];
+                    else if (mapType == 1)
+                        val = little_big_heightmap[i, mapstep, SCANcontroller.controller.projection];
                     if (val == 0)
                     {
                         if (data.isCovered(lon, lat, SCANdata.SCANtype.AltimetryHiRes))
@@ -365,14 +381,14 @@ namespace SCANsat
                             // high resolution gets a coloured pixel for the actual position
                             val = (float)data.getElevation(lon, lat);
                             pix[i] = heightToColor(val, scheme);
-                            heightMapArray(val, mapstep, i);
+                            heightMapArray(val, mapstep, i, mapType);
                         }
                         else
                         {
                             // basic altimetry gets forced greyscale with lower resolution
                             val = (float)data.getElevation(((int)(lon * 5)) / 5, ((int)(lat * 5)) / 5);
                             pix[i] = heightToColor(val, 1);
-                            heightMapArray(val, mapstep, i);
+                            heightMapArray(val, mapstep, i, mapType);
                         }
                     }
                     else if (val != 0)
@@ -404,15 +420,19 @@ namespace SCANsat
 						pix [i] = Color.Lerp (Color.black , Color.white , UnityEngine.Random.value);
 						continue;
 					}
-                    float val = big_heightmap[i, mapstep, SCANcontroller.controller.projection];
+                    float val = 0f;
+                    if (mapType == 0)
+                        val = big_heightmap[i, mapstep, SCANcontroller.controller.projection];
+                    else if (mapType == 1)
+                        val = little_big_heightmap[i, mapstep, SCANcontroller.controller.projection];
 					if (val == 0)
                     {
                         if (data.isCovered (lon , lat , SCANdata.SCANtype.AltimetryHiRes)) {
 						    val = (float)data.getElevation (lon , lat);
-                            heightMapArray(val, mapstep, i);
+                            heightMapArray(val, mapstep, i, mapType);
 					    } else {
 						    val = (float)data.getElevation (((int)(lon * 5)) / 5 , ((int)(lat * 5)) / 5);
-                            heightMapArray(val, mapstep, i);
+                            heightMapArray(val, mapstep, i, mapType);
 					    }
                     }
 					if (mapstep == 0) {
@@ -463,17 +483,21 @@ namespace SCANsat
 					} else {
 						Color elevation = Color.gray;
 						if (data.isCovered (lon , lat , SCANdata.SCANtype.Altimetry)) {
-                            float val = big_heightmap[i, mapstep, SCANcontroller.controller.projection];
+                            float val = 0f;
+                            if (mapType == 0)
+                                val = big_heightmap[i, mapstep, SCANcontroller.controller.projection];
+                            else if (mapType == 1)
+                                val = little_big_heightmap[i, mapstep, SCANcontroller.controller.projection];
 							if (val == 0) {
                                 if (data.isCovered(lon, lat, SCANdata.SCANtype.AltimetryHiRes))
                                 {
                                     val = (float)data.getElevation(lon, lat);
-                                    heightMapArray(val, mapstep, i);
+                                    heightMapArray(val, mapstep, i, mapType);
                                 }
                                 else
                                 {
                                     val = (float)data.getElevation(((int)(lon * 5)) / 5, ((int)(lat * 5)) / 5);
-                                    heightMapArray(val, mapstep, i);
+                                    heightMapArray(val, mapstep, i, mapType);
                                 }
                             }
 							elevation = Color.Lerp (Color.black , Color.white , Mathf.Clamp (val + 1500f , 0 , 9000) / 9000f);
