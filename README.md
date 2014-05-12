@@ -65,14 +65,42 @@ For licensing information, please see the [included LICENSE.txt][SCANsat:license
 
 ### 2. Types of Scans
 ------------------------------------------
+SCANsat supports several different kinds of scans (as opposed to
+scanning modules or parts).
+
+As of May 2014, these include:
+  * **RadarLo**: Basic, Low-Resolution RADAR Altimetry (b&w, limited zoom)
+  * **RadarHi**: Advanced, High-Resolution RADAR Altimetry (in color, unlimited zoom)
+  * **Slope**: Slope Data converted from RADAR data
+  * **Biome**: Biome Detection and Classification (in color, unlimited zoom)
+  * **Anomaly**: Anomaly Detection and Labeling
+
+Other parts and add-ons are free to include one or more of these kinds of scans. In general,
+we would request that similar (same order of magitude) scanning paramters and limitations are used
+on custom parts, but this is not a requirement.
 
 ### 3. Basic Usage
 ------------------------------------------
 
+Put scanner part on rocket, aim rocket at sky, launch. If your rocket is not pointing at the sky, you are probably not going to map today, because most sensors only work above 5 km.
+
+You can start scanning by selecting a SCANsat part's context menu, enabling the part. Here, you will find a **small map**.
+
+The mapping interface consists of a small-ish map of the planet, as far as it has been scanned in your current game. It scans and updates quickly and shows positions of the active vessel, as well as other scanning vessels in orbit around the same planet. Orbital information is also provided. For a slower but more detailed view, see the **[big map][4]**.
+
 ### 4. Big Map
 ------------------------------------------
+A bigger map can be rendered on demand. Rendered maps are automatically
+saved to GameData/SCANsat/PluginData. Note that position indicators for
+vessels or anomalies are not visible on exported images (but they may be a future release).
+
+You can mouse over the big map to see what sensors have data for the location, as well as terrain elevation, and other details.
+
+Right-clicking on the big map shows a magnified view around the position where you clicked. Mouse operations work inside this magnified view just like they work outside, meaning the data displayed at the bottom window applies to your position inside the magnified view, and right-clicking inside it will increase magnification. This can be useful to find landing spots which won't kill your kerbals.
+
 ### 5. Parts and Sensor Types
 ------------------------------------------
+
 ### 6. (Career Mode) Research and Development
 ------------------------------------------
 ### 7. Background Scanning
