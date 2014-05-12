@@ -5,16 +5,16 @@ S.C.A.N. High Performance Scanning Sensors
 
 **Table of Contents**:
 
-[0. Authors, Maintainers, Contributors, and Licenses][0]
-[1. Installation][1]
-[2. Types of Scans][2]
-[3. Basic Usage][3]
-[4. Big Map][4]
-[5. Parts and Sensors Types][5]
-[6. (Career Mode) Research and Development][6]
-[7. Background Scanning][7]
-[8. Time Warp][8]
-[9. Note: Data Sources][9]
+* [0. Authors, Maintainers, Contributors, and Licenses][0]
+* [1. Installation][1]
+* [2. Types of Scans][2]
+* [3. Basic Usage][3]
+* [4. Big Map][4]
+* [5. Parts and Sensors Types][5]
+* [6. (Career Mode) Research and Development][6]
+* [7. Background Scanning][7]
+* [8. Time Warp][8]
+* [9. Note: Data Sources][9]
 
 **WARNING**:
 
