@@ -237,6 +237,7 @@ namespace SCANsat
 			mapwidth = w;
 			mapscale = mapwidth / 360f;
 			mapheight = (int)(w / 2);
+			big_heightmap = new float [mapwidth, mapheight, 3];
 			map = null;
 			resetMap ();
 		}
