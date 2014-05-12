@@ -16,6 +16,14 @@ S.C.A.N. High Performance Scanning Sensors
 8. [Time Warp][8]
 9. [Note: Data Sources][9]
 
+**WARNING**:
+
+This add-on is a **work**-in-**progress**.
+
+This means you should expect that it *may not work*, and you should be unsurprised if it *does not progress*.
+
+Disclaimer aside, this add-on is widely used and it usually works just fine.
+
 ### 0. Authors, Maintainers, Contributors, and Licenses
 ------------------------------------------
 #### Authors
@@ -28,7 +36,7 @@ Past authors include:
 
 As of May 2014, the vast majority of code is damny's, and technogeeky and DMagic are very slowly encroaching.
 
-### Maintainers
+#### Maintainers
 The current maintainer is:
   + [technogeeky][technogeeky] \<<technogeeky@gmail.com>\>
 
@@ -38,12 +46,12 @@ Complaints in the form of [GitHub Issues][SCANsat:issues] are given **higher** p
 complaints in the form of [GitHub Pull Requests][SCANsat:pulls] are given the **highest** priority possible.
 
 
-### Contributors
+#### Contributors
 
 In addition to the authors, the following people have contributed:
   + (Models, Graphics, Textures) [Milkshakefiend][Milkshakefiend]
 
-### Licenses
+#### Licenses
 
 For licensing information, please see the [included LICENSE.txt][SCANsat:licenses] file.
 
@@ -88,10 +96,9 @@ includes:
   * biomes
   * anomiles
 
-I can't guarantee that all anomalies will be found; in particular, some are so close
+SCANsat can't guarantee that all anomalies will be found; in particular, some are so close
 to others that they don't show up on their own, and if the [developers][KSP:developers] want to be
 sneaky then they can of course be sneaky.
-
 ------------------------------------------
 
 
