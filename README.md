@@ -24,8 +24,17 @@ This means you should expect that it *may not work*, and you should be unsurpris
 
 Disclaimer aside, this add-on is widely used and it usually works just fine.
 
-### 0. Authors, Maintainers, Contributors, and Licenses
+### 0. Maintainers, Authors, Contributors, and Licenses
 ------------------------------------------
+#### Maintainers
+The current maintainer is:
+  + [technogeeky][technogeeky] \<<technogeeky@gmail.com>\>
+
+Maintainers are the people who you should complain to if there is something wrong.
+
+Complaints in the form of [GitHub Issues][SCANsat:issues] are given *higher* priority than other complaints;
+complaints in the form of [GitHub Pull Requests][SCANsat:pulls] are given the **highest** priority possible.
+
 #### Authors
 The current authors include:
   + [technogeeky][technogeeky] \<<technogeeky@gmail.com>\>
@@ -35,15 +44,6 @@ Past authors include:
   + [damny][damny] \<<missing-in-action@nowhere-to-be-found.com>\>
 
 As of May 2014, the vast majority of code is damny's, and technogeeky and DMagic are very slowly encroaching.
-
-#### Maintainers
-The current maintainer is:
-  + [technogeeky][technogeeky] \<<technogeeky@gmail.com>\>
-
-Maintainers are the people who you should complain to if there is something wrong.
-
-Complaints in the form of [GitHub Issues][SCANsat:issues] are given **higher** priority than other complaints;
-complaints in the form of [GitHub Pull Requests][SCANsat:pulls] are given the **highest** priority possible.
 
 
 #### Contributors
