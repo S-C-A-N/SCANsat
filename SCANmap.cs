@@ -82,7 +82,6 @@ namespace SCANsat
 		public MapProjection projection = MapProjection.Rectangular;
 
 		protected float[,,] big_heightmap;
-        protected float[,,] little_big_heightmap;
         protected int mapType;
         
 
@@ -91,10 +90,6 @@ namespace SCANsat
                 if (type == 0)
                 {
             		big_heightmap[i, line, SCANcontroller.controller.projection] = height;
-                }
-                else if (type == 1)
-                {
-                    little_big_heightmap[i, line, SCANcontroller.controller.projection] = height;
                 }
         	}
 
@@ -229,7 +224,6 @@ namespace SCANsat
 			if (h <= 0)
 				h = (int)(180 * mapscale);
 			mapheight = h;
-            little_big_heightmap = new float [mapwidth, mapheight, 3];
 			if (map != null) {
 				if (mapwidth != map.width || mapheight != map.height)
 					map = null;
@@ -372,8 +366,6 @@ namespace SCANsat
                     float val = 0f;
                     if (mapType == 0)
                         val = big_heightmap[i, mapstep, SCANcontroller.controller.projection];
-                    else if (mapType == 1)
-                        val = little_big_heightmap[i, mapstep, SCANcontroller.controller.projection];
                     if (val == 0)
                     {
                         if (data.isCovered(lon, lat, SCANdata.SCANtype.AltimetryHiRes))
@@ -423,8 +415,6 @@ namespace SCANsat
                     float val = 0f;
                     if (mapType == 0)
                         val = big_heightmap[i, mapstep, SCANcontroller.controller.projection];
-                    else if (mapType == 1)
-                        val = little_big_heightmap[i, mapstep, SCANcontroller.controller.projection];
 					if (val == 0)
                     {
                         if (data.isCovered (lon , lat , SCANdata.SCANtype.AltimetryHiRes)) {
@@ -486,8 +476,6 @@ namespace SCANsat
                             float val = 0f;
                             if (mapType == 0)
                                 val = big_heightmap[i, mapstep, SCANcontroller.controller.projection];
-                            else if (mapType == 1)
-                                val = little_big_heightmap[i, mapstep, SCANcontroller.controller.projection];
 							if (val == 0) {
                                 if (data.isCovered(lon, lat, SCANdata.SCANtype.AltimetryHiRes))
                                 {
