@@ -101,8 +101,26 @@ Right-clicking on the big map shows a magnified view around the position where y
 ### 5. Parts and Sensor Types
 ------------------------------------------
 
+| **Part** | **Scan Type** | **FOV** | Altitude (**Min**) | (**Ideal**) | (**Max**) |
+| --- | --- | --- | --- | --- | --- |
+| RADAR Altimetry Sensor | **RadarLo** / **Slope**| 5 | 5000 m | 5000 m | 500 km |
+| SAR Altimetry Sensor | **RadarHi** | 2 | 5000 m | 750 km | 800 km |
+| Multispectral Sensor | **Biome** | 4 | 5000 m | 250 km | 500 km |
+| Been There Done That® | **Anomaly** | 1 | 0 m | 0 m | 2 km |
+
+
+
 ### 6. (Career Mode) Research and Development
 ------------------------------------------
+
+The **RADAR Altimetry** sensor can be unlocked in **Science Tech**.
+
+The **SAR Altimetry** sensor can be unlocked in **Experimental Science**.
+
+The **Multispectral** sensor can be unlocked in **Advanced Exploration**.
+
+The **BTDT** sensor can be unlocked in **Field Science**.
+
 ### 7. Background Scanning
 ------------------------------------------
 Unlike some other KSP scanning systems, SCANsat allows scanning with multiple
