@@ -127,6 +127,7 @@ includes:
 SCANsat can't guarantee that all anomalies will be found; in particular, some are so close
 to others that they don't show up on their own, and if the [developers][KSP:developers] want to be
 sneaky then they can of course be sneaky.
+
 ------------------------------------------
 
 
