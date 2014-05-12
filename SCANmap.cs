@@ -81,53 +81,7 @@ namespace SCANsat
 		public static string[] projectionNames = getProjectionNames ();
 		public MapProjection projection = MapProjection.Rectangular;
 
-		protected int mapstep;
-		protected bool mapsaved;
-		protected double[] mapline;
-		protected CelestialBody body;
-		public Texture2D map;
-        	protected float[,,] big_heightmap;
-
-		public void setBody ( CelestialBody b ) {
-			if (body == b)
-				return;
-			body = b;
-			resetMap ();
-		}
-
-		public void setSize ( int w , int h ) {
-			if (w == 0)
-				w = 360 * (Screen.width / 360);
-			if (w > 360 * 4)
-				w = 360 * 4;
-			mapwidth = w;
-			mapscale = mapwidth / 360f;
-			if (h <= 0)
-				h = (int)(180 * mapscale);
-			mapheight = h;
-			if (map != null) {
-				if (mapwidth != map.width || mapheight != map.height)
-					map = null;
-			}
-		}
-
-		public void setWidth ( int w ) {
-			if (w == 0) {
-				w = 360 * (int)(Screen.width / 360);
-				if (w > 360 * 4)
-					w = 360 * 4;
-			}
-			if (w < 360)
-				w = 360;
-			if (mapwidth == w)
-				return;
-			mapwidth = w;
-			mapscale = mapwidth / 360f;
-			mapheight = (int)(w / 2);
-            		big_heightmap = new float [mapwidth, mapheight, 3];
-			map = null;
-			resetMap ();
-		}
+		protected float[,,] big_heightmap;
 
         	public void heightMapArray (float height, int line, int i)
         	{
