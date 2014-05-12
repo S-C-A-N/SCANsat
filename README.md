@@ -77,15 +77,15 @@ includes:
 I can't guarantee that all anomalies will be found; in particular, some are so close
 to others that they don't show up on their own, and if the [developers][KSP:developers] want to be
 sneaky then they can of course be sneaky.
-[technogeeky](http://forum.kerbalspaceprogram.com/members/110153-technogeeky)
-[DMagic](http://forum.kerbalspaceprogram.com/members/59127-DMagic)
-[damny](http://forum.kerbalspaceprogram.com/members/80692-damny)
-[Milkshakefiend](http://forum.kerbalspaceprogram.com/members/72507-Milkshakefiend)
+[technogeeky]: (http://forum.kerbalspaceprogram.com/members/110153-technogeeky)
+[DMagic]: (http://forum.kerbalspaceprogram.com/members/59127-DMagic)
+[damny]: (http://forum.kerbalspaceprogram.com/members/80692-damny)
+[Milkshakefiend]: (http://forum.kerbalspaceprogram.com/members/72507-Milkshakefiend)
 
-[SCANsat:issues](https://github.com/technogeeky/SCANsat/issues)
-[SCANsat:pulls](https://github.com/technogeeky/SCANsat/pulls)
-[SCANsat:source](https://github.com/technogeeky/SCANsat)
-[SCANsat:licenses](https://github.com/technogeeky/SCANsat/blob/master/LICENSE.txt)
+[SCANsat:issues]: (https://github.com/technogeeky/SCANsat/issues)
+[SCANsat:pulls]: (https://github.com/technogeeky/SCANsat/pulls)
+[SCANsat:source]: (https://github.com/technogeeky/SCANsat)
+[SCANsat:licenses]: (https://github.com/technogeeky/SCANsat/blob/master/LICENSE.txt)
 
-[KSP:developers](https://kerbalspaceprogram.com/index.php)
+[KSP:developers]:(https://kerbalspaceprogram.com/index.php)
 
