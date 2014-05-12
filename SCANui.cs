@@ -1215,15 +1215,15 @@ namespace SCANsat
 			GUILayout.BeginVertical ();
 			style_button.normal.textColor = bigmap.mapmode == 0 ? c_good : Color.white;
 			if (GUILayout.Button ("Altimetry" , style_button)) {
-				bigmap.resetMap (0);
+				bigmap.resetMap (0, 0);
 			}
 			style_button.normal.textColor = bigmap.mapmode == 1 ? c_good : Color.white;
 			if (GUILayout.Button ("Slope" , style_button)) {
-				bigmap.resetMap (1);
+				bigmap.resetMap (1, 0);
 			}
 			style_button.normal.textColor = bigmap.mapmode == 2 ? c_good : Color.white;
 			if (GUILayout.Button ("Biome" , style_button)) {
-				bigmap.resetMap (2);
+				bigmap.resetMap (2, 0);
 			}
 			GUILayout.EndVertical ();
 
@@ -1382,6 +1382,8 @@ namespace SCANsat
 					if (bigmap_dragging) {
 					} else if (Event.current.button == 1) {
 						if (in_map || in_spotmap) {
+                            if (bigmap.isMapComplete())
+                            {
 							if (spotmap == null) {
 								spotmap = new SCANmap ();
 								spotmap.setSize (180 , 180);
@@ -1392,7 +1394,7 @@ namespace SCANsat
 								spotmap.mapscale = 10;
 							}
 							spotmap.centerAround (mlon , mlat);
-							spotmap.resetMap (bigmap.mapmode);
+							spotmap.resetMap (bigmap.mapmode, 1);
 							pos_spotmap.width = 180;
 							pos_spotmap.height = 180;
 							if (!in_spotmap) {
@@ -1405,14 +1407,18 @@ namespace SCANsat
 								pos_spotmap.x = Math.Max (maprect.x , Math.Min (maprect.x + maprect.width - pos_spotmap.width , pos_spotmap.x));
 								pos_spotmap.y = Math.Max (maprect.y , Math.Min (maprect.y + maprect.height - pos_spotmap.height , pos_spotmap.y));
 							}
+                            }
 						}
 					} else if (Event.current.button == 0) {
 						if (spotmap != null && in_spotmap) {
+                            if (bigmap.isMapComplete())
+                            {
 							spotmap.mapscale = spotmap.mapscale / 1.25f;
 							if (spotmap.mapscale < 10)
 								spotmap.mapscale = 10;
-							spotmap.resetMap (spotmap.mapmode);
+							spotmap.resetMap (spotmap.mapmode, 1);
 							Event.current.Use ();
+                            }
 						}
 					}
 					Event.current.Use ();
