@@ -3,6 +3,19 @@ The Scientific Committee on Advanced Navigation is proud to bring you:
 S.C.A.N. High Performance Scanning Sensors
 ------------------------------------------
 
+**Table of Contents**:
+
+0. [Authors, Maintainers, Contributors, and Licenses][0]
+1. [Installation][1]
+2. [Types of Scans][2]
+3. [Basic Usage][3]
+4. [Big Map][4]
+5. [Parts and Sensors Types][5]
+6. [(Career Mode) Research and Development][6]
+7. [Background Scanning][7]
+8. [Time Warp][8]
+9. [Note: Data Sources][9]
+
 ### 0. Authors, Maintainers, Contributors, and Licenses
 ------------------------------------------
 #### Authors
@@ -94,4 +107,15 @@ sneaky then they can of course be sneaky.
 [SCANsat:licenses]: https://github.com/technogeeky/SCANsat/blob/master/LICENSE.txt
 
 [KSP:developers]: https://kerbalspaceprogram.com/index.php
+
+[0]: https://github.com/technogeeky/SCANsat#0-authors-maintainers-contributors-and-licenses
+[1]: https://github.com/technogeeky/SCANsat#1-installation
+[2]: https://github.com/technogeeky/SCANsat#2-types-of-scans
+[3]: https://github.com/technogeeky/SCANsat#3-basic-usage
+[4]: https://github.com/technogeeky/SCANsat#4-big-map
+[5]: https://github.com/technogeeky/SCANsat#5-parts-and-sensor-types
+[6]: https://github.com/technogeeky/SCANsat#6-career-mode-research-and-development
+[7]: https://github.com/technogeeky/SCANsat#7-background-scanning
+[8]: https://github.com/technogeeky/SCANsat#8-time-warp
+[9]: https://github.com/technogeeky/SCANsat#9-note-concerning-data-sources
 
