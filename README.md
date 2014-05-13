@@ -5,7 +5,7 @@ S.C.A.N. High Performance Scanning Sensors
 
 **Table of Contents**:
 
-* [0. Authors, Maintainers, Contributors, and Licenses][0]
+* [0. Maintainers, Authors, Contributors, and Licenses][0]
 * [1. Installation][1]
 * [2. Types of Scans][2]
 * [3. Basic Usage][3]
@@ -162,7 +162,7 @@ sneaky then they can of course be sneaky.
 
 [KSP:developers]: https://kerbalspaceprogram.com/index.php
 
-[0]: https://github.com/technogeeky/SCANsat#0-authors-maintainers-contributors-and-licenses
+[0]: https://github.com/technogeeky/SCANsat#0-maintainers-authors-contributors-and-licenses
 [1]: https://github.com/technogeeky/SCANsat#1-installation
 [2]: https://github.com/technogeeky/SCANsat#2-types-of-scans
 [3]: https://github.com/technogeeky/SCANsat#3-basic-usage
