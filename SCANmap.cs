@@ -291,7 +291,7 @@ namespace SCANsat
 		}
 		public void resetMap ( int mode, int maptype ) {
 			mapmode = mode;
-            mapType = maptype;
+            	mapType = maptype;
 			resetMap ();
 		}
 
