@@ -434,9 +434,9 @@ namespace SCANsat
 				sensor.inRange = true;
 
 				double fov = sensor.fov;
-				//double ba = Math.Min(sensor.best_alt, soi_radius);
-				//if(alt < ba) fov = (alt / ba) * fov;
-				//else sensor.bestRange = true;
+				double ba = Math.Min(sensor.best_alt, soi_radius);
+				if(alt < ba) fov = (alt / ba) * fov;
+				else sensor.bestRange = true;
 
 				double surfscale = 600000d/v.mainBody.Radius;
 				if(surfscale < 1) surfscale = 1;
