@@ -18,7 +18,7 @@ namespace SCANsat
 	public class SCANsat : PartModule, IScienceDataContainer
 	{
 		protected SCANcontroller con = SCANcontroller.controller;
-		protected bool powerIsProblem;  //initialized = false, *Unused now
+		protected bool powerIsProblem;
 		protected Animation anim = null;
 		protected List<ScienceData> storedData = new List<ScienceData> ();
 		protected ExperimentsResultDialog expDialog = null;
@@ -59,7 +59,7 @@ namespace SCANsat
 			Events ["EVACollect"].active = storedData.Count > 0;
 			Events ["startScan"].active = !scanning;
 			Events ["stopScan"].active = scanning;
-            if (scanning) {
+            	if (scanning) {
 				if (sensorType == 0 || SCANcontroller.controller.isVesselKnown (vessel.id , (SCANdata.SCANtype)sensorType)) {
 					if (TimeWarp.CurrentRate < 1500) { // would need large buffer batteries, just not very smooth
 						float p = power * TimeWarp.deltaTime;
@@ -90,18 +90,9 @@ namespace SCANsat
 				}
 			}
 		}
-        	public override void OnInitialize() //** Maybe this should all just go at the end of OnStart?
+        	public override void OnInitialize()
         {
-            if (sensorType == 0)
-            {
-               Events["startScan"].guiName = "Open Map";
-               Events["stopScan"].guiName = "Close Map";
-			Events["analyze"].active = false;
-               Actions["startScanAction"].guiName = "Open Map";
-               Actions["stopScanAction"].guiName = "Close Map";
-               Actions["toggleScanAction"].guiName = "Toggle Map";
-            }
-            else if (scanName != null)
+		if (scanName != null)
             {
                Events["startScan"].guiName = "Start " + scanName;
                Events["stopScan"].guiName = "Stop " + scanName;
@@ -110,6 +101,25 @@ namespace SCANsat
                Actions["stopScanAction"].guiName = "Stop " + scanName;
                Actions["toggleScanAction"].guiName = "Toggle " + scanName;
             }
+
+            if (sensorType == 0)
+            {
+			// here, we override all event and action labels
+			// and we also disable the analyze button (it does nothing)
+               Events["startScan"].guiName = "Open Map";
+               Events["stopScan"].guiName = "Close Map";
+			Events["analyze"].active = false;
+               Actions["startScanAction"].guiName = "Open Map";
+               Actions["stopScanAction"].guiName = "Close Map";
+               Actions["toggleScanAction"].guiName = "Toggle Map";
+			Actions["analyzeData"].active = false;
+            }
+		  else if (sensorType == 32) {
+			// here, we only disable analyze; BTDT has good labels
+			Events["analyze"].active = false;
+			Actions["analyzeData"].active = false;
+		  }
+
             if (scanning) startScan();
         }
         	public override void OnLoad(ConfigNode node)
@@ -167,7 +177,6 @@ namespace SCANsat
 		/* SCAN: all of these fields and only scanning is persistant */
 		[KSPField(isPersistant = true)]
 		protected bool scanning = false;
-
 		public bool scanningNow () { return scanning; }
 
 		/* SCAN: context (right click) buttons in FLIGHT */
@@ -184,24 +193,19 @@ namespace SCANsat
 		}
 		[KSPEvent(guiActive = true, guiName = "Stop RADAR Scan", active = true)]
 		public void stopScan () {
-            unregisterScanner ();
-            //scanning = false;
-            //if (sensorType > 0) {
-            //    SCANcontroller.controller.unregisterSensor (vessel , (SCANdata.SCANtype)sensorType);
-            //}
+            	unregisterScanner ();
+			powerIsProblem = false;
 			animate (-1);
 		}
-		[KSPEvent(guiActive = true, guiName = "Analyze Data", active = true)] //** Always active
+		[KSPEvent(guiActive = true, guiName = "Analyze Data", active = true)]
 		public void analyze () {
 			makeScienceData (true);
 			ReviewData ();
 		}
-        	//** Allows us to review stored science data
         	[KSPEvent(guiActive = true, guiName = "Review Data", active = false)]
         	public void reviewEvent() {
             ReviewData();
         }
-        	//** EVA data collection
         	[KSPEvent(guiActiveUnfocused = true, guiName = "Collect Stored Data", externalToEVAOnly = true, unfocusedRange = 1.5f, active = false)]
         	public void EVACollect()
         {
@@ -246,15 +250,15 @@ namespace SCANsat
 		}
 
 		/* SCAN: actions for ... something ... */
-		[KSPAction("Start RADAR Scan")]
+		[KSPAction("Start Scan")]
 		public void startScanAction ( KSPActionParam param ) {
 			startScan ();
 		}
-		[KSPAction("Stop RADAR Scan")]
+		[KSPAction("Stop Scan")]
 		public void stopScanAction ( KSPActionParam param ) {
 			stopScan ();
 		}
-		[KSPAction("Toggle RADAR Scan")]
+		[KSPAction("Toggle Scan")]
 		public void toggleScanAction ( KSPActionParam param ) {
 			if (scanning)
 				stopScan ();
@@ -278,7 +282,7 @@ namespace SCANsat
 			}
 		}
 
-        	//** Register scanners without going through animations too
+        	/* SCAN: register scanners without going through animation */
         	public void registerScanner() {
             scanning = true;
             if (sensorType > 0) 
@@ -308,8 +312,6 @@ namespace SCANsat
 			print ("[SCANsat] keeping data");
 			expDialog = null;
 		}
-
-        	//** This is closer to the stock method of data transmission
         	public void TransmitData(ScienceData data) {
             print("[SCANsat] transmitting data");
             expDialog = null;
