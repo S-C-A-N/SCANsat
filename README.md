@@ -2,8 +2,10 @@
 
 [S.C.A.N]-brand High Performance Scanning Sensors
 ------------------------------------------
-> ![scan your planetoid like the big boys do][bigmap-scan-10000x]
-> ###### SCANsat: Real Scanning, Real Science, at Warp Speed!
+#### **SCANsat**: Real Scanning, Real Science, at Warp Speed!
+![scan your planetoid like the big boys do][bigmap-scan-10000x]
+###### **Example SAR scan of Kerbin at 1000x and then 10,000x warp**
+
 
 **Table of Contents**:
 * [0. Maintainers, Authors, Contributors, and Licenses][0]
