@@ -93,6 +93,8 @@ The mapping interface consists of a small-ish map of the planet, as far as it ha
 
 ### 4. Big Map
 ------------------------------------------
+![A Big Big Map][bigmap-anim]
+
 A bigger map can be rendered on demand. Rendered maps are automatically
 saved to GameData/SCANsat/PluginData. Note that position indicators for
 vessels or anomalies are not visible on exported images (but they may be a future release).
@@ -110,12 +112,14 @@ Right-clicking on the big map shows a magnified view around the position where y
 | SAR Altimetry Sensor | **RadarHi** | 2 | 5000 m | 750 km | 800 km |  ![SAR][vab-sar-thumb]
 | Multispectral Sensor | **Biome** **ANOM** | 4 | 5000 m | 250 km | 500 km |  ![RADAR][vab-multi-thumb]
 | Been There Done That® | **Anomaly** | 1 | 0 m | 0 m | 2 km |  ![RADAR][vab-btdt-thumb]
+| MapTraq® | **None** | N/A | N/A | N/A | N/A | ![MapTraq][vab-maptraq-thumb]
 
-#### a. The RADAR Altimetry Sensor ![RADAR][vab-radar]
+#### a. The RADAR Altimetry Sensor  ![RADAR][vab-radar]
 #### b. The SAR Altimetry Sensor ![SAR][vab-sar]
 #### c. The Multispectral Sensor ![Multi][vab-multi]
 #### d. Been There Done That ![BTDT][vab-btdt]
-
+#### e. MapTraq ![MapTraq][vab-maptraq]
+ 
 
 
 ### 6. (Career Mode) Research and Development
@@ -129,8 +133,23 @@ The **Multispectral** sensor can be unlocked in **Advanced Exploration**.
 
 The **BTDT** sensor can be unlocked in **Field Science**.
 
+
+##### 6a.Minimum Scan for Science
+Once you scan at least 30% of a particular map, you can use **Analyze Data** to get delicious science:
+
+![30% is your minimum][science-min]
+
+##### 6b. Getting Maximum Science
+Between 30% and 100%, you will get a number of science points proportional to the percentage. Really,
+the upper cutoff is 95% in case you didn't scan the whole map.
+
+![Scan 95% to get all science][science-max]
+
 ### 7. Background Scanning
 ------------------------------------------
+
+![Note the background scanning (non-active vessels are scanning)][small-scan]
+
 Unlike some other KSP scanning systems, SCANsat allows scanning with multiple
 vessels.  All online scanners scan at the same time, but only when your *active vessel* has
 **at least one** of the parts included in this mod equipped and the mapping interface is open. 
@@ -185,17 +204,22 @@ sneaky then they can of course be sneaky.
 [logo]: http://i.imgur.com/GArPFFB.png
 
 [vab-radar-thumb]: http://i.imgur.com/PrRIcYvs.png 
-[vab-sar-thumb]: http://i.imgur.com/zUmj6USs.png
+[vab-sar-thumb]: http://i.imgur.com/4aTTVfWs.png
 [vab-multi-thumb]: http://i.imgur.com/byIYXP9s.png
 [vab-maptraq-thumb]: http://i.imgur.com/Skrqc8Cs.png
-[vab-btdt-thumb]: http://i.imgur.com/4aTTVfWs.png
+[vab-btdt-thumb]:  http://i.imgur.com/zUmj6USs.png
 
 [vab-radar]: http://i.imgur.com/PrRIcYv.png
-[vab-sar]: http://i.imgur.com/zUmj6US.png
+[vab-sar]: http://i.imgur.com/4aTTVfW.png
 [vab-multi]: http://i.imgur.com/byIYXP9.png
 [vab-maptraq]: http://i.imgur.com/Skrqc8C.png
-[vab-btdt]: http://i.imgur.com/4aTTVfW.png
+[vab-btdt]:  http://i.imgur.com/zUmj6US.png
 
+[science-min]: http://i.imgur.com/kEj4fz0.gif
+[science-max]: http://i.imgur.com/eMtIL5H.gif
 
+[small-scan]: http://i.imgur.com/uVP6Ujs.gif
 [bigmap-scan-10000x]: http://i.imgur.com/VEPL3oN.gif
 [bigmap-scan-100x]: http://i.imgur.com/bcht47p.gif
+
+[bigmap-anim]: http://i.imgur.com/kxyl8xR.gif
