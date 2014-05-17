@@ -89,7 +89,18 @@ Put scanner part on rocket, aim rocket at sky, launch. If your rocket is not poi
 
 You can start scanning by selecting a SCANsat part's context menu, enabling the part. Here, you will find a **small map**.
 
+###### SAR scanner with a thin swath width due to low altitude
+![][small-scan-color]
+
+###### RADAR scanner with an ideal swath width
+![][small-scan-bw]
+
 The mapping interface consists of a small-ish map of the planet, as far as it has been scanned in your current game. It scans and updates quickly and shows positions of the active vessel, as well as other scanning vessels in orbit around the same planet. Orbital information is also provided. For a slower but more detailed view, see the **[big map][4]**.
+
+Be sure to remember to pack enough batteries, radioisotope generators, and solar panels. If you forget, you'll run out of electricity, you'll stop recording data, and you'll see useless static:
+
+###### Static! Oh no, adjust the rabbit ears!
+![][small-static]
 
 ### 4. Big Map
 ------------------------------------------
@@ -163,8 +174,17 @@ vessels.  All online scanners scan at the same time, but only when your *active 
 ------------------------------------------
 SCANsat does not interpolate satellite paths during time warp; nevertheless, due to the relatively large field of view
 of each sensor, it's still possible to acquire data faster by time warping. The maximum recommended time warp speed
-is currently **1000x**. Scanning at this warp factor should allow identical scanning performance 
+is currently **10,000x**. Scanning at this warp factor should allow identical scanning performance 
 (in terms of [swath width](http://en.wikipedia.org/wiki/Swath_width)) as scanning at *1x*.
+
+As an example of speed, here is a BigMap rendering of a scan at **100x**:
+![this is pretty peaceful][bigmap-scan-100x]
+
+And this is a BigMap rendering of the same orbit, but later in the scan. 
+It starts at **1000x** and then speeds up to **10,000x**:
+![this makes my OCD happy][bigmap-scan-10000x]
+
+Notice that the only gaps in coverage are those at the poles (ie, the selected inclination was not high enough to capture the poles).
 
 ### 9. Note Concerning Data Sources
 ------------------------------------------
@@ -224,7 +244,11 @@ sneaky then they can of course be sneaky.
 [science-max]: http://i.imgur.com/eMtIL5H.gif
 
 [small-scan]: http://i.imgur.com/uVP6Ujs.gif
+[small-scan-color]: http://i.imgur.com/0AbDwKL.gif
+[small-scan-bw]:  http://i.imgur.com/dlRckBl.gif
+[small-static]: http://i.imgur.com/oPN2qIR.gif
+[small-nodata]: http://i.imgur.com/0ArIcqj.png
+
 [bigmap-scan-10000x]: http://i.imgur.com/VEPL3oN.gif
 [bigmap-scan-100x]: http://i.imgur.com/bcht47p.gif
-
 [bigmap-anim]: http://i.imgur.com/kxyl8xR.gif
