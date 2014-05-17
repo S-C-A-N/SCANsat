@@ -1,7 +1,8 @@
-The Scientific Committee on Advanced Navigation is proud to bring you:
+![May Your Tentacles Orbit in Peace][logo]
 
-S.C.A.N. High Performance Scanning Sensors
+[S.C.A.N] High Performance Scanning Sensors
 ------------------------------------------
+
 
 **Table of Contents**:
 
@@ -172,4 +173,7 @@ sneaky then they can of course be sneaky.
 [7]: https://github.com/technogeeky/SCANsat#7-background-scanning
 [8]: https://github.com/technogeeky/SCANsat#8-time-warp
 [9]: https://github.com/technogeeky/SCANsat#9-note-concerning-data-sources
+
+
+[logo]: http://i.imgur.com/GArPFFB.png
 
