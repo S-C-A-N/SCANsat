@@ -114,11 +114,16 @@ Right-clicking on the big map shows a magnified view around the position where y
 | Been There Done That® | **Anomaly** | 1 | 0 m | 0 m | 2 km |  ![RADAR][vab-btdt-thumb]
 | MapTraq® | **None** | N/A | N/A | N/A | N/A | ![MapTraq][vab-maptraq-thumb]
 
-#### a. The RADAR Altimetry Sensor  ![RADAR][vab-radar]
-#### b. The SAR Altimetry Sensor ![SAR][vab-sar]
-#### c. The Multispectral Sensor ![Multi][vab-multi]
-#### d. Been There Done That ![BTDT][vab-btdt]
-#### e. MapTraq ![MapTraq][vab-maptraq]
+#### a. The RADAR Altimetry Sensor
+![RADAR][vab-radar]
+#### b. The SAR Altimetry Sensor
+![SAR][vab-sar]
+#### c. The Multispectral Sensor
+![Multi][vab-multi]
+#### d. Been There Done That
+![BTDT][vab-btdt]
+#### e. MapTraq
+![MapTraq][vab-maptraq]
  
 
 
