@@ -1,11 +1,11 @@
 ![May Your Tentacles Orbit in Peace][logo]
 
-[S.C.A.N] High Performance Scanning Sensors
+[S.C.A.N]-brand High Performance Scanning Sensors
 ------------------------------------------
-
+> ![scan your planetoid like the big boys do][bigmap-scan-10000x]
+> ###### SCANsat: Real Scanning, Real Science, at Warp Speed!
 
 **Table of Contents**:
-
 * [0. Maintainers, Authors, Contributors, and Licenses][0]
 * [1. Installation][1]
 * [2. Types of Scans][2]
@@ -102,12 +102,17 @@ Right-clicking on the big map shows a magnified view around the position where y
 ### 5. Parts and Sensor Types
 ------------------------------------------
 
-| **Part** | **Scan Type** | **FOV** | Altitude (**Min**) | (**Ideal**) | (**Max**) |
-| --- | --- | --- | --- | --- | --- |
-| RADAR Altimetry Sensor | **RadarLo** / **Slope**| 5 | 5000 m | 5000 m | 500 km |
-| SAR Altimetry Sensor | **RadarHi** | 2 | 5000 m | 750 km | 800 km |
-| Multispectral Sensor | **Biome** | 4 | 5000 m | 250 km | 500 km |
-| Been There Done That® | **Anomaly** | 1 | 0 m | 0 m | 2 km |
+| **Part** | **Scan Type** | **FOV** | Altitude (**Min**) | (**Ideal**) | (**Max**) | ** VAB ** | 
+| --- | --- | --- | --- | --- | --- | ---:|
+| RADAR Altimetry Sensor | **RadarLo** / **Slope**| 5 | 5000 m | 5000 m | 500 km |  ![RADAR][vab-radar-thumb]
+| SAR Altimetry Sensor | **RadarHi** | 2 | 5000 m | 750 km | 800 km |  ![SAR][vab-sar-thumb]
+| Multispectral Sensor | **Biome** **ANOM** | 4 | 5000 m | 250 km | 500 km |  ![RADAR][vab-multi-thumb]
+| Been There Done That® | **Anomaly** | 1 | 0 m | 0 m | 2 km |  ![RADAR][vab-btdt-thumb]
+
+#### a. The RADAR Altimetry Sensor ![RADAR][vab-radar]
+#### b. The SAR Altimetry Sensor ![SAR][vab-sar]
+#### c. The Multispectral Sensor ![Multi][vab-multi]
+#### d. Been There Done That ![BTDT][vab-btdt]
 
 
 
@@ -177,3 +182,18 @@ sneaky then they can of course be sneaky.
 
 [logo]: http://i.imgur.com/GArPFFB.png
 
+[vab-radar-thumb]: http://i.imgur.com/PrRIcYvs.png 
+[vab-sar-thumb]: http://i.imgur.com/zUmj6USs.png
+[vab-multi-thumb]: http://i.imgur.com/byIYXP9s.png
+[vab-maptraq-thumb]: http://i.imgur.com/Skrqc8Cs.png
+[vab-btdt-thumb]: http://i.imgur.com/4aTTVfWs.png
+
+[vab-radar]: http://i.imgur.com/PrRIcYv.png
+[vab-sar]: http://i.imgur.com/zUmj6US.png
+[vab-multi]: http://i.imgur.com/byIYXP9.png
+[vab-maptraq]: http://i.imgur.com/Skrqc8C.png
+[vab-btdt]: http://i.imgur.com/4aTTVfW.png
+
+
+[bigmap-scan-10000x]: http://i.imgur.com/VEPL3oN.gif
+[bigmap-scan-100x]: http://i.imgur.com/bcht47p.gif
