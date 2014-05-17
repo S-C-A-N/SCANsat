@@ -61,11 +61,11 @@ namespace SCANsat
 			Events ["stopScan"].active = scanning;
             	if (scanning) {
 				if (sensorType == 0 || SCANcontroller.controller.isVesselKnown (vessel.id , (SCANdata.SCANtype)sensorType)) {
-					if (TimeWarp.CurrentRate < 1500) { // would need large buffer batteries, just not very smooth
+					if (TimeWarp.CurrentRate < 1500) {
 						float p = power * TimeWarp.deltaTime;
 						float e = part.RequestResource ("ElectricCharge" , p);
 						if (e < p) {
-							unregisterScanner (); //** I'm thinking a dedicated start/stop method should be used for these
+							unregisterScanner ();
 							powerIsProblem = true;
 						} else {
 							registerScanner ();
@@ -121,6 +121,7 @@ namespace SCANsat
 		  }
 
             if (scanning) startScan();
+		  powerIsProblem = false;
         }
         	public override void OnLoad(ConfigNode node)
         {
