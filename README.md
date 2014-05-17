@@ -1,6 +1,6 @@
 ![May Your Tentacles Orbit in Peace][logo]
 
-[S.C.A.N]-brand High Performance Scanning Sensors
+High Performance Scanning Sensors
 ------------------------------------------
 #### **SCANsat**: Real Scanning, Real Science, at Warp Speed!
 ![scan your planetoid like the big boys do][bigmap-scan-10000x]
