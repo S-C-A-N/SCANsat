@@ -12,6 +12,8 @@ High Performance Scanning Sensors
 * [1. Installation][1]
 * [2. Types of Scans][2]
 * [3. Basic Usage][3]
+  * [a. FAQ: Finding a Good Altitude][3a]
+  * [b. Mismatched Scanners][3b]
 * [4. Big Map][4]
 * [5. Parts and Sensors Types][5]
   * [a. RADAR][5a]
@@ -251,6 +253,8 @@ sneaky then they can of course be sneaky.
 [1]: https://github.com/S-C-A-N/SCANsat#1-installation
 [2]: https://github.com/S-C-A-N/SCANsat#2-types-of-scans
 [3]: https://github.com/S-C-A-N/SCANsat#3-basic-usage
+[3a]: https://github.com/S-C-A-N/SCANsat#3a-faq-finding-a-good-altitude
+[3b]: https://github.com/S-C-A-N/SCANsat#3b-mismatched-scanners
 [4]: https://github.com/S-C-A-N/SCANsat#4-big-map
 [5]: https://github.com/S-C-A-N/SCANsat#5-parts-and-sensor-types
 [5a]: https://github.com/S-C-A-N/SCANsat#a-the-radar-altimetry-sensor
