@@ -14,12 +14,14 @@ High Performance Scanning Sensors
 * [3. Basic Usage][3]
 * [4. Big Map][4]
 * [5. Parts and Sensors Types][5]
-* [5a. RADAR][5a]
-* [5b. SAR][5b]
-* [5c. Multi][5c]
-* [5d. BTDT][5d]
-* [5e. MapTraq][5e]
+  * [a. RADAR][5a]
+  * [b. SAR][5b]
+  * [c. Multi][5c]
+  * [d. BTDT][5d]
+  * [e. MapTraq][5e]
 * [6. (Career Mode) Research and Development][6]
+  * [a. Minimum Scan for Science (30%)][6a]
+  * [b. Getting Maximum Science][6b]
 * [7. Background Scanning][7]
 * [8. Time Warp][8]
 * [9. Note: Data Sources][9]
@@ -94,6 +96,32 @@ Put scanner part on rocket, aim rocket at sky, launch. If your rocket is not poi
 
 You can start scanning by selecting a SCANsat part's context menu, enabling the part. Here, you will find a **small map**.
 
+#### 3a. FAQ: Finding a Good Altitude
+
+Watch the data indicators on the small map to determine how well your scanners are performing.
+
+
+###### too high
+Solid ORANGE means you're too high (and therefore no data is being recorded):
+![][small-toohigh]
+
+###### too low
+Flashing ORANGE/GREEN means you're too low (and therefore you have a FOV penalty):
+![][small-toolow]
+
+###### just right
+Solid GREEN means you're in an ideal orbit. Notice the larger swath width on the right:
+![][small-justright]
+
+#### 3b. Mismatched Scanners
+
+In these examples, the SAR and Multi sensors are not very well matched. Because the SAR sensors is ideal above 750km, and becuase it has a large field of view penalty if it's down near the ideal for Multi (250km), these sensors probably should not be used on the same scanner.
+
+![][small-mismatch1]
+
+![][small-mismatch2]
+
+
 ###### SAR scanner with a thin swath width due to low altitude
 ![][small-scan-color]
 
@@ -124,11 +152,11 @@ Right-clicking on the big map shows a magnified view around the position where y
 
 | **Part** | **Scan Type** | **FOV** | Altitude (**Min**) | (**Ideal**) | (**Max**) | ** VAB ** | 
 | --- | --- | --- | --- | --- | --- | ---:|
-| RADAR Altimetry Sensor | **RadarLo** / **Slope**| 5 | 5000 m | 5000 m | 500 km |  ![RADAR][vab-radar-thumb]
-| SAR Altimetry Sensor | **RadarHi** | 2 | 5000 m | 750 km | 800 km |  ![SAR][vab-sar-thumb]
-| Multispectral Sensor | **Biome** **ANOM** | 4 | 5000 m | 250 km | 500 km |  ![RADAR][vab-multi-thumb]
-| Been There Done That® | **Anomaly** | 1 | 0 m | 0 m | 2 km |  ![RADAR][vab-btdt-thumb]
-| MapTraq® | **None** | N/A | N/A | N/A | N/A | ![MapTraq][vab-maptraq-thumb]
+| [RADAR Altimetry Sensor][5a] | **RadarLo** / **Slope**| 5 | 5000 m | 5000 m | 500 km |  ![RADAR][vab-radar-thumb]
+| [SAR Altimetry Sensor][5b] | **RadarHi** | 2 | 5000 m | 750 km | 800 km |  ![SAR][vab-sar-thumb]
+| [Multispectral Sensor][5c] | **Biome** **ANOM** | 4 | 5000 m | 250 km | 500 km |  ![RADAR][vab-multi-thumb]
+| [Been There Done That®][5d] | **Anomaly** | 1 | 0 m | 0 m | 2 km |  ![RADAR][vab-btdt-thumb]
+| [MapTraq®][5e] | **None** | N/A | N/A | N/A | N/A | ![MapTraq][vab-maptraq-thumb]
 
 #### a. The RADAR Altimetry Sensor
 ![RADAR][vab-radar]
@@ -231,6 +259,8 @@ sneaky then they can of course be sneaky.
 [5d]: https://github.com/S-C-A-N/SCANsat#d-been-there-done-that
 [5e]: https://github.com/S-C-A-N/SCANsat#e-maptraq
 [6]: https://github.com/S-C-A-N/SCANsat#6-career-mode-research-and-development
+[6a]: https://github.com/S-C-A-N/SCANsat#6aminimum-scan-for-science
+[6b]: https://github.com/S-C-A-N/SCANsat#6b-getting-maximum-science
 [7]: https://github.com/S-C-A-N/SCANsat#7-background-scanning
 [8]: https://github.com/S-C-A-N/SCANsat#8-time-warp
 [9]: https://github.com/S-C-A-N/SCANsat#9-note-concerning-data-sources
@@ -254,10 +284,16 @@ sneaky then they can of course be sneaky.
 [science-max]: http://i.imgur.com/eMtIL5H.gif
 
 [small-scan]: http://i.imgur.com/uVP6Ujs.gif
-[small-scan-color]: http://i.imgur.com/0AbDwKL.gif
-[small-scan-bw]:  http://i.imgur.com/dlRckBl.gif
+[small-scan-bw]: http://i.imgur.com/0AbDwKL.gif
+[small-scan-color]:  http://i.imgur.com/dlRckBl.gif
 [small-static]: http://i.imgur.com/oPN2qIR.gif
 [small-nodata]: http://i.imgur.com/0ArIcqj.png
+
+[small-toolow]: https://i.imgur.com/fTDLvw0.gif
+[small-toohigh]: https://i.imgur.com/a8YKkXH.gif
+[small-justright]: https://i.imgur.com/Oft4xXP.gif
+[small-mismatch1]: https://i.imgur.com/fNztoUN.gif
+[small-mismatch2]: https://i.imgur.com/aQtTGvV.gif
 
 [bigmap-scan-10000x]: http://i.imgur.com/VEPL3oN.gif
 [bigmap-scan-100x]: http://i.imgur.com/bcht47p.gif
