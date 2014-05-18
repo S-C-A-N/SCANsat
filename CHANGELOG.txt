@@ -30,8 +30,6 @@ Minor Changes:
 + [NEW] Added support for showing the vessel icons for Asteroids in orbit around the same
 			mainBody. [tg]
 
-+ [NEW] All scanners have had their physicalSignificance turned OFF. This is to debug rotato-kraken bug. [tg]
-
 + [NEW] Include SCANsatRPM by default in packaging. [tg]
 
 + [NEW] S.C.A.N. logo [thanks K3 | Chris!]
