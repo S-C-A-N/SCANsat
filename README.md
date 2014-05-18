@@ -152,13 +152,13 @@ Right-clicking on the big map shows a magnified view around the position where y
 ### 5. Parts and Sensor Types
 ------------------------------------------
 
-| **Part** | **Scan Type** | **FOV** | Altitude (**Min**) | (**Ideal**) | (**Max**) | ** VAB ** | 
-| --- | --- | --- | --- | --- | --- | ---:|
-| [RADAR Altimetry Sensor][5a] | **RadarLo** / **Slope**| 5 | 5000 m | 5000 m | 500 km |  ![RADAR][vab-radar-thumb]
-| [SAR Altimetry Sensor][5b] | **RadarHi** | 2 | 5000 m | 750 km | 800 km |  ![SAR][vab-sar-thumb]
-| [Multispectral Sensor][5c] | **Biome** **ANOM** | 4 | 5000 m | 250 km | 500 km |  ![RADAR][vab-multi-thumb]
-| [Been There Done That®][5d] | **Anomaly** | 1 | 0 m | 0 m | 2 km |  ![RADAR][vab-btdt-thumb]
-| [MapTraq®][5e] | **None** | N/A | N/A | N/A | N/A | ![MapTraq][vab-maptraq-thumb]
+| **Part** | **Scan Type** | **FOV** | Altitude (**Min**) | (**Ideal**) | (**Max**) 
+|:--- | --- | --- | --- | --- | --- |
+| [RADAR Altimetry Sensor][5a] | **RadarLo** / **Slope**| 5 | 5000 m | 5000 m | 500 km
+| [SAR Altimetry Sensor][5b] | **RadarHi** | 2 | 5000 m | 750 km | 800 km 
+| [Multispectral Sensor][5c] | **Biome** **ANOM** | 4 | 5000 m | 250 km | 500 km 
+| [Been There Done That®][5d] | **Anomaly** | 1 | 0 m | 0 m | 2 km
+| [MapTraq®][5e] | **None** | N/A | N/A | N/A | N/A 
 
 #### a. The RADAR Altimetry Sensor
 ![RADAR][vab-radar]
