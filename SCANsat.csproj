@@ -60,7 +60,6 @@
     <Compile Include="SCANmap.cs" />
     <Compile Include="RemoteView.cs" />
     <Compile Include="SCANquickload.cs" />
-    <Compile Include="SCANtoolbar.cs" />
     <Compile Include="SCANtoolbarwrapper.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
