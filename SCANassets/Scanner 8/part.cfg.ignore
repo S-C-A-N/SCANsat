@@ -23,6 +23,9 @@ title = SCAN Multispectral Sensor
 manufacturer = [SCAN]: Scientific Committee on Advanced Navigation
 description = This multichannel sensor detects radiation across several infrared, visible light, and RADAR bands. This gives it the capability to differentiate between terrain types and biomes. It can also detect anomalies such as structures on the ground.
 
+// disable physics to try and stop rotato-kraken
+physicalSignificance = 1
+
 mass = 0.03
 dragModelType = default
 maximum_drag = 0.2

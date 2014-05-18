@@ -21,6 +21,9 @@ title = SCAN SAR Altimetry Sensor
 manufacturer = [SCAN]: Scientific Committee on Advanced Navigation
 description = This Synthetic Aperture RADAR sensor uses its flight path to simulate a much larger antenna. This makes it possible to detect terrain elevation at much higher resolution. The downside is that its field of view is comparatively small, and it works better at higher altitudes.
 
+// disable physics to try and stop rotato-kraken
+physicalSignificance = 1
+
 mass = 0.03
 dragModelType = default
 maximum_drag = 0.2

@@ -23,6 +23,9 @@ title = SCAN RADAR Altimetry Sensor
 manufacturer = [SCAN]: Scientific Committee on Advanced Navigation
 description = SCAN brings you this high performance RADAR altimetry sensor. This is the entry-level model in this sensor family, and commonly sold in a bundle with toy rockets and remote-controlled model planes. After focus group testing revealed that 95% of the target audience tried to duct tape it to the exhaust pipe of their rocket engines, this new and improved model has been made even easier to use.
 
+// disable physics to try and stop rotato-kraken
+physicalSignificance = 1
+
 mass = 0.03
 dragModelType = default
 maximum_drag = 0.2
