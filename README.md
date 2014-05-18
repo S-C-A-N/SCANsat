@@ -14,6 +14,11 @@ High Performance Scanning Sensors
 * [3. Basic Usage][3]
 * [4. Big Map][4]
 * [5. Parts and Sensors Types][5]
+* [5a. RADAR][5a]
+* [5b. SAR][5b]
+* [5c. Multi][5c]
+* [5d. BTDT][5d]
+* [5e. MapTraq][5e]
 * [6. (Career Mode) Research and Development][6]
 * [7. Background Scanning][7]
 * [8. Time Warp][8]
@@ -207,23 +212,28 @@ sneaky then they can of course be sneaky.
 [damny]: http://forum.kerbalspaceprogram.com/members/80692-damny
 [Milkshakefiend]: http://forum.kerbalspaceprogram.com/members/72507-Milkshakefiend
 
-[SCANsat:issues]: https://github.com/technogeeky/SCANsat/issues
-[SCANsat:pulls]: https://github.com/technogeeky/SCANsat/pulls
-[SCANsat:source]: https://github.com/technogeeky/SCANsat
-[SCANsat:licenses]: https://github.com/technogeeky/SCANsat/blob/master/LICENSE.txt
+[SCANsat:issues]: https://github.com/S-C-A-N/SCANsat/issues
+[SCANsat:pulls]: https://github.com/S-C-A-N/SCANsat/pulls
+[SCANsat:source]: https://github.com/S-C-A-N/SCANsat
+[SCANsat:licenses]: https://github.com/S-C-A-N/SCANsat/blob/master/LICENSE.txt
 
 [KSP:developers]: https://kerbalspaceprogram.com/index.php
 
-[0]: https://github.com/technogeeky/SCANsat#0-maintainers-authors-contributors-and-licenses
-[1]: https://github.com/technogeeky/SCANsat#1-installation
-[2]: https://github.com/technogeeky/SCANsat#2-types-of-scans
-[3]: https://github.com/technogeeky/SCANsat#3-basic-usage
-[4]: https://github.com/technogeeky/SCANsat#4-big-map
-[5]: https://github.com/technogeeky/SCANsat#5-parts-and-sensor-types
-[6]: https://github.com/technogeeky/SCANsat#6-career-mode-research-and-development
-[7]: https://github.com/technogeeky/SCANsat#7-background-scanning
-[8]: https://github.com/technogeeky/SCANsat#8-time-warp
-[9]: https://github.com/technogeeky/SCANsat#9-note-concerning-data-sources
+[0]: https://github.com/S-C-A-N/SCANsat#0-maintainers-authors-contributors-and-licenses
+[1]: https://github.com/S-C-A-N/SCANsat#1-installation
+[2]: https://github.com/S-C-A-N/SCANsat#2-types-of-scans
+[3]: https://github.com/S-C-A-N/SCANsat#3-basic-usage
+[4]: https://github.com/S-C-A-N/SCANsat#4-big-map
+[5]: https://github.com/S-C-A-N/SCANsat#5-parts-and-sensor-types
+[5a]: https://github.com/S-C-A-N/SCANsat#a-the-radar-altimetry-sensor
+[5b]: https://github.com/S-C-A-N/SCANsat#b-the-sar-altimetry-sensor
+[5c]: https://github.com/S-C-A-N/SCANsat#c-the-multispectral-sensor
+[5d]: https://github.com/S-C-A-N/SCANsat#d-been-there-done-that
+[5e]: https://github.com/S-C-A-N/SCANsat#e-maptraq
+[6]: https://github.com/S-C-A-N/SCANsat#6-career-mode-research-and-development
+[7]: https://github.com/S-C-A-N/SCANsat#7-background-scanning
+[8]: https://github.com/S-C-A-N/SCANsat#8-time-warp
+[9]: https://github.com/S-C-A-N/SCANsat#9-note-concerning-data-sources
 
 
 [logo]: http://i.imgur.com/GArPFFB.png
