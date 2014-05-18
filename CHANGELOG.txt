@@ -1,39 +1,66 @@
-Build 6 - 2014-05-12
---------------------
+Version 6.0 - 2014-05-17 (frozen by tg)
+------------------------
 
-+ [REQUIRED] Update for KSP version 0.23.5. This version of SCANsat now requires KSP 0.23.5.
+* Update for KSP version 0.23.5. This version of SCANsat now requires KSP 0.23.5.
 
-+ [ADDED] Added support for showing the vessel icons for Asteroids in orbit around the same
-			mainBody.
-			
-+ [OPTIONAL] Toolbar support. Built against 1.7.1. TOTALLY OPTIONAL. Though the experience
+Major Changes:
+
++ [NEW] Big Map Caching. When not scanning, rendering of the Big Map is much, much faster. [Thanks! DMagic!]
+
+* [KNOWN ISSUE] Sometimes the cache is not properly updated, resulting in strange looking Big Maps.
+				Use the map resize button ( [\\], right hand size), resize the map a bit.
+				This will reset the cache, and fix whatever is wrong.
+
++ [NEW] [OPTIONAL] Toolbar support. Strongly suggested, because the experience
 	is better and more consistent with the Toolbar. [thanks DMagic!]
 
 - [REMOVED] Removed the old expanding/contracting floating SCANsat button. Replaced instead with
-	either a Toolbar toolbar or with nothing, but maps become visible upon starting a scan. [thanks Dmagic!]
+	either a Toolbar toolbar or with nothing, but maps become visible upon starting a scan. [Thanks Dmagic!]
 
-- [REMOVED] Non-animated parts no longer show an 'Extend' option in EDITOR. [... Dmagic is doing all the work!]
++ [DOCS] New README docuemntation is in Markdown format, see: https://github.com/S-C-A-N/SCANsat [tg]
 
-+ [COMPATABILITY] "Change access modifiers to allow for more control from RPM".
-		Yes, it's in quotes	because I trust Dmagic THAT much.
-													[thanks Dmagic!]
-+ [ADDED] Big Map Caching. [Thanks!!!1 DMagic!]
-											
-- [BUGFIX] Scanning high inclinations with wide-enough FOV scanners 
++ [DOCS] New documentation in the form of imgur albums, see: https://scansat.imgur.com/ [tg]
+
++ [INFO] Future releases can be found here: https://github.com/S-C-A-N/SCANsat/releases/latest [tg]
+
++ [INFO] Source code can be found here: https://github.com/S-C-A-N/SCANsat [tg]
+
+Minor Changes:
+
++ [NEW] Added support for showing the vessel icons for Asteroids in orbit around the same
+			mainBody. [tg]
+
++ [NEW] All scanners have had their physicalSignificance turned OFF. This is to debug rotato-kraken bug. [tg]
+
++ [NEW] Include SCANsatRPM by default in packaging. [tg]
+
++ [NEW] S.C.A.N. logo [thanks K3 | Chris!]
+
+- [REMOVED] Non-animated parts no longer show an 'Extend' option in EDITOR. [DMagic]
+
++ [COMPATABILITY] "Change access modifiers to allow for more control from RPM". [thanks Dmagic!]
+
++ [BUGFIX] The Multispectral scanner should now be easier to highlight and click. [tg]
+
++ [BUGFIX] Scanning high inclinations with wide-enough FOV scanners
 	(ie, Multi, RADAR, but not SAR) will no longer reveal the opposite polar region. [thanks DMagic!]
 	[example orbit]:  Minmus 250.000x250.000km @ 91.0 degrees
 
-+ [HUMOR] This file is different, and so is TODO.txt.
 
-+ [dev] Support for changing what you define as 'sea level'. Compiled to be default (ie, 0).
-- [dev] Removed all unused declerations
-+ [dev]	switched to unix line endings.
-+ [dev] switched to custom, but uniform formatting (for now done by MonoDevelop).
-- [dev] removed windows commands in .csproj and .sln.
-+ [dev] added unix commands. I will be happy to have both if I can be shown how.
-+ [dev] added debugging and profiling support. Includes dummy executable.
+Internal (Developer) Changes:
+
+The following changes are only important for SCANsat or other module developers:
+
++ [dev] version number hardcoded, now "1.0.6.0" until version 6.1 ("1.0.6.1") or 7.0 ("1.0.7.0"). [tg]
++ [dev] Support for changing what you define as 'sea level'. Compiled to be default (ie, 0). [tg]
+- [dev] Removed all unused declerations [tg]
++ [dev] Abstracted some lat/long functions to lambdas. [tg]
++ [dev]	switched to Windows line endings. [tg]
+- [dev] removed windows commands in .csproj and .sln. [tg]
++ [dev] added unix commands. [tg]
++ [dev] added debugging and profiling support. Includes dummy executable. [tg]
 + [dev] [requires] that the SCANsat.dll be put directly in place (ie, GameData\SCANsat\.)
-			for debugging to work
+			for debugging to work [tg]
 
 
 Build 5 - 2013-12-18
