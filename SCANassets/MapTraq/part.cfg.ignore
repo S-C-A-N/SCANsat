@@ -21,9 +21,6 @@ title = SCAN MapTraq®
 manufacturer = [SCAN]: Scientific Committee on Advanced Navigation
 description = Originally intended for the consumer market, this small device can communicate with a mapping satellite network and display a map and your position on it. Since nobody has actually built such a satellite network, these devices can currently be acquired very cheaply in bulk.
 
-// disable physics to try and stop rotato-kraken
-physicalSignificance = 1
-
 mass = 0.03
 dragModelType = default
 maximum_drag = 0.2
