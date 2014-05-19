@@ -62,10 +62,10 @@ namespace SCANsat
             ORS_1 = 21, //Uranium - KSPI
             ORS_2 = 22, //Thorium - KSPI
             ORS_3 = 23, //Alumina - KSPI
-            ORS_4 = 24, //Water - KSPI
-            ORS_5 = 25,
-            ORS_6 = 26,
-            ORS_7 = 27,
+            ORS_4 = 24, //Water - KSPI, MKS
+            ORS_5 = 25, //Ore - MKS
+            ORS_6 = 26, //Minerals - MKS
+            ORS_7 = 27, //Substrate - MKS
             ORS_8 = 28,
             ORS_9 = 29,
             ORS_10 = 30
