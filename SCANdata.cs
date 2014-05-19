@@ -19,12 +19,13 @@ namespace SCANsat
 	{
 		/* MAP: anonymous functions (in place of preprocessor macros */
 		// icLON and icLAT: [i]nteger casted, [c]lamped, longitude and latitude
-		Func<double,int> icLON = (lon) => ((int)(lon + 360 + 180)) % 360;
-		Func<double,int> icLAT = (lat) => ((int)(lat + 180 + 90 )) % 180;
+		internal Func<double,int> icLON = (lon) => ((int)(lon + 360 + 180)) % 360;
+		internal Func<double,int> icLAT = (lat) => ((int)(lat + 180 + 90 )) % 180;
 		Func<int,int,bool> badLonLat = (lon,lat) => (lon < 0 || lat < 0 || lon >= 360 || lat >= 180);
 
 		/* MAP: state */
-		protected byte[,] coverage = new byte[360 , 180];
+		internal byte[,] coverage = new byte[360 , 180];
+        internal byte[,] resourceCoverage = new byte[360, 180]; //Secondary coverage map for resources
 		protected float[,] heightmap = new float[360 , 180];
 		public CelestialBody body;
 		public Texture2D map_small = new Texture2D (360 , 180 , TextureFormat.RGB24 , false);
@@ -37,12 +38,38 @@ namespace SCANsat
 			AltimetryLoRes = 1, // low resolution altimetry (limited zoom)
 			AltimetryHiRes = 2, // high resolution altimetry (unlimited zoom)
 			Altimetry = 3, 	// both (setting) or either (testing) altimetry
-			//Slope = 4,		// slope data
+			Kethane = 4,		// Generic Kethane resource sensor
 			Biome = 8,		// biome data
 			Anomaly = 16,		// anomalies (position of anomaly)
 			AnomalyDetail = 32,	// anomaly detail (name of anomaly, etc.)
+            ORS = 64,           // Generic ORS scanner
 			Everything = 255	// everything
 		}
+
+        public enum SCANResourceType //Additional enum needed here to store the many possible resource types
+        {
+            Nothing = 0,
+            Kethane_1 = 1, //Kethane
+            Kethane_2 = 2, //Ore - EPL, MKS
+            Kethane_3 = 3, //Minerals - MKS
+            Kethane_4 = 4, //Water - MKS
+            Kethane_5 = 5, //Substrate - MKS
+            Kethane_6 = 6,
+            Kethane_7 = 7,
+            Kethane_8 = 8,
+            Kethane_9 = 9,
+            Kethane_10 = 10,
+            ORS_1 = 21, //Uranium - KSPI
+            ORS_2 = 22, //Thorium - KSPI
+            ORS_3 = 23, //Alumina - KSPI
+            ORS_4 = 24, //Water - KSPI
+            ORS_5 = 25,
+            ORS_6 = 26,
+            ORS_7 = 27,
+            ORS_8 = 28,
+            ORS_9 = 29,
+            ORS_10 = 30
+        }
 
 		/* DATA: map passes and coverage (passes >= 1)*/
 		public void registerPass ( double lon , double lat , SCANtype type ) {
@@ -63,6 +90,18 @@ namespace SCANsat
 			if (badLonLat(ilon,ilat)) return false;
 			return (coverage [ilon, ilat] & (byte)type) == (byte)type;
 		}
+        public void registerResourcePass (double lon, double lat, SCANResourceType type) { //A few additional methods to handle resource coverage
+			int ilon = icLON(lon);
+			int ilat = icLAT(lat);
+			if (badLonLat(ilon,ilat)) return;
+			resourceCoverage [ilon, ilat] |= (byte)type;
+        }
+        public bool isCoveredResource (double lon, double lat, SCANResourceType type) {
+            int ilon = icLON(lon);
+            int ilat = icLAT(lat);
+            if (badLonLat(ilon, ilat)) return false;
+            return (resourceCoverage[ilon, ilat] & (byte)type) != 0;
+        }
 
 		/* DATA: elevation (called often, probably) */
 		public double getElevation ( double lon , double lat ) {
@@ -257,25 +296,30 @@ namespace SCANsat
 		}
 
 		/* DATA: serialization and compression */
-		public string serialize () {
+		public string serialize (int i) {
 			// convert the byte[,] array into a KSP-savefile-safe variant of Base64
 			MemoryStream mem = new MemoryStream ();
 			BinaryFormatter binf = new BinaryFormatter ();
-			binf.Serialize (mem , coverage);
+			if (i == 0) binf.Serialize (mem , coverage); //Modified to handle saving both the regural coverage map and the resource coverage map, same for deserialize
+            else if (i == 1) binf.Serialize (mem , resourceCoverage); 
 			string blob = Convert.ToBase64String (CLZF2.Compress (mem.ToArray ()));
 			return blob.Replace ("/" , "-").Replace ("=" , "_");
 		}
-		public void deserialize ( string blob ) {
+		public void deserialize ( string blob, int i ) {
 			try {
 				blob = blob.Replace ("-" , "/").Replace ("_" , "=");
 				byte[] bytes = Convert.FromBase64String (blob);
 				bytes = CLZF2.Decompress (bytes);
 				MemoryStream mem = new MemoryStream (bytes , false);
 				BinaryFormatter binf = new BinaryFormatter ();
-				coverage = (byte[,])binf.Deserialize (mem);
+				if (i == 0) coverage = (byte[,])binf.Deserialize (mem);
+                else if (i == 1) resourceCoverage = (byte[,])binf.Deserialize (mem);
 			} catch (Exception e) {
-				coverage = new byte[360 , 180];
-				heightmap = new float[360 , 180];
+				if (i ==0) {
+                    coverage = new byte[360 , 180];
+                    heightmap = new float[360 , 180];
+                }
+				else if (i ==1) resourceCoverage = new byte[360, 180];
 				throw e;
 			}
 			resetImages ();
