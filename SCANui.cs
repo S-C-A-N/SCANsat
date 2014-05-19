@@ -674,22 +674,36 @@ namespace SCANsat
             // resources overlay
             GUILayout.Space(16);
             GUILayout.Label("Resources Overlay", style_headline);
-            SCANcontroller.controller.gridOverlay = GUILayout.Toggle(SCANcontroller.controller.gridOverlay, "Activate Resource Overlay"); //global toggle for resource overlay
+            SCANcontroller.controller.globalOverlay = GUILayout.Toggle(SCANcontroller.controller.globalOverlay, "Activate Resource Overlay"); //global toggle for resource overlay
             GUILayout.BeginHorizontal();
             if (GUILayout.Button("Kethane Resources", style_button)) //select from two resource types, populates the list below
             {
                 SCANcontroller.controller.resourceOverlayType = 1;
                 SCANcontroller.controller.OverlayResources();
+                if (SCANcontroller.controller.ResourcesList.Count == 0)
+                {
+                    GUILayout.EndHorizontal();
+                    GUILayout.Label("No Kethane Resources Detected", style_headline);
+                    SCANcontroller.controller.globalOverlay = false;
+                }
+                else SCANcontroller.controller.globalOverlay = true;
             }
             if (GUILayout.Button("Open Resources", style_button))
             {
                 SCANcontroller.controller.resourceOverlayType = 0;
                 SCANcontroller.controller.OverlayResources();
+                if (SCANcontroller.controller.ResourcesList.Count == 0)
+                {
+                    GUILayout.EndHorizontal();
+                    GUILayout.Label("No ORS Resources Detected", style_headline);
+                    SCANcontroller.controller.globalOverlay = false;
+                }
+                else SCANcontroller.controller.globalOverlay = true;
             }
             GUILayout.EndHorizontal();
-            GUILayout.BeginHorizontal();
-            SCANcontroller.controller.gridSelection = GUILayout.SelectionGrid(SCANcontroller.controller.gridSelection, SCANcontroller.controller.ResourcesList.ToArray(), 3); //select resource to display
-            GUILayout.EndHorizontal();
+            //GUILayout.BeginHorizontal();
+            SCANcontroller.controller.gridSelection = GUILayout.SelectionGrid(SCANcontroller.controller.gridSelection, SCANcontroller.controller.ResourcesList.ToArray(), 4); //select resource to display
+            //GUILayout.EndHorizontal();
 
 			// background scanning
 			GUILayout.Space (16);
@@ -1279,7 +1293,7 @@ namespace SCANsat
 				overlay_static_dirty = true;
 			}
 
-            if (SCANcontroller.controller.gridOverlay) //Button to turn on/off resource overlay
+            if (SCANcontroller.controller.globalOverlay) //Button to turn on/off resource overlay
             {
                 style_button.normal.textColor = SCANcontroller.controller.map_ResourceOverlay ? c_good : Color.white;
                 if (GUILayout.Button(SCANcontroller.controller.ResourcesList[SCANcontroller.controller.gridSelection], style_button))
@@ -1652,6 +1666,8 @@ namespace SCANsat
 					SCANcontroller.controller.map_y = (int)pos_bigmap.y;
 				}
 				bigmap.setBody (vessel.mainBody);
+                if (bigmap.lastGridSelection != SCANcontroller.controller.gridSelection) 
+                    bigmap.resetMap(bigmap.mapmode, 1); //Not really sure where to put this
 				string rendering = "";
 				if (bigmap_dragging)
 					rendering += " [" + bigmap_drag_w + "x" + (bigmap_drag_w / 2) + "]";
