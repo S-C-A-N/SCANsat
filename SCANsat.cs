@@ -100,6 +100,10 @@ namespace SCANsat
                Actions["startScanAction"].guiName = "Start " + scanName;
                Actions["stopScanAction"].guiName = "Stop " + scanName;
                Actions["toggleScanAction"].guiName = "Toggle " + scanName;
+            if (resourceType != 0) { //Turn off the science options for resource scanners, precludes possibility of combined SCANsat and resource sensors
+                Events["analyze"].active = false;  //probably a reasonable way around this
+                Actions["analyzeData"].active = false;
+            }
             }
 
             if (sensorType == 0)
@@ -174,6 +178,8 @@ namespace SCANsat
 		public string scanName;
 		[KSPField]
 		public string animationName;
+        [KSPField]
+        public int resourceType = 0; //Additional resource type field to specify which resources to scan for, defaults to 0 if left blank in the part.cfg file
 
 		/* SCAN: all of these fields and only scanning is persistant */
 		[KSPField(isPersistant = true)]
@@ -284,10 +290,10 @@ namespace SCANsat
 		}
 
         	/* SCAN: register scanners without going through animation */
-        	public void registerScanner() {
+        	public void registerScanner() { //Updated to reflect the resource type variable
             scanning = true;
             if (sensorType > 0) 
-                SCANcontroller.controller.registerSensor(vessel, (SCANdata.SCANtype)sensorType, fov, min_alt, max_alt, best_alt);
+                SCANcontroller.controller.registerSensor(vessel, (SCANdata.SCANtype)sensorType, (SCANdata.SCANResourceType)resourceType, fov, min_alt, max_alt, best_alt);
         }
         	public void unregisterScanner() {
             scanning = false;
