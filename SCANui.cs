@@ -26,7 +26,7 @@ namespace SCANsat
 		private static Rect pos_instruments = new Rect (-1 , 100f , 10f , 10f);
 		private static Rect pos_settings = new Rect (-1 , 100f , 0f , 10f);
 		private static Rect rc = new Rect (0 , 0 , 0 , 0);
-		private static bool bigmap_dragging; //icon_dragging; //This bool no longer needed because the default infobox code is removed
+		private static bool bigmap_dragging;
 		private static float bigmap_drag_w, bigmap_drag_x;
 		private static SCANmap bigmap, spotmap;
 		private static Texture2D overlay_static, test_image;
@@ -671,6 +671,26 @@ namespace SCANsat
 			}
 			GUILayout.EndHorizontal ();
 
+            // resources overlay
+            GUILayout.Space(16);
+            GUILayout.Label("Resources Overlay", style_headline);
+            SCANcontroller.controller.gridOverlay = GUILayout.Toggle(SCANcontroller.controller.gridOverlay, "Activate Resource Overlay"); //global toggle for resource overlay
+            GUILayout.BeginHorizontal();
+            if (GUILayout.Button("Kethane Resources", style_button)) //select from two resource types, populates the list below
+            {
+                SCANcontroller.controller.resourceOverlayType = 1;
+                SCANcontroller.controller.OverlayResources();
+            }
+            if (GUILayout.Button("Open Resources", style_button))
+            {
+                SCANcontroller.controller.resourceOverlayType = 0;
+                SCANcontroller.controller.OverlayResources();
+            }
+            GUILayout.EndHorizontal();
+            GUILayout.BeginHorizontal();
+            SCANcontroller.controller.gridSelection = GUILayout.SelectionGrid(SCANcontroller.controller.gridSelection, SCANcontroller.controller.ResourcesList.ToArray(), 3); //select resource to display
+            GUILayout.EndHorizontal();
+
 			// background scanning
 			GUILayout.Space (16);
 			GUILayout.Label ("Background Scanning" , style_headline);
@@ -1251,11 +1271,25 @@ namespace SCANsat
 			}
 			GUILayout.EndHorizontal ();
 
+            GUILayout.BeginHorizontal();
+
 			style_button.normal.textColor = SCANcontroller.controller.map_grid ? c_good : Color.white;
 			if (GUILayout.Button ("Grid" , style_button)) {
 				SCANcontroller.controller.map_grid = !SCANcontroller.controller.map_grid;
 				overlay_static_dirty = true;
 			}
+
+            if (SCANcontroller.controller.gridOverlay) //Button to turn on/off resource overlay
+            {
+                style_button.normal.textColor = SCANcontroller.controller.map_ResourceOverlay ? c_good : Color.white;
+                if (GUILayout.Button(SCANcontroller.controller.ResourcesList[SCANcontroller.controller.gridSelection], style_button))
+                {
+                    SCANcontroller.controller.map_ResourceOverlay = !SCANcontroller.controller.map_ResourceOverlay;
+                    bigmap.resetMap();
+                }
+            }
+
+            GUILayout.EndHorizontal();
 			GUILayout.EndVertical ();
 
 			GUILayout.BeginVertical ();
@@ -1338,6 +1372,13 @@ namespace SCANsat
 					info += "\n" + toDMS (mlat , mlon) + " (lat: " + mlat.ToString ("F2") + " lon: " + mlon.ToString ("F2") + ") ";
 					if (in_spotmap)
 						info += " " + spotmap.mapscale.ToString ("F1") + "x";
+                    if (SCANcontroller.controller.map_ResourceOverlay) //Adds selected resource amount to big map legend
+                    {
+                        if (SCANcontroller.controller.resourceOverlayType == 0) {
+                        CelestialBody body = bigmap.body;
+                        info += colored(XKCDColors.Magenta, "\n<b>" + SCANcontroller.controller.ResourcesList[SCANcontroller.controller.gridSelection] + ": " + bigmap.ORSOverlay(mlon, mlat, body.flightGlobalsIndex, SCANcontroller.controller.ResourcesList[SCANcontroller.controller.gridSelection]).ToString("N1") + " ppm</b>");
+                        }
+                    }
 				} else {
 					info += " " + mlat.ToString ("F") + " " + mlon.ToString ("F"); // uncomment for debugging projections
 				}
