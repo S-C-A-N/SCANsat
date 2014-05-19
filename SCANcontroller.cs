@@ -66,7 +66,7 @@ namespace SCANsat
 		[KSPField(isPersistant = true)]
 		public int timeWarpResolution = 20;
         [KSPField(isPersistant = true)]
-        public bool gridOverlay = true; //Global resource overlay toggle
+        public bool globalOverlay = true; //Global resource overlay toggle
         [KSPField(isPersistant = true)]
         public int gridSelection = 0; //Which resource type is selected in the settings menu
         [KSPField(isPersistant = true)]
@@ -180,49 +180,57 @@ namespace SCANsat
             {
                 foreach (ConfigNode node in GameDatabase.Instance.GetConfigNodes("PLANETARY_RESOURCE_DEFINITION"))
                 {
-                    string resourceName = node.GetValue("name");
-                    if (!ResourcesList.Contains(resourceName)) ResourcesList.Add(resourceName); //ORS resources are defined per planet, this avoids repeats of the same type
+                    if (node != null)
+                    {
+                        string resourceName = node.GetValue("name");
+                        if (!ResourcesList.Contains(resourceName)) ResourcesList.Add(resourceName); //ORS resources are defined per planet, this avoids repeats of the same type
+                    }
                 }
             }
             else if (resourceOverlayType == 1)
             {
                 foreach (ConfigNode node in GameDatabase.Instance.GetConfigNodes("KethaneResource"))
                 {
-                    string resourceName = node.GetValue("Resource");
-                    ResourcesList.Add(resourceName);
+                    if (node != null)
+                    {
+                        string resourceName = node.GetValue("Resource");
+                        ResourcesList.Add(resourceName);
+                    }
                 }
             }
         }
 
         
-        internal SCANdata.SCANResourceType OverlayResourceType(int i) //Assign the proper resource type depending on the selection in the settings menu
+        internal SCANdata.SCANResourceType OverlayResourceType(string s) //Assign the proper resource type depending on the selection in the settings menu
         {
             if (resourceOverlayType == 0) {
-                switch(i)
+                switch(s)
                 {
-                    case 0: return SCANdata.SCANResourceType.ORS_1;
-                    case 1: return SCANdata.SCANResourceType.ORS_2;
-                    case 2: return SCANdata.SCANResourceType.ORS_3;
-                    case 3: return SCANdata.SCANResourceType.ORS_4;
-                    case 4: return SCANdata.SCANResourceType.ORS_5;
+                    case "Uranium": return SCANdata.SCANResourceType.ORS_1;
+                    case "Thorium": return SCANdata.SCANResourceType.ORS_2;
+                    case "Alumina": return SCANdata.SCANResourceType.ORS_3;
+                    case "Water": return SCANdata.SCANResourceType.ORS_4;
+                    case "Ore": return SCANdata.SCANResourceType.ORS_5;
+                    case "Minerals": return SCANdata.SCANResourceType.ORS_6;
+                    case "Substrate": return SCANdata.SCANResourceType.ORS_7;
                     default: return SCANdata.SCANResourceType.Nothing;
                 }
             }
             else if (resourceOverlayType == 1) {
-                switch(i)
+                switch(s)
                 {
-                    case 0: return SCANdata.SCANResourceType.Kethane_1;
-                    case 1: return SCANdata.SCANResourceType.Kethane_2;
-                    case 2: return SCANdata.SCANResourceType.Kethane_3;
-                    case 3: return SCANdata.SCANResourceType.Kethane_4;
-                    case 4: return SCANdata.SCANResourceType.Kethane_5;
+                    case "Kethane": return SCANdata.SCANResourceType.Kethane_1;
+                    case "Ore": return SCANdata.SCANResourceType.Kethane_2;
+                    case "Minerals": return SCANdata.SCANResourceType.Kethane_3;
+                    case "Water": return SCANdata.SCANResourceType.Kethane_4;
+                    case "Substrate": return SCANdata.SCANResourceType.Kethane_5;
                     default: return SCANdata.SCANResourceType.Nothing;
                 }
             }
             return SCANdata.SCANResourceType.Nothing;
         }
 
-        internal Color gridColor(string resource) //Get the resource color
+        internal Color gridColor(string resource, int full) //Get the resource color
         {
             Color gridcolor = Color.white;
             if (resourceOverlayType == 0) //ORS resources might need to be manually set
@@ -233,14 +241,59 @@ namespace SCANsat
             {
                 foreach (ConfigNode node in GameDatabase.Instance.GetConfigNodes("KethaneResource")) //Kethane resource colors stored in their config nodes
                 {
-                    if (node.GetValue("Resource") == resource)
+                    if (node != null)
                     {
-                        var color = node.GetValue("ColorFull");
-                        gridcolor = ConfigNode.ParseColor(color);
+                        if (node.GetValue("Resource") == resource)
+                        {
+                            if (full == 0)
+                            {
+                                var color = node.GetValue("ColorFull");
+                                gridcolor = ConfigNode.ParseColor(color);
+                            }
+                            else if (full == 1)
+                            {
+                                var color = node.GetValue("ColorEmpty");
+                                gridcolor = ConfigNode.ParseColor(color);
+                            }
+                        }
                     }
                 }
             }
             return gridcolor;
+        }
+
+        internal double ORSScalar(string s)
+        {
+            double scalar = 1f;
+            foreach (ConfigNode node in GameDatabase.Instance.GetConfigNodes("PLANETARY_RESOURCE_DEFINITION"))
+            {
+                if (node != null)
+                {
+                    string resourceName = node.GetValue("name");
+                    if (resourceName == s)
+                    {
+                        if (double.TryParse(node.GetValue("scaleFactor"), out scalar)) return scalar;
+                    }
+                }
+            }
+            return scalar;
+        }
+
+        internal double ORSMultiplier(string s)
+        {
+            double mult = 1f;
+            foreach (ConfigNode node in GameDatabase.Instance.GetConfigNodes("PLANETARY_RESOURCE_DEFINITION"))
+            {
+                if (node != null)
+                {
+                    string resourceName = node.GetValue("name");
+                    if (resourceName == s)
+                    {
+                        if (double.TryParse(node.GetValue("scaleMultiplier"), out mult)) return mult;
+                    }
+                }
+            }
+            return mult;
         }
 
 		protected Dictionary<Guid, SCANvessel> knownVessels = new Dictionary<Guid, SCANvessel>();
@@ -546,9 +599,11 @@ namespace SCANsat
 						clampLat = lat + y;
 						if (clampLat > 90) clampLat = 90;
 						if (clampLat < -90) clampLat = -90;
-						data.registerPass(clampLon, clampLat, sensor.sensor);
-                        if (sensor.resourceSensor != 0) data.registerResourcePass(clampLon, clampLat, sensor.resourceSensor); //Additional scan pass for resource scanners, probably needs some tweaking
-					}
+                        if (sensor.resourceSensor != 0) 
+                            data.registerResourcePass(clampLon, clampLat, sensor.resourceSensor); //Additional scan pass for resource scanners, probably needs some tweaking
+					    else
+                            data.registerPass(clampLon, clampLat, sensor.sensor);
+                    }
 				}
 			}
 			if(uncovered) return;
