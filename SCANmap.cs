@@ -11,6 +11,7 @@
 
 using System;
 using UnityEngine;
+using OpenResourceSystem;
 
 namespace SCANsat
 {
@@ -274,8 +275,12 @@ namespace SCANsat
 		protected int mapstep; // all refs are below
 		protected bool mapsaved; // all refs are below
 		protected double[] mapline; // all refs are below
-		protected CelestialBody body; // all refs are below
+		internal CelestialBody body; // all refs are below
 		protected Color[] redline; // all refs are below
+        internal Color gridFull = SCANcontroller.controller.gridColor(SCANcontroller.controller.ResourcesList[SCANcontroller.controller.gridSelection]); // resource colors
+        internal Color gridEmpty = new Color(0.5f, 0.5f, 0.5f);
+        private SCANdata.SCANResourceType overlayType; //resource type, determined by selection in settings menu
+        //internal string resource;
 
 		/* MAP: nearly trivial functions */
 		public void setBody ( CelestialBody b ) {
@@ -296,6 +301,9 @@ namespace SCANsat
 		public void resetMap ( int mode, int maptype ) {
 			mapmode = mode;
             	mapType = maptype;
+                overlayType = SCANcontroller.controller.OverlayResourceType(SCANcontroller.controller.gridSelection); //current resource selection
+                //resource = SCANcontroller.controller.ResourcesList[SCANcontroller.controller.gridSelection];
+                gridFull = SCANcontroller.controller.gridColor(SCANcontroller.controller.ResourcesList[SCANcontroller.controller.gridSelection]); //grab the proper color for the selected resource
 			resetMap ();
 		}
 
@@ -321,10 +329,20 @@ namespace SCANsat
 			ScreenMessages.PostScreenMessage ("Map saved: " + filename , 5 , ScreenMessageStyle.UPPER_CENTER);
 		}
 
+        public double ORSOverlay(double lon, double lat, int i, string s) //Uses ORS methods to grab the resource amount given a lat and long
+        {
+            double amount = 0f;
+            ORSPlanetaryResourcePixel overlayPixel = ORSPlanetaryResourceMapData.getResourceAvailability(i, s, lat, lon);
+            amount = overlayPixel.getAmount() * 1000000; //values in ppm
+            return amount;
+        }
+
 		/* MAP: build: map to Texture2D */
 		public Texture2D getPartialMap () {
 			SCANdata data = SCANcontroller.controller.getData (body);
 			Color[] pix;
+            Color baseColor = Color.grey; //default pixel color
+            string resource = SCANcontroller.controller.ResourcesList[SCANcontroller.controller.gridSelection]; //name of the currently selected resource
 
 			/* init cache if necessary */
 			if (body != big_heightmap_body) {
@@ -385,14 +403,16 @@ namespace SCANsat
                         {
                             // high resolution gets a coloured pixel for the actual position
                             val = (float)data.getElevation(lon, lat);
-                            pix[i] = heightToColor(val, scheme);
+                            baseColor = heightToColor(val, scheme); //use temporary color to store pixel value
+                            //pix[i] = heightToColor(val, scheme);
                             heightMapArray(val, mapstep, i, mapType);
                         }
                         else
                         {
                             // basic altimetry gets forced greyscale with lower resolution
                             val = (float)data.getElevation(((int)(lon * 5)) / 5, ((int)(lat * 5)) / 5);
-                            pix[i] = heightToColor(val, 1);
+                            baseColor = heightToColor(val, 1);
+                            //pix[i] = heightToColor(val, 1);
                             heightMapArray(val, mapstep, i, mapType);
                         }
                     }
@@ -400,13 +420,36 @@ namespace SCANsat
                     {
                         if (data.isCovered(lon, lat, SCANdata.SCANtype.AltimetryHiRes))
                         {
-                            pix[i] = heightToColor(val, scheme);
+                            baseColor = heightToColor(val, scheme);
+                            //pix[i] = heightToColor(val, scheme);
                         }
                         else
                         {
-                            pix[i] = heightToColor(val, 1);
+                            baseColor = heightToColor(val, 1);
+                            //pix[i] = heightToColor(val, 1);
                         }
                     }
+                    if (SCANcontroller.controller.map_ResourceOverlay) //no support for kethane resources yet
+                    {
+                        //int ilon = data.icLON(lon) - 180;
+                        //int ilat = data.icLAT(lat) - 90;
+                        if (SCANcontroller.controller.resourceOverlayType == 0)
+                        {
+                            if (data.isCoveredResource(lon, lat, overlayType)) //check our new resource coverage map
+                            {
+                                double amount = ORSOverlay(lon, lat, body.flightGlobalsIndex, resource); //grab the resource amount for the current pixel
+                                if (amount > 2) //low cutoff value, probably needs to be set with a variable
+                                {
+                                    if (amount > 100) amount = 100; //max cutoff value
+                                    pix[i] = Color.Lerp(baseColor, gridFull, (float)(amount) / 100); //vary color by resource amount
+                                }
+                                else pix[i] = baseColor;
+                            }
+                            else pix[i] = baseColor;
+                        }
+                        else pix[i] = baseColor;
+                    }
+                    else pix[i] = baseColor;
                     
 					/* draw height lines - works, but mostly useless...
 				int step = (int)(val / 1000);
