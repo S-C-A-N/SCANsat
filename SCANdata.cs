@@ -331,6 +331,9 @@ namespace SCANsat
 			heightmap = new float[360 , 180];
 			resetImages ();
 		}
+        public void resetResource () {
+            resourceCoverage = new byte[360, 180];
+        }
 		public void resetImages () {
 			// Just draw a simple grid to initialize the image; the map will appear on top of it
 			for (int y=0; y<map_small.height; y++) {
