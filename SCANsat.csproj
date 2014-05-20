@@ -42,6 +42,7 @@
   <ItemGroup>
     <Reference Include="OpenResourceSystem_1_1_0">
       <HintPath>..\..\OpenResourceSystem\Plugins\OpenResourceSystem_1_1_0.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="System" />
     <Reference Include="Assembly-CSharp">

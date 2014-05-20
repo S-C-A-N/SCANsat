@@ -1,0 +1,4 @@
+C:\Users\David\Documents\Visual Studio 2010\Projects\KSP Science\SCANsat Dev\Kerbal Space Program\GameData\SCANsat\Source\SCANsatkethane\obj\Debug\SCANsatkethane.csprojResolveAssemblyReference.cache
+C:\Users\David\Documents\Visual Studio 2010\Projects\KSP Science\SCANsat Dev\Kerbal Space Program\GameData\SCANsat\Source\SCANsatkethane\obj\Debug\SCANsatKethane.dll
+C:\Users\David\Documents\Visual Studio 2010\Projects\KSP Science\SCANsat Dev\Kerbal Space Program\GameData\SCANsatKethane.dll
+C:\Users\David\Documents\Visual Studio 2010\Projects\KSP Science\SCANsat Dev\Kerbal Space Program\GameData\SCANsat\SCANsatKethane.dll
