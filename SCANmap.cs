@@ -11,7 +11,6 @@
 
 using System;
 using UnityEngine;
-using OpenResourceSystem;
 
 namespace SCANsat
 {
@@ -277,13 +276,12 @@ namespace SCANsat
 		protected double[] mapline; // all refs are below
 		internal CelestialBody body; // all refs are below
 		protected Color[] redline; // all refs are below
-        //internal int lastGridSelection; // = SCANcontroller.controller.gridSelection;
-        private Color gridFull; // = SCANcontroller.controller.gridColor(SCANcontroller.controller.ResourcesList[SCANcontroller.controller.gridSelection], 0); // resource colors
-        private Color gridEmpty; // = SCANcontroller.controller.gridColor(SCANcontroller.controller.ResourcesList[SCANcontroller.controller.gridSelection], 1);
-        private SCANdata.SCANResourceType overlayType; // = SCANcontroller.controller.OverlayResourceType(SCANcontroller.controller.ResourcesList[SCANcontroller.controller.gridSelection]); //resource type, determined by selection in settings menu
-        private double ORSScalar; // = SCANcontroller.controller.ORSScalar(SCANcontroller.controller.ResourcesList[SCANcontroller.controller.gridSelection], body);
-        private double ORSMultiplier; // = SCANcontroller.controller.ORSMultiplier(SCANcontroller.controller.ResourcesList[SCANcontroller.controller.gridSelection]);
-        private string resource; // = SCANcontroller.controller.ResourcesList[SCANcontroller.controller.gridSelection]; //name of the currently selected resource
+        private Color gridFull; // resource colors
+        private Color gridEmpty; //empty resource color
+        private SCANdata.SCANResourceType overlayType; //resource type, determined by selection in settings menu
+        private double ORSScalar; // ORS log scalar value
+        private double ORSMultiplier; // ORS multiplier value
+        private string resource; //name of the currently selected resource
 
 		/* MAP: nearly trivial functions */
 		public void setBody ( CelestialBody b ) {
@@ -304,7 +302,6 @@ namespace SCANsat
                 overlayType = SCANcontroller.controller.OverlayResourceType(resource); //current resource selection
                 gridFull = SCANcontroller.controller.gridColor(resource, 0); //grab the proper color for the selected resource
                 gridEmpty = SCANcontroller.controller.gridColor(resource, 1); //grab the empty color value
-                //lastGridSelection = SCANcontroller.controller.gridSelection; //watching for change to selected resource
                 if (SCANcontroller.controller.resourceOverlayType == 0) //ORS resource multipliers
                 {
                     ORSScalar = SCANcontroller.controller.ORSScalar(resource, body);
@@ -315,19 +312,6 @@ namespace SCANsat
 		public void resetMap ( int mode, int maptype ) {
 			mapmode = mode;
             	mapType = maptype;
-                //if (SCANcontroller.controller.globalOverlay)
-                //{
-                //    resource = SCANcontroller.controller.ResourcesList[SCANcontroller.controller.gridSelection]; //grab resource name
-                //    overlayType = SCANcontroller.controller.OverlayResourceType(resource); //current resource selection
-                //    gridFull = SCANcontroller.controller.gridColor(resource, 0); //grab the proper color for the selected resource
-                //    gridEmpty = SCANcontroller.controller.gridColor(resource, 1); //grab the empty color value
-                //    lastGridSelection = SCANcontroller.controller.gridSelection; //watching for change to selected resource
-                //    if (SCANcontroller.controller.resourceOverlayType == 0) //ORS resource multipliers
-                //    {
-                //        ORSScalar = SCANcontroller.controller.ORSScalar(resource, body);
-                //        ORSMultiplier = SCANcontroller.controller.ORSMultiplier(resource);
-                //    }
-                //}
                 resetMap ();
 		}
         public void setResource (string s) {
@@ -359,19 +343,11 @@ namespace SCANsat
 			ScreenMessages.PostScreenMessage ("Map saved: " + filename , 5 , ScreenMessageStyle.UPPER_CENTER);
 		}
 
-        public double ORSOverlay(double lon, double lat, int i, string s) //Uses ORS methods to grab the resource amount given a lat and long
-        {
-            double amount = 0f;
-            ORSPlanetaryResourcePixel overlayPixel = ORSPlanetaryResourceMapData.getResourceAvailability(i, s, lat, lon);
-            amount = overlayPixel.getAmount() * 1000000; //values in ppm
-            return amount;
-        }
-
 		/* MAP: build: map to Texture2D */
 		public Texture2D getPartialMap () {
 			SCANdata data = SCANcontroller.controller.getData (body);
 			Color[] pix;
-            Color baseColor = Color.grey; //default pixel color
+            Color baseColor = Color.grey; //default pixel color 
 
 			/* init cache if necessary */
 			if (body != big_heightmap_body) {
@@ -410,7 +386,7 @@ namespace SCANsat
 				double la = lat, lo = lon;
 				lat = unprojectLatitude (lo , la);
 				lon = unprojectLongitude (lo , la);
-				pix [i] = Color.grey;
+                pix[i] = baseColor;
 				if (double.IsNaN (lat) || double.IsNaN (lon) || lat < -90 || lat > 90 || lon < -180 || lon > 180) {
 					pix [i] = Color.clear;
 					continue;
@@ -469,7 +445,7 @@ namespace SCANsat
                         {
                             if (data.isCoveredResource(lon, lat, overlayType)) //check our new resource coverage map
                             {
-                                double amount = ORSOverlay(lon, lat, body.flightGlobalsIndex, resource); //grab the resource amount for the current pixel
+                                double amount = data.ORSOverlay(lon, lat, body.flightGlobalsIndex, resource); //grab the resource amount for the current pixel
                                 double scalar = ORSMultiplier * ORSScalar;
                                 if (amount > scalar)
                                 {
@@ -480,9 +456,13 @@ namespace SCANsat
                             }
                             else pix[i] = baseColor;
                         }
-                        else if (SCANcontroller.controller.resourceOverlayType == 1)
+                        else if (SCANcontroller.controller.resourceOverlayType == 1) //Kethane methods go here
                         {
-                            pix[i] = baseColor;
+                            if (data.isCoveredResource(lon, lat, overlayType))
+                            {
+                                pix[i] = baseColor;
+                            }
+                            else pix[i] = baseColor;
                         }
                         else pix[i] = baseColor;
                     }
@@ -564,7 +544,7 @@ namespace SCANsat
                         {
                             if (data.isCoveredResource(lon, lat, overlayType)) //check our new resource coverage map
                             {
-                                double amount = ORSOverlay(lon, lat, body.flightGlobalsIndex, resource); //grab the resource amount for the current pixel
+                                double amount = data.ORSOverlay(lon, lat, body.flightGlobalsIndex, resource); //grab the resource amount for the current pixel
                                 double scalar = ORSMultiplier * ORSScalar;
                                 if (amount > scalar)
                                 {
@@ -575,9 +555,13 @@ namespace SCANsat
                             }
                             else pix[i] = baseColor;
                         }
-                        else if (SCANcontroller.controller.resourceOverlayType == 1)
+                        else if (SCANcontroller.controller.resourceOverlayType == 1) //Kethane methods go here
                         {
-                            pix[i] = baseColor;
+                            if (data.isCoveredResource(lon, lat, overlayType))
+                            {
+                                pix[i] = baseColor;
+                            }
+                            else pix[i] = baseColor;
                         }
                         else pix[i] = baseColor;
                     }
@@ -662,7 +646,7 @@ namespace SCANsat
                         {
                             if (data.isCoveredResource(lon, lat, overlayType)) //check our new resource coverage map
                             {
-                                double amount = ORSOverlay(lon, lat, body.flightGlobalsIndex, resource); //grab the resource amount for the current pixel
+                                double amount = data.ORSOverlay(lon, lat, body.flightGlobalsIndex, resource); //grab the resource amount for the current pixel
                                 double scalar = ORSMultiplier * ORSScalar;
                                 if (amount > scalar)
                                 {
@@ -673,9 +657,13 @@ namespace SCANsat
                             }
                             else pix[i] = baseColor;
                         }
-                        else if (SCANcontroller.controller.resourceOverlayType == 1)
+                        else if (SCANcontroller.controller.resourceOverlayType == 1) //Kethane methods go here
                         {
-                            pix[i] = baseColor;
+                            if (data.isCoveredResource(lon, lat, overlayType))
+                            {
+                                pix[i] = baseColor;
+                            }
+                            else pix[i] = baseColor;
                         }
                         else pix[i] = baseColor;
                     }
