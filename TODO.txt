@@ -1,0 +1,68 @@
+BEFORE NEXT BUILD:
+
+- I would suggest adding something about the effective orbital range of each part to their description though. (DMagic)
+- options for color of text (DMagic)
+- show exit symbol on ground track for active orbit
+
+DAY/NIGHT DETECTION:
+- make anomaly detection use an optical sensor that only works during day
+- showing the day / night terminator like on some of the world clocks (drtedastro)
+- pre-requisite for visual band scanner
+
+BIG MAP:
+- the removal of the auto-render of the big map when you stop resizing it, reduces the jiggle-lag time if you just want to temp narrow it a bit for example (Thourion)
+- a Marker addition from the big map for custom points with a small note. (Thourion)
+	- make somehow usable as target?
+	
+OTHER (NEW OR EXISTING) SCANNERS:
+- Maybe use Figaro if installed? (OrtwinS)
+- Kethane data on map? (brienne) (should not be handled by SCANsat itself)
+- SSTV receiver (KhaosCorp)  (should probably be a separate mod...)
+- visible band scanner for pretty pictures (Nertea) 
+   - planet texture overlaid with greyscale elevation map?
+   - should only work when the area is receiving sunlight?
+- api for other mods to hook SCANsat up with data
+- RWR (Radar warning receiver) .. The "map" could look like that real RWR: http://upload.wikimedia.org/wikipedia/en/f/fc/Rwr_example.gif (Nostromo)
+
+SCIENCE AND SUCH:
+- science value scanner (show biome map by amount of remaining science)
+- science based on how often the satellite setup can update data?
+- science for detected anomalies etc. (BananaDealer)
+
+ANOMALIES:
+- add more anomalies, e.g. "highest elevation"
+- Can we get a table/list of detected anomalies? That would be excellent, even if it's only from a text file in the data directory. (Free Trader Beowulf)
+- A few things I would like to see is the anomalies and other markers on the small map and the zoomed in pop up window available from the small map as well. (DwellerBenthos)
+
+TOOLBAR:
+- Position limits for UI elements, so that the icon never leaves the screen, and maps (big&small) always have a piece of their title-bar in reach (mind the KSP UI itself!).
+
+
+MINE:
+
+- detect strongly localized biomes and indicate on map (e.g. craters, badlands)
+- cache bigmap height values?
+- zoom box should only work if the area can be seen from a relevant sensor in orbit
+- optionally display ground track for moons that have an active sensor in orbit?
+- kill time warp at critical altitudes if altimetry sensor on board, OR within view of enough satellites
+- zoom box wonky at poles (ground track)
+- find that one exception that must be printed somewhere (might not be SCANsat after all...)
+
+
+OTHERS:
+- I cant get the instrument window to show up anymore, debug log doesnt mention anything out of order, i just click the button but no dice. I tried with many already flying ships, along with new ones. (Thourion)
+- overlaying the planets in the stock map view with your generated images, showing them as a solid colour if they haven't been mapped? (pizzaoverhead)
+- Would be nice one day to be able to zoom in on a particular grid and have a small 3d window preview that you can rotate around to get a real sense of a place to land (sirkut)
+- configurable raw data export (drtedastro) http://forum.kerbalspaceprogram.com/threads/55832-PLUGIN-PARTS-WIP-SCANsat-terrain-mapping?p=746489&viewfull=1#post746489
+- I know that it's common in flight sims to have some kind of mapping app that takes data output from the sim to plot your location, like a GPS map. (DMagic)
+- Is there a way to adjust the "sea level". My wife likes a pink Mun, but I'd like to tone it down a bit. (DarthJazno)
+
+
+- Are you sure button for Forget Map (Geschosskopf)
+- an "inverted" display of sorts? Not as in inverted colors, but a map that greys out mapped areas while making non-mapped areas some other (preferably bright) color. (Hremsfeld)
+
+
+
+See this for fixing Multispectral hard-to-fixness:
+
+http://forum.kerbalspaceprogram.com/threads/55832-PLUGIN-PARTS-0-23-SCANsat-terrain-mapping?p=1105732&viewfull=1#post1105732
