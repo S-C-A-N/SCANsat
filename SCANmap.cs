@@ -277,13 +277,13 @@ namespace SCANsat
 		protected double[] mapline; // all refs are below
 		internal CelestialBody body; // all refs are below
 		protected Color[] redline; // all refs are below
-        internal int lastGridSelection = SCANcontroller.controller.gridSelection;
-        private Color gridFull = SCANcontroller.controller.gridColor(SCANcontroller.controller.ResourcesList[SCANcontroller.controller.gridSelection], 0); // resource colors
-        private Color gridEmpty = SCANcontroller.controller.gridColor(SCANcontroller.controller.ResourcesList[SCANcontroller.controller.gridSelection], 1);
-        private SCANdata.SCANResourceType overlayType = SCANcontroller.controller.OverlayResourceType(SCANcontroller.controller.ResourcesList[SCANcontroller.controller.gridSelection]); //resource type, determined by selection in settings menu
-        private double ORSScalar = SCANcontroller.controller.ORSScalar(SCANcontroller.controller.ResourcesList[SCANcontroller.controller.gridSelection]);
-        private double ORSMultiplier = SCANcontroller.controller.ORSMultiplier(SCANcontroller.controller.ResourcesList[SCANcontroller.controller.gridSelection]);
-        private string resource = SCANcontroller.controller.ResourcesList[SCANcontroller.controller.gridSelection]; //name of the currently selected resource
+        //internal int lastGridSelection; // = SCANcontroller.controller.gridSelection;
+        private Color gridFull; // = SCANcontroller.controller.gridColor(SCANcontroller.controller.ResourcesList[SCANcontroller.controller.gridSelection], 0); // resource colors
+        private Color gridEmpty; // = SCANcontroller.controller.gridColor(SCANcontroller.controller.ResourcesList[SCANcontroller.controller.gridSelection], 1);
+        private SCANdata.SCANResourceType overlayType; // = SCANcontroller.controller.OverlayResourceType(SCANcontroller.controller.ResourcesList[SCANcontroller.controller.gridSelection]); //resource type, determined by selection in settings menu
+        private double ORSScalar; // = SCANcontroller.controller.ORSScalar(SCANcontroller.controller.ResourcesList[SCANcontroller.controller.gridSelection], body);
+        private double ORSMultiplier; // = SCANcontroller.controller.ORSMultiplier(SCANcontroller.controller.ResourcesList[SCANcontroller.controller.gridSelection]);
+        private string resource; // = SCANcontroller.controller.ResourcesList[SCANcontroller.controller.gridSelection]; //name of the currently selected resource
 
 		/* MAP: nearly trivial functions */
 		public void setBody ( CelestialBody b ) {
@@ -300,25 +300,42 @@ namespace SCANsat
 		public void resetMap () {
 			mapstep = 0;
 			mapsaved = false;
+            if (SCANcontroller.controller.globalOverlay) {
+                overlayType = SCANcontroller.controller.OverlayResourceType(resource); //current resource selection
+                gridFull = SCANcontroller.controller.gridColor(resource, 0); //grab the proper color for the selected resource
+                gridEmpty = SCANcontroller.controller.gridColor(resource, 1); //grab the empty color value
+                //lastGridSelection = SCANcontroller.controller.gridSelection; //watching for change to selected resource
+                if (SCANcontroller.controller.resourceOverlayType == 0) //ORS resource multipliers
+                {
+                    ORSScalar = SCANcontroller.controller.ORSScalar(resource, body);
+                    ORSMultiplier = SCANcontroller.controller.ORSMultiplier(resource, body);
+                }
+            }
 		}
 		public void resetMap ( int mode, int maptype ) {
 			mapmode = mode;
             	mapType = maptype;
-                if (SCANcontroller.controller.globalOverlay)
-                {
-                    resource = SCANcontroller.controller.ResourcesList[SCANcontroller.controller.gridSelection]; //grab resource name
-                    overlayType = SCANcontroller.controller.OverlayResourceType(resource); //current resource selection
-                    gridFull = SCANcontroller.controller.gridColor(resource, 0); //grab the proper color for the selected resource
-                    gridEmpty = SCANcontroller.controller.gridColor(resource, 1); //grab the empty color value
-                    lastGridSelection = SCANcontroller.controller.gridSelection; //watching for change to selected resource
-                    if (SCANcontroller.controller.resourceOverlayType == 0) //ORS resource multipliers
-                    {
-                        ORSScalar = SCANcontroller.controller.ORSScalar(resource);
-                        ORSMultiplier = SCANcontroller.controller.ORSMultiplier(resource);
-                    }
-                }
+                //if (SCANcontroller.controller.globalOverlay)
+                //{
+                //    resource = SCANcontroller.controller.ResourcesList[SCANcontroller.controller.gridSelection]; //grab resource name
+                //    overlayType = SCANcontroller.controller.OverlayResourceType(resource); //current resource selection
+                //    gridFull = SCANcontroller.controller.gridColor(resource, 0); //grab the proper color for the selected resource
+                //    gridEmpty = SCANcontroller.controller.gridColor(resource, 1); //grab the empty color value
+                //    lastGridSelection = SCANcontroller.controller.gridSelection; //watching for change to selected resource
+                //    if (SCANcontroller.controller.resourceOverlayType == 0) //ORS resource multipliers
+                //    {
+                //        ORSScalar = SCANcontroller.controller.ORSScalar(resource, body);
+                //        ORSMultiplier = SCANcontroller.controller.ORSMultiplier(resource);
+                //    }
+                //}
                 resetMap ();
 		}
+        public void setResource (string s) {
+            if (resource == s)
+                return;
+            resource = SCANcontroller.controller.ResourcesList[SCANcontroller.controller.gridSelection];
+            resetMap();
+        }
 
 		/* MAP: export: PNG file */
 		public void exportPNG () {
@@ -444,7 +461,7 @@ namespace SCANsat
                             }
                         }
                     }
-                    if (SCANcontroller.controller.map_ResourceOverlay) //no support for kethane resources yet
+                    if (SCANcontroller.controller.map_ResourceOverlay && SCANcontroller.controller.globalOverlay) //no support for kethane resources yet
                     {
                         //int ilon = data.icLON(lon) - 180;
                         //int ilat = data.icLAT(lat) - 90;
@@ -456,8 +473,8 @@ namespace SCANsat
                                 double scalar = ORSMultiplier * ORSScalar;
                                 if (amount > scalar)
                                 {
-                                    if (amount > 100 * scalar) amount = 100 * scalar; //max cutoff value
-                                    pix[i] = Color.Lerp(baseColor, gridFull, (float)(amount) / (float)(100 * scalar)); //vary color by resource amount
+                                    if (amount > 50 * scalar) amount = 50 * scalar; //max cutoff value
+                                    pix[i] = Color.Lerp(baseColor, gridFull, (float)(amount) / (float)(50 * scalar)); //vary color by resource amount
                                 }
                                 else pix[i] = baseColor;
                             }
@@ -539,7 +556,7 @@ namespace SCANsat
                         }
                         mapline[i] = val;
                     }
-                    if (SCANcontroller.controller.map_ResourceOverlay) //no support for kethane resources yet
+                    if (SCANcontroller.controller.map_ResourceOverlay && SCANcontroller.controller.globalOverlay) //no support for kethane resources yet
                     {
                         //int ilon = data.icLON(lon) - 180;
                         //int ilat = data.icLAT(lat) - 90;
@@ -551,8 +568,8 @@ namespace SCANsat
                                 double scalar = ORSMultiplier * ORSScalar;
                                 if (amount > scalar)
                                 {
-                                    if (amount > 100 * scalar) amount = 100 * scalar; //max cutoff value
-                                    pix[i] = Color.Lerp(baseColor, gridFull, (float)(amount) / (float)(100 * scalar)); //vary color by resource amount
+                                    if (amount > 50 * scalar) amount = 50 * scalar; //max cutoff value
+                                    pix[i] = Color.Lerp(baseColor, gridFull, (float)(amount) / (float)(50 * scalar)); //vary color by resource amount
                                 }
                                 else pix[i] = baseColor;
                             }
@@ -637,7 +654,7 @@ namespace SCANsat
                         baseColor = biome;
                         mapline[i] = bio;
                     }
-                    if (SCANcontroller.controller.map_ResourceOverlay) //no support for kethane resources yet
+                    if (SCANcontroller.controller.map_ResourceOverlay && SCANcontroller.controller.globalOverlay) //no support for kethane resources yet
                     {
                         //int ilon = data.icLON(lon) - 180;
                         //int ilat = data.icLAT(lat) - 90;
@@ -649,8 +666,8 @@ namespace SCANsat
                                 double scalar = ORSMultiplier * ORSScalar;
                                 if (amount > scalar)
                                 {
-                                    if (amount > 100 * scalar) amount = 100 * scalar; //max cutoff value
-                                    pix[i] = Color.Lerp(baseColor, gridFull, (float)(amount) / (float)(100 * scalar)); //vary color by resource amount
+                                    if (amount > 50 * scalar) amount = 50 * scalar; //max cutoff value
+                                    pix[i] = Color.Lerp(baseColor, gridFull, (float)(amount) / (float)(50 * scalar)); //vary color by resource amount
                                 }
                                 else pix[i] = baseColor;
                             }
