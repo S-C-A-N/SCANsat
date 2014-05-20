@@ -12,6 +12,7 @@ using System;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
 using UnityEngine;
+using OpenResourceSystem;
 
 namespace SCANsat
 {
@@ -25,8 +26,9 @@ namespace SCANsat
 
 		/* MAP: state */
 		internal byte[,] coverage = new byte[360 , 180];
-        internal byte[,] resourceCoverage = new byte[360, 180]; //Secondary coverage map for resources
+        public byte[,] resourceCoverage = new byte[360, 180]; //Secondary coverage map for resources
 		protected float[,] heightmap = new float[360 , 180];
+        public float[,] kethanemap = new float[360, 180]; //Store kethane cell data in here
 		public CelestialBody body;
 		public Texture2D map_small = new Texture2D (360 , 180 , TextureFormat.RGB24 , false);
 		public bool disabled;
@@ -149,6 +151,19 @@ namespace SCANsat
 				return "unknown";
 			return a.name;
 		}
+
+        /* DATA: resources */ //May as well put this in with the other data generating methods instead of in SCANmap
+        public double ORSOverlay(double lon, double lat, int i, string s) //Uses ORS methods to grab the resource amount given a lat and long
+        {
+            double amount = 0f;
+            ORSPlanetaryResourcePixel overlayPixel = ORSPlanetaryResourceMapData.getResourceAvailability(i, s, lat, lon);
+            amount = overlayPixel.getAmount() * 1000000; //values in ppm
+            return amount;
+        }
+
+        public void KethaneOverlay() //Needs to be filled in
+        {
+        }
 
 		/* DATA: coverage */
 		public int[] coverage_count = new int[8];
