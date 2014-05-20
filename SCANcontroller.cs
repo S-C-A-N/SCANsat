@@ -262,7 +262,7 @@ namespace SCANsat
             return gridcolor;
         }
 
-        internal double ORSScalar(string s)
+        internal double ORSScalar(string s, CelestialBody b)
         {
             double scalar = 1f;
             foreach (ConfigNode node in GameDatabase.Instance.GetConfigNodes("PLANETARY_RESOURCE_DEFINITION"))
@@ -270,7 +270,8 @@ namespace SCANsat
                 if (node != null)
                 {
                     string resourceName = node.GetValue("name");
-                    if (resourceName == s)
+                    string bodyName = node.GetValue("celestialBodyName");
+                    if (resourceName == s && bodyName == b.name)
                     {
                         if (double.TryParse(node.GetValue("scaleFactor"), out scalar)) return scalar;
                     }
@@ -279,7 +280,7 @@ namespace SCANsat
             return scalar;
         }
 
-        internal double ORSMultiplier(string s)
+        internal double ORSMultiplier(string s, CelestialBody b)
         {
             double mult = 1f;
             foreach (ConfigNode node in GameDatabase.Instance.GetConfigNodes("PLANETARY_RESOURCE_DEFINITION"))
@@ -287,7 +288,8 @@ namespace SCANsat
                 if (node != null)
                 {
                     string resourceName = node.GetValue("name");
-                    if (resourceName == s)
+                    string bodyName = node.GetValue("celestialBodyName");
+                    if (resourceName == s && bodyName == b.name)
                     {
                         if (double.TryParse(node.GetValue("scaleMultiplier"), out mult)) return mult;
                     }
