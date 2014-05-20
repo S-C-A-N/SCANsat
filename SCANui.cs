@@ -714,7 +714,10 @@ namespace SCANsat
             }
             GUILayout.EndHorizontal();
 
-            if (noResources) GUILayout.Label("No Resources Detected", style_headline);
+            if (noResources) {
+                GUILayout.Space (5);
+                GUILayout.Label("No Resources Found", style_headline);
+            }
             SCANcontroller.controller.gridSelection = GUILayout.SelectionGrid(SCANcontroller.controller.gridSelection, SCANcontroller.controller.ResourcesList.ToArray(), 4); //select resource to display
 
 			// background scanning
@@ -761,11 +764,11 @@ namespace SCANsat
 			GUILayout.Space (16);
 			GUILayout.Label ("Data Management" , style_headline);
 			GUILayout.BeginHorizontal ();
-			if (GUILayout.Button ("Reset map of " + FlightGlobals.currentMainBody.theName)) {
+			if (GUILayout.Button ("Reset map of " + FlightGlobals.currentMainBody.theName, style_button)) {
 				SCANdata data = SCANcontroller.controller.getData (FlightGlobals.currentMainBody);
 				data.reset ();
 			}
-            if (GUILayout.Button ("Reset resource maps of " + FlightGlobals.currentMainBody.theName)) {
+            if (GUILayout.Button ("Reset resource maps of " + FlightGlobals.currentMainBody.theName, style_button)) {
                 SCANdata data = SCANcontroller.controller.getData (FlightGlobals.currentMainBody);
                 data.resetResource ();
                 bigmap.resetMap ();
@@ -773,12 +776,12 @@ namespace SCANsat
             GUILayout.EndHorizontal ();
 
             GUILayout.BeginHorizontal ();
-			if (GUILayout.Button ("Reset <b>all</b> data")) {
+			if (GUILayout.Button ("Reset <b>all</b> data", style_button)) {
 				foreach (SCANdata data in SCANcontroller.controller.body_data.Values) {
 					data.reset ();
 				}
 			}
-            if (GUILayout.Button ("Reset <b>all</b> resource maps")) {
+            if (GUILayout.Button ("Reset <b>all</b> resource maps", style_button)) {
                 foreach (SCANdata data in SCANcontroller.controller.body_data.Values) {
                     data.resetResource ();
                 }
@@ -1416,7 +1419,7 @@ namespace SCANsat
                     {
                         if (SCANcontroller.controller.resourceOverlayType == 0) {
                         CelestialBody body = bigmap.body;
-                        info += colored(XKCDColors.Magenta, "\n<b>" + SCANcontroller.controller.ResourcesList[SCANcontroller.controller.gridSelection] + ": " + bigmap.ORSOverlay(mlon, mlat, body.flightGlobalsIndex, SCANcontroller.controller.ResourcesList[SCANcontroller.controller.gridSelection]).ToString("N1") + " ppm</b>");
+                        info += colored(XKCDColors.Magenta, "\n<b>" + SCANcontroller.controller.ResourcesList[SCANcontroller.controller.gridSelection] + ": " + data.ORSOverlay(mlon, mlat, body.flightGlobalsIndex, SCANcontroller.controller.ResourcesList[SCANcontroller.controller.gridSelection]).ToString("N1") + " ppm</b>");
                         }
                     }
 				} else {
@@ -1440,7 +1443,7 @@ namespace SCANsat
 
 			if (spotmap != null) {
 				spotmap.setBody (vessel.mainBody);
-                if (SCANcontroller.controller.globalOverlay)
+                if (SCANcontroller.controller.globalOverlay) //make sure resources show up in zoom map
                     spotmap.setResource(SCANcontroller.controller.ResourcesList[SCANcontroller.controller.gridSelection]);
 				GUI.Box (pos_spotmap , spotmap.getPartialMap ());
 				if (!notMappingToday) {
@@ -1477,8 +1480,6 @@ namespace SCANsat
 								spotmap.mapscale = 10;
 							}
 							spotmap.centerAround (mlon , mlat);
-                            //if (SCANcontroller.controller.globalOverlay)
-                            //    spotmap.setResource (SCANcontroller.controller.ResourcesList[SCANcontroller.controller.gridSelection]);
 							spotmap.resetMap (bigmap.mapmode, 1);
 							pos_spotmap.width = 180;
 							pos_spotmap.height = 180;
@@ -1696,7 +1697,7 @@ namespace SCANsat
 					SCANcontroller.controller.map_y = (int)pos_bigmap.y;
 				}
 				bigmap.setBody (vessel.mainBody);
-                if (SCANcontroller.controller.globalOverlay)
+                if (SCANcontroller.controller.globalOverlay) //Update selected resource
                     bigmap.setResource (SCANcontroller.controller.ResourcesList[SCANcontroller.controller.gridSelection]);
 				string rendering = "";
 				if (bigmap_dragging)
