@@ -1440,6 +1440,8 @@ namespace SCANsat
 
 			if (spotmap != null) {
 				spotmap.setBody (vessel.mainBody);
+                if (SCANcontroller.controller.globalOverlay)
+                    spotmap.setResource(SCANcontroller.controller.ResourcesList[SCANcontroller.controller.gridSelection]);
 				GUI.Box (pos_spotmap , spotmap.getPartialMap ());
 				if (!notMappingToday) {
 					drawOrbit (pos_spotmap , spotmap , vessel);
@@ -1475,8 +1477,8 @@ namespace SCANsat
 								spotmap.mapscale = 10;
 							}
 							spotmap.centerAround (mlon , mlat);
-                            if (SCANcontroller.controller.globalOverlay)
-                                spotmap.setResource (SCANcontroller.controller.ResourcesList[SCANcontroller.controller.gridSelection]);
+                            //if (SCANcontroller.controller.globalOverlay)
+                            //    spotmap.setResource (SCANcontroller.controller.ResourcesList[SCANcontroller.controller.gridSelection]);
 							spotmap.resetMap (bigmap.mapmode, 1);
 							pos_spotmap.width = 180;
 							pos_spotmap.height = 180;
