@@ -171,7 +171,7 @@ namespace SCANsat
 			public double lastUT;
 		}
         
-        internal List<string> ResourcesList = new List<string>(); //The list of all relevant resource names
+        public List<string> ResourcesList = new List<string>(); //The list of all relevant resource names
         
         internal void OverlayResources() //Grab the resource name out of the relevant config node
         {
@@ -194,14 +194,14 @@ namespace SCANsat
                     if (node != null)
                     {
                         string resourceName = node.GetValue("Resource");
-                        ResourcesList.Add(resourceName);
+                        if (!ResourcesList.Contains(resourceName)) ResourcesList.Add(resourceName); //Just in case there are also Kethane duplicates
                     }
                 }
             }
         }
 
         
-        internal SCANdata.SCANResourceType OverlayResourceType(string s) //Assign the proper resource type depending on the selection in the settings menu
+        public SCANdata.SCANResourceType OverlayResourceType(string s) //Assign the proper resource type depending on the selection in the settings menu
         {
             if (resourceOverlayType == 0) {
                 switch(s)
@@ -230,7 +230,7 @@ namespace SCANsat
             return SCANdata.SCANResourceType.Nothing;
         }
 
-        internal Color gridColor(string resource, int full) //Get the resource color
+        internal Color gridColor(string resource, int i) //Get the resource color
         {
             Color gridcolor = Color.white;
             if (resourceOverlayType == 0) //ORS resources might need to be manually set
@@ -245,12 +245,12 @@ namespace SCANsat
                     {
                         if (node.GetValue("Resource") == resource)
                         {
-                            if (full == 0)
+                            if (i == 0)
                             {
                                 var color = node.GetValue("ColorFull");
                                 gridcolor = ConfigNode.ParseColor(color);
                             }
-                            else if (full == 1)
+                            else if (i == 1)
                             {
                                 var color = node.GetValue("ColorEmpty");
                                 gridcolor = ConfigNode.ParseColor(color);
