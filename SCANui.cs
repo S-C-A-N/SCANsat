@@ -43,6 +43,7 @@ namespace SCANsat
 		private static GUIStyle style_toggle;
 		private static GUIStyle style_overlay;
 		private static Font dotty;
+        private static bool noResources = false;
 
 		/* UI: Colors and color information */
 		/* FIXME: move to PALETTE */
@@ -674,19 +675,27 @@ namespace SCANsat
             // resources overlay
             GUILayout.Space(16);
             GUILayout.Label("Resources Overlay", style_headline);
-            SCANcontroller.controller.globalOverlay = GUILayout.Toggle(SCANcontroller.controller.globalOverlay, "Activate Resource Overlay"); //global toggle for resource overlay
+            if (noResources) SCANcontroller.controller.globalOverlay = false;
+            else if (SCANcontroller.controller.globalOverlay != GUILayout.Toggle(SCANcontroller.controller.globalOverlay, "Activate Resource Overlay")) { //global toggle for resource overlay
+                SCANcontroller.controller.globalOverlay = !SCANcontroller.controller.globalOverlay;
+                bigmap.resetMap();
+            }
             GUILayout.BeginHorizontal();
+
             if (GUILayout.Button("Kethane Resources", style_button)) //select from two resource types, populates the list below
             {
                 SCANcontroller.controller.resourceOverlayType = 1;
                 SCANcontroller.controller.OverlayResources();
                 if (SCANcontroller.controller.ResourcesList.Count == 0)
                 {
-                    GUILayout.EndHorizontal();
-                    GUILayout.Label("No Kethane Resources Detected", style_headline);
+                    noResources = true;
                     SCANcontroller.controller.globalOverlay = false;
                 }
-                else SCANcontroller.controller.globalOverlay = true;
+                else {
+                    SCANcontroller.controller.globalOverlay = true;
+                    noResources = false;
+                }
+                bigmap.resetMap();
             }
             if (GUILayout.Button("Open Resources", style_button))
             {
@@ -694,16 +703,19 @@ namespace SCANsat
                 SCANcontroller.controller.OverlayResources();
                 if (SCANcontroller.controller.ResourcesList.Count == 0)
                 {
-                    GUILayout.EndHorizontal();
-                    GUILayout.Label("No ORS Resources Detected", style_headline);
+                    noResources = true;
                     SCANcontroller.controller.globalOverlay = false;
                 }
-                else SCANcontroller.controller.globalOverlay = true;
+                else {
+                    SCANcontroller.controller.globalOverlay = true;
+                    noResources = false;
+                }
+                bigmap.resetMap();
             }
             GUILayout.EndHorizontal();
-            //GUILayout.BeginHorizontal();
+
+            if (noResources) GUILayout.Label("No Resources Detected", style_headline);
             SCANcontroller.controller.gridSelection = GUILayout.SelectionGrid(SCANcontroller.controller.gridSelection, SCANcontroller.controller.ResourcesList.ToArray(), 4); //select resource to display
-            //GUILayout.EndHorizontal();
 
 			// background scanning
 			GUILayout.Space (16);
@@ -753,11 +765,25 @@ namespace SCANsat
 				SCANdata data = SCANcontroller.controller.getData (FlightGlobals.currentMainBody);
 				data.reset ();
 			}
+            if (GUILayout.Button ("Reset resource maps of " + FlightGlobals.currentMainBody.theName)) {
+                SCANdata data = SCANcontroller.controller.getData (FlightGlobals.currentMainBody);
+                data.resetResource ();
+                bigmap.resetMap ();
+            }
+            GUILayout.EndHorizontal ();
+
+            GUILayout.BeginHorizontal ();
 			if (GUILayout.Button ("Reset <b>all</b> data")) {
 				foreach (SCANdata data in SCANcontroller.controller.body_data.Values) {
 					data.reset ();
 				}
 			}
+            if (GUILayout.Button ("Reset <b>all</b> resource maps")) {
+                foreach (SCANdata data in SCANcontroller.controller.body_data.Values) {
+                    data.resetResource ();
+                }
+                bigmap.resetMap ();
+            }
 			GUILayout.EndHorizontal ();
 			GUILayout.BeginHorizontal ();
 			if (GUILayout.Button ("Reset window positions")) {
@@ -1386,7 +1412,7 @@ namespace SCANsat
 					info += "\n" + toDMS (mlat , mlon) + " (lat: " + mlat.ToString ("F2") + " lon: " + mlon.ToString ("F2") + ") ";
 					if (in_spotmap)
 						info += " " + spotmap.mapscale.ToString ("F1") + "x";
-                    if (SCANcontroller.controller.map_ResourceOverlay) //Adds selected resource amount to big map legend
+                    if (SCANcontroller.controller.map_ResourceOverlay && SCANcontroller.controller.globalOverlay) //Adds selected resource amount to big map legend
                     {
                         if (SCANcontroller.controller.resourceOverlayType == 0) {
                         CelestialBody body = bigmap.body;
@@ -1449,6 +1475,8 @@ namespace SCANsat
 								spotmap.mapscale = 10;
 							}
 							spotmap.centerAround (mlon , mlat);
+                            if (SCANcontroller.controller.globalOverlay)
+                                spotmap.setResource (SCANcontroller.controller.ResourcesList[SCANcontroller.controller.gridSelection]);
 							spotmap.resetMap (bigmap.mapmode, 1);
 							pos_spotmap.width = 180;
 							pos_spotmap.height = 180;
@@ -1666,8 +1694,8 @@ namespace SCANsat
 					SCANcontroller.controller.map_y = (int)pos_bigmap.y;
 				}
 				bigmap.setBody (vessel.mainBody);
-                if (bigmap.lastGridSelection != SCANcontroller.controller.gridSelection) 
-                    bigmap.resetMap(bigmap.mapmode, 1); //Not really sure where to put this
+                if (SCANcontroller.controller.globalOverlay)
+                    bigmap.setResource (SCANcontroller.controller.ResourcesList[SCANcontroller.controller.gridSelection]);
 				string rendering = "";
 				if (bigmap_dragging)
 					rendering += " [" + bigmap_drag_w + "x" + (bigmap_drag_w / 2) + "]";
