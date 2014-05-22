@@ -764,11 +764,11 @@ namespace SCANsat
 			GUILayout.Space (16);
 			GUILayout.Label ("Data Management" , style_headline);
 			GUILayout.BeginHorizontal ();
-			if (GUILayout.Button ("Reset map of " + FlightGlobals.currentMainBody.theName)) {
+			if (GUILayout.Button ("Reset map of " + FlightGlobals.currentMainBody.theName, style_button)) {
 				SCANdata data = SCANcontroller.controller.getData (FlightGlobals.currentMainBody);
 				data.reset ();
 			}
-            if (GUILayout.Button ("Reset resource maps of " + FlightGlobals.currentMainBody.theName)) {
+            if (GUILayout.Button ("Reset resource maps of " + FlightGlobals.currentMainBody.theName, style_button)) {
                 SCANdata data = SCANcontroller.controller.getData (FlightGlobals.currentMainBody);
                 data.resetResource ();
                 bigmap.resetMap ();
@@ -776,12 +776,12 @@ namespace SCANsat
             GUILayout.EndHorizontal ();
 
             GUILayout.BeginHorizontal ();
-			if (GUILayout.Button ("Reset <b>all</b> data")) {
+			if (GUILayout.Button ("Reset <b>all</b> data", style_button)) {
 				foreach (SCANdata data in SCANcontroller.controller.body_data.Values) {
 					data.reset ();
 				}
 			}
-            if (GUILayout.Button ("Reset <b>all</b> resource maps")) {
+            if (GUILayout.Button ("Reset <b>all</b> resource maps", style_button)) {
                 foreach (SCANdata data in SCANcontroller.controller.body_data.Values) {
                     data.resetResource ();
                 }
@@ -1245,13 +1245,7 @@ namespace SCANsat
 			if (GUILayout.Button ("Close")) {
 				bigmap_visible = false;
 			}
-            if (SCANcontroller.controller.resourceOverlayType == 1) { //Rebuild the Kethane database
-                if (GUILayout.Button ("Rebuild Kethane")) {
-                    SCANcontroller.controller.kethaneRebuild = !SCANcontroller.controller.kethaneRebuild;
-                }
-            }
-			else 
-                GUILayout.FlexibleSpace ();
+			GUILayout.FlexibleSpace ();
 			style_button.normal.textColor = Color.grey;
 			if (bigmap.isMapComplete ())
 				style_button.normal.textColor = Color.white;
@@ -1424,15 +1418,8 @@ namespace SCANsat
                     if (SCANcontroller.controller.map_ResourceOverlay && SCANcontroller.controller.globalOverlay) //Adds selected resource amount to big map legend
                     {
                         if (SCANcontroller.controller.resourceOverlayType == 0) {
-                            if (data.isCoveredResource (mlon, mlat, bigmap.overlayType)) {
-                                info += colored(XKCDColors.Magenta, "\n<b>" + bigmap.resource + ": " + data.ORSOverlay(mlon, mlat, bigmap.body.flightGlobalsIndex, bigmap.resource).ToString("N1") + " ppm</b>");
-                            }
-                        } else if (SCANcontroller.controller.resourceOverlayType == 1) {
-                            if (data.isCoveredResource (mlon, mlat, bigmap.overlayType)) {
-                                double amount = data.kethaneValueMap[data.icLON(mlon), data.icLAT(mlat)];
-                                if (amount < 0) amount = 0d;
-                                info += colored(XKCDColors.PukeGreen, "\n<b>" + bigmap.resource + ": " + amount.ToString("N1") + "</b>");
-                            }
+                        CelestialBody body = bigmap.body;
+                        info += colored(XKCDColors.Magenta, "\n<b>" + SCANcontroller.controller.ResourcesList[SCANcontroller.controller.gridSelection] + ": " + data.ORSOverlay(mlon, mlat, body.flightGlobalsIndex, SCANcontroller.controller.ResourcesList[SCANcontroller.controller.gridSelection]).ToString("N1") + " ppm</b>");
                         }
                     }
 				} else {
