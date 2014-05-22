@@ -1383,7 +1383,7 @@ namespace SCANsat
                         {
                             if (data.isCoveredResource(mlon, mlat, bigmap.overlayType))
                             {
-                                info += colored(pallete.Magenta, "\n<b>" + bigmap.resource + ": " + data.ORSOverlay(mlon, mlat, bigmap.body.flightGlobalsIndex, bigmap.resource).ToString("N1") + " ppm</b>");
+                                info += palette.colored(palette.magenta, "\n<b>" + bigmap.resource + ": " + data.ORSOverlay(mlon, mlat, bigmap.body.flightGlobalsIndex, bigmap.resource).ToString("N1") + " ppm</b>");
                             }
                         }
                         else if (SCANcontroller.controller.resourceOverlayType == 1)
@@ -1392,7 +1392,7 @@ namespace SCANsat
                             {
                                 double amount = data.kethaneValueMap[data.icLON(mlon), data.icLAT(mlat)];
                                 if (amount < 0) amount = 0d;
-                                info += colored(palette.PukeGreen, "\n<b>" + bigmap.resource + ": " + amount.ToString("N1") + "</b>");
+                                info += palette.colored(palette.xkcd_PukeGreen, "\n<b>" + bigmap.resource + ": " + amount.ToString("N1") + "</b>");
                             }
                         }
                     }
