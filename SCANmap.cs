@@ -444,7 +444,7 @@ namespace SCANsat
                                 else
                                 {
                                     float max = SCANcontroller.controller.KethaneMax(resource);
-                                    pix[i] = palette.lerp(baseColor, palette.lerp(gridEmpty, gridFull, amount / max), 0.8f);
+                                    pix[i] = palette.lerp(baseColor, palette.lerp(palette.gridEmpty, palette.gridFull, amount / max), 0.8f);
                                 }
                             }
                             else pix[i] = baseColor;
@@ -551,7 +551,7 @@ namespace SCANsat
                                 else
                                 {
                                     float max = SCANcontroller.controller.KethaneMax(resource);
-                                    pix[i] = palette.lerp(baseColor, palette.lerp(gridEmpty, gridFull, amount / max), 0.8f);
+                                    pix[i] = palette.lerp(baseColor, palette.lerp(palette.gridEmpty, palette.gridFull, amount / max), 0.8f);
                                 }
                             }
                             else pix[i] = baseColor;
@@ -661,7 +661,7 @@ namespace SCANsat
                                 else
                                 {
                                     float max = SCANcontroller.controller.KethaneMax(resource);
-                                    pix[i] = palette.lerp(baseColor, palette.lerp(gridEmpty, gridFull, amount / max), 0.8f);
+                                    pix[i] = palette.lerp(baseColor, palette.lerp(palette.gridEmpty, palette.gridFull, amount / max), 0.8f);
                                 }
                             }
                             else pix[i] = baseColor;
