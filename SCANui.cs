@@ -611,9 +611,31 @@ namespace SCANsat
 		/* UI: a window for setting SCANsat settings */
 		public static void gui_settings_build ( int wid ) {
 			GUI.skin = null;
-			GUILayout.BeginVertical ();
-			GUILayout.Space (8);
 
+			GUILayout.BeginVertical ();
+
+			GUILayout.Space (8);
+			gui_settings_xmarks(wid); 				/* X marker selection */
+			GUILayout.Space(16);
+			gui_settings_resources(wid);				/* resource details sub-window */
+			GUILayout.Space (16);
+			gui_settings_toggle_body_scanning(wid);		/* background and body scanning toggles */
+			GUILayout.Space (16);
+			gui_settings_timewarp (wid);				/* time warp resolution settings */
+			GUILayout.Space (8);
+			GUILayout.Label (gui_settings_numbers (wid));/* sensor/scanning statistics */
+			GUILayout.Space (16);
+			gui_settings_data_resets (wid);			/* reset data and/or reset resources */
+			GUILayout.Space (8);
+			gui_settings_window_resets (wid);			/* reset windows and positions */
+			GUILayout.Space (16);
+			if (GUILayout.Button ("Close")) settings_visible = false;	/* close settings */
+
+			GUILayout.EndVertical ();
+			GUI.DragWindow ();
+		}
+		public static void gui_settings_xmarks (int wid) {
+			Color prevColor = style_button.normal.textColor; // FIXME: hack to return style to previous color
 			// anomaly marker & close widget
 			GUILayout.Label ("X Marks" , style_headline);
 			GUILayout.BeginHorizontal ();
@@ -634,84 +656,97 @@ namespace SCANsat
 				GUILayout.EndVertical ();
 			}
 			GUILayout.EndHorizontal ();
+			style_button.normal.textColor = prevColor;
+		}
+		public static void gui_settings_resources (int wid) {
+			GUILayout.Label ("Resources Overlay" , style_headline);
+			// under vertical from above
+			GUILayout.BeginHorizontal ();
+			if (noResources)
+				SCANcontroller.controller.globalOverlay = false;
 
-            // resources overlay
-            GUILayout.Space(16);
-            GUILayout.Label("Resources Overlay", style_headline);
-            if (noResources) SCANcontroller.controller.globalOverlay = false;
-            else if (SCANcontroller.controller.globalOverlay != GUILayout.Toggle(SCANcontroller.controller.globalOverlay, "Activate Resource Overlay")) { //global toggle for resource overlay
-                SCANcontroller.controller.globalOverlay = !SCANcontroller.controller.globalOverlay;
-                bigmap.resetMap();
-            }
-            GUILayout.BeginHorizontal();
+			if (SCANcontroller.controller.globalOverlay != GUILayout.Toggle (SCANcontroller.controller.globalOverlay , "Activate Resource Overlay")) { //global toggle for resource overlay
+				SCANcontroller.controller.globalOverlay = !SCANcontroller.controller.globalOverlay;
+				bigmap.resetMap ();
+			}
+			GUILayout.EndHorizontal ();
+			GUILayout.BeginHorizontal ();
 
-            if (GUILayout.Button("Kethane Resources", style_button)) //select from two resource types, populates the list below
-            {
-                SCANcontroller.controller.resourceOverlayType = 1;
-                SCANcontroller.controller.OverlayResources();
-                if (SCANcontroller.controller.ResourcesList.Count == 0)
-                {
-                    noResources = true;
-                    SCANcontroller.controller.globalOverlay = false;
-                }
-                else {
-                    SCANcontroller.controller.globalOverlay = true;
-                    noResources = false;
-                }
-                bigmap.resetMap();
-            }
-            if (GUILayout.Button("Open Resources", style_button))
-            {
-                SCANcontroller.controller.resourceOverlayType = 0;
-                SCANcontroller.controller.OverlayResources();
-                if (SCANcontroller.controller.ResourcesList.Count == 0)
-                {
-                    noResources = true;
-                    SCANcontroller.controller.globalOverlay = false;
-                }
-                else {
-                    SCANcontroller.controller.globalOverlay = true;
-                    noResources = false;
-                }
-                bigmap.resetMap();
-            }
-            GUILayout.EndHorizontal();
+			if (GUILayout.Button ("Kethane Resources" , style_button)) //select from two resource types, populates the list below
+			{
+				SCANcontroller.controller.resourceOverlayType = 1;
+				SCANcontroller.controller.OverlayResources ();
 
-            if (noResources) {
-                GUILayout.Space (5);
-                GUILayout.Label("No Resources Found", style_headline);
-            }
-            SCANcontroller.controller.gridSelection = GUILayout.SelectionGrid(SCANcontroller.controller.gridSelection, SCANcontroller.controller.ResourcesList.ToArray(), 4); //select resource to display
+				if (SCANcontroller.controller.ResourcesList.Count == 0)
+				{
+					noResources = true;
+					SCANcontroller.controller.globalOverlay = false;
+				} else {
+					SCANcontroller.controller.globalOverlay = true;
+					noResources = false;
+				}
 
-			// background scanning
-			GUILayout.Space (16);
+				bigmap.resetMap ();
+			}
+			if (GUILayout.Button ("Open Resources" , style_button))
+			{
+				SCANcontroller.controller.resourceOverlayType = 0;
+				SCANcontroller.controller.OverlayResources ();
+				if (SCANcontroller.controller.ResourcesList.Count == 0)
+				{
+					noResources = true;
+					SCANcontroller.controller.globalOverlay = false;
+				} else {
+					SCANcontroller.controller.globalOverlay = true;
+					noResources = false;
+				}
+
+				bigmap.resetMap ();
+			}
+
+			if (noResources) {
+				GUILayout.Space (5);
+				GUILayout.Label ("No Resources Found" , style_headline);
+			}
+
+			GUILayout.EndHorizontal();
+			GUILayout.BeginHorizontal ();
+			SCANcontroller.controller.gridSelection = GUILayout.SelectionGrid (SCANcontroller.controller.gridSelection , SCANcontroller.controller.ResourcesList.ToArray () , 4); //select resource to display
+			GUILayout.EndHorizontal ();
+		}
+		public static void gui_settings_toggle_body_scanning (int wid) {
+
 			GUILayout.Label ("Background Scanning" , style_headline);
+			// scan background
 			SCANcontroller.controller.scan_background = GUILayout.Toggle (SCANcontroller.controller.scan_background , "Scan all active celestials");
-
 			// scanning for individual SoIs
 			GUILayout.BeginHorizontal ();
 			int count = 0;
 			foreach (CelestialBody body in FlightGlobals.Bodies) {
-				if (count == 0)
-					GUILayout.BeginVertical ();
+				if (count == 0) GUILayout.BeginVertical ();
 				SCANdata data = SCANcontroller.controller.getData (body);
 				data.disabled = !GUILayout.Toggle (!data.disabled , body.bodyName + " (" + data.getCoveragePercentage (SCANdata.SCANtype.Nothing).ToString ("N1") + "%)");
-				if (count >= 4) {
-					GUILayout.EndVertical ();
-					count = 0;
-				} else {
-					++count;
+				switch (count) {
+					case 4: GUILayout.EndVertical (); count = 0; break;
+					default: ++count; break;
 				}
 			}
 			if (count != 0)
-				GUILayout.EndVertical ();
+			GUILayout.EndVertical ();
 			GUILayout.EndHorizontal ();
 
-			// time warp resolution
-			GUILayout.Space (16);
+		}
+		public static String gui_settings_numbers (int wid) {
+			return	"Sensors: " 	+ SCANcontroller.activeSensors +
+					" Vessels: " 	+ SCANcontroller.activeVessels.ToString () +
+					" Passes: " 	+ SCANcontroller.controller.actualPasses.ToString ();
+		}
+		public static void gui_settings_timewarp (int wid) {
 			GUILayout.Label ("Time Warp Resolution" , style_headline);
 			GUILayout.BeginHorizontal ();
-			for (int i=0; i<twnames.Length; ++i) {
+			Color prevColor = style_button.normal.textColor;
+
+			for (int i=0; i < twnames.Length; ++i) {
 				style_button.normal.textColor = palette.white;
 				if (SCANcontroller.controller.timeWarpResolution == twvals [i])
 					style_button.normal.textColor = palette.c_good;
@@ -719,38 +754,44 @@ namespace SCANsat
 					SCANcontroller.controller.timeWarpResolution = twvals [i];
 				}
 			}
-			GUILayout.EndHorizontal ();
-			string txt = "Sensors: " + SCANcontroller.activeSensors.ToString () + " Vessels: " + SCANcontroller.activeVessels.ToString () + " Passes: " + SCANcontroller.controller.actualPasses.ToString ();
-			GUILayout.Label (txt);
+			style_button.normal.textColor = prevColor;
 
-			// data management
-			GUILayout.Space (16);
+			GUILayout.EndHorizontal ();
+		}
+		public static void gui_settings_data_resets (int wid) {
+			CelestialBody thisBody = FlightGlobals.currentMainBody;
+
 			GUILayout.Label ("Data Management" , style_headline);
+
 			GUILayout.BeginHorizontal ();
-			if (GUILayout.Button ("Reset map of " + FlightGlobals.currentMainBody.theName, style_button)) {
-				SCANdata data = SCANcontroller.controller.getData (FlightGlobals.currentMainBody);
+
+			if (GUILayout.Button ("Reset map of " + thisBody.theName, style_button)) {
+				SCANdata data = SCANcontroller.controller.getData (thisBody);
 				data.reset ();
 			}
-            if (GUILayout.Button ("Reset resource maps of " + FlightGlobals.currentMainBody.theName, style_button)) {
-                SCANdata data = SCANcontroller.controller.getData (FlightGlobals.currentMainBody);
-                data.resetResource ();
-                bigmap.resetMap ();
-            }
-            GUILayout.EndHorizontal ();
+			if (GUILayout.Button ("Reset resource maps of " + thisBody.theName , style_button)) {
+				SCANdata data = SCANcontroller.controller.getData (thisBody);
+				data.resetResource ();
+				bigmap.resetMap ();	// this should be named redrawMap, right? or something?
+			}
 
-            GUILayout.BeginHorizontal ();
+			GUILayout.EndHorizontal ();
+			GUILayout.BeginHorizontal ();
+
 			if (GUILayout.Button ("Reset <b>all</b> data", style_button)) {
 				foreach (SCANdata data in SCANcontroller.controller.body_data.Values) {
 					data.reset ();
 				}
 			}
-            if (GUILayout.Button ("Reset <b>all</b> resource maps", style_button)) {
-                foreach (SCANdata data in SCANcontroller.controller.body_data.Values) {
-                    data.resetResource ();
-                }
-                bigmap.resetMap ();
-            }
+			if (GUILayout.Button ("Reset <b>all</b> resource maps" , style_button)) {
+				foreach (SCANdata data in SCANcontroller.controller.body_data.Values) {
+					data.resetResource ();
+				}
+				bigmap.resetMap ();
+			}
 			GUILayout.EndHorizontal ();
+		}
+		public static void gui_settings_window_resets (int wid) {
 			GUILayout.BeginHorizontal ();
 			if (GUILayout.Button ("Reset window positions")) {
 				pos_bigmap.x = 0;
@@ -764,15 +805,8 @@ namespace SCANsat
 				pos_instruments.y = 0;
 			}
 			GUILayout.EndHorizontal ();
-
-			GUILayout.Space (16);
-			if (GUILayout.Button ("Close")) {
-				settings_visible = false;
-			}
-			GUILayout.EndVertical ();
-			GUI.DragWindow ();
 		}
-
+		
 		/* UI: This probably should not be out here. Did I do this? -- tg */
 		static double startUT;
 
