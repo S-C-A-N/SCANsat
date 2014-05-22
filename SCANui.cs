@@ -727,11 +727,11 @@ namespace SCANsat
 			GUILayout.Space (16);
 			GUILayout.Label ("Data Management" , style_headline);
 			GUILayout.BeginHorizontal ();
-			if (GUILayout.Button ("Reset map of " + FlightGlobals.currentMainBody.theName, style_button)) {
+			if (GUILayout.Button ("Reset map of " + FlightGlobals.currentMainBody.theName)) {
 				SCANdata data = SCANcontroller.controller.getData (FlightGlobals.currentMainBody);
 				data.reset ();
 			}
-            if (GUILayout.Button ("Reset resource maps of " + FlightGlobals.currentMainBody.theName, style_button)) {
+            if (GUILayout.Button ("Reset resource maps of " + FlightGlobals.currentMainBody.theName)) {
                 SCANdata data = SCANcontroller.controller.getData (FlightGlobals.currentMainBody);
                 data.resetResource ();
                 bigmap.resetMap ();
@@ -739,12 +739,12 @@ namespace SCANsat
             GUILayout.EndHorizontal ();
 
             GUILayout.BeginHorizontal ();
-			if (GUILayout.Button ("Reset <b>all</b> data", style_button)) {
+			if (GUILayout.Button ("Reset <b>all</b> data")) {
 				foreach (SCANdata data in SCANcontroller.controller.body_data.Values) {
 					data.reset ();
 				}
 			}
-            if (GUILayout.Button ("Reset <b>all</b> resource maps", style_button)) {
+            if (GUILayout.Button ("Reset <b>all</b> resource maps")) {
                 foreach (SCANdata data in SCANcontroller.controller.body_data.Values) {
                     data.resetResource ();
                 }
@@ -1199,7 +1199,15 @@ namespace SCANsat
 			if (GUILayout.Button ("Close")) {
 				bigmap_visible = false;
 			}
-			GUILayout.FlexibleSpace ();
+            if (SCANcontroller.controller.resourceOverlayType == 1)
+            { //Rebuild the Kethane database
+                if (GUILayout.Button("Rebuild Kethane"))
+                {
+                    SCANcontroller.controller.kethaneRebuild = !SCANcontroller.controller.kethaneRebuild;
+                }
+            }
+            else
+                GUILayout.FlexibleSpace();
 			style_button.normal.textColor = palette.grey;
 			if (bigmap.isMapComplete ())
 				style_button.normal.textColor = palette.white;
@@ -1371,9 +1379,21 @@ namespace SCANsat
 						info += " " + spotmap.mapscale.ToString ("F1") + "x";
                     if (SCANcontroller.controller.map_ResourceOverlay && SCANcontroller.controller.globalOverlay) //Adds selected resource amount to big map legend
                     {
-                        if (SCANcontroller.controller.resourceOverlayType == 0) {
-                        CelestialBody body = bigmap.body;
-                        info += palette.colored(palette.xkcd_Magenta, "\n<b>" + SCANcontroller.controller.ResourcesList[SCANcontroller.controller.gridSelection] + ": " + data.ORSOverlay(mlon, mlat, body.flightGlobalsIndex, SCANcontroller.controller.ResourcesList[SCANcontroller.controller.gridSelection]).ToString("N1") + " ppm</b>");
+                        if (SCANcontroller.controller.resourceOverlayType == 0)
+                        {
+                            if (data.isCoveredResource(mlon, mlat, bigmap.overlayType))
+                            {
+                                info += colored(pallete.Magenta, "\n<b>" + bigmap.resource + ": " + data.ORSOverlay(mlon, mlat, bigmap.body.flightGlobalsIndex, bigmap.resource).ToString("N1") + " ppm</b>");
+                            }
+                        }
+                        else if (SCANcontroller.controller.resourceOverlayType == 1)
+                        {
+                            if (data.isCoveredResource(mlon, mlat, bigmap.overlayType))
+                            {
+                                double amount = data.kethaneValueMap[data.icLON(mlon), data.icLAT(mlat)];
+                                if (amount < 0) amount = 0d;
+                                info += colored(palette.PukeGreen, "\n<b>" + bigmap.resource + ": " + amount.ToString("N1") + "</b>");
+                            }
                         }
                     }
 				} else {
