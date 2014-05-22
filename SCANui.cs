@@ -43,7 +43,7 @@ namespace SCANsat
 		private static GUIStyle style_toggle;
 		private static GUIStyle style_overlay;
 		private static Font dotty;
-        private static bool noResources = false;
+        internal static bool noResources = false;
 
 		/* UI: Colors and color information */
 		/* FIXME: move to PALETTE */
@@ -692,6 +692,8 @@ namespace SCANsat
                     SCANcontroller.controller.globalOverlay = false;
                 }
                 else {
+                    SCANcontroller.controller.gridSelection = 0;
+                    SCANcontroller.controller.map_ResourceOverlay = false;
                     SCANcontroller.controller.globalOverlay = true;
                     noResources = false;
                 }
@@ -707,6 +709,7 @@ namespace SCANsat
                     SCANcontroller.controller.globalOverlay = false;
                 }
                 else {
+                    SCANcontroller.controller.gridSelection = 0;
                     SCANcontroller.controller.globalOverlay = true;
                     noResources = false;
                 }
@@ -764,11 +767,11 @@ namespace SCANsat
 			GUILayout.Space (16);
 			GUILayout.Label ("Data Management" , style_headline);
 			GUILayout.BeginHorizontal ();
-			if (GUILayout.Button ("Reset map of " + FlightGlobals.currentMainBody.theName, style_button)) {
+			if (GUILayout.Button ("Reset map of " + FlightGlobals.currentMainBody.theName)) {
 				SCANdata data = SCANcontroller.controller.getData (FlightGlobals.currentMainBody);
 				data.reset ();
 			}
-            if (GUILayout.Button ("Reset resource maps of " + FlightGlobals.currentMainBody.theName, style_button)) {
+            if (GUILayout.Button ("Reset resource maps of " + FlightGlobals.currentMainBody.theName)) {
                 SCANdata data = SCANcontroller.controller.getData (FlightGlobals.currentMainBody);
                 data.resetResource ();
                 bigmap.resetMap ();
@@ -776,12 +779,12 @@ namespace SCANsat
             GUILayout.EndHorizontal ();
 
             GUILayout.BeginHorizontal ();
-			if (GUILayout.Button ("Reset <b>all</b> data", style_button)) {
+			if (GUILayout.Button ("Reset <b>all</b> data")) {
 				foreach (SCANdata data in SCANcontroller.controller.body_data.Values) {
 					data.reset ();
 				}
 			}
-            if (GUILayout.Button ("Reset <b>all</b> resource maps", style_button)) {
+            if (GUILayout.Button ("Reset <b>all</b> resource maps")) {
                 foreach (SCANdata data in SCANcontroller.controller.body_data.Values) {
                     data.resetResource ();
                 }
