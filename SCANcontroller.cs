@@ -172,9 +172,6 @@ namespace SCANsat
 		}
         
         public List<string> ResourcesList = new List<string>(); //The list of all relevant resource names
-        public bool kethaneRebuild = false;
-        public bool kethaneReset = false;
-        public bool kethaneBusy = false;
         
         internal void OverlayResources() //Grab the resource name out of the relevant config node
         {
@@ -216,7 +213,6 @@ namespace SCANsat
                     case "Ore": return SCANdata.SCANResourceType.ORS_5;
                     case "Minerals": return SCANdata.SCANResourceType.ORS_6;
                     case "Substrate": return SCANdata.SCANResourceType.ORS_7;
-                    case "KEEZO": return SCANdata.SCANResourceType.ORS_8;
                     default: return SCANdata.SCANResourceType.Nothing;
                 }
             }
@@ -264,26 +260,6 @@ namespace SCANsat
                 }
             }
             return gridcolor;
-        }
-
-        internal float KethaneMax (string s)
-        {
-            float max = 1000000f; //Just a reasonably sounding max resource/deposit amount
-            foreach (ConfigNode node in GameDatabase.Instance.GetConfigNodes("KethaneResource"))
-            {
-                if (node != null)
-                {
-                    if (node.GetValue("Resource") == s)
-                    {
-                        ConfigNode subNode = node.GetNode("Generator");
-                        if (subNode != null)
-                        {
-                            if (float.TryParse(subNode.GetValue("MaxQuantity"), out max)) return max;
-                        }
-                    }
-                }
-            }
-            return max;
         }
 
         internal double ORSScalar(string s, CelestialBody b)
