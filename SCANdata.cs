@@ -28,7 +28,7 @@ namespace SCANsat
 		internal byte[,] coverage = new byte[360 , 180];
         public byte[,] resourceCoverage = new byte[360, 180]; //Secondary coverage map for resources
 		protected float[,] heightmap = new float[360 , 180];
-        public float[,] kethanemap = new float[360, 180]; //Store kethane cell data in here
+        public float[,] kethaneValueMap = new float[360, 180]; //Store kethane cell data in here
 		public CelestialBody body;
 		public Texture2D map_small = new Texture2D (360 , 180 , TextureFormat.RGB24 , false);
 		public bool disabled;
@@ -68,7 +68,7 @@ namespace SCANsat
             ORS_5 = 25, //Ore - MKS
             ORS_6 = 26, //Minerals - MKS
             ORS_7 = 27, //Substrate - MKS
-            ORS_8 = 28,
+            ORS_8 = 28, //KEEZO - Tessai, unreleased
             ORS_9 = 29,
             ORS_10 = 30
         }
@@ -159,10 +159,6 @@ namespace SCANsat
             ORSPlanetaryResourcePixel overlayPixel = ORSPlanetaryResourceMapData.getResourceAvailability(i, s, lat, lon);
             amount = overlayPixel.getAmount() * 1000000; //values in ppm
             return amount;
-        }
-
-        public void KethaneOverlay() //Needs to be filled in
-        {
         }
 
 		/* DATA: coverage */
