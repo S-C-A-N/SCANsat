@@ -278,10 +278,10 @@ namespace SCANsat
 		protected Color[] redline; // all refs are below
         private Color gridFull; // resource colors
         private Color gridEmpty; //empty resource color
-        private SCANdata.SCANResourceType overlayType; //resource type, determined by selection in settings menu
+        internal SCANdata.SCANResourceType overlayType; //resource type, determined by selection in settings menu
         private double ORSScalar; // ORS log scalar value
         private double ORSMultiplier; // ORS multiplier value
-        private string resource; //name of the currently selected resource
+        internal string resource; //name of the currently selected resource
 
 		/* MAP: nearly trivial functions */
 		public void setBody ( CelestialBody b ) {
@@ -307,6 +307,8 @@ namespace SCANsat
                     ORSScalar = SCANcontroller.controller.ORSScalar(resource, body);
                     ORSMultiplier = SCANcontroller.controller.ORSMultiplier(resource, body);
                 }
+                else if (SCANcontroller.controller.resourceOverlayType == 1)
+                    SCANcontroller.controller.kethaneReset = !SCANcontroller.controller.kethaneReset;
             }
 		}
 		public void resetMap ( int mode, int maptype ) {
@@ -439,8 +441,6 @@ namespace SCANsat
                     }
                     if (SCANcontroller.controller.map_ResourceOverlay && SCANcontroller.controller.globalOverlay) //no support for kethane resources yet
                     {
-                        //int ilon = data.icLON(lon) - 180;
-                        //int ilat = data.icLAT(lat) - 90;
                         if (SCANcontroller.controller.resourceOverlayType == 0)
                         {
                             if (data.isCoveredResource(lon, lat, overlayType)) //check our new resource coverage map
@@ -460,7 +460,15 @@ namespace SCANsat
                         {
                             if (data.isCoveredResource(lon, lat, overlayType))
                             {
-                                pix[i] = baseColor;
+                                int ilon = data.icLON(lon);
+                                int ilat = data.icLAT(lat);
+                                float amount = data.kethaneValueMap[ilon, ilat];
+                                if (amount <= 0) pix[i] = Color.Lerp(baseColor, Color.grey, 0.4f);
+                                else
+                                {
+                                    float max = SCANcontroller.controller.KethaneMax(resource);
+                                    pix[i] = Color.Lerp(baseColor, Color.Lerp(gridEmpty, gridFull, amount / max), 0.8f);
+                                }
                             }
                             else pix[i] = baseColor;
                         }
@@ -538,8 +546,6 @@ namespace SCANsat
                     }
                     if (SCANcontroller.controller.map_ResourceOverlay && SCANcontroller.controller.globalOverlay) //no support for kethane resources yet
                     {
-                        //int ilon = data.icLON(lon) - 180;
-                        //int ilat = data.icLAT(lat) - 90;
                         if (SCANcontroller.controller.resourceOverlayType == 0)
                         {
                             if (data.isCoveredResource(lon, lat, overlayType)) //check our new resource coverage map
@@ -559,7 +565,15 @@ namespace SCANsat
                         {
                             if (data.isCoveredResource(lon, lat, overlayType))
                             {
-                                pix[i] = baseColor;
+                                int ilon = data.icLON(lon);
+                                int ilat = data.icLAT(lat);
+                                float amount = data.kethaneValueMap[ilon, ilat];
+                                if (amount <= 0) pix[i] = Color.Lerp(baseColor, Color.grey, 0.4f);
+                                else
+                                {
+                                    float max = SCANcontroller.controller.KethaneMax(resource);
+                                    pix[i] = Color.Lerp(baseColor, Color.Lerp(gridEmpty, gridFull, amount / max), 0.8f);
+                                }
                             }
                             else pix[i] = baseColor;
                         }
@@ -640,8 +654,6 @@ namespace SCANsat
                     }
                     if (SCANcontroller.controller.map_ResourceOverlay && SCANcontroller.controller.globalOverlay) //no support for kethane resources yet
                     {
-                        //int ilon = data.icLON(lon) - 180;
-                        //int ilat = data.icLAT(lat) - 90;
                         if (SCANcontroller.controller.resourceOverlayType == 0)
                         {
                             if (data.isCoveredResource(lon, lat, overlayType)) //check our new resource coverage map
@@ -661,7 +673,14 @@ namespace SCANsat
                         {
                             if (data.isCoveredResource(lon, lat, overlayType))
                             {
-                                pix[i] = baseColor;
+                                int ilon = data.icLON(lon);
+                                int ilat = data.icLAT(lat);
+                                float amount = data.kethaneValueMap[ilon, ilat];
+                                if (amount <= 0) pix[i] = Color.Lerp(baseColor, Color.grey, 0.4f);
+                                else {
+                                    float max = SCANcontroller.controller.KethaneMax (resource);
+                                    pix[i] = Color.Lerp(baseColor, Color.Lerp(gridEmpty, gridFull, amount / max), 0.8f);
+                                }
                             }
                             else pix[i] = baseColor;
                         }
