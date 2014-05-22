@@ -347,7 +347,7 @@ namespace SCANsat
 		public Texture2D getPartialMap () {
 			SCANdata data = SCANcontroller.controller.getData (body);
 			Color[] pix;
-            Color baseColor = Color.grey; //default pixel color 
+            
 
 			/* init cache if necessary */
 			if (body != big_heightmap_body) {
@@ -380,6 +380,7 @@ namespace SCANsat
 			}
 			pix = map.GetPixels (0 , mapstep , map.width , 1);
 			for (int i=0; i<map.width; i++) {
+                Color baseColor = Color.grey; //default pixel color 
 				int scheme = 0;
 				double lat = (mapstep * 1.0f / mapscale) - 90f + lat_offset;
 				double lon = (i * 1.0f / mapscale) - 180f + lon_offset;
@@ -436,6 +437,7 @@ namespace SCANsat
                                 //pix[i] = heightToColor(val, 1);
                             }
                         }
+                        mapline[i] = val;
                     }
                     if (SCANcontroller.controller.map_ResourceOverlay && SCANcontroller.controller.globalOverlay) //no support for kethane resources yet
                     {
