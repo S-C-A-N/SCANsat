@@ -11,36 +11,14 @@
 
 using System;
 using UnityEngine;
+using palette = SCANsat.SCANpalette;
 
 namespace SCANsat
 {
 	public class SCANmap
 	{
-		private static Color[] heightGradient = {
-			XKCDColors.ArmyGreen,
-			XKCDColors.Yellow,
-			XKCDColors.Red,
-			XKCDColors.Magenta,
-			XKCDColors.White,
-			XKCDColors.White
-		};
 
-		public static Color heightToColor ( float val , int scheme ) {
-			if (scheme == 1 || SCANcontroller.controller.colours == 1) {
-				return Color.Lerp (Color.black , Color.white , Mathf.Clamp ((val + 1500f) / 9000f , 0 , 1));
-			}
-			Color c = Color.black;
-			int sealevel = 0;
 
-			if (val <= sealevel) {
-				val = (Mathf.Clamp (val , -1500 , sealevel) + 1500) / 1000f;
-				c = Color.Lerp (XKCDColors.DarkPurple , XKCDColors.Cerulean , val);
-			} else {
-				val = (heightGradient.Length - 2) * Mathf.Clamp (val , sealevel , (sealevel + 7500)) / (sealevel + 7500.0f);
-				c = Color.Lerp (heightGradient [(int)val] , heightGradient [(int)val + 1] , val - (int)val);
-			}
-			return c;
-		}
 
 		/* MAP: legends */
 
@@ -57,7 +35,7 @@ namespace SCANsat
 			Color[] pix = legend.GetPixels ();
 			for (int x=0; x<256; ++x) {
 				float val = (x * (max - min)) / 256f + min;
-				pix [x] = heightToColor (val , scheme);
+				pix [x] = palette.heightToColor (val , scheme);
 			}
 			legend.SetPixels (pix);
 			legend.Apply ();
@@ -275,13 +253,10 @@ namespace SCANsat
 		protected bool mapsaved; // all refs are below
 		protected double[] mapline; // all refs are below
 		internal CelestialBody body; // all refs are below
-		protected Color[] redline; // all refs are below
-        private Color gridFull; // resource colors
-        private Color gridEmpty; //empty resource color
-        private SCANdata.SCANResourceType overlayType; //resource type, determined by selection in settings menu
-        private double ORSScalar; // ORS log scalar value
-        private double ORSMultiplier; // ORS multiplier value
-        private string resource; //name of the currently selected resource
+        	private SCANdata.SCANResourceType overlayType; //resource type, determined by selection in settings menu
+        	private double ORSScalar; // ORS log scalar value
+        	private double ORSMultiplier; // ORS multiplier value
+        	private string resource; //name of the currently selected resource
 
 		/* MAP: nearly trivial functions */
 		public void setBody ( CelestialBody b ) {
@@ -300,8 +275,8 @@ namespace SCANsat
 			mapsaved = false;
             if (SCANcontroller.controller.globalOverlay) {
                 overlayType = SCANcontroller.controller.OverlayResourceType(resource); //current resource selection
-                gridFull = SCANcontroller.controller.gridColor(resource, 0); //grab the proper color for the selected resource
-                gridEmpty = SCANcontroller.controller.gridColor(resource, 1); //grab the empty color value
+                palette.gridFull = SCANcontroller.controller.gridColor(resource, 0); //grab the proper color for the selected resource
+                palette.gridEmpty = SCANcontroller.controller.gridColor(resource, 1); //grab the empty color value
                 if (SCANcontroller.controller.resourceOverlayType == 0) //ORS resource multipliers
                 {
                     ORSScalar = SCANcontroller.controller.ORSScalar(resource, body);
@@ -314,7 +289,7 @@ namespace SCANsat
             	mapType = maptype;
                 resetMap ();
 		}
-        public void setResource (string s) {
+        	public void setResource (string s) {
             if (resource == s)
                 return;
             resource = SCANcontroller.controller.ResourcesList[SCANcontroller.controller.gridSelection];
@@ -347,7 +322,7 @@ namespace SCANsat
 		public Texture2D getPartialMap () {
 			SCANdata data = SCANcontroller.controller.getData (body);
 			Color[] pix;
-            Color baseColor = Color.grey; //default pixel color 
+            Color baseColor = palette.grey; //default pixel color 
 
 			/* init cache if necessary */
 			if (body != big_heightmap_body) {
@@ -361,18 +336,18 @@ namespace SCANsat
 				map = new Texture2D (mapwidth , mapheight , TextureFormat.ARGB32 , false);
 				pix = map.GetPixels ();
 				for (int i=0; i<pix.Length; ++i)
-					pix [i] = Color.clear;
+					pix [i] = palette.clear;
 				map.SetPixels (pix);
 			} else if (mapstep >= map.height) {
 				return map;
 			}
-			if (redline == null || redline.Length != map.width) {
-				redline = new Color[map.width];
-				for (int i=0; i<redline.Length; ++i)
-					redline [i] = Color.red;
+			if (palette.redline == null || palette.redline.Length != map.width) {
+				palette.redline = new Color[map.width];
+				for (int i=0; i<palette.redline.Length; ++i)
+					palette.redline [i] = palette.red;
 			}
 			if (mapstep < map.height - 1) {
-				map.SetPixels (0 , mapstep + 1 , map.width , 1 , redline);
+				map.SetPixels (0 , mapstep + 1 , map.width , 1 , palette.redline);
 			}
 			if (mapstep <= 0) {
 				mapstep = 0;
@@ -388,14 +363,14 @@ namespace SCANsat
 				lon = unprojectLongitude (lo , la);
                 pix[i] = baseColor;
 				if (double.IsNaN (lat) || double.IsNaN (lon) || lat < -90 || lat > 90 || lon < -180 || lon > 180) {
-					pix [i] = Color.clear;
+					pix [i] = palette.clear;
 					continue;
 				}
 				if (mapmode == 0) {
                     //if (!data.isCovered (lon , lat , SCANdata.SCANtype.Altimetry))
                     //    continue;
 					if (body.pqsController == null) {
-						baseColor = Color.Lerp (Color.black , Color.white , UnityEngine.Random.value);
+						baseColor = palette.lerp (palette.black , palette.white , UnityEngine.Random.value);
                         //big_heightmap[i, mapstep, SCANcontroller.controller.projection] = 0;
                         //continue;
 					}
@@ -410,7 +385,7 @@ namespace SCANsat
                             {
                                 // high resolution gets a coloured pixel for the actual position
                                 val = (float)data.getElevation(lon, lat);
-                                baseColor = heightToColor(val, scheme); //use temporary color to store pixel value
+                                baseColor = palette.heightToColor(val, scheme); //use temporary color to store pixel value
                                 //pix[i] = heightToColor(val, scheme);
                                 heightMapArray(val, mapstep, i, mapType);
                             }
@@ -418,7 +393,7 @@ namespace SCANsat
                             {
                                 // basic altimetry gets forced greyscale with lower resolution
                                 val = (float)data.getElevation(((int)(lon * 5)) / 5, ((int)(lat * 5)) / 5);
-                                baseColor = heightToColor(val, 1);
+                                baseColor = palette.heightToColor(val, 1);
                                 //pix[i] = heightToColor(val, 1);
                                 heightMapArray(val, mapstep, i, mapType);
                             }
@@ -427,12 +402,12 @@ namespace SCANsat
                         {
                             if (data.isCovered(lon, lat, SCANdata.SCANtype.AltimetryHiRes))
                             {
-                                baseColor = heightToColor(val, scheme);
+                                baseColor = palette.heightToColor(val, scheme);
                                 //pix[i] = heightToColor(val, scheme);
                             }
                             else
                             {
-                                baseColor = heightToColor(val, 1);
+                                baseColor = palette.heightToColor(val, 1);
                                 //pix[i] = heightToColor(val, 1);
                             }
                         }
@@ -450,7 +425,7 @@ namespace SCANsat
                                 if (amount > scalar)
                                 {
                                     if (amount > 50 * scalar) amount = 50 * scalar; //max cutoff value
-                                    pix[i] = Color.Lerp(baseColor, gridFull, (float)(amount) / (float)(50 * scalar)); //vary color by resource amount
+                                    pix[i] = palette.lerp(baseColor, palette.gridFull, (float)(amount) / (float)(50 * scalar)); //vary color by resource amount
                                 }
                                 else pix[i] = baseColor;
                             }
@@ -474,7 +449,7 @@ namespace SCANsat
 				if(i > 0) step_h = (int)(bigline[i - 1] / 1000);
 				if(bigstep > 0) step_v = (int)(bigline[i] / 1000);
 				if(step != step_h || step != step_v) {
-					pix[i] = Color.white;
+					pix[i] = palette.white;
 				}
 				*/
                     //mapline [i] = val;
@@ -482,7 +457,7 @@ namespace SCANsat
                     //if (!data.isCovered (lon , lat , SCANdata.SCANtype.Altimetry))
                     //    continue;
 					if (body.pqsController == null) {
-						baseColor = Color.Lerp (Color.black , Color.white , UnityEngine.Random.value);
+						baseColor = palette.lerp (palette.black , palette.white , UnityEngine.Random.value);
                         //continue;
 					}
                     else if (data.isCovered(lon, lat, SCANdata.SCANtype.Altimetry))
@@ -505,7 +480,7 @@ namespace SCANsat
                         }
                         if (mapstep == 0)
                         {
-                            baseColor = Color.grey;
+                            baseColor = palette.grey;
                         }
                         else
                         {
@@ -520,17 +495,17 @@ namespace SCANsat
                             float v = Mathf.Clamp((float)Math.Abs(val - v1) / 1000f, 0, 2f);
                             if (SCANcontroller.controller.colours == 1)
                             {
-                                baseColor = Color.Lerp(Color.black, Color.white, v / 2f);
+                                baseColor = palette.lerp(palette.black, palette.white, v / 2f);
                             }
                             else
                             {
                                 if (v < 1)
                                 {
-                                    baseColor = Color.Lerp(XKCDColors.PukeGreen, XKCDColors.Lemon, v);
+                                    baseColor = palette.lerp(palette.xkcd_PukeGreen, palette.xkcd_Lemon, v);
                                 }
                                 else
                                 {
-                                    baseColor = Color.Lerp(XKCDColors.Lemon, XKCDColors.OrangeRed, v - 1);
+                                    baseColor = palette.lerp(palette.xkcd_Lemon, palette.xkcd_OrangeRed, v - 1);
                                 }
                             }
                         }
@@ -549,7 +524,7 @@ namespace SCANsat
                                 if (amount > scalar)
                                 {
                                     if (amount > 50 * scalar) amount = 50 * scalar; //max cutoff value
-                                    pix[i] = Color.Lerp(baseColor, gridFull, (float)(amount) / (float)(50 * scalar)); //vary color by resource amount
+                                    pix[i] = palette.lerp(baseColor, palette.gridFull, (float)(amount) / (float)(50 * scalar)); //vary color by resource amount
                                 }
                                 else pix[i] = baseColor;
                             }
@@ -570,7 +545,7 @@ namespace SCANsat
                     //if (!data.isCovered (lon , lat , SCANdata.SCANtype.Biome))
                     //    continue;
 					if (body.BiomeMap == null || body.BiomeMap.Map == null) {
-						baseColor = Color.Lerp (Color.black , Color.white , UnityEngine.Random.value);
+						baseColor = palette.lerp (palette.black , palette.white , UnityEngine.Random.value);
                         //continue;
 					}
 					/* // this just basically stretches the actual biome map to fit... it looks horrible
@@ -583,24 +558,24 @@ namespace SCANsat
                     else if (data.isCovered(lon, lat, SCANdata.SCANtype.Biome))
                     {
                         double bio = data.getBiomeIndexFraction(lon, lat);
-                        Color biome = Color.grey;
+                        Color biome = palette.grey;
                         if (SCANcontroller.controller.colours == 1)
                         {
                             if ((i > 0 && mapline[i - 1] != bio) || (mapstep > 0 && mapline[i] != bio))
                             {
-                                biome = Color.white;
+                                biome = palette.white;
                             }
                             else
                             {
-                                biome = Color.Lerp(Color.black, Color.white, (float)bio);
+                                biome = palette.lerp(palette.black, palette.white, (float)bio);
                             }
                         }
                         else
                         {
-                            Color elevation = Color.gray;
+                            Color elevation = palette.grey;
                             if (body.pqsController == null)
                             {
-                                baseColor = Color.Lerp(Color.black, Color.white, UnityEngine.Random.value);
+                                baseColor = palette.lerp(palette.black, palette.white, UnityEngine.Random.value);
                             }
                             else if (data.isCovered(lon, lat, SCANdata.SCANtype.Altimetry))
                             {
@@ -620,18 +595,18 @@ namespace SCANsat
                                         heightMapArray(val, mapstep, i, mapType);
                                     }
                                 }
-                                elevation = Color.Lerp(Color.black, Color.white, Mathf.Clamp(val + 1500f, 0, 9000) / 9000f);
+                                elevation = palette.lerp(palette.black, palette.white, Mathf.Clamp(val + 1500f, 0, 9000) / 9000f);
                             }
-                            Color bio1 = XKCDColors.CamoGreen;
-                            Color bio2 = XKCDColors.Marigold;
+                            Color bio1 = palette.xkcd_CamoGreen;
+                            Color bio2 = palette.xkcd_Marigold;
                             if ((i > 0 && mapline[i - 1] != bio) || (mapstep > 0 && mapline[i] != bio))
                             {
-                                //biome = Color.Lerp(XKCDColors.Puce, elevation, 0.5f);
-                                biome = Color.white;
+                                //biome = palette.lerp(palette.xkcd_Puce, elevation, 0.5f);
+                                biome = palette.white;
                             }
                             else
                             {
-                                biome = Color.Lerp(Color.Lerp(bio1, bio2, (float)bio), elevation, 0.5f);
+                                biome = palette.lerp(palette.lerp(bio1, bio2, (float)bio), elevation, 0.5f);
                             }
                         }
 
@@ -651,7 +626,7 @@ namespace SCANsat
                                 if (amount > scalar)
                                 {
                                     if (amount > 50 * scalar) amount = 50 * scalar; //max cutoff value
-                                    pix[i] = Color.Lerp(baseColor, gridFull, (float)(amount) / (float)(50 * scalar)); //vary color by resource amount
+                                    pix[i] = palette.lerp(baseColor, palette.gridFull, (float)(amount) / (float)(50 * scalar)); //vary color by resource amount
                                 }
                                 else pix[i] = baseColor;
                             }

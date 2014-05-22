@@ -13,6 +13,7 @@ using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
 using UnityEngine;
 using OpenResourceSystem;
+using palette = SCANsat.SCANpalette;
 
 namespace SCANsat
 {
@@ -26,9 +27,9 @@ namespace SCANsat
 
 		/* MAP: state */
 		internal byte[,] coverage = new byte[360 , 180];
-        public byte[,] resourceCoverage = new byte[360, 180]; //Secondary coverage map for resources
+        	public byte[,] resourceCoverage = new byte[360, 180]; //Secondary coverage map for resources
 		protected float[,] heightmap = new float[360 , 180];
-        public float[,] kethanemap = new float[360, 180]; //Store kethane cell data in here
+        	public float[,] kethanemap = new float[360, 180]; //Store kethane cell data in here
 		public CelestialBody body;
 		public Texture2D map_small = new Texture2D (360 , 180 , TextureFormat.RGB24 , false);
 		public bool disabled;
@@ -44,7 +45,7 @@ namespace SCANsat
 			Biome = 8,		// biome data
 			Anomaly = 16,		// anomalies (position of anomaly)
 			AnomalyDetail = 32,	// anomaly detail (name of anomaly, etc.)
-            ORS = 64,           // Generic ORS scanner
+            	ORS = 64,           // Generic ORS scanner
 			Everything = 255	// everything
 		}
 
@@ -209,7 +210,7 @@ namespace SCANsat
 		}
 
 		/* DATA: all hail the red line of scanning */
-		protected Color[] redline;
+
 		protected int scanline = 0;
 		protected int scanstep = 0;
 		public void drawHeightScanline ( SCANtype type ) {
@@ -220,7 +221,7 @@ namespace SCANsat
 				if (val == 0 && isCovered (ilon - 180 , scanline - 90 , SCANtype.Altimetry)) {
 					if (body.pqsController == null) {
 						heightmap [ilon, scanline] = 0;
-						cols_height_map_small [ilon] = Color.Lerp (Color.black , Color.white , UnityEngine.Random.value);
+						cols_height_map_small [ilon] = palette.lerp (palette.black , palette.white , UnityEngine.Random.value);
 						continue;
 					} else {
 						// convert to radial vector
@@ -234,23 +235,23 @@ namespace SCANsat
 						heightmap [ilon, scanline] = val;
 					}
 				}
-				Color c = Color.black;
+				Color c = palette.black;
 				if (val != 0) {
 					if (isCovered (ilon - 180 , scanline - 90 , SCANtype.AltimetryHiRes))
-						c = SCANmap.heightToColor (val , scheme);
+						c = palette.heightToColor (val , scheme);
 					else
-						c = SCANmap.heightToColor (val , 1);
+						c = palette.heightToColor (val , 1);
 				} else {
-					c = Color.grey;
+					c = palette.grey;
 					if (scanline % 30 == 0 && ilon % 3 == 0) {
-						c = Color.white;
+						c = palette.white;
 					} else if (ilon % 30 == 0 && scanline % 3 == 0) {
-						c = Color.white;
+						c = palette.white;
 					}
 				}
 				if (type != SCANtype.Nothing) {
 					if (!isCoveredByAll (ilon - 180 , scanline - 90 , type)) {
-						c = Color.Lerp (c , Color.black , 0.5f);
+						c = palette.lerp (c , palette.black , 0.5f);
 					}
 				}
 				cols_height_map_small [ilon] = c;
@@ -263,14 +264,14 @@ namespace SCANsat
 			}
 		}
 		public void updateImages ( SCANtype type ) {
-			if (redline == null) {
-				redline = new Color[360];
+			if (palette.small_redline == null) {
+				palette.small_redline = new Color[360];
 				for (int i=0; i<360; i++)
-					redline [i] = Color.red;
+					palette.small_redline [i] = palette.red;
 			}
 			drawHeightScanline (type);
 			if (scanline < 179) {
-				map_small.SetPixels (0 , scanline + 1 , 360 , 1 , redline);
+				map_small.SetPixels (0 , scanline + 1 , 360 , 1 , palette.small_redline);
 			}
 			map_small.Apply ();
 		}
@@ -354,9 +355,9 @@ namespace SCANsat
 			for (int y=0; y<map_small.height; y++) {
 				for (int x=0; x<map_small.width; x++) {
 					if ((x % 30 == 0 && y % 3 > 0) || (y % 30 == 0 && x % 3 > 0)) {
-						map_small.SetPixel (x , y , Color.white);
+						map_small.SetPixel (x , y , palette.white);
 					} else {
-						map_small.SetPixel (x , y , Color.grey);
+						map_small.SetPixel (x , y , palette.grey);
 					}
 				}
 			}
