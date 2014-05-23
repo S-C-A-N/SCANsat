@@ -253,10 +253,10 @@ namespace SCANsat
 		protected bool mapsaved; // all refs are below
 		protected double[] mapline; // all refs are below
 		internal CelestialBody body; // all refs are below
-        	private SCANdata.SCANResourceType overlayType; //resource type, determined by selection in settings menu
+		internal SCANdata.SCANResourceType overlayType; //resource type, determined by selection in settings menu
         	private double ORSScalar; // ORS log scalar value
         	private double ORSMultiplier; // ORS multiplier value
-        	private string resource; //name of the currently selected resource
+		internal string resource; //name of the currently selected resource
 
 		/* MAP: nearly trivial functions */
 		public void setBody ( CelestialBody b ) {
@@ -354,7 +354,7 @@ namespace SCANsat
 			}
 			pix = map.GetPixels (0 , mapstep , map.width , 1);
 			for (int i=0; i<map.width; i++) {
-                Color baseColor = palette.grey; //default pixel color 
+			Color baseColor = palette.grey; //default pixel color 
 				int scheme = 0;
 				double lat = (mapstep * 1.0f / mapscale) - 90f + lat_offset;
 				double lon = (i * 1.0f / mapscale) - 180f + lon_offset;
@@ -411,6 +411,7 @@ namespace SCANsat
                                 //pix[i] = heightToColor(val, 1);
                             }
                         }
+                        mapline[i] = val;
                     }
                     if (SCANcontroller.controller.map_ResourceOverlay && SCANcontroller.controller.globalOverlay) //no support for kethane resources yet
                     {
