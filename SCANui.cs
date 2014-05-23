@@ -1154,8 +1154,8 @@ namespace SCANsat
 			if (bigmap_dragging && !repainting) {
 				if (Input.GetMouseButtonUp (0)) {
 					bigmap_dragging = false;
-					if (bigmap_drag_w < 400)
-						bigmap_drag_w = 400;
+					if (bigmap_drag_w < 450)
+						bigmap_drag_w = 450;
 					bigmap.setWidth ((int)bigmap_drag_w);
 					overlay_static = null;
 					SCANcontroller.controller.map_width = bigmap.mapwidth;
@@ -1169,20 +1169,23 @@ namespace SCANsat
 			}
 
 			Vessel vessel = FlightGlobals.ActiveVessel;
+
 			GUILayout.BeginVertical ();
+			GUILayout.BeginHorizontal (); // added to put colors on the right of map
 
 			SCANdata data = SCANcontroller.controller.getData (vessel.mainBody);
-			Texture2D map = bigmap.getPartialMap ();
+			Texture2D map = bigmap.getPartialMap (); // this is the expensive call
 
 			float dw = bigmap_drag_w;
-			if (dw < 400)
-				dw = 400;
+			if (dw < 450) dw = 450;	// changed to prevent resizer from overlapping with buttons
 			float dh = dw / 2f;
 			if (bigmap_dragging) {
 				GUILayout.Label ("" , GUILayout.Width (dw) , GUILayout.Height (dh));
 			} else {
 				GUILayout.Label ("" , GUILayout.Width (map.width) , GUILayout.Height (map.height));
 			}
+
+
 			Rect maprect = GUILayoutUtility.GetLastRect ();
 			maprect.width = bigmap.mapwidth;
 			maprect.height = bigmap.mapheight;
@@ -1200,13 +1203,13 @@ namespace SCANsat
 				overlay_static.Apply ();
 				overlay_static_dirty = false;
 			}
-		
+
 			if (bigmap_dragging) {
 				maprect.width = dw;
 				maprect.height = dh;
 				GUI.DrawTexture (maprect , map , ScaleMode.StretchToFill);
 			} else {
-				GUI.DrawTexture (maprect , map);
+				GUI.DrawTexture (maprect , map); // this is the drawing of the map
 			}
 
 			if (overlay_static != null) {
@@ -1225,10 +1228,21 @@ namespace SCANsat
 				drawOrbit (maprect , bigmap , vessel);
 			}
 
+			GUILayout.BeginVertical ();
+			// draw colors in here
+			SCANpalette.swatch (palette.xkcd_ArmyGreen);
+			SCANpalette.swatch (palette.xkcd_Yellow);
+			SCANpalette.swatch (palette.xkcd_Red);
+			SCANpalette.swatch (palette.xkcd_Magenta);
+			SCANpalette.swatch (palette.xkcd_White);
+			SCANpalette.swatch (palette.xkcd_White);
+
+			GUILayout.EndVertical ();
+			GUILayout.EndHorizontal (); // draw colors before here
 			GUILayout.BeginHorizontal (GUILayout.ExpandWidth (true));
 			GUILayout.BeginHorizontal (GUILayout.Width (300));
 
-
+			#region buttons: close / export png
 			GUILayout.BeginVertical ();
 			if (GUILayout.Button ("Close")) {
 				bigmap_visible = false;
@@ -1242,9 +1256,12 @@ namespace SCANsat
 					bigmap.exportPNG ();
 				}
 			}
-			GUILayout.EndVertical ();
+			#endregion
 
+			GUILayout.EndVertical ();
 			GUILayout.BeginVertical ();
+
+			#region buttons: grey / color / legend
 			style_button.normal.textColor = SCANcontroller.controller.colours == 1 ? palette.c_good : palette.white;
 			if (GUILayout.Button ("Grey" , style_button)) {
 				SCANcontroller.controller.colours = 1;
@@ -1261,9 +1278,10 @@ namespace SCANsat
 			if (GUILayout.Button ("Legend" , style_button)) {
 				SCANcontroller.controller.legend = !SCANcontroller.controller.legend;
 			}
+			#endregion
 			GUILayout.EndVertical ();
-
 			GUILayout.BeginVertical ();
+			#region buttons: altimetry / slope / biome
 			style_button.normal.textColor = bigmap.mapmode == 0 ? palette.c_good : palette.white;
 			if (GUILayout.Button ("Altimetry" , style_button)) {
 				bigmap.resetMap (0, 0);
@@ -1276,10 +1294,11 @@ namespace SCANsat
 			if (GUILayout.Button ("Biome" , style_button)) {
 				bigmap.resetMap (2, 0);
 			}
+			#endregion
 			GUILayout.EndVertical ();
-
 			GUILayout.BeginVertical ();
 			GUILayout.BeginHorizontal ();
+			#region buttons: markers / flags / orbit / asteroids
 			style_button.normal.textColor = SCANcontroller.controller.map_markers ? palette.c_good : palette.white;
 			if (GUILayout.Button ("Markers" , style_button)) {
 				SCANcontroller.controller.map_markers = !SCANcontroller.controller.map_markers;
@@ -1300,30 +1319,32 @@ namespace SCANsat
 			if (GUILayout.Button ("Asteroids" , style_button)) {
 				SCANcontroller.controller.map_asteroids = !SCANcontroller.controller.map_asteroids;
 			}
+			#endregion
 			GUILayout.EndHorizontal ();
-
-            GUILayout.BeginHorizontal();
-
+			GUILayout.BeginHorizontal();
+			#region buttons: grid / [resources]
 			style_button.normal.textColor = SCANcontroller.controller.map_grid ? palette.c_good : palette.white;
 			if (GUILayout.Button ("Grid" , style_button)) {
 				SCANcontroller.controller.map_grid = !SCANcontroller.controller.map_grid;
 				overlay_static_dirty = true;
 			}
 
-            if (SCANcontroller.controller.globalOverlay) //Button to turn on/off resource overlay
-            {
-                style_button.normal.textColor = SCANcontroller.controller.map_ResourceOverlay ? palette.c_good : palette.white;
-                if (GUILayout.Button(SCANcontroller.controller.ResourcesList[SCANcontroller.controller.gridSelection], style_button))
-                {
-                    SCANcontroller.controller.map_ResourceOverlay = !SCANcontroller.controller.map_ResourceOverlay;
-                    bigmap.resetMap();
-                }
-            }
+			if (SCANcontroller.controller.globalOverlay) //Button to turn on/off resource overlay
+			{
+			 style_button.normal.textColor = SCANcontroller.controller.map_ResourceOverlay ? palette.c_good : palette.white;
+			 if (GUILayout.Button(SCANcontroller.controller.ResourcesList[SCANcontroller.controller.gridSelection], style_button))
+			 {
+			     SCANcontroller.controller.map_ResourceOverlay = !SCANcontroller.controller.map_ResourceOverlay;
+			     bigmap.resetMap();
+			 }
+			}
+			#endregion
 
-            GUILayout.EndHorizontal();
+			GUILayout.EndHorizontal();
 			GUILayout.EndVertical ();
-
 			GUILayout.BeginVertical ();
+
+			#region buttons: projections
 			for (int i=0; i<SCANmap.projectionNames.Length; ++i) {
 				style_button.normal.textColor = (int)bigmap.projection == i ? palette.c_good : palette.white;
 				if (GUILayout.Button (SCANmap.projectionNames [i] , style_button)) {
@@ -1332,6 +1353,8 @@ namespace SCANsat
 					overlay_static_dirty = true;
 				}
 			}
+			#endregion
+
 			GUILayout.EndVertical ();
 			GUILayout.EndHorizontal ();
 
@@ -1340,6 +1363,8 @@ namespace SCANsat
 			float my = Event.current.mousePosition.y - maprect.y;
 			bool in_map = false, in_spotmap = false;
 			double mlon = 0, mlat = 0;
+
+			#region if (mouse inside bigmap)
 			if (mx >= 0 && my >= 0 && mx < map.width && my < map.height && !bigmap_dragging) {
 				double mlo = (mx * 360f / map.width) - 180;
 				double mla = 90 - (my * 180f / map.height);
@@ -1416,6 +1441,9 @@ namespace SCANsat
 					info += " " + mlat.ToString ("F") + " " + mlon.ToString ("F"); // uncomment for debugging projections
 				}
 			}
+			#endregion
+
+			#region bigmap mouseover info and legend
 			if (maprect.width < 720) {
 				GUILayout.EndHorizontal ();
 				readableLabel (info , palette.white);
@@ -1427,14 +1455,18 @@ namespace SCANsat
 				GUILayout.EndVertical ();
 				GUILayout.EndHorizontal ();
 			}
+			#endregion
 
 			if (!notMappingToday)
 				drawMapLabels (maprect , vessel , bigmap , data);
 
+			#region zoom map
 			if (spotmap != null) {
 				spotmap.setBody (vessel.mainBody);
-                if (SCANcontroller.controller.globalOverlay) //make sure resources show up in zoom map
-                    spotmap.setResource(SCANcontroller.controller.ResourcesList[SCANcontroller.controller.gridSelection]);
+
+				if (SCANcontroller.controller.globalOverlay) //make sure resources show up in zoom map
+                    	spotmap.setResource(SCANcontroller.controller.ResourcesList[SCANcontroller.controller.gridSelection]);
+
 				GUI.Box (pos_spotmap , spotmap.getPartialMap ());
 				if (!notMappingToday) {
 					drawOrbit (pos_spotmap , spotmap , vessel);
@@ -1447,10 +1479,12 @@ namespace SCANsat
 					spotmap = null;
 				}
 			}
-
+			#endregion
+			#region big map fps counter
 			Rect fpswidget = new Rect (maprect.x + maprect.width - 32 , maprect.y + maprect.height + 32 , 32 , 24);
 			GUI.Label (fpswidget , fps.ToString ("N1"));
-
+			#endregion
+			#region big map resizing
 			Rect resizer = new Rect (maprect.x + maprect.width - 24 , maprect.y + maprect.height + 8 , 24 , 24);
 			GUI.Box (resizer , "//");
 			if (Event.current.isMouse) {
@@ -1509,6 +1543,7 @@ namespace SCANsat
 					}
 				}
 			} 
+			#endregion
 
 			GUILayout.EndVertical ();
 			GUI.DragWindow ();

@@ -163,14 +163,13 @@ namespace SCANsat
 			return c;
 		}
 
-		public static Color swatch(Color c) {
+		public static void swatch(Color c) {
 			Texture2D tex = new Texture2D (20,20);
 			GUILayout.BeginVertical ("Box",new GUILayoutOption[]{GUILayout.Width (22),GUILayout.Height (22)});
 			GUI.color = c;
 			GUILayout.Label (tex);
 			GUI.color = Color.white;
 			GUILayout.EndVertical ();
-			return c;
 		}
 
 
