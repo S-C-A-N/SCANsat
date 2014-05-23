@@ -253,10 +253,10 @@ namespace SCANsat
 		protected bool mapsaved; // all refs are below
 		protected double[] mapline; // all refs are below
 		internal CelestialBody body; // all refs are below
-        	private SCANdata.SCANResourceType overlayType; //resource type, determined by selection in settings menu
+		internal SCANdata.SCANResourceType overlayType; //resource type, determined by selection in settings menu
         	private double ORSScalar; // ORS log scalar value
         	private double ORSMultiplier; // ORS multiplier value
-        	private string resource; //name of the currently selected resource
+		internal string resource; //name of the currently selected resource
 
 		/* MAP: nearly trivial functions */
 		public void setBody ( CelestialBody b ) {

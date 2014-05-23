@@ -665,7 +665,7 @@ namespace SCANsat
 			if (noResources)
 				SCANcontroller.controller.globalOverlay = false;
 
-			if (SCANcontroller.controller.globalOverlay != GUILayout.Toggle (SCANcontroller.controller.globalOverlay , "Activate Resource Overlay")) { //global toggle for resource overlay
+			else if (SCANcontroller.controller.globalOverlay != GUILayout.Toggle (SCANcontroller.controller.globalOverlay , "Activate Resource Overlay")) { //global toggle for resource overlay
 				SCANcontroller.controller.globalOverlay = !SCANcontroller.controller.globalOverlay;
 				bigmap.resetMap ();
 			}
@@ -782,7 +782,7 @@ namespace SCANsat
 					data.reset ();
 				}
 			}
-			if (GUILayout.Button ("Reset <b>all</b> resource maps" , style_button)) {
+			if (GUILayout.Button ("Reset <b>all</b> resource maps")) {
 				foreach (SCANdata data in SCANcontroller.controller.body_data.Values) {
 					data.resetResource ();
 				}
@@ -1403,13 +1403,15 @@ namespace SCANsat
 					info += "\n" + toDMS (mlat , mlon) + " (lat: " + mlat.ToString ("F2") + " lon: " + mlon.ToString ("F2") + ") ";
 					if (in_spotmap)
 						info += " " + spotmap.mapscale.ToString ("F1") + "x";
-                    if (SCANcontroller.controller.map_ResourceOverlay && SCANcontroller.controller.globalOverlay) //Adds selected resource amount to big map legend
-                    {
-                        if (SCANcontroller.controller.resourceOverlayType == 0) {
-                        CelestialBody body = bigmap.body;
-                        info += palette.colored(palette.xkcd_Magenta, "\n<b>" + SCANcontroller.controller.ResourcesList[SCANcontroller.controller.gridSelection] + ": " + data.ORSOverlay(mlon, mlat, body.flightGlobalsIndex, SCANcontroller.controller.ResourcesList[SCANcontroller.controller.gridSelection]).ToString("N1") + " ppm</b>");
-                        }
-                    }
+					if (SCANcontroller.controller.map_ResourceOverlay && SCANcontroller.controller.globalOverlay) //Adds selected resource amount to big map legend
+					{
+						if (SCANcontroller.controller.resourceOverlayType == 0) {
+							if (data.isCoveredResource(mlon, mlat, bigmap.overlayType))
+							{
+								info += palette.colored(palette.magenta, "\n<b>" + bigmap.resource + ": " + data.ORSOverlay(mlon, mlat, bigmap.body.flightGlobalsIndex, bigmap.resource).ToString("N1") + " ppm</b>");
+							}
+						}
+					}
 				} else {
 					info += " " + mlat.ToString ("F") + " " + mlon.ToString ("F"); // uncomment for debugging projections
 				}
