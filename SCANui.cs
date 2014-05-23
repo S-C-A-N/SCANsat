@@ -672,7 +672,7 @@ namespace SCANsat
 			GUILayout.EndHorizontal ();
 			GUILayout.BeginHorizontal ();
 
-			if (GUILayout.Button ("Kethane Resources" , style_button)) //select from two resource types, populates the list below
+			if (GUILayout.Button ("Kethane Resources")) //select from two resource types, populates the list below
 			{
 				SCANcontroller.controller.resourceOverlayType = 1;
 				SCANcontroller.controller.OverlayResources ();
@@ -689,7 +689,7 @@ namespace SCANsat
 				bigmap.resetMap();
 			}
 
-			if (GUILayout.Button ("Open Resources" , style_button))
+			if (GUILayout.Button ("Open Resources"))
 			{
 				SCANcontroller.controller.resourceOverlayType = 0;
 				SCANcontroller.controller.OverlayResources ();
