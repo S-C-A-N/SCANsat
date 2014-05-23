@@ -12,6 +12,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq; //Needed for the OrderBy() method for data transmission
 using UnityEngine;
+using palette = SCANsat.SCANpalette;
+
 
 namespace SCANsat
 {
@@ -284,7 +286,7 @@ namespace SCANsat
 			Texture2D map = data.map_small;
 			if (map != null) {
 				for (int i=0; i<1000; ++i) {
-					map.SetPixel (UnityEngine.Random.Range (0 , 360) , UnityEngine.Random.Range (0 , 180) , Color.Lerp (Color.black , Color.white , UnityEngine.Random.value));
+					map.SetPixel (UnityEngine.Random.Range (0 , 360) , UnityEngine.Random.Range (0 , 180) , palette.lerp (palette.black , palette.white , UnityEngine.Random.value));
 				}
 			}
 		}

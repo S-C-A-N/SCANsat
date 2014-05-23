@@ -11,6 +11,8 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using palette = SCANsat.SCANpalette;
+
 
 namespace SCANsat
 {
@@ -45,9 +47,9 @@ namespace SCANsat
 				// ramp texture to render everything in dark shades of Amber,
 				// except originally dark lines, which become bright Amber
 				for (int i=0; i<256; ++i)
-					t.SetPixel (i , 0 , Color.Lerp (Color.black , XKCDColors.Amber , i / 1024f));
+					t.SetPixel (i , 0 , palette.lerp (palette.black , palette.xkcd_Amber , i / 1024f));
 				for (int i=0; i<10; ++i)
-					t.SetPixel (i , 0 , XKCDColors.Amber);
+					t.SetPixel (i , 0 , palette.xkcd_Amber);
 				t.Apply ();
 				grayscaleMaterial.SetTexture ("_RampTex" , t);
 			}

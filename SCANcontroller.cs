@@ -13,6 +13,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using palette = SCANsat.SCANpalette;
 
 namespace SCANsat
 {
@@ -236,10 +237,10 @@ namespace SCANsat
 
         internal Color gridColor(string resource, int i) //Get the resource color
         {
-            Color gridcolor = Color.white;
+            Color gridcolor = palette.white;
             if (resourceOverlayType == 0) //ORS resources might need to be manually set
             {
-                gridcolor = Color.magenta;
+                gridcolor = palette.magenta;
             }
             else if (resourceOverlayType == 1)
             {
@@ -615,8 +616,8 @@ namespace SCANsat
 			if(uncovered) return;
 			/* 
 			if(v.mainBody == FlightGlobals.currentMainBody) {
-				if(res > 0) data.map_small.SetPixel((int)Math.Round(lon) + 180, (int)Math.Round(lat) + 90, Color.magenta);
-				else data.map_small.SetPixel((int)Math.Round(lon) + 180, (int)Math.Round(lat) + 90, Color.yellow);
+				if(res > 0) data.map_small.SetPixel((int)Math.Round(lon) + 180, (int)Math.Round(lat) + 90, palette.magenta);
+				else data.map_small.SetPixel((int)Math.Round(lon) + 180, (int)Math.Round(lat) + 90, palette.yellow);
 			}
 			*/
 
