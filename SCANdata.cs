@@ -183,12 +183,16 @@ namespace SCANsat
 				uncov += coverage_count [0];
 			if ((type & SCANtype.AltimetryHiRes) != SCANtype.Nothing)
 				uncov += coverage_count [1];
+            if ((type & SCANtype.Kethane) != SCANtype.Nothing)
+                uncov += coverage_count [2];
 			if ((type & SCANtype.Biome) != SCANtype.Nothing)
 				uncov += coverage_count [3];
 			if ((type & SCANtype.Anomaly) != SCANtype.Nothing)
 				uncov += coverage_count [4];
 			if ((type & SCANtype.AnomalyDetail) != SCANtype.Nothing)
 				uncov += coverage_count [5];
+            if ((type & SCANtype.ORS) != SCANtype.Nothing)
+                uncov += coverage_count [6];
 			return uncov;
 
 		}

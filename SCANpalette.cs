@@ -143,6 +143,36 @@ namespace SCANsat
 		}
 
 
+		public static Color picker(Rect r, Color c) {
+
+
+			GUILayout.BeginArea (r,"","Box");
+			GUILayout.BeginHorizontal ();
+			// R
+			GUILayout.EndHorizontal();
+
+			GUILayout.BeginHorizontal ();
+			// G
+			GUILayout.EndHorizontal();
+
+			GUILayout.BeginHorizontal ();
+			// B
+			GUILayout.EndHorizontal();
+
+			GUILayout.EndArea ();
+			return c;
+		}
+
+		public static Color swatch(Color c) {
+			Texture2D tex = new Texture2D (20,20);
+			GUILayout.BeginVertical ("Box",new GUILayoutOption[]{GUILayout.Width (22),GUILayout.Height (22)});
+			GUI.color = c;
+			GUILayout.Label (tex);
+			GUI.color = Color.white;
+			GUILayout.EndVertical ();
+			return c;
+		}
+
 
 	}
 

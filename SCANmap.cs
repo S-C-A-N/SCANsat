@@ -253,10 +253,10 @@ namespace SCANsat
 		protected bool mapsaved; // all refs are below
 		protected double[] mapline; // all refs are below
 		internal CelestialBody body; // all refs are below
-        	internal SCANdata.SCANResourceType overlayType; //resource type, determined by selection in settings menu
+		internal SCANdata.SCANResourceType overlayType; //resource type, determined by selection in settings menu
         	private double ORSScalar; // ORS log scalar value
         	private double ORSMultiplier; // ORS multiplier value
-        	internal string resource; //name of the currently selected resource
+		internal string resource; //name of the currently selected resource
 
 		/* MAP: nearly trivial functions */
 		public void setBody ( CelestialBody b ) {
@@ -282,8 +282,6 @@ namespace SCANsat
                     ORSScalar = SCANcontroller.controller.ORSScalar(resource, body);
                     ORSMultiplier = SCANcontroller.controller.ORSMultiplier(resource, body);
                 }
-                else if (SCANcontroller.controller.resourceOverlayType == 1)
-                    SCANcontroller.controller.kethaneReset = !SCANcontroller.controller.kethaneReset;
             }
 		}
 		public void resetMap ( int mode, int maptype ) {
@@ -324,7 +322,6 @@ namespace SCANsat
 		public Texture2D getPartialMap () {
 			SCANdata data = SCANcontroller.controller.getData (body);
 			Color[] pix;
-            Color baseColor = palette.grey; //default pixel color 
 
 			/* init cache if necessary */
 			if (body != big_heightmap_body) {
@@ -357,6 +354,7 @@ namespace SCANsat
 			}
 			pix = map.GetPixels (0 , mapstep , map.width , 1);
 			for (int i=0; i<map.width; i++) {
+                Color baseColor = Color.grey; //default pixel color 
 				int scheme = 0;
 				double lat = (mapstep * 1.0f / mapscale) - 90f + lat_offset;
 				double lon = (i * 1.0f / mapscale) - 180f + lon_offset;
@@ -413,6 +411,7 @@ namespace SCANsat
                                 //pix[i] = heightToColor(val, 1);
                             }
                         }
+                        mapline[i] = val;
                     }
                     if (SCANcontroller.controller.map_ResourceOverlay && SCANcontroller.controller.globalOverlay) //no support for kethane resources yet
                     {
@@ -437,15 +436,7 @@ namespace SCANsat
                         {
                             if (data.isCoveredResource(lon, lat, overlayType))
                             {
-                                int ilon = data.icLON(lon);
-                                int ilat = data.icLAT(lat);
-                                float amount = data.kethaneValueMap[ilon, ilat];
-                                if (amount <= 0) pix[i] = palette.lerp(baseColor, palette.grey, 0.4f);
-                                else
-                                {
-                                    float max = SCANcontroller.controller.KethaneMax(resource);
-                                    pix[i] = palette.lerp(baseColor, palette.lerp(palette.gridEmpty, palette.gridFull, amount / max), 0.8f);
-                                }
+                                pix[i] = baseColor;
                             }
                             else pix[i] = baseColor;
                         }
@@ -544,15 +535,7 @@ namespace SCANsat
                         {
                             if (data.isCoveredResource(lon, lat, overlayType))
                             {
-                                int ilon = data.icLON(lon);
-                                int ilat = data.icLAT(lat);
-                                float amount = data.kethaneValueMap[ilon, ilat];
-                                if (amount <= 0) pix[i] = palette.lerp(baseColor, palette.grey, 0.4f);
-                                else
-                                {
-                                    float max = SCANcontroller.controller.KethaneMax(resource);
-                                    pix[i] = palette.lerp(baseColor, palette.lerp(palette.gridEmpty, palette.gridFull, amount / max), 0.8f);
-                                }
+                                pix[i] = baseColor;
                             }
                             else pix[i] = baseColor;
                         }
@@ -654,15 +637,7 @@ namespace SCANsat
                         {
                             if (data.isCoveredResource(lon, lat, overlayType))
                             {
-                                int ilon = data.icLON(lon);
-                                int ilat = data.icLAT(lat);
-                                float amount = data.kethaneValueMap[ilon, ilat];
-                                if (amount <= 0) pix[i] = palette.lerp(baseColor, palette.grey, 0.4f);
-                                else
-                                {
-                                    float max = SCANcontroller.controller.KethaneMax(resource);
-                                    pix[i] = palette.lerp(baseColor, palette.lerp(palette.gridEmpty, palette.gridFull, amount / max), 0.8f);
-                                }
+                                pix[i] = baseColor;
                             }
                             else pix[i] = baseColor;
                         }

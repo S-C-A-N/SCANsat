@@ -67,7 +67,7 @@ namespace SCANsat
 		[KSPField(isPersistant = true)]
 		public int timeWarpResolution = 20;
         [KSPField(isPersistant = true)]
-        public bool globalOverlay = true; //Global resource overlay toggle
+        public bool globalOverlay = false; //Global resource overlay toggle
         [KSPField(isPersistant = true)]
         public int gridSelection = 0; //Which resource type is selected in the settings menu
         [KSPField(isPersistant = true)]
@@ -115,6 +115,10 @@ namespace SCANsat
 				}
 			}
             OverlayResources();
+            if (ResourcesList.Count == 0) {
+                globalOverlay = false;
+                SCANui.noResources = true;
+            }
 		}
 
 		public override void OnSave(ConfigNode node) {
