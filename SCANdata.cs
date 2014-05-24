@@ -26,8 +26,7 @@ namespace SCANsat
 		Func<int,int,bool> badLonLat = (lon,lat) => (lon < 0 || lat < 0 || lon >= 360 || lat >= 180);
 
 		/* MAP: state */
-		internal byte[,] coverage = new byte[360 , 180];
-        	public byte[,] resourceCoverage = new byte[360, 180]; //Secondary coverage map for resources
+		public Int32[,] coverage = new Int32[360 , 180];
 		protected float[,] heightmap = new float[360 , 180];
         	public float[,] kethaneValueMap = new float[360, 180]; //Store kethane cell data in here
 		public CelestialBody body;
@@ -35,76 +34,54 @@ namespace SCANsat
 		public bool disabled;
 
 		/* MAP: known types of data */
-		public enum SCANtype
+		public enum SCANtype: int
 		{
-			Nothing = 0, 		// no data
-			AltimetryLoRes = 1, // low resolution altimetry (limited zoom)
-			AltimetryHiRes = 2, // high resolution altimetry (unlimited zoom)
-			Altimetry = 3, 	// both (setting) or either (testing) altimetry
-			Kethane = 4,		// Generic Kethane resource sensor
-			Biome = 8,		// biome data
-			Anomaly = 16,		// anomalies (position of anomaly)
-			AnomalyDetail = 32,	// anomaly detail (name of anomaly, etc.)
-            	ORS = 64,           // Generic ORS scanner
-			Everything = 255	// everything
-		}
+			Nothing = 0, 		    // no data (MapTraq)
+			AltimetryLoRes = 1<<0,  // low resolution altimetry (limited zoom)
+			AltimetryHiRes = 1<<1,  // high resolution altimetry (unlimited zoom)
+			Altimetry = 3, 	        // both (setting) or either (testing) altimetry
+			SCANsat_1 = 1<<2,		// Unused, reserved for future SCANsat scanner
+			Biome = 1<<3,		    // biome data
+			Anomaly = 1<<4,		    // anomalies (position of anomaly)
+			AnomalyDetail = 1<<5,	// anomaly detail (name of anomaly, etc.)
+            Kethane = 1<<6,         // Kethane - K-type - Kethane
+            Ore = 1<<7,             // Ore - K-type - EPL
+            Kethane_3 = 1<<8,       // Reserved - K-type
+            Kethane_4 = 1<<9,       // Reserved - K-type
+            Uranium = 1<<10,        // Uranium - ORS - KSPI
+            Thorium = 1<<11,        // Thorium - ORS - KSPI
+            Alumina = 1<<12,        // Alumina - ORS - KSPI
+            Water = 1<<13,          // Water - ORS - MKS
+            Ore_ORS = 1<<14,        // Ore - ORS - MKS
+            Minerals = 1<<15,       // Minerals - ORS - MKS
+            Substrate = 1<<16,      // Substrate - ORS - MKS
+            KEEZO = 1<<17,          // KEEZO - ORS - Kass Effect
+            ORS_9 = 1<<18,          // Reserved - ORS
+            ORS_10 = 1<<19,         // Reserved - ORS
 
-        public enum SCANResourceType //Additional enum needed here to store the many possible resource types
-        {
-            Nothing = 0,
-            Kethane_1 = 1, //Kethane
-            Kethane_2 = 2, //Ore - EPL, MKS
-            Kethane_3 = 3, //Minerals - MKS
-            Kethane_4 = 4, //Water - MKS
-            Kethane_5 = 5, //Substrate - MKS
-            Kethane_6 = 6,
-            Kethane_7 = 7,
-            Kethane_8 = 8,
-            Kethane_9 = 9,
-            Kethane_10 = 10,
-            ORS_1 = 21, //Uranium - KSPI
-            ORS_2 = 22, //Thorium - KSPI
-            ORS_3 = 23, //Alumina - KSPI
-            ORS_4 = 24, //Water - KSPI, MKS
-            ORS_5 = 25, //Ore - MKS
-            ORS_6 = 26, //Minerals - MKS
-            ORS_7 = 27, //Substrate - MKS
-            ORS_8 = 28, //KEEZO - Tessai, unreleased
-            ORS_9 = 29,
-            ORS_10 = 30
-        }
+			Everything_SCAN = 255,	// All default SCANsat scanners
+            Everything = 1<<32      // All scanner types
+		}
 
 		/* DATA: map passes and coverage (passes >= 1)*/
 		public void registerPass ( double lon , double lat , SCANtype type ) {
 			int ilon = icLON(lon);
 			int ilat = icLAT(lat);
 			if (badLonLat(ilon,ilat)) return;
-			coverage [ilon, ilat] |= (byte)type;
+			coverage [ilon, ilat] |= (Int32)type;
 		}
 		public bool isCovered ( double lon , double lat , SCANtype type ) {
 			int ilon = icLON(lon);
 			int ilat = icLAT(lat);
 			if (badLonLat(ilon,ilat)) return false;
-			return (coverage [ilon, ilat] & (byte)type) != 0;
+			return (coverage [ilon, ilat] & (Int32)type) != 0;
 		}
 		public bool isCoveredByAll ( double lon , double lat , SCANtype type ) {
 			int ilon = icLON(lon);
 			int ilat = icLAT(lat);
 			if (badLonLat(ilon,ilat)) return false;
-			return (coverage [ilon, ilat] & (byte)type) == (byte)type;
+			return (coverage [ilon, ilat] & (Int32)type) == (Int32)type;
 		}
-        public void registerResourcePass (double lon, double lat, SCANResourceType type) { //A few additional methods to handle resource coverage
-			int ilon = icLON(lon);
-			int ilat = icLAT(lat);
-			if (badLonLat(ilon,ilat)) return;
-			resourceCoverage [ilon, ilat] |= (byte)type;
-        }
-        public bool isCoveredResource (double lon, double lat, SCANResourceType type) {
-            int ilon = icLON(lon);
-            int ilat = icLAT(lat);
-            if (badLonLat(ilon, ilat)) return false;
-            return (resourceCoverage[ilon, ilat] & (byte)type) != 0;
-        }
 
 		/* DATA: elevation (called often, probably) */
 		public double getElevation ( double lon , double lat ) {
@@ -153,7 +130,7 @@ namespace SCANsat
 			return a.name;
 		}
 
-        /* DATA: resources */ //May as well put this in with the other data generating methods instead of in SCANmap
+        /* DATA: resources */
         public double ORSOverlay(double lon, double lat, int i, string s) //Uses ORS methods to grab the resource amount given a lat and long
         {
             double amount = 0f;
@@ -163,36 +140,61 @@ namespace SCANsat
         }
 
 		/* DATA: coverage */
-		public int[] coverage_count = new int[8];
-		public void updateCoverage () {
-			for (int i=0; i<6; ++i) {
-				SCANtype t = (SCANtype)(1 << i);
+        //public int[] coverage_count = new int[32];
+		public int updateCoverage (SCANtype t) {
+            //for (int i=0; i<32; ++i) {
+            //    SCANtype t = (SCANtype)(1 << i);
 				int cc = 0;
 				for (int x=0; x<360; ++x) {
 					for (int y=0; y<180; ++y) {
-						if ((coverage [x, y] & (byte)t) == 0)
+						if ((coverage [x, y] & (Int32)t) == 0)
 							++cc;
 					}
 				}
-				coverage_count [i] = cc;
-			}
+            return cc;
+                //coverage_count [i] = cc;
+            //}
 		}
 		public int getCoverage ( SCANtype type ) {
 			int uncov = 0;
-			if ((type & SCANtype.AltimetryLoRes) != SCANtype.Nothing)
-				uncov += coverage_count [0];
-			if ((type & SCANtype.AltimetryHiRes) != SCANtype.Nothing)
-				uncov += coverage_count [1];
-            if ((type & SCANtype.Kethane) != SCANtype.Nothing)
-                uncov += coverage_count [2];
-			if ((type & SCANtype.Biome) != SCANtype.Nothing)
-				uncov += coverage_count [3];
-			if ((type & SCANtype.Anomaly) != SCANtype.Nothing)
-				uncov += coverage_count [4];
-			if ((type & SCANtype.AnomalyDetail) != SCANtype.Nothing)
-				uncov += coverage_count [5];
-            if ((type & SCANtype.ORS) != SCANtype.Nothing)
-                uncov += coverage_count [6];
+			if (type != SCANtype.Nothing)
+				uncov += updateCoverage(type);
+            //if ((type & SCANtype.AltimetryHiRes) != SCANtype.Nothing)
+            //    uncov += coverage_count [1];
+            //if ((type & SCANtype.Biome) != SCANtype.Nothing)
+            //    uncov += coverage_count [3];
+            //if ((type & SCANtype.Anomaly) != SCANtype.Nothing)
+            //    uncov += coverage_count [4];
+            //if ((type & SCANtype.AnomalyDetail) != SCANtype.Nothing)
+            //    uncov += coverage_count [5];
+            //if ((type & SCANtype.Kethane) != SCANtype.Nothing)
+            //    uncov += coverage_count [6];
+            //if ((type & SCANtype.Ore) != SCANtype.Nothing)
+            //    uncov += coverage_count [7];
+            //if ((type & SCANtype.Kethane_3) != SCANtype.Nothing)
+            //    uncov += coverage_count [8];
+            //if ((type & SCANtype.Kethane_4) != SCANtype.Nothing)
+            //    uncov += coverage_count [9];
+            //if ((type & SCANtype.Uranium) != SCANtype.Nothing)
+            //    uncov += coverage_count [10];
+            //if ((type & SCANtype.Thorium) != SCANtype.Nothing)
+            //    uncov += coverage_count [11];
+            //if ((type & SCANtype.Alumina) != SCANtype.Nothing)
+            //    uncov += coverage_count [12];
+            //if ((type & SCANtype.Water) != SCANtype.Nothing)
+            //    uncov += coverage_count [13];
+            //if ((type & SCANtype.Ore_ORS) != SCANtype.Nothing)
+            //    uncov += coverage_count [14];
+            //if ((type & SCANtype.Minerals) != SCANtype.Nothing)
+            //    uncov += coverage_count [15];
+            //if ((type & SCANtype.Substrate) != SCANtype.Nothing)
+            //    uncov += coverage_count [16];
+            //if ((type & SCANtype.KEEZO) != SCANtype.Nothing)
+            //    uncov += coverage_count [17];
+            //if ((type & SCANtype.ORS_9) != SCANtype.Nothing)
+            //    uncov += coverage_count [18];
+            //if ((type & SCANtype.ORS_10) != SCANtype.Nothing)
+            //    uncov += coverage_count [19];
 			return uncov;
 
 		}
@@ -311,31 +313,76 @@ namespace SCANsat
 			return anomalies;
 		}
 
+        /* DATA: Array conversion */
+
+        //Take the Int32[] coverage and convert it to a single dimension byte array
+        private byte[] ConvertToByte (Int32[,] iArray) {
+            byte[] bArray = new byte[360 * 180 * 4];
+            int k = 0;
+            for (int i = 0; i < 360; i++) {
+                for (int j = 0; j < 180; j++) {
+                    byte[] bytes = BitConverter.GetBytes(iArray[i,j]);
+                    for (int m = 0; m < bytes.Length; m++) {
+                        bArray[k++] = bytes[m];
+                    }
+                }
+            }
+            return bArray;
+        }
+
+        //Convert byte array from persistent file to usable Int32[]
+        private Int32[,] ConvertToInt (byte[] bArray) {
+            Int32[,] iArray = new Int32[360, 180];
+            int k = 0;
+            for (int i = 0; i < 360; i++) {
+                for (int j = 0; j < 180; j++) {
+                    iArray[i,j] = BitConverter.ToInt32(bArray, k);
+                    k += 4;
+                }
+            }
+            return iArray;
+        }
+
+        //One time conversion of single byte[] to Int32 to recover old scanning data
+        private Int32[,] RecoverToInt (byte[,] bArray) {
+            Int32[,] iArray = new Int32[360, 180];
+            for (int i = 0; i < 360; i++) {
+                for (int j = 0; j < 180; j++) {
+                    iArray[i,j] = (Int32)bArray[i,j];
+                }
+            }
+            return iArray;
+        }
+
 		/* DATA: serialization and compression */
-		public string serialize (int i) {
+		public string serialize () {
 			// convert the byte[,] array into a KSP-savefile-safe variant of Base64
+            byte[] bytes = ConvertToByte(coverage);
 			MemoryStream mem = new MemoryStream ();
 			BinaryFormatter binf = new BinaryFormatter ();
-			if (i == 0) binf.Serialize (mem , coverage); //Modified to handle saving both the regural coverage map and the resource coverage map, same for deserialize
-            else if (i == 1) binf.Serialize (mem , resourceCoverage); 
+			binf.Serialize (mem , bytes);
 			string blob = Convert.ToBase64String (CLZF2.Compress (mem.ToArray ()));
 			return blob.Replace ("/" , "-").Replace ("=" , "_");
 		}
-		public void deserialize ( string blob, int i ) {
+		public void deserialize ( string blob, bool b ) {
 			try {
 				blob = blob.Replace ("-" , "/").Replace ("_" , "=");
 				byte[] bytes = Convert.FromBase64String (blob);
 				bytes = CLZF2.Decompress (bytes);
 				MemoryStream mem = new MemoryStream (bytes , false);
 				BinaryFormatter binf = new BinaryFormatter ();
-				if (i == 0) coverage = (byte[,])binf.Deserialize (mem);
-                else if (i == 1) resourceCoverage = (byte[,])binf.Deserialize (mem);
-			} catch (Exception e) {
-				if (i ==0) {
-                    coverage = new byte[360 , 180];
-                    heightmap = new float[360 , 180];
+				if (b) {
+                    byte[,] bRecover = new byte[360, 180];
+                    bRecover = (byte[,])binf.Deserialize (mem);
+                    coverage = RecoverToInt(bRecover);
                 }
-				else if (i ==1) resourceCoverage = new byte[360, 180];
+                else {
+                    byte[] bArray = (byte[])binf.Deserialize (mem);
+                    coverage = ConvertToInt(bArray);
+                }
+			} catch (Exception e) {
+                coverage = new Int32[360 , 180];
+                heightmap = new float[360 , 180];
 				throw e;
 			}
 			resetImages ();
@@ -343,13 +390,10 @@ namespace SCANsat
 
 		/* DATA: reset the map */
 		public void reset () {
-			coverage = new byte[360 , 180];
+			coverage = new Int32[360 , 180];
 			heightmap = new float[360 , 180];
 			resetImages ();
 		}
-        public void resetResource () {
-            resourceCoverage = new byte[360, 180];
-        }
 		public void resetImages () {
 			// Just draw a simple grid to initialize the image; the map will appear on top of it
 			for (int y=0; y<map_small.height; y++) {
