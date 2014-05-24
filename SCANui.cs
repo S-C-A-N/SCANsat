@@ -762,34 +762,34 @@ namespace SCANsat
 
 			GUILayout.Label ("Data Management" , style_headline);
 
-			GUILayout.BeginHorizontal ();
+            //GUILayout.BeginHorizontal ();
 
 			if (GUILayout.Button ("Reset map of " + thisBody.theName)) {
 				SCANdata data = SCANcontroller.controller.getData (thisBody);
 				data.reset ();
 			}
-			if (GUILayout.Button ("Reset resource maps of " + thisBody.theName)) {
-				SCANdata data = SCANcontroller.controller.getData (thisBody);
-				data.resetResource ();
-				bigmap.resetMap ();
-			}
+            //if (GUILayout.Button ("Reset resource maps of " + thisBody.theName)) {
+            //    SCANdata data = SCANcontroller.controller.getData (thisBody);
+            //    data.resetResource ();
+            //    bigmap.resetMap ();
+            //}
 
-			GUILayout.EndHorizontal ();
-			GUILayout.BeginHorizontal ();
+            //GUILayout.EndHorizontal ();
+            //GUILayout.BeginHorizontal ();
 
 			if (GUILayout.Button ("Reset <b>all</b> data")) {
 				foreach (SCANdata data in SCANcontroller.controller.body_data.Values) {
 					data.reset ();
 				}
 			}
-			if (GUILayout.Button ("Reset <b>all</b> resource maps")) {
-				foreach (SCANdata data in SCANcontroller.controller.body_data.Values) {
-					data.resetResource ();
-				}
-				bigmap.resetMap ();
-			}
+            //if (GUILayout.Button ("Reset <b>all</b> resource maps")) {
+            //    foreach (SCANdata data in SCANcontroller.controller.body_data.Values) {
+            //        data.resetResource ();
+            //    }
+            //    bigmap.resetMap ();
+            //}
 
-			GUILayout.EndHorizontal ();
+            //GUILayout.EndHorizontal ();
 		}
 		public static void gui_settings_window_resets (int wid) {
 			GUILayout.BeginHorizontal ();
@@ -1228,16 +1228,16 @@ namespace SCANsat
 				drawOrbit (maprect , bigmap , vessel);
 			}
 
-			GUILayout.BeginVertical ();
-			// draw colors in here
-			SCANpalette.swatch (palette.xkcd_ArmyGreen);
-			SCANpalette.swatch (palette.xkcd_Yellow);
-			SCANpalette.swatch (palette.xkcd_Red);
-			SCANpalette.swatch (palette.xkcd_Magenta);
-			SCANpalette.swatch (palette.xkcd_White);
-			SCANpalette.swatch (palette.xkcd_White);
+            //GUILayout.BeginVertical ();
+            //// draw colors in here
+            //SCANpalette.swatch (palette.xkcd_ArmyGreen);
+            //SCANpalette.swatch (palette.xkcd_Yellow);
+            //SCANpalette.swatch (palette.xkcd_Red);
+            //SCANpalette.swatch (palette.xkcd_Magenta);
+            //SCANpalette.swatch (palette.xkcd_White);
+            //SCANpalette.swatch (palette.xkcd_White);
 
-			GUILayout.EndVertical ();
+            //GUILayout.EndVertical ();
 			GUILayout.EndHorizontal (); // draw colors before here
 			GUILayout.BeginHorizontal (GUILayout.ExpandWidth (true));
 			GUILayout.BeginHorizontal (GUILayout.Width (300));
@@ -1247,7 +1247,15 @@ namespace SCANsat
 			if (GUILayout.Button ("Close")) {
 				bigmap_visible = false;
 			}
-			GUILayout.FlexibleSpace ();
+            if (SCANcontroller.controller.resourceOverlayType == 1)
+            { //Rebuild the Kethane database
+                if (GUILayout.Button("Rebuild Kethane"))
+                {
+                    SCANcontroller.controller.kethaneRebuild = !SCANcontroller.controller.kethaneRebuild;
+                }
+            }
+            else
+                GUILayout.FlexibleSpace();
 			style_button.normal.textColor = palette.grey;
 			if (bigmap.isMapComplete ())
 				style_button.normal.textColor = palette.white;
@@ -1431,11 +1439,20 @@ namespace SCANsat
 					if (SCANcontroller.controller.map_ResourceOverlay && SCANcontroller.controller.globalOverlay) //Adds selected resource amount to big map legend
 					{
 						if (SCANcontroller.controller.resourceOverlayType == 0) {
-							if (data.isCoveredResource(mlon, mlat, bigmap.overlayType))
+							if (data.isCovered(mlon, mlat, bigmap.overlayType))
 							{
 								info += palette.colored(palette.magenta, "\n<b>" + bigmap.resource + ": " + data.ORSOverlay(mlon, mlat, bigmap.body.flightGlobalsIndex, bigmap.resource).ToString("N1") + " ppm</b>");
 							}
 						}
+                        else if (SCANcontroller.controller.resourceOverlayType == 1)
+                        {
+                            if (data.isCovered(mlon, mlat, bigmap.overlayType))
+                            {
+                                double amount = data.kethaneValueMap[data.icLON(mlon), data.icLAT(mlat)];
+                                if (amount < 0) amount = 0d;
+                                info += palette.colored(palette.xkcd_PukeGreen, "\n<b>" + bigmap.resource + ": " + amount.ToString("N1") + "</b>");
+                            }
+                        }
 					}
 				} else {
 					info += " " + mlat.ToString ("F") + " " + mlon.ToString ("F"); // uncomment for debugging projections
