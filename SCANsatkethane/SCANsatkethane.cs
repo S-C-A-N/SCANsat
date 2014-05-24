@@ -29,6 +29,7 @@ namespace SCANsatKethane
 
         public void OnDestroy()
         {
+            print("[Kethane Watcher] Shutting Down");
             GameEvents.onFlightReady.Remove(initialize);
         }
 
@@ -38,7 +39,7 @@ namespace SCANsatKethane
                 if (rebuildStep < 180) {
                     rebuildResourceArray();
                 }
-                if (rebuildValueStep < 180) {
+                if (rebuildValueStep < 45) {
                     rebuildResourceValue(SCANcontroller.controller.OverlayResourceType(resource));
                 }
                 if (SCANcontroller.controller.resourceOverlayType == 1) {
@@ -61,6 +62,7 @@ namespace SCANsatKethane
 
         private void setBody(CelestialBody b) { //Watcher to check for Celestial Body changes
             if (body == b) return;
+            if (b != null) {
             body = b;
             resource = SCANcontroller.controller.ResourcesList[SCANcontroller.controller.gridSelection];
             reset = SCANcontroller.controller.kethaneReset;
@@ -71,6 +73,7 @@ namespace SCANsatKethane
             rebuildFrame = 0;
             SCANcontroller.controller.kethaneBusy = true;
             //rebuildResourceArray(); //Update coverage map and reset resource value array
+            }
         }
 
         private void setResource(string s) { //Watcher to check for the user switching to different Kethane resources
@@ -100,7 +103,7 @@ namespace SCANsatKethane
         }
 
         //Update the Kethane database - used after background scanning
-        private void updateKethaneData (SCANdata.SCANResourceType type)
+        private void updateKethaneData (SCANdata.SCANtype type)
         {
             print("[Kethane Watcher] Updating Kethane Database");
             SCANdata data = SCANcontroller.controller.getData (body);
@@ -108,9 +111,9 @@ namespace SCANsatKethane
             {
                 for (int ilon = 0; ilon < 360; ilon++)
                 {
-                    if (data.isCoveredResource (ilon, ilat, type))
+                    if (data.isCovered (ilon - 180, ilat - 90, type))
                     {
-                        Cell cell = getKethaneCell (ilon, ilat);
+                        Cell cell = getKethaneCell (ilon - 180, ilat - 90);
                         if (!KethaneData.Current.Scans[resource][body.name][cell])
                             KethaneData.Current.Scans[resource][body.name][cell] = true;
                     }
@@ -121,13 +124,14 @@ namespace SCANsatKethane
         //Pulls data out of the Kethane database to update the SCANsat resource coverage map - needs some method to slow this down
         private void rebuildResourceArray ()
         {
+            SCANdata data = SCANcontroller.controller.getData (body);
             if (printer) {
                 print("[Kethane Watcher] Rebuilding SCANsat Kethane Array");
                 printer = false;
             }
-            for (int ilon = 120 * rebuildFrame; ilon < 120 * (rebuildFrame + 1); ilon++) //Run sixty points per frame; 18 seconds at 60FPS
+            for (int ilon = 120 * rebuildFrame; ilon < 120 * (rebuildFrame + 1); ilon++) //Run 120 points per frame; 9 seconds at 60FPS
             {
-                Cell cell = getKethaneCell(ilon, rebuildStep);
+                Cell cell = getKethaneCell(ilon - 180, rebuildStep - 90);
                 if (KethaneData.Current.Scans[resource][body.name][cell])
                 {
                     updateResourceArray(ilon, rebuildStep, SCANcontroller.controller.OverlayResourceType(resource));
@@ -149,47 +153,49 @@ namespace SCANsatKethane
         }
 
         //Reset the resource value array - quicker than rebuildKethaneData (), called on map resets
-        private void rebuildResourceValue (SCANdata.SCANResourceType type)
+        private void rebuildResourceValue (SCANdata.SCANtype type)
         {
             if (printera) {
                 print("[Kethane Watcher] Rebuilding Value Array");
                 printera = false;
             }
             SCANdata data = SCANcontroller.controller.getData (body);
-            //for (int ilat = 0; ilat < 180; ilat++)
-            //{
+            for (int ilat = 4 * rebuildValueStep; ilat < 4 * (rebuildValueStep + 1); ilat++)
+            {
                 for (int ilon = 0; ilon < 360; ilon++)
                 {
-                    if (data.isCoveredResource(ilon, rebuildValueStep, type))
+                    if (data.isCovered(ilon, ilat, type))
                     {
-                        //if (data.resourceCoverage[ilon, ilat] == 0) //Only check unassigned values
-                        //{
-                            Cell cell = getKethaneCell(ilon, rebuildValueStep);
+                        if (data.kethaneValueMap[ilon, ilat] == 0) //Only check unassigned values
+                        {
+                            Cell cell = getKethaneCell(ilon - 180, ilat - 90);
                             ICellResource deposit = KethaneData.Current.GetCellDeposit(resource, body, cell); 
-                            if (deposit != null) updateResourceValue (ilon, rebuildValueStep, deposit.Quantity);
-                            else updateResourceValue (ilon, rebuildValueStep, -1d); //Give empty cells -1 resources, fix later in the UI
-                        //}
+                            if (deposit != null) updateResourceValue (ilon, ilat, deposit.Quantity);
+                            else updateResourceValue (ilon, ilat, -1d); //Give empty cells -1 resources, fix later in the UI
+                        }
                     }
                 }
+
+                
+            }
                 rebuildValueStep++;
-                if (rebuildValueStep >= 180) {
+                if (rebuildValueStep >= 45) {
                     print("[Kethane Watcher] Value Array Rebuilt");
                     printera = true;
                 }
-            //}
         }
 
         private Cell getKethaneCell (int ilon, int ilat) //Find the Kethane cell corresponding to the current position
         {
-            Vector3 pos = body.GetWorldSurfacePosition((double)ilat - 90, (double)ilon - 180, 50000d); //Set high altitude just to make sure the vector is above the surface
+            Vector3 pos = body.GetWorldSurfacePosition((double)ilat, (double)ilon, 50000d); //Set high altitude just to make sure the vector is above the surface
             Vector3 Wpos = body.transform.InverseTransformPoint(pos); //Draws a line from the position defined above through the center of the planet
             return Kethane.Cell.Containing(Wpos, 5);
         }
 
-        private void updateResourceArray (int lon, int lat, SCANdata.SCANResourceType type)
+        private void updateResourceArray (int lon, int lat, SCANdata.SCANtype type)
         {
             SCANdata data = SCANcontroller.controller.getData(body);
-            data.resourceCoverage[lon, lat] = (byte)type;
+            data.coverage[lon, lat] |= (Int32)type;
         }
 
         private void updateResourceValue (int lon, int lat, double value)
