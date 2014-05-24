@@ -72,6 +72,8 @@ namespace SCANsat
         public int gridSelection = 0; //Which resource type is selected in the settings menu
         [KSPField(isPersistant = true)]
         public int resourceOverlayType = 0; //0 for ORS, 1 for Kethane
+        [KSPField(isPersistant = true)]
+        public bool dataRebuild = true;
 
 		public override void OnLoad(ConfigNode node) {
 			ConfigNode node_vessels = node.GetNode("Scanners");
@@ -86,12 +88,11 @@ namespace SCANsat
                     //}
 					foreach(ConfigNode node_sensor in node_vessel.GetNodes("Sensor")) {
 						int sensor = Convert.ToInt32(node_sensor.GetValue("type"));
-                        int rscSensor = Convert.ToInt32(node_sensor.GetValue("rscType"));
 						double fov = Convert.ToDouble(node_sensor.GetValue("fov"));
 						double min_alt = Convert.ToDouble(node_sensor.GetValue("min_alt"));
 						double max_alt = Convert.ToDouble(node_sensor.GetValue("max_alt"));
 						double best_alt = Convert.ToDouble(node_sensor.GetValue("best_alt"));
-						registerSensor(id, (SCANdata.SCANtype)sensor, (SCANdata.SCANResourceType)rscSensor, fov, min_alt, max_alt, best_alt);
+						registerSensor(id, (SCANdata.SCANtype)sensor, fov, min_alt, max_alt, best_alt);
 					}
 				}
 			}
@@ -103,14 +104,12 @@ namespace SCANsat
 					SCANdata body_data = getData(body_name);
 					try {
 						string mapdata = node_body.GetValue("Map");
-						body_data.deserialize(mapdata, 0);
-                        string resourceMapData = node_body.GetValue("Resource Map");
-                        body_data.deserialize(resourceMapData, 1);
+                        body_data.deserialize(mapdata, dataRebuild);
 					} catch(Exception e) {
 						print(e.ToString());
 						print(e.StackTrace);
 						// fail somewhat gracefully; don't make the save unloadable 
-					}
+					} 
 					body_data.disabled = Convert.ToBoolean(node_body.GetValue("Disabled"));
 				}
 			}
@@ -119,6 +118,7 @@ namespace SCANsat
                 globalOverlay = false;
                 SCANui.noResources = true;
             }
+            dataRebuild = false;
 		}
 
 		public override void OnSave(ConfigNode node) {
@@ -130,7 +130,6 @@ namespace SCANsat
 				foreach(SCANsensor sensor in knownVessels[id].sensors.Values) {
 					ConfigNode node_sensor = new ConfigNode("Sensor");
 					node_sensor.AddValue("type", (int)sensor.sensor);
-                    node_sensor.AddValue("rscType", (int)sensor.resourceSensor);
 					node_sensor.AddValue("fov", sensor.fov);
 					node_sensor.AddValue("min_alt", sensor.min_alt);
 					node_sensor.AddValue("max_alt", sensor.max_alt);
@@ -146,8 +145,7 @@ namespace SCANsat
 				SCANdata body_scan = body_data[body_name];
 				node_body.AddValue("Name", body_name);
 				node_body.AddValue("Disabled", body_scan.disabled);
-				node_body.AddValue("Map", body_scan.serialize(0));
-                node_body.AddValue("Resource Map", body_scan.serialize(1));
+				node_body.AddValue("Map", body_scan.serialize());
 				node_progress.AddNode(node_body);
 			}
 			node.AddNode(node_progress);
@@ -158,7 +156,6 @@ namespace SCANsat
 			public SCANdata.SCANtype sensor;
 			public double fov;
 			public double min_alt, max_alt, best_alt;
-            public SCANdata.SCANResourceType resourceSensor; //additional variable to track resource scanners
 
 			public bool inRange;
 			public bool bestRange;
@@ -209,34 +206,31 @@ namespace SCANsat
         }
 
         
-        public SCANdata.SCANResourceType OverlayResourceType(string s) //Assign the proper resource type depending on the selection in the settings menu
+        public SCANdata.SCANtype OverlayResourceType(string s) //Assign the proper resource type depending on the selection in the settings menu
         {
             if (resourceOverlayType == 0) {
                 switch(s)
                 {
-                    case "Uranium": return SCANdata.SCANResourceType.ORS_1;
-                    case "Thorium": return SCANdata.SCANResourceType.ORS_2;
-                    case "Alumina": return SCANdata.SCANResourceType.ORS_3;
-                    case "Water": return SCANdata.SCANResourceType.ORS_4;
-                    case "Ore": return SCANdata.SCANResourceType.ORS_5;
-                    case "Minerals": return SCANdata.SCANResourceType.ORS_6;
-                    case "Substrate": return SCANdata.SCANResourceType.ORS_7;
-                    case "KEEZO": return SCANdata.SCANResourceType.ORS_8;
-                    default: return SCANdata.SCANResourceType.Nothing;
+                    case "Uranium": return SCANdata.SCANtype.Uranium;
+                    case "Thorium": return SCANdata.SCANtype.Thorium;
+                    case "Alumina": return SCANdata.SCANtype.Alumina;
+                    case "Water": return SCANdata.SCANtype.Water;
+                    case "Ore": return SCANdata.SCANtype.Ore_ORS;
+                    case "Minerals": return SCANdata.SCANtype.Minerals;
+                    case "Substrate": return SCANdata.SCANtype.Substrate;
+                    case "KEEZO": return SCANdata.SCANtype.KEEZO;
+                    default: return SCANdata.SCANtype.Nothing;
                 }
             }
             else if (resourceOverlayType == 1) {
                 switch(s)
                 {
-                    case "Kethane": return SCANdata.SCANResourceType.Kethane_1;
-                    case "Ore": return SCANdata.SCANResourceType.Kethane_2;
-                    case "Minerals": return SCANdata.SCANResourceType.Kethane_3;
-                    case "Water": return SCANdata.SCANResourceType.Kethane_4;
-                    case "Substrate": return SCANdata.SCANResourceType.Kethane_5;
-                    default: return SCANdata.SCANResourceType.Nothing;
+                    case "Kethane": return SCANdata.SCANtype.Kethane;
+                    case "Ore": return SCANdata.SCANtype.Ore;
+                    default: return SCANdata.SCANtype.Nothing;
                 }
             }
-            return SCANdata.SCANResourceType.Nothing;
+            return SCANdata.SCANtype.Nothing;
         }
 
         internal Color gridColor(string resource, int i) //Get the resource color
@@ -330,14 +324,14 @@ namespace SCANsat
 		protected Dictionary<Guid, SCANvessel> knownVessels = new Dictionary<Guid, SCANvessel>();
 
         //Add the additional resource type variable to registered sensors
-		public void registerSensor(Vessel v, SCANdata.SCANtype sensors, SCANdata.SCANResourceType resourceSensor, double fov, double min_alt, double max_alt, double best_alt) {
-			registerSensor(v.id, sensors, resourceSensor, fov, min_alt, max_alt, best_alt);
+		public void registerSensor(Vessel v, SCANdata.SCANtype sensors, double fov, double min_alt, double max_alt, double best_alt) {
+			registerSensor(v.id, sensors, fov, min_alt, max_alt, best_alt);
 			knownVessels[v.id].vessel = v;
 			knownVessels[v.id].latitude = fixLatitude(v.latitude);
 			knownVessels[v.id].longitude = fixLongitude(v.longitude);
 		}
 
-		public void registerSensor(Guid id, SCANdata.SCANtype sensors, SCANdata.SCANResourceType resourceSensor, double fov, double min_alt, double max_alt, double best_alt) {
+		public void registerSensor(Guid id, SCANdata.SCANtype sensors, double fov, double min_alt, double max_alt, double best_alt) {
 			if(!knownVessels.ContainsKey(id)) knownVessels[id] = new SCANvessel();
 			SCANvessel sv = knownVessels[id];
 			sv.id = id;
@@ -361,7 +355,6 @@ namespace SCANsat
 				if(!sv.sensors.ContainsKey(sensor)) sv.sensors[sensor] = new SCANsensor();
 				SCANsensor s = sv.sensors[sensor];
 				s.sensor = sensor;
-                s.resourceSensor = resourceSensor; //Record resource type for the SCANsensor in question
 				s.fov = this_fov;
 				s.min_alt = this_min_alt;
 				s.max_alt = this_max_alt;
@@ -530,7 +523,7 @@ namespace SCANsat
 			currentActiveVessel = 0;
 			actualPasses = 0;
 			maxRes = 0;
-			foreach(SCANdata data in body_data.Values) data.updateCoverage();
+            //foreach(SCANdata data in body_data.Values) data.updateCoverage();
 			foreach(Vessel v in FlightGlobals.Vessels) {
 				if(!knownVessels.ContainsKey(v.id)) continue;
 				SCANvessel vessel = knownVessels[v.id];
@@ -630,10 +623,7 @@ namespace SCANsat
 						clampLat = lat + y;
 						if (clampLat > 90) clampLat = 90;
 						if (clampLat < -90) clampLat = -90;
-                        if (sensor.resourceSensor != 0) 
-                            data.registerResourcePass(clampLon, clampLat, sensor.resourceSensor); //Additional scan pass for resource scanners, probably needs some tweaking
-					    else
-                            data.registerPass(clampLon, clampLat, sensor.sensor);
+                        data.registerPass(clampLon, clampLat, sensor.sensor);
                     }
 				}
 			}
