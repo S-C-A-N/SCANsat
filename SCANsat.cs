@@ -95,13 +95,23 @@ namespace SCANsat
         	public override void OnInitialize()
         {
 		if (scanName != null)
-            {
-               Events["startScan"].guiName = "Start " + scanName;
-               Events["stopScan"].guiName = "Stop " + scanName;
-			Events["analyze"].active = true;
-               Actions["startScanAction"].guiName = "Start " + scanName;
-               Actions["stopScanAction"].guiName = "Stop " + scanName;
-               Actions["toggleScanAction"].guiName = "Toggle " + scanName;
+            { // Use bitwise operators to check if the part has valid science collection scanners
+            if ((sensorType & (Int32)SCANdata.SCANtype.AltimetryLoRes) == 0 && (sensorType & (Int32)SCANdata.SCANtype.AltimetryHiRes) == 0 && (sensorType & (Int32)SCANdata.SCANtype.Anomaly) == 0 && (sensorType & (Int32)SCANdata.SCANtype.Biome) == 0) {
+                Events["startScan"].guiName = "Start " + scanName;
+                Events["stopScan"].guiName = "Stop " + scanName;
+			    Events["analyze"].active = false;
+                Actions["startScanAction"].guiName = "Start " + scanName;
+                Actions["stopScanAction"].guiName = "Stop " + scanName;
+                Actions["toggleScanAction"].guiName = "Toggle " + scanName;
+                Actions["analyzeData"].active = false;
+            } else {
+                Events["startScan"].guiName = "Start " + scanName;
+                Events["stopScan"].guiName = "Stop " + scanName;
+			    Events["analyze"].active = true;
+                Actions["startScanAction"].guiName = "Start " + scanName;
+                Actions["stopScanAction"].guiName = "Stop " + scanName;
+                Actions["toggleScanAction"].guiName = "Toggle " + scanName;
+            }
             }
 
             if (sensorType == 0)
