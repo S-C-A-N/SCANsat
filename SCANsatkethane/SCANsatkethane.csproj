@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -12,8 +12,10 @@
     <AssemblyName>SCANsatKethane</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>false</DebugSymbols>
     <DebugType>none</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>..\..\</OutputPath>
@@ -35,7 +37,7 @@
       <Private>False</Private>
     </Reference>
     <Reference Include="Kethane">
-      <HintPath>..\..\..\..\..\..\..\..\..\KSP\addons\Kethane-0.8.5\GameData\Kethane\Plugins\Kethane.dll</HintPath>
+      <HintPath>..\..\..\Kethane\Plugins\Kethane.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="System" />
@@ -45,10 +47,12 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="SCANsatKethane.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SCANStarter.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\SCANsat.csproj">
+    <ProjectReference Include="..\..\..\..\..\..\v7\SCANsat.csproj">
       <Project>{3AE13948-477D-4375-8AB4-B45664966D9E}</Project>
       <Name>SCANsat</Name>
       <Private>False</Private>
@@ -62,7 +66,4 @@
   <Target Name="AfterBuild">
   </Target>
   -->
-  <ItemGroup>
-    <None Include="SCANsatkethane.cs" />
-  </ItemGroup>
 </Project>
