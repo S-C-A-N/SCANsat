@@ -78,7 +78,10 @@ namespace SCANsat
 			smallMap.OnClick += (e2) => SCANui.minimode = (SCANui.minimode == 0 ? 2 : -SCANui.minimode);
 			bigMap.OnClick += (e2) => SCANui.bigmap_visible = !SCANui.bigmap_visible;
 			instrument.OnClick += (e2) => SCANui.instruments_visible = !SCANui.instruments_visible;
-			settings.OnClick += (e2) => SCANui.settings_visible = !SCANui.settings_visible;
+			settings.OnClick += (e2) => {
+                if (!SCANui.settings_visible) SCANcontroller.controller.getSettingsCoverage();
+                SCANui.settings_visible = !SCANui.settings_visible;
+            };
 			list.OnAnyOptionClicked += (  ) => destroyMenu (menu);
 			menu.Drawable = list;
         }
