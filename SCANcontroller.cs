@@ -321,7 +321,7 @@ namespace SCANsat
             return mult;
         }
 
-		protected Dictionary<Guid, SCANvessel> knownVessels = new Dictionary<Guid, SCANvessel>();
+		internal Dictionary<Guid, SCANvessel> knownVessels = new Dictionary<Guid, SCANvessel>();
 
         //Add the additional resource type variable to registered sensors
 		public void registerSensor(Vessel v, SCANdata.SCANtype sensors, double fov, double min_alt, double max_alt, double best_alt) {
@@ -435,7 +435,7 @@ namespace SCANsat
 				if(!found && (sensor & SCANdata.SCANtype.Biome) != SCANdata.SCANtype.Nothing) {
 					found = true;
 					id = "SCANsatBiomeAnomaly";
-					coverage = data.getCoveragePercentage(SCANdata.SCANtype.Biome | SCANdata.SCANtype.Anomaly);
+					coverage = data.getCoveragePercentage(SCANdata.SCANtype.Biome); //This should only really check biomes, and it screws up with the changes made to getCoveragePercentage
 				}
 			}
 
@@ -485,6 +485,14 @@ namespace SCANsat
 			data.body = body;
 			return data;
 		}
+
+        public void getSettingsCoverage() //This handles the scanning coverage value in the settings menu
+        {
+            foreach (CelestialBody body in FlightGlobals.Bodies) {
+                SCANdata data = getData (body);
+                data.coveragePercentage = data.getCoveragePercentage(SCANdata.SCANtype.Nothing);
+            }
+        }
 
         //public void registerPass(CelestialBody body, float lon, float lat, SCANdata.SCANtype type) {
         //    getData(body).registerPass(lon, lat, type);
