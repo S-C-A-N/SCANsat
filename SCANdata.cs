@@ -32,6 +32,7 @@ namespace SCANsat
 		public CelestialBody body;
 		public Texture2D map_small = new Texture2D (360 , 180 , TextureFormat.RGB24 , false);
 		public bool disabled;
+        public double coveragePercentage; //Stores scanning coverage value for the settings menu
 
 		/* MAP: known types of data */
 		public enum SCANtype: int
@@ -141,7 +142,7 @@ namespace SCANsat
 
 		/* DATA: coverage */
         //public int[] coverage_count = new int[32];
-		public int updateCoverage (SCANtype t) {
+		public int updateCoverage (SCANtype t) { //Updating this during background scanning for every planet is too much for an int enum
             //for (int i=0; i<32; ++i) {
             //    SCANtype t = (SCANtype)(1 << i);
 				int cc = 0;
@@ -155,7 +156,7 @@ namespace SCANsat
                 //coverage_count [i] = cc;
             //}
 		}
-		public int getCoverage ( SCANtype type ) {
+		public int getCoverage ( SCANtype type ) { //Instead of calling from a cached value, this directly calculates coverage for a given scanner
 			int uncov = 0;
 			if (type != SCANtype.Nothing)
 				uncov += updateCoverage(type);
@@ -199,12 +200,16 @@ namespace SCANsat
 
 		}
 		public double getCoveragePercentage ( SCANtype type ) {
-			if (type == SCANtype.Nothing) {
-				type = SCANtype.AltimetryLoRes | SCANtype.AltimetryHiRes | SCANtype.Biome | SCANtype.Anomaly;
-			}
-			double cov = getCoverage (type);
-			if (cov <= 0) {
-				cov = 100;
+			double cov = 0d;
+            if (type == SCANtype.Nothing) {
+                type = SCANtype.AltimetryLoRes | SCANtype.AltimetryHiRes | SCANtype.Biome | SCANtype.Anomaly;
+			    cov += getCoverage (SCANtype.AltimetryLoRes); //Running all four of these everytime the GUI updates hammers performance
+                cov += getCoverage (SCANtype.AltimetryHiRes); //I made a new method that updates the coverage percentages only at the 
+                cov += getCoverage (SCANtype.Biome);            //time when the settings menu is opened
+                cov += getCoverage (SCANtype.Anomaly);            
+            } else cov = getCoverage (type);
+            if (cov <= 0) {
+			cov = 100;
 			} else {
 				cov = Math.Min (99.9d , 100 - cov * 100d / (360d * 180d * SCANcontroller.countBits ((int)type)));
 			}
