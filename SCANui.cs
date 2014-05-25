@@ -394,6 +394,7 @@ namespace SCANsat
                 }
 				if (GUILayout.Button ("Settings"))
                 {
+                    if (!settings_visible) SCANcontroller.controller.getSettingsCoverage(); //Updates coverage only when the menu is opened
 					settings_visible = !settings_visible;
                 }
 				GUILayout.EndHorizontal ();
@@ -724,7 +725,7 @@ namespace SCANsat
 			foreach (CelestialBody body in FlightGlobals.Bodies) {
 				if (count == 0) GUILayout.BeginVertical ();
 				SCANdata data = SCANcontroller.controller.getData (body);
-				data.disabled = !GUILayout.Toggle (!data.disabled , body.bodyName + " (" + data.getCoveragePercentage (SCANdata.SCANtype.Nothing).ToString ("N1") + "%)");
+				data.disabled = !GUILayout.Toggle (!data.disabled , body.bodyName + " (" + data.coveragePercentage.ToString ("N1") + "%)"); //No longer updates while the suttings menu is open
 				switch (count) {
 					case 4: GUILayout.EndVertical (); count = 0; break;
 					default: ++count; break;
@@ -767,6 +768,7 @@ namespace SCANsat
 			if (GUILayout.Button ("Reset map of " + thisBody.theName)) {
 				SCANdata data = SCANcontroller.controller.getData (thisBody);
 				data.reset ();
+                data.coveragePercentage = data.getCoveragePercentage(SCANdata.SCANtype.Nothing);
 			}
             //if (GUILayout.Button ("Reset resource maps of " + thisBody.theName)) {
             //    SCANdata data = SCANcontroller.controller.getData (thisBody);
@@ -780,6 +782,7 @@ namespace SCANsat
 			if (GUILayout.Button ("Reset <b>all</b> data")) {
 				foreach (SCANdata data in SCANcontroller.controller.body_data.Values) {
 					data.reset ();
+                    data.coveragePercentage = data.getCoveragePercentage(SCANdata.SCANtype.Nothing);
 				}
 			}
             //if (GUILayout.Button ("Reset <b>all</b> resource maps")) {
@@ -1340,11 +1343,14 @@ namespace SCANsat
 			if (SCANcontroller.controller.globalOverlay) //Button to turn on/off resource overlay
 			{
 			 style_button.normal.textColor = SCANcontroller.controller.map_ResourceOverlay ? palette.c_good : palette.white;
-			 if (GUILayout.Button(SCANcontroller.controller.ResourcesList[SCANcontroller.controller.gridSelection], style_button))
-			 {
-			     SCANcontroller.controller.map_ResourceOverlay = !SCANcontroller.controller.map_ResourceOverlay;
-			     bigmap.resetMap();
-			 }
+			    if (!SCANcontroller.controller.kethaneBusy || SCANcontroller.controller.resourceOverlayType == 0 ) {
+                    if (GUILayout.Button(SCANcontroller.controller.ResourcesList[SCANcontroller.controller.gridSelection], style_button)) {
+			            SCANcontroller.controller.map_ResourceOverlay = !SCANcontroller.controller.map_ResourceOverlay;
+			            bigmap.resetMap();
+			        }
+                } else { //Disable overlay while kethane database is rebuilding
+                    GUILayout.Button("Rebuilding...");
+                }
 			}
 			#endregion
 
@@ -1685,8 +1691,13 @@ namespace SCANsat
 
 				SCANdata.SCANtype active = SCANcontroller.controller.activeSensorsOnVessel (vessel.id);
 				if (active != SCANdata.SCANtype.Nothing) {
-					double cov = data.getCoveragePercentage (active);
-					infotext += " " + cov.ToString ("N1") + "%";
+					double cov = 0d;
+                    int sensorCount = 0;
+                    foreach (SCANdata.SCANtype sense in SCANcontroller.controller.knownVessels[vessel.id].sensors.Keys) {
+                        cov += data.getCoveragePercentage(sense);
+                        sensorCount++;
+                    }
+					infotext += " " + (cov / sensorCount).ToString ("N1") + "%";
 					if (notMappingToday) {
 						infotext = abad + "NO POWER" + ac;
 					}
