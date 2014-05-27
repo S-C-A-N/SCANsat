@@ -79,7 +79,10 @@ namespace SCANsat
 			bigMap.OnClick += (e2) => SCANui.bigmap_visible = !SCANui.bigmap_visible;
 			instrument.OnClick += (e2) => SCANui.instruments_visible = !SCANui.instruments_visible;
 			settings.OnClick += (e2) => {
-                if (!SCANui.settings_visible) SCANcontroller.controller.getSettingsCoverage();
+                if (!SCANui.settings_visible) {
+                    SCANcontroller.controller.getSettingsCoverage();
+                    SCANcontroller.controller.Resources(FlightGlobals.currentMainBody);
+                }
                 SCANui.settings_visible = !SCANui.settings_visible;
             };
 			list.OnAnyOptionClicked += (  ) => destroyMenu (menu);
