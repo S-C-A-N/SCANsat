@@ -253,16 +253,17 @@ namespace SCANsat
 		protected bool mapsaved; // all refs are below
 		protected double[] mapline; // all refs are below
 		internal CelestialBody body; // all refs are below
-		internal SCANdata.SCANtype overlayType; //resource type, determined by selection in settings menu
-        	private double ORSScalar; // ORS log scalar value
-        	private double ORSMultiplier; // ORS multiplier value
-		internal string resource; //name of the currently selected resource
+        public SCANdata.SCANResource resource;
 
 		/* MAP: nearly trivial functions */
 		public void setBody ( CelestialBody b ) {
 			if (body == b)
 				return;
 			body = b;
+            SCANcontroller.controller.Resources(b);
+            if (SCANcontroller.controller.gridSelection > SCANcontroller.controller.ResourcesList.Count - 1)
+                SCANcontroller.controller.gridSelection = 0;
+            resource = SCANcontroller.controller.ResourcesList[SCANcontroller.controller.gridSelection];
 			resetMap ();
 		}
 		public bool isMapComplete () {
@@ -273,18 +274,8 @@ namespace SCANsat
 		public void resetMap () {
 			mapstep = 0;
 			mapsaved = false;
-            if (SCANcontroller.controller.globalOverlay) {
-                overlayType = SCANcontroller.controller.OverlayResourceType(resource); //current resource selection
-                palette.gridFull = SCANcontroller.controller.gridColor(resource, 0); //grab the proper color for the selected resource
-                palette.gridEmpty = SCANcontroller.controller.gridColor(resource, 1); //grab the empty color value
-                if (SCANcontroller.controller.resourceOverlayType == 0) //ORS resource multipliers
-                {
-                    ORSScalar = SCANcontroller.controller.ORSScalar(resource, body);
-                    ORSMultiplier = SCANcontroller.controller.ORSMultiplier(resource, body);
-                }
-                else if (SCANcontroller.controller.resourceOverlayType == 1)
-                    SCANcontroller.controller.kethaneReset = !SCANcontroller.controller.kethaneReset;
-            }
+            if (SCANcontroller.controller.globalOverlay && SCANcontroller.controller.resourceOverlayType == 1)
+                SCANcontroller.controller.kethaneReset = !SCANcontroller.controller.kethaneReset;
 		}
 		public void resetMap ( int mode, int maptype ) {
 			mapmode = mode;
@@ -292,7 +283,7 @@ namespace SCANsat
                 resetMap ();
 		}
         	public void setResource (string s) {
-            if (resource == s)
+            if (resource.name == s)
                 return;
             resource = SCANcontroller.controller.ResourcesList[SCANcontroller.controller.gridSelection];
             resetMap();
@@ -369,12 +360,8 @@ namespace SCANsat
 					continue;
 				}
 				if (mapmode == 0) {
-                    //if (!data.isCovered (lon , lat , SCANdata.SCANtype.Altimetry))
-                    //    continue;
 					if (body.pqsController == null) {
 						baseColor = palette.lerp (palette.black , palette.white , UnityEngine.Random.value);
-                        //big_heightmap[i, mapstep, SCANcontroller.controller.projection] = 0;
-                        //continue;
 					}
                     else if (data.isCovered(lon, lat, SCANdata.SCANtype.Altimetry))
                     {
@@ -388,7 +375,7 @@ namespace SCANsat
                                 // high resolution gets a coloured pixel for the actual position
                                 val = (float)data.getElevation(lon, lat);
                                 baseColor = palette.heightToColor(val, scheme); //use temporary color to store pixel value
-                                //pix[i] = heightToColor(val, scheme);
+                                if (val == 0f) val = -0.001f;
                                 heightMapArray(val, mapstep, i, mapType);
                             }
                             else
@@ -396,7 +383,7 @@ namespace SCANsat
                                 // basic altimetry gets forced greyscale with lower resolution
                                 val = (float)data.getElevation(((int)(lon * 5)) / 5, ((int)(lat * 5)) / 5);
                                 baseColor = palette.heightToColor(val, 1);
-                                //pix[i] = heightToColor(val, 1);
+                                if (val == 0f) val = -0.001f;
                                 heightMapArray(val, mapstep, i, mapType);
                             }
                         }
@@ -405,12 +392,10 @@ namespace SCANsat
                             if (data.isCovered(lon, lat, SCANdata.SCANtype.AltimetryHiRes))
                             {
                                 baseColor = palette.heightToColor(val, scheme);
-                                //pix[i] = heightToColor(val, scheme);
                             }
                             else
                             {
                                 baseColor = palette.heightToColor(val, 1);
-                                //pix[i] = heightToColor(val, 1);
                             }
                         }
                         mapline[i] = val;
@@ -419,22 +404,34 @@ namespace SCANsat
                     {
                         if (SCANcontroller.controller.resourceOverlayType == 0)
                         {
-                            if (data.isCovered(lon, lat, overlayType)) //check our new resource coverage map
+                            if (data.isCovered(lon, lat, resource.type)) //check our new resource coverage map
                             {
-                                double amount = data.ORSOverlay(lon, lat, body.flightGlobalsIndex, resource); //grab the resource amount for the current pixel
-                                double scalar = ORSMultiplier * ORSScalar;
-                                if (amount > scalar)
-                                {
-                                    if (amount > 50 * scalar) amount = 50 * scalar; //max cutoff value
-                                    pix[i] = palette.lerp(baseColor, palette.gridFull, (float)(amount) / (float)(50 * scalar)); //vary color by resource amount
+                                double amount = data.ORSOverlay(lon, lat, body.flightGlobalsIndex, resource.name); //grab the resource amount for the current pixel
+                                double scalar = resource.ORS_Multiplier * resource.ORS_Scalar * resource.ORS_Threshold;
+                                if (resource.linear) {
+                                    amount *= 100;
+                                    if (amount > scalar)
+                                    {
+                                        if (amount > 100) amount = 100; //max cutoff value
+                                        pix[i] = palette.lerp(baseColor, palette.lerp(resource.emptyColor, resource.fullColor, (float)(amount) / 100f), 0.3f); //vary color by resource amount
+                                    }
+                                    else pix[i] = palette.lerp(baseColor, palette.grey, 0.4f);
                                 }
-                                else pix[i] = baseColor;
+                                else {
+                                    amount *= 1000000;
+                                    if (amount > scalar)
+                                    {
+                                        if (amount > 50 * scalar) amount = 50 * scalar; //max cutoff value
+                                        pix[i] = palette.lerp(baseColor, palette.lerp(resource.emptyColor, resource.fullColor, (float)(amount) / (float)(50 * scalar)), 0.8f); //vary color by resource amount
+                                    }
+                                    else pix[i] = palette.lerp(baseColor, palette.grey, 0.4f);
+                                }
                             }
                             else pix[i] = baseColor;
                         }
                         else if (SCANcontroller.controller.resourceOverlayType == 1)
                         {
-                            if (data.isCovered(lon, lat, overlayType))
+                            if (data.isCovered(lon, lat, resource.type))
                             {
                                 int ilon = data.icLON(lon);
                                 int ilat = data.icLAT(lat);
@@ -442,8 +439,7 @@ namespace SCANsat
                                 if (amount <= 0) pix[i] = palette.lerp(baseColor, palette.grey, 0.4f);
                                 else
                                 {
-                                    float max = SCANcontroller.controller.KethaneMax(resource);
-                                    pix[i] = palette.lerp(baseColor, palette.lerp(palette.gridEmpty, palette.gridFull, amount / max), 0.8f);
+                                    pix[i] = palette.lerp(baseColor, palette.lerp(resource.emptyColor, resource.fullColor, amount / resource.maxValue), 0.8f);
                                 }
                             }
                             else pix[i] = baseColor;
@@ -463,11 +459,8 @@ namespace SCANsat
 				*/
                     //mapline [i] = val;
 				} else if (mapmode == 1) {
-                    //if (!data.isCovered (lon , lat , SCANdata.SCANtype.Altimetry))
-                    //    continue;
 					if (body.pqsController == null) {
 						baseColor = palette.lerp (palette.black , palette.white , UnityEngine.Random.value);
-                        //continue;
 					}
                     else if (data.isCovered(lon, lat, SCANdata.SCANtype.Altimetry))
                     {
@@ -479,11 +472,13 @@ namespace SCANsat
                             if (data.isCovered(lon, lat, SCANdata.SCANtype.AltimetryHiRes))
                             {
                                 val = (float)data.getElevation(lon, lat);
+                                if (val == 0f) val = -0.001f;
                                 heightMapArray(val, mapstep, i, mapType);
                             }
                             else
                             {
                                 val = (float)data.getElevation(((int)(lon * 5)) / 5, ((int)(lat * 5)) / 5);
+                                if (val == 0f) val = -0.001f;
                                 heightMapArray(val, mapstep, i, mapType);
                             }
                         }
@@ -524,22 +519,36 @@ namespace SCANsat
                     {
                         if (SCANcontroller.controller.resourceOverlayType == 0)
                         {
-                            if (data.isCovered(lon, lat, overlayType)) //check our new resource coverage map
+                            if (data.isCovered(lon, lat, resource.type)) //check our new resource coverage map
                             {
-                                double amount = data.ORSOverlay(lon, lat, body.flightGlobalsIndex, resource); //grab the resource amount for the current pixel
-                                double scalar = ORSMultiplier * ORSScalar;
-                                if (amount > scalar)
+                                double amount = data.ORSOverlay(lon, lat, body.flightGlobalsIndex, resource.name); //grab the resource amount for the current pixel
+                                double scalar = resource.ORS_Multiplier * resource.ORS_Scalar * resource.ORS_Threshold;
+                                if (resource.linear)
                                 {
-                                    if (amount > 50 * scalar) amount = 50 * scalar; //max cutoff value
-                                    pix[i] = palette.lerp(baseColor, palette.gridFull, (float)(amount) / (float)(50 * scalar)); //vary color by resource amount
+                                    amount *= 100;
+                                    if (amount > scalar)
+                                    {
+                                        if (amount > 100) amount = 100; //max cutoff value
+                                        pix[i] = palette.lerp(baseColor, palette.lerp(resource.emptyColor, resource.fullColor, (float)(amount) / 100f), 0.3f); //vary color by resource amount
+                                    }
+                                    else pix[i] = palette.lerp(baseColor, palette.grey, 0.4f);
                                 }
-                                else pix[i] = baseColor;
+                                else
+                                {
+                                    amount *= 1000000;
+                                    if (amount > scalar)
+                                    {
+                                        if (amount > 50 * scalar) amount = 50 * scalar; //max cutoff value
+                                        pix[i] = palette.lerp(baseColor, palette.lerp(resource.emptyColor, resource.fullColor, (float)(amount) / (float)(50 * scalar)), 0.8f); //vary color by resource amount
+                                    }
+                                    else pix[i] = palette.lerp(baseColor, palette.grey, 0.4f);
+                                }
                             }
                             else pix[i] = baseColor;
                         }
                         else if (SCANcontroller.controller.resourceOverlayType == 1)
                         {
-                            if (data.isCovered(lon, lat, overlayType))
+                            if (data.isCovered(lon, lat, resource.type))
                             {
                                 int ilon = data.icLON(lon);
                                 int ilat = data.icLAT(lat);
@@ -547,8 +556,7 @@ namespace SCANsat
                                 if (amount <= 0) pix[i] = palette.lerp(baseColor, palette.grey, 0.4f);
                                 else
                                 {
-                                    float max = SCANcontroller.controller.KethaneMax(resource);
-                                    pix[i] = palette.lerp(baseColor, palette.lerp(palette.gridEmpty, palette.gridFull, amount / max), 0.8f);
+                                    pix[i] = palette.lerp(baseColor, palette.lerp(resource.emptyColor, resource.fullColor, amount / resource.maxValue), 0.8f);
                                 }
                             }
                             else pix[i] = baseColor;
@@ -557,11 +565,8 @@ namespace SCANsat
                     }
                     else pix[i] = baseColor;
 				} else if (mapmode == 2) {
-                    //if (!data.isCovered (lon , lat , SCANdata.SCANtype.Biome))
-                    //    continue;
 					if (body.BiomeMap == null || body.BiomeMap.Map == null) {
 						baseColor = palette.lerp (palette.black , palette.white , UnityEngine.Random.value);
-                        //continue;
 					}
 					/* // this just basically stretches the actual biome map to fit... it looks horrible
 				float u = ((lon + 360 + 180 + 90)) % 360;
@@ -602,11 +607,13 @@ namespace SCANsat
                                     if (data.isCovered(lon, lat, SCANdata.SCANtype.AltimetryHiRes))
                                     {
                                         val = (float)data.getElevation(lon, lat);
+                                        if (val == 0f) val = -0.001f;
                                         heightMapArray(val, mapstep, i, mapType);
                                     }
                                     else
                                     {
                                         val = (float)data.getElevation(((int)(lon * 5)) / 5, ((int)(lat * 5)) / 5);
+                                        if (val == 0f) val = -0.001f;
                                         heightMapArray(val, mapstep, i, mapType);
                                     }
                                 }
@@ -632,22 +639,36 @@ namespace SCANsat
                     {
                         if (SCANcontroller.controller.resourceOverlayType == 0)
                         {
-                            if (data.isCovered(lon, lat, overlayType)) //check our new resource coverage map
+                            if (data.isCovered(lon, lat, resource.type)) //check our new resource coverage map
                             {
-                                double amount = data.ORSOverlay(lon, lat, body.flightGlobalsIndex, resource); //grab the resource amount for the current pixel
-                                double scalar = ORSMultiplier * ORSScalar;
-                                if (amount > scalar)
+                                double amount = data.ORSOverlay(lon, lat, body.flightGlobalsIndex, resource.name); //grab the resource amount for the current pixel
+                                double scalar = resource.ORS_Multiplier * resource.ORS_Scalar * resource.ORS_Threshold;
+                                if (resource.linear)
                                 {
-                                    if (amount > 50 * scalar) amount = 50 * scalar; //max cutoff value
-                                    pix[i] = palette.lerp(baseColor, palette.gridFull, (float)(amount) / (float)(50 * scalar)); //vary color by resource amount
+                                    amount *= 100;
+                                    if (amount > scalar)
+                                    {
+                                        if (amount > 100) amount = 100; //max cutoff value
+                                        pix[i] = palette.lerp(baseColor, palette.lerp(resource.emptyColor, resource.fullColor, (float)(amount) / 100f), 0.3f); //vary color by resource amount
+                                    }
+                                    else pix[i] = palette.lerp(baseColor, palette.grey, 0.4f);
                                 }
-                                else pix[i] = baseColor;
+                                else
+                                {
+                                    amount *= 1000000;
+                                    if (amount > scalar)
+                                    {
+                                        if (amount > 50 * scalar) amount = 50 * scalar; //max cutoff value
+                                        pix[i] = palette.lerp(baseColor, palette.lerp(resource.emptyColor, resource.fullColor, (float)(amount) / (float)(50 * scalar)), 0.8f); //vary color by resource amount
+                                    }
+                                    else pix[i] = palette.lerp(baseColor, palette.grey, 0.4f);
+                                }
                             }
                             else pix[i] = baseColor;
                         }
                         else if (SCANcontroller.controller.resourceOverlayType == 1)
                         {
-                            if (data.isCovered(lon, lat, overlayType))
+                            if (data.isCovered(lon, lat, resource.type))
                             {
                                 int ilon = data.icLON(lon);
                                 int ilat = data.icLAT(lat);
@@ -655,8 +676,7 @@ namespace SCANsat
                                 if (amount <= 0) pix[i] = palette.lerp(baseColor, palette.grey, 0.4f);
                                 else
                                 {
-                                    float max = SCANcontroller.controller.KethaneMax(resource);
-                                    pix[i] = palette.lerp(baseColor, palette.lerp(palette.gridEmpty, palette.gridFull, amount / max), 0.8f);
+                                    pix[i] = palette.lerp(baseColor, palette.lerp(resource.emptyColor, resource.fullColor, amount / resource.maxValue), 0.8f);
                                 }
                             }
                             else pix[i] = baseColor;
