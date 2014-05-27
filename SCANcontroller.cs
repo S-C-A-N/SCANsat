@@ -104,7 +104,15 @@ namespace SCANsat
 					SCANdata body_data = getData(body_name);
 					try {
 						string mapdata = node_body.GetValue("Map");
-                        body_data.deserialize(mapdata, dataRebuild);
+                        if (dataRebuild) {
+                            body_data.integerDeserialize(mapdata, true);
+                            body_data.deserialize(mapdata);
+                        }
+                        else {
+                            body_data.integerDeserialize(mapdata, false);
+                            string oldMapdata = node_body.GetValue("Old_Map");
+                            body_data.deserialize(oldMapdata);
+                        }
 					} catch(Exception e) {
 						print(e.ToString());
 						print(e.StackTrace);
@@ -113,14 +121,10 @@ namespace SCANsat
 					body_data.disabled = Convert.ToBoolean(node_body.GetValue("Disabled"));
 				}
 			}
-            OverlayResources();
-            if (ResourcesList.Count == 0) {
-                globalOverlay = false;
-                SCANui.noResources = true;
-            }
+            getSettingsCoverage();
             dataRebuild = false;
 		}
-
+        
 		public override void OnSave(ConfigNode node) {
 			ConfigNode node_vessels = new ConfigNode("Scanners");
 			foreach(Guid id in knownVessels.Keys) {
@@ -145,7 +149,8 @@ namespace SCANsat
 				SCANdata body_scan = body_data[body_name];
 				node_body.AddValue("Name", body_name);
 				node_body.AddValue("Disabled", body_scan.disabled);
-				node_body.AddValue("Map", body_scan.serialize());
+				node_body.AddValue("Map", body_scan.integerSerialize());
+                node_body.AddValue("Old_Map", body_scan.serialize());
 				node_progress.AddNode(node_body);
 			}
 			node.AddNode(node_progress);
@@ -173,38 +178,65 @@ namespace SCANsat
 			public double lastUT;
 		}
         
-        public List<string> ResourcesList = new List<string>(); //The list of all relevant resource names
+        public List<SCANdata.SCANResource> ResourcesList = new List<SCANdata.SCANResource>(); //The list of all relevant resources
         public bool kethaneRebuild = false;
         public bool kethaneReset = false;
         public bool kethaneBusy = false;
 
-        internal void OverlayResources() //Grab the resource name out of the relevant config node
+        public void Resources(CelestialBody b)
         {
             ResourcesList.Clear();
-            if (resourceOverlayType == 0)
-            {
-                foreach (ConfigNode node in GameDatabase.Instance.GetConfigNodes("PLANETARY_RESOURCE_DEFINITION"))
-                {
-                    if (node != null)
-                    {
-                        string resourceName = node.GetValue("name");
-                        if (!ResourcesList.Contains(resourceName)) ResourcesList.Add(resourceName); //ORS resources are defined per planet, this avoids repeats of the same type
+            if (resourceOverlayType == 0) {
+                foreach (ConfigNode node in GameDatabase.Instance.GetConfigNodes("PLANETARY_RESOURCE_DEFINITION")) {
+                    if (node != null) {
+                        string body = node.GetValue("celestialBodyName");
+                        if (body == b.name) {
+                            string name = node.GetValue("name");
+                            double scalar = 1d;
+                            double Threshold = 1d;
+                            double mult = 1d;
+                            bool scale = false;
+                            if (node.GetValue("resourceScale") == "LINEAR_SCALE") scale = true;
+                            else if (node.GetValue("resourceScale") == "LOG_SCALE") scale = false;
+                            double.TryParse(node.GetValue("displayThreshold"), out Threshold);
+                            if (scale) {
+                                Threshold *= 10;
+                            }
+                            else {
+                                Threshold *= 10000;
+                                double.TryParse(node.GetValue("scaleFactor"), out scalar);
+                            }
+                            double.TryParse(node.GetValue("scaleMultiplier"), out mult);
+                            Color full = palette.xkcd_PurplyPink;
+                            Color empty = palette.magenta;
+                            SCANdata.SCANtype type = SCANcontroller.controller.OverlayResourceType(name);
+                            ResourcesList.Add(new SCANdata.SCANResource(name, full, empty, scale, scalar, mult, Threshold, 1f, type));
+                        }
                     }
                 }
             }
-            else if (resourceOverlayType == 1)
-            {
-                foreach (ConfigNode node in GameDatabase.Instance.GetConfigNodes("KethaneResource"))
-                {
-                    if (node != null)
-                    {
-                        string resourceName = node.GetValue("Resource");
-                        if (!ResourcesList.Contains(resourceName)) ResourcesList.Add(resourceName); //Just in case there are also Kethane duplicates
+            else if (SCANcontroller.controller.resourceOverlayType == 1) {
+                foreach (ConfigNode node in GameDatabase.Instance.GetConfigNodes("KethaneResource")) {
+                    if (node != null) {
+                        string name = node.GetValue("Resource");
+                        var colorFull = node.GetValue("ColorFull");
+                        Color full = ConfigNode.ParseColor(colorFull);
+                        var colorEmpty = node.GetValue("ColorEmpty");
+                        Color empty = ConfigNode.ParseColor(colorEmpty);
+                        float max = 1000000f;
+                        ConfigNode subNode = node.GetNode("Generator");
+                        if (subNode != null) {
+                            float.TryParse(subNode.GetValue("MaxQuantity"), out max);
+                        }
+                        SCANdata.SCANtype type = SCANcontroller.controller.OverlayResourceType(name);
+                        ResourcesList.Add(new SCANdata.SCANResource(name, full, empty, true, 1d, 1d, 1d, max, type));
                     }
                 }
+            }
+            if (ResourcesList.Count == 0) {
+                globalOverlay = false;
             }
         }
-
         
         public SCANdata.SCANtype OverlayResourceType(string s) //Assign the proper resource type depending on the selection in the settings menu
         {
@@ -231,94 +263,6 @@ namespace SCANsat
                 }
             }
             return SCANdata.SCANtype.Nothing;
-        }
-
-        internal Color gridColor(string resource, int i) //Get the resource color
-        {
-            Color gridcolor = palette.white;
-            if (resourceOverlayType == 0) //ORS resources might need to be manually set
-            {
-                gridcolor = palette.magenta;
-            }
-            else if (resourceOverlayType == 1)
-            {
-                foreach (ConfigNode node in GameDatabase.Instance.GetConfigNodes("KethaneResource")) //Kethane resource colors stored in their config nodes
-                {
-                    if (node != null)
-                    {
-                        if (node.GetValue("Resource") == resource)
-                        {
-                            if (i == 0)
-                            {
-                                var color = node.GetValue("ColorFull");
-                                gridcolor = ConfigNode.ParseColor(color);
-                            }
-                            else if (i == 1)
-                            {
-                                var color = node.GetValue("ColorEmpty");
-                                gridcolor = ConfigNode.ParseColor(color);
-                            }
-                        }
-                    }
-                }
-            }
-            return gridcolor;
-        }
-
-        internal float KethaneMax(string s)
-        {
-            float max = 1000000f; //Just a reasonably sounding max resource/deposit amount
-            foreach (ConfigNode node in GameDatabase.Instance.GetConfigNodes("KethaneResource"))
-            {
-                if (node != null)
-                {
-                    if (node.GetValue("Resource") == s)
-                    {
-                        ConfigNode subNode = node.GetNode("Generator");
-                        if (subNode != null)
-                        {
-                            if (float.TryParse(subNode.GetValue("MaxQuantity"), out max)) return max;
-                        }
-                    }
-                }
-            }
-            return max;
-        }
-
-        internal double ORSScalar(string s, CelestialBody b)
-        {
-            double scalar = 1f;
-            foreach (ConfigNode node in GameDatabase.Instance.GetConfigNodes("PLANETARY_RESOURCE_DEFINITION"))
-            {
-                if (node != null)
-                {
-                    string resourceName = node.GetValue("name");
-                    string bodyName = node.GetValue("celestialBodyName");
-                    if (resourceName == s && bodyName == b.name)
-                    {
-                        if (double.TryParse(node.GetValue("scaleFactor"), out scalar)) return scalar;
-                    }
-                }
-            }
-            return scalar;
-        }
-
-        internal double ORSMultiplier(string s, CelestialBody b)
-        {
-            double mult = 1f;
-            foreach (ConfigNode node in GameDatabase.Instance.GetConfigNodes("PLANETARY_RESOURCE_DEFINITION"))
-            {
-                if (node != null)
-                {
-                    string resourceName = node.GetValue("name");
-                    string bodyName = node.GetValue("celestialBodyName");
-                    if (resourceName == s && bodyName == b.name)
-                    {
-                        if (double.TryParse(node.GetValue("scaleMultiplier"), out mult)) return mult;
-                    }
-                }
-            }
-            return mult;
         }
 
 		internal Dictionary<Guid, SCANvessel> knownVessels = new Dictionary<Guid, SCANvessel>();

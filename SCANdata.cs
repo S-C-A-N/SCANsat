@@ -11,6 +11,8 @@
 using System;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
+using System.Linq;
+using System.Collections.Generic;
 using UnityEngine;
 using OpenResourceSystem;
 using palette = SCANsat.SCANpalette;
@@ -33,6 +35,7 @@ namespace SCANsat
 		public Texture2D map_small = new Texture2D (360 , 180 , TextureFormat.RGB24 , false);
 		public bool disabled;
         public double coveragePercentage; //Stores scanning coverage value for the settings menu
+        private byte[,] backupCoverage = new byte[360, 180];
 
 		/* MAP: known types of data */
 		public enum SCANtype: int
@@ -132,11 +135,34 @@ namespace SCANsat
 		}
 
         /* DATA: resources */
+        public class SCANResource
+        {
+            public SCANResource (string n, Color full, Color empty, bool sc, double scalar, double mult, double threshold, float max, SCANtype t)
+            {
+                name = n;
+                fullColor = full;
+                emptyColor = empty;
+                linear = sc;
+                ORS_Scalar = scalar;
+                ORS_Multiplier = mult;
+                ORS_Threshold = threshold;
+                maxValue = max;
+                type = t;
+            }
+
+            public string name;
+            public double ORS_Scalar, ORS_Multiplier, ORS_Threshold;
+            public Color fullColor, emptyColor;
+            public bool linear;
+            public float maxValue;
+            public SCANtype type;
+        }
+
         public double ORSOverlay(double lon, double lat, int i, string s) //Uses ORS methods to grab the resource amount given a lat and long
         {
             double amount = 0f;
             ORSPlanetaryResourcePixel overlayPixel = ORSPlanetaryResourceMapData.getResourceAvailability(i, s, lat, lon);
-            amount = overlayPixel.getAmount() * 1000000; //values in ppm
+            amount = overlayPixel.getAmount();            
             return amount;
         }
 
@@ -359,17 +385,16 @@ namespace SCANsat
             return iArray;
         }
 
-		/* DATA: serialization and compression */
-		public string serialize () {
-			// convert the byte[,] array into a KSP-savefile-safe variant of Base64
+        internal string integerSerialize () {
             byte[] bytes = ConvertToByte(coverage);
 			MemoryStream mem = new MemoryStream ();
 			BinaryFormatter binf = new BinaryFormatter ();
 			binf.Serialize (mem , bytes);
 			string blob = Convert.ToBase64String (CLZF2.Compress (mem.ToArray ()));
 			return blob.Replace ("/" , "-").Replace ("=" , "_");
-		}
-		public void deserialize ( string blob, bool b ) {
+        }
+
+        public void integerDeserialize ( string blob, bool b ) {
 			try {
 				blob = blob.Replace ("-" , "/").Replace ("_" , "=");
 				byte[] bytes = Convert.FromBase64String (blob);
@@ -391,6 +416,32 @@ namespace SCANsat
 				throw e;
 			}
 			resetImages ();
+		}
+
+
+
+		/* DATA: serialization and compression */
+		public string serialize () {
+			// convert the byte[,] array into a KSP-savefile-safe variant of Base64
+			MemoryStream mem = new MemoryStream ();
+			BinaryFormatter binf = new BinaryFormatter ();
+			binf.Serialize (mem , backupCoverage);
+			string blob = Convert.ToBase64String (CLZF2.Compress (mem.ToArray ()));
+			return blob.Replace ("/" , "-").Replace ("=" , "_");
+		}
+
+		public void deserialize ( string blob ) {
+			try {
+				blob = blob.Replace ("-" , "/").Replace ("_" , "=");
+				byte[] bytes = Convert.FromBase64String (blob);
+				bytes = CLZF2.Decompress (bytes);
+				MemoryStream mem = new MemoryStream (bytes , false);
+				BinaryFormatter binf = new BinaryFormatter ();
+				backupCoverage = (byte[,])binf.Deserialize (mem);
+			} catch (Exception e) {
+                backupCoverage = new byte[360 , 180];
+				throw e;
+			}
 		}
 
 		/* DATA: reset the map */
