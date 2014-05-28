@@ -135,7 +135,7 @@ namespace SCANsat
 		}
 
         /* DATA: resources */
-        public class SCANResource
+        public class SCANResource //The new class to store resource information stored in the respective config nodes
         {
             public SCANResource (string n, Color full, Color empty, bool sc, double scalar, double mult, double threshold, float max, SCANtype t)
             {
@@ -167,10 +167,10 @@ namespace SCANsat
         }
 
 		/* DATA: coverage */
-        //public int[] coverage_count = new int[32];
-		public int updateCoverage (SCANtype t) { //Updating this during background scanning for every planet is too much for an int enum
-            //for (int i=0; i<32; ++i) {
-            //    SCANtype t = (SCANtype)(1 << i);
+        public int[] coverage_count = new int[32];
+		public void updateCoverage () {
+            for (int i=0; i<32; ++i) {
+                SCANtype t = (SCANtype)(1 << i);
 				int cc = 0;
 				for (int x=0; x<360; ++x) {
 					for (int y=0; y<180; ++y) {
@@ -178,67 +178,61 @@ namespace SCANsat
 							++cc;
 					}
 				}
-            return cc;
-                //coverage_count [i] = cc;
-            //}
+                coverage_count [i] = cc;
+            }
 		}
-		public int getCoverage ( SCANtype type ) { //Instead of calling from a cached value, this directly calculates coverage for a given scanner
+		public int getCoverage ( SCANtype type ) {
 			int uncov = 0;
-			if (type != SCANtype.Nothing)
-				uncov += updateCoverage(type);
-            //if ((type & SCANtype.AltimetryHiRes) != SCANtype.Nothing)
-            //    uncov += coverage_count [1];
-            //if ((type & SCANtype.Biome) != SCANtype.Nothing)
-            //    uncov += coverage_count [3];
-            //if ((type & SCANtype.Anomaly) != SCANtype.Nothing)
-            //    uncov += coverage_count [4];
-            //if ((type & SCANtype.AnomalyDetail) != SCANtype.Nothing)
-            //    uncov += coverage_count [5];
-            //if ((type & SCANtype.Kethane) != SCANtype.Nothing)
-            //    uncov += coverage_count [6];
-            //if ((type & SCANtype.Ore) != SCANtype.Nothing)
-            //    uncov += coverage_count [7];
-            //if ((type & SCANtype.Kethane_3) != SCANtype.Nothing)
-            //    uncov += coverage_count [8];
-            //if ((type & SCANtype.Kethane_4) != SCANtype.Nothing)
-            //    uncov += coverage_count [9];
-            //if ((type & SCANtype.Uranium) != SCANtype.Nothing)
-            //    uncov += coverage_count [10];
-            //if ((type & SCANtype.Thorium) != SCANtype.Nothing)
-            //    uncov += coverage_count [11];
-            //if ((type & SCANtype.Alumina) != SCANtype.Nothing)
-            //    uncov += coverage_count [12];
-            //if ((type & SCANtype.Water) != SCANtype.Nothing)
-            //    uncov += coverage_count [13];
-            //if ((type & SCANtype.Ore_ORS) != SCANtype.Nothing)
-            //    uncov += coverage_count [14];
-            //if ((type & SCANtype.Minerals) != SCANtype.Nothing)
-            //    uncov += coverage_count [15];
-            //if ((type & SCANtype.Substrate) != SCANtype.Nothing)
-            //    uncov += coverage_count [16];
-            //if ((type & SCANtype.KEEZO) != SCANtype.Nothing)
-            //    uncov += coverage_count [17];
-            //if ((type & SCANtype.ORS_9) != SCANtype.Nothing)
-            //    uncov += coverage_count [18];
-            //if ((type & SCANtype.ORS_10) != SCANtype.Nothing)
-            //    uncov += coverage_count [19];
+			if ((type & SCANtype.AltimetryLoRes) != SCANtype.Nothing)
+                uncov += coverage_count[0];
+            if ((type & SCANtype.AltimetryHiRes) != SCANtype.Nothing)
+                uncov += coverage_count [1];
+            if ((type & SCANtype.Biome) != SCANtype.Nothing)
+                uncov += coverage_count [3];
+            if ((type & SCANtype.Anomaly) != SCANtype.Nothing)
+                uncov += coverage_count [4];
+            if ((type & SCANtype.AnomalyDetail) != SCANtype.Nothing)
+                uncov += coverage_count [5];
+            if ((type & SCANtype.Kethane) != SCANtype.Nothing)
+                uncov += coverage_count [6];
+            if ((type & SCANtype.Ore) != SCANtype.Nothing)
+                uncov += coverage_count [7];
+            if ((type & SCANtype.Kethane_3) != SCANtype.Nothing)
+                uncov += coverage_count [8];
+            if ((type & SCANtype.Kethane_4) != SCANtype.Nothing)
+                uncov += coverage_count [9];
+            if ((type & SCANtype.Uranium) != SCANtype.Nothing)
+                uncov += coverage_count [10];
+            if ((type & SCANtype.Thorium) != SCANtype.Nothing)
+                uncov += coverage_count [11];
+            if ((type & SCANtype.Alumina) != SCANtype.Nothing)
+                uncov += coverage_count [12];
+            if ((type & SCANtype.Water) != SCANtype.Nothing)
+                uncov += coverage_count [13];
+            if ((type & SCANtype.Ore_ORS) != SCANtype.Nothing)
+                uncov += coverage_count [14];
+            if ((type & SCANtype.Minerals) != SCANtype.Nothing)
+                uncov += coverage_count [15];
+            if ((type & SCANtype.Substrate) != SCANtype.Nothing)
+                uncov += coverage_count [16];
+            if ((type & SCANtype.KEEZO) != SCANtype.Nothing)
+                uncov += coverage_count [17];
+            if ((type & SCANtype.ORS_9) != SCANtype.Nothing)
+                uncov += coverage_count [18];
+            if ((type & SCANtype.ORS_10) != SCANtype.Nothing)
+                uncov += coverage_count [19];
 			return uncov;
 
 		}
 		public double getCoveragePercentage ( SCANtype type ) {
 			double cov = 0d;
-            if (type == SCANtype.Nothing) {
-                type = SCANtype.AltimetryLoRes | SCANtype.AltimetryHiRes | SCANtype.Biome | SCANtype.Anomaly;
-			    cov += getCoverage (SCANtype.AltimetryLoRes); //Running all four of these everytime the GUI updates hammers performance
-                cov += getCoverage (SCANtype.AltimetryHiRes); //I made a new method that updates the coverage percentages only at the 
-                cov += getCoverage (SCANtype.Biome);            //time when the settings menu is opened
-                cov += getCoverage (SCANtype.Anomaly);            
-            } else cov = getCoverage (type);
-            if (cov <= 0) {
-			cov = 100;
-			} else {
+            if (type == SCANtype.Nothing) 
+                type = SCANtype.AltimetryLoRes | SCANtype.AltimetryHiRes | SCANtype.Biome | SCANtype.Anomaly;          
+            cov = getCoverage (type);
+            if (cov <= 0)
+			    cov = 100;
+			else
 				cov = Math.Min (99.9d , 100 - cov * 100d / (360d * 180d * SCANcontroller.countBits ((int)type)));
-			}
 			return cov;
 		}
 
@@ -374,7 +368,7 @@ namespace SCANsat
             return iArray;
         }
 
-        //One time conversion of single byte[] to Int32 to recover old scanning data
+        //One time conversion of single byte[,] to Int32 to recover old scanning data
         private Int32[,] RecoverToInt (byte[,] bArray) {
             Int32[,] iArray = new Int32[360, 180];
             for (int i = 0; i < 360; i++) {
@@ -385,6 +379,7 @@ namespace SCANsat
             return iArray;
         }
 
+        /* DATA: legacy serialization and compression */
         internal string integerSerialize () {
             byte[] bytes = ConvertToByte(coverage);
 			MemoryStream mem = new MemoryStream ();
