@@ -75,6 +75,12 @@ namespace SCANsat
         [KSPField(isPersistant = true)]
         public bool dataRebuild = true;
 
+
+        public List<SCANdata.SCANResource> ResourcesList = new List<SCANdata.SCANResource>(); //The list of all relevant resources
+        public bool kethaneRebuild = false; //these three used by the kethane watcher
+        public bool kethaneReset = false;
+        public bool kethaneBusy = false;
+
 		public override void OnLoad(ConfigNode node) {
 			ConfigNode node_vessels = node.GetNode("Scanners");
 			if(node_vessels != null) {
@@ -104,11 +110,11 @@ namespace SCANsat
 					SCANdata body_data = getData(body_name);
 					try {
 						string mapdata = node_body.GetValue("Map");
-                        if (dataRebuild) {
+                        if (dataRebuild) { //On the first load deserialize the "Map" value to both coverage arrays
                             body_data.integerDeserialize(mapdata, true);
                             body_data.deserialize(mapdata);
                         }
-                        else {
+                        else { //On subsequent loads the two coverage arrays are stored in separate strings
                             body_data.integerDeserialize(mapdata, false);
                             string oldMapdata = node_body.GetValue("Old_Map");
                             body_data.deserialize(oldMapdata);
@@ -121,8 +127,9 @@ namespace SCANsat
 					body_data.disabled = Convert.ToBoolean(node_body.GetValue("Disabled"));
 				}
 			}
-            getSettingsCoverage();
-            dataRebuild = false;
+            getSettingsCoverage(); //Rebuild the settings menu coverage percentages
+            Resources(FlightGlobals.currentMainBody);
+            dataRebuild = false; //Used for the one-time update to the new integer array
 		}
         
 		public override void OnSave(ConfigNode node) {
@@ -177,13 +184,8 @@ namespace SCANsat
 			public int frame;
 			public double lastUT;
 		}
-        
-        public List<SCANdata.SCANResource> ResourcesList = new List<SCANdata.SCANResource>(); //The list of all relevant resources
-        public bool kethaneRebuild = false;
-        public bool kethaneReset = false;
-        public bool kethaneBusy = false;
 
-        public void Resources(CelestialBody b)
+        public void Resources(CelestialBody b) //Repopulates the master resources list with data from config nodes
         {
             ResourcesList.Clear();
             if (resourceOverlayType == 0) {
@@ -209,13 +211,13 @@ namespace SCANsat
                             double.TryParse(node.GetValue("scaleMultiplier"), out mult);
                             Color full = palette.xkcd_PurplyPink;
                             Color empty = palette.magenta;
-                            SCANdata.SCANtype type = SCANcontroller.controller.OverlayResourceType(name);
+                            SCANdata.SCANtype type = OverlayResourceType(name);
                             ResourcesList.Add(new SCANdata.SCANResource(name, full, empty, scale, scalar, mult, Threshold, 1f, type));
                         }
                     }
                 }
             }
-            else if (SCANcontroller.controller.resourceOverlayType == 1) {
+            else if (resourceOverlayType == 1) {
                 foreach (ConfigNode node in GameDatabase.Instance.GetConfigNodes("KethaneResource")) {
                     if (node != null) {
                         string name = node.GetValue("Resource");
@@ -228,14 +230,15 @@ namespace SCANsat
                         if (subNode != null) {
                             float.TryParse(subNode.GetValue("MaxQuantity"), out max);
                         }
-                        SCANdata.SCANtype type = SCANcontroller.controller.OverlayResourceType(name);
+                        SCANdata.SCANtype type = OverlayResourceType(name);
                         ResourcesList.Add(new SCANdata.SCANResource(name, full, empty, true, 1d, 1d, 1d, max, type));
                     }
                 }
             }
-            if (ResourcesList.Count == 0) {
+            if (ResourcesList.Count == 0)
                 globalOverlay = false;
-            }
+            if (gridSelection > ResourcesList.Count - 1)
+                gridSelection = 0;
         }
         
         public SCANdata.SCANtype OverlayResourceType(string s) //Assign the proper resource type depending on the selection in the settings menu
@@ -267,7 +270,6 @@ namespace SCANsat
 
 		internal Dictionary<Guid, SCANvessel> knownVessels = new Dictionary<Guid, SCANvessel>();
 
-        //Add the additional resource type variable to registered sensors
 		public void registerSensor(Vessel v, SCANdata.SCANtype sensors, double fov, double min_alt, double max_alt, double best_alt) {
 			registerSensor(v.id, sensors, fov, min_alt, max_alt, best_alt);
 			knownVessels[v.id].vessel = v;
@@ -409,9 +411,9 @@ namespace SCANsat
 
 			if(notZero && science <= 0) science = 0.00001f;
 
-			sd = new ScienceData(science, 1f, 0f, id, se.experimentTitle + " of " + v.mainBody.theName);
-			sd.subjectID = su.id;
-			return sd;
+			sd = new ScienceData(science * su.dataScale, 1f, 0f, su.id, se.experimentTitle + " of " + v.mainBody.theName);
+			su.title = sd.title;
+            return sd;
 		}
 
 		public Dictionary<string, SCANdata> body_data = new Dictionary<string, SCANdata>();
@@ -459,7 +461,7 @@ namespace SCANsat
 			if(disabled) disabledBodies.Add(name);
 			else disabledBodies.Remove(name);
 		}
-
+        private int i = 0;
 		protected static int last_scan_frame;
 		protected static float last_scan_time;
 		protected static double scan_UT;
@@ -475,7 +477,10 @@ namespace SCANsat
 			currentActiveVessel = 0;
 			actualPasses = 0;
 			maxRes = 0;
-            //foreach(SCANdata data in body_data.Values) data.updateCoverage();
+            SCANdata bdata = getData (FlightGlobals.Bodies[i]); //Update coverage for planets one at a time, rather than all together
+            bdata.updateCoverage();
+            i++;
+            if (i >= FlightGlobals.Bodies.Count) i = 0;
 			foreach(Vessel v in FlightGlobals.Vessels) {
 				if(!knownVessels.ContainsKey(v.id)) continue;
 				SCANvessel vessel = knownVessels[v.id];
