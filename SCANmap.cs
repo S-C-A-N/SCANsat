@@ -260,10 +260,9 @@ namespace SCANsat
 			if (body == b)
 				return;
 			body = b;
-            SCANcontroller.controller.Resources(b);
-            if (SCANcontroller.controller.gridSelection > SCANcontroller.controller.ResourcesList.Count - 1)
-                SCANcontroller.controller.gridSelection = 0;
-            resource = SCANcontroller.controller.ResourcesList[SCANcontroller.controller.gridSelection];
+            SCANcontroller.controller.Resources(b); //Repopulate resource list when changing SOI
+            if (SCANcontroller.controller.globalOverlay)
+                resource = SCANcontroller.controller.ResourcesList[SCANcontroller.controller.gridSelection];
 			resetMap ();
 		}
 		public bool isMapComplete () {
@@ -274,19 +273,23 @@ namespace SCANsat
 		public void resetMap () {
 			mapstep = 0;
 			mapsaved = false;
-            if (SCANcontroller.controller.globalOverlay && SCANcontroller.controller.resourceOverlayType == 1)
+            if (SCANcontroller.controller.globalOverlay) { //Make sure that a resource is initialized if necessary
+                if (resource == null) resource = SCANcontroller.controller.ResourcesList[SCANcontroller.controller.gridSelection];
+                if (SCANcontroller.controller.resourceOverlayType == 1)
                 SCANcontroller.controller.kethaneReset = !SCANcontroller.controller.kethaneReset;
+            }
 		}
 		public void resetMap ( int mode, int maptype ) {
 			mapmode = mode;
             	mapType = maptype;
                 resetMap ();
 		}
-        	public void setResource (string s) {
-            if (resource.name == s)
-                return;
-            resource = SCANcontroller.controller.ResourcesList[SCANcontroller.controller.gridSelection];
-            resetMap();
+        	public void setResource (string s) { //Used when a different resource is selected
+                if (resource == null) resource = SCANcontroller.controller.ResourcesList[SCANcontroller.controller.gridSelection];
+                else if (resource.name == s)
+                    return;
+                resource = SCANcontroller.controller.ResourcesList[SCANcontroller.controller.gridSelection];
+                resetMap();
         }
 
 		/* MAP: export: PNG file */
@@ -407,17 +410,17 @@ namespace SCANsat
                             if (data.isCovered(lon, lat, resource.type)) //check our new resource coverage map
                             {
                                 double amount = data.ORSOverlay(lon, lat, body.flightGlobalsIndex, resource.name); //grab the resource amount for the current pixel
-                                double scalar = resource.ORS_Multiplier * resource.ORS_Scalar * resource.ORS_Threshold;
-                                if (resource.linear) {
+                                double scalar = resource.ORS_Multiplier * resource.ORS_Scalar * resource.ORS_Threshold; //low cutoff value
+                                if (resource.linear) { //linear resources are measured on 0-100% scale
                                     amount *= 100;
                                     if (amount > scalar)
                                     {
-                                        if (amount > 100) amount = 100; //max cutoff value
+                                        if (amount > 100) amount = 100;
                                         pix[i] = palette.lerp(baseColor, palette.lerp(resource.emptyColor, resource.fullColor, (float)(amount) / 100f), 0.3f); //vary color by resource amount
                                     }
                                     else pix[i] = palette.lerp(baseColor, palette.grey, 0.4f);
                                 }
-                                else {
+                                else { //log_scale resources are measured in ppm
                                     amount *= 1000000;
                                     if (amount > scalar)
                                     {
@@ -429,13 +432,13 @@ namespace SCANsat
                             }
                             else pix[i] = baseColor;
                         }
-                        else if (SCANcontroller.controller.resourceOverlayType == 1)
+                        else if (SCANcontroller.controller.resourceOverlayType == 1) //Kethane overlay
                         {
                             if (data.isCovered(lon, lat, resource.type))
                             {
                                 int ilon = data.icLON(lon);
                                 int ilat = data.icLAT(lat);
-                                float amount = data.kethaneValueMap[ilon, ilat];
+                                float amount = data.kethaneValueMap[ilon, ilat]; //Fetch Kethane resource values from cached array
                                 if (amount <= 0) pix[i] = palette.lerp(baseColor, palette.grey, 0.4f);
                                 else
                                 {
