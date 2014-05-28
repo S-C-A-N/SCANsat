@@ -96,7 +96,7 @@ namespace SCANsat
         {
 		if (scanName != null)
             { // Use bitwise operators to check if the part has valid science collection scanners
-            if ((sensorType & (Int32)SCANdata.SCANtype.AltimetryLoRes) == 0 && (sensorType & (Int32)SCANdata.SCANtype.AltimetryHiRes) == 0 && (sensorType & (Int32)SCANdata.SCANtype.Anomaly) == 0 && (sensorType & (Int32)SCANdata.SCANtype.Biome) == 0) {
+            if ((sensorType & (Int32)SCANdata.SCANtype.AltimetryLoRes) == 0 && (sensorType & (Int32)SCANdata.SCANtype.AltimetryHiRes) == 0 && (sensorType & (Int32)SCANdata.SCANtype.Biome) == 0) {
                 Events["startScan"].guiName = "Start " + scanName;
                 Events["stopScan"].guiName = "Stop " + scanName;
 			    Events["analyze"].active = false;
@@ -322,11 +322,9 @@ namespace SCANsat
 			return storedData.ToArray ();
 		}
 		public void KeepData ( ScienceData data ) {
-			print ("[SCANsat] keeping data");
 			expDialog = null;
 		}
         	public void TransmitData(ScienceData data) {
-            print("[SCANsat] transmitting data");
             expDialog = null;
             List<IScienceDataTransmitter> tranList = vessel.FindPartModulesImplementing<IScienceDataTransmitter>();
             if (tranList.Count > 0 && storedData.Count > 0)
@@ -338,7 +336,6 @@ namespace SCANsat
             else ScreenMessages.PostScreenMessage("No transmitters available on this vessel.", 4f, ScreenMessageStyle.UPPER_LEFT);
         }
 		public void DumpData ( ScienceData data ) {
-			print ("[SCANsat] dumping data");
 			expDialog = null;
 			while (storedData.Contains(data)) {
 				storedData.Remove (data);
