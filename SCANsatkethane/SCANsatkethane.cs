@@ -21,9 +21,9 @@ namespace SCANsatKethane
     public class SCANsatKethane: MonoBehaviour
     {
         private CelestialBody body;
-        private string resource;
+        private SCANdata.SCANResource resource;
         private bool rebuild, reset;
-        private int rebuildStep, rebuildValueStep, rebuildFrame;
+        private int rebuildStep, rebuildValueStep;
         private bool initialized, rebuildingArray, rebuildingValue = false;
                 
         public void Start() {
@@ -42,11 +42,11 @@ namespace SCANsatKethane
                     rebuildResourceArray();
                 }
                 if (rebuildValueStep < 45) {
-                    rebuildResourceValue(SCANcontroller.controller.OverlayResourceType(resource));
+                    rebuildResourceValue(resource.type);
                 }
                 if (SCANcontroller.controller.resourceOverlayType == 1 && SCANcontroller.controller.ResourcesList.Count > 0 && !SCANcontroller.controller.kethaneBusy) {
                     setBody (FlightGlobals.currentMainBody);
-                    setResource (SCANcontroller.controller.ResourcesList[SCANcontroller.controller.gridSelection]);
+                    setResource (SCANcontroller.controller.ResourcesList[SCANcontroller.controller.gridSelection].name);
                     setRebuild (SCANcontroller.controller.kethaneRebuild);
                     setReset (SCANcontroller.controller.kethaneReset);
                 }
@@ -58,7 +58,6 @@ namespace SCANsatKethane
             print("[SCAN Kethane] Initialized");
             rebuildStep = 180;
             rebuildValueStep = 180;
-            rebuildFrame = 0;
             initialized = true;
         }
 
@@ -72,34 +71,31 @@ namespace SCANsatKethane
             SCANdata data = SCANcontroller.controller.getData(body);
             data.kethaneValueMap = new float[360, 180];
             rebuildStep = 0;
-            rebuildFrame = 0;
             SCANcontroller.controller.kethaneBusy = true;
             }
         }
 
         private void setResource(string s) { //Watcher to check for the user switching to different Kethane resources
-            if (s == resource) return;
+            if (s == resource.name) return;
             resource = SCANcontroller.controller.ResourcesList[SCANcontroller.controller.gridSelection];
             reset = SCANcontroller.controller.kethaneReset;
             SCANcontroller.controller.map_ResourceOverlay = false; //Force the overlay off to allow array to rebuild
             SCANdata data = SCANcontroller.controller.getData (body);
             data.kethaneValueMap = new float[360, 180];
             rebuildStep = 0;
-            rebuildFrame = 0;
             SCANcontroller.controller.kethaneBusy = true;
         }
 
         private void setRebuild(bool b) { //Watcher to check for "Rebuild" button pushes from UI
             if (b == rebuild) return;
             rebuild = b;
-            updateKethaneData (SCANcontroller.controller.OverlayResourceType(resource)); //Update the Kethane database after background scanning
+            updateKethaneData (resource.type); //Update the Kethane database after background scanning
         }
 
         private void setReset (bool b) { //Watcher to check for big map reset
             if (b == reset) return;
             reset = b;
             rebuildValueStep = 0;
-            rebuildResourceValue (SCANcontroller.controller.OverlayResourceType(resource));
         }
 
         //Update the Kethane database - used after background scanning
@@ -110,8 +106,8 @@ namespace SCANsatKethane
                 for (int ilon = 0; ilon < 360; ilon++) {
                     if (data.isCovered (ilon - 180, ilat - 90, type)) {
                         Cell cell = getKethaneCell (ilon - 180, ilat - 90);
-                        if (!KethaneData.Current.Scans[resource][body.name][cell])
-                            KethaneData.Current.Scans[resource][body.name][cell] = true;
+                        if (!KethaneData.Current.Scans[resource.name][body.name][cell])
+                            KethaneData.Current.Scans[resource.name][body.name][cell] = true;
                     }
                 }
             }
@@ -124,20 +120,16 @@ namespace SCANsatKethane
                 print("[SCAN Kethane] Rebuilding SCANsat Kethane Array");
                 rebuildingArray = true;
             }
-            for (int ilon = 120 * rebuildFrame; ilon < 120 * (rebuildFrame + 1); ilon++) {//Run 120 points per frame; 9 seconds at 60FPS
+            for (int ilon = 0; ilon < 360; ilon++) {//Run 360 points per frame; 3 seconds at 60FPS
                 Cell cell = getKethaneCell(ilon - 180, rebuildStep - 90);
-                if (KethaneData.Current.Scans[resource][body.name][cell]) {
-                    updateResourceArray(ilon, rebuildStep, SCANcontroller.controller.OverlayResourceType(resource), data);
-                    ICellResource deposit = KethaneData.Current.GetCellDeposit(resource, body, cell);
+                if (KethaneData.Current.Scans[resource.name][body.name][cell]) {
+                    updateResourceArray(ilon, rebuildStep, resource.type, data);
+                    ICellResource deposit = KethaneData.Current.GetCellDeposit(resource.name, body, cell);
                     if (deposit != null) updateResourceValue(ilon, rebuildStep, deposit.Quantity, data);
                     else updateResourceValue(ilon, rebuildStep, -1d, data); //Give empty cells -1 resources, account for this later on
                 }
             }
-            rebuildFrame++;
-            if (rebuildFrame >= 3) {
-                rebuildStep++;
-                rebuildFrame = 0;
-            }
+            rebuildStep++;
             if (rebuildStep >= 180) {
                 SCANcontroller.controller.kethaneBusy = false;
                 rebuildingArray = false;
@@ -157,7 +149,7 @@ namespace SCANsatKethane
                     if (data.isCovered(ilon, ilat, type)) {
                         if (data.kethaneValueMap[ilon, ilat] == 0) { //Only check unassigned values
                             Cell cell = getKethaneCell(ilon - 180, ilat - 90);
-                            ICellResource deposit = KethaneData.Current.GetCellDeposit(resource, body, cell); 
+                            ICellResource deposit = KethaneData.Current.GetCellDeposit(resource.name, body, cell); 
                             if (deposit != null) updateResourceValue (ilon, ilat, deposit.Quantity, data);
                             else updateResourceValue (ilon, ilat, -1d, data); //Give empty cells -1 resources, account for this later on
                         }
