@@ -624,6 +624,7 @@ namespace SCANsat
 			gui_settings_resources(wid);				/* resource details sub-window */
 			GUILayout.Space (16);
 			gui_settings_toggle_body_scanning(wid);		/* background and body scanning toggles */
+            gui_settings_rebuild_kethane(wid);
 			GUILayout.Space (16);
 			gui_settings_timewarp (wid);				/* time warp resolution settings */
 			GUILayout.Space (8);
@@ -664,29 +665,20 @@ namespace SCANsat
 		}
 		public static void gui_settings_resources (int wid) {
 			GUILayout.Label ("Resources Overlay" , style_headline);
-			// under vertical from above
-			GUILayout.BeginHorizontal ();
-			if (SCANcontroller.controller.ResourcesList.Count == 0)
-				SCANcontroller.controller.globalOverlay = false;
-
-			else if (SCANcontroller.controller.globalOverlay != GUILayout.Toggle (SCANcontroller.controller.globalOverlay , "Activate Resource Overlay")) { //global toggle for resource overlay
+			if (SCANcontroller.controller.ResourcesList.Count > 0) {
+				if (SCANcontroller.controller.globalOverlay != GUILayout.Toggle (SCANcontroller.controller.globalOverlay , "Activate Resource Overlay")) { //global toggle for resource overlay
 				SCANcontroller.controller.globalOverlay = !SCANcontroller.controller.globalOverlay;
 				if (bigmap != null) bigmap.resetMap ();
+                }
 			}
-			GUILayout.EndHorizontal ();
-			GUILayout.BeginHorizontal ();
 
+			GUILayout.BeginHorizontal ();
 			if (GUILayout.Button ("Kethane Resources")) //select from two resource types, populates the list below
 			{
 				SCANcontroller.controller.resourceOverlayType = 1;
                 SCANcontroller.controller.Resources(FlightGlobals.currentMainBody);
-				if (SCANcontroller.controller.ResourcesList.Count == 0)
-				{
-					SCANcontroller.controller.globalOverlay = false;
-				} else {
+				if (SCANcontroller.controller.ResourcesList.Count > 0)
 					SCANcontroller.controller.globalOverlay = true;
-					SCANcontroller.controller.gridSelection = 0;
-				}
 				if (bigmap != null) bigmap.resetMap();
 			}
 
@@ -694,13 +686,8 @@ namespace SCANsat
 			{
 				SCANcontroller.controller.resourceOverlayType = 0;
                 SCANcontroller.controller.Resources(FlightGlobals.currentMainBody);
-				if (SCANcontroller.controller.ResourcesList.Count == 0)
-				{
-					SCANcontroller.controller.globalOverlay = false;
-				} else {
-					SCANcontroller.controller.globalOverlay = true;
-					SCANcontroller.controller.gridSelection = 0;
-				}
+				if (SCANcontroller.controller.ResourcesList.Count > 0)
+				    SCANcontroller.controller.globalOverlay = true;
 				if (bigmap != null) bigmap.resetMap ();
 			}
 			GUILayout.EndHorizontal();
@@ -734,6 +721,12 @@ namespace SCANsat
 			GUILayout.EndHorizontal ();
 
 		}
+        public static void gui_settings_rebuild_kethane (int wid) { //Move this function into the settings menu
+            if (SCANcontroller.controller.resourceOverlayType == 1 && SCANcontroller.controller.globalOverlay) { //Rebuild the Kethane database
+                if (GUILayout.Button("Rebuild Kethane Grid Database"))
+                    SCANcontroller.controller.kethaneRebuild = !SCANcontroller.controller.kethaneRebuild;
+            }
+        }
 		public static String gui_settings_numbers (int wid) {
 			return	"Sensors: " 	+ SCANcontroller.activeSensors +
 					" Vessels: " 	+ SCANcontroller.activeVessels.ToString () +
@@ -1248,13 +1241,7 @@ namespace SCANsat
 			if (GUILayout.Button ("Close")) {
 				bigmap_visible = false;
 			}
-            if (SCANcontroller.controller.resourceOverlayType == 1 && SCANcontroller.controller.ResourcesList.Count > 0)
-            { //Rebuild the Kethane database
-                if (GUILayout.Button("Rebuild Kethane")) {
-                    SCANcontroller.controller.kethaneRebuild = !SCANcontroller.controller.kethaneRebuild;
-                }
-            }
-            else
+            
                 GUILayout.FlexibleSpace();
 			style_button.normal.textColor = palette.grey;
 			if (bigmap.isMapComplete ())
@@ -1446,7 +1433,7 @@ namespace SCANsat
 							{
                                 double amount = data.ORSOverlay(mlon, mlat, bigmap.body.flightGlobalsIndex, bigmap.resource.name);
                                 string label;
-                                if (bigmap.resource.linear)
+                                if (bigmap.resource.linear) //Make sure that ORS values are handled correctly based on which scale type they use
                                     label = (amount * 100).ToString("N1") + " %";
                                 else 
                                     label = (amount * 1000000).ToString("N1") + " ppm";
@@ -1694,13 +1681,8 @@ namespace SCANsat
 
 				SCANdata.SCANtype active = SCANcontroller.controller.activeSensorsOnVessel (vessel.id);
 				if (active != SCANdata.SCANtype.Nothing) {
-					double cov = 0d;
-                    int sensorCount = 0;
-                    foreach (SCANdata.SCANtype sense in SCANcontroller.controller.knownVessels[vessel.id].sensors.Keys) {
-                        cov += data.getCoveragePercentage(sense);
-                        sensorCount++;
-                    }
-					infotext += " " + (cov / sensorCount).ToString ("N1") + "%";
+					double cov = data.getCoveragePercentage (active);
+					infotext += " " + cov.ToString ("N1") + "%";
 					if (notMappingToday) {
 						infotext = abad + "NO POWER" + ac;
 					}
