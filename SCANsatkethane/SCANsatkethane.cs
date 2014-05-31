@@ -163,10 +163,9 @@ namespace SCANsatKethane
             }
         }
 
-        private Cell getKethaneCell (int ilon, int ilat) {  //Find the Kethane cell corresponding to the current position 
-            Vector3 pos = body.GetWorldSurfacePosition((double)ilat, (double)ilon, 50000d); //Set high altitude just to make sure the vector is above the surface
-            Vector3 Wpos = body.transform.InverseTransformPoint(pos); //Draws a line from the position defined above through the center of the planet
-            return Kethane.Cell.Containing(Wpos, 5);
+        private Cell getKethaneCell (int ilon, int ilat) {  //Find the Kethane cell corresponding to the current position
+            Vector3 pos = body.GetRelSurfaceNVector((double)ilat, (double)ilon); 
+            return Kethane.Cell.Containing(pos, 5);
         }
 
         private void updateResourceArray (int lon, int lat, SCANdata.SCANtype type, SCANdata data) {
