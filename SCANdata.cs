@@ -43,7 +43,7 @@ namespace SCANsat
 			Nothing = 0, 		    // no data (MapTraq)
 			AltimetryLoRes = 1<<0,  // low resolution altimetry (limited zoom)
 			AltimetryHiRes = 1<<1,  // high resolution altimetry (unlimited zoom)
-			Altimetry = 1<<2-1, 	        // both (setting) or either (testing) altimetry
+			Altimetry = (1<<2)-1, 	        // both (setting) or either (testing) altimetry
 			SCANsat_1 = 1<<2,		// Unused, reserved for future SCANsat scanner
 			Biome = 1<<3,		    // biome data
 			Anomaly = 1<<4,		    // anomalies (position of anomaly)
@@ -63,8 +63,8 @@ namespace SCANsat
             ORS_9 = 1<<18,          // Reserved - ORS
             ORS_10 = 1<<19,         // Reserved - ORS
 
-			Everything_SCAN = 1<<6-1,	// All default SCANsat scanners
-            Everything = 1<<32-1      // All scanner types
+			Everything_SCAN = (1<<6)-1,	// All default SCANsat scanners
+            Everything = (1<<32)-1      // All scanner types
 		}
 
 		/* DATA: map passes and coverage (passes >= 1)*/
