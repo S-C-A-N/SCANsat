@@ -127,7 +127,6 @@ namespace SCANsat
 					body_data.disabled = Convert.ToBoolean(node_body.GetValue("Disabled"));
 				}
 			}
-            getSettingsCoverage(); //Rebuild the settings menu coverage percentages
             Resources(FlightGlobals.currentMainBody);
             dataRebuild = false; //Used for the one-time update to the new integer array
 		}
@@ -191,28 +190,56 @@ namespace SCANsat
             if (resourceOverlayType == 0) {
                 foreach (ConfigNode node in GameDatabase.Instance.GetConfigNodes("PLANETARY_RESOURCE_DEFINITION")) {
                     if (node != null) {
+                        SCANdata.SCANResource resource = null; //Setup initial values, get the resource name and celestial body name
+                        double scalar = 1d;
+                        double Threshold = 1d;
+                        double mult = 1d;
+                        bool scale = false;
+                        string name = node.GetValue("name");
                         string body = node.GetValue("celestialBodyName");
-                        if (body == b.name) {
-                            string name = node.GetValue("name");
-                            double scalar = 1d;
-                            double Threshold = 1d;
-                            double mult = 1d;
-                            bool scale = false;
-                            if (node.GetValue("resourceScale") == "LINEAR_SCALE") scale = true;
-                            else if (node.GetValue("resourceScale") == "LOG_SCALE") scale = false;
-                            double.TryParse(node.GetValue("displayThreshold"), out Threshold);
-                            if (scale) {
-                                Threshold *= 10;
+                        foreach (SCANdata.SCANResource res in ResourcesList) { //Check to see if the resource is already in the list
+                            if (name == res.name) {
+                                resource = res;
+                                break;
                             }
-                            else {
-                                Threshold *= 10000;
-                                double.TryParse(node.GetValue("scaleFactor"), out scalar);
+                        }
+                        if (resource != null) { //If the resource is already in the list check to see if this node represents the current body and assign values
+                            if (body == b.name) {
+                                if (node.GetValue("resourceScale") == "LINEAR_SCALE") scale = true;
+                                else if (node.GetValue("resourceScale") == "LOG_SCALE") scale = false;
+                                double.TryParse(node.GetValue("displayThreshold"), out Threshold);
+                                if (scale) {
+                                    Threshold *= 10;
+                                }
+                                else {
+                                    Threshold *= 10000;
+                                    double.TryParse(node.GetValue("scaleFactor"), out scalar);
+                                }
+                                double.TryParse(node.GetValue("scaleMultiplier"), out mult);
+                                resource.linear = scale; //Reassign resource properties with the proper values if this is the current body
+                                resource.ORS_Threshold = Threshold;
+                                resource.ORS_Scalar = scalar;
+                                resource.ORS_Multiplier = mult;
                             }
-                            double.TryParse(node.GetValue("scaleMultiplier"), out mult);
+                        }
+                        else { //If the resource isn't in the list check to see if this node is the right celestial body and assign values
                             Color full = palette.xkcd_PurplyPink;
                             Color empty = palette.magenta;
                             SCANdata.SCANtype type = OverlayResourceType(name);
-                            ResourcesList.Add(new SCANdata.SCANResource(name, full, empty, scale, scalar, mult, Threshold, 1f, type));
+                            if (body == b.name) {
+                                if (node.GetValue("resourceScale") == "LINEAR_SCALE") scale = true;
+                                else if (node.GetValue("resourceScale") == "LOG_SCALE") scale = false;
+                                double.TryParse(node.GetValue("displayThreshold"), out Threshold);
+                                if (scale) {
+                                    Threshold *= 10;
+                                }
+                                else {
+                                    Threshold *= 10000;
+                                    double.TryParse(node.GetValue("scaleFactor"), out scalar);
+                                }
+                                double.TryParse(node.GetValue("scaleMultiplier"), out mult);
+                            }
+                            ResourcesList.Add(new SCANdata.SCANResource(name, full, empty, scale, scalar, mult, Threshold, 1f, type)); //Add the resource to the list, with the proper values if applicable
                         }
                     }
                 }
@@ -228,7 +255,15 @@ namespace SCANsat
                         float max = 1000000f;
                         ConfigNode subNode = node.GetNode("Generator");
                         if (subNode != null) {
-                            float.TryParse(subNode.GetValue("MaxQuantity"), out max);
+                            float.TryParse(subNode.GetValue("MaxQuantity"), out max); //Global max quantity
+                            foreach (ConfigNode bodySubNode in subNode.GetNodes("Body")) {
+                                string body = bodySubNode.GetValue("name");
+                                if (body == b.name)
+                                {
+                                    if (bodySubNode.HasValue("MaxQuantity"))
+                                        float.TryParse(bodySubNode.GetValue("MaxQuantity"), out max); //Optional body-specific max quantity
+                                }
+                            }
                         }
                         SCANdata.SCANtype type = OverlayResourceType(name);
                         ResourcesList.Add(new SCANdata.SCANResource(name, full, empty, true, 1d, 1d, 1d, max, type));
@@ -250,7 +285,8 @@ namespace SCANsat
                     case "Thorium": return SCANdata.SCANtype.Thorium;
                     case "Alumina": return SCANdata.SCANtype.Alumina;
                     case "Water": return SCANdata.SCANtype.Water;
-                    case "Ore": return SCANdata.SCANtype.Ore_ORS;
+                    case "Aquifer": return SCANdata.SCANtype.Aquifer;
+                    case "Ore": return SCANdata.SCANtype.Ore;
                     case "Minerals": return SCANdata.SCANtype.Minerals;
                     case "Substrate": return SCANdata.SCANtype.Substrate;
                     case "KEEZO": return SCANdata.SCANtype.KEEZO;
@@ -262,6 +298,9 @@ namespace SCANsat
                 {
                     case "Kethane": return SCANdata.SCANtype.Kethane;
                     case "Ore": return SCANdata.SCANtype.Ore;
+                    case "Water": return SCANdata.SCANtype.Water;
+                    case "Minerals": return SCANdata.SCANtype.Minerals;
+                    case "Substrate": return SCANdata.SCANtype.Substrate;
                     default: return SCANdata.SCANtype.Nothing;
                 }
             }
@@ -431,14 +470,6 @@ namespace SCANsat
 			data.body = body;
 			return data;
 		}
-
-        public void getSettingsCoverage() //This handles the scanning coverage value in the settings menu
-        {
-            foreach (CelestialBody body in FlightGlobals.Bodies) {
-                SCANdata data = getData (body);
-                data.coveragePercentage = data.getCoveragePercentage(SCANdata.SCANtype.Nothing);
-            }
-        }
 
         //public void registerPass(CelestialBody body, float lon, float lat, SCANdata.SCANtype type) {
         //    getData(body).registerPass(lon, lat, type);
