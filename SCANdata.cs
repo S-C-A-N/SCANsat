@@ -34,7 +34,6 @@ namespace SCANsat
 		public CelestialBody body;
 		public Texture2D map_small = new Texture2D (360 , 180 , TextureFormat.RGB24 , false);
 		public bool disabled;
-        public double coveragePercentage; //Stores scanning coverage value for the settings menu
         private byte[,] backupCoverage = new byte[360, 180];
 
 		/* MAP: known types of data */
@@ -49,16 +48,16 @@ namespace SCANsat
 			Anomaly = 1<<4,		    // anomalies (position of anomaly)
 			AnomalyDetail = 1<<5,	// anomaly detail (name of anomaly, etc.)
             Kethane = 1<<6,         // Kethane - K-type - Kethane
-            Ore = 1<<7,             // Ore - K-type - EPL
+            Ore = 1<<7,             // Ore - ORS & K-type - EPL & MKS
             Kethane_3 = 1<<8,       // Reserved - K-type
             Kethane_4 = 1<<9,       // Reserved - K-type
             Uranium = 1<<10,        // Uranium - ORS - KSPI
             Thorium = 1<<11,        // Thorium - ORS - KSPI
             Alumina = 1<<12,        // Alumina - ORS - KSPI
-            Water = 1<<13,          // Water - ORS - MKS
-            Ore_ORS = 1<<14,        // Ore - ORS - MKS
-            Minerals = 1<<15,       // Minerals - ORS - MKS
-            Substrate = 1<<16,      // Substrate - ORS - MKS
+            Water = 1<<13,          // Water - ORS - KSPI
+            Aquifer = 1<<14,        // Aquifer - ORS & K-type - MKS
+            Minerals = 1<<15,       // Minerals - ORS & K-type - MKS
+            Substrate = 1<<16,      // Substrate - ORS & K-type - MKS
             KEEZO = 1<<17,          // KEEZO - ORS - Kass Effect
             ORS_9 = 1<<18,          // Reserved - ORS
             ORS_10 = 1<<19,         // Reserved - ORS
@@ -209,7 +208,7 @@ namespace SCANsat
                 uncov += coverage_count [12];
             if ((type & SCANtype.Water) != SCANtype.Nothing)
                 uncov += coverage_count [13];
-            if ((type & SCANtype.Ore_ORS) != SCANtype.Nothing)
+            if ((type & SCANtype.Aquifer) != SCANtype.Nothing)
                 uncov += coverage_count [14];
             if ((type & SCANtype.Minerals) != SCANtype.Nothing)
                 uncov += coverage_count [15];
