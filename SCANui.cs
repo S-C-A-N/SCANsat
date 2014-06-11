@@ -394,10 +394,8 @@ namespace SCANsat
                 }
 				if (GUILayout.Button ("Settings"))
                 {
-                    if (!settings_visible) {
-                        SCANcontroller.controller.getSettingsCoverage(); //Updates coverage only when the menu is opened
+                    if (!settings_visible) 
                         SCANcontroller.controller.Resources(FlightGlobals.currentMainBody);
-                    }
 					settings_visible = !settings_visible;
                 }
 				GUILayout.EndHorizontal ();
@@ -710,7 +708,7 @@ namespace SCANsat
 			foreach (CelestialBody body in FlightGlobals.Bodies) {
 				if (count == 0) GUILayout.BeginVertical ();
 				SCANdata data = SCANcontroller.controller.getData (body);
-				data.disabled = !GUILayout.Toggle (!data.disabled , body.bodyName + " (" + data.coveragePercentage.ToString ("N1") + "%)"); //No longer updates while the suttings menu is open
+				data.disabled = !GUILayout.Toggle (!data.disabled , body.bodyName + " (" + data.getCoveragePercentage(SCANdata.SCANtype.Nothing).ToString("N1") + "%)"); //No longer updates while the suttings menu is open
 				switch (count) {
 					case 4: GUILayout.EndVertical (); count = 0; break;
 					default: ++count; break;
@@ -759,7 +757,6 @@ namespace SCANsat
 			if (GUILayout.Button ("Reset map of " + thisBody.theName)) {
 				SCANdata data = SCANcontroller.controller.getData (thisBody);
 				data.reset ();
-                data.coveragePercentage = data.getCoveragePercentage(SCANdata.SCANtype.Nothing);
 			}
             //if (GUILayout.Button ("Reset resource maps of " + thisBody.theName)) {
             //    SCANdata data = SCANcontroller.controller.getData (thisBody);
@@ -773,7 +770,6 @@ namespace SCANsat
 			if (GUILayout.Button ("Reset <b>all</b> data")) {
 				foreach (SCANdata data in SCANcontroller.controller.body_data.Values) {
 					data.reset ();
-                    data.coveragePercentage = data.getCoveragePercentage(SCANdata.SCANtype.Nothing);
 				}
 			}
             //if (GUILayout.Button ("Reset <b>all</b> resource maps")) {
