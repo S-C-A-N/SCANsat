@@ -25,6 +25,7 @@ namespace SCANsatKethane
         private bool rebuild, reset;
         private int rebuildStep, rebuildValueStep;
         private bool initialized, rebuildingArray, rebuildingValue = false;
+        private Cell cell;
                 
         public void Start() {
             print("[SCAN Kethane] Starting Up");
@@ -105,9 +106,10 @@ namespace SCANsatKethane
             for (int ilat = 0; ilat < 180; ilat++) {
                 for (int ilon = 0; ilon < 360; ilon++) {
                     if (data.isCovered (ilon - 180, ilat - 90, type)) {
-                        Cell cell = getKethaneCell (ilon - 180, ilat - 90);
-                        if (!KethaneData.Current.Scans[resource.name][body.name][cell])
-                            KethaneData.Current.Scans[resource.name][body.name][cell] = true;
+                        cell = getKethaneCell (ilon - 180, ilat - 90);
+                        if (!KethaneData.Current.Scans[resource.name][body.name][cell]) {
+                            KethaneData.Current.Scans[resource.name][body.name][cell] = true; 
+                        }
                     }
                 }
             }
@@ -121,7 +123,7 @@ namespace SCANsatKethane
                 rebuildingArray = true;
             }
             for (int ilon = 0; ilon < 360; ilon++) {//Run 360 points per frame; 3 seconds at 60FPS
-                Cell cell = getKethaneCell(ilon - 180, rebuildStep - 90);
+                cell = getKethaneCell(ilon - 180, rebuildStep - 90);
                 if (KethaneData.Current.Scans[resource.name][body.name][cell]) {
                     updateResourceArray(ilon, rebuildStep, resource.type, data);
                     ICellResource deposit = KethaneData.Current.GetCellDeposit(resource.name, body, cell);
@@ -148,7 +150,7 @@ namespace SCANsatKethane
                 for (int ilon = 0; ilon < 360; ilon++) {
                     if (data.isCovered(ilon, ilat, type)) {
                         if (data.kethaneValueMap[ilon, ilat] == 0) { //Only check unassigned values
-                            Cell cell = getKethaneCell(ilon - 180, ilat - 90);
+                            cell = getKethaneCell(ilon - 180, ilat - 90);
                             ICellResource deposit = KethaneData.Current.GetCellDeposit(resource.name, body, cell); 
                             if (deposit != null) updateResourceValue (ilon, ilat, deposit.Quantity, data);
                             else updateResourceValue (ilon, ilat, -1d, data); //Give empty cells -1 resources, account for this later on
@@ -165,7 +167,7 @@ namespace SCANsatKethane
 
         private Cell getKethaneCell (int ilon, int ilat) {  //Find the Kethane cell corresponding to the current position
             Vector3 pos = body.GetRelSurfaceNVector((double)ilat, (double)ilon); 
-            return Kethane.Cell.Containing(pos, 5);
+            return Cell.Containing(pos, 5);
         }
 
         private void updateResourceArray (int lon, int lat, SCANdata.SCANtype type, SCANdata data) {
