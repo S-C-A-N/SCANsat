@@ -244,7 +244,7 @@ namespace SCANsat
 			for (int ilon=0; ilon<360; ilon+=1) {
 				int scheme = 0;
 				float val = heightmap [ilon, scanline];
-				if (val == 0 && isCovered (ilon - 180 , scanline - 90 , SCANtype.Altimetry)) {
+                if (val == 0) { //Some preparation for bigger changes in map caching, automatically calculate elevation for every point on the small map, only display scanned areas
 					if (body.pqsController == null) {
 						heightmap [ilon, scanline] = 0;
 						cols_height_map_small [ilon] = palette.lerp (palette.black , palette.white , UnityEngine.Random.value);
@@ -262,7 +262,7 @@ namespace SCANsat
 					}
 				}
 				Color c = palette.black;
-				if (val != 0) {
+				if (isCovered (ilon - 180, scanline - 90, SCANtype.Altimetry)) { //We check for coverage down here now, after elevation data is collected
 					if (isCovered (ilon - 180 , scanline - 90 , SCANtype.AltimetryHiRes))
 						c = palette.heightToColor (val , scheme);
 					else
