@@ -631,6 +631,10 @@ namespace SCANsat
 			gui_settings_data_resets (wid);			/* reset data and/or reset resources */
 			GUILayout.Space (8);
 			gui_settings_window_resets (wid);			/* reset windows and positions */
+    # if DEBUG
+            GUILayout.Space(8);
+            gui_settings_window_mapFill (wid);
+    #endif
 			GUILayout.Space (16);
 			if (GUILayout.Button ("Close")) settings_visible = false;	/* close settings */
 
@@ -749,37 +753,16 @@ namespace SCANsat
 		}
 		public static void gui_settings_data_resets (int wid) {
 			CelestialBody thisBody = FlightGlobals.currentMainBody;
-
 			GUILayout.Label ("Data Management" , style_headline);
-
-            //GUILayout.BeginHorizontal ();
-
 			if (GUILayout.Button ("Reset map of " + thisBody.theName)) {
 				SCANdata data = SCANcontroller.controller.getData (thisBody);
 				data.reset ();
 			}
-            //if (GUILayout.Button ("Reset resource maps of " + thisBody.theName)) {
-            //    SCANdata data = SCANcontroller.controller.getData (thisBody);
-            //    data.resetResource ();
-            //    bigmap.resetMap ();
-            //}
-
-            //GUILayout.EndHorizontal ();
-            //GUILayout.BeginHorizontal ();
-
 			if (GUILayout.Button ("Reset <b>all</b> data")) {
 				foreach (SCANdata data in SCANcontroller.controller.body_data.Values) {
 					data.reset ();
 				}
 			}
-            //if (GUILayout.Button ("Reset <b>all</b> resource maps")) {
-            //    foreach (SCANdata data in SCANcontroller.controller.body_data.Values) {
-            //        data.resetResource ();
-            //    }
-            //    bigmap.resetMap ();
-            //}
-
-            //GUILayout.EndHorizontal ();
 		}
 		public static void gui_settings_window_resets (int wid) {
 			GUILayout.BeginHorizontal ();
@@ -796,6 +779,21 @@ namespace SCANsat
 			}
 			GUILayout.EndHorizontal ();
 		}
+        public static void gui_settings_window_mapFill (int wid) {
+            GUILayout.BeginHorizontal();
+            CelestialBody thisBody = FlightGlobals.currentMainBody;
+            if (GUILayout.Button("Fill SCAN map of " + thisBody.theName)) {
+                SCANdata data = SCANcontroller.controller.getData(thisBody);
+                data.fillMap();
+            }
+            if (GUILayout.Button("Fill SCAN map for all planets")) {
+                foreach (CelestialBody b in FlightGlobals.Bodies) {
+                    SCANdata data = SCANcontroller.controller.getData(b);
+                    data.fillMap();
+                }
+            }
+            GUILayout.EndHorizontal();
+        }
         		
 		/* UI: This probably should not be out here. Did I do this? -- tg */
 		static double startUT;
