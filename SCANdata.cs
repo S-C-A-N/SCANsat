@@ -63,7 +63,7 @@ namespace SCANsat
             ORS_10 = 1<<19,         // Reserved - ORS
 
 			Everything_SCAN = (1<<6)-1,	// All default SCANsat scanners
-            Everything = (1<<32)-1      // All scanner types
+            Everything = Int32.MaxValue      // All scanner types
 		}
 
 		/* DATA: map passes and coverage (passes >= 1)*/
@@ -437,6 +437,14 @@ namespace SCANsat
 				throw e;
 			}
 		}
+
+        public void fillMap () {
+            for (int i = 0; i < 360; i++) {
+                for (int j = 0; j < 180; j++) { 
+                    coverage[i,j] |= (Int32)SCANtype.Everything;
+                }
+            }
+        }
 
 		/* DATA: reset the map */
 		public void reset () {
