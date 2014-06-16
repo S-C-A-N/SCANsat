@@ -322,8 +322,17 @@ namespace SCANsat
 			/* init cache if necessary */
 			if (body != big_heightmap_body) {
 				switch (mapType) {
-					case 0: big_heightmap = new float [mapwidth, mapheight, 3]; big_heightmap_body = body; break;
-					default: break;
+					case 0: {
+					    for (int x = 0; x < mapwidth; x++) { //Save memory by not unnecessarily making a new cache
+                            for (int y = 0; y < mapwidth/2; y++) {
+                                for (int z = 0; z < 3; z++) {
+                                    big_heightmap[x,y,z] = 0f;
+                                }
+                            }
+                        }
+                        break;
+                        }
+                    default: break;
 				}
 			}
 
