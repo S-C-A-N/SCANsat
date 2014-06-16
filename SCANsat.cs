@@ -313,9 +313,9 @@ namespace SCANsat
             string altitude = "Unknown";
             if (vessel.altitude < min_alt)
                 altitude = "Too low";
-            else if (vessel.altitude < (best_alt - 5000f))
+            else if (vessel.altitude < best_alt)
                 altitude = "Sub-optimal";
-            else if (vessel.altitude > (best_alt - 5000f) && vessel.altitude < max_alt)
+            else if (vessel.altitude > best_alt && vessel.altitude < max_alt)
                 altitude = "Ideal";
             else if (vessel.altitude > max_alt)
                 altitude = "Too high";
