@@ -21,16 +21,13 @@ namespace SCANsat
     [KSPAddon(KSPAddon.Startup.MainMenu, true)]
     internal class SCANversions: MonoBehaviour
     {
-        private string[] Assemblies = new string[7] {"SCANsat", "SCANsatRPM", "SCANsatKethane", "Kethane", "RasterPropMonitor", "MechJebRPM", "MuMech"};
-        internal static string SCANsatVersion;
+        private string[] Assemblies = new string[7] {"SCANsat", "SCANsatRPM", "SCANsatKethane", "Kethane", "RasterPropMonitor", "MechJebRPM", "MechJeb2"};
+        internal static string SCANsatVersion = "";
+        internal static string SCANurl = "";
         private List<AssemblyLog> assemblyList = new List<AssemblyLog>();
 
         private void Start() {
             findAssemblies(Assemblies);
-            debugWriter();
-               if (assemblyList[0].location != "SCANsat") //Complain if SCANsat is installed in the wrong place
-                ScreenMessages.PostScreenMessage(string.Format("SCANsat plugin installed in the wrong directory: {0}. Installation location should be: Kerbal Space Program/GameData/SCANsat/SCANsat.dll", assemblyList[0].location), 15f, ScreenMessageStyle.UPPER_CENTER);
-            SCANsatVersion = assemblyList[0].infoVersion;
         }
 
         private void findAssemblies(string[] assemblies) {
@@ -38,6 +35,11 @@ namespace SCANsat
                 var assembly = AssemblyLoader.loadedAssemblies.SingleOrDefault(a => a.assembly.GetName().Name == name);
                 if (assembly != null)
                     assemblyList.Add(new AssemblyLog(assembly));
+            }
+            if (assemblyList.Count > 0) { 
+                SCANsatVersion = assemblyList[0].infoVersion;
+                SCANurl = assemblyList[0].location;
+                debugWriter();
             }
         }
 
@@ -58,12 +60,7 @@ namespace SCANsat
         {
             name = assembly.assembly.GetName().Name;
             version = assembly.assembly.GetName().Version.ToString();
-            try {
-                infoVersion = FileVersionInfo.GetVersionInfo(assembly.assembly.Location).ProductVersion; 
-            }
-            catch {
-                infoVersion = "Not Found";
-            }
+            infoVersion = FileVersionInfo.GetVersionInfo(assembly.assembly.Location).ProductVersion; 
             location = assembly.url.ToString();
         }
     
