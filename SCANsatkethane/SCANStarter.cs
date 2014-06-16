@@ -11,6 +11,7 @@
  */
 
 using System.Linq;
+using System.Diagnostics;
 using UnityEngine;
 
 namespace SCANsatKethane
@@ -19,6 +20,7 @@ namespace SCANsatKethane
     class SCANStarter : MonoBehaviour
     {
         private SCANsatKethane SCANK;
+        private string Version = "0.8.6";
         
         public void Start() {
             print("[SCAN Kethane] Searching For Kethane Assembly...");
@@ -28,8 +30,12 @@ namespace SCANsatKethane
         private void searching () {
             var KAssembly = AssemblyLoader.loadedAssemblies.SingleOrDefault(a => a.assembly.GetName().Name == "Kethane");
             if (KAssembly != null) {
-                print("[SCAN Kethane] Kethane Assembly Found, Launching Watcher");
+                if (FileVersionInfo.GetVersionInfo(KAssembly.assembly.Location).ProductVersion == Version) {
+                print("[SCAN Kethane] Kethane Assembly Found; Version: " + Version + ", Launching Watcher");
                 launcher();
+                }
+                else 
+                    print("[SCAN Kethane] Kethane Assembly Found; Unsupported Version: " + Version + ", Shutting Down");
             } else 
                 print("[SCAN Kethane] Kethane Assembly Not Found, Shutting Down");
         }
