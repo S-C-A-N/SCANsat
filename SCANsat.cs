@@ -80,6 +80,7 @@ namespace SCANsat
 				} else {
 					unregisterScanner ();
 				}
+                alt_indicator = scanAlt();
 			}
 			SCANcontroller.controller.scanFromAllVessels ();
 			if (vessel == FlightGlobals.ActiveVessel) {
@@ -186,6 +187,8 @@ namespace SCANsat
 		public string scanName;
 		[KSPField]
 		public string animationName;
+        [KSPField(guiName = "SCANsat Altitude", guiActive = false)]
+        public string alt_indicator;
 
 		/* SCAN: all of these fields and only scanning is persistant */
 		[KSPField(isPersistant = true)]
@@ -198,16 +201,15 @@ namespace SCANsat
 			if (!ToolbarManager.ToolbarAvailable)
 				SCANui.minimode = (SCANui.minimode > 0 ? 2 : -SCANui.minimode);
             registerScanner ();
-            //scanning = true;
-            //if (sensorType > 0) {
-            //    SCANcontroller.controller.registerSensor (vessel , (SCANdata.SCANtype)sensorType , fov , min_alt , max_alt , best_alt);
-            //}
+            if (sensorType != 0 && sensorType != 32)
+                Fields["alt_indicator"].guiActive = true;
 			animate (1);
 		}
 		[KSPEvent(guiActive = true, guiName = "Stop RADAR Scan", active = true)]
 		public void stopScan () {
             	unregisterScanner ();
 			powerIsProblem = false;
+            Fields["alt_indicator"].guiActive = false;
 			animate (-1);
 		}
 		[KSPEvent(guiActive = true, guiName = "Analyze Data", active = true)]
@@ -305,6 +307,19 @@ namespace SCANsat
             scanning = false;
             if (sensorType > 0) 
                 SCANcontroller.controller.unregisterSensor (vessel , (SCANdata.SCANtype)sensorType);
+        }
+
+        private string scanAlt () {
+            string altitude = "Unknown";
+            if (vessel.altitude < min_alt)
+                altitude = "Too low";
+            else if (vessel.altitude < (best_alt - 5000f))
+                altitude = "Sub-optimal";
+            else if (vessel.altitude > (best_alt - 5000f) && vessel.altitude < max_alt)
+                altitude = "Ideal";
+            else if (vessel.altitude > max_alt)
+                altitude = "Too high";
+            return altitude;
         }
 
 		/* SCAN: SCIENCE! make, store, transmit, keep
