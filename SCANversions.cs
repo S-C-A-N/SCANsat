@@ -32,7 +32,7 @@ namespace SCANsat
 
         private void findAssemblies(string[] assemblies) {
             foreach (string name in assemblies) { //Search for the relevant plugins among the loaded assemblies
-                var assembly = AssemblyLoader.loadedAssemblies.SingleOrDefault(a => a.assembly.GetName().Name == name);
+                AssemblyLoader.LoadedAssembly assembly = AssemblyLoader.loadedAssemblies.FirstOrDefault(a => a.assembly.GetName().Name == name);
                 if (assembly != null)
                     assemblyList.Add(new AssemblyLog(assembly));
             }
