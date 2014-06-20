@@ -32,19 +32,9 @@ namespace SCANsat
 
         private void findAssemblies(string[] assemblies) {
             foreach (string name in assemblies) { //Search for the relevant plugins among the loaded assemblies
-                AssemblyLoader.LoadedAssembly assembly = null;
-                try {
-                    assembly = AssemblyLoader.loadedAssemblies.SingleOrDefault(a => a.assembly.GetName().Name == name);
-                    if (assembly != null)
-                        assemblyList.Add(new AssemblyLog(assembly));
-                }
-                catch {
-                    assembly = AssemblyLoader.loadedAssemblies.FirstOrDefault(a => a.assembly.GetName().Name == name);
-                    if (assembly != null) {
-                        assemblyList.Add(new AssemblyLog(assembly));
-                        ScreenMessages.PostScreenMessage(string.Format("Multiple copies of assembly: {0}.dll detected, only one copy should be installed", name), 15f, ScreenMessageStyle.UPPER_CENTER);
-                    }
-                }
+                AssemblyLoader.LoadedAssembly assembly = AssemblyLoader.loadedAssemblies.FirstOrDefault(a => a.assembly.GetName().Name == name);
+                if (assembly != null)
+                    assemblyList.Add(new AssemblyLog(assembly));
             }
             if (assemblyList.Count > 0) { 
                 SCANsatVersion = assemblyList[0].infoVersion;
