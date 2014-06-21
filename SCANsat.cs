@@ -54,8 +54,46 @@ namespace SCANsat
                     }
                 }
             }
+            if (scanName != null) { // Use bitwise operators to check if the part has valid science collection scanners
+                if ((sensorType & (Int32)SCANdata.SCANtype.AltimetryLoRes) == 0 && (sensorType & (Int32)SCANdata.SCANtype.AltimetryHiRes) == 0 && (sensorType & (Int32)SCANdata.SCANtype.Biome) == 0) {
+                    Events["startScan"].guiName = "Start " + scanName;
+                    Events["stopScan"].guiName = "Stop " + scanName;
+			        Events["analyze"].active = false;
+                    Actions["startScanAction"].guiName = "Start " + scanName;
+                    Actions["stopScanAction"].guiName = "Stop " + scanName;
+                    Actions["toggleScanAction"].guiName = "Toggle " + scanName;
+                    Actions["analyzeData"].active = false;
+                } else {
+                    Events["startScan"].guiName = "Start " + scanName;
+                    Events["stopScan"].guiName = "Stop " + scanName;
+			        Events["analyze"].active = true;
+                    Actions["startScanAction"].guiName = "Start " + scanName;
+                    Actions["stopScanAction"].guiName = "Stop " + scanName;
+                    Actions["toggleScanAction"].guiName = "Toggle " + scanName;
+                }
+            }
+
+            if (sensorType == 0) {
+			// here, we override all event and action labels
+			// and we also disable the analyze button (it does nothing)
+                Events["startScan"].guiName = "Open Map";
+                Events["stopScan"].guiName = "Close Map";
+			    Events["analyze"].active = false;
+                Actions["startScanAction"].guiName = "Open Map";
+                Actions["stopScanAction"].guiName = "Close Map";
+                Actions["toggleScanAction"].guiName = "Toggle Map";
+			    Actions["analyzeData"].active = false;
+            }
+		    else if (sensorType == 32) {
+			// here, we only disable analyze; BTDT has good labels
+			    Events["analyze"].active = false;
+			    Actions["analyzeData"].active = false;
+		    }
+            if (scanning) startScan();
+		    powerIsProblem = false;
 			print ("[SCANsat] sensorType: " + sensorType.ToString () + " fov: " + fov.ToString () + " min_alt: " + min_alt.ToString () + " max_alt: " + max_alt.ToString () + " best_alt: " + best_alt.ToString () + " power: " + power.ToString ());
         }
+
 		public override void OnUpdate () {
 			Events ["reviewEvent"].active = storedData.Count > 0;
 			Events ["EVACollect"].active = storedData.Count > 0;
@@ -93,49 +131,7 @@ namespace SCANsat
 				}
 			}
 		}
-        	public override void OnInitialize()
-        {
-		if (scanName != null)
-            { // Use bitwise operators to check if the part has valid science collection scanners
-            if ((sensorType & (Int32)SCANdata.SCANtype.AltimetryLoRes) == 0 && (sensorType & (Int32)SCANdata.SCANtype.AltimetryHiRes) == 0 && (sensorType & (Int32)SCANdata.SCANtype.Biome) == 0) {
-                Events["startScan"].guiName = "Start " + scanName;
-                Events["stopScan"].guiName = "Stop " + scanName;
-			    Events["analyze"].active = false;
-                Actions["startScanAction"].guiName = "Start " + scanName;
-                Actions["stopScanAction"].guiName = "Stop " + scanName;
-                Actions["toggleScanAction"].guiName = "Toggle " + scanName;
-                Actions["analyzeData"].active = false;
-            } else {
-                Events["startScan"].guiName = "Start " + scanName;
-                Events["stopScan"].guiName = "Stop " + scanName;
-			    Events["analyze"].active = true;
-                Actions["startScanAction"].guiName = "Start " + scanName;
-                Actions["stopScanAction"].guiName = "Stop " + scanName;
-                Actions["toggleScanAction"].guiName = "Toggle " + scanName;
-            }
-            }
 
-            if (sensorType == 0)
-            {
-			// here, we override all event and action labels
-			// and we also disable the analyze button (it does nothing)
-               Events["startScan"].guiName = "Open Map";
-               Events["stopScan"].guiName = "Close Map";
-			Events["analyze"].active = false;
-               Actions["startScanAction"].guiName = "Open Map";
-               Actions["stopScanAction"].guiName = "Close Map";
-               Actions["toggleScanAction"].guiName = "Toggle Map";
-			Actions["analyzeData"].active = false;
-            }
-		  else if (sensorType == 32) {
-			// here, we only disable analyze; BTDT has good labels
-			Events["analyze"].active = false;
-			Actions["analyzeData"].active = false;
-		  }
-
-            if (scanning) startScan();
-		  powerIsProblem = false;
-        }
         	public override void OnLoad(ConfigNode node)
         {
             if (node.HasNode("ScienceData"))
