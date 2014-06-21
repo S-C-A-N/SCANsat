@@ -21,7 +21,7 @@ namespace SCANsat
     [KSPAddon(KSPAddon.Startup.MainMenu, true)]
     internal class SCANversions: MonoBehaviour
     {
-        private string[] Assemblies = new string[7] {"SCANsat", "SCANsatRPM", "SCANsatKethane", "Kethane", "RasterPropMonitor", "MechJebRPM", "MechJeb2"};
+        private string[] Assemblies = new string[6] {"SCANsatRPM", "SCANsatKethane", "Kethane", "RasterPropMonitor", "MechJebRPM", "MechJeb2"};
         internal static string SCANsatVersion = "";
         internal static string SCANurl = "";
         private List<AssemblyLog> assemblyList = new List<AssemblyLog>();
@@ -31,6 +31,7 @@ namespace SCANsat
         }
 
         private void findAssemblies(string[] assemblies) {
+            assemblyList.Add(new AssemblyLog(AssemblyLoader.loadedAssemblies.GetByAssembly(Assembly.GetExecutingAssembly()))); //More reliable method for SCANsat.dll
             foreach (string name in assemblies) { //Search for the relevant plugins among the loaded assemblies
                 AssemblyLoader.LoadedAssembly assembly = AssemblyLoader.loadedAssemblies.FirstOrDefault(a => a.assembly.GetName().Name == name);
                 if (assembly != null)
