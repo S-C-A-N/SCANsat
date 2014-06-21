@@ -36,7 +36,7 @@ namespace SCANsat
             {
 				print ("[SCANsat] start: live");
             }
-			if (animationName != null)
+			if (!string.IsNullOrEmpty(animationName))
             {
 				Animation[] a = part.FindModelAnimators (animationName);
 				if (a.Length == 0)
@@ -47,11 +47,11 @@ namespace SCANsat
 					print ("[SCANsat] using animation #1 out of " + a.Length.ToString () + " animations named '" + animationName + "'");
 					anim = a [0];
 					// maybe use this later for advanced animation...
-					Transform modeltransform = part.transform.FindChild ("model");
-					foreach (Transform t in modeltransform.GetComponentsInChildren<Transform>())
-                    {
-						//print("[SCANsat] transform " + t.name + ": " + t);
-                    }
+                    //Transform modeltransform = part.transform.FindChild ("model");
+                    //foreach (Transform t in modeltransform.GetComponentsInChildren<Transform>())
+                    //{
+                    //    //print("[SCANsat] transform " + t.name + ": " + t);
+                    //}
                 }
             }
             if (scanName != null) { // Use bitwise operators to check if the part has valid science collection scanners
@@ -89,7 +89,7 @@ namespace SCANsat
 			    Events["analyze"].active = false;
 			    Actions["analyzeData"].active = false;
 		    }
-            if (scanning) startScan();
+            if (scanning) animate(1, 1);
 		    powerIsProblem = false;
 			print ("[SCANsat] sensorType: " + sensorType.ToString () + " fov: " + fov.ToString () + " min_alt: " + min_alt.ToString () + " max_alt: " + max_alt.ToString () + " best_alt: " + best_alt.ToString () + " power: " + power.ToString ());
         }
@@ -199,14 +199,14 @@ namespace SCANsat
             registerScanner ();
             if (sensorType != 0 && sensorType != 32)
                 Fields["alt_indicator"].guiActive = true;
-			animate (1);
+			animate (1, 0);
 		}
 		[KSPEvent(guiActive = true, guiName = "Stop RADAR Scan", active = true)]
 		public void stopScan () {
             	unregisterScanner ();
 			powerIsProblem = false;
             Fields["alt_indicator"].guiActive = false;
-			animate (-1);
+			animate (-1, 1);
 		}
 		[KSPEvent(guiActive = true, guiName = "Analyze Data", active = true)]
 		public void analyze () {
@@ -234,27 +234,28 @@ namespace SCANsat
 		public void editorExtend () {
 			Events ["editorExtend"].active = false;
 			Events ["editorRetract"].active = true;
-			animate (1);
+			animate (1, 0);
 		}
 		[KSPEvent(guiActiveEditor = true, guiName = "Retract", active = false)]
 		public void editorRetract () {
 			Events ["editorExtend"].active = true;
 			Events ["editorRetract"].active = false;
-			animate (-1);
+			animate (-1, 1);
 		}
 
 		/* SCAN: trivial function to do animation */
-		public void animate ( float speed ) {
+		public void animate ( float speed, float time ) {
 			if (anim != null && anim [animationName] != null) {
 				anim [animationName].speed = speed;
 				if (anim.IsPlaying (animationName)) {
 					if (anim [animationName].normalizedTime <= 0) {
-						anim [animationName].normalizedTime = 0;
+						anim [animationName].normalizedTime = time;
 					} else if (anim [animationName].normalizedTime >= 1 - float.Epsilon) {
-						anim [animationName].normalizedTime = 1;
+						anim [animationName].normalizedTime = time;
 					}
 				} else {
 					anim [animationName].wrapMode = WrapMode.ClampForever;
+                    anim [animationName].normalizedTime = time;
 					anim.Play (animationName);
 				}
 			}
