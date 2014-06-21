@@ -130,7 +130,7 @@ namespace SCANsat
 			}
             Resources(FlightGlobals.currentMainBody);
             dataRebuild = false; //Used for the one-time update to the new integer array
-            if (!warned && SCANversions.SCANurl != "SCANsat") { //Complain if SCANsat is installed in the wrong place
+            if (!warned && SCANversions.SCANurl != "SCANsat" && !string.IsNullOrEmpty(SCANversions.SCANurl)) { //Complain if SCANsat is installed in the wrong place
                 ScreenMessages.PostScreenMessage(string.Format("SCANsat plugin installed in the wrong directory: {0}. Installation location should be: Kerbal Space Program/GameData/SCANsat/SCANsat.dll", SCANversions.SCANurl), 15f, ScreenMessageStyle.UPPER_CENTER);
 		        warned = true;
             }
