@@ -1487,13 +1487,13 @@ namespace SCANsat
 				}
 			}
 			#endregion
-			#region big map fps counter
+			#region big map fps counter, version label
 			Rect fpswidget = new Rect (maprect.x + maprect.width - 32 , maprect.y + maprect.height + 32 , 32 , 24);
 			GUI.Label (fpswidget , fps.ToString ("N1"));
 			#endregion
             #region version label
-            Rect versionLabel = new Rect (maprect.x + maprect.width - 48, maprect.y + maprect.height + 50, 60, 24);
-            GUI.Label (versionLabel, "V" + SCANversions.SCANsatVersion);
+            Rect versionLabel = new Rect (maprect.x + maprect.width - 44, maprect.y + maprect.height + 50, 54, 24);
+            GUI.Label (versionLabel, SCANversions.SCANsatVersion);
             #endregion
             #region big map resizing
             Rect resizer = new Rect (maprect.x + maprect.width - 24 , maprect.y + maprect.height + 8 , 24 , 24);
@@ -1691,7 +1691,7 @@ namespace SCANsat
 					}
 				}
 
-				title = "S.C.A.N. Planetary Mapping - V" + SCANversions.SCANsatVersion;
+				title = "S.C.A.N. Planetary Mapping " + SCANversions.SCANsatVersion;
 
 				if (minimode <= 0)
 					title = " ";
@@ -1752,11 +1752,11 @@ namespace SCANsat
 			}
 
 			if (settings_visible) {
-				pos_settings = GUILayout.Window (47110004 , pos_settings , gui_settings_build , "S.C.A.N. Settings - V" + SCANversions.SCANsatVersion , GUILayout.Width (360) , GUILayout.Height (180));
+				pos_settings = GUILayout.Window (47110004 , pos_settings , gui_settings_build , "S.C.A.N. Settings " + SCANversions.SCANsatVersion , GUILayout.Width (360) , GUILayout.Height (180));
 				if (pos_settings.x < 0 && pos_settings.width > 0) {
 					pos_settings.x = Screen.width / 2 - pos_settings.width / 2;
 					pos_settings.y = Screen.height / 3 - pos_settings.height / 2;
-					pos_settings = GUILayout.Window (47110004 , pos_settings , gui_settings_build , "S.C.A.N. Settings - V" + SCANversions.SCANsatVersion , GUILayout.Width (360) , GUILayout.Height (180));
+					pos_settings = GUILayout.Window (47110004 , pos_settings , gui_settings_build , "S.C.A.N. Settings " + SCANversions.SCANsatVersion , GUILayout.Width (360) , GUILayout.Height (180));
 				}
 			}
 		}
