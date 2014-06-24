@@ -9,4 +9,5 @@ using System.Runtime.CompilerServices;
 [assembly: AssemblyVersion("1.0.6.0")]
 [assembly: AssemblyFileVersion("1.0.7.24")]
 [assembly: AssemblyInformationalVersion("v7.0rc2.4")]
+[assembly: KSPAssemblyDependency ("SCANsat", 1, 6)]
 
