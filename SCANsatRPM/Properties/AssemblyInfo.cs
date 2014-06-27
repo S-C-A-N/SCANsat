@@ -7,7 +7,10 @@ using System.Runtime.CompilerServices;
 [assembly: AssemblyDescription ("RasterPropMonitor / SCANsat interface plugin for Kerbal Space Program")]
 
 [assembly: AssemblyVersion("1.0.6.0")]
-[assembly: AssemblyFileVersion("1.0.7.24")]
-[assembly: AssemblyInformationalVersion("v7.0rc2.4")]
-[assembly: KSPAssemblyDependency ("SCANsat", 1, 6)]
+[assembly: AssemblyFileVersion("1.0.7.25")]
+[assembly: AssemblyInformationalVersion("v7.0rc2.5")]
+
+[assembly: KSPAssembly ("SCANsatRPM", 0, 725)]
+[assembly: KSPAssemblyDependency ("SCANsat", 0, 725)]
+[assembly: KSPAssemblyDependency("RasterPropMonitor", 0, 17)]
 
