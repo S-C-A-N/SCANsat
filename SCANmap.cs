@@ -330,6 +330,7 @@ namespace SCANsat
                                 }
                             }
                         }
+                        big_heightmap_body = body;
                         break;
                         }
                     default: break;
