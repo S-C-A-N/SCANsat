@@ -598,7 +598,7 @@ namespace SCANsatRPM
 		private void Start()
 		{
 
-			InstallationPathWarning.Warn("SCANsatRPM");
+			InstallationPathWarning.Warn("SCANsat/Plugins");
 
 			// Arrrgh.
 			if (!string.IsNullOrEmpty(iconColorSelf))
