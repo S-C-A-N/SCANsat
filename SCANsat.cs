@@ -99,7 +99,7 @@ namespace SCANsat
 			Events ["EVACollect"].active = storedData.Count > 0;
 			Events ["startScan"].active = !scanning;
 			Events ["stopScan"].active = scanning;
-            	if (scanning) {
+				if (scanning) {
 				if (sensorType == 0 || SCANcontroller.controller.isVesselKnown (vessel.id , (SCANdata.SCANtype)sensorType)) {
 					if (TimeWarp.CurrentRate < 1500) {
 						float p = power * TimeWarp.deltaTime;
@@ -142,6 +142,17 @@ namespace SCANsat
                     storedData.Add(data);
                 }
             }
+			if (node.HasNode("SCANsatRPM")) {
+				ConfigNode RPMPersistence = node.GetNode("SCANsatRPM");
+				foreach (ConfigNode RPMNode in RPMPersistence.GetNodes("Prop")) {
+					string id = RPMNode.GetValue("Prop ID");
+					int Mode = Convert.ToInt32(RPMNode.GetValue("Mode"));
+					int Color = Convert.ToInt32(RPMNode.GetValue("Color"));
+					int Zoom = Convert.ToInt32(RPMNode.GetValue("Zoom"));
+					bool Lines = Convert.ToBoolean(RPMNode.GetValue("Lines"));
+					RPMList.Add(new RPMPersistence(id, Mode, Color, Zoom, Lines));
+				}
+			}
         }
         	public override void OnSave(ConfigNode node)
         {
@@ -151,6 +162,19 @@ namespace SCANsat
                 ConfigNode storedDataNode = node.AddNode("ScienceData");
                 SCANData.Save(storedDataNode);
             }
+			if (RPMList.Count > 0) {
+				ConfigNode RPMPersistence = new ConfigNode("SCANsatRPM");
+				foreach (RPMPersistence RPMMFD in RPMList) {
+					ConfigNode RPMProp = new ConfigNode("Prop");
+					RPMProp.AddValue("Prop ID", RPMMFD.RPMID);
+					RPMProp.AddValue("Mode", RPMMFD.RPMMode);
+					RPMProp.AddValue("Color", RPMMFD.RPMColor);
+					RPMProp.AddValue("Zoom", RPMMFD.RPMZoom);
+					RPMProp.AddValue("Lines", RPMMFD.RPMLines);
+					RPMPersistence.AddNode(RPMProp);
+				}
+				node.AddNode(RPMPersistence);
+			}
         }
 		public override string GetInfo () {
 			string str = base.GetInfo ();
@@ -183,8 +207,9 @@ namespace SCANsat
 		public string scanName;
 		[KSPField]
 		public string animationName;
-        [KSPField(guiName = "SCANsat Altitude", guiActive = false)]
-        public string alt_indicator;
+		[KSPField(guiName = "SCANsat Altitude", guiActive = false)]
+		public string alt_indicator;
+		internal List<RPMPersistence> RPMList = new List<RPMPersistence>();
 
 		/* SCAN: all of these fields and only scanning is persistant */
 		[KSPField(isPersistant = true)]

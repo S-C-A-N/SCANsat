@@ -1,6 +1,6 @@
-using SCANsat;
 using UnityEngine;
 using System;
+using System.Linq;
 using System.Collections.Generic;
 using System.Globalization;
 
@@ -88,6 +88,8 @@ namespace SCANsat
 		private double redrawDeviation;
 		private SCANdata.SCANanomaly[] localAnomalies;
 		private Material iconMaterial;
+		private SCANsat sat;
+		internal RPMPersistence persist;
 
 			 // TODO: Reimplement persistence storage.
 			 // Mihara: That's the one caveat here.
@@ -118,12 +120,14 @@ namespace SCANsat
 
 		private bool TestForActiveSCANsat()
 		{
-			if (satFound)
-				return true;
-			foreach (ScenarioModule thatScenario in ScenarioRunner.GetLoadedModules()) {
-				if (thatScenario.ClassName == "SCANcontroller") {
-					satFound = true;
+			if (sat != null) {
+				if (satFound)
 					return true;
+				foreach (ScenarioModule thatScenario in ScenarioRunner.GetLoadedModules()) {
+					if (thatScenario.ClassName == "SCANcontroller") {
+						satFound = true;
+						return true;
+					}
 				}
 			}
 			return false;
@@ -139,17 +143,13 @@ namespace SCANsat
 				return false;
 
 			if (screenWidth == 0 || screenHeight == 0) {
-						  /*  TODO: Reimplement persistence in some other way.
-				int? loadedMode = persistence.GetVar(persistentVarName + "mode");
+
+				int? loadedMode = persist.RPMMode;
 				mapMode = loadedMode ?? 0;
-				int? loadedZoom = persistence.GetVar(persistentVarName + "zoom");
+				int? loadedZoom = persist.RPMZoom;
 				zoomLevel = loadedZoom ?? 0;
-				int? loadedColors = persistence.GetVar(persistentVarName + "color");
+				int? loadedColors = persist.RPMColor;
 				SCANcontroller.controller.colours = loadedColors ?? 0;
-				*/
-				mapMode = 0;
-				zoomLevel = 0;
-				SCANcontroller.controller.colours = 0;
 				screenWidth = screen.width;
 				screenHeight = screen.height;
 				iconMaterial = new Material(Shader.Find("KSP/Alpha/Unlit Transparent"));
@@ -183,7 +183,7 @@ namespace SCANsat
 			// Trails go above markup lines
 			if (showLines && trailLimit > 0 && trail.Count > 0)
 				DrawTrail(trail, trailColorValue, new Vector2d(vessel.longitude, vessel.latitude), true);
-
+		
 			// Anomalies go above trails
 			foreach (SCANdata.SCANanomaly anomaly in localAnomalies) {
 				if (anomaly.known)
@@ -479,16 +479,12 @@ namespace SCANsat
 			if (buttonID == buttonEsc) {
 				// Whatever possessed him to do THAT?
 				SCANcontroller.controller.colours = SCANcontroller.controller.colours == 0 ? 1 : 0;
-				/* TODO: Reimplement persistence storage.
-				persistence.SetVar(persistentVarName + "color", SCANcontroller.controller.colours);
-				*/
+				persist.RPMColor = SCANcontroller.controller.colours;
 				RedrawMap();
 			}
 			if (buttonID == buttonHome) {
 				showLines = !showLines;
-				/* TODO: Reimplement persistence storage.
-				persistence.SetVar(persistentVarName + "lines", showLines);
-				*/
+				persist.RPMLines = showLines;
 			}
 		}
 
@@ -500,9 +496,7 @@ namespace SCANsat
 				mapMode = 0;
 			if (mapMode < 0)
 				mapMode = 2;
-			/* TODO: Reimplement persistence storage.
-			persistence.SetVar(persistentVarName + "mode", mapMode);
-			*/
+			persist.RPMMode = mapMode;
 			RedrawMap();
 		}
 
@@ -515,9 +509,7 @@ namespace SCANsat
 			if (zoomLevel > maxZoom)
 				zoomLevel = maxZoom;
 			if (zoomLevel != oldZoom) {
-				/* TODO: Reimplement persistence storage.
-				persistence.SetVar(persistentVarName + "zoom", zoomLevel);
-				*/
+				persist.RPMZoom = zoomLevel;
 				RedrawMap();
 			}
 		}
@@ -616,7 +608,6 @@ namespace SCANsat
 
 		private void Start()
 		{
-
 			// Arrrgh.
 			if (!string.IsNullOrEmpty(iconColorSelf))
 				iconColorSelfValue = ConfigNode.ParseColor32(iconColorSelf);
@@ -639,14 +630,27 @@ namespace SCANsat
 			if (!string.IsNullOrEmpty(trailColor))
 				trailColorValue = ConfigNode.ParseColor32(trailColor);
 
+
 			// Referencing the parent project should work, shouldn't it.
 			persistentVarName = "scansat" + internalProp.propID;
-		     /* TODO: Reimplement persistence storage.
-			persistence = new PersistenceAccessor(part);
+			sat = part.FindModulesImplementing<SCANsat>().First();
 
-			showLines = persistence.GetBool(persistentVarName + "lines") ?? true;
-			*/
-			showLines = true;
+			if (sat != null) {
+				if (sat.RPMList.Count > 0) {
+					foreach (RPMPersistence RPMProp in sat.RPMList) {
+						if (RPMProp.RPMID == persistentVarName) {
+							persist = RPMProp;
+							break;
+						}
+					}
+				}
+				if (persist == null) {
+					persist = new RPMPersistence(persistentVarName);
+					sat.RPMList.Add(persist);
+				}
+			}
+
+			showLines = persist.RPMLines;
 
 			trailMaterial = JUtil.DrawLineMaterial();
 
@@ -719,4 +723,28 @@ namespace SCANsat
 			}
 		}
 	}
+
+	internal class RPMPersistence
+	{
+		internal int RPMMode, RPMColor, RPMZoom = 0;
+		internal bool RPMLines = true;
+		internal string RPMID;
+
+		internal RPMPersistence(string id)
+		{
+			RPMID = id;
+		}
+
+		internal RPMPersistence(string id, int mode, int color, int zoom, bool lines)
+		{
+			RPMID = id;
+			RPMMode = mode;
+			RPMColor = color;
+			RPMZoom = zoom;
+			RPMLines = lines;
+		}
+	}
+
 }
+
+
