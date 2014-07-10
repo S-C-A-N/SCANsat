@@ -720,7 +720,7 @@ namespace SCANsat
 				data.reset ();
 			}
 			if (GUILayout.Button ("Reset <b>all</b> data")) {
-				foreach (SCANdata data in SCANcontroller.controller.body_data.Values) {
+				foreach (SCANdata data in SCANUtil.body_data.Values) {
 					data.reset ();
 				}
 			}
@@ -1375,6 +1375,11 @@ namespace SCANsat
 			Rect fpswidget = new Rect (maprect.x + maprect.width - 32 , maprect.y + maprect.height + 32 , 32 , 24);
 			GUI.Label (fpswidget , fps.ToString ("N1"));
 
+			#region version label
+			Rect versionLabel = new Rect(maprect.x + maprect.width - 44, maprect.y + maprect.height + 50, 54, 24);
+			GUI.Label(versionLabel, SCANversions.SCANsatVersion);
+			#endregion
+
 			Rect resizer = new Rect (maprect.x + maprect.width - 24 , maprect.y + maprect.height + 8 , 24 , 24);
 			GUI.Box (resizer , "//");
 			if (Event.current.isMouse) {
@@ -1569,7 +1574,7 @@ namespace SCANsat
 					}
 				}
 
-				title = "S.C.A.N. Planetary Mapping";
+				title = "S.C.A.N. Planetary Mapping " + SCANversions.SCANsatVersion;
 
 				if (minimode <= 0)
 					title = " ";
@@ -1628,11 +1633,11 @@ namespace SCANsat
 			}
 
 			if (settings_visible) {
-				pos_settings = GUILayout.Window (47110004 , pos_settings , gui_settings_build , "S.C.A.N. Settings" , GUILayout.Width (360) , GUILayout.Height (180));
+				pos_settings = GUILayout.Window (47110004 , pos_settings , gui_settings_build , "S.C.A.N. Settings " + SCANversions.SCANsatVersion , GUILayout.Width (360) , GUILayout.Height (180));
 				if (pos_settings.x < 0 && pos_settings.width > 0) {
 					pos_settings.x = Screen.width / 2 - pos_settings.width / 2;
 					pos_settings.y = Screen.height / 3 - pos_settings.height / 2;
-					pos_settings = GUILayout.Window (47110004 , pos_settings , gui_settings_build , "S.C.A.N. Settings" , GUILayout.Width (360) , GUILayout.Height (180));
+					pos_settings = GUILayout.Window (47110004 , pos_settings , gui_settings_build , "S.C.A.N. Settings " + SCANversions.SCANsatVersion , GUILayout.Width (360) , GUILayout.Height (180));
 				}
 			}
 		}
