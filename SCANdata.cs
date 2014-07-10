@@ -30,11 +30,20 @@ namespace SCANsat
 		/* MAP: state */
 		public Int32[,] coverage = new Int32[360 , 180];
 		protected float[,] heightmap = new float[360 , 180];
-        	public float[,] kethaneValueMap = new float[360, 180]; //Store kethane cell data in here
+		public float[,] kethaneValueMap = new float[360, 180]; //Store kethane cell data in here
 		public CelestialBody body;
 		public Texture2D map_small = new Texture2D (360 , 180 , TextureFormat.RGB24 , false);
 		public bool disabled;
-        private byte[,] backupCoverage = new byte[360, 180];
+		private byte[,] backupCoverage = new byte[360, 180];
+
+		internal SCANdata(CelestialBody b)
+		{
+			body = b;
+		}
+
+		internal SCANdata()
+		{
+		}
 
 		/* MAP: known types of data */
 		public enum SCANtype: int
