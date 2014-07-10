@@ -5,5 +5,4 @@ using System.Runtime.CompilerServices;
 // Change them to the values specific to your project.
 [assembly: AssemblyTitle("SCANsatRPM")]
 [assembly: AssemblyDescription ("RasterPropMonitor / SCANsat interface plugin for Kerbal Space Program")]
-[assembly: KSPAssemblyDependency("SCANsat", 1, 6)]
 
