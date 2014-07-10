@@ -11,6 +11,7 @@
  */
 
 using System;
+using System.Linq;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -64,6 +65,8 @@ namespace SCANsat
 		[KSPField(isPersistant = true)]
 		public int timeWarpResolution = 20;
 
+		private bool warned = false;
+
 		public override void OnLoad(ConfigNode node) {
 			ConfigNode node_vessels = node.GetNode("Scanners");
 			if(node_vessels != null) {
@@ -90,17 +93,25 @@ namespace SCANsat
 				foreach(ConfigNode node_body in node_progress.GetNodes("Body")) {
 					string body_name = node_body.GetValue("Name");
 					print("SCANsat Controller: Loading map for " + body_name);
-					SCANdata body_data = getData(body_name);
-					try {
-						string mapdata = node_body.GetValue("Map");
-						body_data.deserialize(mapdata);
-					} catch(Exception e) {
-						print(e.ToString());
-						print(e.StackTrace);
-						// fail somewhat gracefully; don't make the save unloadable 
+					CelestialBody body = FlightGlobals.Bodies.FirstOrDefault(b => b.name == body_name);
+					if (body != null) {
+						SCANdata body_data = SCANUtil.getData(body);
+						try {
+							string mapdata = node_body.GetValue("Map");
+							body_data.deserialize(mapdata);
+						} catch(Exception e) {
+							print(e.ToString());
+							print(e.StackTrace);
+							// fail somewhat gracefully; don't make the save unloadable 
+						}
+						body_data.disabled = Convert.ToBoolean(node_body.GetValue("Disabled"));
 					}
-					body_data.disabled = Convert.ToBoolean(node_body.GetValue("Disabled"));
 				}
+			}
+			if (!warned && SCANversions.SCANurl != "SCANsat/Plugins" && !string.IsNullOrEmpty(SCANversions.SCANurl))
+			{ //Complain if SCANsat is installed in the wrong place
+				ScreenMessages.PostScreenMessage(string.Format("SCANsat plugin installed in the wrong directory: {0}. Installation location should be:/nKerbal Space Program/GameData/SCANsat/Plugins/SCANsat.dll", SCANversions.SCANurl), 15f, ScreenMessageStyle.UPPER_CENTER);
+				warned = true;
 			}
 		}
 
@@ -123,9 +134,9 @@ namespace SCANsat
 			}
 			node.AddNode(node_vessels);
 			ConfigNode node_progress = new ConfigNode("Progress");
-			foreach(string body_name in body_data.Keys) {
+			foreach(string body_name in SCANUtil.body_data.Keys) {
 				ConfigNode node_body = new ConfigNode("Body");
-				SCANdata body_scan = body_data[body_name];
+				SCANdata body_scan = SCANUtil.body_data[body_name];
 				node_body.AddValue("Name", body_name);
 				node_body.AddValue("Disabled", body_scan.disabled);
 				node_body.AddValue("Map", body_scan.serialize());
@@ -304,14 +315,14 @@ namespace SCANsat
 			return sd;
 		}
 
-		public Dictionary<string, SCANdata> body_data = new Dictionary<string, SCANdata>();
+		//public Dictionary<string, SCANdata> body_data = new Dictionary<string, SCANdata>();
 
 		public SCANdata getData(string name) {
-			if(!body_data.ContainsKey(name)) {
-				body_data[name] = new SCANdata();
-				body_data[name].resetImages();
+			if(!SCANUtil.body_data.ContainsKey(name)) {
+				SCANUtil.body_data[name] = new SCANdata();
+				SCANUtil.body_data[name].resetImages();
 			}
-			return body_data[name];
+			return SCANUtil.body_data[name];
 		}
 
 		public SCANdata getData(CelestialBody body) {
@@ -357,7 +368,7 @@ namespace SCANsat
 			currentActiveVessel = 0;
 			actualPasses = 0;
 			maxRes = 0;
-			foreach(SCANdata data in body_data.Values) data.updateCoverage();
+			foreach(SCANdata data in SCANUtil.body_data.Values) data.updateCoverage();
 			foreach(Vessel v in FlightGlobals.Vessels) {
 				if(!knownVessels.ContainsKey(v.id)) continue;
 				SCANvessel vessel = knownVessels[v.id];
