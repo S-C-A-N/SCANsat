@@ -89,20 +89,12 @@ namespace SCANsat
 
 		internal static Dictionary<string, SCANdata> body_data = new Dictionary<string, SCANdata>();
 
-		internal static SCANdata getData(string name)
-		{
-			if (!body_data.ContainsKey(name))
-			{
-				body_data[name] = new SCANdata();
-				body_data[name].resetImages();
-			}
-			return body_data[name];
-		}
-
 		internal static SCANdata getData(CelestialBody body)
 		{
-			SCANdata data = getData(body.name);
-			data.body = body;
+			if (!body_data.ContainsKey(body.name)) {
+				body_data[body.name] = new SCANdata(body);
+			}
+			SCANdata data = body_data[body.name];
 			return data;
 		}
 
