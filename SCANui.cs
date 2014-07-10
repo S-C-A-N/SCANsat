@@ -759,7 +759,7 @@ namespace SCANsat
 				data.reset ();
 			}
 			if (GUILayout.Button ("Reset <b>all</b> data")) {
-				foreach (SCANdata data in SCANcontroller.controller.body_data.Values) {
+				foreach (SCANdata data in SCANUtil.body_data.Values) {
 					data.reset ();
 				}
 			}
