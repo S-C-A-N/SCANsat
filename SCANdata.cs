@@ -24,11 +24,20 @@ namespace SCANsat
 		Func<int,int,bool> badLonLat = (lon,lat) => (lon < 0 || lat < 0 || lon >= 360 || lat >= 180);
 
 		/* MAP: state */
-		protected byte[,] coverage = new byte[360 , 180];
+		public byte[,] coverage = new byte[360 , 180];
 		protected float[,] heightmap = new float[360 , 180];
 		public CelestialBody body;
 		public Texture2D map_small = new Texture2D (360 , 180 , TextureFormat.RGB24 , false);
 		public bool disabled;
+
+		internal SCANdata(CelestialBody b)
+		{
+			body = b;
+		}
+
+		internal SCANdata()
+		{
+		}
 
 		/* MAP: known types of data */
 		public enum SCANtype
