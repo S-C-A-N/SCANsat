@@ -11,6 +11,7 @@
  * Created by David to allow the SCANsat plugin to function through the toolbar interface
  */
 
+using System.IO;
 using UnityEngine;
 
 namespace SCANsat
