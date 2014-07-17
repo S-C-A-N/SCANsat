@@ -57,7 +57,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="SCANsatRPM.cs" />
-    <Compile Include="SCANutilities.cs" />
+    <Compile Include="SCANutil.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SCANcontroller.cs" />
     <Compile Include="SCANdata.cs" />
