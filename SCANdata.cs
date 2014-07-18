@@ -23,13 +23,13 @@ namespace SCANsat
 	{
 		/* MAP: anonymous functions (in place of preprocessor macros */
 		// icLON and icLAT: [i]nteger casted, [c]lamped, longitude and latitude
-		internal Func<double,int> icLON = (lon) => ((int)(lon + 360 + 180)) % 360;
-		internal Func<double,int> icLAT = (lat) => ((int)(lat + 180 + 90 )) % 180;
-		Func<int,int,bool> badLonLat = (lon,lat) => (lon < 0 || lat < 0 || lon >= 360 || lat >= 180);
+		//internal Func<double,int> icLON = (lon) => ((int)(lon + 360 + 180)) % 360;
+		//internal Func<double,int> icLAT = (lat) => ((int)(lat + 180 + 90 )) % 180;
+		//Func<int,int,bool> badLonLat = (lon,lat) => (lon < 0 || lat < 0 || lon >= 360 || lat >= 180);
 
 		/* MAP: state */
 		public Int32[,] coverage = new Int32[360 , 180];
-		protected float[,] heightmap = new float[360 , 180];
+		internal float[,] heightmap = new float[360 , 180];
 		public float[,] kethaneValueMap = new float[360, 180]; //Store kethane cell data in here
 		public CelestialBody body;
 		public Texture2D map_small = new Texture2D (360 , 180 , TextureFormat.RGB24 , false);
@@ -41,9 +41,9 @@ namespace SCANsat
 			body = b;
 		}
 
-		internal SCANdata()
-		{
-		}
+		//internal SCANdata()
+		//{
+		//}
 
 		/* MAP: known types of data */
 		public enum SCANtype: int
@@ -76,71 +76,72 @@ namespace SCANsat
 		}
 
 		/* DATA: map passes and coverage (passes >= 1)*/
-		public void registerPass ( double lon , double lat , SCANtype type ) {
-			int ilon = icLON(lon);
-			int ilat = icLAT(lat);
-			if (badLonLat(ilon,ilat)) return;
-			coverage [ilon, ilat] |= (Int32)type;
-		}
-		public bool isCovered ( double lon , double lat , SCANtype type ) {
-			int ilon = icLON(lon);
-			int ilat = icLAT(lat);
-			if (badLonLat(ilon,ilat)) return false;
-			return (coverage [ilon, ilat] & (Int32)type) != 0;
-		}
-		public bool isCoveredByAll ( double lon , double lat , SCANtype type ) {
-			int ilon = icLON(lon);
-			int ilat = icLAT(lat);
-			if (badLonLat(ilon,ilat)) return false;
-			return (coverage [ilon, ilat] & (Int32)type) == (Int32)type;
-		}
+		//public void registerPass ( double lon , double lat , SCANtype type ) {
+		//    int ilon = SCANUtil.icLON(lon);
+		//    int ilat = SCANUtil.icLAT(lat);
+		//    if (SCANUtil.badLonLat(ilon, ilat)) return;
+		//    coverage [ilon, ilat] |= (Int32)type;
+		//}
+		//public bool isCovered ( double lon , double lat , SCANtype type ) {
+		//    int ilon = SCANUtil.icLON(lon);
+		//    int ilat = SCANUtil.icLAT(lat);
+		//    if (SCANUtil.badLonLat(ilon, ilat)) return false;
+		//    return (coverage [ilon, ilat] & (Int32)type) != 0;
+		//}
+		//public bool isCoveredByAll(double lon, double lat, SCANtype type)
+		//{
+		//    int ilon = SCANUtil.icLON(lon);
+		//    int ilat = SCANUtil.icLAT(lat);
+		//    if (SCANUtil.badLonLat(ilon, ilat)) return false;
+		//    return (coverage[ilon, ilat] & (Int32)type) == (Int32)type;
+		//}
 
 		/* DATA: elevation (called often, probably) */
-		public double getElevation ( double lon , double lat ) {
-			if (body.pqsController == null) return 0;	// FIXME: something == null does not imply sealevel.
-			/* FIXME: unused */ //int ilon = ((int)(lon + 360 + 180)) % 360;
-			/* FIXME: unused */ //int ilat = ((int)(lat + 180 + 90)) % 180;
-			double rlon = Mathf.Deg2Rad * lon;
-			double rlat = Mathf.Deg2Rad * lat;
-			Vector3d rad = new Vector3d (Math.Cos (rlat) * Math.Cos (rlon) , Math.Sin (rlat) , Math.Cos (rlat) * Math.Sin (rlon));
-			return Math.Round (body.pqsController.GetSurfaceHeight (rad) - body.pqsController.radius , 1);
-		}
+		//public double getElevation ( double lon , double lat ) {
+		//    if (body.pqsController == null) return 0;	// FIXME: something == null does not imply sealevel.
+		//    /* FIXME: unused */ //int ilon = ((int)(lon + 360 + 180)) % 360;
+		//    /* FIXME: unused */ //int ilat = ((int)(lat + 180 + 90)) % 180;
+		//    double rlon = Mathf.Deg2Rad * lon;
+		//    double rlat = Mathf.Deg2Rad * lat;
+		//    Vector3d rad = new Vector3d (Math.Cos (rlat) * Math.Cos (rlon) , Math.Sin (rlat) , Math.Cos (rlat) * Math.Sin (rlon));
+		//    return Math.Round (body.pqsController.GetSurfaceHeight (rad) - body.pqsController.radius , 1);
+		//}
 
 		/* DATA: Biomes and such */
-		public int getBiomeIndex ( double lon , double lat ) {
-			if (body.BiomeMap == null)		return -1;
-			if (body.BiomeMap.Map == null)	return -1;
+		//public int getBiomeIndex ( double lon , double lat ) {
+		//    if (body.BiomeMap == null)		return -1;
+		//    if (body.BiomeMap.Map == null)	return -1;
 
-			double u = ((lon + 360 + 180 + 90)) % 360;	// not casted to int, so not the same
-			double v = ((lat + 180 + 90)) % 180;		// not casted to int, so not the same
+		//    double u = ((lon + 360 + 180 + 90)) % 360;	// not casted to int, so not the same
+		//    double v = ((lat + 180 + 90)) % 180;		// not casted to int, so not the same
 
-			if (u < 0 || v < 0 || u >= 360 || v >= 180)
-				return -1;
-			CBAttributeMap.MapAttribute att = body.BiomeMap.GetAtt (Mathf.Deg2Rad * lat , Mathf.Deg2Rad * lon);
-			for (int i = 0; i < body.BiomeMap.Attributes.Length; ++i) {
-				if (body.BiomeMap.Attributes [i] == att) {
-					return i;
-				}
-			}
-			return -1;
-		}
-		public double getBiomeIndexFraction ( double lon , double lat ) {
-			if (body.BiomeMap == null) return 0f;
-			return getBiomeIndex (lon , lat) * 1.0f / body.BiomeMap.Attributes.Length;
-		}
-		public CBAttributeMap.MapAttribute getBiome ( double lon , double lat ) {
-			if (body.BiomeMap == null)		return null;
-			if (body.BiomeMap.Map == null)	return body.BiomeMap.defaultAttribute;
-			int i = getBiomeIndex (lon , lat);
-			if (i < 0)					return body.BiomeMap.defaultAttribute;
-			else 						return body.BiomeMap.Attributes [i];
-		}
-		public string getBiomeName ( double lon , double lat ) {
-			CBAttributeMap.MapAttribute a = getBiome (lon , lat);
-			if (a == null)
-				return "unknown";
-			return a.name;
-		}
+		//    if (u < 0 || v < 0 || u >= 360 || v >= 180)
+		//        return -1;
+		//    CBAttributeMap.MapAttribute att = body.BiomeMap.GetAtt (Mathf.Deg2Rad * lat , Mathf.Deg2Rad * lon);
+		//    for (int i = 0; i < body.BiomeMap.Attributes.Length; ++i) {
+		//        if (body.BiomeMap.Attributes [i] == att) {
+		//            return i;
+		//        }
+		//    }
+		//    return -1;
+		//}
+		//public double getBiomeIndexFraction ( double lon , double lat ) {
+		//    if (body.BiomeMap == null) return 0f;
+		//    return SCANUtil.getBiomeIndex(body, lon, lat) * 1.0f / body.BiomeMap.Attributes.Length;
+		//}
+		//public CBAttributeMap.MapAttribute getBiome ( double lon , double lat ) {
+		//    if (body.BiomeMap == null)		return null;
+		//    if (body.BiomeMap.Map == null)	return body.BiomeMap.defaultAttribute;
+		//    int i = SCANUtil.getBiomeIndex(body, lon, lat);
+		//    if (i < 0)					return body.BiomeMap.defaultAttribute;
+		//    else 						return body.BiomeMap.Attributes [i];
+		//}
+		//public string getBiomeName ( double lon , double lat ) {
+		//    CBAttributeMap.MapAttribute a = getBiome (lon , lat);
+		//    if (a == null)
+		//        return "unknown";
+		//    return a.name;
+		//}
 
         /* DATA: resources */
         public class SCANResource //The new class to store resource information stored in the respective config nodes
@@ -260,19 +261,21 @@ namespace SCANsat
 						continue;
 					} else {
 						// convert to radial vector
-						double rlon = Mathf.Deg2Rad * (ilon - 180);
-						double rlat = Mathf.Deg2Rad * (scanline - 90);
-						Vector3d rad = new Vector3d (Math.Cos (rlat) * Math.Cos (rlon) , Math.Sin (rlat) , Math.Cos (rlat) * Math.Sin (rlon));
-						// query terrain controller for elevation at this point
-						val = (float)Math.Round (body.pqsController.GetSurfaceHeight (rad) - body.pqsController.radius , 1);
+						val = (float)SCANUtil.getElevation(body, ilon - 180, scanline - 90);
+						//double rlon = Mathf.Deg2Rad * (ilon - 180);
+						//double rlat = Mathf.Deg2Rad * (scanline - 90);
+						//Vector3d rad = new Vector3d (Math.Cos (rlat) * Math.Cos (rlon) , Math.Sin (rlat) , Math.Cos (rlat) * Math.Sin (rlon));
+						//// query terrain controller for elevation at this point
+						//val = (float)Math.Round (body.pqsController.GetSurfaceHeight (rad) - body.pqsController.radius , 1);
 						if (val == 0)
 							val = -0.001f; // this is terrible
 						heightmap [ilon, scanline] = val;
 					}
 				}
 				Color c = palette.black;
-				if (isCovered (ilon - 180, scanline - 90, SCANtype.Altimetry)) { //We check for coverage down here now, after elevation data is collected
-					if (isCovered (ilon - 180 , scanline - 90 , SCANtype.AltimetryHiRes))
+				if (SCANUtil.isCovered(ilon, scanline, this, SCANtype.Altimetry))
+				{ //We check for coverage down here now, after elevation data is collected
+					if (SCANUtil.isCovered(ilon, scanline, this, SCANtype.AltimetryHiRes))
 						c = palette.heightToColor (val , scheme);
 					else
 						c = palette.heightToColor (val , 1);
@@ -285,7 +288,8 @@ namespace SCANsat
 					}
 				}
 				if (type != SCANtype.Nothing) {
-					if (!isCoveredByAll (ilon - 180 , scanline - 90 , type)) {
+					if (!SCANUtil.isCoveredByAll(ilon, scanline, this, type))
+					{
 						c = palette.lerp (c , palette.black , 0.5f);
 					}
 				}
@@ -340,112 +344,112 @@ namespace SCANsat
 				}
 			}
 			for (int i=0; i<anomalies.Length; ++i) {
-				anomalies [i].known = isCovered (anomalies [i].longitude , anomalies [i].latitude , SCANtype.Anomaly);
-				anomalies [i].detail = isCovered (anomalies [i].longitude , anomalies [i].latitude , SCANtype.AnomalyDetail);
+				anomalies[i].known = SCANUtil.isCovered(anomalies[i].longitude, anomalies[i].latitude, this, SCANtype.Anomaly);
+				anomalies[i].detail = SCANUtil.isCovered(anomalies[i].longitude, anomalies[i].latitude, this, SCANtype.AnomalyDetail);
 			}
 			return anomalies;
 		}
 
         /* DATA: Array conversion */
 
-        //Take the Int32[] coverage and convert it to a single dimension byte array
-        private byte[] ConvertToByte (Int32[,] iArray) {
-            byte[] bArray = new byte[360 * 180 * 4];
-            int k = 0;
-            for (int i = 0; i < 360; i++) {
-                for (int j = 0; j < 180; j++) {
-                    byte[] bytes = BitConverter.GetBytes(iArray[i,j]);
-                    for (int m = 0; m < bytes.Length; m++) {
-                        bArray[k++] = bytes[m];
-                    }
-                }
-            }
-            return bArray;
-        }
+		////Take the Int32[] coverage and convert it to a single dimension byte array
+		//private byte[] ConvertToByte (Int32[,] iArray) {
+		//    byte[] bArray = new byte[360 * 180 * 4];
+		//    int k = 0;
+		//    for (int i = 0; i < 360; i++) {
+		//        for (int j = 0; j < 180; j++) {
+		//            byte[] bytes = BitConverter.GetBytes(iArray[i,j]);
+		//            for (int m = 0; m < bytes.Length; m++) {
+		//                bArray[k++] = bytes[m];
+		//            }
+		//        }
+		//    }
+		//    return bArray;
+		//}
 
-        //Convert byte array from persistent file to usable Int32[]
-        private Int32[,] ConvertToInt (byte[] bArray) {
-            Int32[,] iArray = new Int32[360, 180];
-            int k = 0;
-            for (int i = 0; i < 360; i++) {
-                for (int j = 0; j < 180; j++) {
-                    iArray[i,j] = BitConverter.ToInt32(bArray, k);
-                    k += 4;
-                }
-            }
-            return iArray;
-        }
+		////Convert byte array from persistent file to usable Int32[]
+		//private Int32[,] ConvertToInt (byte[] bArray) {
+		//    Int32[,] iArray = new Int32[360, 180];
+		//    int k = 0;
+		//    for (int i = 0; i < 360; i++) {
+		//        for (int j = 0; j < 180; j++) {
+		//            iArray[i,j] = BitConverter.ToInt32(bArray, k);
+		//            k += 4;
+		//        }
+		//    }
+		//    return iArray;
+		//}
 
-        //One time conversion of single byte[,] to Int32 to recover old scanning data
-        private Int32[,] RecoverToInt (byte[,] bArray) {
-            Int32[,] iArray = new Int32[360, 180];
-            for (int i = 0; i < 360; i++) {
-                for (int j = 0; j < 180; j++) {
-                    iArray[i,j] = (Int32)bArray[i,j];
-                }
-            }
-            return iArray;
-        }
+		////One time conversion of single byte[,] to Int32 to recover old scanning data
+		//private Int32[,] RecoverToInt (byte[,] bArray) {
+		//    Int32[,] iArray = new Int32[360, 180];
+		//    for (int i = 0; i < 360; i++) {
+		//        for (int j = 0; j < 180; j++) {
+		//            iArray[i,j] = (Int32)bArray[i,j];
+		//        }
+		//    }
+		//    return iArray;
+		//}
 
         /* DATA: legacy serialization and compression */
-        internal string integerSerialize () {
-            byte[] bytes = ConvertToByte(coverage);
-			MemoryStream mem = new MemoryStream ();
-			BinaryFormatter binf = new BinaryFormatter ();
-			binf.Serialize (mem , bytes);
-			string blob = Convert.ToBase64String (CLZF2.Compress (mem.ToArray ()));
-			return blob.Replace ("/" , "-").Replace ("=" , "_");
-        }
+		//internal string integerSerialize () {
+		//    byte[] bytes = ConvertToByte(coverage);
+		//    MemoryStream mem = new MemoryStream ();
+		//    BinaryFormatter binf = new BinaryFormatter ();
+		//    binf.Serialize (mem , bytes);
+		//    string blob = Convert.ToBase64String (CLZF2.Compress (mem.ToArray ()));
+		//    return blob.Replace ("/" , "-").Replace ("=" , "_");
+		//}
 
-        public void integerDeserialize ( string blob, bool b ) {
-			try {
-				blob = blob.Replace ("-" , "/").Replace ("_" , "=");
-				byte[] bytes = Convert.FromBase64String (blob);
-				bytes = CLZF2.Decompress (bytes);
-				MemoryStream mem = new MemoryStream (bytes , false);
-				BinaryFormatter binf = new BinaryFormatter ();
-				if (b) {
-                    byte[,] bRecover = new byte[360, 180];
-                    bRecover = (byte[,])binf.Deserialize (mem);
-                    coverage = RecoverToInt(bRecover);
-                }
-                else {
-                    byte[] bArray = (byte[])binf.Deserialize (mem);
-                    coverage = ConvertToInt(bArray);
-                }
-			} catch (Exception e) {
-                coverage = new Int32[360 , 180];
-                heightmap = new float[360 , 180];
-				throw e;
-			}
-			resetImages ();
-		}
+		//public void integerDeserialize ( string blob, bool b ) {
+		//    try {
+		//        blob = blob.Replace ("-" , "/").Replace ("_" , "=");
+		//        byte[] bytes = Convert.FromBase64String (blob);
+		//        bytes = CLZF2.Decompress (bytes);
+		//        MemoryStream mem = new MemoryStream (bytes , false);
+		//        BinaryFormatter binf = new BinaryFormatter ();
+		//        if (b) {
+		//            byte[,] bRecover = new byte[360, 180];
+		//            bRecover = (byte[,])binf.Deserialize (mem);
+		//            coverage = RecoverToInt(bRecover);
+		//        }
+		//        else {
+		//            byte[] bArray = (byte[])binf.Deserialize (mem);
+		//            coverage = ConvertToInt(bArray);
+		//        }
+		//    } catch (Exception e) {
+		//        coverage = new Int32[360 , 180];
+		//        heightmap = new float[360 , 180];
+		//        throw e;
+		//    }
+		//    resetImages ();
+		//}
 
 
 
-		/* DATA: serialization and compression */
-		public string serialize () {
-			// convert the byte[,] array into a KSP-savefile-safe variant of Base64
-			MemoryStream mem = new MemoryStream ();
-			BinaryFormatter binf = new BinaryFormatter ();
-			binf.Serialize (mem , backupCoverage);
-			string blob = Convert.ToBase64String (CLZF2.Compress (mem.ToArray ()));
-			return blob.Replace ("/" , "-").Replace ("=" , "_");
-		}
+		///* DATA: serialization and compression */
+		//public string serialize () {
+		//    // convert the byte[,] array into a KSP-savefile-safe variant of Base64
+		//    MemoryStream mem = new MemoryStream ();
+		//    BinaryFormatter binf = new BinaryFormatter ();
+		//    binf.Serialize (mem , backupCoverage);
+		//    string blob = Convert.ToBase64String (CLZF2.Compress (mem.ToArray ()));
+		//    return blob.Replace ("/" , "-").Replace ("=" , "_");
+		//}
 
-		public void deserialize ( string blob ) {
-			try {
-				blob = blob.Replace ("-" , "/").Replace ("_" , "=");
-				byte[] bytes = Convert.FromBase64String (blob);
-				bytes = CLZF2.Decompress (bytes);
-				MemoryStream mem = new MemoryStream (bytes , false);
-				BinaryFormatter binf = new BinaryFormatter ();
-				backupCoverage = (byte[,])binf.Deserialize (mem);
-			} catch (Exception e) {
-                backupCoverage = new byte[360 , 180];
-				throw e;
-			}
-		}
+		//public void deserialize ( string blob ) {
+		//    try {
+		//        blob = blob.Replace ("-" , "/").Replace ("_" , "=");
+		//        byte[] bytes = Convert.FromBase64String (blob);
+		//        bytes = CLZF2.Decompress (bytes);
+		//        MemoryStream mem = new MemoryStream (bytes , false);
+		//        BinaryFormatter binf = new BinaryFormatter ();
+		//        backupCoverage = (byte[,])binf.Deserialize (mem);
+		//    } catch (Exception e) {
+		//        backupCoverage = new byte[360 , 180];
+		//        throw e;
+		//    }
+		//}
 
         public void fillMap () {
             for (int i = 0; i < 360; i++) {
