@@ -321,8 +321,8 @@ namespace SCANsat
 		public void registerSensor(Vessel v, SCANdata.SCANtype sensors, double fov, double min_alt, double max_alt, double best_alt) {
 			registerSensor(v.id, sensors, fov, min_alt, max_alt, best_alt);
 			knownVessels[v.id].vessel = v;
-			knownVessels[v.id].latitude = fixLatitude(v.latitude);
-			knownVessels[v.id].longitude = fixLongitude(v.longitude);
+			knownVessels[v.id].latitude = SCANUtil.fixLatShift(v.latitude);
+			knownVessels[v.id].longitude = SCANUtil.fixLonShift(v.longitude);
 		}
 
 		public void registerSensor(Guid id, SCANdata.SCANtype sensors, double fov, double min_alt, double max_alt, double best_alt) {
@@ -330,7 +330,7 @@ namespace SCANsat
 			SCANvessel sv = knownVessels[id];
 			sv.id = id;
 			foreach(SCANdata.SCANtype sensor in Enum.GetValues(typeof(SCANdata.SCANtype))) {
-				if(countBits((int)sensor) != 1) continue;
+				if(SCANUtil.countBits((int)sensor) != 1) continue;
 				if((sensor & sensors) == SCANdata.SCANtype.Nothing) continue;
 				double this_fov = fov, this_min_alt = min_alt, this_max_alt = max_alt, this_best_alt = best_alt;
 				if(this_max_alt <= 0) {
@@ -368,11 +368,11 @@ namespace SCANsat
 			}
 		}
 
-		public static int countBits(int i) {
-			int count;
-			for(count=0; i!=0; ++count) i &= (i - 1);
-			return count;
-		}
+		//public static int countBits(int i) {
+		//    int count;
+		//    for(count=0; i!=0; ++count) i &= (i - 1);
+		//    return count;
+		//}
 
 		public bool isVesselKnown(Guid id, SCANdata.SCANtype sensor) {
 			if(!knownVessels.ContainsKey(id)) return false;
@@ -404,93 +404,93 @@ namespace SCANsat
 			return sensors;
 		}
 
-		public ScienceData getAvailableScience(Vessel v, SCANdata.SCANtype sensor, bool notZero) {
-			SCANdata data = getData(v.mainBody);
-			ScienceData sd = null;
-			ScienceExperiment se = null;
-			ScienceSubject su = null;
-			bool found = false;
-			string id = null;
-			double coverage = 0f;
+		//public ScienceData getAvailableScience(Vessel v, SCANdata.SCANtype sensor, bool notZero) {
+		//    SCANdata data = getData(v.mainBody);
+		//    ScienceData sd = null;
+		//    ScienceExperiment se = null;
+		//    ScienceSubject su = null;
+		//    bool found = false;
+		//    string id = null;
+		//    double coverage = 0f;
 
-			if(v.mainBody.pqsController != null) {
-				if(!found && (sensor & SCANdata.SCANtype.AltimetryLoRes) != SCANdata.SCANtype.Nothing) {
-					found = true;
-					id = "SCANsatAltimetryLoRes";
-					coverage = data.getCoveragePercentage(SCANdata.SCANtype.AltimetryLoRes);
-				}
-				if(!found && (sensor & SCANdata.SCANtype.AltimetryHiRes) != SCANdata.SCANtype.Nothing) {
-					found = true;
-					id = "SCANsatAltimetryHiRes";
-					coverage = data.getCoveragePercentage(SCANdata.SCANtype.AltimetryHiRes);
-				}
-			}
-			if(v.mainBody.BiomeMap != null) {
-				if(!found && (sensor & SCANdata.SCANtype.Biome) != SCANdata.SCANtype.Nothing) {
-					found = true;
-					id = "SCANsatBiomeAnomaly";
-					coverage = data.getCoveragePercentage(SCANdata.SCANtype.Biome); //This should only really check biomes, and it screws up with the changes made to getCoveragePercentage
-				}
-			}
+		//    if(v.mainBody.pqsController != null) {
+		//        if(!found && (sensor & SCANdata.SCANtype.AltimetryLoRes) != SCANdata.SCANtype.Nothing) {
+		//            found = true;
+		//            id = "SCANsatAltimetryLoRes";
+		//            coverage = data.getCoveragePercentage(SCANdata.SCANtype.AltimetryLoRes);
+		//        }
+		//        if(!found && (sensor & SCANdata.SCANtype.AltimetryHiRes) != SCANdata.SCANtype.Nothing) {
+		//            found = true;
+		//            id = "SCANsatAltimetryHiRes";
+		//            coverage = data.getCoveragePercentage(SCANdata.SCANtype.AltimetryHiRes);
+		//        }
+		//    }
+		//    if(v.mainBody.BiomeMap != null) {
+		//        if(!found && (sensor & SCANdata.SCANtype.Biome) != SCANdata.SCANtype.Nothing) {
+		//            found = true;
+		//            id = "SCANsatBiomeAnomaly";
+		//            coverage = data.getCoveragePercentage(SCANdata.SCANtype.Biome); //This should only really check biomes, and it screws up with the changes made to getCoveragePercentage
+		//        }
+		//    }
 
-			if(!found) return null;
+		//    if(!found) return null;
 
-			se = ResearchAndDevelopment.GetExperiment(id);
-			if(se == null) return null;
+		//    se = ResearchAndDevelopment.GetExperiment(id);
+		//    if(se == null) return null;
 
-			su = ResearchAndDevelopment.GetExperimentSubject(se, ExperimentSituations.InSpaceHigh, v.mainBody, "surface");
-			if(su == null) return null;
+		//    su = ResearchAndDevelopment.GetExperimentSubject(se, ExperimentSituations.InSpaceHigh, v.mainBody, "surface");
+		//    if(su == null) return null;
 
-			print("[SCANsat] coverage " + coverage.ToString("F1") + ", science cap " + su.scienceCap.ToString("F1") + ", subject value " + su.subjectValue.ToString("F2") + ", science value " + su.scientificValue.ToString("F2") + ", science " + su.science.ToString("F2"));
-			su.scientificValue = 1;
+		//    print("[SCANsat] coverage " + coverage.ToString("F1") + ", science cap " + su.scienceCap.ToString("F1") + ", subject value " + su.subjectValue.ToString("F2") + ", science value " + su.scientificValue.ToString("F2") + ", science " + su.science.ToString("F2"));
+		//    su.scientificValue = 1;
 
-			float science = (float)coverage;
-			if(science > 95) science = 100;
-			if(science < 30) science = 0;
-			science = science / 100f;
-			science = Mathf.Max(0, (science * su.scienceCap) - su.science);
+		//    float science = (float)coverage;
+		//    if(science > 95) science = 100;
+		//    if(science < 30) science = 0;
+		//    science = science / 100f;
+		//    science = Mathf.Max(0, (science * su.scienceCap) - su.science);
 
-			print("[SCANsat] remaining science: " + science.ToString("F1") + ", base = " + (se.baseValue).ToString("F1"));
+		//    print("[SCANsat] remaining science: " + science.ToString("F1") + ", base = " + (se.baseValue).ToString("F1"));
 
-			science /= Mathf.Max(0.1f, su.scientificValue);
-			science /= su.subjectValue;
+		//    science /= Mathf.Max(0.1f, su.scientificValue);
+		//    science /= su.subjectValue;
 
-			print("[SCANsat] result = " + science.ToString("F2"));
+		//    print("[SCANsat] result = " + science.ToString("F2"));
 
-			if(notZero && science <= 0) science = 0.00001f;
+		//    if(notZero && science <= 0) science = 0.00001f;
 
-			sd = new ScienceData(science * su.dataScale, 1f, 0f, su.id, se.experimentTitle + " of " + v.mainBody.theName);
-			su.title = sd.title;
-            return sd;
-		}
+		//    sd = new ScienceData(science * su.dataScale, 1f, 0f, su.id, se.experimentTitle + " of " + v.mainBody.theName);
+		//    su.title = sd.title;
+		//    return sd;
+		//}
 
 		//public Dictionary<string, SCANdata> body_data = new Dictionary<string, SCANdata>();
 
-		public SCANdata getData(string name) {
-			if(!SCANUtil.body_data.ContainsKey(name)) {
-				SCANUtil.body_data[name] = new SCANdata();
-				SCANUtil.body_data[name].resetImages();
-			}
-			return SCANUtil.body_data[name];
-		}
+		//public SCANdata getData(string name) {
+		//    if(!SCANUtil.body_data.ContainsKey(name)) {
+		//        SCANUtil.body_data[name] = new SCANdata();
+		//        SCANUtil.body_data[name].resetImages();
+		//    }
+		//    return SCANUtil.body_data[name];
+		//}
 
-		public SCANdata getData(CelestialBody body) {
-			SCANdata data = getData(body.bodyName);
-			data.body = body;
-			return data;
-		}
+		//public SCANdata getData(CelestialBody body) {
+		//    SCANdata data = getData(body.bodyName);
+		//    data.body = body;
+		//    return data;
+		//}
 
         //public void registerPass(CelestialBody body, float lon, float lat, SCANdata.SCANtype type) {
         //    getData(body).registerPass(lon, lat, type);
         //}
 
-		public double fixLatitude(double lat) {
-			return (lat + 90 + 180) % 180 - 90;
-		}
+		//public double fixLatitude(double lat) {
+		//    return (lat + 90 + 180) % 180 - 90;
+		//}
 
-		public double fixLongitude(double lon) {
-			return (lon + 180 + 360) % 360 - 180;
-		}
+		//public double fixLongitude(double lon) {
+		//    return (lon + 180 + 360) % 360 - 180;
+		//}
 
 		//****Unused****//
 		//protected static HashSet<string> disabledBodies = new HashSet<string>();
@@ -519,14 +519,14 @@ namespace SCANsat
 			currentActiveVessel = 0;
 			actualPasses = 0;
 			maxRes = 0;
-            SCANdata bdata = getData (FlightGlobals.Bodies[i]); //Update coverage for planets one at a time, rather than all together
+            SCANdata bdata = SCANUtil.getData (FlightGlobals.Bodies[i]); //Update coverage for planets one at a time, rather than all together
             bdata.updateCoverage();
             i++;
             if (i >= FlightGlobals.Bodies.Count) i = 0;
 			foreach(Vessel v in FlightGlobals.Vessels) {
 				if(!knownVessels.ContainsKey(v.id)) continue;
 				SCANvessel vessel = knownVessels[v.id];
-				SCANdata data = getData(v.mainBody);
+				SCANdata data = SCANUtil.getData(v.mainBody);
 				vessel.vessel = v;
 			
 				if(!data.disabled) {
@@ -542,8 +542,8 @@ namespace SCANsat
 				vessel.body = v.mainBody;
 				vessel.frame = Time.frameCount;
 				vessel.lastUT = scan_UT;
-				vessel.latitude = fixLatitude(v.latitude);
-				vessel.longitude = fixLongitude(v.longitude);
+				vessel.latitude = SCANUtil.fixLatShift(v.latitude);
+				vessel.longitude = SCANUtil.fixLonShift(v.longitude);
 			}
 			activeVessels = currentActiveVessel;
 			activeSensors = currentActiveSensor;
@@ -553,9 +553,9 @@ namespace SCANsat
 		protected static Queue<double> scanQueue;
 		protected void doScanPass(SCANvessel vessel, double UT, double startUT, double lastUT, double llat, double llon) {
 			Vessel v = vessel.vessel;
-			SCANdata data = getData(v.mainBody);
+			SCANdata data = SCANUtil.getData(v.mainBody);
 			double soi_radius = v.mainBody.sphereOfInfluence - v.mainBody.Radius;
-			double alt = v.altitude, lat = fixLatitude(v.latitude), lon = fixLongitude(v.longitude);
+			double alt = v.altitude, lat = SCANUtil.fixLatShift(v.latitude), lon = SCANUtil.fixLonShift(v.longitude);
 			double res = 0;
 			Orbit o = v.orbit;
 			bool uncovered;
@@ -574,8 +574,8 @@ namespace SCANsat
 					rotation = (360 * ((UT - scan_UT) / v.mainBody.rotationPeriod)) % 360;
 				}
 				alt = v.mainBody.GetAltitude(pos);
-				lat = fixLatitude(v.mainBody.GetLatitude(pos));
-				lon = fixLongitude(v.mainBody.GetLongitude(pos) - rotation);
+				lat = SCANUtil.fixLatShift(v.mainBody.GetLatitude(pos));
+				lon = SCANUtil.fixLonShift(v.mainBody.GetLongitude(pos) - rotation);
 				if(alt < 0) alt = 0;
 				if(res > maxRes) maxRes = (int)res;
 			} else {
