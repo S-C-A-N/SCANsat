@@ -149,7 +149,7 @@ namespace SCANsatKethane
 			SCANdata data = SCANUtil.getData(body);
 			for (int ilat = 4 * rebuildValueStep; ilat < 4 * (rebuildValueStep + 1); ilat++) {
 				for (int ilon = 0; ilon < 360; ilon++) {
-					if (SCANUtil.isCovered(ilon, ilat, data, type))
+					if (SCANUtil.isCovered(ilon, ilat, body, (int)type))
 					{
 						if (data.kethaneValueMap[ilon, ilat] == 0) { //Only check unassigned values
 							cell = getKethaneCell(ilon - 180, ilat - 90);
