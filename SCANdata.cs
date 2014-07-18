@@ -166,13 +166,13 @@ namespace SCANsat
             public SCANtype type;
         }
 
-        public double ORSOverlay(double lon, double lat, int i, string s) //Uses ORS methods to grab the resource amount given a lat and long
-        {
-            double amount = 0f;
-            ORSPlanetaryResourcePixel overlayPixel = ORSPlanetaryResourceMapData.getResourceAvailability(i, s, lat, lon);
-            amount = overlayPixel.getAmount();            
-            return amount;
-        }
+		//public double ORSOverlay(double lon, double lat, int i, string s) //Uses ORS methods to grab the resource amount given a lat and long
+		//{
+		//    double amount = 0f;
+		//    ORSPlanetaryResourcePixel overlayPixel = ORSPlanetaryResourceMapData.getResourceAvailability(i, s, lat, lon);
+		//    amount = overlayPixel.getAmount();            
+		//    return amount;
+		//}
 
 		/* DATA: coverage */
         public int[] coverage_count = new int[32];
@@ -240,7 +240,7 @@ namespace SCANsat
             if (cov <= 0)
 			    cov = 100;
 			else
-				cov = Math.Min (99.9d , 100 - cov * 100d / (360d * 180d * SCANcontroller.countBits ((int)type)));
+				cov = Math.Min (99.9d , 100 - cov * 100d / (360d * 180d * SCANUtil.countBits ((int)type)));
 			return cov;
 		}
 

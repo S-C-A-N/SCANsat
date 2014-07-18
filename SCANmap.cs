@@ -316,7 +316,7 @@ namespace SCANsat
 
 		/* MAP: build: map to Texture2D */
 		public Texture2D getPartialMap () {
-			SCANdata data = SCANcontroller.controller.getData (body);
+			SCANdata data = SCANUtil.getData (body);
 			Color[] pix;
 
 			/* init cache if necessary */
@@ -419,7 +419,7 @@ namespace SCANsat
                         {
                             if (data.isCovered(lon, lat, resource.type)) //check our new resource coverage map
                             {
-                                double amount = data.ORSOverlay(lon, lat, body.flightGlobalsIndex, resource.name); //grab the resource amount for the current pixel
+                                double amount = SCANUtil.ORSOverlay(lon, lat, body.flightGlobalsIndex, resource.name); //grab the resource amount for the current pixel
                                 double scalar = resource.ORS_Multiplier * resource.ORS_Scalar * resource.ORS_Threshold; //low cutoff value
                                 if (resource.linear) { //linear resources are measured on 0-100% scale
                                     amount *= 100;
@@ -534,7 +534,7 @@ namespace SCANsat
                         {
                             if (data.isCovered(lon, lat, resource.type)) //check our new resource coverage map
                             {
-                                double amount = data.ORSOverlay(lon, lat, body.flightGlobalsIndex, resource.name); //grab the resource amount for the current pixel
+                                double amount = SCANUtil.ORSOverlay(lon, lat, body.flightGlobalsIndex, resource.name); //grab the resource amount for the current pixel
                                 double scalar = resource.ORS_Multiplier * resource.ORS_Scalar * resource.ORS_Threshold;
                                 if (resource.linear)
                                 {
@@ -654,7 +654,7 @@ namespace SCANsat
                         {
                             if (data.isCovered(lon, lat, resource.type)) //check our new resource coverage map
                             {
-                                double amount = data.ORSOverlay(lon, lat, body.flightGlobalsIndex, resource.name); //grab the resource amount for the current pixel
+                                double amount = SCANUtil.ORSOverlay(lon, lat, body.flightGlobalsIndex, resource.name); //grab the resource amount for the current pixel
                                 double scalar = resource.ORS_Multiplier * resource.ORS_Scalar * resource.ORS_Threshold;
                                 if (resource.linear)
                                 {

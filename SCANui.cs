@@ -356,7 +356,7 @@ namespace SCANsat
 			GUI.skin = null;
 			/* FIXME: unused */ //bool repainting = Event.current.type == EventType.Repaint;
 			Vessel vessel = FlightGlobals.ActiveVessel;
-			SCANdata data = SCANcontroller.controller.getData (vessel.mainBody);
+			SCANdata data = SCANUtil.getData (vessel.mainBody);
 			Rect r;
 
 			if (minimode > 0)
@@ -493,7 +493,7 @@ namespace SCANsat
 			style_readout.fontSize = 40;
 			style_readout.normal.textColor = palette.c_good;
 			SCANdata.SCANtype sensors = SCANcontroller.controller.activeSensorsOnVessel (FlightGlobals.ActiveVessel.id);
-			SCANdata data = SCANcontroller.controller.getData (FlightGlobals.currentMainBody);
+			SCANdata data = SCANUtil.getData (FlightGlobals.currentMainBody);
 
 			if (maptraq_frame >= Time.frameCount - 5) {
 				if (data.isCovered (FlightGlobals.ActiveVessel.longitude , FlightGlobals.ActiveVessel.latitude , SCANdata.SCANtype.AltimetryHiRes)) {
@@ -711,7 +711,7 @@ namespace SCANsat
 			int count = 0;
 			foreach (CelestialBody body in FlightGlobals.Bodies) {
 				if (count == 0) GUILayout.BeginVertical ();
-				SCANdata data = SCANcontroller.controller.getData (body);
+				SCANdata data = SCANUtil.getData (body);
 				data.disabled = !GUILayout.Toggle (!data.disabled , body.bodyName + " (" + data.getCoveragePercentage(SCANdata.SCANtype.Nothing).ToString("N1") + "%)"); //No longer updates while the suttings menu is open
 				switch (count) {
 					case 4: GUILayout.EndVertical (); count = 0; break;
@@ -755,7 +755,7 @@ namespace SCANsat
 			CelestialBody thisBody = FlightGlobals.currentMainBody;
 			GUILayout.Label ("Data Management" , style_headline);
 			if (GUILayout.Button ("Reset map of " + thisBody.theName)) {
-				SCANdata data = SCANcontroller.controller.getData (thisBody);
+				SCANdata data = SCANUtil.getData (thisBody);
 				data.reset ();
 			}
 			if (GUILayout.Button ("Reset <b>all</b> data")) {
@@ -783,12 +783,12 @@ namespace SCANsat
             GUILayout.BeginHorizontal();
             CelestialBody thisBody = FlightGlobals.currentMainBody;
             if (GUILayout.Button("Fill SCAN map of " + thisBody.theName)) {
-                SCANdata data = SCANcontroller.controller.getData(thisBody);
+                SCANdata data = SCANUtil.getData(thisBody);
                 data.fillMap();
             }
             if (GUILayout.Button("Fill SCAN map for all planets")) {
                 foreach (CelestialBody b in FlightGlobals.Bodies) {
-                    SCANdata data = SCANcontroller.controller.getData(b);
+                    SCANdata data = SCANUtil.getData(b);
                     data.fillMap();
                 }
             }
@@ -1161,7 +1161,7 @@ namespace SCANsat
 			GUILayout.BeginVertical ();
 			GUILayout.BeginHorizontal (); // added to put colors on the right of map
 
-			SCANdata data = SCANcontroller.controller.getData (vessel.mainBody);
+			SCANdata data = SCANUtil.getData (vessel.mainBody);
 			Texture2D map = bigmap.getPartialMap (); // this is the expensive call
 
 			float dw = bigmap_drag_w;
@@ -1425,7 +1425,7 @@ namespace SCANsat
 						if (SCANcontroller.controller.resourceOverlayType == 0) {
 							if (data.isCovered(mlon, mlat, bigmap.resource.type))
 							{
-                                double amount = data.ORSOverlay(mlon, mlat, bigmap.body.flightGlobalsIndex, bigmap.resource.name);
+                                double amount = SCANUtil.ORSOverlay(mlon, mlat, bigmap.body.flightGlobalsIndex, bigmap.resource.name);
                                 string label;
                                 if (bigmap.resource.linear) //Make sure that ORS values are handled correctly based on which scale type they use
                                     label = (amount * 100).ToString("N1") + " %";
@@ -1616,7 +1616,7 @@ namespace SCANsat
 			GUI.skin.button.wordWrap = false;
 
 			SCANdata.SCANtype sensors = SCANcontroller.controller.activeSensorsOnVessel (vessel.id);
-			SCANdata data = SCANcontroller.controller.getData (vessel.mainBody);
+			SCANdata data = SCANUtil.getData (vessel.mainBody);
 			data.updateImages (sensors);
 
 			if (!repainting) { // Unity gets confused if the layout changes between layout and repaint events
