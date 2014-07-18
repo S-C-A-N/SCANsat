@@ -1,14 +1,36 @@
-﻿using System;
+﻿/* 
+ * [Scientific Committee on Advanced Navigation]
+ * 			S.C.A.N. Satellite
+ * 
+ * SCANutil - various static utilities methods used througout SCANsat
+ * 
+ * Copyright (c)2014 technogeeky <technogeeky@gmail.com>;
+ * Copyright (c)2014 David Grandy <david.grandy@gmail.com>;
+ * Copyright (c)2014 (Your Name Here) <your email here>; see LICENSE.txt for licensing details.
+ */
+
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
 using OpenResourceSystem;
+using System.IO;
+using System.Runtime.Serialization.Formatters.Binary;
+using palette = SCANsat.SCANpalette;
 
 namespace SCANsat
 {
 
 	public static class SCANUtil
 	{
+		/// <summary>
+		/// Determines scanning coverage for a given area with a given scanner type
+		/// </summary>
+		/// <param name="lon">Clamped double in the -180 - 180 degree range</param>
+		/// <param name="lat">Clamped double in the -90 - 90 degree range</param>
+		/// <param name="body">Celestial body in question</param>
+		/// <param name="SCANtype">SCANtype cast as an integer</param>
+		/// <returns></returns>
 		public static bool isCovered(double lon, double lat, CelestialBody body, int SCANtype)
 		{
 			int ilon = icLON(lon);
@@ -18,6 +40,14 @@ namespace SCANsat
 			return (data.coverage[ilon, ilat] & SCANtype) != 0;
 		}
 
+		/// <summary>
+		/// Determines scanning coverage for a given area with a given scanner type
+		/// </summary>
+		/// <param name="lon">Clamped integer in the 0-360 degree range</param>
+		/// <param name="lat">Clamped integer in the 0-180 degree range</param>
+		/// <param name="body">Celestial body in question</param>
+		/// <param name="SCANtype">SCANtype cast as an integer</param>
+		/// <returns></returns>
 		public static bool isCovered(int lon, int lat, CelestialBody body, int SCANtype)
 		{
 			if (badLonLat(lon, lat)) return false;
@@ -39,20 +69,24 @@ namespace SCANsat
 			return (data.coverage[lon, lat] & (Int32)type) != 0;
 		}
 
-		internal static bool isCoveredByAll (CelestialBody body, double lon , double lat , SCANdata.SCANtype type)
+		internal static bool isCoveredByAll (int lon, int lat, SCANdata data, SCANdata.SCANtype type)
 		{
-			int ilon = icLON(lon);
-			int ilat = icLAT(lat);
-			if (badLonLat(ilon,ilat)) return false;
-			SCANdata data = getData(body);
-			return (data.coverage[ilon, ilat] & (Int32)type) == (Int32)type;
+			if (badLonLat(lon,lat)) return false;
+			return (data.coverage[lon, lat] & (Int32)type) == (Int32)type;
+		}
+
+		internal static void registerPass ( double lon, double lat, SCANdata data, SCANdata.SCANtype type ) {
+			int ilon = SCANUtil.icLON(lon);
+			int ilat = SCANUtil.icLAT(lat);
+			if (SCANUtil.badLonLat(ilon, ilat)) return;
+			data.coverage [ilon, ilat] |= (Int32)type;
 		}
 
 		internal static double getCoveragePercentage(CelestialBody body, SCANdata.SCANtype type )
 		{
 			SCANdata data = getData(body);
 			double cov = 0d;
-			if (type == SCANdata.SCANtype.Nothing) 
+			if (type == SCANdata.SCANtype.Nothing)
 				type = SCANdata.SCANtype.AltimetryLoRes | SCANdata.SCANtype.AltimetryHiRes | SCANdata.SCANtype.Biome | SCANdata.SCANtype.Anomaly;          
 			cov = data.getCoverage (type);
 			if (cov <= 0)
@@ -87,14 +121,12 @@ namespace SCANsat
 			return (lon + 360 + 180) % 360;
 		}
 
-		internal static Dictionary<string, SCANdata> body_data = new Dictionary<string, SCANdata>();
-
 		public static SCANdata getData(CelestialBody body)
 		{
-			if (!body_data.ContainsKey(body.name)) {
-				body_data[body.name] = new SCANdata(body);
+			if (!SCANcontroller.body_data.ContainsKey(body.name)) {
+				SCANcontroller.body_data[body.name] = new SCANdata(body);
 			}
-			SCANdata data = body_data[body.name];
+			SCANdata data = SCANcontroller.body_data[body.name];
 			return data;
 		}
 
@@ -183,37 +215,6 @@ namespace SCANsat
 			return sd;
 		}
 
-		//internal static SCANdata.SCANtype OverlayResourceType(string s)
-		//{
-		//    if (SCANcontroller.controller.resourceOverlayType == 0) {
-		//        switch(s)
-		//        {
-		//            case "Uranium": return SCANdata.SCANtype.Uranium;
-		//            case "Thorium": return SCANdata.SCANtype.Thorium;
-		//            case "Alumina": return SCANdata.SCANtype.Alumina;
-		//            case "Water": return SCANdata.SCANtype.Water;
-		//            case "Aquifer": return SCANdata.SCANtype.Aquifer;
-		//            case "Ore": return SCANdata.SCANtype.Ore;
-		//            case "Minerals": return SCANdata.SCANtype.Minerals;
-		//            case "Substrate": return SCANdata.SCANtype.Substrate;
-		//            case "KEEZO": return SCANdata.SCANtype.KEEZO;
-		//            default: return SCANdata.SCANtype.Nothing;
-		//        }
-		//    }
-		//    else if (SCANcontroller.controller.resourceOverlayType == 1) {
-		//        switch(s)
-		//        {
-		//            case "Kethane": return SCANdata.SCANtype.Kethane;
-		//            case "Ore": return SCANdata.SCANtype.Ore;
-		//            case "Water": return SCANdata.SCANtype.Water;
-		//            case "Minerals": return SCANdata.SCANtype.Minerals;
-		//            case "Substrate": return SCANdata.SCANtype.Substrate;
-		//            default: return SCANdata.SCANtype.Nothing;
-		//        }
-		//    }
-		//    return SCANdata.SCANtype.Nothing;
-		//}
-
 		internal static double ORSOverlay(double lon, double lat, int i, string s)
 		{
 			double amount = 0f;
@@ -277,8 +278,90 @@ namespace SCANsat
 			Debug.Log(finalLog);
 		}
 
+		//Take the Int32[] coverage and convert it to a single dimension byte array
+		private static byte[] ConvertToByte(Int32[,] iArray)
+		{
+			byte[] bArray = new byte[360 * 180 * 4];
+			int k = 0;
+			for (int i = 0; i < 360; i++) {
+				for (int j = 0; j < 180; j++) {
+					byte[] bytes = BitConverter.GetBytes(iArray[i, j]);
+					for (int m = 0; m < bytes.Length; m++) {
+						bArray[k++] = bytes[m];
+					}
+				}
+			}
+			return bArray;
+		}
+
+		//Convert byte array from persistent file to usable Int32[]
+		private static Int32[,] ConvertToInt(byte[] bArray)
+		{
+			Int32[,] iArray = new Int32[360, 180];
+			int k = 0;
+			for (int i = 0; i < 360; i++) {
+				for (int j = 0; j < 180; j++) {
+					iArray[i, j] = BitConverter.ToInt32(bArray, k);
+					k += 4;
+				}
+			}
+			return iArray;
+		}
+
+		//One time conversion of single byte[,] to Int32 to recover old scanning data
+		private static Int32[,] RecoverToInt(byte[,] bArray)
+		{
+			Int32[,] iArray = new Int32[360, 180];
+			for (int i = 0; i < 360; i++) {
+				for (int j = 0; j < 180; j++) {
+					iArray[i, j] = (Int32)bArray[i, j];
+				}
+			}
+			return iArray;
+		}
+
+		/* DATA: serialization and compression */
+		internal static string integerSerialize(SCANdata data)
+		{
+			byte[] bytes = ConvertToByte(data.coverage);
+			MemoryStream mem = new MemoryStream();
+			BinaryFormatter binf = new BinaryFormatter();
+			binf.Serialize(mem, bytes);
+			string blob = Convert.ToBase64String(CLZF2.Compress(mem.ToArray()));
+			return blob.Replace("/", "-").Replace("=", "_");
+		}
+
+		internal static void integerDeserialize(string blob, bool b, SCANdata data)
+		{
+			try {
+				blob = blob.Replace("-", "/").Replace("_", "=");
+				byte[] bytes = Convert.FromBase64String(blob);
+				bytes = CLZF2.Decompress(bytes);
+				MemoryStream mem = new MemoryStream(bytes, false);
+				BinaryFormatter binf = new BinaryFormatter();
+				if (b) {
+					byte[,] bRecover = new byte[360, 180];
+					bRecover = (byte[,])binf.Deserialize(mem);
+					data.coverage = RecoverToInt(bRecover);
+				}
+				else {
+					byte[] bArray = (byte[])binf.Deserialize(mem);
+					data.coverage = ConvertToInt(bArray);
+				}
+			}
+			catch (Exception e) {
+				data.coverage = new Int32[360, 180];
+				data.heightmap = new float[360, 180];
+				throw e;
+			}
+			data.resetImages();
+		}
+
 	}
-		// This extension is from MechJeb; Used with permission from r4m0n: https://github.com/MuMech/MechJeb2/blob/master/MechJeb2/OrbitExtensions.cs
+
+	#region MechJeb Extensions
+
+	// This extension is from MechJeb; Used with permission from r4m0n: https://github.com/MuMech/MechJeb2/blob/master/MechJeb2/OrbitExtensions.cs
 
 		public static class OrbitExtensions
 		{
@@ -454,6 +537,10 @@ namespace SCANsat
 				}
 		}
 
+	#endregion
+
+		#region fix Duplicated Code
+
 		// Mihara: Notice that quite a bit of it, at least conceptually, duplicates code that SCANsat already contains elsewhere,
 		// and in general needs trimming.
 
@@ -583,6 +670,9 @@ namespace SCANsat
 				}
 		}
 
+		#endregion
+
+		#region JUtil
 
 		public static class JUtil
 		{
@@ -773,5 +863,6 @@ namespace SCANsat
 						return CameraManager.Instance.currentCameraMode == CameraManager.CameraMode.IVA || CameraManager.Instance.currentCameraMode == CameraManager.CameraMode.Internal;
 				}
 		}
-}
+	}
+		#endregion
 
