@@ -430,6 +430,7 @@ namespace SCANsat
 			return sensors;
 		}
 
+		//**** Most commented code moved to SCANUtil****
 		//public ScienceData getAvailableScience(Vessel v, SCANdata.SCANtype sensor, bool notZero) {
 		//    SCANdata data = getData(v.mainBody);
 		//    ScienceData sd = null;

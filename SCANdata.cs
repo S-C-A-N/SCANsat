@@ -75,6 +75,7 @@ namespace SCANsat
             Everything = Int32.MaxValue      // All scanner types
 		}
 
+		//****Commented code moved to SCANUtil****
 		/* DATA: map passes and coverage (passes >= 1)*/
 		//public void registerPass ( double lon , double lat , SCANtype type ) {
 		//    int ilon = SCANUtil.icLON(lon);
@@ -350,7 +351,7 @@ namespace SCANsat
 			return anomalies;
 		}
 
-        /* DATA: Array conversion */
+        /* DATA: Array conversion **** Moved to SCANUtil*/
 
 		////Take the Int32[] coverage and convert it to a single dimension byte array
 		//private byte[] ConvertToByte (Int32[,] iArray) {
