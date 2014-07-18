@@ -394,8 +394,8 @@ namespace SCANsat
                 }
 				if (GUILayout.Button ("Settings"))
                 {
-                    if (!settings_visible) 
-                        SCANcontroller.controller.Resources(FlightGlobals.currentMainBody);
+                    if (!settings_visible)
+						SCANcontroller.controller.Resources(FlightGlobals.currentMainBody);
 					settings_visible = !settings_visible;
                 }
 				GUILayout.EndHorizontal ();
@@ -496,10 +496,10 @@ namespace SCANsat
 			SCANdata data = SCANUtil.getData (FlightGlobals.currentMainBody);
 
 			if (maptraq_frame >= Time.frameCount - 5) {
-				if (data.isCovered (FlightGlobals.ActiveVessel.longitude , FlightGlobals.ActiveVessel.latitude , SCANdata.SCANtype.AltimetryHiRes)) {
+				if (SCANUtil.isCovered (FlightGlobals.ActiveVessel.longitude, FlightGlobals.ActiveVessel.latitude, data, SCANdata.SCANtype.AltimetryHiRes)) {
 					sensors |= SCANdata.SCANtype.Altimetry;
 				}
-				if (data.isCovered (FlightGlobals.ActiveVessel.longitude , FlightGlobals.ActiveVessel.latitude , SCANdata.SCANtype.Biome)) {
+				if (SCANUtil.isCovered (FlightGlobals.ActiveVessel.longitude, FlightGlobals.ActiveVessel.latitude, data, SCANdata.SCANtype.Biome)) {
 					sensors |= SCANdata.SCANtype.Biome;
 				}
 			}
@@ -511,7 +511,7 @@ namespace SCANsat
 				GUILayout.Label ("NO DATA" , style_readout);
 			} else {
 				if ((sensors & SCANdata.SCANtype.Biome) != SCANdata.SCANtype.Nothing) {
-					GUILayout.Label (data.getBiomeName (FlightGlobals.ActiveVessel.longitude , FlightGlobals.ActiveVessel.latitude) , style_readout);
+					GUILayout.Label(SCANUtil.getBiomeName(FlightGlobals.ActiveVessel.mainBody, FlightGlobals.ActiveVessel.longitude, FlightGlobals.ActiveVessel.latitude), style_readout);
 					++parts;
 				}
 
@@ -667,7 +667,8 @@ namespace SCANsat
 		}
 		public static void gui_settings_resources (int wid) {
 			GUILayout.Label ("Resources Overlay" , style_headline);
-			if (SCANcontroller.controller.ResourcesList.Count > 0) {
+			if (SCANcontroller.ResourcesList.Count > 0)
+			{
 				if (SCANcontroller.controller.globalOverlay != GUILayout.Toggle (SCANcontroller.controller.globalOverlay , "Activate Resource Overlay")) { //global toggle for resource overlay
 				SCANcontroller.controller.globalOverlay = !SCANcontroller.controller.globalOverlay;
 				if (bigmap != null) bigmap.resetMap ();
@@ -678,8 +679,8 @@ namespace SCANsat
 			if (GUILayout.Button ("Kethane Resources")) //select from two resource types, populates the list below
 			{
 				SCANcontroller.controller.resourceOverlayType = 1;
-                SCANcontroller.controller.Resources(FlightGlobals.currentMainBody);
-				if (SCANcontroller.controller.ResourcesList.Count > 0)
+				SCANcontroller.controller.Resources(FlightGlobals.currentMainBody);
+				if (SCANcontroller.ResourcesList.Count > 0)
 					SCANcontroller.controller.globalOverlay = true;
 				if (bigmap != null) bigmap.resetMap();
 			}
@@ -687,18 +688,19 @@ namespace SCANsat
 			if (GUILayout.Button ("ORS Resources"))
 			{
 				SCANcontroller.controller.resourceOverlayType = 0;
-                SCANcontroller.controller.Resources(FlightGlobals.currentMainBody);
-				if (SCANcontroller.controller.ResourcesList.Count > 0)
+				SCANcontroller.controller.Resources(FlightGlobals.currentMainBody);
+				if (SCANcontroller.ResourcesList.Count > 0)
 				    SCANcontroller.controller.globalOverlay = true;
 				if (bigmap != null) bigmap.resetMap ();
 			}
 			GUILayout.EndHorizontal();
-			if (SCANcontroller.controller.ResourcesList.Count == 0) {
+			if (SCANcontroller.ResourcesList.Count == 0)
+			{
 				GUILayout.Space (5);
 				GUILayout.Label ("No Resources Found" , style_headline);
 			}
 			GUILayout.BeginHorizontal ();
-			SCANcontroller.controller.gridSelection = GUILayout.SelectionGrid (SCANcontroller.controller.gridSelection , SCANcontroller.controller.ResourcesList.Select(a => a.name).ToArray(), 4); //select resource to display
+			SCANcontroller.controller.gridSelection = GUILayout.SelectionGrid(SCANcontroller.controller.gridSelection, SCANcontroller.ResourcesList.Select(a => a.name).ToArray(), 4); //select resource to display
 			GUILayout.EndHorizontal ();
 		}
 		public static void gui_settings_toggle_body_scanning (int wid) {
@@ -759,7 +761,7 @@ namespace SCANsat
 				data.reset ();
 			}
 			if (GUILayout.Button ("Reset <b>all</b> data")) {
-				foreach (SCANdata data in SCANUtil.body_data.Values) {
+				foreach (SCANdata data in SCANcontroller.body_data.Values) {
 					data.reset ();
 				}
 			}
@@ -1322,7 +1324,8 @@ namespace SCANsat
 			{
 			 style_button.normal.textColor = SCANcontroller.controller.map_ResourceOverlay ? palette.c_good : palette.white;
 			    if (!SCANcontroller.controller.kethaneBusy || SCANcontroller.controller.resourceOverlayType == 0 ) {
-                    if (GUILayout.Button(SCANcontroller.controller.ResourcesList[SCANcontroller.controller.gridSelection].name, style_button)) {
+					if (GUILayout.Button(SCANcontroller.ResourcesList[SCANcontroller.controller.gridSelection].name, style_button))
+					{
 			            SCANcontroller.controller.map_ResourceOverlay = !SCANcontroller.controller.map_ResourceOverlay;
 			            bigmap.resetMap();
 			        }
@@ -1380,42 +1383,49 @@ namespace SCANsat
 
 				if (mlon >= -180 && mlon <= 180 && mlat >= -90 && mlat <= 90) {
 					in_map = true;
-					if (data.isCovered (mlon , mlat , SCANdata.SCANtype.AltimetryLoRes)) {
+					if (SCANUtil.isCovered(mlon, mlat, data, SCANdata.SCANtype.AltimetryLoRes))
+					{
 						if (vessel.mainBody.pqsController == null)
 							info += palette.colored (palette.c_ugly , "LO ");
 						else
 							info += palette.colored (palette.c_good , "LO ");
 					} else
 						info += "<color=\"grey\">LO</color> ";
-					if (data.isCovered (mlon , mlat , SCANdata.SCANtype.AltimetryHiRes)) {
+					if (SCANUtil.isCovered(mlon, mlat, data, SCANdata.SCANtype.AltimetryHiRes))
+					{
 						if (vessel.mainBody.pqsController == null)
 							info += palette.colored (palette.c_ugly , "HI ");
 						else
 							info += palette.colored (palette.c_good , "HI ");
 					} else
 						info += "<color=\"grey\">HI</color> ";
-					if (data.isCovered (mlon , mlat , SCANdata.SCANtype.Biome)) {
+					if (SCANUtil.isCovered(mlon, mlat, data, SCANdata.SCANtype.Biome))
+					{
 						if (vessel.mainBody.BiomeMap == null || vessel.mainBody.BiomeMap.Map == null)
 							info += palette.colored (palette.c_ugly , "BIO ");
 						else
 							info += palette.colored (palette.c_good , "BIO ");
 					} else
 						info += "<color=\"grey\">BIO</color> ";
-					if (data.isCovered (mlon , mlat , SCANdata.SCANtype.Anomaly))
+					if (SCANUtil.isCovered(mlon, mlat, data, SCANdata.SCANtype.Anomaly))
 						info += palette.colored (palette.c_good , "ANOM ");
 					else
 						info += "<color=\"grey\">ANOM</color> ";
-					if (data.isCovered (mlon , mlat , SCANdata.SCANtype.AnomalyDetail))
+					if (SCANUtil.isCovered(mlon, mlat, data, SCANdata.SCANtype.AnomalyDetail))
 						info += palette.colored (palette.c_good , "BTDT ");
 					else
 						info += "<color=\"grey\">BTDT</color> ";
-					if (data.isCovered (mlon , mlat , SCANdata.SCANtype.AltimetryHiRes)) {
-						info += "<b>" + data.getElevation (mlon , mlat).ToString ("N2") + "m</b> ";
-					} else if (data.isCovered (mlon , mlat , SCANdata.SCANtype.AltimetryLoRes)) {
-						info += "<b>~" + (((int)data.getElevation (mlon , mlat) / 500) * 500).ToString () + "m</b> ";
+					if (SCANUtil.isCovered(mlon, mlat, data, SCANdata.SCANtype.AltimetryHiRes))
+					{
+						info += "<b>" + SCANUtil.getElevation(vessel.mainBody, mlon, mlat).ToString("N2") + "m</b> ";
 					}
-					if (data.isCovered (mlon , mlat , SCANdata.SCANtype.Biome)) {
-						info += data.getBiomeName (mlon , mlat) + " ";
+					else if (SCANUtil.isCovered(mlon, mlat, data, SCANdata.SCANtype.AltimetryLoRes))
+					{
+						info += "<b>~" + (((int)SCANUtil.getElevation(vessel.mainBody, mlon, mlat) / 500) * 500).ToString() + "m</b> ";
+					}
+					if (SCANUtil.isCovered(mlon, mlat, data, SCANdata.SCANtype.Biome))
+					{
+						info += SCANUtil.getBiomeName(vessel.mainBody, mlon, mlat) + " ";
 					}
 					info += "\n" + toDMS (mlat , mlon) + " (lat: " + mlat.ToString ("F2") + " lon: " + mlon.ToString ("F2") + ") ";
 					if (in_spotmap)
@@ -1423,7 +1433,7 @@ namespace SCANsat
 					if (SCANcontroller.controller.map_ResourceOverlay && SCANcontroller.controller.globalOverlay) //Adds selected resource amount to big map legend
 					{
 						if (SCANcontroller.controller.resourceOverlayType == 0) {
-							if (data.isCovered(mlon, mlat, bigmap.resource.type))
+							if (SCANUtil.isCovered(mlon, mlat, data, bigmap.resource.type))
 							{
                                 double amount = SCANUtil.ORSOverlay(mlon, mlat, bigmap.body.flightGlobalsIndex, bigmap.resource.name);
                                 string label;
@@ -1436,9 +1446,9 @@ namespace SCANsat
 						}
                         else if (SCANcontroller.controller.resourceOverlayType == 1)
                         {
-                            if (data.isCovered(mlon, mlat, bigmap.resource.type))
+							if (SCANUtil.isCovered(mlon, mlat, data, bigmap.resource.type))
                             {
-                                double amount = data.kethaneValueMap[data.icLON(mlon), data.icLAT(mlat)];
+                                double amount = data.kethaneValueMap[SCANUtil.icLON(mlon), SCANUtil.icLAT(mlat)];
                                 if (amount < 0) amount = 0d;
                                 info += palette.colored(palette.xkcd_PukeGreen, "\n<b>" + bigmap.resource.name + ": " + amount.ToString("N1") + "</b>");
                             }
@@ -1472,7 +1482,7 @@ namespace SCANsat
 				spotmap.setBody (vessel.mainBody);
 
 				if (SCANcontroller.controller.globalOverlay) //make sure resources show up in zoom map
-                    	spotmap.setResource(SCANcontroller.controller.ResourcesList[SCANcontroller.controller.gridSelection].name);
+					spotmap.setResource(SCANcontroller.ResourcesList[SCANcontroller.controller.gridSelection].name);
 
 				GUI.Box (pos_spotmap , spotmap.getPartialMap ());
 				if (!notMappingToday) {
@@ -1734,7 +1744,7 @@ namespace SCANsat
 				}
 				bigmap.setBody (vessel.mainBody);
                 if (SCANcontroller.controller.globalOverlay) //Update selected resource
-                    bigmap.setResource (SCANcontroller.controller.ResourcesList[SCANcontroller.controller.gridSelection].name);
+					bigmap.setResource(SCANcontroller.ResourcesList[SCANcontroller.controller.gridSelection].name);
 				string rendering = "";
 				if (bigmap_dragging)
 					rendering += " [" + bigmap_drag_w + "x" + (bigmap_drag_w / 2) + "]";

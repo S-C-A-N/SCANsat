@@ -260,9 +260,9 @@ namespace SCANsat
 			if (body == b)
 				return;
 			body = b;
-            SCANcontroller.controller.Resources(b); //Repopulate resource list when changing SOI
+			SCANcontroller.controller.Resources(b); //Repopulate resource list when changing SOI
             if (SCANcontroller.controller.globalOverlay)
-                resource = SCANcontroller.controller.ResourcesList[SCANcontroller.controller.gridSelection];
+				resource = SCANcontroller.ResourcesList[SCANcontroller.controller.gridSelection];
 			resetMap ();
 		}
 		public bool isMapComplete () {
@@ -274,7 +274,7 @@ namespace SCANsat
 			mapstep = 0;
 			mapsaved = false;
             if (SCANcontroller.controller.globalOverlay) { //Make sure that a resource is initialized if necessary
-                if (resource == null) resource = SCANcontroller.controller.ResourcesList[SCANcontroller.controller.gridSelection];
+				if (resource == null) resource = SCANcontroller.ResourcesList[SCANcontroller.controller.gridSelection];
                 if (SCANcontroller.controller.resourceOverlayType == 1)
                 SCANcontroller.controller.kethaneReset = !SCANcontroller.controller.kethaneReset;
             }
@@ -285,10 +285,10 @@ namespace SCANsat
                 resetMap ();
 		}
         	public void setResource (string s) { //Used when a different resource is selected
-                if (resource == null) resource = SCANcontroller.controller.ResourcesList[SCANcontroller.controller.gridSelection];
+				if (resource == null) resource = SCANcontroller.ResourcesList[SCANcontroller.controller.gridSelection];
                 else if (resource.name == s)
                     return;
-                resource = SCANcontroller.controller.ResourcesList[SCANcontroller.controller.gridSelection];
+				resource = SCANcontroller.ResourcesList[SCANcontroller.controller.gridSelection];
                 resetMap();
         }
 
@@ -376,17 +376,17 @@ namespace SCANsat
 					if (body.pqsController == null) {
 						baseColor = palette.lerp (palette.black , palette.white , UnityEngine.Random.value);
 					}
-                    else if (data.isCovered(lon, lat, SCANdata.SCANtype.Altimetry))
+					else if (SCANUtil.isCovered(lon, lat, data, SCANdata.SCANtype.Altimetry))
                     {
                         float val = 0f;
                         if (mapType == 0)
                             val = big_heightmap[i, mapstep, SCANcontroller.controller.projection];
                         if (val == 0)
                         {
-                            if (data.isCovered(lon, lat, SCANdata.SCANtype.AltimetryHiRes))
+							if (SCANUtil.isCovered(lon, lat, data, SCANdata.SCANtype.AltimetryHiRes))
                             {
                                 // high resolution gets a coloured pixel for the actual position
-                                val = (float)data.getElevation(lon, lat);
+                                val = (float)SCANUtil.getElevation(body, lon, lat);
                                 baseColor = palette.heightToColor(val, scheme); //use temporary color to store pixel value
                                 if (val == 0f) val = -0.001f;
                                 heightMapArray(val, mapstep, i, mapType);
@@ -394,7 +394,7 @@ namespace SCANsat
                             else
                             {
                                 // basic altimetry gets forced greyscale with lower resolution
-                                val = (float)data.getElevation(((int)(lon * 5)) / 5, ((int)(lat * 5)) / 5);
+								val = (float)SCANUtil.getElevation(body, ((int)(lon * 5)) / 5, ((int)(lat * 5)) / 5);
                                 baseColor = palette.heightToColor(val, 1);
                                 if (val == 0f) val = -0.001f;
                                 heightMapArray(val, mapstep, i, mapType);
@@ -402,7 +402,7 @@ namespace SCANsat
                         }
                         else if (val != 0)
                         {
-                            if (data.isCovered(lon, lat, SCANdata.SCANtype.AltimetryHiRes))
+							if (SCANUtil.isCovered(lon, lat, data, SCANdata.SCANtype.AltimetryHiRes))
                             {
                                 baseColor = palette.heightToColor(val, scheme);
                             }
@@ -417,7 +417,7 @@ namespace SCANsat
                     {
                         if (SCANcontroller.controller.resourceOverlayType == 0)
                         {
-                            if (data.isCovered(lon, lat, resource.type)) //check our new resource coverage map
+							if (SCANUtil.isCovered(lon, lat, data, resource.type)) //check our new resource coverage map
                             {
                                 double amount = SCANUtil.ORSOverlay(lon, lat, body.flightGlobalsIndex, resource.name); //grab the resource amount for the current pixel
                                 double scalar = resource.ORS_Multiplier * resource.ORS_Scalar * resource.ORS_Threshold; //low cutoff value
@@ -444,10 +444,10 @@ namespace SCANsat
                         }
                         else if (SCANcontroller.controller.resourceOverlayType == 1) //Kethane overlay
                         {
-                            if (data.isCovered(lon, lat, resource.type))
+							if (SCANUtil.isCovered(lon, lat, data, resource.type))
                             {
-                                int ilon = data.icLON(lon);
-                                int ilat = data.icLAT(lat);
+								int ilon = SCANUtil.icLON(lon);
+								int ilat = SCANUtil.icLAT(lat);
                                 float amount = data.kethaneValueMap[ilon, ilat]; //Fetch Kethane resource values from cached array
                                 if (amount <= 0) pix[i] = palette.lerp(baseColor, palette.grey, 0.4f);
                                 else
@@ -475,22 +475,22 @@ namespace SCANsat
 					if (body.pqsController == null) {
 						baseColor = palette.lerp (palette.black , palette.white , UnityEngine.Random.value);
 					}
-                    else if (data.isCovered(lon, lat, SCANdata.SCANtype.Altimetry))
+					else if (SCANUtil.isCovered(lon, lat, data, SCANdata.SCANtype.Altimetry))
                     {
                         float val = 0f;
                         if (mapType == 0)
                             val = big_heightmap[i, mapstep, SCANcontroller.controller.projection];
                         if (val == 0)
                         {
-                            if (data.isCovered(lon, lat, SCANdata.SCANtype.AltimetryHiRes))
+							if (SCANUtil.isCovered(lon, lat, data, SCANdata.SCANtype.AltimetryHiRes))
                             {
-                                val = (float)data.getElevation(lon, lat);
+								val = (float)SCANUtil.getElevation(body, lon, lat);
                                 if (val == 0f) val = -0.001f;
                                 heightMapArray(val, mapstep, i, mapType);
                             }
                             else
                             {
-                                val = (float)data.getElevation(((int)(lon * 5)) / 5, ((int)(lat * 5)) / 5);
+								val = (float)SCANUtil.getElevation(body, ((int)(lon * 5)) / 5, ((int)(lat * 5)) / 5);
                                 if (val == 0f) val = -0.001f;
                                 heightMapArray(val, mapstep, i, mapType);
                             }
@@ -532,7 +532,7 @@ namespace SCANsat
                     {
                         if (SCANcontroller.controller.resourceOverlayType == 0)
                         {
-                            if (data.isCovered(lon, lat, resource.type)) //check our new resource coverage map
+							if (SCANUtil.isCovered(lon, lat, data, resource.type)) //check our new resource coverage map
                             {
                                 double amount = SCANUtil.ORSOverlay(lon, lat, body.flightGlobalsIndex, resource.name); //grab the resource amount for the current pixel
                                 double scalar = resource.ORS_Multiplier * resource.ORS_Scalar * resource.ORS_Threshold;
@@ -561,10 +561,10 @@ namespace SCANsat
                         }
                         else if (SCANcontroller.controller.resourceOverlayType == 1)
                         {
-                            if (data.isCovered(lon, lat, resource.type))
+							if (SCANUtil.isCovered(lon, lat, data, resource.type))
                             {
-                                int ilon = data.icLON(lon);
-                                int ilat = data.icLAT(lat);
+								int ilon = SCANUtil.icLON(lon);
+								int ilat = SCANUtil.icLAT(lat);
                                 float amount = data.kethaneValueMap[ilon, ilat];
                                 if (amount <= 0) pix[i] = palette.lerp(baseColor, palette.grey, 0.4f);
                                 else
@@ -588,9 +588,9 @@ namespace SCANsat
 				u /= 360f; v /= 180f;
 				pix[i] = body.BiomeMap.Map.GetPixelBilinear(u, v);
 				*/
-                    else if (data.isCovered(lon, lat, SCANdata.SCANtype.Biome))
+					else if (SCANUtil.isCovered(lon, lat, data, SCANdata.SCANtype.Biome))
                     {
-                        double bio = data.getBiomeIndexFraction(lon, lat);
+						double bio = SCANUtil.getBiomeIndexFraction(body, lon, lat);
                         Color biome = palette.grey;
                         if (SCANcontroller.controller.colours == 1)
                         {
@@ -610,22 +610,22 @@ namespace SCANsat
                             {
                                 baseColor = palette.lerp(palette.black, palette.white, UnityEngine.Random.value);
                             }
-                            else if (data.isCovered(lon, lat, SCANdata.SCANtype.Altimetry))
+							else if (SCANUtil.isCovered(lon, lat, data, SCANdata.SCANtype.Altimetry))
                             {
                                 float val = 0f;
                                 if (mapType == 0)
                                     val = big_heightmap[i, mapstep, SCANcontroller.controller.projection];
                                 if (val == 0)
                                 {
-                                    if (data.isCovered(lon, lat, SCANdata.SCANtype.AltimetryHiRes))
+									if (SCANUtil.isCovered(lon, lat, data, SCANdata.SCANtype.AltimetryHiRes))
                                     {
-                                        val = (float)data.getElevation(lon, lat);
+										val = (float)SCANUtil.getElevation(body, lon, lat);
                                         if (val == 0f) val = -0.001f;
                                         heightMapArray(val, mapstep, i, mapType);
                                     }
                                     else
                                     {
-                                        val = (float)data.getElevation(((int)(lon * 5)) / 5, ((int)(lat * 5)) / 5);
+										val = (float)SCANUtil.getElevation(body, ((int)(lon * 5)) / 5, ((int)(lat * 5)) / 5);
                                         if (val == 0f) val = -0.001f;
                                         heightMapArray(val, mapstep, i, mapType);
                                     }
@@ -652,7 +652,7 @@ namespace SCANsat
                     {
                         if (SCANcontroller.controller.resourceOverlayType == 0)
                         {
-                            if (data.isCovered(lon, lat, resource.type)) //check our new resource coverage map
+							if (SCANUtil.isCovered(lon, lat, data, resource.type)) //check our new resource coverage map
                             {
                                 double amount = SCANUtil.ORSOverlay(lon, lat, body.flightGlobalsIndex, resource.name); //grab the resource amount for the current pixel
                                 double scalar = resource.ORS_Multiplier * resource.ORS_Scalar * resource.ORS_Threshold;
@@ -681,10 +681,10 @@ namespace SCANsat
                         }
                         else if (SCANcontroller.controller.resourceOverlayType == 1)
                         {
-                            if (data.isCovered(lon, lat, resource.type))
+							if (SCANUtil.isCovered(lon, lat, data, resource.type))
                             {
-                                int ilon = data.icLON(lon);
-                                int ilat = data.icLAT(lat);
+								int ilon = SCANUtil.icLON(lon);
+								int ilat = SCANUtil.icLAT(lat);
                                 float amount = data.kethaneValueMap[ilon, ilat];
                                 if (amount <= 0) pix[i] = palette.lerp(baseColor, palette.grey, 0.4f);
                                 else
