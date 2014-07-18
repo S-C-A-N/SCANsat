@@ -20,7 +20,7 @@ namespace SCANsatKethane
     class SCANStarter : MonoBehaviour
     {
         private SCANsatKethane SCANK;
-        private string Version = "0.8.7";
+        private string Version = "0.8.8";
         
         public void Start() {
             print("[SCAN Kethane] Searching For Kethane Assembly...");
