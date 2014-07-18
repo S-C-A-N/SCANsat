@@ -32,16 +32,16 @@ namespace SCANsat
 			SmallButton 	= ToolbarManager.Instance.add ("SCANsat" , "SmallMap");
 
             //Fall back to some default toolbar icons if someone deletes the SCANsat icons or puts them in the wrong folder
-            if (File.Exists(Path.Combine(new DirectoryInfo(KSPUtil.ApplicationRootPath).FullName, "GameData/SCANsat/SCANsat_Icon.png").Replace("\\", "/")))
-                SCANButton.TexturePath 	= "SCANsat/SCANsat_Icon"; // S.C.A.N
+            if (File.Exists(Path.Combine(new DirectoryInfo(KSPUtil.ApplicationRootPath).FullName, "GameData/SCANsat/Icons/SCANsat_Icon.png").Replace("\\", "/")))
+                SCANButton.TexturePath 	= "SCANsat/Icons/SCANsat_Icon"; // S.C.A.N
             else 
                 SCANButton.TexturePath = "000_Toolbar/toolbar-dropdown";
-            if (File.Exists(Path.Combine(new DirectoryInfo(KSPUtil.ApplicationRootPath).FullName, "GameData/SCANsat/SCANsat_Map_Icon.png").Replace("\\", "/")))
-			    MapButton.TexturePath 	= "SCANsat/SCANsat_Map_Icon"; // from in-game biome map of Kerbin
+            if (File.Exists(Path.Combine(new DirectoryInfo(KSPUtil.ApplicationRootPath).FullName, "GameData/SCANsat/Icons/SCANsat_Map_Icon.png").Replace("\\", "/")))
+			    MapButton.TexturePath 	= "SCANsat/Icons/SCANsat_Map_Icon"; // from in-game biome map of Kerbin
             else
                 MapButton.TexturePath = "000_Toolbar/move-cursor";
-            if (File.Exists(Path.Combine(new DirectoryInfo(KSPUtil.ApplicationRootPath).FullName, "GameData/SCANsat/SCANsat_SmallMap_Icon.png").Replace("\\", "/")))
-			    SmallButton.TexturePath 	= "SCANsat/SCANsat_SmallMap_Icon"; // from unity, edited by DG
+            if (File.Exists(Path.Combine(new DirectoryInfo(KSPUtil.ApplicationRootPath).FullName, "GameData/SCANsat/Icons/SCANsat_SmallMap_Icon.png").Replace("\\", "/")))
+			    SmallButton.TexturePath 	= "SCANsat/Icons/SCANsat_SmallMap_Icon"; // from unity, edited by DG
             else
                 SmallButton.TexturePath = "000_Toolbar/resize-cursor";
                 
