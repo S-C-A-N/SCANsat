@@ -310,7 +310,7 @@ namespace SCANsat
 
 		/* SCAN: add static (a warning that we're low on electric charge) */
 		public void addStatic () {
-			SCANdata data = SCANcontroller.controller.getData (vessel.mainBody.bodyName);
+			SCANdata data = SCANUtil.getData (vessel.mainBody);
 			Texture2D map = data.map_small;
 			if (map != null) {
 				for (int i=0; i<1000; ++i) {
@@ -350,7 +350,7 @@ namespace SCANsat
 			if (expDialog != null)
 				DestroyImmediate (expDialog);
 			storedData.Clear ();
-			ScienceData sd = SCANcontroller.controller.getAvailableScience (vessel , (SCANdata.SCANtype)sensorType , notZero);
+			ScienceData sd = SCANUtil.getAvailableScience (vessel , (SCANdata.SCANtype)sensorType , notZero);
 			if (sd == null)
 				return;
 			storedData.Add (sd);
