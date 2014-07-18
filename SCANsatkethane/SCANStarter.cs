@@ -21,7 +21,8 @@ namespace SCANsatKethane
     {
         private SCANsatKethane SCANK;
         private string Version = "0.8.7";
-        
+		private string Version2 = "0.8.8";
+
         public void Start() {
             print("[SCAN Kethane] Searching For Kethane Assembly...");
             searching();
@@ -30,7 +31,8 @@ namespace SCANsatKethane
         private void searching () {
             var KAssembly = AssemblyLoader.loadedAssemblies.SingleOrDefault(a => a.assembly.GetName().Name == "Kethane");
             if (KAssembly != null) {
-                if (FileVersionInfo.GetVersionInfo(KAssembly.assembly.Location).ProductVersion == Version) {
+				if (FileVersionInfo.GetVersionInfo(KAssembly.assembly.Location).ProductVersion == Version || FileVersionInfo.GetVersionInfo(KAssembly.assembly.Location).ProductVersion == Version2)
+				{
                 print("[SCAN Kethane] Kethane Assembly Found; Version: " + Version + ", Launching Watcher");
                 launcher();
                 }
