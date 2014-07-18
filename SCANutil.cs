@@ -89,7 +89,7 @@ namespace SCANsat
 
 		internal static Dictionary<string, SCANdata> body_data = new Dictionary<string, SCANdata>();
 
-		internal static SCANdata getData(CelestialBody body)
+		public static SCANdata getData(CelestialBody body)
 		{
 			if (!body_data.ContainsKey(body.name)) {
 				body_data[body.name] = new SCANdata(body);
@@ -183,36 +183,36 @@ namespace SCANsat
 			return sd;
 		}
 
-		internal static SCANdata.SCANtype OverlayResourceType(string s)
-		{
-			if (SCANcontroller.controller.resourceOverlayType == 0) {
-				switch(s)
-				{
-					case "Uranium": return SCANdata.SCANtype.Uranium;
-					case "Thorium": return SCANdata.SCANtype.Thorium;
-					case "Alumina": return SCANdata.SCANtype.Alumina;
-					case "Water": return SCANdata.SCANtype.Water;
-					case "Aquifer": return SCANdata.SCANtype.Aquifer;
-					case "Ore": return SCANdata.SCANtype.Ore;
-					case "Minerals": return SCANdata.SCANtype.Minerals;
-					case "Substrate": return SCANdata.SCANtype.Substrate;
-					case "KEEZO": return SCANdata.SCANtype.KEEZO;
-					default: return SCANdata.SCANtype.Nothing;
-				}
-			}
-			else if (SCANcontroller.controller.resourceOverlayType == 1) {
-				switch(s)
-				{
-					case "Kethane": return SCANdata.SCANtype.Kethane;
-					case "Ore": return SCANdata.SCANtype.Ore;
-					case "Water": return SCANdata.SCANtype.Water;
-					case "Minerals": return SCANdata.SCANtype.Minerals;
-					case "Substrate": return SCANdata.SCANtype.Substrate;
-					default: return SCANdata.SCANtype.Nothing;
-				}
-			}
-			return SCANdata.SCANtype.Nothing;
-		}
+		//internal static SCANdata.SCANtype OverlayResourceType(string s)
+		//{
+		//    if (SCANcontroller.controller.resourceOverlayType == 0) {
+		//        switch(s)
+		//        {
+		//            case "Uranium": return SCANdata.SCANtype.Uranium;
+		//            case "Thorium": return SCANdata.SCANtype.Thorium;
+		//            case "Alumina": return SCANdata.SCANtype.Alumina;
+		//            case "Water": return SCANdata.SCANtype.Water;
+		//            case "Aquifer": return SCANdata.SCANtype.Aquifer;
+		//            case "Ore": return SCANdata.SCANtype.Ore;
+		//            case "Minerals": return SCANdata.SCANtype.Minerals;
+		//            case "Substrate": return SCANdata.SCANtype.Substrate;
+		//            case "KEEZO": return SCANdata.SCANtype.KEEZO;
+		//            default: return SCANdata.SCANtype.Nothing;
+		//        }
+		//    }
+		//    else if (SCANcontroller.controller.resourceOverlayType == 1) {
+		//        switch(s)
+		//        {
+		//            case "Kethane": return SCANdata.SCANtype.Kethane;
+		//            case "Ore": return SCANdata.SCANtype.Ore;
+		//            case "Water": return SCANdata.SCANtype.Water;
+		//            case "Minerals": return SCANdata.SCANtype.Minerals;
+		//            case "Substrate": return SCANdata.SCANtype.Substrate;
+		//            default: return SCANdata.SCANtype.Nothing;
+		//        }
+		//    }
+		//    return SCANdata.SCANtype.Nothing;
+		//}
 
 		internal static double ORSOverlay(double lon, double lat, int i, string s)
 		{
@@ -278,7 +278,7 @@ namespace SCANsat
 		}
 
 	}
-		// Mihara: ...mmm. Those two extension classes are initially from MechJeb. It needs more investigation on whether these licenses are compatible.
+		// This extension is from MechJeb; Used with permission from r4m0n: https://github.com/MuMech/MechJeb2/blob/master/MechJeb2/OrbitExtensions.cs
 
 		public static class OrbitExtensions
 		{
