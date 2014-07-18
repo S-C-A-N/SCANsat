@@ -285,7 +285,7 @@ namespace SCANsat
 				rotOffset = (360 * ((timePoint - initial) / thatVessel.mainBody.rotationPeriod)) % 360;
 			}
 			Vector3d pos = thatOrbit.getPositionAtUT(timePoint);
-			if (thatOrbit.Radius(timePoint) < thatVessel.mainBody.Radius + thatVessel.mainBody.TerrainAltitude(pos)) {
+			if (thatOrbit.Radius(timePoint) < thatVessel.mainBody.Radius + thatVessel.mainBody.getElevation(pos)) {
 				collision = true;
 				return false;
 			}
@@ -571,7 +571,7 @@ namespace SCANsat
 			mapSizeScale = new Vector2d(360.0 * map.mapscale / map.mapwidth, 180.0 * map.mapscale / map.mapheight);
 			redrawDeviation = redrawEdge * 180 / (zoomLevel * zoomLevel + zoomModifier);
 			try {
-				localAnomalies = SCANcontroller.controller.getData(vessel.mainBody).getAnomalies();
+				localAnomalies = SCANUtil.getData(vessel.mainBody).getAnomalies();
 			} catch {
 				Debug.Log("JSISCANsatRPM: Could not get a list of anomalies, what happened?");
 			}
