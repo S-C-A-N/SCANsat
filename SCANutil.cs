@@ -1,4 +1,15 @@
-﻿using System;
+﻿/* 
+ * [Scientific Committee on Advanced Navigation]
+ * 			S.C.A.N. Satellite
+ * 
+ * SCANutil - various static utilities methods used througout SCANsat
+ * 
+ * Copyright (c)2014 technogeeky <technogeeky@gmail.com>;
+ * Copyright (c)2014 David Grandy <david.grandy@gmail.com>;
+ * Copyright (c)2014 (Your Name Here) <your email here>; see LICENSE.txt for licensing details.
+ */
+
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
@@ -8,6 +19,15 @@ namespace SCANsat
 
 	public static class SCANUtil
 	{
+
+		/// <summary>
+		/// Determines scanning coverage for a given area with a given scanner type
+		/// </summary>
+		/// <param name="lon">Clamped double in the -180 - 180 degree range</param>
+		/// <param name="lat">Clamped double in the -90 - 90 degree range</param>
+		/// <param name="body">Celestial body in question</param>
+		/// <param name="SCANtype">SCANtype cast as an integer</param>
+		/// <returns></returns>
 		public static bool isCovered(double lon, double lat, CelestialBody body, int SCANtype)
 		{
 			int ilon = icLON(lon);
@@ -17,6 +37,14 @@ namespace SCANsat
 			return (data.coverage[ilon, ilat] & SCANtype) != 0;
 		}
 
+		/// <summary>
+		/// Determines scanning coverage for a given area with a given scanner type
+		/// </summary>
+		/// <param name="lon">Clamped integer in the 0-360 degree range</param>
+		/// <param name="lat">Clamped integer in the 0-180 degree range</param>
+		/// <param name="body">Celestial body in question</param>
+		/// <param name="SCANtype">SCANtype cast as an integer</param>
+		/// <returns></returns>
 		public static bool isCovered(int lon, int lat, CelestialBody body, int SCANtype)
 		{
 			if (badLonLat(lon, lat)) return false;
@@ -24,95 +52,18 @@ namespace SCANsat
 			return (data.coverage[lon, lat] & SCANtype) != 0;
 		}
 
-		internal static bool isCovered(double lon, double lat, SCANdata data, SCANdata.SCANtype type)
-		{
-			int ilon = icLON(lon);
-			int ilat = icLAT(lat);
-			if (badLonLat(ilon, ilat)) return false;
-			return (data.coverage[ilon, ilat] & (Int32)type) != 0;
-		}
-
-		internal static bool isCovered(int lon, int lat, SCANdata data, SCANdata.SCANtype type)
-		{
-			if (badLonLat(lon, lat)) return false;
-			return (data.coverage[lon, lat] & (Int32)type) != 0;
-		}
-
-		internal static bool isCoveredByAll (CelestialBody body, double lon , double lat , SCANdata.SCANtype type)
-		{
-			int ilon = icLON(lon);
-			int ilat = icLAT(lat);
-			if (badLonLat(ilon,ilat)) return false;
-			SCANdata data = getData(body);
-			return (data.coverage[ilon, ilat] & (Int32)type) == (Int32)type;
-		}
-
-		internal static double getCoveragePercentage(CelestialBody body, SCANdata.SCANtype type )
-		{
-			SCANdata data = getData(body);
-			double cov = 0d;
-			if (type == SCANdata.SCANtype.Nothing) 
-				type = SCANdata.SCANtype.AltimetryLoRes | SCANdata.SCANtype.AltimetryHiRes | SCANdata.SCANtype.Biome | SCANdata.SCANtype.Anomaly;          
-			cov = data.getCoverage (type);
-			if (cov <= 0)
-				cov = 100;
-			else
-				cov = Math.Min (99.9d , 100 - cov * 100d / (360d * 180d * countBits((int)type)));
-			return cov;
-		}
-
 		internal static Func<double, int> icLON = (lon) => ((int)(lon + 360 + 180)) % 360;
 		internal static Func<double, int> icLAT = (lat) => ((int)(lat + 180 + 90)) % 180;
 		internal static Func<int, int, bool> badLonLat = (lon, lat) => (lon < 0 || lat < 0 || lon >= 360 || lat >= 180);
 		internal static Func<double, double, bool> badDLonLat = (lon, lat) => (lon < 0 || lat <0 || lon >= 360 || lat >= 180);
 
-		internal static double fixLatShift(double lat)
-		{
-			return (lat + 180 + 90) % 180 - 90;
-		}
-
-		internal static double fixLat(double lat)
-		{
-			return (lat + 180 + 90) % 180;
-		}
-
-		internal static double fixLonShift(double lon)
-		{
-			return (lon + 360 + 180) % 360 - 180;
-		}
-
-		internal static double fixLon(double lon)
-		{
-			return (lon + 360 + 180) % 360;
-		}
-
-		internal static Dictionary<string, SCANdata> body_data = new Dictionary<string, SCANdata>();
-
 		internal static SCANdata getData(CelestialBody body)
 		{
-			if (!body_data.ContainsKey(body.name)) {
-				body_data[body.name] = new SCANdata(body);
+			if (!SCANcontroller.body_data.ContainsKey(body.name)) {
+				SCANcontroller.body_data[body.name] = new SCANdata(body);
 			}
-			SCANdata data = body_data[body.name];
+			SCANdata data = SCANcontroller.body_data[body.name];
 			return data;
-		}
-
-		internal static double getElevation(CelestialBody body, double lon, double lat)
-		{
-			if (body.pqsController == null) return 0;
-			double rlon = Mathf.Deg2Rad * lon;
-			double rlat = Mathf.Deg2Rad * lat;
-			Vector3d rad = new Vector3d(Math.Cos(rlat) * Math.Cos(rlon), Math.Sin(rlat), Math.Cos(rlat) * Math.Sin(rlon));
-			return Math.Round(body.pqsController.GetSurfaceHeight(rad) - body.pqsController.radius, 1);
-		}
-
-		internal static double getElevation(CelestialBody body, int lon, int lat)
-		{
-			if (body.pqsController == null) return 0;
-			double rlon = Mathf.Deg2Rad * lon;
-			double rlat = Mathf.Deg2Rad * lat;
-			Vector3d rad = new Vector3d(Math.Cos(rlat) * Math.Cos(rlon), Math.Sin(rlat), Math.Cos(rlat) * Math.Sin(rlon));
-			return Math.Round(body.pqsController.GetSurfaceHeight(rad) - body.pqsController.radius, 1);
 		}
 
 		internal static double getElevation(this CelestialBody body, Vector3d worldPosition)
@@ -125,159 +76,11 @@ namespace SCANsat
 				ret = 0;
 			return ret;
 		}
-
-		internal static ScienceData getAvailableScience(Vessel v, SCANdata.SCANtype sensor, bool notZero)
-		{
-			SCANdata data = getData(v.mainBody);
-			ScienceData sd = null;
-			ScienceExperiment se = null;
-			ScienceSubject su = null;
-			bool found = false;
-			string id = null;
-			double coverage = 0f;
-
-			if(!found && (sensor & SCANdata.SCANtype.AltimetryLoRes) != SCANdata.SCANtype.Nothing) {
-				found = true;
-				id = "SCANsatAltimetryLoRes";
-				coverage = data.getCoveragePercentage(SCANdata.SCANtype.AltimetryLoRes);
-			}
-			else if(!found && (sensor & SCANdata.SCANtype.AltimetryHiRes) != SCANdata.SCANtype.Nothing) {
-				found = true;
-				id = "SCANsatAltimetryHiRes";
-				coverage = data.getCoveragePercentage(SCANdata.SCANtype.AltimetryHiRes);
-			}
-			else if(!found && (sensor & SCANdata.SCANtype.Biome) != SCANdata.SCANtype.Nothing) {
-				found = true;
-				id = "SCANsatBiomeAnomaly";
-				coverage = data.getCoveragePercentage(SCANdata.SCANtype.Biome);
-			}
-			if(!found) return null;
-			se = ResearchAndDevelopment.GetExperiment(id);
-			if(se == null) return null;
-
-			su = ResearchAndDevelopment.GetExperimentSubject(se, ExperimentSituations.InSpaceHigh, v.mainBody, "surface");
-			if(su == null) return null;
-
-			debugLog("Coverage: {0}, Science cap: {1}, Subject value: {2}, Scientific value: {3}, Science: {4}", new object[5] {coverage.ToString("F1"), su.scienceCap.ToString("F1"), su.subjectValue.ToString("F2"), su.scientificValue.ToString("F2"), su.science.ToString("F2")});
-
-			su.scientificValue = 1;
-
-			float science = (float)coverage;
-			if(science > 95) science = 100;
-			if(science < 30) science = 0;
-			science = science / 100f;
-			science = Mathf.Max(0, (science * su.scienceCap) - su.science);
-
-			debugLog("Remaining science: {0}, Base value: {1}", new object[2] {science.ToString("F1"), se.baseValue.ToString("F1")});
-
-			science /= Mathf.Max(0.1f, su.scientificValue);
-			science /= su.subjectValue;
-
-			debugLog("Resulting science value: {0}", new object[1] {science.ToString("F2")});
-
-			if(notZero && science <= 0) science = 0.00001f;
-
-			sd = new ScienceData(science * su.dataScale, 1f, 0f, su.id, se.experimentTitle + " of " + v.mainBody.theName);
-			su.title = sd.title;
-			return sd;
-		}
-
-		//internal static SCANdata.SCANtype OverlayResourceType(string s)
-		//{
-		//    if (SCANcontroller.controller.resourceOverlayType == 0) {
-		//        switch(s)
-		//        {
-		//            case "Uranium": return SCANdata.SCANtype.Uranium;
-		//            case "Thorium": return SCANdata.SCANtype.Thorium;
-		//            case "Alumina": return SCANdata.SCANtype.Alumina;
-		//            case "Water": return SCANdata.SCANtype.Water;
-		//            case "Aquifer": return SCANdata.SCANtype.Aquifer;
-		//            case "Ore": return SCANdata.SCANtype.Ore;
-		//            case "Minerals": return SCANdata.SCANtype.Minerals;
-		//            case "Substrate": return SCANdata.SCANtype.Substrate;
-		//            case "KEEZO": return SCANdata.SCANtype.KEEZO;
-		//            default: return SCANdata.SCANtype.Nothing;
-		//        }
-		//    }
-		//    else if (SCANcontroller.controller.resourceOverlayType == 1) {
-		//        switch(s)
-		//        {
-		//            case "Kethane": return SCANdata.SCANtype.Kethane;
-		//            case "Ore": return SCANdata.SCANtype.Ore;
-		//            case "Water": return SCANdata.SCANtype.Water;
-		//            case "Minerals": return SCANdata.SCANtype.Minerals;
-		//            case "Substrate": return SCANdata.SCANtype.Substrate;
-		//            default: return SCANdata.SCANtype.Nothing;
-		//        }
-		//    }
-		//    return SCANdata.SCANtype.Nothing;
-		//}
-
-		//internal static double ORSOverlay(double lon, double lat, int i, string s)
-		//{
-		//    double amount = 0f;
-		//    ORSPlanetaryResourcePixel overlayPixel = ORSPlanetaryResourceMapData.getResourceAvailability(i, s, lat, lon);
-		//    amount = overlayPixel.getAmount();
-		//    return amount;
-		//}
-
-		internal static int getBiomeIndex(CelestialBody body, double lon , double lat)
-		{
-			if (body.BiomeMap == null)		return -1;
-			if (body.BiomeMap.Map == null)	return -1;
-			double u = fixLon(lon);
-			double v = fixLat(lat);
-
-			if (badDLonLat(u, v))
-				return -1;
-			CBAttributeMap.MapAttribute att = body.BiomeMap.GetAtt (Mathf.Deg2Rad * lat , Mathf.Deg2Rad * lon);
-			for (int i = 0; i < body.BiomeMap.Attributes.Length; ++i) {
-				if (body.BiomeMap.Attributes [i] == att) {
-					return i;
-				}
-			}
-			return -1;
-		}
-
-		internal static double getBiomeIndexFraction(CelestialBody body, double lon , double lat)
-		{
-			if (body.BiomeMap == null) return 0f;
-			return getBiomeIndex (body, lon , lat) * 1.0f / body.BiomeMap.Attributes.Length;
-		}
-
-		internal static CBAttributeMap.MapAttribute getBiome(CelestialBody body, double lon , double lat)
-		{
-			if (body.BiomeMap == null) return null;
-			if (body.BiomeMap.Map == null) return body.BiomeMap.defaultAttribute;
-			int i = getBiomeIndex(body, lon , lat);
-			if (i < 0) return body.BiomeMap.defaultAttribute;
-			else return body.BiomeMap.Attributes [i];
-		}
-
-		internal static string getBiomeName(CelestialBody body, double lon , double lat)
-		{
-			CBAttributeMap.MapAttribute a = getBiome (body, lon , lat);
-			if (a == null)
-				return "unknown";
-			return a.name;
-		}
-
-		internal static int countBits(int i)
-		{
-			int count;
-			for(count=0; i!=0; ++count) i &= (i - 1);
-			return count;
-		}
-
-		internal static void debugLog(string log, params object[] stringObjects)
-		{
-			log = string.Format(log, stringObjects);
-			string finalLog = string.Format("[SCANsat] {0}", log);
-			Debug.Log(finalLog);
-		}
-
 	}
-		// Mihara: ...mmm. Those two extension classes are initially from MechJeb. It needs more investigation on whether these licenses are compatible.
+
+	#region MechJeb Extensions
+
+	//This extension is from MechJeb; Used with permission from r4m0n: https://github.com/MuMech/MechJeb2/blob/master/MechJeb2/OrbitExtensions.cs
 
 		public static class OrbitExtensions
 		{
@@ -453,6 +256,10 @@ namespace SCANsat
 				}
 		}
 
+	#endregion
+
+		#region Duplicated SCANsat code...
+
 		// Mihara: Notice that quite a bit of it, at least conceptually, duplicates code that SCANsat already contains elsewhere,
 		// and in general needs trimming.
 
@@ -582,6 +389,9 @@ namespace SCANsat
 				}
 		}
 
+		#endregion
+
+		#region JUtil for SCANsatRPM
 
 		public static class JUtil
 		{
@@ -772,5 +582,7 @@ namespace SCANsat
 						return CameraManager.Instance.currentCameraMode == CameraManager.CameraMode.IVA || CameraManager.Instance.currentCameraMode == CameraManager.CameraMode.Internal;
 				}
 		}
-}
+	}
+
+		#endregion
 
