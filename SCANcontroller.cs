@@ -67,7 +67,10 @@ namespace SCANsat
 
 		private bool warned = false;
 
+		internal static Dictionary<string, SCANdata> body_data = new Dictionary<string, SCANdata>();
+
 		public override void OnLoad(ConfigNode node) {
+			body_data.Clear();
 			ConfigNode node_vessels = node.GetNode("Scanners");
 			if(node_vessels != null) {
 				print("SCANsat Controller: Loading " + node_vessels.CountNodes.ToString() + " known vessels");
@@ -95,16 +98,16 @@ namespace SCANsat
 					print("SCANsat Controller: Loading map for " + body_name);
 					CelestialBody body = FlightGlobals.Bodies.FirstOrDefault(b => b.name == body_name);
 					if (body != null) {
-						SCANdata body_data = SCANUtil.getData(body);
+						SCANdata data = SCANUtil.getData(body);
 						try {
 							string mapdata = node_body.GetValue("Map");
-							body_data.deserialize(mapdata);
+							data.deserialize(mapdata);
 						} catch(Exception e) {
 							print(e.ToString());
 							print(e.StackTrace);
 							// fail somewhat gracefully; don't make the save unloadable 
 						}
-						body_data.disabled = Convert.ToBoolean(node_body.GetValue("Disabled"));
+						data.disabled = Convert.ToBoolean(node_body.GetValue("Disabled"));
 					}
 				}
 			}
@@ -134,9 +137,9 @@ namespace SCANsat
 			}
 			node.AddNode(node_vessels);
 			ConfigNode node_progress = new ConfigNode("Progress");
-			foreach(string body_name in SCANUtil.body_data.Keys) {
+			foreach(string body_name in body_data.Keys) {
 				ConfigNode node_body = new ConfigNode("Body");
-				SCANdata body_scan = SCANUtil.body_data[body_name];
+				SCANdata body_scan = body_data[body_name];
 				node_body.AddValue("Name", body_name);
 				node_body.AddValue("Disabled", body_scan.disabled);
 				node_body.AddValue("Map", body_scan.serialize());
@@ -256,7 +259,7 @@ namespace SCANsat
 		}
 
 		public ScienceData getAvailableScience(Vessel v, SCANdata.SCANtype sensor, bool notZero) {
-			SCANdata data = getData(v.mainBody);
+			SCANdata data = SCANUtil.getData(v.mainBody);
 			ScienceData sd = null;
 			ScienceExperiment se = null;
 			ScienceSubject su = null;
@@ -315,25 +318,23 @@ namespace SCANsat
 			return sd;
 		}
 
-		//public Dictionary<string, SCANdata> body_data = new Dictionary<string, SCANdata>();
+		//public SCANdata getData(string name) {
+		//    if(!body_data.ContainsKey(name)) {
+		//        body_data[name] = new SCANdata();
+		//        body_data[name].resetImages();
+		//    }
+		//    return body_data[name];
+		//}
 
-		public SCANdata getData(string name) {
-			if(!SCANUtil.body_data.ContainsKey(name)) {
-				SCANUtil.body_data[name] = new SCANdata();
-				SCANUtil.body_data[name].resetImages();
-			}
-			return SCANUtil.body_data[name];
-		}
+		//public SCANdata getData(CelestialBody body) {
+		//    SCANdata data = getData(body.bodyName);
+		//    data.body = body;
+		//    return data;
+		//}
 
-		public SCANdata getData(CelestialBody body) {
-			SCANdata data = getData(body.bodyName);
-			data.body = body;
-			return data;
-		}
-
-		public void registerPass(CelestialBody body, float lon, float lat, SCANdata.SCANtype type) {
-			getData(body).registerPass(lon, lat, type);
-		}
+		//public void registerPass(CelestialBody body, float lon, float lat, SCANdata.SCANtype type) {
+		//    getData(body).registerPass(lon, lat, type);
+		//}
 
 		public double fixLatitude(double lat) {
 			return (lat + 90 + 180) % 180 - 90;
@@ -368,11 +369,11 @@ namespace SCANsat
 			currentActiveVessel = 0;
 			actualPasses = 0;
 			maxRes = 0;
-			foreach(SCANdata data in SCANUtil.body_data.Values) data.updateCoverage();
+			foreach(SCANdata data in body_data.Values) data.updateCoverage();
 			foreach(Vessel v in FlightGlobals.Vessels) {
 				if(!knownVessels.ContainsKey(v.id)) continue;
 				SCANvessel vessel = knownVessels[v.id];
-				SCANdata data = getData(v.mainBody);
+				SCANdata data = SCANUtil.getData(v.mainBody);
 				vessel.vessel = v;
 			
 				if(!data.disabled) {
@@ -399,7 +400,7 @@ namespace SCANsat
 		protected static Queue<double> scanQueue;
 		protected void doScanPass(SCANvessel vessel, double UT, double startUT, double lastUT, double llat, double llon) {
 			Vessel v = vessel.vessel;
-			SCANdata data = getData(v.mainBody);
+			SCANdata data = SCANUtil.getData(v.mainBody);
 			double soi_radius = v.mainBody.sphereOfInfluence - v.mainBody.Radius;
 			double alt = v.altitude, lat = fixLatitude(v.latitude), lon = fixLongitude(v.longitude);
 			double res = 0;
