@@ -323,7 +323,7 @@ namespace SCANsat
 
 		/* MAP: build: map to Texture2D */
 		public Texture2D getPartialMap () {
-			SCANdata data = SCANcontroller.controller.getData (body);
+			SCANdata data = SCANUtil.getData (body);
 			Color[] pix;
 
 			/* init cache if necessary */

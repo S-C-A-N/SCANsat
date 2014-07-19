@@ -392,7 +392,7 @@ namespace SCANsat
 			GUI.skin = null;
 			/* FIXME: unused */ //bool repainting = Event.current.type == EventType.Repaint;
 			Vessel vessel = FlightGlobals.ActiveVessel;
-			SCANdata data = SCANcontroller.controller.getData (vessel.mainBody);
+			SCANdata data = SCANUtil.getData (vessel.mainBody);
 			Rect r;
 
 			if (minimode > 0)
@@ -527,7 +527,7 @@ namespace SCANsat
 			style_readout.fontSize = 40;
 			style_readout.normal.textColor = c_good;
 			SCANdata.SCANtype sensors = SCANcontroller.controller.activeSensorsOnVessel (FlightGlobals.ActiveVessel.id);
-			SCANdata data = SCANcontroller.controller.getData (FlightGlobals.currentMainBody);
+			SCANdata data = SCANUtil.getData (FlightGlobals.currentMainBody);
 
 			if (maptraq_frame >= Time.frameCount - 5) {
 				if (data.isCovered (FlightGlobals.ActiveVessel.longitude , FlightGlobals.ActiveVessel.latitude , SCANdata.SCANtype.AltimetryHiRes)) {
@@ -682,7 +682,7 @@ namespace SCANsat
 			foreach (CelestialBody body in FlightGlobals.Bodies) {
 				if (count == 0)
 					GUILayout.BeginVertical ();
-				SCANdata data = SCANcontroller.controller.getData (body);
+				SCANdata data = SCANUtil.getData (body);
 				data.disabled = !GUILayout.Toggle (!data.disabled , body.bodyName + " (" + data.getCoveragePercentage (SCANdata.SCANtype.Nothing).ToString ("N1") + "%)");
 				if (count >= 4) {
 					GUILayout.EndVertical ();
@@ -716,11 +716,11 @@ namespace SCANsat
 			GUILayout.Label ("Data Management" , style_headline);
 			GUILayout.BeginHorizontal ();
 			if (GUILayout.Button ("Reset map of " + FlightGlobals.currentMainBody.theName)) {
-				SCANdata data = SCANcontroller.controller.getData (FlightGlobals.currentMainBody);
+				SCANdata data = SCANUtil.getData (FlightGlobals.currentMainBody);
 				data.reset ();
 			}
 			if (GUILayout.Button ("Reset <b>all</b> data")) {
-				foreach (SCANdata data in SCANcontroller.controller.body_data.Values) {
+				foreach (SCANdata data in SCANcontroller.body_data.Values) {
 					data.reset ();
 				}
 			}
@@ -1120,7 +1120,7 @@ namespace SCANsat
 			Vessel vessel = FlightGlobals.ActiveVessel;
 			GUILayout.BeginVertical ();
 
-			SCANdata data = SCANcontroller.controller.getData (vessel.mainBody);
+			SCANdata data = SCANUtil.getData (vessel.mainBody);
 			Texture2D map = bigmap.getPartialMap ();
 
 			float dw = bigmap_drag_w;
@@ -1375,6 +1375,11 @@ namespace SCANsat
 			Rect fpswidget = new Rect (maprect.x + maprect.width - 32 , maprect.y + maprect.height + 32 , 32 , 24);
 			GUI.Label (fpswidget , fps.ToString ("N1"));
 
+			#region version label
+			Rect versionLabel = new Rect(maprect.x + maprect.width - 44, maprect.y + maprect.height + 50, 54, 24);
+			GUI.Label(versionLabel, SCANversions.SCANsatVersion);
+			#endregion
+
 			Rect resizer = new Rect (maprect.x + maprect.width - 24 , maprect.y + maprect.height + 8 , 24 , 24);
 			GUI.Box (resizer , "//");
 			if (Event.current.isMouse) {
@@ -1494,7 +1499,7 @@ namespace SCANsat
 			GUI.skin.button.wordWrap = false;
 
 			SCANdata.SCANtype sensors = SCANcontroller.controller.activeSensorsOnVessel (vessel.id);
-			SCANdata data = SCANcontroller.controller.getData (vessel.mainBody);
+			SCANdata data = SCANUtil.getData (vessel.mainBody);
 			data.updateImages (sensors);
 
 			if (!repainting) { // Unity gets confused if the layout changes between layout and repaint events
@@ -1569,7 +1574,7 @@ namespace SCANsat
 					}
 				}
 
-				title = "S.C.A.N. Planetary Mapping";
+				title = "S.C.A.N. Planetary Mapping " + SCANversions.SCANsatVersion;
 
 				if (minimode <= 0)
 					title = " ";
@@ -1628,11 +1633,11 @@ namespace SCANsat
 			}
 
 			if (settings_visible) {
-				pos_settings = GUILayout.Window (47110004 , pos_settings , gui_settings_build , "S.C.A.N. Settings" , GUILayout.Width (360) , GUILayout.Height (180));
+				pos_settings = GUILayout.Window (47110004 , pos_settings , gui_settings_build , "S.C.A.N. Settings " + SCANversions.SCANsatVersion , GUILayout.Width (360) , GUILayout.Height (180));
 				if (pos_settings.x < 0 && pos_settings.width > 0) {
 					pos_settings.x = Screen.width / 2 - pos_settings.width / 2;
 					pos_settings.y = Screen.height / 3 - pos_settings.height / 2;
-					pos_settings = GUILayout.Window (47110004 , pos_settings , gui_settings_build , "S.C.A.N. Settings" , GUILayout.Width (360) , GUILayout.Height (180));
+					pos_settings = GUILayout.Window (47110004 , pos_settings , gui_settings_build , "S.C.A.N. Settings " + SCANversions.SCANsatVersion , GUILayout.Width (360) , GUILayout.Height (180));
 				}
 			}
 		}

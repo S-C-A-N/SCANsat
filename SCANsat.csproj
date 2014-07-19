@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -40,14 +40,12 @@
     </CustomCommands>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="System" />
     <Reference Include="Assembly-CSharp">
-      <HintPath>..\..\..\KSP_Data\Managed\Assembly-CSharp.dll</HintPath>
-      <Private>False</Private>
+      <HintPath>..\..\..\..\..\Visual Studio 2010\Projects\KSP Science\SCANsat Dev\Kerbal Space Program\KSP_Data\Managed\Assembly-CSharp.dll</HintPath>
     </Reference>
+    <Reference Include="System" />
     <Reference Include="UnityEngine">
-      <HintPath>..\..\..\KSP_Data\Managed\UnityEngine.dll</HintPath>
-      <Private>False</Private>
+      <HintPath>..\..\..\..\..\Visual Studio 2010\Projects\KSP Science\SCANsat Dev\Kerbal Space Program\KSP_Data\Managed\UnityEngine.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
@@ -56,16 +54,18 @@
     <Compile Include="SCANdata.cs" />
     <Compile Include="CLZF2.cs" />
     <Compile Include="SCANsat.cs" />
+    <Compile Include="SCANsatRPM.cs" />
     <Compile Include="SCANui.cs" />
     <Compile Include="SCANmap.cs" />
     <Compile Include="RemoteView.cs" />
     <Compile Include="SCANquickload.cs" />
     <Compile Include="SCANtoolbar.cs" />
     <Compile Include="SCANtoolbarwrapper.cs" />
+    <Compile Include="SCANutil.cs" />
+    <Compile Include="SCANversions.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
-    <None Include="TODO.txt" />
     <None Include="LICENSE.txt" />
     <None Include="CHANGELOG.txt" />
     <None Include="README.md" />

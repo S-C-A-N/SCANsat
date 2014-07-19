@@ -5,8 +5,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SCANsat", "SCANsat.csproj",
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SCANdebug", "SCANdebug\SCANdebug.csproj", "{81775A58-7251-4E16-9923-AC60DC3DAED6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SCANsatRPM", "SCANsatRPM\SCANsatRPM.csproj", "{DCA12670-1880-4F59-829F-CA378AAF4E24}"
-EndProject
 Project("{9344bdbb-3e7f-41fc-a0dd-8665d75ee146}") = "SCANassets", "SCANassets\SCANassets.mdproj", "{0B3343ED-6E2B-489D-9F53-4CF850ABF30D}"
 EndProject
 Global

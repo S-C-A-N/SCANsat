@@ -123,6 +123,7 @@ namespace SCANsat
             if (scanning) startScan();
 		  powerIsProblem = false;
         }
+
         	public override void OnLoad(ConfigNode node)
         {
             if (node.HasNode("ScienceData"))
@@ -133,6 +134,18 @@ namespace SCANsat
                     storedData.Add(data);
                 }
             }
+			if (node.HasNode("SCANsatRPM")) {
+				ConfigNode RPMPersistence = node.GetNode("SCANsatRPM");
+				foreach (ConfigNode RPMNode in RPMPersistence.GetNodes("Prop"))
+				{
+					string id = RPMNode.GetValue("Prop ID");
+					int Mode = Convert.ToInt32(RPMNode.GetValue("Mode"));
+					int Color = Convert.ToInt32(RPMNode.GetValue("Color"));
+					int Zoom = Convert.ToInt32(RPMNode.GetValue("Zoom"));
+					bool Lines = Convert.ToBoolean(RPMNode.GetValue("Lines"));
+					RPMList.Add(new RPMPersistence(id, Mode, Color, Zoom, Lines));
+				}
+			}
         }
         	public override void OnSave(ConfigNode node)
         {
@@ -142,6 +155,21 @@ namespace SCANsat
                 ConfigNode storedDataNode = node.AddNode("ScienceData");
                 SCANData.Save(storedDataNode);
             }
+			if (RPMList.Count > 0)
+			{
+				ConfigNode RPMPersistence = new ConfigNode("SCANsatRPM");
+				foreach (RPMPersistence RPMMFD in RPMList)
+				{
+					ConfigNode RPMProp = new ConfigNode("Prop");
+					RPMProp.AddValue("Prop ID", RPMMFD.RPMID);
+					RPMProp.AddValue("Mode", RPMMFD.RPMMode);
+					RPMProp.AddValue("Color", RPMMFD.RPMColor);
+					RPMProp.AddValue("Zoom", RPMMFD.RPMZoom);
+					RPMProp.AddValue("Lines", RPMMFD.RPMLines);
+					RPMPersistence.AddNode(RPMProp);
+				}
+				node.AddNode(RPMPersistence);
+			}
         }
 		public override string GetInfo () {
 			string str = base.GetInfo ();
@@ -174,6 +202,7 @@ namespace SCANsat
 		public string scanName;
 		[KSPField]
 		public string animationName;
+		internal List<RPMPersistence> RPMList = new List<RPMPersistence>();
 
 		/* SCAN: all of these fields and only scanning is persistant */
 		[KSPField(isPersistant = true)]
@@ -274,7 +303,7 @@ namespace SCANsat
 
 		/* SCAN: add static (a warning that we're low on electric charge) */
 		public void addStatic () {
-			SCANdata data = SCANcontroller.controller.getData (vessel.mainBody.bodyName);
+			SCANdata data = SCANUtil.getData (vessel.mainBody);
 			Texture2D map = data.map_small;
 			if (map != null) {
 				for (int i=0; i<1000; ++i) {
