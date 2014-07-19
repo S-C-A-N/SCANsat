@@ -35,10 +35,6 @@ namespace SCANsat
 			body = b;
 		}
 
-		internal SCANdata()
-		{
-		}
-
 		/* MAP: known types of data */
 		public enum SCANtype
 		{

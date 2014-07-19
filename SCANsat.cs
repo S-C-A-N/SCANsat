@@ -303,7 +303,7 @@ namespace SCANsat
 
 		/* SCAN: add static (a warning that we're low on electric charge) */
 		public void addStatic () {
-			SCANdata data = SCANcontroller.controller.getData (vessel.mainBody.bodyName);
+			SCANdata data = SCANUtil.getData (vessel.mainBody);
 			Texture2D map = data.map_small;
 			if (map != null) {
 				for (int i=0; i<1000; ++i) {

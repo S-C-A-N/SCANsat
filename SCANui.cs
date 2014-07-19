@@ -392,7 +392,7 @@ namespace SCANsat
 			GUI.skin = null;
 			/* FIXME: unused */ //bool repainting = Event.current.type == EventType.Repaint;
 			Vessel vessel = FlightGlobals.ActiveVessel;
-			SCANdata data = SCANcontroller.controller.getData (vessel.mainBody);
+			SCANdata data = SCANUtil.getData (vessel.mainBody);
 			Rect r;
 
 			if (minimode > 0)
@@ -527,7 +527,7 @@ namespace SCANsat
 			style_readout.fontSize = 40;
 			style_readout.normal.textColor = c_good;
 			SCANdata.SCANtype sensors = SCANcontroller.controller.activeSensorsOnVessel (FlightGlobals.ActiveVessel.id);
-			SCANdata data = SCANcontroller.controller.getData (FlightGlobals.currentMainBody);
+			SCANdata data = SCANUtil.getData (FlightGlobals.currentMainBody);
 
 			if (maptraq_frame >= Time.frameCount - 5) {
 				if (data.isCovered (FlightGlobals.ActiveVessel.longitude , FlightGlobals.ActiveVessel.latitude , SCANdata.SCANtype.AltimetryHiRes)) {
@@ -682,7 +682,7 @@ namespace SCANsat
 			foreach (CelestialBody body in FlightGlobals.Bodies) {
 				if (count == 0)
 					GUILayout.BeginVertical ();
-				SCANdata data = SCANcontroller.controller.getData (body);
+				SCANdata data = SCANUtil.getData (body);
 				data.disabled = !GUILayout.Toggle (!data.disabled , body.bodyName + " (" + data.getCoveragePercentage (SCANdata.SCANtype.Nothing).ToString ("N1") + "%)");
 				if (count >= 4) {
 					GUILayout.EndVertical ();
@@ -716,11 +716,11 @@ namespace SCANsat
 			GUILayout.Label ("Data Management" , style_headline);
 			GUILayout.BeginHorizontal ();
 			if (GUILayout.Button ("Reset map of " + FlightGlobals.currentMainBody.theName)) {
-				SCANdata data = SCANcontroller.controller.getData (FlightGlobals.currentMainBody);
+				SCANdata data = SCANUtil.getData (FlightGlobals.currentMainBody);
 				data.reset ();
 			}
 			if (GUILayout.Button ("Reset <b>all</b> data")) {
-				foreach (SCANdata data in SCANUtil.body_data.Values) {
+				foreach (SCANdata data in SCANcontroller.body_data.Values) {
 					data.reset ();
 				}
 			}
@@ -1120,7 +1120,7 @@ namespace SCANsat
 			Vessel vessel = FlightGlobals.ActiveVessel;
 			GUILayout.BeginVertical ();
 
-			SCANdata data = SCANcontroller.controller.getData (vessel.mainBody);
+			SCANdata data = SCANUtil.getData (vessel.mainBody);
 			Texture2D map = bigmap.getPartialMap ();
 
 			float dw = bigmap_drag_w;
@@ -1499,7 +1499,7 @@ namespace SCANsat
 			GUI.skin.button.wordWrap = false;
 
 			SCANdata.SCANtype sensors = SCANcontroller.controller.activeSensorsOnVessel (vessel.id);
-			SCANdata data = SCANcontroller.controller.getData (vessel.mainBody);
+			SCANdata data = SCANUtil.getData (vessel.mainBody);
 			data.updateImages (sensors);
 
 			if (!repainting) { // Unity gets confused if the layout changes between layout and repaint events
