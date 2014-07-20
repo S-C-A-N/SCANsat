@@ -90,18 +90,6 @@ namespace SCANsat
 		private Material iconMaterial;
 		private SCANsat sat;
 		internal RPMPersistence persist;
-
-			 // TODO: Reimplement persistence storage.
-			 // Mihara: That's the one caveat here.
-			 // Internal modules cannot store persistence variables natively.
-			 // The hack I made to do it implies that the PartModule RasterPropMonitorComputer does this for all the internal modules that live in the IVA in it's pod.
-			 // When importing SCANsatRPM like this, you can't use it.
-			 // So a completely different mechanic for storing these things will be needed.
-			 // I actually might make an RPM API to let modules use RPM's persistence store anyway...
-			 // In the meantime I've commented out the offending lines.
-
-			 // private PersistenceAccessor persistence;
-
 		private string persistentVarName;
 		private double pixelsPerKm;
 		private Texture2D scaleBarTexture, scaleLabelTexture;
@@ -633,7 +621,14 @@ namespace SCANsat
 
 			// Referencing the parent project should work, shouldn't it.
 			persistentVarName = "scansat" + internalProp.propID;
-			sat = part.FindModulesImplementing<SCANsat>().First();
+
+			try {
+				sat = part.FindModulesImplementing<SCANsat>().First();
+			}
+			catch {
+				Debug.LogWarning("[SCANsatRPM] SCANsat module not attached to this IVA, check for Module Manager problems and make sure the RPMMapTraq.cfg file is in the SCANsat/MMconfigs folder");
+				sat = null;
+			}
 
 			if (sat != null) {
 				if (sat.RPMList.Count > 0) {
@@ -647,10 +642,9 @@ namespace SCANsat
 				if (persist == null) {
 					persist = new RPMPersistence(persistentVarName);
 					sat.RPMList.Add(persist);
+					showLines = persist.RPMLines;
 				}
 			}
-
-			showLines = persist.RPMLines;
 
 			trailMaterial = JUtil.DrawLineMaterial();
 
