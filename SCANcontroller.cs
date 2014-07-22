@@ -26,10 +26,16 @@ namespace SCANsat
 				if(g == null) return null;
 				foreach(ProtoScenarioModule mod in g.scenarios) {
 					if(mod.moduleName == typeof(SCANcontroller).Name) {
+						var tScene = mod.targetScenes.FirstOrDefault(t => t == GameScenes.SPACECENTER);
+						if (tScene != GameScenes.SPACECENTER) {
+							SCANUtil.debugLog("Adding new target scenes to scenario module");
+							mod.targetScenes.Add(GameScenes.SPACECENTER);
+							mod.targetScenes.Add(GameScenes.TRACKSTATION);
+						}
 						return (SCANcontroller)mod.moduleRef;
 					}
 				}
-				return (SCANcontroller)g.AddProtoScenarioModule(typeof(SCANcontroller), GameScenes.FLIGHT).moduleRef;
+				return (SCANcontroller)g.AddProtoScenarioModule(typeof(SCANcontroller), GameScenes.FLIGHT, GameScenes.SPACECENTER, GameScenes.TRACKSTATION).moduleRef;
 			}
 			private set { }
 		}
@@ -175,6 +181,18 @@ namespace SCANsat
 				node_progress.AddNode(node_body);
 			}
 			node.AddNode(node_progress);
+		}
+
+		//Is this really all it takes to allow background scanning to function independent of parts???
+		public void Update()
+		{
+			if (scan_background) {
+				scanFromAllVessels();
+				if (HighLogic.LoadedScene == GameScenes.FLIGHT) {
+					SCANui.gui_ping(false);
+					SCANui.gui_ping_maptraq();
+				}
+			}
 		}
 
 		public class SCANsensor
