@@ -68,7 +68,7 @@ namespace SCANsat
             Minerals = 1<<15,       // Minerals - ORS & K-type - MKS
             Substrate = 1<<16,      // Substrate - ORS & K-type - MKS
             KEEZO = 1<<17,          // KEEZO - ORS - Kass Effect
-            ORS_9 = 1<<18,          // Reserved - ORS
+			Karbonite = 1 << 18,    // Karbonite - ORS
             ORS_10 = 1<<19,         // Reserved - ORS
 
 			Everything_SCAN = (1<<6)-1,	// All default SCANsat scanners
@@ -227,7 +227,7 @@ namespace SCANsat
                 uncov += coverage_count [16];
             if ((type & SCANtype.KEEZO) != SCANtype.Nothing)
                 uncov += coverage_count [17];
-            if ((type & SCANtype.ORS_9) != SCANtype.Nothing)
+            if ((type & SCANtype.Karbonite) != SCANtype.Nothing)
                 uncov += coverage_count [18];
             if ((type & SCANtype.ORS_10) != SCANtype.Nothing)
                 uncov += coverage_count [19];

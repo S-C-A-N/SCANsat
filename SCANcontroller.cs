@@ -342,6 +342,7 @@ namespace SCANsat
 					case "Minerals": return SCANdata.SCANtype.Minerals;
 					case "Substrate": return SCANdata.SCANtype.Substrate;
 					case "KEEZO": return SCANdata.SCANtype.KEEZO;
+					case "Karbonite": return SCANdata.SCANtype.Karbonite;
 					default: return SCANdata.SCANtype.Nothing;
 				}
 			}
