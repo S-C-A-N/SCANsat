@@ -120,14 +120,14 @@ namespace SCANsat
 				}
                 alt_indicator = scanAlt();
 			}
-			SCANcontroller.controller.scanFromAllVessels ();
+			//SCANcontroller.controller.scanFromAllVessels ();
 			if (vessel == FlightGlobals.ActiveVessel) {
-				SCANui.gui_ping (powerIsProblem);
+				SCANui.gui_ping(powerIsProblem);
 				if (powerIsProblem) {
 					addStatic ();
 					registerScanner ();
-				} else if (sensorType == 0 && scanning) {
-					SCANui.gui_ping_maptraq ();
+				//} else if (sensorType == 0 && scanning) {
+				//    SCANui.gui_ping_maptraq ();
 				}
 			}
 		}
