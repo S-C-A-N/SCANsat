@@ -56,14 +56,15 @@ namespace SCANsat
 
 		private void LateUpdate ()
         {
-			if (ToolbarManager.ToolbarAvailable) buttonVisible (FlightGlobals.ActiveVessel.FindPartModulesImplementing<SCANsat> ().Count > 0);
+			if (ToolbarManager.ToolbarAvailable)
+				buttonVisible (FlightGlobals.ActiveVessel.FindPartModulesImplementing<SCANsat> ().Count > 0);
         }
 
 		private void buttonVisible ( bool active )
         {
 			if (!ToolbarManager.ToolbarAvailable) return; // bail if we don't have a toolbar
-			if (SCANButton.Visible != active) 	SCANButton.Visible = active;
-			if (MapButton.Visible != active) 	MapButton.Visible = active;
+			//if (SCANButton.Visible != active) 	SCANButton.Visible = active;
+			//if (MapButton.Visible != active) 	MapButton.Visible = active;
 			if (SmallButton.Visible != active)	SmallButton.Visible = active;
         }
 
@@ -81,21 +82,28 @@ namespace SCANsat
 			if (!ToolbarManager.ToolbarAvailable) return; // bail if we don't have a toolbar
 
 			PopupMenuDrawable list = new PopupMenuDrawable ();
-			IButton smallMap = list.AddOption ("Small Map");
+
+			if (FlightGlobals.ActiveVessel.FindPartModulesImplementing<SCANsat>().Count > 0)
+			{
+				IButton smallMap = list.AddOption("Small Map");
+				IButton instrument = list.AddOption("Instruments");
+
+				smallMap.OnClick += (e2) => SCANui.minimode = (SCANui.minimode == 0 ? 2 : -SCANui.minimode);
+				instrument.OnClick += (e2) => SCANui.instruments_visible = !SCANui.instruments_visible;
+			}
+
 			IButton bigMap = list.AddOption ("Big Map");
-			IButton instrument = list.AddOption ("Instruments");
 			IButton settings = list.AddOption ("Settings");
-			smallMap.OnClick += (e2) => SCANui.minimode = (SCANui.minimode == 0 ? 2 : -SCANui.minimode);
+
 			bigMap.OnClick += (e2) => SCANui.bigmap_visible = !SCANui.bigmap_visible;
-			instrument.OnClick += (e2) => SCANui.instruments_visible = !SCANui.instruments_visible;
 			settings.OnClick += (e2) => {
-                if (!SCANui.settings_visible)
-                    SCANcontroller.controller.Resources(FlightGlobals.currentMainBody);
-                SCANui.settings_visible = !SCANui.settings_visible;
-            };
+				if (!SCANui.settings_visible)
+					SCANcontroller.controller.Resources(FlightGlobals.currentMainBody);
+				SCANui.settings_visible = !SCANui.settings_visible;
+			};
 			list.OnAnyOptionClicked += (  ) => destroyMenu (menu);
 			menu.Drawable = list;
-        }
+		}
 
 		private void destroyMenu ( IButton menu )
         {
@@ -109,7 +117,8 @@ namespace SCANsat
 			if (!ToolbarManager.ToolbarAvailable) return; // bail if we don't have a toolbar
 			SCANButton.Destroy ();
 			MapButton.Destroy ();
-			SmallButton.Destroy ();
+			if (SmallButton != null)
+				SmallButton.Destroy ();
         }
 
     }       
