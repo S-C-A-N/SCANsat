@@ -12,10 +12,10 @@ rescaleFactor = 1
 attachRules = 0,1,0,0,0
 node_attach = 0.0, 0.05, 0.0, 0.0, -1.0, 0.0, 0
 
-TechRequired = scienceTech
+TechRequired = Unresearcheable
 entryCost = 0
 cost = 2500
-category = Science
+category = none
 subcategory = 0
 title = SCAN MapTraq®
 manufacturer = [SCAN]: Scientific Committee on Advanced Navigation

@@ -76,12 +76,12 @@ namespace SCANsat
             if (sensorType == 0) {
 			// here, we override all event and action labels
 			// and we also disable the analyze button (it does nothing)
-                Events["startScan"].guiName = "Open Map";
-                Events["stopScan"].guiName = "Close Map";
+				Events["startScan"].active = false;
+				Events["stopScan"].active = false;
 			    Events["analyze"].active = false;
-                Actions["startScanAction"].guiName = "Open Map";
-                Actions["stopScanAction"].guiName = "Close Map";
-                Actions["toggleScanAction"].guiName = "Toggle Map";
+				Actions["startScanAction"].active = false;
+				Actions["stopScanAction"].active = false;
+				Actions["toggleScanAction"].active = false;
 			    Actions["analyzeData"].active = false;
             }
 		    else if (sensorType == 32) {
