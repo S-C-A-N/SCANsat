@@ -168,19 +168,26 @@ namespace SCANsat
 			bool found = false;
 			string id = null;
 			double coverage = 0f;
+			float multiplier = 1f;
 
 			if(!found && (sensor & SCANdata.SCANtype.AltimetryLoRes) != SCANdata.SCANtype.Nothing) {
 				found = true;
+				if (v.mainBody.pqsController == null)
+					multiplier = 0.5f;
 				id = "SCANsatAltimetryLoRes";
 				coverage = data.getCoveragePercentage(SCANdata.SCANtype.AltimetryLoRes);
 			}
 			else if(!found && (sensor & SCANdata.SCANtype.AltimetryHiRes) != SCANdata.SCANtype.Nothing) {
 				found = true;
+				if (v.mainBody.pqsController == null)
+					multiplier = 0.5f;
 				id = "SCANsatAltimetryHiRes";
 				coverage = data.getCoveragePercentage(SCANdata.SCANtype.AltimetryHiRes);
 			}
 			else if(!found && (sensor & SCANdata.SCANtype.Biome) != SCANdata.SCANtype.Nothing) {
 				found = true;
+				if (v.mainBody.BiomeMap.Map == null)
+					multiplier = 0.5f;
 				id = "SCANsatBiomeAnomaly";
 				coverage = data.getCoveragePercentage(SCANdata.SCANtype.Biome);
 			}
@@ -205,6 +212,7 @@ namespace SCANsat
 
 			science /= Mathf.Max(0.1f, su.scientificValue);
 			science /= su.subjectValue;
+			science *= multiplier;
 
 			debugLog("Resulting science value: {0}", new object[1] {science.ToString("F2")});
 
