@@ -79,6 +79,7 @@ namespace SCANsat
 				Events["startScan"].active = false;
 				Events["stopScan"].active = false;
 			    Events["analyze"].active = false;
+				Events["editorExtend"].active = false;
 				Actions["startScanAction"].active = false;
 				Actions["stopScanAction"].active = false;
 				Actions["toggleScanAction"].active = false;
@@ -95,39 +96,43 @@ namespace SCANsat
         }
 
 		public override void OnUpdate () {
-			Events ["reviewEvent"].active = storedData.Count > 0;
-			Events ["EVACollect"].active = storedData.Count > 0;
-			Events ["startScan"].active = !scanning;
-			Events ["stopScan"].active = scanning;
+			if (sensorType != 0) {
+				Events["reviewEvent"].active = storedData.Count > 0;
+				Events["EVACollect"].active = storedData.Count > 0;
+				Events["startScan"].active = !scanning;
+				Events["stopScan"].active = scanning;
 				if (scanning) {
-				if (sensorType == 0 || SCANcontroller.controller.isVesselKnown (vessel.id , (SCANdata.SCANtype)sensorType)) {
-					if (TimeWarp.CurrentRate < 1500) {
-						float p = power * TimeWarp.deltaTime;
-						float e = part.RequestResource ("ElectricCharge" , p);
-						if (e < p) {
-							unregisterScanner ();
-							powerIsProblem = true;
-						} else {
-							registerScanner ();
+					if (sensorType == 0 || SCANcontroller.controller.isVesselKnown(vessel.id, (SCANdata.SCANtype)sensorType)) {
+						if (TimeWarp.CurrentRate < 1500) {
+							float p = power * TimeWarp.deltaTime;
+							float e = part.RequestResource("ElectricCharge", p);
+							if (e < p) {
+								unregisterScanner();
+								powerIsProblem = true;
+							}
+							else {
+								registerScanner();
+								powerIsProblem = false;
+							}
+						}
+						else if (powerIsProblem) {
+							registerScanner();
 							powerIsProblem = false;
 						}
-					} else if (powerIsProblem) {
-						registerScanner ();
-						powerIsProblem = false;
 					}
-				} else {
-					unregisterScanner ();
+					else
+						unregisterScanner();
+					alt_indicator = scanAlt();
 				}
-                alt_indicator = scanAlt();
-			}
-			//SCANcontroller.controller.scanFromAllVessels ();
-			if (vessel == FlightGlobals.ActiveVessel) {
-				SCANui.gui_ping(powerIsProblem);
-				if (powerIsProblem) {
-					addStatic ();
-					registerScanner ();
-				//} else if (sensorType == 0 && scanning) {
-				//    SCANui.gui_ping_maptraq ();
+				//SCANcontroller.controller.scanFromAllVessels ();
+				if (vessel == FlightGlobals.ActiveVessel) {
+					SCANui.gui_ping(powerIsProblem);
+					if (powerIsProblem) {
+						addStatic();
+						registerScanner();
+						//} else if (sensorType == 0 && scanning) {
+						//    SCANui.gui_ping_maptraq ();
+					}
 				}
 			}
 		}
