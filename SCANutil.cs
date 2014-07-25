@@ -227,7 +227,8 @@ namespace SCANsat
 		{
 			double amount = 0f;
 			ORSPlanetaryResourcePixel overlayPixel = ORSPlanetaryResourceMapData.getResourceAvailability(i, s, lat, lon);
-			amount = overlayPixel.getAmount();
+			if (overlayPixel != null)
+				amount = overlayPixel.getAmount();
 			return amount;
 		}
 
