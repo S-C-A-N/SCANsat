@@ -105,17 +105,16 @@ namespace SCANsat
 		private readonly Color scaleTint = new Color(0.5f, 0.5f, 0.5f, 0.5f);
 		// Neutral tint.
 		private bool satFound;
+		private bool satModuleFound = true;
 
 		private bool TestForActiveSCANsat()
 		{
-			if (sat != null) {
-				if (satFound)
+			if (satFound)
+				return true;
+			foreach (ScenarioModule thatScenario in ScenarioRunner.GetLoadedModules()) {
+				if (thatScenario.ClassName == "SCANcontroller") {
+					satFound = true;
 					return true;
-				foreach (ScenarioModule thatScenario in ScenarioRunner.GetLoadedModules()) {
-					if (thatScenario.ClassName == "SCANcontroller") {
-						satFound = true;
-						return true;
-					}
 				}
 			}
 			return false;
@@ -132,12 +131,18 @@ namespace SCANsat
 
 			if (screenWidth == 0 || screenHeight == 0) {
 
-				int? loadedMode = persist.RPMMode;
-				mapMode = loadedMode ?? 0;
-				int? loadedZoom = persist.RPMZoom;
-				zoomLevel = loadedZoom ?? 0;
-				int? loadedColors = persist.RPMColor;
-				SCANcontroller.controller.colours = loadedColors ?? 0;
+				if (satModuleFound) {
+					int? loadedMode = persist.RPMMode;
+					mapMode = loadedMode ?? 0;
+					int? loadedZoom = persist.RPMZoom;
+					zoomLevel = loadedZoom ?? 0;
+					int? loadedColors = persist.RPMColor;
+					SCANcontroller.controller.colours = loadedColors ?? 0;
+				}
+				else {
+					mapMode = 0;
+					zoomLevel = 0;
+				}
 				screenWidth = screen.width;
 				screenHeight = screen.height;
 				iconMaterial = new Material(Shader.Find("KSP/Alpha/Unlit Transparent"));
@@ -467,12 +472,14 @@ namespace SCANsat
 			if (buttonID == buttonEsc) {
 				// Whatever possessed him to do THAT?
 				SCANcontroller.controller.colours = SCANcontroller.controller.colours == 0 ? 1 : 0;
-				persist.RPMColor = SCANcontroller.controller.colours;
+				if (satModuleFound)
+					persist.RPMColor = SCANcontroller.controller.colours;
 				RedrawMap();
 			}
 			if (buttonID == buttonHome) {
 				showLines = !showLines;
-				persist.RPMLines = showLines;
+				if (satModuleFound)
+					persist.RPMLines = showLines;
 			}
 		}
 
@@ -484,7 +491,8 @@ namespace SCANsat
 				mapMode = 0;
 			if (mapMode < 0)
 				mapMode = 2;
-			persist.RPMMode = mapMode;
+			if (satModuleFound)
+				persist.RPMMode = mapMode;
 			RedrawMap();
 		}
 
@@ -497,7 +505,8 @@ namespace SCANsat
 			if (zoomLevel > maxZoom)
 				zoomLevel = maxZoom;
 			if (zoomLevel != oldZoom) {
-				persist.RPMZoom = zoomLevel;
+				if (satModuleFound)
+					persist.RPMZoom = zoomLevel;
 				RedrawMap();
 			}
 		}
@@ -596,6 +605,36 @@ namespace SCANsat
 
 		private void Start()
 		{
+			// Referencing the parent project should work, shouldn't it.
+			persistentVarName = "scansat" + internalProp.propID;
+
+			try {
+				sat = part.FindModulesImplementing<SCANsat>().First();
+			}
+			catch {
+				Debug.LogWarning("[SCANsatRPM] SCANsat module not attached to this IVA, check for Module Manager problems and make sure the RPMMapTraq.cfg file is in the SCANsat/MMconfigs folder");
+				sat = null;
+			}
+
+			if (sat != null) {
+				satModuleFound = true;
+				if (sat.RPMList.Count > 0) {
+					foreach (RPMPersistence RPMProp in sat.RPMList) {
+						if (RPMProp.RPMID == persistentVarName) {
+							persist = RPMProp;
+							break;
+						}
+					}
+				}
+				if (persist == null) {
+					persist = new RPMPersistence(persistentVarName);
+					sat.RPMList.Add(persist);
+				}
+				showLines = persist.RPMLines;
+			}
+			else
+				satModuleFound = false;
+
 			// Arrrgh.
 			if (!string.IsNullOrEmpty(iconColorSelf))
 				iconColorSelfValue = ConfigNode.ParseColor32(iconColorSelf);
@@ -619,32 +658,6 @@ namespace SCANsat
 				trailColorValue = ConfigNode.ParseColor32(trailColor);
 
 
-			// Referencing the parent project should work, shouldn't it.
-			persistentVarName = "scansat" + internalProp.propID;
-
-			try {
-				sat = part.FindModulesImplementing<SCANsat>().First();
-			}
-			catch {
-				Debug.LogWarning("[SCANsatRPM] SCANsat module not attached to this IVA, check for Module Manager problems and make sure the RPMMapTraq.cfg file is in the SCANsat/MMconfigs folder");
-				sat = null;
-			}
-
-			if (sat != null) {
-				if (sat.RPMList.Count > 0) {
-					foreach (RPMPersistence RPMProp in sat.RPMList) {
-						if (RPMProp.RPMID == persistentVarName) {
-							persist = RPMProp;
-							break;
-						}
-					}
-				}
-				if (persist == null) {
-					persist = new RPMPersistence(persistentVarName);
-					sat.RPMList.Add(persist);
-					showLines = persist.RPMLines;
-				}
-			}
 
 			trailMaterial = JUtil.DrawLineMaterial();
 
