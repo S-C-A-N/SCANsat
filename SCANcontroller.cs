@@ -148,7 +148,8 @@ namespace SCANsat
 				ScreenMessages.PostScreenMessage(string.Format("SCANsat plugin installed in the wrong directory: {0}. Installation location should be:/nKerbal Space Program/GameData/SCANsat/Plugins/SCANsat.dll", SCANversions.SCANurl), 15f, ScreenMessageStyle.UPPER_CENTER);
 				warned = true;
 			}
-			Resources(FlightGlobals.currentMainBody);
+			if (HighLogic.LoadedScene == GameScenes.FLIGHT || HighLogic.LoadedScene == GameScenes.SPACECENTER)
+				Resources(FlightGlobals.currentMainBody);
 		}
 
 		public override void OnSave(ConfigNode node) {
