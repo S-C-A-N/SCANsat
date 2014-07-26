@@ -14,7 +14,6 @@ using System;
 using SCANsat;
 using Kethane;
 using UnityEngine;
-
 namespace SCANsatKethane
 {
 

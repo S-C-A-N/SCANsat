@@ -3,7 +3,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>10.0.0</ProductVersion>
+    <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{3AE13948-477D-4375-8AB4-B45664966D9E}</ProjectGuid>
     <OutputType>Library</OutputType>
@@ -14,17 +14,16 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugType>none</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>..\Plugins\</OutputPath>
-    <DefineConstants>
-    </DefineConstants>
+    <OutputPath>..\..\GameData\SCANsat</OutputPath>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <ConsolePause>false</ConsolePause>
     <additionalargs>-debug:full</additionalargs>
+    <DefineConstants>DEBUG;</DefineConstants>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <Optimize>true</Optimize>
-    <OutputPath>..\Plugins\</OutputPath>
+    <OutputPath>..\..\GameData\SCANsat</OutputPath>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <ConsolePause>false</ConsolePause>
@@ -34,24 +33,27 @@
         <Command type="AfterBuild" command="cp &quot;${ProjectDir}/CHANGELOG.txt&quot; ." workingdir="${TargetDir}" />
         <Command type="AfterBuild" command="cp &quot;${ProjectDir}/README.md&quot; ." workingdir="${TargetDir}" />
         <Command type="AfterBuild" command="cp &quot;${ProjectDir}/LICENSE.txt&quot; ." workingdir="${TargetDir}" />
-        <Command type="AfterBuild" command="cp &quot;${ProjectDir}/TODO.txt&quot; ." workingdir="${TargetDir}" />
-        <Command type="AfterBuild" command="for s in &quot;Resources&quot; &quot;MapTraq&quot; &quot;Scanner 1&quot; &quot;Scanner 2&quot; &quot;Scanner 8&quot; &quot;Scanner 32&quot;; do cp -ur &quot;${ProjectDir}/SCANassets/$s&quot; .; done" workingdir="${TargetDir}" externalConsole="true" />
-        <Command type="AfterBuild" command="for s in &quot;MapTraq&quot; &quot;Scanner 1&quot; &quot;Scanner 2&quot; &quot;Scanner 8&quot; &quot;Scanner 32&quot;; do mv &quot;./$s/part.cfg.ignore&quot; &quot;./$s/part.cfg&quot;; done" workingdir="${TargetDir}" externalConsole="true" />
+        <Command type="AfterBuild" command="bash -c 'for s in &quot;Plugins&quot; &quot;Flags&quot; &quot;Icons&quot; &quot;MM_Parts&quot; &quot;Parts&quot; &quot;Resources&quot;; do cp -ur &quot;${ProjectDir}/SCANassets/$s&quot; .; done'" workingdir="${TargetDir}" externalConsole="True" />
+        <Command type="Clean" command="rm LICENSE.txt CHANGELOG.txt README.md" workingdir="${TargetDir}" />
+        <Command type="Clean" command="bash -c 'for s in &quot;Plugins&quot; &quot;Flags&quot; &quot;Icons&quot; &quot;MM_Parts&quot; &quot;Parts&quot; &quot;Resources&quot;; do rm -r $s ; done'" workingdir="${TargetDir}" externalConsole="True" />
       </CustomCommands>
     </CustomCommands>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="OpenResourceSystem_1_1_0">
-      <HintPath>..\Plugins\OpenResourceSystem_1_1_0.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="System" />
     <Reference Include="Assembly-CSharp">
-      <HintPath>..\..\..\KSP_Data\Managed\Assembly-CSharp.dll</HintPath>
+      <HintPath>..\..\KSP_Data\Managed\Assembly-CSharp.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine">
-      <HintPath>..\..\..\KSP_Data\Managed\UnityEngine.dll</HintPath>
+      <HintPath>..\..\KSP_Data\Managed\UnityEngine.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="System">
+      <HintPath>..\..\KSP_Data\Managed\System.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="OpenResourceSystem_1_1_0">
+      <HintPath>..\..\GameData\OpenResourceSystem\Plugins\OpenResourceSystem_1_1_0.dll</HintPath>
       <Private>False</Private>
     </Reference>
   </ItemGroup>
@@ -77,7 +79,7 @@
     <MonoDevelop>
       <Properties>
         <Policies>
-          <TextStylePolicy FileWidth="100" TabWidth="5" RemoveTrailingWhitespace="True" EolMarker="Unix" inheritsSet="Mono" inheritsScope="text/plain" scope="text/x-csharp" />
+          <TextStylePolicy FileWidth="100" TabWidth="5" EolMarker="Unix" inheritsSet="Mono" inheritsScope="text/plain" scope="text/x-csharp" />
           <CSharpFormattingPolicy IndentSwitchBody="True" IndentBreakStatements="False" NamespaceBraceStyle="DoNotChange" ClassBraceStyle="DoNotChange" InterfaceBraceStyle="DoNotChange" StructBraceStyle="DoNotChange" EnumBraceStyle="DoNotChange" MethodBraceStyle="DoNotChange" AnonymousMethodBraceStyle="DoNotChange" ConstructorBraceStyle="DoNotChange" DestructorBraceStyle="DoNotChange" PropertyBraceStyle="DoNotChange" PropertyGetBraceStyle="DoNotChange" PropertySetBraceStyle="DoNotChange" EventBraceStyle="DoNotChange" EventAddBraceStyle="DoNotChange" EventRemoveBraceStyle="DoNotChange" StatementBraceStyle="DoNotChange" BeforeMethodDeclarationParameterComma="True" WithinMethodDeclarationParentheses="True" BeforeMethodCallParameterComma="True" BeforeConstructorDeclarationParameterComma="True" WithinConstructorDeclarationParentheses="True" WithinIndexerDeclarationBracket="True" BeforeIndexerDeclarationParameterComma="True" BeforeDelegateDeclarationParameterComma="True" AfterDelegateDeclarationParameterComma="True" WithinDelegateDeclarationParentheses="True" BeforeNewParameterComma="True" BlankLinesBetweenTypes="0" inheritsSet="Mono" inheritsScope="text/x-csharp" scope="text/x-csharp" />
         </Policies>
       </Properties>
