@@ -90,8 +90,6 @@ namespace SCANsat
         public bool kethaneReset = false;
         public bool kethaneBusy = false;
 
-        private bool warned = false;
-
 		public override void OnLoad(ConfigNode node) {
 			body_data.Clear();
 			ResourcesList.Clear();
@@ -100,11 +98,6 @@ namespace SCANsat
 				print("SCANsat Controller: Loading " + node_vessels.CountNodes.ToString() + " known vessels");
 				foreach(ConfigNode node_vessel in node_vessels.GetNodes("Vessel")) {
 					Guid id = new Guid(node_vessel.GetValue("guid"));
-                    //string stext = node_vessel.GetValue("sensors");
-                    //if(stext != null && stext != "") {
-                    //    int sensors = Convert.ToInt32(stext);
-                    //    if(sensors != 0) registerSensor(id, (SCANdata.SCANtype)sensors, 0, 0, 0, 0);
-                    //}
 					foreach(ConfigNode node_sensor in node_vessel.GetNodes("Sensor")) {
 						int sensor = Convert.ToInt32(node_sensor.GetValue("type"));
 						double fov = Convert.ToDouble(node_sensor.GetValue("fov"));
@@ -144,10 +137,6 @@ namespace SCANsat
 				}
 			}
 			dataRebuild = false; //Used for the one-time update to the new integer array
-			if (!warned && SCANversions.SCANurl != "SCANsat/Plugins" && !string.IsNullOrEmpty(SCANversions.SCANurl)) { //Complain if SCANsat is installed in the wrong place
-				ScreenMessages.PostScreenMessage(string.Format("SCANsat plugin installed in the wrong directory: {0}. Installation location should be:/nKerbal Space Program/GameData/SCANsat/Plugins/SCANsat.dll", SCANversions.SCANurl), 15f, ScreenMessageStyle.UPPER_CENTER);
-				warned = true;
-			}
 			if (HighLogic.LoadedScene == GameScenes.FLIGHT || HighLogic.LoadedScene == GameScenes.SPACECENTER)
 				Resources(FlightGlobals.currentMainBody);
 		}
