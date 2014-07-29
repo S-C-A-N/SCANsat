@@ -20,8 +20,7 @@ namespace SCANsatKethane
     class SCANStarter : MonoBehaviour
     {
         private SCANsatKethane SCANK;
-        private string Version = "0.8.7";
-		private string Version2 = "0.8.8";
+		private string Version = "1.0.5323.33891";
 
         public void Start() {
             print("[SCAN Kethane] Searching For Kethane Assembly...");
@@ -31,7 +30,8 @@ namespace SCANsatKethane
         private void searching () {
             var KAssembly = AssemblyLoader.loadedAssemblies.SingleOrDefault(a => a.assembly.GetName().Name == "Kethane");
             if (KAssembly != null) {
-				if (FileVersionInfo.GetVersionInfo(KAssembly.assembly.Location).ProductVersion == Version || FileVersionInfo.GetVersionInfo(KAssembly.assembly.Location).ProductVersion == Version2)
+				if (KAssembly.assembly.GetName().Version.ToString() == Version)
+				//if (FileVersionInfo.GetVersionInfo(KAssembly.assembly.Location).ProductVersion == Version)
 				{
                 print("[SCAN Kethane] Kethane Assembly Found; Version: " + Version + ", Launching Watcher");
                 launcher();
