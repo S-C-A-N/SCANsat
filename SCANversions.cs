@@ -23,7 +23,6 @@ namespace SCANsat
     {
         private string[] Assemblies = new string[6] {"SCANsatRPM", "SCANsatKethane", "Kethane", "RasterPropMonitor", "MechJebRPM", "MechJeb2"};
         internal static string SCANsatVersion = "";
-        internal static string SCANurl = "";
         private List<AssemblyLog> assemblyList = new List<AssemblyLog>();
 
         private void Start() {
@@ -39,7 +38,6 @@ namespace SCANsat
             }
             if (assemblyList.Count > 0) { 
                 SCANsatVersion = assemblyList[0].infoVersion;
-                SCANurl = assemblyList[0].location;
                 debugWriter();
             }
         }
