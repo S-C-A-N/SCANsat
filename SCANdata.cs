@@ -21,12 +21,6 @@ namespace SCANsat
 {
 	public class SCANdata
 	{
-		/* MAP: anonymous functions (in place of preprocessor macros */
-		// icLON and icLAT: [i]nteger casted, [c]lamped, longitude and latitude
-		//internal Func<double,int> icLON = (lon) => ((int)(lon + 360 + 180)) % 360;
-		//internal Func<double,int> icLAT = (lat) => ((int)(lat + 180 + 90 )) % 180;
-		//Func<int,int,bool> badLonLat = (lon,lat) => (lon < 0 || lat < 0 || lon >= 360 || lat >= 180);
-
 		/* MAP: state */
 		public Int32[,] coverage = new Int32[360 , 180];
 		internal float[,] heightmap = new float[360 , 180];
@@ -40,10 +34,6 @@ namespace SCANsat
 		{
 			body = b;
 		}
-
-		//internal SCANdata()
-		//{
-		//}
 
 		/* MAP: known types of data */
 		public enum SCANtype: int
@@ -75,76 +65,7 @@ namespace SCANsat
             Everything = Int32.MaxValue      // All scanner types
 		}
 
-		//****Commented code moved to SCANUtil****
-		/* DATA: map passes and coverage (passes >= 1)*/
-		//public void registerPass ( double lon , double lat , SCANtype type ) {
-		//    int ilon = SCANUtil.icLON(lon);
-		//    int ilat = SCANUtil.icLAT(lat);
-		//    if (SCANUtil.badLonLat(ilon, ilat)) return;
-		//    coverage [ilon, ilat] |= (Int32)type;
-		//}
-		//public bool isCovered ( double lon , double lat , SCANtype type ) {
-		//    int ilon = SCANUtil.icLON(lon);
-		//    int ilat = SCANUtil.icLAT(lat);
-		//    if (SCANUtil.badLonLat(ilon, ilat)) return false;
-		//    return (coverage [ilon, ilat] & (Int32)type) != 0;
-		//}
-		//public bool isCoveredByAll(double lon, double lat, SCANtype type)
-		//{
-		//    int ilon = SCANUtil.icLON(lon);
-		//    int ilat = SCANUtil.icLAT(lat);
-		//    if (SCANUtil.badLonLat(ilon, ilat)) return false;
-		//    return (coverage[ilon, ilat] & (Int32)type) == (Int32)type;
-		//}
-
-		/* DATA: elevation (called often, probably) */
-		//public double getElevation ( double lon , double lat ) {
-		//    if (body.pqsController == null) return 0;	// FIXME: something == null does not imply sealevel.
-		//    /* FIXME: unused */ //int ilon = ((int)(lon + 360 + 180)) % 360;
-		//    /* FIXME: unused */ //int ilat = ((int)(lat + 180 + 90)) % 180;
-		//    double rlon = Mathf.Deg2Rad * lon;
-		//    double rlat = Mathf.Deg2Rad * lat;
-		//    Vector3d rad = new Vector3d (Math.Cos (rlat) * Math.Cos (rlon) , Math.Sin (rlat) , Math.Cos (rlat) * Math.Sin (rlon));
-		//    return Math.Round (body.pqsController.GetSurfaceHeight (rad) - body.pqsController.radius , 1);
-		//}
-
-		/* DATA: Biomes and such */
-		//public int getBiomeIndex ( double lon , double lat ) {
-		//    if (body.BiomeMap == null)		return -1;
-		//    if (body.BiomeMap.Map == null)	return -1;
-
-		//    double u = ((lon + 360 + 180 + 90)) % 360;	// not casted to int, so not the same
-		//    double v = ((lat + 180 + 90)) % 180;		// not casted to int, so not the same
-
-		//    if (u < 0 || v < 0 || u >= 360 || v >= 180)
-		//        return -1;
-		//    CBAttributeMap.MapAttribute att = body.BiomeMap.GetAtt (Mathf.Deg2Rad * lat , Mathf.Deg2Rad * lon);
-		//    for (int i = 0; i < body.BiomeMap.Attributes.Length; ++i) {
-		//        if (body.BiomeMap.Attributes [i] == att) {
-		//            return i;
-		//        }
-		//    }
-		//    return -1;
-		//}
-		//public double getBiomeIndexFraction ( double lon , double lat ) {
-		//    if (body.BiomeMap == null) return 0f;
-		//    return SCANUtil.getBiomeIndex(body, lon, lat) * 1.0f / body.BiomeMap.Attributes.Length;
-		//}
-		//public CBAttributeMap.MapAttribute getBiome ( double lon , double lat ) {
-		//    if (body.BiomeMap == null)		return null;
-		//    if (body.BiomeMap.Map == null)	return body.BiomeMap.defaultAttribute;
-		//    int i = SCANUtil.getBiomeIndex(body, lon, lat);
-		//    if (i < 0)					return body.BiomeMap.defaultAttribute;
-		//    else 						return body.BiomeMap.Attributes [i];
-		//}
-		//public string getBiomeName ( double lon , double lat ) {
-		//    CBAttributeMap.MapAttribute a = getBiome (lon , lat);
-		//    if (a == null)
-		//        return "unknown";
-		//    return a.name;
-		//}
-
-        /* DATA: resources */
+		/* DATA: resources */
         public class SCANResource //The new class to store resource information stored in the respective config nodes
         {
             public SCANResource (string n, Color full, Color empty, bool sc, double scalar, double mult, double threshold, float max, SCANtype t)
@@ -167,14 +88,6 @@ namespace SCANsat
             public float maxValue;
             public SCANtype type;
         }
-
-		//public double ORSOverlay(double lon, double lat, int i, string s) //Uses ORS methods to grab the resource amount given a lat and long
-		//{
-		//    double amount = 0f;
-		//    ORSPlanetaryResourcePixel overlayPixel = ORSPlanetaryResourceMapData.getResourceAvailability(i, s, lat, lon);
-		//    amount = overlayPixel.getAmount();            
-		//    return amount;
-		//}
 
 		/* DATA: coverage */
         public int[] coverage_count = new int[32];
@@ -351,8 +264,121 @@ namespace SCANsat
 			return anomalies;
 		}
 
-        /* DATA: Array conversion **** Moved to SCANUtil*/
+        public void fillMap () {
+            for (int i = 0; i < 360; i++) {
+                for (int j = 0; j < 180; j++) { 
+                    coverage[i,j] |= (Int32)SCANtype.Everything;
+                }
+            }
+        }
 
+		/* DATA: reset the map */
+		public void reset () {
+			coverage = new Int32[360 , 180];
+			heightmap = new float[360 , 180];
+			resetImages ();
+		}
+		public void resetImages () {
+			// Just draw a simple grid to initialize the image; the map will appear on top of it
+			for (int y=0; y<map_small.height; y++) {
+				for (int x=0; x<map_small.width; x++) {
+					if ((x % 30 == 0 && y % 3 > 0) || (y % 30 == 0 && x % 3 > 0)) {
+						map_small.SetPixel (x , y , palette.white);
+					} else {
+						map_small.SetPixel (x , y , palette.grey);
+					}
+				}
+			}
+			map_small.Apply ();
+		}
+
+
+		#region Unused code
+
+		/* MAP: anonymous functions (in place of preprocessor macros */
+		// icLON and icLAT: [i]nteger casted, [c]lamped, longitude and latitude
+		//internal Func<double,int> icLON = (lon) => ((int)(lon + 360 + 180)) % 360;
+		//internal Func<double,int> icLAT = (lat) => ((int)(lat + 180 + 90 )) % 180;
+		//Func<int,int,bool> badLonLat = (lon,lat) => (lon < 0 || lat < 0 || lon >= 360 || lat >= 180);
+
+		//****Commented code moved to SCANUtil****
+		/* DATA: map passes and coverage (passes >= 1)*/
+		//public void registerPass ( double lon , double lat , SCANtype type ) {
+		//    int ilon = SCANUtil.icLON(lon);
+		//    int ilat = SCANUtil.icLAT(lat);
+		//    if (SCANUtil.badLonLat(ilon, ilat)) return;
+		//    coverage [ilon, ilat] |= (Int32)type;
+		//}
+		//public bool isCovered ( double lon , double lat , SCANtype type ) {
+		//    int ilon = SCANUtil.icLON(lon);
+		//    int ilat = SCANUtil.icLAT(lat);
+		//    if (SCANUtil.badLonLat(ilon, ilat)) return false;
+		//    return (coverage [ilon, ilat] & (Int32)type) != 0;
+		//}
+		//public bool isCoveredByAll(double lon, double lat, SCANtype type)
+		//{
+		//    int ilon = SCANUtil.icLON(lon);
+		//    int ilat = SCANUtil.icLAT(lat);
+		//    if (SCANUtil.badLonLat(ilon, ilat)) return false;
+		//    return (coverage[ilon, ilat] & (Int32)type) == (Int32)type;
+		//}
+
+		/* DATA: elevation (called often, probably) */
+		//public double getElevation ( double lon , double lat ) {
+		//    if (body.pqsController == null) return 0;	// FIXME: something == null does not imply sealevel.
+		//    /* FIXME: unused */ //int ilon = ((int)(lon + 360 + 180)) % 360;
+		//    /* FIXME: unused */ //int ilat = ((int)(lat + 180 + 90)) % 180;
+		//    double rlon = Mathf.Deg2Rad * lon;
+		//    double rlat = Mathf.Deg2Rad * lat;
+		//    Vector3d rad = new Vector3d (Math.Cos (rlat) * Math.Cos (rlon) , Math.Sin (rlat) , Math.Cos (rlat) * Math.Sin (rlon));
+		//    return Math.Round (body.pqsController.GetSurfaceHeight (rad) - body.pqsController.radius , 1);
+		//}
+
+		/* DATA: Biomes and such */
+		//public int getBiomeIndex ( double lon , double lat ) {
+		//    if (body.BiomeMap == null)		return -1;
+		//    if (body.BiomeMap.Map == null)	return -1;
+
+		//    double u = ((lon + 360 + 180 + 90)) % 360;	// not casted to int, so not the same
+		//    double v = ((lat + 180 + 90)) % 180;		// not casted to int, so not the same
+
+		//    if (u < 0 || v < 0 || u >= 360 || v >= 180)
+		//        return -1;
+		//    CBAttributeMap.MapAttribute att = body.BiomeMap.GetAtt (Mathf.Deg2Rad * lat , Mathf.Deg2Rad * lon);
+		//    for (int i = 0; i < body.BiomeMap.Attributes.Length; ++i) {
+		//        if (body.BiomeMap.Attributes [i] == att) {
+		//            return i;
+		//        }
+		//    }
+		//    return -1;
+		//}
+		//public double getBiomeIndexFraction ( double lon , double lat ) {
+		//    if (body.BiomeMap == null) return 0f;
+		//    return SCANUtil.getBiomeIndex(body, lon, lat) * 1.0f / body.BiomeMap.Attributes.Length;
+		//}
+		//public CBAttributeMap.MapAttribute getBiome ( double lon , double lat ) {
+		//    if (body.BiomeMap == null)		return null;
+		//    if (body.BiomeMap.Map == null)	return body.BiomeMap.defaultAttribute;
+		//    int i = SCANUtil.getBiomeIndex(body, lon, lat);
+		//    if (i < 0)					return body.BiomeMap.defaultAttribute;
+		//    else 						return body.BiomeMap.Attributes [i];
+		//}
+		//public string getBiomeName ( double lon , double lat ) {
+		//    CBAttributeMap.MapAttribute a = getBiome (lon , lat);
+		//    if (a == null)
+		//        return "unknown";
+		//    return a.name;
+		//}
+
+		//public double ORSOverlay(double lon, double lat, int i, string s) //Uses ORS methods to grab the resource amount given a lat and long
+		//{
+		//    double amount = 0f;
+		//    ORSPlanetaryResourcePixel overlayPixel = ORSPlanetaryResourceMapData.getResourceAvailability(i, s, lat, lon);
+		//    amount = overlayPixel.getAmount();            
+		//    return amount;
+		//}
+
+		/* DATA: Array conversion **** Moved to SCANUtil*/
 		////Take the Int32[] coverage and convert it to a single dimension byte array
 		//private byte[] ConvertToByte (Int32[,] iArray) {
 		//    byte[] bArray = new byte[360 * 180 * 4];
@@ -392,7 +418,7 @@ namespace SCANsat
 		//    return iArray;
 		//}
 
-        /* DATA: legacy serialization and compression */
+		/* DATA: legacy serialization and compression */
 		//internal string integerSerialize () {
 		//    byte[] bytes = ConvertToByte(coverage);
 		//    MemoryStream mem = new MemoryStream ();
@@ -426,8 +452,6 @@ namespace SCANsat
 		//    resetImages ();
 		//}
 
-
-
 		///* DATA: serialization and compression */
 		//public string serialize () {
 		//    // convert the byte[,] array into a KSP-savefile-safe variant of Base64
@@ -452,32 +476,6 @@ namespace SCANsat
 		//    }
 		//}
 
-        public void fillMap () {
-            for (int i = 0; i < 360; i++) {
-                for (int j = 0; j < 180; j++) { 
-                    coverage[i,j] |= (Int32)SCANtype.Everything;
-                }
-            }
-        }
-
-		/* DATA: reset the map */
-		public void reset () {
-			coverage = new Int32[360 , 180];
-			heightmap = new float[360 , 180];
-			resetImages ();
-		}
-		public void resetImages () {
-			// Just draw a simple grid to initialize the image; the map will appear on top of it
-			for (int y=0; y<map_small.height; y++) {
-				for (int x=0; x<map_small.width; x++) {
-					if ((x % 30 == 0 && y % 3 > 0) || (y % 30 == 0 && x % 3 > 0)) {
-						map_small.SetPixel (x , y , palette.white);
-					} else {
-						map_small.SetPixel (x , y , palette.grey);
-					}
-				}
-			}
-			map_small.Apply ();
-		}
+		#endregion
 	}
 }
