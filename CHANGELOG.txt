@@ -1,3 +1,92 @@
+Build 8 - 2014-08-02
+---------------------
+
+- Updated for KSP 0.24.2
+
+Resource Scanning:
+- Planetary resource overlay for big map
+	- Supports latest Kethane version - 0.8.8.1
+	- Supports ORS resources
+	- All resources types can be scanned in the background; no need to remain in control of a vessel while scanning
+	- All resource scanning data is persistent; no different from standard SCANsat sensors
+	- Resource types controlled through the SCANsat settings menu
+	- Resources require explicit support from SCANsat
+		- Users cannot add or change which resource types are supported
+	
+- Module Manager configs included for Kethane, Extraplanetary Launchpad and Interstellar resources
+	- Support for Modular Kolonization System and Karbonite are provided in their respective packages
+	
+- ORS resources
+	- Resources displayed on the big map with a place holder color overlay
+	- ORS plugin included with SCANsat package; compatible with any version of ORS included in other mods
+	
+- Kethane resources
+	- Background scanning requires using the SCANsat modules added through the included Module Manager configs
+		- This function is separate from standard Kethane scanning; both are accessed through the right-click context menu
+	- SCANsat will read existing Kethane scanning data if present; no SCANsat scanners are required for this
+	- Kethane grid can be updated through the SCANsat settings menu
+		- Grid must be forced to reset before changes become visible; saving/loading or switching which resource type is displayed works
+	- Kethane resources displayed with their specified color values based on deposit concentration
+
+Parts:
+- MapTraq deprecated
+	- Part still exists but is not available in the VAB/SPH
+	- Part functionality is completely removed
+	- Module Manager configs for adding the MapTraq SCANsat module should be removed (having the module shouldn't hurt though)
+	
+- Scanning altitude indicator is present for all SCANsat scanners, including resource scanners
+	- Displayed in the right-click context menu
+	
+- Improved Multi-Spectral scanner
+	- Improved clickability
+	- More efficient model; 60% reduction in triangle count
+	
+- Rescaled the BTDT to be much smaller
+
+- Part cost balancing
+
+BackEnd Changes:
+- Background scanning will function in every scene where time passes
+	- Flight, Map, Tracking Station and Space Center
+	- Can be turned off from the SCANsat settings menu
+- SCANsat parts not required for background scanning during flight
+- SCANsat parts not required for toolbar icons and functional maps
+	- Maps and menus don't work outside of the flight/map scenes
+	
+- Persistent scanning data storage has been altered
+	- Requires a one-time, automatic conversion from the old to the new method
+	- There have been no complaints as of yet, but users upgrading from SCANsat v6.x may want to make backups of any existing save files
+	
+- ModStatistics removed
+	
+Bug Fixes:
+- Science can be gathered from all planets
+	- Reduced science return for planets without terrain/biomes
+- Active scanners no longer play through their animation on startup; they start fully deployed
+- Toolbar icons fallback to place holder textures if the default SCANsat icons are moved/altered/deleted
+- Prevent small map from opening improperly in non-toolbar version
+
+- Improved support for command pods/cockpits using Raster Prop Monitor
+	- Possibly prevent problems such as issue #63
+
+	
+Version 6.1 - 2014-07-19
+-----------------------------
+
+- Update for KSP v 0.24
+
+- Folder structure significantly changed; you must delete any old SCANsat installations
+
+- SCANsatRPM integrated into standard SCANsat
+     - You must delete any SCANsatRPM folders; do not install SCANsatRPM from any source
+	 
+- ModStatistics Added
+
+- Some minor bug fixes
+- SCANsat flag added
+- Initial part cost balancing
+	
+	
 Version 6.0 - 2014-05-17 (frozen by tg)
 ------------------------
 
