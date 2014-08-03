@@ -54,20 +54,6 @@ namespace SCANsat
 			SmallButton.OnClick += (e) => SCANui.minimode = (SCANui.minimode == 0 ? 2 : -SCANui.minimode);
         }
 
-		//private void LateUpdate ()
-		//{
-		//    if (ToolbarManager.ToolbarAvailable)
-		//        buttonVisible (FlightGlobals.ActiveVessel.FindPartModulesImplementing<SCANsat> ().Count > 0);
-		//}
-
-		//private void buttonVisible(bool active)
-		//{
-		//    if (!ToolbarManager.ToolbarAvailable) return; // bail if we don't have a toolbar
-		//    if (SCANButton.Visible != active) SCANButton.Visible = active;
-		//    if (MapButton.Visible != active) MapButton.Visible = active;
-		//    if (SmallButton.Visible != active) SmallButton.Visible = active;
-		//}
-
 		private void toggleMenu ( IButton menu )
         {
 			if (!ToolbarManager.ToolbarAvailable) return; // bail if we don't have a toolbar
