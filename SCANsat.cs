@@ -10,7 +10,7 @@
  */
 using System;
 using System.Collections.Generic;
-using System.Linq; //Needed for the OrderBy() method for data transmission
+using System.Linq;
 using UnityEngine;
 using palette = SCANsat.SCANpalette;
 
@@ -46,12 +46,6 @@ namespace SCANsat
                 {
 					print ("[SCANsat] using animation #1 out of " + a.Length.ToString () + " animations named '" + animationName + "'");
 					anim = a [0];
-					// maybe use this later for advanced animation...
-                    //Transform modeltransform = part.transform.FindChild ("model");
-                    //foreach (Transform t in modeltransform.GetComponentsInChildren<Transform>())
-                    //{
-                    //    //print("[SCANsat] transform " + t.name + ": " + t);
-                    //}
                 }
             }
             if (scanName != null) { // Use bitwise operators to check if the part has valid science collection scanners
@@ -101,6 +95,8 @@ namespace SCANsat
 				Events["EVACollect"].active = storedData.Count > 0;
 				Events["startScan"].active = !scanning;
 				Events["stopScan"].active = scanning;
+				if (sensorType != 32)
+					Fields["alt_indicator"].guiActive = scanning;
 				if (scanning) {
 					if (sensorType == 0 || SCANcontroller.controller.isVesselKnown(vessel.id, (SCANdata.SCANtype)sensorType)) {
 						if (TimeWarp.CurrentRate < 1500) {
@@ -227,15 +223,12 @@ namespace SCANsat
 			if (!ToolbarManager.ToolbarAvailable)
 				SCANui.minimode = (SCANui.minimode > 0 ? 2 : -SCANui.minimode);
             registerScanner ();
-            if (sensorType != 0 && sensorType != 32)
-                Fields["alt_indicator"].guiActive = true;
 			animate (1, 0);
 		}
 		[KSPEvent(guiActive = true, guiName = "Stop RADAR Scan", active = true)]
 		public void stopScan () {
             	unregisterScanner ();
 			powerIsProblem = false;
-            Fields["alt_indicator"].guiActive = false;
 			animate (-1, 1);
 		}
 		[KSPEvent(guiActive = true, guiName = "Analyze Data", active = true)]
@@ -325,7 +318,7 @@ namespace SCANsat
 		}
 
         	/* SCAN: register scanners without going through animation */
-        	public void registerScanner() { //Updated to reflect the resource type variable
+        	public void registerScanner() {
             scanning = true;
             if (sensorType > 0) 
                 SCANcontroller.controller.registerSensor(vessel, (SCANdata.SCANtype)sensorType, fov, min_alt, max_alt, best_alt);
@@ -384,8 +377,7 @@ namespace SCANsat
 			}
 		}
 		public void ReviewDataItem ( ScienceData sd ) {
-            //expDialog = ExperimentsResultDialog.DisplayResult (new ExperimentResultDialogPage (part , sd , 1f , 0f , false , "" , true , false , DumpData , KeepData , TransmitData , null));
-            ReviewData(); //** Just go directly to the regular method: fairly certain this is never used anyway
+            ReviewData();
         }
 		public void ReviewData () {
 			if (storedData.Count < 1)
@@ -396,7 +388,7 @@ namespace SCANsat
 			expDialog = ExperimentsResultDialog.DisplayResult (new ExperimentResultDialogPage (part , sd , 1f , 0f , false , "" , true , false , DumpData , KeepData , TransmitData , null));
 		}
 		public bool IsRerunnable () {
-			return true; //** true? I don't think it matters, but might gum up other science tracking mods
+			return true;
 		}
 		public int GetScienceCount () {
 			return storedData.Count;
