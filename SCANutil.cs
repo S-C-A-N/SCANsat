@@ -198,6 +198,8 @@ namespace SCANsat
 			su = ResearchAndDevelopment.GetExperimentSubject(se, ExperimentSituations.InSpaceHigh, v.mainBody, "surface");
 			if(su == null) return null;
 
+			su.scienceCap *= multiplier;
+
 			debugLog("Coverage: {0}, Science cap: {1}, Subject value: {2}, Scientific value: {3}, Science: {4}", new object[5] {coverage.ToString("F1"), su.scienceCap.ToString("F1"), su.subjectValue.ToString("F2"), su.scientificValue.ToString("F2"), su.science.ToString("F2")});
 
 			su.scientificValue = 1;
@@ -210,9 +212,8 @@ namespace SCANsat
 
 			debugLog("Remaining science: {0}, Base value: {1}", new object[2] {science.ToString("F1"), se.baseValue.ToString("F1")});
 
-			science /= Mathf.Max(0.1f, su.scientificValue);
+			science /= Mathf.Max(0.1f, su.scientificValue); //look 10 lines up; this is always 1...
 			science /= su.subjectValue;
-			science *= multiplier;
 
 			debugLog("Resulting science value: {0}", new object[1] {science.ToString("F2")});
 
