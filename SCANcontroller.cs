@@ -135,7 +135,7 @@ namespace SCANsat
 				}
 			}
 			dataRebuild = false; //Used for the one-time update to the new integer array
-			if (HighLogic.LoadedScene == GameScenes.FLIGHT || HighLogic.LoadedScene == GameScenes.SPACECENTER)
+			if (HighLogic.LoadedScene == GameScenes.FLIGHT)
 				Resources(FlightGlobals.currentMainBody);
 		}
 
