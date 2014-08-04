@@ -192,14 +192,14 @@ on custom parts, but this is not a requirement.
 
 
 
-### 3. Basic Usage
+### [:top:][top] 3. Basic Usage
 ------------------------------------------
 
 Put scanner part on rocket, aim rocket at sky, launch. If your rocket is not pointing at the sky, you are probably not going to map today, because most sensors only work above 5 km.
 
 You can start scanning by selecting a SCANsat part's context menu, enabling the part. Here, you will find a **small map**.
 
-#### 3a. FAQ: Finding a Good Altitude
+#### [:top:][top] 3a. FAQ: Finding a Good Altitude
 
 Watch the data indicators on the small map to determine how well your scanners are performing.
 
@@ -216,7 +216,7 @@ Flashing ORANGE/GREEN means you're too low (and therefore you have a FOV penalty
 Solid GREEN means you're in an ideal orbit. Notice the larger swath width on the right:
 ![][small-justright]
 
-#### 3b. Mismatched Scanners
+#### [:top:][top] 3b. Mismatched Scanners
 
 In these examples, the SAR and Multi sensors are not very well matched. Because the SAR sensors is ideal above 750km, and becuase it has a large field of view penalty if it's down near the ideal for Multi (250km), these sensors probably should not be used on the same scanner.
 
@@ -238,7 +238,7 @@ Be sure to remember to pack enough batteries, radioisotope generators, and solar
 ###### Static! Oh no, adjust the rabbit ears!
 ![][small-static]
 
-### 4. Big Map
+### [:top:][top] 4. Big Map
 ------------------------------------------
 ![A Big Big Map][bigmap-anim]
 
@@ -250,7 +250,7 @@ You can mouse over the big map to see what sensors have data for the location, a
 
 Right-clicking on the big map shows a magnified view around the position where you clicked. Mouse operations work inside this magnified view just like they work outside, meaning the data displayed at the bottom window applies to your position inside the magnified view, and right-clicking inside it will increase magnification. This can be useful to find landing spots which won't kill your kerbals.
 
-### 5. Parts and Sensor Types
+### [:top:][top] 5. Parts and Sensor Types
 ------------------------------------------
 
 | **Part** | **Scan Type** | **FOV** | Altitude (**Min**) | (**Ideal**) | (**Max**) 
@@ -261,20 +261,20 @@ Right-clicking on the big map shows a magnified view around the position where y
 | [Been There Done That®][5d] | **Anomaly** | 1 | 0 m | 0 m | 2 km
 | [MapTraq® (deprecated)][5e] | **None** | N/A | N/A | N/A | N/A 
 
-#### a. The RADAR Altimetry Sensor
+#### [:top:][top] a. The RADAR Altimetry Sensor
 ![RADAR][vab-radar]
-#### b. The SAR Altimetry Sensor
+#### [:top:][top] b. The SAR Altimetry Sensor
 ![SAR][vab-sar]
-#### c. The Multispectral Sensor
+#### [:top:][top] c. The Multispectral Sensor
 ![Multi][vab-multi]
-#### d. Been There Done That
+#### [:top:][top] d. Been There Done That
 ![BTDT][vab-btdt]
-#### e. MapTraq (deprecated)
+#### [:top:][top] e. MapTraq (deprecated)
 ![MapTraq][vab-maptraq]
  
 
 
-### 6. (Career Mode) Research and Development
+### [:top:][top] 6. (Career Mode) Research and Development
 ------------------------------------------
 
 The **RADAR Altimetry** sensor can be unlocked in **Science Tech**.
@@ -286,18 +286,18 @@ The **Multispectral** sensor can be unlocked in **Advanced Exploration**.
 The **BTDT** sensor can be unlocked in **Field Science**.
 
 
-##### 6a.Minimum Scan for Science
+##### [:top:][top] 6a. Minimum Scan for Science
 Once you scan at least 30% of a particular map, you can use **Analyze Data** to get delicious science:
 
 ![30% is your minimum][science-min]
 
-##### 6b. Getting Maximum Science
+##### [:top:][top] 6b. Getting Maximum Science
 Between 30% and 100%, you will get a number of science points proportional to the percentage. Really,
 the upper cutoff is 95% in case you didn't scan the whole map.
 
 ![Scan 95% to get all science][science-max]
 
-### 7. Background Scanning
+### [:top:][top] 7. Background Scanning
 ------------------------------------------
 
 ![Note the background scanning (non-active vessels are scanning)][small-scan]
@@ -306,7 +306,7 @@ Unlike some other KSP scanning systems, SCANsat allows scanning with multiple
 vessels.  All online scanners scan at the same time, but only when your *active vessel* has
 **at least one** of the parts included in this mod equipped and the mapping interface is open. 
 
-### 8. Time Warp
+### [:top:][top] 8. Time Warp
 ------------------------------------------
 SCANsat does not interpolate satellite paths during time warp; nevertheless, due to the relatively large field of view
 of each sensor, it's still possible to acquire data faster by time warping. The maximum recommended time warp speed
@@ -322,7 +322,7 @@ It starts at **1000x** and then speeds up to **10,000x**:
 
 Notice that the only gaps in coverage are those at the poles (ie, the selected inclination was not high enough to capture the poles).
 
-### 9. Note Concerning Data Sources
+### [:top:][top] 9. Note Concerning Data Sources
 ------------------------------------------
 All data this mod shows you is pulled from your game as you play. This
 includes:
