@@ -81,7 +81,7 @@ Disclaimer aside, this add-on is widely used and it usually works just fine.
 
 ### 0. Maintainers, Authors, Contributors, and Licenses
 ------------------------------------------
-#### Maintainers
+#### Maintainers [:top:][top]
 The current maintainer is:
   + [technogeeky][technogeeky] \<<technogeeky@gmail.com>\>
 
@@ -90,8 +90,7 @@ Maintainers are the people who you should complain to if there is something wron
 Complaints in the form of [GitHub Issues][SCANsat:issues] are given *higher* priority than other complaints;
 complaints in the form of [GitHub Pull Requests][SCANsat:pulls] are given the **highest** priority possible.
 
-[:top:][top]
-#### Authors
+#### Authors [:top:][top]
 The current authors include:
   + [technogeeky][technogeeky] \<<technogeeky@gmail.com>\> @technogeeky
   + [DMagic][DMagic] \<<david.grandy@gmail.com>\> @DMagic1
@@ -115,20 +114,20 @@ For licensing information, please see the [included LICENSE.txt][SCANsat:license
 [Source Code][SCANsat:source] is available, as some licenses may require.
 
 [:top:][top]
-### 1. Installation and Interoperability
+### 1. Installation and Interoperability [:top:][top]
 ------------------------------------------
 :heavy_exclamation_mark:
-[:top:][top]
-#### a. Installation
+
+#### a. Installation [:top:][top]
 :heavy_exclamation_mark:
 
   1. Put the SCANsat folder in your KSP installation's GameData folder.
   2. (Optional) Place the SCANsatRPM folder in your KSP installation's GameData folder.
-[:top:][top]
-#### b. GameData Layout
+
+#### b. GameData Layout [:top:][top]
 :heavy_exclamation_mark:
-[:top:][top]
-#### c. Other Add-Ons
+
+#### c. Other Add-Ons [:top:][top]
 
 * **SCANsat**
   * [x] [**v8.0**][scansat:release] SCANsat Release **version: v8.0**
@@ -158,8 +157,8 @@ For licensing information, please see the [included LICENSE.txt][SCANsat:license
 > + [x] or (checked) means that we build against, test with, inter-operate with, a particular version of this mod.
 > + [ ] or (unchecked) means that it may work, but we S.C.A.N. didn't verify
 
-[:top:][top]
-### 2. Types of Scans
+
+### 2. Types of Scans [:top:][top]
 ------------------------------------------
 SCANsat supports several different kinds of scans (as opposed to
 scanning modules or parts).
@@ -175,22 +174,22 @@ Other parts and add-ons are free to include one or more of these kinds of scans.
 we would request that similar (same order of magitude) scanning paramters and limitations are used
 on custom parts, but this is not a requirement.
 
-#### a. Altimetry
+#### a. Altimetry [:top:][top]
 :heavy_exclamation_mark:
 
-#### b. Biome
+#### b. Biome [:top:][top]
 :heavy_exclamation_mark:
 
-#### c. Anomaly
+#### c. Anomaly [:top:][top]
 :heavy_exclamation_mark:
 
-#### d. Resources
+#### d. Resources [:top:][top]
 :heavy_exclamation_mark:
 
-##### 1. Kethane
+##### 1. Kethane [:top:][top]
 :heavy_exclamation_mark:
 
-##### 2. ORS
+##### 2. ORS [:top:][top]
 :heavy_exclamation_mark:
 
 
