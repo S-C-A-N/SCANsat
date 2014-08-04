@@ -103,15 +103,20 @@ S.C.A.N. is proud to collaborate with other KSP modding teams. Following is a ta
 [**ModuleManager**][mm:release] | [**Extraplanetary Launchpads**][epl:release]
 
 
+As of the following versions:
 * **SCANsat**
   * [x] [**v8.0**][scansat:release] SCANsat Release **version: v8.0**
   * [x] [**v9.0**][scansat:dev] SCANsat Dev **version: v9.0**
+
+**SCANsat** is built against the following mods. **MM**, **RPM**, and **Toolbar** are all **soft** dependencies. This means your experience with SCANsat will be enhanced if you are using these mods, but they are not necessary.
 
 * **Library** Support
   * [x] [**MM**][mm:release]: ModuleManager **version: 2.2.1**
   * [x] [**RPM**][rpm:release]: RasterPropMonitor **version: v0.18.2**
   * [x] via (RPM) <- [**ALCOR**][alcor:release]: Blah Blah Capsule Blah Blah *version: 0.9*
   * [x] [**Toolbar**][toolbar:release] Blizzy's Toolbar **version: 1.7.6**
+
+As of **v8.0**, **SCANsat** generically supports scanning for resources. These resources are powered by **ORS** (included with ZIP) and/or **Kethane** (available [here][kethane:release], patch [here][kethane:patch01]). By working with these two mods, all other resource mod support follows.
 
 * **Resource** Scanning Support
   * [x] [**ORS**][ors:release]: OpenResourceSystem **version: 1.1.0**
@@ -137,12 +142,13 @@ S.C.A.N. is proud to collaborate with other KSP modding teams. Following is a ta
 SCANsat supports several different kinds of scans (as opposed to
 scanning modules or parts).
 
-As of May 2014, these include:
+As of **v8.0** these include:
   * **RadarLo**: Basic, Low-Resolution RADAR Altimetry (b&w, limited zoom)
   * **RadarHi**: Advanced, High-Resolution RADAR Altimetry (in color, unlimited zoom)
   * **Slope**: Slope Data converted from RADAR data
   * **Biome**: Biome Detection and Classification (in color, unlimited zoom)
   * **Anomaly**: Anomaly Detection and Labeling
+  * **Resource**: Scan for chemical or mineral resource on the surface.
 
 Other parts and add-ons are free to include one or more of these kinds of scans. In general,
 we would request that similar (same order of magitude) scanning paramters and limitations are used
