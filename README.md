@@ -1,11 +1,18 @@
-![May Your Tentacles Orbit in Peace][logo]
-
-High Performance Scanning Sensors
-------------------------------------------
-#### **SCANsat**: Real Scanning, Real Science, at Warp Speed!
+## [**SCANsat**][top]: Real Scanning, Real Science, at Warp Speed!
 ![scan your planetoid like the big boys do][bigmap-scan-10000x]
 ###### **Example SAR scan of Kerbin at 1000x and then 10,000x warp**
 
+
+**Built Using** | **Supported By**
+:---: | :---:
+[![Support for Kethane][kethane:logo]][kethane:release] | [![Support for MKS][usi:logo]][usi:release]
+[**OpenResourceSystem**][ors:release] | [![Support for ALCOR][alcor:logo]][alcor:release]
+[**Blizzy78's Toolbar**][toolbar:release] |  [**KSP: Interstellar**][kspi:release]
+[**ModuleManager**][mm:release] | [**Extraplanetary Launchpads**][epl:release]
+
+
+
+![May Your Tentacles Orbit in Peace][SCANsat:logo]
 
 **Table of Contents**
 ------------------------------------------
@@ -107,9 +114,9 @@ For licensing information, please see the [included LICENSE.txt][SCANsat:license
 
 * **Resource** Scanning Support
   * [x] [**ORS**][ors:release]: OpenResourceSystem **version: 1.1.0**
-  * [x]  via (ORS) <- [**KSPI**][kspi:release]: Interstellar *version: 0.11*
-  * [x] via (ORS) <- [**MKS**][mks:release]: USI Kolonization Systems (MKS/OKS) *version: 0.19.3*
-  * [ ] via (ORS) <- [**OKS**][mks:release]: USI Kolonization Systems (MKS/OKS) *version: 0.19.3*
+  * [x] via (ORS) <- [**KSPI**][kspi:release]: Interstellar *version: 0.11*
+  * [x] via (ORS) <- [**MKS**][usi:release]: USI Kolonization Systems (MKS/OKS) *version: 0.19.3*
+  * [ ] via (ORS) <- [**OKS**][usi:release]: USI Kolonization Systems (MKS/OKS) *version: 0.19.3*
   * [x] via (ORS) <- [**Karbonite**][karbonite:release] (Release) *version: 0.1.1*
   * [x] via (ORS) <- [**Karbonite**][karbonite:dev] (Dev) *version: 0.1.1*
   * [ ] [**Kethane**][kethane:release] Kethane **version: 0.8.8**
@@ -310,14 +317,9 @@ sneaky then they can of course be sneaky.
 [damny]: http://forum.kerbalspaceprogram.com/members/80692-damny
 [Milkshakefiend]: http://forum.kerbalspaceprogram.com/members/72507-Milkshakefiend
 
-[SCANsat:issues]: https://github.com/S-C-A-N/SCANsat/issues
-[SCANsat:pulls]: https://github.com/S-C-A-N/SCANsat/pulls
-[SCANsat:source]: https://github.com/S-C-A-N/SCANsat
-[SCANsat:licenses]: https://github.com/S-C-A-N/SCANsat/blob/master/LICENSE.txt
-
 [KSP:developers]: https://kerbalspaceprogram.com/index.php
 
-[logo]: http://i.imgur.com/GArPFFB.png
+
 
 [vab-radar-thumb]: http://i.imgur.com/PrRIcYvs.png 
 [vab-sar-thumb]: http://i.imgur.com/4aTTVfWs.png
@@ -381,18 +383,31 @@ sneaky then they can of course be sneaky.
 [8]: https://github.com/S-C-A-N/SCANsat#top-8-time-warp
 [9]: https://github.com/S-C-A-N/SCANsat#top-9-note-concerning-data-sources
 
+[SCANsat:issues]: https://github.com/S-C-A-N/SCANsat/issues
+[SCANsat:pulls]: https://github.com/S-C-A-N/SCANsat/pulls
+[SCANsat:source]: https://github.com/S-C-A-N/SCANsat
+[SCANsat:licenses]: https://github.com/S-C-A-N/SCANsat/blob/master/LICENSE.txt
+[SCANsat:logo]: http://i.imgur.com/GArPFFB.png
 [scansat:release]: http://forum.kerbalspaceprogram.com/threads/80369
 [scansat:dev]: http://forum.kerbalspaceprogram.com/threads/80661
+
 [karbonite:release]: http://forum.kerbalspaceprogram.com/threads/89401
 [karbonite:dev]: http://forum.kerbalspaceprogram.com/threads/87335
-[mks:release]: http://forum.kerbalspaceprogram.com/threads/79588
-[mks:dev]: http://forum.kerbalspaceprogram.com/threads/72706
+[karbonite:logo]: http://i.imgur.com/PkewuRD.png
+
+[kethane:release]: http://forum.kerbalspaceprogram.com/threads/23979
+[kethane:patch01]: http://forum.kerbalspaceprogram.com/threads/23979-Kethane-Pack-0-8-8-Rebalanced-converters-faster-scanning-and-0-24-compatibility?p=1313690&viewfull=1#post1313690
+[kethane:logo]: http://i.imgur.com/u952LjP.png?1
+
+[usi:release]: http://forum.kerbalspaceprogram.com/threads/79588
+[usi:dev]: http://forum.kerbalspaceprogram.com/threads/72706
+[usi:logo]: http://i.imgur.com/aimhLzU.png
+
 [mm:release]: http://forum.kerbalspaceprogram.com/threads/55219
 [alcor:release]: http://forum.kerbalspaceprogram.com/threads/54925
+[alcor:logo]: http://i.imgur.com/7eJ3IFC.jpg
 [epl:release]: http://forum.kerbalspaceprogram.com/threads/59545
 [kspi:release]: http://forum.kerbalspaceprogram.com/threads/43839
 [ors:release]: http://forum.kerbalspaceprogram.com/threads/64595
-[kethane:release]: http://forum.kerbalspaceprogram.com/threads/23979
-[kethane:patch01]: http://forum.kerbalspaceprogram.com/threads/23979-Kethane-Pack-0-8-8-Rebalanced-converters-faster-scanning-and-0-24-compatibility?p=1313690&viewfull=1#post1313690
 [toolbar:release]: http://forum.kerbalspaceprogram.com/threads/60863
 [rpm:release]: http://forum.kerbalspaceprogram.com/threads/57603
