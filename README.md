@@ -9,8 +9,17 @@ High Performance Scanning Sensors
 
 **Table of Contents**:
 * [0. Maintainers, Authors, Contributors, and Licenses][0]
-* [1. Installation][1]
+* [1. Installation and Interoperability][1]
+  * [a. Installation][1a]
+  * [b. GameData Layout][1b]
+  * [c. Other Add-Ons][1c]
 * [2. Types of Scans][2]
+  * [a. Altimetry][2a]
+  * [b. Biome][2b]
+  * [c. Anomaly][2c]
+  * [d. Resources][2d]
+    * [1. Kethane][2d2]
+    * [2. ORS][2d1]
 * [3. Basic Usage][3]
   * [a. FAQ: Finding a Good Altitude][3a]
   * [b. Mismatched Scanners][3b]
@@ -20,13 +29,45 @@ High Performance Scanning Sensors
   * [b. SAR][5b]
   * [c. Multi][5c]
   * [d. BTDT][5d]
-  * [e. MapTraq][5e]
+  * [e. MapTraq (deprecated)][5e]
 * [6. (Career Mode) Research and Development][6]
   * [a. Minimum Scan for Science (30%)][6a]
   * [b. Getting Maximum Science][6b]
 * [7. Background Scanning][7]
 * [8. Time Warp][8]
 * [9. Note: Data Sources][9]
+
+[0]: https://github.com/S-C-A-N/SCANsat#0-maintainers-authors-contributors-and-licenses
+
+[1]: https://github.com/S-C-A-N/SCANsat#1-installation-and-interoperability
+[1a]: https://github.com/S-C-A-N/SCANsat#1a-installation
+[1b]: https://github.com/S-C-A-N/SCANsat#1b-gamedata-layout
+[1c]: https://github.com/S-C-A-N/SCANsat#1c-other-add-ons
+[2]: https://github.com/S-C-A-N/SCANsat#2-types-of-scans
+[2a]: https://github.com/S-C-A-N/SCANsat#2a-altimetry
+[2b]: https://github.com/S-C-A-N/SCANsat#2b-biome
+[2c]: https://github.com/S-C-A-N/SCANsat#2c-anomaly
+[2d]: https://github.com/S-C-A-N/SCANsat#2d-resources
+[2d1]: https://github.com/S-C-A-N/SCANsat#2d1-kethane
+[2d2]: https://github.com/S-C-A-N/SCANsat#2d2-ORS
+[3]: https://github.com/S-C-A-N/SCANsat#3-basic-usage
+[3a]: https://github.com/S-C-A-N/SCANsat#3a-faq-finding-a-good-altitude
+[3b]: https://github.com/S-C-A-N/SCANsat#3b-mismatched-scanners
+[4]: https://github.com/S-C-A-N/SCANsat#4-big-map
+[5]: https://github.com/S-C-A-N/SCANsat#5-parts-and-sensor-types
+[5a]: https://github.com/S-C-A-N/SCANsat#a-the-radar-altimetry-sensor
+[5b]: https://github.com/S-C-A-N/SCANsat#b-the-sar-altimetry-sensor
+[5c]: https://github.com/S-C-A-N/SCANsat#c-the-multispectral-sensor
+[5d]: https://github.com/S-C-A-N/SCANsat#d-been-there-done-that
+[5e]: https://github.com/S-C-A-N/SCANsat#e-maptraq-deprecated
+[6]: https://github.com/S-C-A-N/SCANsat#6-career-mode-research-and-development
+[6a]: https://github.com/S-C-A-N/SCANsat#6aminimum-scan-for-science
+[6b]: https://github.com/S-C-A-N/SCANsat#6b-getting-maximum-science
+[7]: https://github.com/S-C-A-N/SCANsat#7-background-scanning
+[8]: https://github.com/S-C-A-N/SCANsat#8-time-warp
+[9]: https://github.com/S-C-A-N/SCANsat#9-note-concerning-data-sources
+
+
 
 **WARNING**:
 
@@ -49,8 +90,8 @@ complaints in the form of [GitHub Pull Requests][SCANsat:pulls] are given the **
 
 #### Authors
 The current authors include:
-  + [technogeeky][technogeeky] \<<technogeeky@gmail.com>\>
-  + [DMagic][DMagic] \<<david.grandy@gmail.com>\>
+  + [technogeeky][technogeeky] \<<technogeeky@gmail.com>\> @technogeeky
+  + [DMagic][DMagic] \<<david.grandy@gmail.com>\> @DMagic1
 
 Past authors include:
   + [damny][damny] \<<missing-in-action@nowhere-to-be-found.com>\>
@@ -70,10 +111,52 @@ For licensing information, please see the [included LICENSE.txt][SCANsat:license
 [Source Code][SCANsat:source] is available, as some licenses may require.
 
 
-### 1. Installation
+### 1. Installation and Interoperability
 ------------------------------------------
+:heavy_exclamation_mark:
+
+#### a. Installation
+:heavy_exclamation_mark:
+
   1. Put the SCANsat folder in your KSP installation's GameData folder.
   2. (Optional) Place the SCANsatRPM folder in your KSP installation's GameData folder.
+
+#### b. GameData Layout
+:heavy_exclamation_mark:
+
+#### c. Other Add-Ons
+
+* **SCANsat**
+  * [x] [**v8.0**][scansat:release] SCANsat Release **version: v8.0**
+  * [x] [**v9.0**][scansat:dev] SCANsat Dev **version: v9.0**
+
+* **Library** Support
+  * [x] [**MM**][mm:release]: ModuleManager **version: 2.2.1**
+  * [x] [**RPM**][rpm:release]: RasterPropMonitor **version: v0.18.2**
+  * [x] via (RPM) <- [**ALCOR**][alcor:release]: Blah Blah Capsule Blah Blah *version: 0.9*
+  * [x] [**Toolbar**][toolbar:release] Blizzy's Toolbar **version: 1.7.6**
+
+* **Resource** Scanning Support
+  * [x] [**ORS**][ors:release]: OpenResourceSystem **version: 1.1.0**
+  * [x]  via (ORS) <- [**KSPI**][kspi:release]: Interstellar *version: 0.11*
+  * [x] via (ORS) <- [**MKS**][mks:release]: USI Kolonization Systems (MKS/OKS) *version: 0.19.3*
+  * [ ] via (ORS) <- [**OKS**][mks:release]: USI Kolonization Systems (MKS/OKS) *version: 0.19.3*
+  * [x] via (ORS) <- [**Karbonite**][karbonite:release] (Release) *version: 0.1.1*
+  * [x] via (ORS) <- [**Karbonite**][karbonite:dev] (Dev) *version: 0.1.1*
+  * [ ] [**Kethane**][kethane:release] Kethane **version: 0.8.8**
+  * [x] [**Kethane**][kethane:release] Kethane ([**patch**][kethane:patch01] by taniwha) **version: 0.8.8.1**
+  * [x] via (Kethane) <- [**EPL**][epl:release]: Extra Planetary Launchpads *version: v4.2.3*
+
+> Notes
+> + **BOLD**: is there to identify (b-)acronyms we endure
+> + **bold** versions are those who we directly match
+> + *italics* versions are those which use a mod we support
+> + [x] or (checked) means that we build against, test with, inter-operate with, a particular version of this mod.
+> + [ ] or (unchecked) means that it may work, but we S.C.A.N. didn't verify
+
+
+
+
 
 ### 2. Types of Scans
 ------------------------------------------
@@ -90,6 +173,26 @@ As of May 2014, these include:
 Other parts and add-ons are free to include one or more of these kinds of scans. In general,
 we would request that similar (same order of magitude) scanning paramters and limitations are used
 on custom parts, but this is not a requirement.
+
+#### a. Altimetry
+:heavy_exclamation_mark:
+
+#### b. Biome
+:heavy_exclamation_mark:
+
+#### c. Anomaly
+:heavy_exclamation_mark:
+
+#### d. Resources
+:heavy_exclamation_mark:
+
+##### 1. Kethane
+:heavy_exclamation_mark:
+
+##### 2. ORS
+:heavy_exclamation_mark:
+
+
 
 ### 3. Basic Usage
 ------------------------------------------
@@ -158,7 +261,7 @@ Right-clicking on the big map shows a magnified view around the position where y
 | [SAR Altimetry Sensor][5b] | **RadarHi** | 2 | 5000 m | 750 km | 800 km 
 | [Multispectral Sensor][5c] | **Biome** **ANOM** | 4 | 5000 m | 250 km | 500 km 
 | [Been There Done That®][5d] | **Anomaly** | 1 | 0 m | 0 m | 2 km
-| [MapTraq®][5e] | **None** | N/A | N/A | N/A | N/A 
+| [MapTraq® (deprecated)][5e] | **None** | N/A | N/A | N/A | N/A 
 
 #### a. The RADAR Altimetry Sensor
 ![RADAR][vab-radar]
@@ -168,7 +271,7 @@ Right-clicking on the big map shows a magnified view around the position where y
 ![Multi][vab-multi]
 #### d. Been There Done That
 ![BTDT][vab-btdt]
-#### e. MapTraq
+#### e. MapTraq (deprecated)
 ![MapTraq][vab-maptraq]
  
 
@@ -236,7 +339,6 @@ sneaky then they can of course be sneaky.
 ------------------------------------------
 
 
-
 [technogeeky]: http://forum.kerbalspaceprogram.com/members/110153-technogeeky
 [DMagic]: http://forum.kerbalspaceprogram.com/members/59127-DMagic
 [damny]: http://forum.kerbalspaceprogram.com/members/80692-damny
@@ -249,25 +351,6 @@ sneaky then they can of course be sneaky.
 
 [KSP:developers]: https://kerbalspaceprogram.com/index.php
 
-[0]: https://github.com/S-C-A-N/SCANsat#0-maintainers-authors-contributors-and-licenses
-[1]: https://github.com/S-C-A-N/SCANsat#1-installation
-[2]: https://github.com/S-C-A-N/SCANsat#2-types-of-scans
-[3]: https://github.com/S-C-A-N/SCANsat#3-basic-usage
-[3a]: https://github.com/S-C-A-N/SCANsat#3a-faq-finding-a-good-altitude
-[3b]: https://github.com/S-C-A-N/SCANsat#3b-mismatched-scanners
-[4]: https://github.com/S-C-A-N/SCANsat#4-big-map
-[5]: https://github.com/S-C-A-N/SCANsat#5-parts-and-sensor-types
-[5a]: https://github.com/S-C-A-N/SCANsat#a-the-radar-altimetry-sensor
-[5b]: https://github.com/S-C-A-N/SCANsat#b-the-sar-altimetry-sensor
-[5c]: https://github.com/S-C-A-N/SCANsat#c-the-multispectral-sensor
-[5d]: https://github.com/S-C-A-N/SCANsat#d-been-there-done-that
-[5e]: https://github.com/S-C-A-N/SCANsat#e-maptraq
-[6]: https://github.com/S-C-A-N/SCANsat#6-career-mode-research-and-development
-[6a]: https://github.com/S-C-A-N/SCANsat#6aminimum-scan-for-science
-[6b]: https://github.com/S-C-A-N/SCANsat#6b-getting-maximum-science
-[7]: https://github.com/S-C-A-N/SCANsat#7-background-scanning
-[8]: https://github.com/S-C-A-N/SCANsat#8-time-warp
-[9]: https://github.com/S-C-A-N/SCANsat#9-note-concerning-data-sources
 
 
 [logo]: http://i.imgur.com/GArPFFB.png
@@ -302,3 +385,20 @@ sneaky then they can of course be sneaky.
 [bigmap-scan-10000x]: http://i.imgur.com/VEPL3oN.gif
 [bigmap-scan-100x]: http://i.imgur.com/bcht47p.gif
 [bigmap-anim]: http://i.imgur.com/kxyl8xR.gif
+
+
+[scansat:release]: http://forum.kerbalspaceprogram.com/threads/80369
+[scansat:dev]: http://forum.kerbalspaceprogram.com/threads/80661
+[karbonite:release]: http://forum.kerbalspaceprogram.com/threads/89401
+[karbonite:dev]: http://forum.kerbalspaceprogram.com/threads/87335
+[mks:release]: http://forum.kerbalspaceprogram.com/threads/79588
+[mks:dev]: http://forum.kerbalspaceprogram.com/threads/72706
+[mm:release]: http://forum.kerbalspaceprogram.com/threads/55219
+[alcor:release]: http://forum.kerbalspaceprogram.com/threads/54925
+[epl:release]: http://forum.kerbalspaceprogram.com/threads/59545
+[kspi:release]: http://forum.kerbalspaceprogram.com/threads/43839
+[ors:release]: http://forum.kerbalspaceprogram.com/threads/64595
+[kethane:release]: http://forum.kerbalspaceprogram.com/threads/23979
+[kethane:patch01]: http://forum.kerbalspaceprogram.com/threads/23979-Kethane-Pack-0-8-8-Rebalanced-converters-faster-scanning-and-0-24-compatibility?p=1313690&viewfull=1#post1313690
+[toolbar:release]: http://forum.kerbalspaceprogram.com/threads/60863
+[rpm:release]: http://forum.kerbalspaceprogram.com/threads/57603
