@@ -39,7 +39,7 @@ High Performance Scanning Sensors
 * [8. Time Warp][8]
 * [9. Note: Data Sources][9]
 
-[top]: https://https://github.com/S-C-A-N/SCANsat#table-of-contents
+[top]: https://github.com/S-C-A-N/SCANsat#table-of-contents
 [0]: https://github.com/S-C-A-N/SCANsat#0-maintainers-authors-contributors-and-licenses
 [1]: https://github.com/S-C-A-N/SCANsat#1-installation-and-interoperability
 [1a]: https://github.com/S-C-A-N/SCANsat#a-installation
