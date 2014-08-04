@@ -92,14 +92,13 @@ For licensing information, please see the [included LICENSE.txt][SCANsat:license
 
 #### [:top:][top] c. Other Add-Ons 
 
-S.C.A.N. is proud to collaborate with other KSP modding teams.
+S.C.A.N. is proud to collaborate with other KSP modding teams. Following is a table of all of the mods, add-ons, or software that we interoperate with. **Do not fear** though, this does not mean installation and usage of SCANsat is difficult!
 
 **Built Using** | **Supported By**
 :---: | :---:
 [![Support for Kethane][kethane:logo]][kethane:release] | [![Support for MKS][usi:logo]][usi:release]
-  | [![Support for Karbonite][karbonite:logo]][karbonite:release]
-  | [![Support for ALCOR][alcor:logo]][alcor:release]
-[**OpenResourceSystem**][ors:release] |   
+[**OpenResourceSystem**][ors:release] | [![Support for ALCOR][alcor:logo]][alcor:release]
+[**RasterPropMonitor**][rpm:release]  | [![Support for Karbonite][karbonite:logo]][karbonite:release]
 [**Blizzy78's Toolbar**][toolbar:release] |  [**KSP: Interstellar**][kspi:release]
 [**ModuleManager**][mm:release] | [**Extraplanetary Launchpads**][epl:release]
 
