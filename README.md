@@ -7,7 +7,9 @@ High Performance Scanning Sensors
 ###### **Example SAR scan of Kerbin at 1000x and then 10,000x warp**
 
 
-**Table of Contents**:
+**Table of Contents**
+------------------------------------------
+
 * [0. Maintainers, Authors, Contributors, and Licenses][0]
 * [1. Installation and Interoperability][1]
   * [a. Installation][1a]
@@ -37,8 +39,8 @@ High Performance Scanning Sensors
 * [8. Time Warp][8]
 * [9. Note: Data Sources][9]
 
+[top]: https://https://github.com/S-C-A-N/SCANsat#table-of-contents
 [0]: https://github.com/S-C-A-N/SCANsat#0-maintainers-authors-contributors-and-licenses
-
 [1]: https://github.com/S-C-A-N/SCANsat#1-installation-and-interoperability
 [1a]: https://github.com/S-C-A-N/SCANsat#a-installation
 [1b]: https://github.com/S-C-A-N/SCANsat#b-gamedata-layout
@@ -49,7 +51,7 @@ High Performance Scanning Sensors
 [2c]: https://github.com/S-C-A-N/SCANsat#c-anomaly
 [2d]: https://github.com/S-C-A-N/SCANsat#d-resources
 [2d1]: https://github.com/S-C-A-N/SCANsat#1-kethane
-[2d2]: https://github.com/S-C-A-N/SCANsat#2-ORS
+[2d2]: https://github.com/S-C-A-N/SCANsat#2-ors
 [3]: https://github.com/S-C-A-N/SCANsat#3-basic-usage
 [3a]: https://github.com/S-C-A-N/SCANsat#3a-faq-finding-a-good-altitude
 [3b]: https://github.com/S-C-A-N/SCANsat#3b-mismatched-scanners
@@ -88,6 +90,7 @@ Maintainers are the people who you should complain to if there is something wron
 Complaints in the form of [GitHub Issues][SCANsat:issues] are given *higher* priority than other complaints;
 complaints in the form of [GitHub Pull Requests][SCANsat:pulls] are given the **highest** priority possible.
 
+[:top:][top]
 #### Authors
 The current authors include:
   + [technogeeky][technogeeky] \<<technogeeky@gmail.com>\> @technogeeky
@@ -98,32 +101,33 @@ Past authors include:
 
 As of May 2014, the vast majority of code is damny's, and technogeeky and DMagic are very slowly encroaching.
 
-
+[:top:][top]
 #### Contributors
 
 In addition to the authors, the following people have contributed:
   + (Models, Graphics, Textures) [Milkshakefiend][Milkshakefiend]
 
+[:top:][top]
 #### Licenses
 
 For licensing information, please see the [included LICENSE.txt][SCANsat:licenses] file.
 
 [Source Code][SCANsat:source] is available, as some licenses may require.
 
-
+[:top:][top]
 ### 1. Installation and Interoperability
 ------------------------------------------
 :heavy_exclamation_mark:
-
+[:top:][top]
 #### a. Installation
 :heavy_exclamation_mark:
 
   1. Put the SCANsat folder in your KSP installation's GameData folder.
   2. (Optional) Place the SCANsatRPM folder in your KSP installation's GameData folder.
-
+[:top:][top]
 #### b. GameData Layout
 :heavy_exclamation_mark:
-
+[:top:][top]
 #### c. Other Add-Ons
 
 * **SCANsat**
@@ -154,10 +158,7 @@ For licensing information, please see the [included LICENSE.txt][SCANsat:license
 > + [x] or (checked) means that we build against, test with, inter-operate with, a particular version of this mod.
 > + [ ] or (unchecked) means that it may work, but we S.C.A.N. didn't verify
 
-
-
-
-
+[:top:][top]
 ### 2. Types of Scans
 ------------------------------------------
 SCANsat supports several different kinds of scans (as opposed to
