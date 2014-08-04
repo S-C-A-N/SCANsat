@@ -2,16 +2,6 @@
 ![scan your planetoid like the big boys do][bigmap-scan-10000x]
 ###### **Example SAR scan of Kerbin at 1000x and then 10,000x warp**
 
-
-**Built Using** | **Supported By**
-:---: | :---:
-[![Support for Kethane][kethane:logo]][kethane:release] | [![Support for MKS][usi:logo]][usi:release]
-[**OpenResourceSystem**][ors:release] | [![Support for ALCOR][alcor:logo]][alcor:release]
-[**Blizzy78's Toolbar**][toolbar:release] |  [**KSP: Interstellar**][kspi:release]
-[**ModuleManager**][mm:release] | [**Extraplanetary Launchpads**][epl:release]
-
-
-
 ![May Your Tentacles Orbit in Peace][SCANsat:logo]
 
 **Table of Contents**
@@ -101,6 +91,16 @@ For licensing information, please see the [included LICENSE.txt][SCANsat:license
 :heavy_exclamation_mark:
 
 #### [:top:][top] c. Other Add-Ons 
+
+S.C.A.N. is proud to collaborate with other KSP modding teams.
+
+**Built Using** | **Supported By**
+:---: | :---:
+[![Support for Kethane][kethane:logo]][kethane:release] | [![Support for MKS][usi:logo]][usi:release]
+[**OpenResourceSystem**][ors:release] | [![Support for ALCOR][alcor:logo]][alcor:release]
+[**Blizzy78's Toolbar**][toolbar:release] |  [**KSP: Interstellar**][kspi:release]
+[**ModuleManager**][mm:release] | [**Extraplanetary Launchpads**][epl:release]
+
 
 * **SCANsat**
   * [x] [**v8.0**][scansat:release] SCANsat Release **version: v8.0**
