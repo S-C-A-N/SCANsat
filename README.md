@@ -39,38 +39,6 @@ High Performance Scanning Sensors
 * [8. Time Warp][8]
 * [9. Note: Data Sources][9]
 
-[top]: https://github.com/S-C-A-N/SCANsat#table-of-contents
-[0]: https://github.com/S-C-A-N/SCANsat#top-0-maintainers-authors-contributors-and-licenses
-[1]: https://github.com/S-C-A-N/SCANsat#top-1-installation-and-interoperability
-[1a]: https://github.com/S-C-A-N/SCANsat#top-a-installation
-[1b]: https://github.com/S-C-A-N/SCANsat#top-b-gamedata-layout
-[1c]: https://github.com/S-C-A-N/SCANsat#top-c-other-add-ons
-[2]: https://github.com/S-C-A-N/SCANsat#top-2-types-of-scans
-[2a]: https://github.com/S-C-A-N/SCANsat#top-a-altimetry
-[2b]: https://github.com/S-C-A-N/SCANsat#top-b-biome
-[2c]: https://github.com/S-C-A-N/SCANsat#top-c-anomaly
-[2d]: https://github.com/S-C-A-N/SCANsat#top-d-resources
-[2d1]: https://github.com/S-C-A-N/SCANsat#top-1-kethane
-[2d2]: https://github.com/S-C-A-N/SCANsat#top-2-ors
-[3]: https://github.com/S-C-A-N/SCANsat#top-3-basic-usage
-[3a]: https://github.com/S-C-A-N/SCANsat#top-3a-faq-finding-a-good-altitude
-[3b]: https://github.com/S-C-A-N/SCANsat#top-3b-mismatched-scanners
-[4]: https://github.com/S-C-A-N/SCANsat#top-4-big-map
-[5]: https://github.com/S-C-A-N/SCANsat#top-5-parts-and-sensor-types
-[5a]: https://github.com/S-C-A-N/SCANsat#top-a-the-radar-altimetry-sensor
-[5b]: https://github.com/S-C-A-N/SCANsat#top-b-the-sar-altimetry-sensor
-[5c]: https://github.com/S-C-A-N/SCANsat#top-c-the-multispectral-sensor
-[5d]: https://github.com/S-C-A-N/SCANsat#top-d-been-there-done-that
-[5e]: https://github.com/S-C-A-N/SCANsat#top-e-maptraq-deprecated
-[6]: https://github.com/S-C-A-N/SCANsat#top-6-career-mode-research-and-development
-[6a]: https://github.com/S-C-A-N/SCANsat#top-6aminimum-scan-for-science
-[6b]: https://github.com/S-C-A-N/SCANsat#top-6b-getting-maximum-science
-[7]: https://github.com/S-C-A-N/SCANsat#top-7-background-scanning
-[8]: https://github.com/S-C-A-N/SCANsat#top-8-time-warp
-[9]: https://github.com/S-C-A-N/SCANsat#top-9-note-concerning-data-sources
-
-
-
 **WARNING**:
 
 This add-on is a **work**-in-**progress**.
@@ -349,8 +317,6 @@ sneaky then they can of course be sneaky.
 
 [KSP:developers]: https://kerbalspaceprogram.com/index.php
 
-
-
 [logo]: http://i.imgur.com/GArPFFB.png
 
 [vab-radar-thumb]: http://i.imgur.com/PrRIcYvs.png 
@@ -384,6 +350,36 @@ sneaky then they can of course be sneaky.
 [bigmap-scan-100x]: http://i.imgur.com/bcht47p.gif
 [bigmap-anim]: http://i.imgur.com/kxyl8xR.gif
 
+
+[top]: https://github.com/S-C-A-N/SCANsat#table-of-contents
+[0]: https://github.com/S-C-A-N/SCANsat#top-0-maintainers-authors-contributors-and-licenses
+[1]: https://github.com/S-C-A-N/SCANsat#top-1-installation-and-interoperability
+[1a]: https://github.com/S-C-A-N/SCANsat#top-a-installation
+[1b]: https://github.com/S-C-A-N/SCANsat#top-b-gamedata-layout
+[1c]: https://github.com/S-C-A-N/SCANsat#top-c-other-add-ons
+[2]: https://github.com/S-C-A-N/SCANsat#top-2-types-of-scans
+[2a]: https://github.com/S-C-A-N/SCANsat#top-a-altimetry
+[2b]: https://github.com/S-C-A-N/SCANsat#top-b-biome
+[2c]: https://github.com/S-C-A-N/SCANsat#top-c-anomaly
+[2d]: https://github.com/S-C-A-N/SCANsat#top-d-resources
+[2d1]: https://github.com/S-C-A-N/SCANsat#top-1-kethane
+[2d2]: https://github.com/S-C-A-N/SCANsat#top-2-ors
+[3]: https://github.com/S-C-A-N/SCANsat#top-3-basic-usage
+[3a]: https://github.com/S-C-A-N/SCANsat#top-3a-faq-finding-a-good-altitude
+[3b]: https://github.com/S-C-A-N/SCANsat#top-3b-mismatched-scanners
+[4]: https://github.com/S-C-A-N/SCANsat#top-4-big-map
+[5]: https://github.com/S-C-A-N/SCANsat#top-5-parts-and-sensor-types
+[5a]: https://github.com/S-C-A-N/SCANsat#top-a-the-radar-altimetry-sensor
+[5b]: https://github.com/S-C-A-N/SCANsat#top-b-the-sar-altimetry-sensor
+[5c]: https://github.com/S-C-A-N/SCANsat#top-c-the-multispectral-sensor
+[5d]: https://github.com/S-C-A-N/SCANsat#top-d-been-there-done-that
+[5e]: https://github.com/S-C-A-N/SCANsat#top-e-maptraq-deprecated
+[6]: https://github.com/S-C-A-N/SCANsat#top-6-career-mode-research-and-development
+[6a]: https://github.com/S-C-A-N/SCANsat#top-6aminimum-scan-for-science
+[6b]: https://github.com/S-C-A-N/SCANsat#top-6b-getting-maximum-science
+[7]: https://github.com/S-C-A-N/SCANsat#top-7-background-scanning
+[8]: https://github.com/S-C-A-N/SCANsat#top-8-time-warp
+[9]: https://github.com/S-C-A-N/SCANsat#top-9-note-concerning-data-sources
 
 [scansat:release]: http://forum.kerbalspaceprogram.com/threads/80369
 [scansat:dev]: http://forum.kerbalspaceprogram.com/threads/80661
