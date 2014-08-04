@@ -40,16 +40,16 @@ High Performance Scanning Sensors
 [0]: https://github.com/S-C-A-N/SCANsat#0-maintainers-authors-contributors-and-licenses
 
 [1]: https://github.com/S-C-A-N/SCANsat#1-installation-and-interoperability
-[1a]: https://github.com/S-C-A-N/SCANsat#1a-installation
-[1b]: https://github.com/S-C-A-N/SCANsat#1b-gamedata-layout
-[1c]: https://github.com/S-C-A-N/SCANsat#1c-other-add-ons
+[1a]: https://github.com/S-C-A-N/SCANsat#a-installation
+[1b]: https://github.com/S-C-A-N/SCANsat#b-gamedata-layout
+[1c]: https://github.com/S-C-A-N/SCANsat#c-other-add-ons
 [2]: https://github.com/S-C-A-N/SCANsat#2-types-of-scans
-[2a]: https://github.com/S-C-A-N/SCANsat#2a-altimetry
-[2b]: https://github.com/S-C-A-N/SCANsat#2b-biome
-[2c]: https://github.com/S-C-A-N/SCANsat#2c-anomaly
-[2d]: https://github.com/S-C-A-N/SCANsat#2d-resources
-[2d1]: https://github.com/S-C-A-N/SCANsat#2d1-kethane
-[2d2]: https://github.com/S-C-A-N/SCANsat#2d2-ORS
+[2a]: https://github.com/S-C-A-N/SCANsat#a-altimetry
+[2b]: https://github.com/S-C-A-N/SCANsat#b-biome
+[2c]: https://github.com/S-C-A-N/SCANsat#c-anomaly
+[2d]: https://github.com/S-C-A-N/SCANsat#d-resources
+[2d1]: https://github.com/S-C-A-N/SCANsat#1-kethane
+[2d2]: https://github.com/S-C-A-N/SCANsat#2-ORS
 [3]: https://github.com/S-C-A-N/SCANsat#3-basic-usage
 [3a]: https://github.com/S-C-A-N/SCANsat#3a-faq-finding-a-good-altitude
 [3b]: https://github.com/S-C-A-N/SCANsat#3b-mismatched-scanners
