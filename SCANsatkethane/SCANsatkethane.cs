@@ -102,7 +102,6 @@ namespace SCANsatKethane
 		//Update the Kethane database - used after background scanning
 		private void updateKethaneData (SCANdata.SCANtype type) {
 			print("[SCAN Kethane] Updating Kethane Database");
-			SCANdata data = SCANUtil.getData(body);
 			for (int ilat = 0; ilat < 180; ilat++) {
 				for (int ilon = 0; ilon < 360; ilon++) {
 					if (SCANUtil.isCovered (ilon, ilat, body, (int)type)) {

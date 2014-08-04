@@ -28,7 +28,6 @@ namespace SCANsat
 		public CelestialBody body;
 		public Texture2D map_small = new Texture2D (360 , 180 , TextureFormat.RGB24 , false);
 		public bool disabled;
-		private byte[,] backupCoverage = new byte[360, 180];
 
 		internal SCANdata(CelestialBody b)
 		{
