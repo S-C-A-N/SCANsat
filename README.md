@@ -52,18 +52,23 @@ The current maintainer is:
 
 Maintainers are the people who you should complain to if there is something wrong.
 
-Complaints in the form of [GitHub Issues][SCANsat:issues] are given *higher* priority than other complaints;
-complaints in the form of [GitHub Pull Requests][SCANsat:pulls] are given the **highest** priority possible.
+Complaints in various forms are prioritized as such:
+
+1. [Pull Requests][SCANsat:pulls] are given the **highest** priority possible. ~ 24 hour response
+2. [Issues][SCANsat:issues] are given *higher* priority than other complaints. ~ 2 day response
+3. [Forum Posts][SCANsat:release] are given a medium priority. ~ 1 week response
+4. [Forum Private Messages](http://forum.kerbalspaceprogram.com/private.php) are given a low priority. We might forget!
+5. [Reddit Posts and PMs][KSP:reddit] are the lowest priority. We often lurk and don't login!
 
 #### Authors
 The current authors include:
-  + [technogeeky][technogeeky] \<<technogeeky@gmail.com>\> @technogeeky
-  + [DMagic][DMagic] \<<david.grandy@gmail.com>\> @DMagic1
+  + [technogeeky][technogeeky] \<<technogeeky@gmail.com>\>
+  + [DMagic][DMagic] \<<david.grandy@gmail.com>\>
 
 Past authors include:
   + [damny][damny] \<<missing-in-action@nowhere-to-be-found.com>\>
 
-As of May 2014, the vast majority of code is damny's, and technogeeky and DMagic are very slowly encroaching.
+As of August 2014, the vast majority of code is damny's and DMagic's; and technogeeky and is slowly helping out here and there.
 
 #### Contributors
 
@@ -325,7 +330,7 @@ sneaky then they can of course be sneaky.
 [Milkshakefiend]: http://forum.kerbalspaceprogram.com/members/72507-Milkshakefiend
 
 [KSP:developers]: https://kerbalspaceprogram.com/index.php
-
+[KSP:reddit]: http://www.reddit.com/r/KerbalSpaceProgram
 
 
 [vab-radar-thumb]: http://i.imgur.com/PrRIcYvs.png 
