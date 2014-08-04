@@ -40,9 +40,9 @@
 
 This add-on is a **work**-in-**progress**.
 
-This means you should expect that it *may not work*, and you should be unsurprised if it *does not progress*.
+This means you should expect that it **may not work**, and you should be unsurprised if it **does not progress**.
 
-Disclaimer aside, this add-on is widely used and it usually works just fine.
+Disclaimer aside, this add-on is widely used and it **usually** works just fine.
 
 ### [:top:][top] 0. Maintainers, Authors, Contributors, and Licenses
 ------------------------------------------
