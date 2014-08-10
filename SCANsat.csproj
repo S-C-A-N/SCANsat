@@ -58,21 +58,21 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="SCANsatRPM.cs" />
-    <Compile Include="SCANutil.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="SCANcontroller.cs" />
-    <Compile Include="SCANdata.cs" />
-    <Compile Include="CLZF2.cs" />
-    <Compile Include="SCANsat.cs" />
-    <Compile Include="SCANui.cs" />
-    <Compile Include="SCANmap.cs" />
-    <Compile Include="RemoteView.cs" />
-    <Compile Include="SCANquickload.cs" />
-    <Compile Include="SCANtoolbar.cs" />
-    <Compile Include="SCANtoolbarwrapper.cs" />
-    <Compile Include="SCANpalette.cs" />
-    <Compile Include="SCANversions.cs" />
+    <Compile Include="SCANsat\CLZF2.cs" />
+    <Compile Include="SCANsat\RemoteView.cs" />
+    <Compile Include="SCANsat\SCANcontroller.cs" />
+    <Compile Include="SCANsat\SCANdata.cs" />
+    <Compile Include="SCANsat\SCANmap.cs" />
+    <Compile Include="SCANsat\SCANpalette.cs" />
+    <Compile Include="SCANsat\SCANquickload.cs" />
+    <Compile Include="SCANsat\SCANsat.cs" />
+    <Compile Include="SCANsat\SCANsatRPM.cs" />
+    <Compile Include="SCANsat\SCANtoolbar.cs" />
+    <Compile Include="SCANsat\SCANtoolbarwrapper.cs" />
+    <Compile Include="SCANsat\SCANui.cs" />
+    <Compile Include="SCANsat\SCANutil.cs" />
+    <Compile Include="SCANsat\SCANversions.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>
@@ -85,4 +85,7 @@
       </Properties>
     </MonoDevelop>
   </ProjectExtensions>
+  <ItemGroup>
+    <Folder Include="SCANsat\" />
+  </ItemGroup>
 </Project>
