@@ -62,10 +62,9 @@
   </Target>
   -->
   <ItemGroup>
-    <ProjectReference Include="..\SCANsat.csproj">
+    <ProjectReference Include="..\SCANsat\SCANsat.csproj">
       <Project>{3AE13948-477D-4375-8AB4-B45664966D9E}</Project>
       <Name>SCANsat</Name>
-      <Private>False</Private>
     </ProjectReference>
   </ItemGroup>
 </Project>

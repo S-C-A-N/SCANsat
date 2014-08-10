@@ -31,48 +31,30 @@
     <CustomCommands>
       <CustomCommands>
         <Command type="AfterBuild" command="cp &quot;${ProjectDir}/CHANGELOG.txt&quot; ." workingdir="${TargetDir}" />
-        <Command type="AfterBuild" command="cp &quot;${ProjectDir}/README.md&quot; ." workingdir="${TargetDir}" />
+        <Command type="AfterBuild" command="cp &quot;${ProjectDir}/../README.md&quot; ." workingdir="${TargetDir}" />
         <Command type="AfterBuild" command="cp &quot;${ProjectDir}/LICENSE.txt&quot; ." workingdir="${TargetDir}" />
-        <Command type="AfterBuild" command="bash -c 'for s in &quot;Plugins&quot; &quot;Flags&quot; &quot;Icons&quot; &quot;MM_Parts&quot; &quot;Parts&quot; &quot;Resources&quot;; do cp -ur &quot;${ProjectDir}/SCANassets/$s&quot; .; done'" workingdir="${TargetDir}" externalConsole="True" />
+        <Command type="AfterBuild" command="bash -c 'for s in &quot;Plugins&quot; &quot;Flags&quot; &quot;Icons&quot; &quot;MM_Parts&quot; &quot;Parts&quot; &quot;Resources&quot;; do cp -ur &quot;${ProjectDir}/../SCANassets/$s&quot; .; done'" workingdir="${TargetDir}" externalConsole="True" />
         <Command type="Clean" command="rm LICENSE.txt CHANGELOG.txt README.md" workingdir="${TargetDir}" />
         <Command type="Clean" command="bash -c 'for s in &quot;Plugins&quot; &quot;Flags&quot; &quot;Icons&quot; &quot;MM_Parts&quot; &quot;Parts&quot; &quot;Resources&quot;; do rm -r $s ; done'" workingdir="${TargetDir}" externalConsole="True" />
       </CustomCommands>
     </CustomCommands>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Assembly-CSharp">
-      <HintPath>..\..\KSP_Data\Managed\Assembly-CSharp.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="UnityEngine">
-      <HintPath>..\..\KSP_Data\Managed\UnityEngine.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="System">
-      <HintPath>..\..\KSP_Data\Managed\System.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="OpenResourceSystem_1_1_0">
-      <HintPath>..\..\GameData\OpenResourceSystem\Plugins\OpenResourceSystem_1_1_0.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-  </ItemGroup>
-  <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="SCANsat\CLZF2.cs" />
-    <Compile Include="SCANsat\RemoteView.cs" />
-    <Compile Include="SCANsat\SCANcontroller.cs" />
-    <Compile Include="SCANsat\SCANdata.cs" />
-    <Compile Include="SCANsat\SCANmap.cs" />
-    <Compile Include="SCANsat\SCANpalette.cs" />
-    <Compile Include="SCANsat\SCANquickload.cs" />
-    <Compile Include="SCANsat\SCANsat.cs" />
-    <Compile Include="SCANsat\SCANsatRPM.cs" />
-    <Compile Include="SCANsat\SCANtoolbar.cs" />
-    <Compile Include="SCANsat\SCANtoolbarwrapper.cs" />
-    <Compile Include="SCANsat\SCANui.cs" />
-    <Compile Include="SCANsat\SCANutil.cs" />
-    <Compile Include="SCANsat\SCANversions.cs" />
+    <Compile Include="CLZF2.cs" />
+    <Compile Include="RemoteView.cs" />
+    <Compile Include="SCANcontroller.cs" />
+    <Compile Include="SCANdata.cs" />
+    <Compile Include="SCANmap.cs" />
+    <Compile Include="SCANpalette.cs" />
+    <Compile Include="SCANquickload.cs" />
+    <Compile Include="SCANsat.cs" />
+    <Compile Include="SCANsatRPM.cs" />
+    <Compile Include="SCANtoolbar.cs" />
+    <Compile Include="SCANtoolbarwrapper.cs" />
+    <Compile Include="SCANui.cs" />
+    <Compile Include="SCANutil.cs" />
+    <Compile Include="SCANversions.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>
@@ -86,6 +68,17 @@
     </MonoDevelop>
   </ProjectExtensions>
   <ItemGroup>
-    <Folder Include="SCANsat\" />
+    <Reference Include="OpenResourceSystem_1_1_0">
+      <HintPath>..\..\..\GameData\OpenResourceSystem\Plugins\OpenResourceSystem.dll</HintPath>
+    </Reference>
+    <Reference Include="Assembly-CSharp">
+      <HintPath>..\..\..\KSP_Data\Managed\Assembly-CSharp.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine">
+      <HintPath>..\..\..\KSP_Data\Managed\UnityEngine.dll</HintPath>
+    </Reference>
+    <Reference Include="System">
+      <HintPath>..\..\..\KSP_Data\Managed\System.dll</HintPath>
+    </Reference>
   </ItemGroup>
 </Project>
