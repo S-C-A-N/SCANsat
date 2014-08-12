@@ -1,9 +1,9 @@
-## [**SCANsat**][top]: Real Scanning, Real Science, at Warp Speed!
+## [**SCANsat**][top]: Real Scanning, Real Science, Warp Speed!
 ![scan your planetoid like the big boys do][bigmap-scan-10000x]
 ###### **Example SAR scan of Kerbin at 1000x and then 10,000x warp**
 
 ![May Your Tentacles Orbit in Peace][SCANsat:logo]
-
+![][SCANsat:rel-jenkins-build-status]
 **Table of Contents**
 ------------------------------------------
 
@@ -414,6 +414,9 @@ sneaky then they can of course be sneaky.
 
 [SCANsat:dev-jenkins]: https://ksp.sarbian.com/jenkins/job/SCANsat-dev/
 [SCANsat:rel-jenkins]: https://ksp.sarbian.com/jenkins/job/SCANsat-release/
+
+[SCANsat:dev-jenkins-build-status]: https://ksp.sarbian.com/jenkins/buildStatus/icon?job=SCANsat-dev
+[SCANsat:rel-jenkins-build-status]: https://ksp.sarbian.com/jenkins/buildStatus/icon?job=SCANsat-release
 
 [SCANsat:dev-license]: https://github.com/S-C-A-N/SCANsat/blob/dev/SCANsat/LICENSE.txt
 [SCANsat:rel-license]: https://github.com/S-C-A-N/SCANsat/blob/dev/SCANsat/LICENSE.txt
