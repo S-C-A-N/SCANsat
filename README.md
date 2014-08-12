@@ -3,6 +3,7 @@
 ###### **Example SAR scan of Kerbin at 1000x and then 10,000x warp**
 
 ![May Your Tentacles Orbit in Peace][SCANsat:logo]
+
 ![][SCANsat:rel-jenkins-build-status]
 **Table of Contents**
 ------------------------------------------
