@@ -56,7 +56,7 @@ Complaints in various forms are prioritized as such:
 
 1. [Pull Requests][SCANsat:pulls] are given the **highest** priority possible. ~ 24 hour response
 2. [Issues][SCANsat:issues] are given *higher* priority than other complaints. ~ 2 day response
-3. [Forum Posts][SCANsat:release] are given a medium priority. ~ 1 week response
+3. [Forum Posts][SCANsat:rel-thread] are given a medium priority. ~ 1 week response
 4. [Forum Private Messages](http://forum.kerbalspaceprogram.com/private.php) are given a low priority. We might forget!
 5. [Reddit Posts and PMs][KSP:reddit] are the lowest priority. We often lurk and don't login!
 
@@ -77,7 +77,7 @@ In addition to the authors, the following people have contributed:
 
 #### Licenses
 
-For licensing information, please see the [included LICENSE.txt][SCANsat:licenses] file.
+For licensing information, please see the [included LICENSE.txt][SCANsat:rel-license] file.
 
 [Source Code][SCANsat:source] is available, as some licenses may require.
 
@@ -110,8 +110,8 @@ S.C.A.N. is proud to collaborate with other KSP modding teams. Following is a ta
 
 As of the following versions:
 * **SCANsat**
-  * [x] [**v8.0**][scansat:release] SCANsat Release **version: v8.0**
-  * [x] [**v9.0**][scansat:dev] SCANsat Dev **version: v9.0**
+  * [x] [**v8.0**][SCANsat:rel-thread] SCANsat Release **version: v8.0**
+  * [x] [**v9.0**][SCANsat:dev-thread] SCANsat Dev **version: v9.0**
 
 **SCANsat** is built against the following mods. **MM**, **RPM**, and **Toolbar** are all **soft** dependencies. This means your experience with SCANsat will be enhanced if you are using these mods, but they are not necessary.
 
@@ -395,13 +395,42 @@ sneaky then they can of course be sneaky.
 [8]: https://github.com/S-C-A-N/SCANsat#top-8-time-warp
 [9]: https://github.com/S-C-A-N/SCANsat#top-9-note-concerning-data-sources
 
+[SCANsat:organization]: https://github.com/S-C-A-N
+[SCANsat:logo]: http://i.imgur.com/GArPFFB.png
+[SCANsat:logo-square]: http://i.imgur.com/GArPFFB.png?1
 [SCANsat:issues]: https://github.com/S-C-A-N/SCANsat/issues
 [SCANsat:pulls]: https://github.com/S-C-A-N/SCANsat/pulls
-[SCANsat:source]: https://github.com/S-C-A-N/SCANsat
-[SCANsat:licenses]: https://github.com/S-C-A-N/SCANsat/blob/master/LICENSE.txt
-[SCANsat:logo]: http://i.imgur.com/GArPFFB.png
-[scansat:release]: http://forum.kerbalspaceprogram.com/threads/80369
-[scansat:dev]: http://forum.kerbalspaceprogram.com/threads/80661
+[SCANsat:imgur-albums]: https://scansat.imgur.com
+[SCANsat:best-orbits-table]: https://www.example.com
+
+[SCANsat:dev-readme]: https://github.com/S-C-A-N/SCANsat/tree/dev/#table-of-contents
+[SCANsat:rel-readme]: https://github.com/S-C-A-N/SCANsat/#table-of-contents
+
+[SCANsat:rel-thread]: http://forum.kerbalspaceprogram.com/threads/80369
+[SCANsat:dev-thread]: http://forum.kerbalspaceprogram.com/threads/80661
+
+[SCANsat:dev-source]: https://github.com/S-C-A-N/SCANsat/tree/dev
+[SCANsat:rel-source]: https://github.com/S-C-A-N/SCANsat
+
+[SCANsat:dev-jenkins]: https://ksp.sarbian.com/jenkins/job/SCANsat-dev/
+[SCANsat:rel-jenkins]: https://ksp.sarbian.com/jenkins/job/SCANsat-release/
+
+[SCANsat:dev-license]: https://github.com/S-C-A-N/SCANsat/blob/dev/SCANsat/LICENSE.txt
+[SCANsat:rel-license]: https://github.com/S-C-A-N/SCANsat/blob/dev/SCANsat/LICENSE.txt
+
+[SCANsat:rel-dist-curseforge]: http://kerbal.curseforge.com/ksp-mods/www.example.com-SCANsat
+[SCANsat:rel-dist-curseforge-zip]: http://kerbal.curseforge.com/ksp-mods/www.example.com-SCANsat/files/latest
+[SCANsat:rel-dist-github]: https://github.com/S-C-A-N/SCANsat/releases/tag/www.example.com
+[SCANsat:rel-dist-github-zip]: https://github.com/S-C-A-N/SCANsat/releases/download/www.example.com/SCANsat.zip
+[SCANsat:rel-dist-kerbalstuff]: http://beta.kerbalstuff.com/mod/www.example.com/SCANsat
+[SCANsat:rel-dist-kerbalstuff-zip]: http://beta.kerbalstuff.com/mod/www.example.com/SCANsat/download/www.example.com
+
+[SCANsat:dev-dist-curseforge]: https://www.example.com
+[SCANsat:dev-dist-curseforge-zip]: https://www.example.com
+[SCANsat:dev-dist-github]: https://github.com/S-C-A-N/SCANsat/releases/tag/www.example.com
+[SCANsat:dev-dist-github-zip]: https://github.com/S-C-A-N/SCANsat/releases/download/www.example.com/SCANsat.zip
+[SCANsat:dev-dist-kerbalstuff]: http://beta.kerbalstuff.com/mod/www.example.com/SCANsat
+[SCANsat:dev-dist-kerbalstuff-zip]: http://beta.kerbalstuff.com/mod/www.example.com/SCANsat/download/www.example.com
 
 [karbonite:release]: http://forum.kerbalspaceprogram.com/threads/89401
 [karbonite:dev]: http://forum.kerbalspaceprogram.com/threads/87335
