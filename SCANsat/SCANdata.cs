@@ -14,7 +14,6 @@ using System.Runtime.Serialization.Formatters.Binary;
 using System.Linq;
 using System.Collections.Generic;
 using UnityEngine;
-using OpenResourceSystem;
 using palette = SCANsat.SCANpalette;
 
 namespace SCANsat
@@ -67,9 +66,10 @@ namespace SCANsat
 		/* DATA: resources */
         public class SCANResource //The new class to store resource information stored in the respective config nodes
         {
-            public SCANResource (string n, Color full, Color empty, bool sc, double scalar, double mult, double threshold, float max, SCANtype t)
+            public SCANResource (string n, string Body, Color full, Color empty, bool sc, double scalar, double mult, double threshold, float max, SCANresourceType t)
             {
                 name = n;
+				body = Body;
                 fullColor = full;
                 emptyColor = empty;
                 linear = sc;
@@ -77,16 +77,33 @@ namespace SCANsat
                 ORS_Multiplier = mult;
                 ORS_Threshold = threshold;
                 maxValue = max;
-                type = t;
+				resourceType = t;
+				type = resourceType.type;
             }
 
-            public string name;
+            public string name, body;
             public double ORS_Scalar, ORS_Multiplier, ORS_Threshold;
             public Color fullColor, emptyColor;
             public bool linear;
             public float maxValue;
             public SCANtype type;
+			public SCANresourceType resourceType;
         }
+
+		public class SCANresourceType
+		{
+			public string name;
+			public SCANtype type;
+			public Color colorFull, colorEmpty;
+
+			internal SCANresourceType (string s, int i, string Full, string Empty)
+			{
+				name = s;
+				type = (SCANtype)i;
+				colorFull = ConfigNode.ParseColor(Full);
+				colorEmpty = ConfigNode.ParseColor(Empty);
+			}
+		}
 
 		/* DATA: coverage */
         public int[] coverage_count = new int[32];
