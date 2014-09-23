@@ -23,9 +23,9 @@ using System.Runtime.CompilerServices;
 // You can specify all the values or you can default the Build and Revision Numbers 
 // by using the '*' as shown below:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("1.0.8.0")]
-[assembly: AssemblyFileVersion("1.0.8.0")]
-[assembly: AssemblyInformationalVersion("v8.0")]
+[assembly: AssemblyVersion("1.0.6.0")]
+[assembly: AssemblyFileVersion("1.0.7.5")]
+[assembly: AssemblyInformationalVersion("v7rc5")]
 
-[assembly: KSPAssembly ("SCANsatKethane", 0, 8)]
-[assembly: KSPAssemblyDependency ("SCANsat", 0, 8)]
+[assembly: KSPAssembly ("SCANsatKethane", 0, 75)]
+[assembly: KSPAssemblyDependency ("SCANsat", 0, 75)]
