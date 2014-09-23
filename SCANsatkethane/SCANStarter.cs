@@ -10,8 +10,10 @@
  *
  */
 
+using System;
 using System.Linq;
 using System.Diagnostics;
+using System.Reflection;
 using UnityEngine;
 
 namespace SCANsatKethane
@@ -20,7 +22,7 @@ namespace SCANsatKethane
     class SCANStarter : MonoBehaviour
     {
         private SCANsatKethane SCANK;
-		private string Version = "1.0.5323.33891";
+		private readonly string Version = "0.9";
 
         public void Start() {
             print("[SCAN Kethane] Searching For Kethane Assembly...");
@@ -30,15 +32,18 @@ namespace SCANsatKethane
         private void searching () {
             var KAssembly = AssemblyLoader.loadedAssemblies.SingleOrDefault(a => a.assembly.GetName().Name == "Kethane");
             if (KAssembly != null) {
-				if (KAssembly.assembly.GetName().Version.ToString() == Version)
-				//if (FileVersionInfo.GetVersionInfo(KAssembly.assembly.Location).ProductVersion == Version)
+				var ainfoV = Attribute.GetCustomAttribute(KAssembly.assembly, typeof(AssemblyInformationalVersionAttribute)) as AssemblyInformationalVersionAttribute;
+				if (ainfoV != null)
 				{
-                print("[SCAN Kethane] Kethane Assembly Found; Version: " + Version + ", Launching Watcher");
-                launcher();
+					if (ainfoV.InformationalVersion == Version)
+					{
+						print("[SCAN Kethane] Kethane Assembly Found; Version: " + Version + ", Launching Watcher");
+						launcher();
+					}
                 }
-                else 
-                    print("[SCAN Kethane] Kethane Assembly Found; Unsupported Version: " + Version + ", Shutting Down");
-            } else 
+                else
+                    print("[SCAN Kethane] Kethane Assembly Found; Unsupported Version, Shutting Down");
+            } else
                 print("[SCAN Kethane] Kethane Assembly Not Found, Shutting Down");
         }
         
@@ -48,6 +53,12 @@ namespace SCANsatKethane
                 SCANK = gameObject.AddComponent<SCANsatKethane>();
             }
         }
+
+		private void OnDestroy()
+		{
+			if (SCANK != null)
+				Destroy(SCANK);
+		}
 
     }
 }
