@@ -241,18 +241,15 @@ namespace SCANsat
 			string name = "";
 			string body = "";
 			bool scale = false;
-			bool hidden = false;
-			Color empty = XKCDColors.UglyYellow;
-			Color full = XKCDColors.HotPink;
 			if (node.HasValue("name"))
 				name = node.GetValue("name");
 			else
 				return null;
 			SCANdata.SCANresourceType type = OverlayResourceType(name);
+			if (type == null)
+				return null;
 			if (type.type == SCANdata.SCANtype.Nothing)
 				return null;
-			empty = type.colorEmpty;
-			full = type.colorFull;
 			if (node.HasValue("celestialBodyName"))
 				body = node.GetValue("celestialBodyName");
 			else
@@ -276,12 +273,8 @@ namespace SCANsat
 			}
 			if (node.HasValue("scaleMultiplier"))
 				double.TryParse(node.GetValue("scaleMultiplier"), out mult);
-			if (node.HasValue("hidden"))
-				bool.TryParse(node.GetValue("hidden"), out hidden);
-			if (hidden)
-				return null;
 
-			SCANdata.SCANResource SCANres = new SCANdata.SCANResource(name, body, full, empty, scale, scalar, mult, Threshold, 1f, type);
+			SCANdata.SCANResource SCANres = new SCANdata.SCANResource(name, body, type.colorFull, type.colorEmpty, scale, scalar, mult, Threshold, 1f, type);
 			if (SCANres != null)
 				return SCANres;
 
