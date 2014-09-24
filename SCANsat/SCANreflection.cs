@@ -25,7 +25,6 @@ namespace SCANsat
 		private const string ORSXPlanetDataType = "ORSX.ORSX_PlanetaryResourceMapData";
 		private const string ORSXPixelAbundanceMethod = "getPixelAbundanceValue";
 		private const string ORSXAssemblyName = "ORSX";
-		private const string ORSXVersion = "1.0.0.0";
 
 		private static bool ORSXRun = false;
 
@@ -42,7 +41,6 @@ namespace SCANsat
 			return _ORSXpixelAbundance(body, resourceName, lat, lon);
 		}
 
-
 		private void Start()
 		{
 			ORSXFound = ORSXReflectionMethod();
@@ -56,19 +54,10 @@ namespace SCANsat
 			AssemblyLoader.LoadedAssembly assembly = AssemblyLoader.loadedAssemblies.FirstOrDefault(a => a.assembly.GetName().Name == ORSXAssemblyName);
 			if (assembly != null)
 			{
-				if (assembly.assembly.GetName().Version.ToString() == ORSXVersion)
-				{
-					SCANUtil.SCANlog("ORSX Assembly Loaded");
-					ORSXAssembly = assembly;
-					return true;
-				}
-				else
-				{
-					Debug.LogWarning(string.Format("[SCANsat] Incompatible ORSX Assembly Detected: Version [{0}]; Delete All Copies of ORSX Other Than {1}", assembly.assembly.GetName().Version, ORSXAssemblyName));
-					return false;
-				}
+				SCANUtil.SCANlog("ORSX Assembly Loaded");
+				ORSXAssembly = assembly;
+				return true;
 			}
-
 			SCANUtil.SCANlog("ORSX Assembly Not Found");
 			return false;
 		}
@@ -99,15 +88,15 @@ namespace SCANsat
 
 				_ORSXPlanetType = ORSXType;
 
-				MethodInfo ORSMethod = ORSXType.GetMethod(ORSXPixelAbundanceMethod, new Type[] { typeof(int), typeof(string), typeof(double), typeof(double) });
+				MethodInfo ORSXMethod = ORSXType.GetMethod(ORSXPixelAbundanceMethod, new Type[] { typeof(int), typeof(string), typeof(double), typeof(double) });
 
-				if (ORSMethod == null)
+				if (ORSXMethod == null)
 				{
 					SCANUtil.SCANlog("ORSX Method Not Found");
 					return false;
 				}
 
-				_ORSXpixelAbundance = (ORSXpixelAbundance)Delegate.CreateDelegate(typeof(ORSXpixelAbundance), ORSMethod);
+				_ORSXpixelAbundance = (ORSXpixelAbundance)Delegate.CreateDelegate(typeof(ORSXpixelAbundance), ORSXMethod);
 
 				SCANUtil.SCANlog("ORSX Reflection Method Assigned");
 
