@@ -101,7 +101,10 @@ namespace SCANsat
 				name = s;
 				type = (SCANtype)i;
 				if ((type & SCANtype.Everything_SCAN) != SCANtype.Nothing)
+				{
+					Debug.LogWarning("[SCANsat] Attempt To Override Default SCANsat Sensors; Resetting Resource Scanner Type To 0");
 					type = SCANtype.Nothing;
+				}
 				colorFull = ConfigNode.ParseColor(Full);
 				colorEmpty = ConfigNode.ParseColor(Empty);
 			}
