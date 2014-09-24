@@ -213,7 +213,7 @@ namespace SCANsat
 			ResourcesList.Clear();
 			if (resourceOverlayType == 0 && SCANreflection.ORSXFound)
 			{
-				foreach (ConfigNode node in GameDatabase.Instance.GetConfigNodes("PLANETARY_RESOURCE_DEFINITION"))
+				foreach (ConfigNode node in GameDatabase.Instance.GetConfigNodes("ORSX_PLANETARY_RESOURCE"))
 				{
 					if (node != null)
 					{
