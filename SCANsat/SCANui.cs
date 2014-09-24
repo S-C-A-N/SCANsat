@@ -684,7 +684,7 @@ namespace SCANsat
 				if (bigmap != null) bigmap.resetMap();
 			}
 
-			if (GUILayout.Button ("ORS Resources"))
+			if (GUILayout.Button ("ORSX Resources"))
 			{
 				SCANcontroller.controller.resourceOverlayType = 0;
 				SCANcontroller.controller.Resources(FlightGlobals.currentMainBody);
