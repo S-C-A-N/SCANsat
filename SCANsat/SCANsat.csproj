@@ -9,21 +9,23 @@
     <OutputType>Library</OutputType>
     <RootNamespace>SCANsat</RootNamespace>
     <AssemblyName>SCANsat</AssemblyName>
+    <ReleaseVersion>1.0.8.0</ReleaseVersion>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DebugType>none</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>..\..\GameData\SCANsat</OutputPath>
+    <OutputPath>..\GameData\SCANsat\</OutputPath>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <ConsolePause>false</ConsolePause>
     <additionalargs>-debug:full</additionalargs>
     <DefineConstants>DEBUG;</DefineConstants>
+    <DebugSymbols>true</DebugSymbols>
+    <NoStdLib>true</NoStdLib>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <Optimize>true</Optimize>
-    <OutputPath>..\..\GameData\SCANsat</OutputPath>
+    <OutputPath>..\GameData\SCANsat\</OutputPath>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <ConsolePause>false</ConsolePause>
@@ -38,6 +40,7 @@
         <Command type="Clean" command="bash -c 'for s in &quot;Plugins&quot; &quot;Flags&quot; &quot;Icons&quot; &quot;MM_Parts&quot; &quot;Parts&quot; &quot;Resources&quot;; do rm -r $s ; done'" workingdir="${TargetDir}" externalConsole="True" />
       </CustomCommands>
     </CustomCommands>
+    <NoStdLib>true</NoStdLib>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -45,40 +48,182 @@
     <Compile Include="RemoteView.cs" />
     <Compile Include="SCANcontroller.cs" />
     <Compile Include="SCANdata.cs" />
+    <Compile Include="SCAN_KSPPP\Extensions\Colors\UnityEngine.Color32_.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="SCAN_KSPPP\Extensions\Colors\UnityEngine.Color_.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="SCAN_KSPPP\Extensions\Colors\UnityEngine.GradientAlphaKey_.cs" />
+    <Compile Include="SCAN_KSPPP\Extensions\Colors\UnityEngine.GradientColorKey_.cs" />
+    <Compile Include="SCAN_KSPPP\Extensions\Colors\UnityEngine.Gradient_.cs" />
+    <Compile Include="SCAN_KSPPP\Extensions\Data\UnityEngine.SerializeFIeld_.cs" />
+    <Compile Include="SCAN_KSPPP\Extensions\GUI\UnityEngine.GUIContent_.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="SCAN_KSPPP\Extensions\GUI\UnityEngine.GUIElement_.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="SCAN_KSPPP\Extensions\GUI\UnityEngine.GUILayer_.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="SCAN_KSPPP\Extensions\GUI\UnityEngine.GUILayoutOption_.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="SCAN_KSPPP\Extensions\GUI\UnityEngine.GUILayoutUtility_.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="SCAN_KSPPP\Extensions\GUI\UnityEngine.GUILayout_.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="SCAN_KSPPP\Extensions\GUI\UnityEngine.GUISettings_.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="SCAN_KSPPP\Extensions\GUI\UnityEngine.GUISkin_.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="SCAN_KSPPP\Extensions\GUI\UnityEngine.GUIStyleState_.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="SCAN_KSPPP\Extensions\GUI\UnityEngine.GUIStyle_.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="SCAN_KSPPP\Extensions\GUI\UnityEngine.GUITexture_.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="SCAN_KSPPP\Extensions\GUI\UnityEngine.GUIText_.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="SCAN_KSPPP\Extensions\GUI\UnityEngine.GUIUtility_.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="SCAN_KSPPP\Extensions\GUI\UnityEngine.GUI_.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="SCAN_KSPPP\Extensions\Math\UnityEngine.Mathf_.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="SCAN_KSPPP\Extensions\Math\UnityEngine.Matrix4x4_.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="SCAN_KSPPP\Extensions\Math\UnityEngine.Random_.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="SCAN_KSPPP\Extensions\Math\UnityEngine.RectOffset_.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="SCAN_KSPPP\Extensions\Math\UnityEngine.Rect_.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="SCAN_KSPPP\Extensions\Math\UnityEngine.Vector2_.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="SCAN_KSPPP\Extensions\Math\UnityEngine.Vector3_.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="SCAN_KSPPP\Extensions\Math\UnityEngine.Vector4_.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="SCAN_KSPPP\Extensions\Rendering\UnityEngine.Mesh_.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="SCAN_KSPPP\Extensions\Rendering\UnityEngine.RenderSettings_.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="SCAN_KSPPP\Extensions\Rendering\UnityEngine.Screen_.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="SCAN_KSPPP\Extensions\Rendering\UnityEngine.Shader_.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="SCAN_KSPPP\Extensions\Rendering\UnityEngine.SparseTexture_.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="SCAN_KSPPP\Extensions\Rendering\UnityEngine.SpriteRenderer_.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="SCAN_KSPPP\Extensions\Rendering\UnityEngine.Texture2D_.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="SCAN_KSPPP\Extensions\Rendering\UnityEngine.Texture3D_.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="SCAN_KSPPP\Extensions\Rendering\UnityEngine.Texture_.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="SCAN_KSPPP\Extensions\Rendering\UnityEngine.TreeInstance_.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="SCAN_KSPPP\Extensions\Rendering\UnityEngine.UIVertex_.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="SCAN_KSPPP\Extensions\Text\UnityEngine.Font_.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="SCAN_KSPPP\Extensions\Text\UnityEngine.TextGenerationSettings_.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="SCAN_KSPPP\Extensions\Text\UnityEngine.TextGenerator_.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="SCAN_KSPPP\Extensions\Text\UnityEngine.TextMesh_.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="SCAN_KSPPP\Extensions\Time\UnityEngine.Event_.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="SCAN_KSPPP\Extensions\Time\UnityEngine.Time_.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="SCAN_UI\Icons.cs" />
+    <Compile Include="SCAN_UI\SCANbigMap.cs" />
+    <Compile Include="SCAN_UI\SCANinstrumentUI.cs" />
+    <Compile Include="SCAN_KSPPP\Logging.cs" />
+    <Compile Include="SCAN_KSPPP\MBE.cs" />
+    <Compile Include="SCAN_KSPPP\MBW.cs" />
+    <Compile Include="SCAN_KSPPP\SkinsLibrary.cs" />
+    <Compile Include="SCAN_UI\SCANkscMap.cs" />
+    <Compile Include="SCAN_UI\SCANmainMap.cs" />
     <Compile Include="SCANmap.cs" />
     <Compile Include="SCANpalette.cs" />
     <Compile Include="SCANquickload.cs" />
+    <Compile Include="SCANreflection.cs" />
     <Compile Include="SCANsat.cs" />
     <Compile Include="SCANsatRPM.cs" />
+    <Compile Include="SCAN_UI\SCANsettingsUI.cs" />
     <Compile Include="SCANtoolbar.cs" />
     <Compile Include="SCANtoolbarwrapper.cs" />
     <Compile Include="SCANui.cs" />
     <Compile Include="SCANutil.cs" />
     <Compile Include="SCANversions.cs" />
+    <Compile Include="SCAN_UI\SCANskins.cs" />
+    <Compile Include="SCAN_UI\SCANuiUtil.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>
     <MonoDevelop>
       <Properties>
         <Policies>
-          <TextStylePolicy FileWidth="100" TabWidth="5" EolMarker="Unix" inheritsSet="Mono" inheritsScope="text/plain" scope="text/x-csharp" />
-          <CSharpFormattingPolicy IndentSwitchBody="True" IndentBreakStatements="False" NamespaceBraceStyle="DoNotChange" ClassBraceStyle="DoNotChange" InterfaceBraceStyle="DoNotChange" StructBraceStyle="DoNotChange" EnumBraceStyle="DoNotChange" MethodBraceStyle="DoNotChange" AnonymousMethodBraceStyle="DoNotChange" ConstructorBraceStyle="DoNotChange" DestructorBraceStyle="DoNotChange" PropertyBraceStyle="DoNotChange" PropertyGetBraceStyle="DoNotChange" PropertySetBraceStyle="DoNotChange" EventBraceStyle="DoNotChange" EventAddBraceStyle="DoNotChange" EventRemoveBraceStyle="DoNotChange" StatementBraceStyle="DoNotChange" BeforeMethodDeclarationParameterComma="True" WithinMethodDeclarationParentheses="True" BeforeMethodCallParameterComma="True" BeforeConstructorDeclarationParameterComma="True" WithinConstructorDeclarationParentheses="True" WithinIndexerDeclarationBracket="True" BeforeIndexerDeclarationParameterComma="True" BeforeDelegateDeclarationParameterComma="True" AfterDelegateDeclarationParameterComma="True" WithinDelegateDeclarationParentheses="True" BeforeNewParameterComma="True" BlankLinesBetweenTypes="0" inheritsSet="Mono" inheritsScope="text/x-csharp" scope="text/x-csharp" />
+          <TextStylePolicy FileWidth="120" TabWidth="2" IndentWidth="2" NoTabsAfterNonTabs="True" EolMarker="Windows" inheritsSet="Mono" inheritsScope="text/plain" scope="text/plain" />
         </Policies>
       </Properties>
     </MonoDevelop>
   </ProjectExtensions>
   <ItemGroup>
-    <Reference Include="OpenResourceSystem_1_1_0">
-      <HintPath>..\..\..\GameData\OpenResourceSystem\Plugins\OpenResourceSystem.dll</HintPath>
-    </Reference>
     <Reference Include="Assembly-CSharp">
-      <HintPath>..\..\..\KSP_Data\Managed\Assembly-CSharp.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEngine">
-      <HintPath>..\..\..\KSP_Data\Managed\UnityEngine.dll</HintPath>
+      <HintPath>..\..\..\KSP Dev Build\Kerbal Space Program\KSP_Data\Managed\Assembly-CSharp.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="System">
       <HintPath>..\..\..\KSP_Data\Managed\System.dll</HintPath>
     </Reference>
+    <Reference Include="mscorlib">
+      <HintPath>..\..\..\KSP_Data\Managed\mscorlib.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine">
+      <HintPath>..\..\..\KSP Dev Build\Kerbal Space Program\KSP_Data\Managed\UnityEngine.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
   </ItemGroup>
+  <ItemGroup />
 </Project>

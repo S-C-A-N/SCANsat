@@ -24,8 +24,8 @@ using System.Runtime.CompilerServices;
 // by using the '*' as shown below:
 // [assembly: AssemblyVersion("1.0.*")]
 [assembly: AssemblyVersion("1.0.8.0")]
-[assembly: AssemblyFileVersion("1.0.8.0")]
-[assembly: AssemblyInformationalVersion("v8.0")]
+[assembly: AssemblyFileVersion("1.0.9.0")]
+[assembly: AssemblyInformationalVersion("v9rc1")]
 
-[assembly: KSPAssembly ("SCANsatKethane", 0, 8)]
-[assembly: KSPAssemblyDependency ("SCANsat", 0, 8)]
+[assembly: KSPAssembly ("SCANsatKethane", 0, 9)]
+[assembly: KSPAssemblyDependency ("SCANsat", 0, 9)]

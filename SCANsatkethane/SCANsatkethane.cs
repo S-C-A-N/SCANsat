@@ -14,6 +14,8 @@ using System;
 using SCANsat;
 using Kethane;
 using UnityEngine;
+using GeodesicGrid;
+
 namespace SCANsatKethane
 {
 
@@ -106,8 +108,8 @@ namespace SCANsatKethane
 				for (int ilon = 0; ilon < 360; ilon++) {
 					if (SCANUtil.isCovered (ilon, ilat, body, (int)type)) {
 						cell = getKethaneCell (ilon - 180, ilat - 90);
-						if (!KethaneData.Current.Scans[resource.name][body.name][cell]) {
-							KethaneData.Current.Scans[resource.name][body.name][cell] = true;
+						if (!KethaneData.Current[resource.name][body].IsCellScanned(cell)) {
+							KethaneData.Current[resource.name][body].ScanCell(cell);
 						}
 					}
 				}
@@ -123,11 +125,13 @@ namespace SCANsatKethane
 			}
 			for (int ilon = 0; ilon < 360; ilon++) {//Run 360 points per frame; 3 seconds at 60FPS
 				cell = getKethaneCell(ilon - 180, rebuildStep - 90);
-				if (KethaneData.Current.Scans[resource.name][body.name][cell]) {
+				if (KethaneData.Current[resource.name][body].IsCellScanned(cell)) {
 					updateResourceArray(ilon, rebuildStep, resource.type, data);
-					ICellResource deposit = KethaneData.Current.GetCellDeposit(resource.name, body, cell);
-					if (deposit != null) updateResourceValue(ilon, rebuildStep, deposit.Quantity, data);
-					else updateResourceValue(ilon, rebuildStep, -1d, data); //Give empty cells -1 resources, account for this later on
+					double? depositValue = KethaneData.Current[resource.name][body].Resources.GetQuantity(cell);
+					if (depositValue != null)
+						updateResourceValue(ilon, rebuildStep, depositValue, data);
+					else
+						updateResourceValue(ilon, rebuildStep, -1d, data); //Give empty cells -1 resources, account for this later on
 				}
 			}
 			rebuildStep++;
@@ -151,9 +155,11 @@ namespace SCANsatKethane
 					{
 						if (data.kethaneValueMap[ilon, ilat] == 0) { //Only check unassigned values
 							cell = getKethaneCell(ilon - 180, ilat - 90);
-							ICellResource deposit = KethaneData.Current.GetCellDeposit(resource.name, body, cell); 
-							if (deposit != null) updateResourceValue (ilon, ilat, deposit.Quantity, data);
-							else updateResourceValue (ilon, ilat, -1d, data); //Give empty cells -1 resources, account for this later on
+							double? depositValue = KethaneData.Current[resource.name][body].Resources.GetQuantity(cell);
+							if (depositValue != null)
+								updateResourceValue (ilon, ilat, depositValue, data);
+							else
+								updateResourceValue (ilon, ilat, -1d, data); //Give empty cells -1 resources, account for this later on
 						}
 					}
 				}
@@ -174,7 +180,7 @@ namespace SCANsatKethane
 			data.coverage[lon, lat] |= (Int32)type;
 		}
 
-		private void updateResourceValue (int lon, int lat, double value, SCANdata data) {
+		private void updateResourceValue (int lon, int lat, double? value, SCANdata data) {
 			data.kethaneValueMap[lon, lat] = (float)value;
 		}
 	}

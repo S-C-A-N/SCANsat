@@ -49,6 +49,7 @@ public class Debug_AutoLoadPersistentSaveOnStartup : MonoBehaviour {
                       */
                     }
 				FlightDriver.StartAndFocusVessel (game , suitableVessel);
+				CheatOptions.InfiniteFuel = true;
                }
           }
      }
