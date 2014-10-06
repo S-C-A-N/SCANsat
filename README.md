@@ -124,12 +124,7 @@ For licensing information, please see the [included LICENSE.txt][SCANsat:rel-lic
 
 #### [:top:][top] b. GameData Layout 
 
----------------------------------------
-**Folder Layout**			**Details**
------------------			-----------
- * GamedData				*[Recommended]
-    *000_Toolbar\				* 000_Toolbar from Blizz78
-  
+[![GameData Layout][SCANsat:gamedata]]
 
 #### [:top:][top] c. Other Add-Ons 
 
@@ -489,6 +484,7 @@ sneaky then they can of course be sneaky.
 [SCANsat:imgur-albums]: https://scansat.imgur.com
 [SCANsat:best-orbits-table]: https://www.example.com
 [SCANsat:email]: mailto:SCANscansat@gmail.com
+[SCANsat:gamedata]: http://i.imgur.com/cS1Lu5w.jpg
 
 [SCANsat:dev-readme]: https://github.com/S-C-A-N/SCANsat/tree/dev/#table-of-contents
 [SCANsat:rel-readme]: https://github.com/S-C-A-N/SCANsat/#table-of-contents
