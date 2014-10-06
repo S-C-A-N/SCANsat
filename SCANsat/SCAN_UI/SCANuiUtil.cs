@@ -28,7 +28,7 @@ namespace SCANsat.SCAN_UI
 			r.y -= 1;
 			GUI.color = palette.white;
 			if (active)
-				GUI.Label(r, text, SCANskins.SCAN_label);
+				GUI.Label(r, text, SCANskins.SCAN_colorLabel);
 			else
 				GUI.Label(r, text, SCANskins.SCAN_inactiveLabel);
 			if (!Event.current.isMouse)
@@ -103,6 +103,38 @@ namespace SCANsat.SCAN_UI
 				GUI.Label(r, txt, SCANskins.SCAN_orbitalLabelOn);
 			else
 				GUI.Label(r, txt, SCANskins.SCAN_orbitalLabelOff);
+		}
+
+		internal static string distanceString(double dist)
+		{
+			if (dist < 5000)
+				return dist.ToString("N1") + "m";
+			return (dist / 1000d).ToString("N3") + "km";
+		}
+
+		internal static void resetMainMapPos()
+		{
+
+		}
+
+		internal static void resetSettingsUIPos()
+		{
+
+		}
+
+		internal static void resetInstUIPos()
+		{
+
+		}
+
+		internal static void resetBigMapPos()
+		{
+
+		}
+
+		internal static void resetKSCMapPos()
+		{
+
 		}
 
 	}
