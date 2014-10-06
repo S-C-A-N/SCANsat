@@ -124,7 +124,7 @@ For licensing information, please see the [included LICENSE.txt][SCANsat:rel-lic
 
 #### [:top:][top] b. GameData Layout 
 
-[GameData Layout][SCANsat:gamedata]
+![][SCANsat:gamedata]
 
 #### [:top:][top] c. Other Add-Ons 
 
