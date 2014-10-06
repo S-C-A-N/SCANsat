@@ -504,7 +504,7 @@ sneaky then they can of course be sneaky.
 [SCANsat:rel-dist-curseforge]: http://kerbal.curseforge.com/ksp-mods/www.example.com-SCANsat
 [SCANsat:rel-dist-curseforge-zip]: http://kerbal.curseforge.com/ksp-mods/www.example.com-SCANsat/files/latest
 
-[SCANsat:rel-dist-github]: https://github.com/S-C-A-N/SCANsat/releases/tag/www.example.com
+[SCANsat:rel-dist-github]: https://github.com/S-C-A-N/SCANsat/releases
 [SCANsat:rel-dist-github-zip]: https://github.com/S-C-A-N/SCANsat/releases/download/www.example.com/SCANsat.zip
 
 [SCANsat:rel-dist-kerbalstuff]: http://beta.kerbalstuff.com/mod/www.example.com/SCANsat
