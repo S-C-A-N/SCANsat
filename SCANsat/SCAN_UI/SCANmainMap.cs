@@ -67,7 +67,7 @@ namespace SCANsat.SCAN_UI
 		private void versionLabel(int id)
 		{
 			Rect r = new Rect(6, 0, 40, 18);
-			GUI.Label(r, SCANversions.SCANsatVersion, SCANskins.SCAN_inactiveLabel);
+			GUI.Label(r, SCANversions.SCANsatVersion, SCANskins.SCAN_whiteLabel);
 		}
 
 		private void topMenu(int id)
@@ -75,7 +75,7 @@ namespace SCANsat.SCAN_UI
 			Rect r = new Rect(WindowRect.width - 40, 0, 18, 18);
 			if (showVesselInfo)
 			{
-				if (GUI.Button(r, "-", SCANskins.SCAN_texButton))
+				if (GUI.Button(r, "-", SCANskins.SCAN_buttonBorderless))
 				{
 					WindowRect.height -= (SCANcontroller.controller.knownVessels.Count * 16);
 					showVesselInfo = !showVesselInfo;
@@ -83,29 +83,29 @@ namespace SCANsat.SCAN_UI
 			}
 			else
 			{
-				if (GUI.Button(r, "+", SCANskins.SCAN_texButton))
+				if (GUI.Button(r, "+", SCANskins.SCAN_buttonBorderless))
 				{
 					WindowRect.height += (SCANcontroller.controller.knownVessels.Count * 16);
 					showVesselInfo = !showVesselInfo;
 				}
 			}
 			r.x += 16;
-			if (GUI.Button(r, SCANcontroller.controller.closeBox, SCANskins.SCAN_closeLabel))
+			if (GUI.Button(r, SCANcontroller.controller.closeBox, SCANskins.SCAN_closeButton))
 				SCANUtil.SCANlog("Close Map");
 		}
 
 		private void topButtons(int id)
 		{
 			growE();
-			if (GUILayout.Button("Big Map"))
+			if (GUILayout.Button("Big Map", SCANskins.SCAN_buttonFixed))
 			{
 				SCANUtil.SCANlog("Open Big Map");
 			}
-			if (GUILayout.Button("Instruments"))
+			if (GUILayout.Button("Instruments", SCANskins.SCAN_buttonFixed))
 			{
 				SCANUtil.SCANlog("Open Instrument");
 			}
-			if (GUILayout.Button("Settings"))
+			if (GUILayout.Button("Settings", SCANskins.SCAN_buttonFixed))
 			{
 				SCANUtil.SCANlog("Open Settings");
 			}
@@ -152,7 +152,6 @@ namespace SCANsat.SCAN_UI
 						if (alt < 0)
 							alt = (float)sV.vessel.altitude;
 						string text = string.Format("[{0}] <b>{1}</b> ({2:F1}°,{3:F1}°; {4:N1}m)", count, sV.vessel.vesselName, lat, lon, alt);
-						//SCANUtil.SCANlog("Vessel: {0}", text);
 						if (sV.vessel == FlightGlobals.ActiveVessel)
 							active = true;
 						else
