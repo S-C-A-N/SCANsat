@@ -26,7 +26,7 @@
 * [2. Types of Scans][2]
   * [a. Native SCANsat][2a]
   * [b. Resource Scans][2b]
-  * [1. Kethane][2b1] [![][shield:support-ket]][kethane:patch01][![][shield:jenkins-ket]][SCANsat:ket-jenkins]
+  * [1. Kethane][2b1] [![][shield:support-ket]][kethane:release][![][shield:jenkins-ket]][SCANsat:ket-jenkins]
   * [2. ORSX][2b2]
 * [3. Basic Usage][3]
   * [a. FAQ: Finding a Good Altitude][3a]
@@ -119,7 +119,7 @@ For licensing information, please see the [included LICENSE.txt][SCANsat:rel-lic
 
 #### [:top:][top] a. Installation 
 
-  1. Download the latest SCANsat package from the releases section of this GitHub Repo
+  1. Download the latest [SCANsat package][SCANsat:rel-dist-github] from the releases section of this GitHub Repo
   2. Extract the included package and put the SCANsat folder in your KSP installation's GameData folder.
 
 #### [:top:][top] b. GameData Layout 
@@ -156,7 +156,7 @@ S.C.A.N. is proud to collaborate with other KSP mods and modding teams. Followin
   * [x] via (ORSX) <- [![][shield:support-kspi]][kspi:release]
   * [x] via (ORSX) <- [![][shield:support-usi]][usi:release]
   * [x] via (ORSX) <- (Release) [![][shield:support-karbonite]][karbonite:release]
-  * [x] [![][shield:support-ket]][kethane:patch01]
+  * [x] [![][shield:support-ket]][kethane:release]
   * [x] via (Kethane) <- [![][shield:support-epl]][epl:release]
 
 
