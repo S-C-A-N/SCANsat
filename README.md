@@ -123,7 +123,13 @@ For licensing information, please see the [included LICENSE.txt][SCANsat:rel-lic
   2. Extract the included package and put the SCANsat folder in your KSP installation's GameData folder.
 
 #### [:top:][top] b. GameData Layout 
-:heavy_exclamation_mark:
+
+---------------------------------------
+**Folder Layout**			**Details**
+-----------------			-----------
+ * GamedData				*[Recommended]
+    *000_Toolbar\				* 000_Toolbar from Blizz78
+  
 
 #### [:top:][top] c. Other Add-Ons 
 
