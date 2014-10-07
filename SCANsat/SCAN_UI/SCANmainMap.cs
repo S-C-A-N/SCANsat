@@ -103,10 +103,12 @@ namespace SCANsat.SCAN_UI
 			}
 			if (GUILayout.Button("Instruments", SCANskins.SCAN_buttonFixed))
 			{
+				SCANcontroller.controller.instrumentsWindow.Visible = !SCANcontroller.controller.instrumentsWindow.Visible;
 				SCANUtil.SCANlog("Open Instrument");
 			}
 			if (GUILayout.Button("Settings", SCANskins.SCAN_buttonFixed))
 			{
+				SCANcontroller.controller.settingsWindow.Visible = !SCANcontroller.controller.settingsWindow.Visible;
 				SCANUtil.SCANlog("Open Settings");
 			}
 			stopE();

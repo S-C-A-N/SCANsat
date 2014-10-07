@@ -93,6 +93,10 @@ namespace SCANsat
         public bool kethaneReset = false;
         public bool kethaneBusy = false;
 
+		internal MBW mainMap;
+		internal MBW settingsWindow;
+		internal MBW instrumentsWindow;
+
 		public override void OnLoad(ConfigNode node) {
 			body_data.Clear();
 			ResourcesList.Clear();
@@ -143,7 +147,9 @@ namespace SCANsat
 			{
 				SCANUtil.loadSCANtypes();
 				Resources(FlightGlobals.currentMainBody);
-				MBW mainMap = gameObject.AddComponent<SCANmainMap>();
+				mainMap = gameObject.AddComponent<SCANmainMap>();
+				settingsWindow = gameObject.AddComponent<SCANsettingsUI>();
+				instrumentsWindow = gameObject.AddComponent<SCANinstrumentUI>();
 			}
 		}
 
@@ -187,6 +193,16 @@ namespace SCANsat
 					SCANui.gui_ping_maptraq();
 				}
 			}
+		}
+
+		private void OnDestroy()
+		{
+			if (mainMap != null)
+				Destroy(mainMap);
+			if (settingsWindow != null)
+				Destroy(settingsWindow);
+			if (instrumentsWindow != null)
+				Destroy(instrumentsWindow);
 		}
 
 		public class SCANsensor
@@ -300,6 +316,11 @@ namespace SCANsat
 			SCANvessel sv = knownVessels[id];
 			sv.id = id;
 			sv.vessel = FlightGlobals.Vessels.FirstOrDefault(a => a.id == id);
+			if (sv.vessel == null)
+			{
+				knownVessels.Remove(id);
+				return;
+			}
 			foreach(SCANdata.SCANtype sensor in Enum.GetValues(typeof(SCANdata.SCANtype))) {
 				if(SCANUtil.countBits((int)sensor) != 1) continue;
 				if((sensor & sensors) == SCANdata.SCANtype.Nothing) continue;
