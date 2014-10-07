@@ -105,6 +105,119 @@ namespace SCANsat.SCAN_UI
 				GUI.Label(r, txt, SCANskins.SCAN_orbitalLabelOff);
 		}
 
+		internal static void drawGrid(Rect maprect, SCANmap map, Texture2D overlay_static)
+		{
+			int x, y;
+			for (double lat = -90; lat < 90; lat += 2)
+			{
+				for (double lon = -180; lon < 180; lon += 2)
+				{
+					if (lat % 30 == 0 || lon % 30 == 0)
+					{
+						x = (int)(map.mapscale * ((map.projectLongitude(lon, lat) + 180) % 360));
+						y = (int)(map.mapscale * ((map.projectLatitude(lon, lat) + 90) % 180));
+						drawDot(x, y, palette.white, overlay_static);
+					}
+				}
+			}
+		}
+
+		private static void drawDot(int x, int y, Color c, Texture2D tex)
+		{
+			tex.SetPixel(x, y, c);
+			tex.SetPixel(x - 1, y, palette.black);
+			tex.SetPixel(x + 1, y, palette.black);
+			tex.SetPixel(x, y - 1, palette.black);
+			tex.SetPixel(x, y + 1, palette.black);
+		}
+
+		internal static void drawMapLabels(Rect maprect, Vessel vessel, SCANmap map, SCANdata data)
+		{
+			foreach (Vessel v in FlightGlobals.Vessels)
+			{
+				if (v.mainBody == vessel.mainBody)
+				{
+					if (v.vesselType == VesselType.Flag && SCANcontroller.controller.map_flags)
+					{
+						drawVesselLabel(maprect, map, 0, v);
+					}
+					if (v.vesselType == VesselType.SpaceObject && SCANcontroller.controller.map_asteroids)
+					{
+						drawVesselLabel(maprect, map, 0, v);
+					}
+				}
+			}
+			if (SCANcontroller.controller.map_markers)
+			{
+				foreach (SCANdata.SCANanomaly anomaly in data.getAnomalies())
+				{
+					drawAnomalyLabel(maprect, map, anomaly);
+				}
+			}
+			drawVesselLabel(maprect, map, 0, vessel);
+		}
+
+		internal static void drawAnomalyLabel(Rect maprect, SCANmap map, SCANdata.SCANanomaly anomaly)
+		{
+			if (!anomaly.known)
+				return;
+			double lon = (anomaly.longitude + 360 + 180) % 360;
+			double lat = (anomaly.latitude + 180 + 90) % 180;
+			if (map != null)
+			{
+				lat = (map.projectLatitude(anomaly.longitude, anomaly.latitude) + 90) % 180;
+				lon = (map.projectLongitude(anomaly.longitude, anomaly.latitude) + 180) % 360;
+				lat = map.scaleLatitude(lat);
+				lon = map.scaleLongitude(lon);
+				if (lat < 0 || lon < 0 || lat > 180 || lon > 360)
+					return;
+			}
+			lon = lon * maprect.width / 360f;
+			lat = maprect.height - lat * maprect.height / 180f;
+			string txt = SCANcontroller.controller.anomalyMarker + " " + anomaly.name;
+			if (!anomaly.detail)
+				txt = SCANcontroller.controller.anomalyMarker + " Anomaly";
+			Rect r = new Rect(maprect.x + (float)lon, maprect.y + (float)lat, 250f, 25f);
+			drawLabel(r, txt, true, true, true);
+		}
+
+		/* FIXME: This may use assumed, shared, static constants with Legend stuff in other SCANsat files */
+		internal static void drawLegendLabel(Rect r, float val, float min, float max)
+		{
+			if (val < min || val > max)
+				return;
+			float scale = r.width * 1f / (max - min);
+			float x = r.x + scale * (val - min);
+			Rect lr = new Rect(x, r.y + r.height / 4, r.width - x, r.height);
+			drawLabel(lr, "|", true, true, false);
+			string txt = val.ToString("N0");
+			GUIContent c = new GUIContent(txt);
+			Vector2 dim = SCANskins.SCAN_whiteLabel.CalcSize(c);
+			lr.y += dim.y * 0.25f;
+			lr.x -= dim.x / 2;
+			if (lr.x < r.x)
+				lr.x = r.x;
+			if (lr.x + dim.x > r.x + r.width)
+				lr.x = r.x + r.width - dim.x;
+			drawLabel(lr, txt, false, true, false);
+		}
+
+		/* FIXME: This uses assumed, shared, static constants with Legend stuff in other SCANsat files */
+		internal static void drawLegend(SCANmap bigmap)
+		{
+			if (bigmap.mapmode == 0 && SCANcontroller.controller.legend)
+			{
+				GUILayout.Label("", GUILayout.ExpandWidth(true));
+				Rect r = GUILayoutUtility.GetLastRect();
+				r.width -= 64;
+				GUI.DrawTexture(r, SCANmap.getLegend(-1500f, 9000f, SCANcontroller.controller.colours));
+				for (float val = -1000f; val < 9000f; val += 1000f)
+				{
+					drawLegendLabel(r, val, -1500f, 9000f);
+				}
+			}
+		}
+
 		internal static string distanceString(double dist)
 		{
 			if (dist < 5000)
