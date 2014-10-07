@@ -23,8 +23,9 @@ namespace SCANsat.SCAN_UI
 		protected override void Awake()
 		{
 			WindowCaption = "S.C.A.N. Settings";
-			WindowRect = new Rect(100, 55, 360, 480);
+			WindowRect = new Rect(100, 55, 360, 300);
 			WindowStyle = SCANskins.SCAN_window;
+			WindowOptions = new GUILayoutOption[2] { GUILayout.Width(360), GUILayout.Height(300) };
 			Visible = true;
 			DragEnabled = true;
 
@@ -53,7 +54,7 @@ namespace SCANsat.SCAN_UI
 				GUILayout.Space(16);
 				gui_settings_timewarp(id);				/* time warp resolution settings */
 				GUILayout.Space(8);
-				GUILayout.Label(gui_settings_numbers(id), SCANskins.SCAN_colorLabel);/* sensor/scanning		statistics */
+				GUILayout.Label(gui_settings_numbers(id), SCANskins.SCAN_whiteLabel);/* sensor/scanning		statistics */
 				GUILayout.Space(16);
 				gui_settings_data_resets(id);			/* reset data and/or reset resources */
 				GUILayout.Space(8);
@@ -74,9 +75,10 @@ namespace SCANsat.SCAN_UI
 
 		private void closeBox(int id)
 		{
-			Rect r = new Rect(WindowRect.width - 25, 0, 22, 22);
+			Rect r = new Rect(WindowRect.width - 20, 0, 18, 18);
 			if (GUI.Button(r, SCANcontroller.controller.closeBox, SCANskins.SCAN_closeButton))
 			{
+				Visible = false;
 				SCANUtil.SCANlog("Close Settings Window");
 			}
 		}
@@ -155,12 +157,12 @@ namespace SCANsat.SCAN_UI
 			int count = 0;
 			foreach (CelestialBody body in FlightGlobals.Bodies)
 			{
-				if (count == 0) growS(); ;
+				if (count == 0) growS();
 				SCANdata data = SCANUtil.getData(body);
 				data.disabled = !GUILayout.Toggle(!data.disabled, body.bodyName + " (" + data.getCoveragePercentage(SCANdata.SCANtype.Nothing).ToString("N1") + "%)"); //No longer updates while the suttings menu is open
 				switch (count)
 				{
-					case 4: stopS(); count = 0; break;
+					case 5: stopS(); count = 0; break;
 					default: ++count; break;
 				}
 			}

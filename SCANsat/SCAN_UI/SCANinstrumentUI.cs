@@ -21,8 +21,9 @@ namespace SCANsat.SCAN_UI
 		protected override void Awake()
 		{
 			WindowCaption = "S.C.A.N. Instruments";
-			WindowRect = new Rect(10, 255, 200, 150);
+			WindowRect = new Rect(20, 455, 200, 60);
 			WindowStyle = SCANskins.SCAN_window;
+			WindowOptions = new GUILayoutOption[2] { GUILayout.Width(200), GUILayout.Height(60) };
 			Visible = true;
 			DragEnabled = true;
 
@@ -92,15 +93,16 @@ namespace SCANsat.SCAN_UI
 
 		private void versionLabel(int id)
 		{
-			Rect r = new Rect(6, 0, 40, 18);
+			Rect r = new Rect(4, 0, 40, 18);
 			GUI.Label(r, SCANversions.SCANsatVersion, SCANskins.SCAN_whiteLabel);
 		}
 
 		private void closeBox(int id)
 		{
-			Rect r = new Rect(WindowRect.width - 25, 0, 22, 22);
+			Rect r = new Rect(WindowRect.width - 20, 0, 18, 18);
 			if (GUI.Button(r, SCANcontroller.controller.closeBox, SCANskins.SCAN_closeButton))
 			{
+				Visible = false;
 				SCANUtil.SCANlog("Close Info Box");
 			}
 		}
