@@ -122,6 +122,307 @@ namespace SCANsat.SCAN_UI
 			}
 		}
 
+		internal static void drawOrbit(Rect maprect, SCANmap map, Vessel vessel, double startUT, Texture2D overlay_static, int[] eq_an_map, int[] eq_dn_map, Texture2D eq_map, int eq_frame)
+		{
+			if (vessel.LandedOrSplashed)
+				return;
+			bool lite = maprect.width < 400;
+			Orbit o = vessel.orbit;
+			startUT = Planetarium.GetUniversalTime();
+			double UT = startUT;
+			int steps = 100; // increase for neater lines, decrease for better speed indication
+			bool ath = false;
+			if (vessel.mainBody.atmosphere)
+			{
+				if (vessel.mainBody.maxAtmosphereAltitude >= vessel.altitude)
+				{
+					ath = true;
+				}
+			}
+			Rect r = new Rect(0, 0, 50f, 50f);
+			Color col;
+			// project the last and the current orbital period onto the map
+			for (int i = -steps; i < steps; ++i)
+			{
+				if (i < 0)
+					UT = startUT - (steps + i) * (o.period / steps);
+				else
+					UT = startUT + i * o.period * 1f / steps;
+				if (double.IsNaN(UT))
+					continue;
+				if (UT < o.StartUT && o.StartUT != startUT)
+					continue;
+				if (UT > o.EndUT)
+					continue;
+				if (double.IsNaN(o.getObtAtUT(UT)))
+					continue;
+				Vector3d pos = o.getPositionAtUT(UT);
+				double rotation = 0;
+				if (vessel.mainBody.rotates)
+				{
+					rotation = (360 * ((UT - startUT) / vessel.mainBody.rotationPeriod)) % 360;
+				}
+				double alt = (vessel.mainBody.GetAltitude(pos));
+				if (alt < 0)
+				{
+					if (i < 0)
+					{
+						i = 0;
+						continue;
+					}
+					break;
+				}
+				double lo = (vessel.mainBody.GetLongitude(pos) - rotation);
+				double la = (vessel.mainBody.GetLatitude(pos));
+				double lon = (map.projectLongitude(lo, la) + 180) % 360;
+				double lat = (map.projectLatitude(lo, la) + 90) % 180;
+				lat = map.scaleLatitude(lat);
+				lon = map.scaleLongitude(lon);
+				if (lat < 0 || lon < 0 || lat > 180 || lon > 360)
+					continue;
+				lon = lon * maprect.width / 360f;
+				lat = maprect.height - lat * maprect.height / 180f;
+				r.x = maprect.x + (float)lon;
+				r.y = maprect.y + (float)lat;
+				col = palette.cb_skyBlue;
+				if (i < 0)
+				{
+					col = palette.cb_orange;
+				}
+				else
+				{
+					if (vessel.mainBody.atmosphere)
+					{
+						if (vessel.mainBody.maxAtmosphereAltitude >= alt)
+						{
+							if (!ath)
+							{
+								ath = true;
+								// do something when it flips?
+							}
+							col = palette.cb_reddishPurple;
+						}
+					}
+				}
+				Icon.drawOrbitIcon((int)r.x, (int)r.y, Icon.OrbitIcon.Planet, col, 8, false);
+			}
+
+			// show apoapsis and periapsis
+			if (o.ApA > 0 && mapPosAtT(maprect, map, ref r, vessel, o, o.timeToAp, startUT))
+			{
+				Icon.drawOrbitIcon((int)r.x, (int)r.y, Icon.OrbitIcon.Ap, palette.cb_skyBlue, 32, true);
+				r.x += 24;
+				r.y -= 12;
+				if (!lite)
+					drawLabel(r, o.ApA.ToString("N1"), true, true, true);
+			}
+			if (o.PeA > 0 && mapPosAtT(maprect, map, ref r, vessel, o, o.timeToPe, startUT))
+			{
+				Icon.drawOrbitIcon((int)r.x, (int)r.y, Icon.OrbitIcon.Pe, palette.cb_skyBlue, 32, true);
+				r.x += 24;
+				r.y -= 12;
+				if (!lite)
+					drawLabel(r, o.PeA.ToString("N1"), true, true, true);
+			}
+
+			if (lite)
+				return;
+
+			// show first maneuver node
+			if (vessel.patchedConicSolver.maneuverNodes.Count > 0)
+			{
+				ManeuverNode n = vessel.patchedConicSolver.maneuverNodes[0];
+				if (n.patch == vessel.orbit && n.nextPatch != null && n.nextPatch.activePatch && n.UT > startUT - o.period && mapPosAtT(maprect, map, ref r, vessel, o, n.UT - startUT, startUT))
+				{
+					col = palette.cb_reddishPurple;
+					if (SCANcontroller.controller.colours != 1)
+						col = palette.xkcd_PurplyPink;
+					Icon.drawOrbitIcon((int)r.x, (int)r.y, Icon.OrbitIcon.ManeuverNode, col, 32, true);
+					Orbit nuo = n.nextPatch;
+					for (int i = 0; i < steps; ++i)
+					{
+						double T = n.UT - startUT + i * nuo.period / steps;
+						if (T + startUT > nuo.EndUT)
+							break;
+						if (mapPosAtT(maprect, map, ref r, vessel, nuo, T, startUT))
+						{
+							Icon.drawOrbitIcon((int)r.x, (int)r.y, Icon.OrbitIcon.Planet, col, 8, false);
+						}
+					}
+					if (nuo.patchEndTransition == Orbit.PatchTransitionType.ESCAPE)
+					{
+						Icon.drawOrbitIcon((int)r.x, (int)r.y, Icon.OrbitIcon.Exit, col, 32, true);
+					}
+					else if (nuo.patchEndTransition == Orbit.PatchTransitionType.ENCOUNTER)
+					{
+						Icon.drawOrbitIcon((int)r.x, (int)r.y, Icon.OrbitIcon.Encounter, col, 32, true);
+					}
+					if (nuo.timeToAp > 0 && n.UT + nuo.timeToAp < nuo.EndUT && mapPosAtT(maprect, map, ref r, vessel, nuo, n.UT - startUT + nuo.timeToAp, startUT))
+					{
+						Icon.drawOrbitIcon((int)r.x, (int)r.y, Icon.OrbitIcon.Ap, col, 32, true);
+					}
+					if (nuo.timeToPe > 0 && n.UT + nuo.timeToPe < nuo.EndUT && mapPosAtT(maprect, map, ref r, vessel, nuo, n.UT - startUT + nuo.timeToPe, startUT))
+					{
+						Icon.drawOrbitIcon((int)r.x, (int)r.y, Icon.OrbitIcon.Pe, col, 32, true);
+					}
+				}
+			}
+
+			if (o.PeA < 0)
+				return;
+			if (overlay_static == null)
+				return;
+			if (map.projection == SCANmap.MapProjection.Polar)
+				return;
+
+			if (eq_frame <= 0)
+			{
+				// predict equatorial crossings for the next 100 loops
+				double TAAN = 360f - o.argumentOfPeriapsis;	// true anomaly at ascending node
+				double TADN = (TAAN + 180) % 360;			// true anomaly at descending node
+				double MAAN = meanForTrue(TAAN, o.eccentricity);
+				double MADN = meanForTrue(TADN, o.eccentricity);
+				double tAN = (((MAAN - o.meanAnomaly * Mathf.Rad2Deg + 360) % 360) / 360f * o.period + startUT);
+				double tDN = (((MADN - o.meanAnomaly * Mathf.Rad2Deg + 360) % 360) / 360f * o.period + startUT);
+
+				int eqh = 16;
+				if (eq_an_map == null || eq_dn_map == null || eq_an_map.Length != overlay_static.width)
+				{
+					eq_an_map = new int[overlay_static.width];
+					eq_dn_map = new int[overlay_static.width];
+				}
+				if (eq_map == null || eq_map.width != eq_an_map.Length)
+				{
+					eq_map = new Texture2D(eq_an_map.Length, eqh, TextureFormat.ARGB32, false);
+				}
+				for (int i = 0; i < eq_an_map.Length; ++i)
+				{
+					eq_an_map[i] = 0;
+					eq_dn_map[i] = 0;
+				}
+				for (int i = 0; i < 100; ++i)
+				{
+					double UTAN = tAN + o.period * i;
+					double UTDN = tDN + o.period * i;
+					if (double.IsNaN(UTAN) || double.IsNaN(UTDN))
+						continue;
+					Vector3d pAN = o.getPositionAtUT(UTAN);
+					Vector3d pDN = o.getPositionAtUT(UTDN);
+					double rotAN = 0, rotDN = 0;
+					if (vessel.mainBody.rotates)
+					{
+						rotAN = ((360 * ((UTAN - startUT) / vessel.mainBody.rotationPeriod)) % 360);
+						rotDN = ((360 * ((UTDN - startUT) / vessel.mainBody.rotationPeriod)) % 360);
+					}
+					double loAN = vessel.mainBody.GetLongitude(pAN) - rotAN;
+					double loDN = vessel.mainBody.GetLongitude(pDN) - rotDN;
+					int lonAN = (int)(((map.projectLongitude(loAN, 0) + 180) % 360) * eq_an_map.Length / 360f);
+					int lonDN = (int)(((map.projectLongitude(loDN, 0) + 180) % 360) * eq_dn_map.Length / 360f);
+					if (lonAN >= 0 && lonAN < eq_an_map.Length)
+						eq_an_map[lonAN] += 1;
+					if (lonDN >= 0 && lonDN < eq_dn_map.Length)
+						eq_dn_map[lonDN] += 1;
+				}
+				Color[] pix = eq_map.GetPixels(0, 0, eq_an_map.Length, eqh);
+				Color cAN = palette.cb_skyBlue, cDN = palette.cb_orange;
+				for (int y = 0; y < eqh; ++y)
+				{
+					Color lc = palette.clear;
+					for (int x = 0; x < eq_an_map.Length; ++x)
+					{
+						Color c = palette.clear;
+						float scale = 0;
+						if (y < eqh / 2)
+						{
+							c = cDN;
+							scale = eq_dn_map[x];
+						}
+						else
+						{
+							c = cAN;
+							scale = eq_an_map[x];
+						}
+						if (scale >= 1)
+						{
+							if (y == 0 || y == eqh - 1)
+							{
+								c = palette.black;
+							}
+							else
+							{
+								if (lc == palette.clear)
+									pix[y * eq_an_map.Length + x - 1] = palette.black;
+								scale = Mathf.Clamp(scale - 1, 0, 10) / 10f;
+								c = palette.lerp(c, palette.white, scale);
+							}
+						}
+						else
+						{
+							c = palette.clear;
+							if (lc != palette.clear && lc != palette.black)
+								c = palette.black;
+						}
+						pix[y * eq_an_map.Length + x] = c;
+						lc = c;
+					}
+				}
+				eq_map.SetPixels(0, 0, eq_an_map.Length, eqh, pix);
+				eq_map.Apply();
+				eq_frame = 4;
+			}
+			else
+			{
+				eq_frame -= 1;
+			}
+
+			if (eq_map != null)
+			{
+				r.x = maprect.x;
+				r.y = maprect.y + maprect.height / 2 + -eq_map.height / 2;
+				r.width = eq_map.width;
+				r.height = eq_map.height;
+				GUI.DrawTexture(r, eq_map);
+			}
+		}
+
+		/* UI: This isn't really a UI function, so it doesn't belong here.
+		 * 		This is more of a time-projection mathematical function. */
+		/* FIXME: possible relocation */
+		private static bool mapPosAtT(Rect maprect, SCANmap map, ref Rect r, Vessel vessel, Orbit o, double dT, double startUT)
+		{
+			double UT = startUT + dT;
+			if (double.IsNaN(UT))
+				return false;
+			try
+			{
+				if (double.IsNaN(o.getObtAtUT(UT)))
+					return false;
+				Vector3d pos = o.getPositionAtUT(UT);
+				double rotation = 0;
+				if (vessel.mainBody.rotates)
+				{
+					rotation = (360 * (dT / vessel.mainBody.rotationPeriod)) % 360;
+				}
+				double lo = (vessel.mainBody.GetLongitude(pos) - rotation);
+				double la = (vessel.mainBody.GetLatitude(pos));
+				double lon = (map.projectLongitude(lo, la) + 180) % 360;
+				double lat = (map.projectLatitude(lo, la) + 90) % 180;
+				lat = map.scaleLatitude(lat);
+				lon = map.scaleLongitude(lon);
+				if (lat < 0 || lon < 0 || lat > 180 || lon > 360)
+					return false;
+				lon = lon * maprect.width / 360f;
+				lat = maprect.height - lat * maprect.height / 180f;
+				r.x = maprect.x + (float)lon;
+				r.y = maprect.y + (float)lat;
+				return true;
+			}
+			catch (Exception)
+			{
+				return false;
+			}
+		}
+
 		private static void drawDot(int x, int y, Color c, Texture2D tex)
 		{
 			tex.SetPixel(x, y, c);
@@ -216,6 +517,54 @@ namespace SCANsat.SCAN_UI
 					drawLegendLabel(r, val, -1500f, 9000f);
 				}
 			}
+		}
+
+		/* UI: conversions to and from DMS */
+		/* FIXME: These do not belong here. And they are only used once! */
+		internal static string toDMS(double thing, string neg, string pos)
+		{
+			string dms = "";
+			if (thing >= 0)
+				neg = pos;
+			thing = Math.Abs(thing);
+			dms += Math.Floor(thing).ToString() + "°";
+			thing = (thing - Math.Floor(thing)) * 60;
+			dms += Math.Floor(thing).ToString() + "'";
+			thing = (thing - Math.Floor(thing)) * 60;
+			dms += thing.ToString("F2") + "\"";
+			dms += neg;
+			return dms;
+		}
+
+		internal static string toDMS(double lat, double lon)
+		{
+			return toDMS(lat, "S", "N") + " " + toDMS(lon, "W", "E");
+		}
+
+		internal static string distanceString(double dist)
+		{
+			if (dist < 5000)
+				return dist.ToString("N1") + "m";
+			return (dist / 1000d).ToString("N3") + "km";
+		}
+
+		internal static double meanForTrue(double TA, double e)
+		{
+			TA = TA * Mathf.Deg2Rad;
+			double EA = Math.Acos((e + Math.Cos(TA)) / (1 + e * Math.Cos(TA)));
+			if (TA > Math.PI)
+				EA = 2 * Math.PI - EA;
+			double MA = EA - e * Math.Sin(EA);
+			// the mean anomaly isn't really an angle, but I'm a simple person
+			return MA * Mathf.Rad2Deg;
+		}
+
+		internal static void clearTexture(Texture2D tex)
+		{
+			Color[] pix = tex.GetPixels();
+			for (int i = 0; i < pix.Length; ++i)
+				pix[i] = palette.clear;
+			tex.SetPixels(pix);
 		}
 
 		internal static string distanceString(double dist)
