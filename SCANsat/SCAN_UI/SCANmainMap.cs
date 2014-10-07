@@ -99,6 +99,7 @@ namespace SCANsat.SCAN_UI
 			growE();
 			if (GUILayout.Button("Big Map", SCANskins.SCAN_buttonFixed))
 			{
+				SCANcontroller.controller.bigMap.Visible = !SCANcontroller.controller.bigMap.Visible;
 				SCANUtil.SCANlog("Open Big Map");
 			}
 			if (GUILayout.Button("Instruments", SCANskins.SCAN_buttonFixed))

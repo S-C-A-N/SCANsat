@@ -96,6 +96,7 @@ namespace SCANsat
 		internal MBW mainMap;
 		internal MBW settingsWindow;
 		internal MBW instrumentsWindow;
+		internal MBW bigMap;
 
 		public override void OnLoad(ConfigNode node) {
 			body_data.Clear();
@@ -150,6 +151,7 @@ namespace SCANsat
 				mainMap = gameObject.AddComponent<SCANmainMap>();
 				settingsWindow = gameObject.AddComponent<SCANsettingsUI>();
 				instrumentsWindow = gameObject.AddComponent<SCANinstrumentUI>();
+				bigMap = gameObject.AddComponent<SCANbigMap>();
 			}
 		}
 
@@ -203,6 +205,8 @@ namespace SCANsat
 				Destroy(settingsWindow);
 			if (instrumentsWindow != null)
 				Destroy(instrumentsWindow);
+			if (bigMap != null)
+				Destroy(bigMap);
 		}
 
 		public class SCANsensor
