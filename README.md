@@ -156,7 +156,7 @@ S.C.A.N. is proud to collaborate with other KSP mods and modding teams. Followin
   * [x] [![][shield:support-orsx]][ORSX:release]
   * [x] via (ORSX) <- [![][shield:support-kspi]][kspi:release]
   * [x] via (ORSX) <- [![][shield:support-usi]][usi:release]
-  * [x] via (ORSX) <- (Release) [![][shield:support-karbonite]][karbonite:release]
+  * [x] via (ORSX) <- [![][shield:support-karbonite]][karbonite:release]
   * [x] [![][shield:support-ket]][kethane:release]
   * [x] via (Kethane) <- [![][shield:support-epl]][epl:release]
 
