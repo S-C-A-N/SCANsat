@@ -357,7 +357,7 @@ namespace SCANsat
 			return count;
 		}
 
-		internal static void SCANlog(string log, params object[] stringObjects)
+		public static void SCANlog(string log, params object[] stringObjects)
 		{
 			log = string.Format(log, stringObjects);
 			string finalLog = string.Format("[SCANsat] {0}", log);
