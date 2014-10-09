@@ -21,7 +21,7 @@ namespace SCANsat
     [KSPAddon(KSPAddon.Startup.MainMenu, true)]
     internal class SCANversions: MonoBehaviour
     {
-		private string[] Assemblies = new string[7] { "SCANsatRPM", "SCANsatKethane", "Kethane", "RasterPropMonitor", "MechJebRPM", "MechJeb2", "ORSX" };
+		private string[] Assemblies = new string[8] { "SCANsatRPM", "SCANsatKethane", "Kethane", "RasterPropMonitor", "MechJebRPM", "MechJeb2", "ORSX", "GeodesicGrid" };
         internal static string SCANsatVersion = "";
         private List<AssemblyLog> assemblyList = new List<AssemblyLog>();
 

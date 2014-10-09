@@ -34,8 +34,6 @@ namespace SCANsat
 
 		private static ORSXpixelAbundance _ORSXpixelAbundance;
 
-		internal static Type _ORSXPlanetType;
-
 		internal static double ORSXpixelAbundanceValue(int body, string resourceName, double lat, double lon)
 		{
 			return _ORSXpixelAbundance(body, resourceName, lat, lon);
@@ -85,8 +83,6 @@ namespace SCANsat
 					SCANUtil.SCANlog("ORSX Type Not Found");
 					return false;
 				}
-
-				_ORSXPlanetType = ORSXType;
 
 				MethodInfo ORSXMethod = ORSXType.GetMethod(ORSXPixelAbundanceMethod, new Type[] { typeof(int), typeof(string), typeof(double), typeof(double) });
 
