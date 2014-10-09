@@ -245,8 +245,9 @@ namespace SCANsat
         {
             List<ModuleScienceContainer> EVACont = FlightGlobals.ActiveVessel.FindPartModulesImplementing<ModuleScienceContainer>();
             if (storedData.Count > 0) {
-                if (EVACont.First().StoreData(new List<IScienceDataContainer>() { this }, false)) {  
-                    DumpData(storedData[0]);
+                if (EVACont.First().StoreData(new List<IScienceDataContainer>() { this }, false)) {
+					foreach (ScienceData data in storedData)
+						DumpData(data);
                 }
             }
         }

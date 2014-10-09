@@ -48,6 +48,7 @@
     <Compile Include="SCANmap.cs" />
     <Compile Include="SCANpalette.cs" />
     <Compile Include="SCANquickload.cs" />
+    <Compile Include="SCANreflection.cs" />
     <Compile Include="SCANsat.cs" />
     <Compile Include="SCANsatRPM.cs" />
     <Compile Include="SCANtoolbar.cs" />
@@ -68,17 +69,16 @@
     </MonoDevelop>
   </ProjectExtensions>
   <ItemGroup>
-    <Reference Include="OpenResourceSystem_1_1_0">
-      <HintPath>..\..\..\GameData\OpenResourceSystem\Plugins\OpenResourceSystem.dll</HintPath>
-    </Reference>
     <Reference Include="Assembly-CSharp">
-      <HintPath>..\..\..\KSP_Data\Managed\Assembly-CSharp.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEngine">
-      <HintPath>..\..\..\KSP_Data\Managed\UnityEngine.dll</HintPath>
+      <HintPath>..\..\..\KSP\Kerbal Space Program\KSP_Data\Managed\Assembly-CSharp.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="System">
       <HintPath>..\..\..\KSP_Data\Managed\System.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine">
+      <HintPath>..\..\..\KSP\Kerbal Space Program\KSP_Data\Managed\UnityEngine.dll</HintPath>
+      <Private>False</Private>
     </Reference>
   </ItemGroup>
 </Project>
