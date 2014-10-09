@@ -97,6 +97,7 @@ namespace SCANsat
 		internal MBW settingsWindow;
 		internal MBW instrumentsWindow;
 		internal MBW bigMap;
+		internal MBW kscMap;
 
 		public override void OnLoad(ConfigNode node) {
 			body_data.Clear();
@@ -153,6 +154,12 @@ namespace SCANsat
 				instrumentsWindow = gameObject.AddComponent<SCANinstrumentUI>();
 				bigMap = gameObject.AddComponent<SCANbigMap>();
 			}
+			else if (HighLogic.LoadedScene == GameScenes.SPACECENTER || HighLogic.LoadedScene == GameScenes.TRACKSTATION)
+			{
+				SCANUtil.loadSCANtypes();
+				Resources(Planetarium.fetch.Home);
+				kscMap = gameObject.AddComponent<SCANkscMap>();
+			}
 		}
 
 		public override void OnSave(ConfigNode node) {
@@ -207,6 +214,8 @@ namespace SCANsat
 				Destroy(instrumentsWindow);
 			if (bigMap != null)
 				Destroy(bigMap);
+			if (kscMap != null)
+				Destroy(kscMap);
 		}
 
 		public class SCANsensor
