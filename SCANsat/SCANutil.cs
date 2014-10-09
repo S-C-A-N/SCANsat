@@ -13,7 +13,6 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
-using OpenResourceSystem;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
 using palette = SCANsat.SCANpalette;
@@ -200,7 +199,7 @@ namespace SCANsat
 
 			su.scienceCap *= multiplier;
 
-			debugLog("Coverage: {0}, Science cap: {1}, Subject value: {2}, Scientific value: {3}, Science: {4}", new object[5] {coverage.ToString("F1"), su.scienceCap.ToString("F1"), su.subjectValue.ToString("F2"), su.scientificValue.ToString("F2"), su.science.ToString("F2")});
+			SCANlog("Coverage: {0}, Science cap: {1}, Subject value: {2}, Scientific value: {3}, Science: {4}", new object[5] {coverage.ToString("F1"), su.scienceCap.ToString("F1"), su.subjectValue.ToString("F2"), su.scientificValue.ToString("F2"), su.science.ToString("F2")});
 
 			su.scientificValue = 1;
 
@@ -210,12 +209,12 @@ namespace SCANsat
 			science = science / 100f;
 			science = Mathf.Max(0, (science * su.scienceCap) - su.science);
 
-			debugLog("Remaining science: {0}, Base value: {1}", new object[2] {science.ToString("F1"), se.baseValue.ToString("F1")});
+			SCANlog("Remaining science: {0}, Base value: {1}", new object[2] {science.ToString("F1"), se.baseValue.ToString("F1")});
 
 			science /= Mathf.Max(0.1f, su.scientificValue); //look 10 lines up; this is always 1...
 			science /= su.subjectValue;
 
-			debugLog("Resulting science value: {0}", new object[1] {science.ToString("F2")});
+			SCANlog("Resulting science value: {0}", new object[1] {science.ToString("F2")});
 
 			if(notZero && science <= 0) science = 0.00001f;
 
@@ -227,10 +226,87 @@ namespace SCANsat
 		internal static double ORSOverlay(double lon, double lat, int i, string s)
 		{
 			double amount = 0f;
-			ORSPlanetaryResourcePixel overlayPixel = ORSPlanetaryResourceMapData.getResourceAvailability(i, s, lat, lon);
-			if (overlayPixel != null)
-				amount = overlayPixel.getAmount();
+			amount = SCANreflection.ORSXpixelAbundanceValue(i, s, lat, lon);
+			//ORSPlanetaryResourcePixel overlayPixel = ORSPlanetaryResourceMapData.getResourceAvailability(i, s, lat, lon);
+			//if (overlayPixel != null)
+			//	amount = overlayPixel.getAmount();
 			return amount;
+		}
+
+		internal static SCANdata.SCANResource ORSConfigLoad(ConfigNode node)
+		{
+			double scalar = 1d;
+			double Threshold = 1d;
+			double mult = 1d;
+			string name = "";
+			string body = "";
+			bool scale = false;
+			if (node.HasValue("name"))
+				name = node.GetValue("name");
+			else
+				return null;
+			SCANdata.SCANresourceType type = OverlayResourceType(name);
+			if (type == null)
+				return null;
+			if (type.type == SCANdata.SCANtype.Nothing)
+				return null;
+			if (node.HasValue("celestialBodyName"))
+				body = node.GetValue("celestialBodyName");
+			else
+				return null;
+			if (node.HasValue("resourceScale"))
+			{
+				if (node.GetValue("resourceScale") == "LINEAR_SCALE")
+					scale = true;
+				else if (node.GetValue("resourceScale") == "LOG_SCALE")
+					scale = false;
+			}
+			if (node.HasValue("displayThreshold"))
+				double.TryParse(node.GetValue("displayThreshold"), out Threshold);
+			if (scale)
+				Threshold *= 10;
+			else
+			{
+				Threshold *= 10000;
+				if (node.HasValue("scaleFactor"))
+					double.TryParse(node.GetValue("scaleFactor"), out scalar);
+			}
+			if (node.HasValue("scaleMultiplier"))
+				double.TryParse(node.GetValue("scaleMultiplier"), out mult);
+
+			SCANdata.SCANResource SCANres = new SCANdata.SCANResource(name, body, type.colorFull, type.colorEmpty, scale, scalar, mult, Threshold, 1f, type);
+			if (SCANres != null)
+				return SCANres;
+
+			return null;
+		}
+
+		internal static void loadSCANtypes()
+		{
+			foreach (ConfigNode node in GameDatabase.Instance.GetConfigNodes("SCANSAT_SENSOR"))
+			{
+				string name = "";
+				int i = 0;
+				string colorFull = "";
+				string colorEmpty = "";
+				if (node.HasValue("name"))
+					name = node.GetValue("name");
+				if (node.HasValue("SCANtype"))
+					if (!int.TryParse(node.GetValue("SCANtype"), out i))
+						continue;
+				if (node.HasValue("ColorFull"))
+					colorFull = node.GetValue("ColorFull");
+				if (node.HasValue("ColorEmpty"))
+					colorEmpty = node.GetValue("ColorEmpty");
+				if (!SCANcontroller.ResourceTypes.ContainsKey(name))
+					SCANcontroller.ResourceTypes.Add(name, new SCANdata.SCANresourceType(name, i, colorFull, colorEmpty));
+			}
+		}
+
+		internal static SCANdata.SCANresourceType OverlayResourceType(string s)
+		{
+			var resourceType = SCANcontroller.ResourceTypes.FirstOrDefault(r => r.Value.name == s).Value;
+			return resourceType;
 		}
 
 		internal static int getBiomeIndex(CelestialBody body, double lon , double lat)
@@ -281,7 +357,7 @@ namespace SCANsat
 			return count;
 		}
 
-		internal static void debugLog(string log, params object[] stringObjects)
+		public static void SCANlog(string log, params object[] stringObjects)
 		{
 			log = string.Format(log, stringObjects);
 			string finalLog = string.Format("[SCANsat] {0}", log);

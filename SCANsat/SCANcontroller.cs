@@ -28,7 +28,7 @@ namespace SCANsat
 					if(mod.moduleName == typeof(SCANcontroller).Name) {
 						var tScene = mod.targetScenes.FirstOrDefault(t => t == GameScenes.SPACECENTER);
 						if (tScene != GameScenes.SPACECENTER) {
-							SCANUtil.debugLog("Adding new target scenes to scenario module");
+							SCANUtil.SCANlog("Adding new target scenes to scenario module");
 							mod.targetScenes.Add(GameScenes.SPACECENTER);
 							mod.targetScenes.Add(GameScenes.TRACKSTATION);
 						}
@@ -85,6 +85,7 @@ namespace SCANsat
 
 		public static List<SCANdata.SCANResource> ResourcesList = new List<SCANdata.SCANResource>(); //The list of all relevant resources
 		internal static Dictionary<string, SCANdata> body_data = new Dictionary<string, SCANdata>();
+		internal static Dictionary<string, SCANdata.SCANresourceType> ResourceTypes = new Dictionary<string, SCANdata.SCANresourceType>();
 
 		public bool kethaneRebuild = false; //these three used by the kethane watcher
         public bool kethaneReset = false;
@@ -93,6 +94,7 @@ namespace SCANsat
 		public override void OnLoad(ConfigNode node) {
 			body_data.Clear();
 			ResourcesList.Clear();
+			ResourceTypes.Clear();
 			ConfigNode node_vessels = node.GetNode("Scanners");
 			if(node_vessels != null) {
 				print("SCANsat Controller: Loading " + node_vessels.CountNodes.ToString() + " known vessels");
@@ -136,7 +138,10 @@ namespace SCANsat
 			}
 			dataRebuild = false; //Used for the one-time update to the new integer array
 			if (HighLogic.LoadedScene == GameScenes.FLIGHT)
+			{
+				SCANUtil.loadSCANtypes();
 				Resources(FlightGlobals.currentMainBody);
+			}
 		}
 
 		public override void OnSave(ConfigNode node) {
@@ -206,73 +211,35 @@ namespace SCANsat
 		public void Resources(CelestialBody b) //Repopulates the master resources list with data from config nodes
 		{
 			ResourcesList.Clear();
-			if (resourceOverlayType == 0)
+			if (resourceOverlayType == 0 && SCANreflection.ORSXFound)
 			{
-				foreach (ConfigNode node in GameDatabase.Instance.GetConfigNodes("PLANETARY_RESOURCE_DEFINITION"))
+				foreach (ConfigNode node in GameDatabase.Instance.GetConfigNodes("ORSX_PLANETARY_RESOURCE"))
 				{
 					if (node != null)
 					{
-						SCANdata.SCANResource resource = null; //Setup initial values, get the resource name and celestial body name
-						double scalar = 1d;
-						double Threshold = 1d;
-						double mult = 1d;
-						bool scale = false;
-						string name = node.GetValue("name");
-						string body = node.GetValue("celestialBodyName");
+						bool resourceAdded = false;
+						SCANdata.SCANResource resource = null;
+						if ((resource = SCANUtil.ORSConfigLoad(node)) == null)
+							continue;
 						foreach (SCANdata.SCANResource res in ResourcesList)
 						{ //Check to see if the resource is already in the list
-							if (name == res.name)
+							if (resource.name == res.name)
 							{
-								resource = res;
+								if (resource.body == b.name)
+								{
+									res.linear = resource.linear;
+									res.fullColor = resource.fullColor;
+									res.emptyColor = resource.emptyColor;
+									res.ORS_Multiplier = resource.ORS_Multiplier;
+									res.ORS_Scalar = resource.ORS_Scalar;
+									res.ORS_Threshold = resource.ORS_Threshold;
+								}
+								resourceAdded = true;
 								break;
 							}
 						}
-						if (resource != null)
-						{ //If the resource is already in the list check to see if this node represents the current body and assign values
-							if (body == b.name)
-							{
-								if (node.GetValue("resourceScale") == "LINEAR_SCALE") scale = true;
-								else if (node.GetValue("resourceScale") == "LOG_SCALE") scale = false;
-								double.TryParse(node.GetValue("displayThreshold"), out Threshold);
-								if (scale)
-								{
-									Threshold *= 10;
-								}
-								else
-								{
-									Threshold *= 10000;
-									double.TryParse(node.GetValue("scaleFactor"), out scalar);
-								}
-								double.TryParse(node.GetValue("scaleMultiplier"), out mult);
-								resource.linear = scale; //Reassign resource properties with the proper values if this is the current body
-								resource.ORS_Threshold = Threshold;
-								resource.ORS_Scalar = scalar;
-								resource.ORS_Multiplier = mult;
-							}
-						}
-						else
-						{ //If the resource isn't in the list check to see if this node is the right celestial body and assign values
-							Color full = palette.xkcd_PurplyPink;
-							Color empty = palette.magenta;
-							SCANdata.SCANtype type = OverlayResourceType(name);
-							if (body == b.name)
-							{
-								if (node.GetValue("resourceScale") == "LINEAR_SCALE") scale = true;
-								else if (node.GetValue("resourceScale") == "LOG_SCALE") scale = false;
-								double.TryParse(node.GetValue("displayThreshold"), out Threshold);
-								if (scale)
-								{
-									Threshold *= 10;
-								}
-								else
-								{
-									Threshold *= 10000;
-									double.TryParse(node.GetValue("scaleFactor"), out scalar);
-								}
-								double.TryParse(node.GetValue("scaleMultiplier"), out mult);
-							}
-							ResourcesList.Add(new SCANdata.SCANResource(name, full, empty, scale, scalar, mult, Threshold, 1f, type)); //Add the resource to the list, with the proper values if applicable
-						}
+						if (!resourceAdded)
+							ResourcesList.Add(resource);
 					}
 				}
 			}
@@ -283,10 +250,11 @@ namespace SCANsat
 					if (node != null)
 					{
 						string name = node.GetValue("Resource");
-						var colorFull = node.GetValue("ColorFull");
-						Color full = ConfigNode.ParseColor(colorFull);
-						var colorEmpty = node.GetValue("ColorEmpty");
-						Color empty = ConfigNode.ParseColor(colorEmpty);
+						SCANdata.SCANresourceType type = null;
+						if ((type = SCANUtil.OverlayResourceType(name)) == null)
+							continue;
+						Color full = type.colorFull;
+						Color empty = type.colorFull;
 						float max = 1000000f;
 						ConfigNode subNode = node.GetNode("Generator");
 						if (subNode != null)
@@ -298,12 +266,14 @@ namespace SCANsat
 								if (body == b.name)
 								{
 									if (bodySubNode.HasValue("MaxQuantity"))
+									{
 										float.TryParse(bodySubNode.GetValue("MaxQuantity"), out max); //Optional body-specific max quantity
+										break;
+									}
 								}
 							}
 						}
-						SCANdata.SCANtype type = OverlayResourceType(name);
-						ResourcesList.Add(new SCANdata.SCANResource(name, full, empty, true, 1d, 1d, 1d, max, type));
+						ResourcesList.Add(new SCANdata.SCANResource(name, "", full, empty, true, 1d, 1d, 1d, max, type));
 					}
 				}
 			}
@@ -311,40 +281,6 @@ namespace SCANsat
 				globalOverlay = false;
 			if (gridSelection > ResourcesList.Count - 1)
 				gridSelection = 0;
-		}
-
-		private SCANdata.SCANtype OverlayResourceType(string s) //Assign the proper resource type depending on the selection in the settings menu
-		{
-			if (resourceOverlayType == 0)
-			{
-				switch (s)
-				{
-					case "Uranium": return SCANdata.SCANtype.Uranium;
-					case "Thorium": return SCANdata.SCANtype.Thorium;
-					case "Alumina": return SCANdata.SCANtype.Alumina;
-					case "Water": return SCANdata.SCANtype.Water;
-					case "Aquifer": return SCANdata.SCANtype.Aquifer;
-					case "Ore": return SCANdata.SCANtype.Ore;
-					case "Minerals": return SCANdata.SCANtype.Minerals;
-					case "Substrate": return SCANdata.SCANtype.Substrate;
-					case "KEEZO": return SCANdata.SCANtype.KEEZO;
-					case "Karbonite": return SCANdata.SCANtype.Karbonite;
-					default: return SCANdata.SCANtype.Nothing;
-				}
-			}
-			else if (resourceOverlayType == 1)
-			{
-				switch (s)
-				{
-					case "Kethane": return SCANdata.SCANtype.Kethane;
-					case "Ore": return SCANdata.SCANtype.Ore;
-					case "Water": return SCANdata.SCANtype.Water;
-					case "Minerals": return SCANdata.SCANtype.Minerals;
-					case "Substrate": return SCANdata.SCANtype.Substrate;
-					default: return SCANdata.SCANtype.Nothing;
-				}
-			}
-			return SCANdata.SCANtype.Nothing;
 		}
 
 		internal Dictionary<Guid, SCANvessel> knownVessels = new Dictionary<Guid, SCANvessel>();

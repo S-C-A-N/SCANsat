@@ -16,9 +16,8 @@ using System.Runtime.CompilerServices;
 // and "{Major}.{Minor}.{Build}.*" will update just the revision.
 [assembly: AssemblyVersion ("1.0.8.0")]
 [assembly: AssemblyFileVersion ("1.0.8.0")]
-[assembly: AssemblyInformationalVersion ("v8.0")]
+[assembly: AssemblyInformationalVersion ("v8")]
 
 [assembly: KSPAssembly ("SCANsat", 0, 8)]
-[assembly: KSPAssemblyDependency("OpenResourceSystem", 1, 1)]
 
 

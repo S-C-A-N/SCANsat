@@ -9,7 +9,7 @@
  * Copyright (c)2014 (Your Name Here) <your email here>; see LICENSE.txt for licensing details.
  */
 
-
+using System;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Diagnostics;
@@ -21,12 +21,12 @@ namespace SCANsat
     [KSPAddon(KSPAddon.Startup.MainMenu, true)]
     internal class SCANversions: MonoBehaviour
     {
-        private string[] Assemblies = new string[6] {"SCANsatRPM", "SCANsatKethane", "Kethane", "RasterPropMonitor", "MechJebRPM", "MechJeb2"};
+		private string[] Assemblies = new string[8] { "SCANsatRPM", "SCANsatKethane", "Kethane", "RasterPropMonitor", "MechJebRPM", "MechJeb2", "ORSX", "GeodesicGrid" };
         internal static string SCANsatVersion = "";
         private List<AssemblyLog> assemblyList = new List<AssemblyLog>();
 
         private void Start() {
-            findAssemblies(Assemblies);
+			findAssemblies(Assemblies);
         }
 
         private void findAssemblies(string[] assemblies) {
@@ -44,7 +44,7 @@ namespace SCANsat
 
         private void debugWriter() {
             foreach (AssemblyLog log in assemblyList) {
-                print(string.Format("[SCANlogger] Assembly: {0} found; Version: {1}; Informational Version: {2}; Location: {3}", log.name, log.version, log.infoVersion, log.location));
+                print(string.Format("[SCANlogger] Assembly: {0} found; Version: {1}; File Version: {2}; Info Version: {3}; Location: {4}", log.name, log.version, log.fileVersion, log.infoVersion, log.location));
             }           
         }
 
@@ -53,14 +53,28 @@ namespace SCANsat
     //A class to gather and store information about assemblies
     internal class AssemblyLog
     {
-        internal string name, version, infoVersion, location;
+        internal string name, version, fileVersion, infoVersion, location;
 
         internal AssemblyLog(AssemblyLoader.LoadedAssembly assembly)
         {
-            name = assembly.assembly.GetName().Name;
-            version = assembly.assembly.GetName().Version.ToString();
-            infoVersion = FileVersionInfo.GetVersionInfo(assembly.assembly.Location).ProductVersion; 
-            location = assembly.url.ToString();
+			var ainfoV = Attribute.GetCustomAttribute(assembly.assembly, typeof(AssemblyInformationalVersionAttribute)) as AssemblyInformationalVersionAttribute;
+			var afileV = Attribute.GetCustomAttribute(assembly.assembly, typeof(AssemblyFileVersionAttribute)) as AssemblyFileVersionAttribute;
+
+			switch (afileV == null)
+			{
+				case true: fileVersion = ""; break;
+				default: fileVersion = afileV.Version; break;
+			}
+
+			switch (ainfoV == null)
+			{
+				case true: infoVersion = ""; break;
+				default: infoVersion = ainfoV.InformationalVersion; break;
+			}
+
+			name = assembly.assembly.GetName().Name;
+			version = assembly.assembly.GetName().Version.ToString();
+			location = assembly.url.ToString();
         }
     
     }

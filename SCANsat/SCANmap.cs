@@ -415,7 +415,7 @@ namespace SCANsat
                     }
                     if (SCANcontroller.controller.map_ResourceOverlay && SCANcontroller.controller.globalOverlay)
                     {
-                        if (SCANcontroller.controller.resourceOverlayType == 0)
+						if (SCANcontroller.controller.resourceOverlayType == 0 && SCANreflection.ORSXFound)
                         {
 							if (SCANUtil.isCovered(lon, lat, data, resource.type)) //check our new resource coverage map
                             {
@@ -434,8 +434,8 @@ namespace SCANsat
                                     amount *= 1000000;
                                     if (amount > scalar)
                                     {
-                                        if (amount > 50 * scalar) amount = 50 * scalar; //max cutoff value
-                                        pix[i] = palette.lerp(baseColor, palette.lerp(resource.emptyColor, resource.fullColor, (float)(amount) / (float)(50 * scalar)), 0.8f); //vary color by resource amount
+                                        if (amount > 25 * scalar) amount = 25 * scalar; //max cutoff value
+                                        pix[i] = palette.lerp(baseColor, palette.lerp(resource.emptyColor, resource.fullColor, (float)(amount) / (float)(25 * scalar)), 0.8f); //vary color by resource amount
                                     }
                                     else pix[i] = palette.lerp(baseColor, palette.grey, 0.4f);
                                 }
@@ -530,7 +530,7 @@ namespace SCANsat
                     }
                     if (SCANcontroller.controller.map_ResourceOverlay && SCANcontroller.controller.globalOverlay)
                     {
-                        if (SCANcontroller.controller.resourceOverlayType == 0)
+						if (SCANcontroller.controller.resourceOverlayType == 0 && SCANreflection.ORSXFound)
                         {
 							if (SCANUtil.isCovered(lon, lat, data, resource.type)) //check our new resource coverage map
                             {
@@ -551,8 +551,8 @@ namespace SCANsat
                                     amount *= 1000000;
                                     if (amount > scalar)
                                     {
-                                        if (amount > 50 * scalar) amount = 50 * scalar; //max cutoff value
-                                        pix[i] = palette.lerp(baseColor, palette.lerp(resource.emptyColor, resource.fullColor, (float)(amount) / (float)(50 * scalar)), 0.8f); //vary color by resource amount
+                                        if (amount > 25 * scalar) amount = 25 * scalar; //max cutoff value
+                                        pix[i] = palette.lerp(baseColor, palette.lerp(resource.emptyColor, resource.fullColor, (float)(amount) / (float)(25 * scalar)), 0.8f); //vary color by resource amount
                                     }
                                     else pix[i] = palette.lerp(baseColor, palette.grey, 0.4f);
                                 }
@@ -650,7 +650,7 @@ namespace SCANsat
                     }
                     if (SCANcontroller.controller.map_ResourceOverlay && SCANcontroller.controller.globalOverlay)
                     {
-                        if (SCANcontroller.controller.resourceOverlayType == 0)
+						if (SCANcontroller.controller.resourceOverlayType == 0 && SCANreflection.ORSXFound)
                         {
 							if (SCANUtil.isCovered(lon, lat, data, resource.type)) //check our new resource coverage map
                             {
@@ -671,8 +671,8 @@ namespace SCANsat
                                     amount *= 1000000;
                                     if (amount > scalar)
                                     {
-                                        if (amount > 50 * scalar) amount = 50 * scalar; //max cutoff value
-                                        pix[i] = palette.lerp(baseColor, palette.lerp(resource.emptyColor, resource.fullColor, (float)(amount) / (float)(50 * scalar)), 0.8f); //vary color by resource amount
+                                        if (amount > 25 * scalar) amount = 25 * scalar; //max cutoff value
+                                        pix[i] = palette.lerp(baseColor, palette.lerp(resource.emptyColor, resource.fullColor, (float)(amount) / (float)(25 * scalar)), 0.8f); //vary color by resource amount
                                     }
                                     else pix[i] = palette.lerp(baseColor, palette.grey, 0.4f);
                                 }
