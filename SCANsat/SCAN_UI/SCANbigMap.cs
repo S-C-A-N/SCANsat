@@ -24,12 +24,6 @@ namespace SCANsat.SCAN_UI
 		private Rect rc = new Rect(0, 0, 0, 0);
 		private Rect pos_spotmap = new Rect(10f, 10f, 10f, 10f);
 		private Rect pos_spotmap_x = new Rect(10f, 10f, 25f, 25f);
-		/* UI: Equitorial Crossing static variables */
-		private int[] eq_an_map, eq_dn_map;
-		private Texture2D eq_map;
-		/* UI: not quite sure what this is... */
-		/* FIXME: find out exactly what this is */
-		private int eq_frame = 0;
 
 		private float fps_time_passed, fps, fps_sum, fps_frames;
 
@@ -43,6 +37,24 @@ namespace SCANsat.SCAN_UI
 			DragEnabled = true;
 
 			SCAN_SkinsLibrary.SetCurrent("SCAN_Unity");
+		}
+
+		internal override void Start()
+		{
+			if (bigmap == null)
+			{
+				bigmap = new SCANmap();
+				bigmap.setProjection((SCANmap.MapProjection)SCANcontroller.controller.projection);
+				bigmap.setWidth(SCANcontroller.controller.map_width);
+				WindowRect.x = SCANcontroller.controller.map_x;
+				WindowRect.y = SCANcontroller.controller.map_y;
+			}
+			else
+			{
+				SCANcontroller.controller.map_x = (int)WindowRect.x;
+				SCANcontroller.controller.map_y = (int)WindowRect.y;
+			}
+			bigmap.setBody(FlightGlobals.currentMainBody);
 		}
 
 		internal override void OnDestroy()
@@ -79,7 +91,8 @@ namespace SCANsat.SCAN_UI
 			}
 
 			v = FlightGlobals.ActiveVessel;
-			data = SCANUtil.getData(v.mainBody);
+			b = v.mainBody;
+			data = SCANUtil.getData(b);
 
 		}
 
@@ -151,7 +164,7 @@ namespace SCANsat.SCAN_UI
 
 			if (SCANcontroller.controller.map_orbit && !notMappingToday)
 			{
-				SCANuiUtil.drawOrbit(maprect, bigmap, v, startUT, overlay_static, eq_an_map, eq_dn_map, eq_map, eq_frame);
+				SCANuiUtil.drawOrbit(maprect, bigmap, v, startUT, overlay_static);
 			}
 
 			stopE(); // draw colors before here
@@ -433,7 +446,7 @@ namespace SCANsat.SCAN_UI
 				GUI.Box(pos_spotmap, spotmap.getPartialMap());
 				if (!notMappingToday)
 				{
-					SCANuiUtil.drawOrbit(pos_spotmap, spotmap, v, startUT, overlay_static, eq_an_map, eq_dn_map, eq_map, eq_frame);
+					SCANuiUtil.drawOrbit(pos_spotmap, spotmap, v, startUT, overlay_static);
 					SCANuiUtil.drawMapLabels(pos_spotmap, v, spotmap, data);
 				}
 				pos_spotmap_x.x = pos_spotmap.x + pos_spotmap.width + 4;

@@ -122,8 +122,14 @@ namespace SCANsat.SCAN_UI
 			}
 		}
 
-		internal static void drawOrbit(Rect maprect, SCANmap map, Vessel vessel, double startUT, Texture2D overlay_static, int[] eq_an_map, int[] eq_dn_map, Texture2D eq_map, int eq_frame)
+		internal static void drawOrbit(Rect maprect, SCANmap map, Vessel vessel, double startUT, Texture2D overlay_static)
 		{
+			int eqh = 16;
+			int[] eq_an_map = new int[overlay_static.width];
+			int[] eq_dn_map = new int[overlay_static.width];
+			Texture2D eq_map = new Texture2D(eq_an_map.Length , eqh , TextureFormat.ARGB32 , false);
+			int eq_frame = 0;
+
 			if (vessel.LandedOrSplashed)
 				return;
 			bool lite = maprect.width < 400;
@@ -285,7 +291,6 @@ namespace SCANsat.SCAN_UI
 				double tAN = (((MAAN - o.meanAnomaly * Mathf.Rad2Deg + 360) % 360) / 360f * o.period + startUT);
 				double tDN = (((MADN - o.meanAnomaly * Mathf.Rad2Deg + 360) % 360) / 360f * o.period + startUT);
 
-				int eqh = 16;
 				if (eq_an_map == null || eq_dn_map == null || eq_an_map.Length != overlay_static.width)
 				{
 					eq_an_map = new int[overlay_static.width];
