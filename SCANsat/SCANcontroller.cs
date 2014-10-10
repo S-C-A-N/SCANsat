@@ -20,27 +20,32 @@ using palette = SCANsat.SCANpalette;
 
 namespace SCANsat
 {
+	[KSPScenario(ScenarioCreationOptions.AddToAllGames | ScenarioCreationOptions.AddToExistingGames, GameScenes.FLIGHT, GameScenes.SPACECENTER, GameScenes.TRACKSTATION)]
 	public class SCANcontroller : ScenarioModule
 	{
-		public static SCANcontroller controller {
-			get {
+		public static SCANcontroller controller
+		{
+			get
+			{
 				Game g = HighLogic.CurrentGame;
-				if(g == null) return null;
-				foreach(ProtoScenarioModule mod in g.scenarios) {
-					if(mod.moduleName == typeof(SCANcontroller).Name) {
-						var tScene = mod.targetScenes.FirstOrDefault(t => t == GameScenes.SPACECENTER);
-						if (tScene != GameScenes.SPACECENTER) {
-							SCANUtil.SCANlog("Adding new target scenes to scenario module");
-							mod.targetScenes.Add(GameScenes.SPACECENTER);
-							mod.targetScenes.Add(GameScenes.TRACKSTATION);
-						}
+				if (g == null) return null;
+				try
+				{
+					var mod = g.scenarios.FirstOrDefault(m => m.moduleName == typeof(SCANcontroller).Name);
+					if (mod != null)
 						return (SCANcontroller)mod.moduleRef;
-					}
+					else
+						return null;
 				}
-				return (SCANcontroller)g.AddProtoScenarioModule(typeof(SCANcontroller), GameScenes.FLIGHT, GameScenes.SPACECENTER, GameScenes.TRACKSTATION).moduleRef;
+				catch (Exception e)
+				{
+					SCANUtil.SCANlog("Could not find SCANsat Scenario Module: {0}", e);
+					return null;
+				}
 			}
 			private set { }
 		}
+
 		public static int minScanAlt = 5000;
 		public static int maxScanAlt = 500000;
 		[KSPField(isPersistant = true)]
@@ -99,16 +104,20 @@ namespace SCANsat
 		internal MBW bigMap;
 		internal MBW kscMap;
 
-		public override void OnLoad(ConfigNode node) {
+		public override void OnLoad(ConfigNode node)
+		{
 			body_data.Clear();
 			ResourcesList.Clear();
 			ResourceTypes.Clear();
 			ConfigNode node_vessels = node.GetNode("Scanners");
-			if(node_vessels != null) {
+			if (node_vessels != null)
+			{
 				print("SCANsat Controller: Loading " + node_vessels.CountNodes.ToString() + " known vessels");
-				foreach(ConfigNode node_vessel in node_vessels.GetNodes("Vessel")) {
+				foreach (ConfigNode node_vessel in node_vessels.GetNodes("Vessel"))
+				{
 					Guid id = new Guid(node_vessel.GetValue("guid"));
-					foreach(ConfigNode node_sensor in node_vessel.GetNodes("Sensor")) {
+					foreach (ConfigNode node_sensor in node_vessel.GetNodes("Sensor"))
+					{
 						int sensor = Convert.ToInt32(node_sensor.GetValue("type"));
 						double fov = Convert.ToDouble(node_sensor.GetValue("fov"));
 						double min_alt = Convert.ToDouble(node_sensor.GetValue("min_alt"));
@@ -118,24 +127,33 @@ namespace SCANsat
 					}
 				}
 			}
+
 			ConfigNode node_progress = node.GetNode("Progress");
-			if(node_progress != null) {
-				foreach(ConfigNode node_body in node_progress.GetNodes("Body")) {
+			if (node_progress != null)
+			{
+				foreach (ConfigNode node_body in node_progress.GetNodes("Body"))
+				{
 					string body_name = node_body.GetValue("Name");
 					print("SCANsat Controller: Loading map for " + body_name);
 					CelestialBody body = FlightGlobals.Bodies.FirstOrDefault(b => b.name == body_name);
-					if (body != null) {
+					if (body != null)
+					{
 						SCANdata data = SCANUtil.getData(body);
-						try {
+						try
+						{
 							string mapdata = node_body.GetValue("Map");
-							if (dataRebuild) { //On the first load deserialize the "Map" value to both coverage arrays
+							if (dataRebuild)
+							{ //On the first load deserialize the "Map" value to both coverage arrays
 								SCANUtil.integerDeserialize(mapdata, true, data);
 								//data.deserialize(mapdata);
 							}
-							else {
+							else
+							{
 								SCANUtil.integerDeserialize(mapdata, false, data);
 							}
-						} catch(Exception e) {
+						}
+						catch (Exception e)
+						{
 							print(e.ToString());
 							print(e.StackTrace);
 							// fail somewhat gracefully; don't make the save unloadable 
@@ -163,41 +181,48 @@ namespace SCANsat
 		}
 
 		public override void OnSave(ConfigNode node) {
-			ConfigNode node_vessels = new ConfigNode("Scanners");
-			foreach(Guid id in knownVessels.Keys) {
-				ConfigNode node_vessel = new ConfigNode("Vessel");
-				node_vessel.AddValue("guid", id.ToString());
-				if(knownVessels[id].vessel != null) node_vessel.AddValue("name", knownVessels[id].vessel.vesselName); // not read
-				foreach(SCANsensor sensor in knownVessels[id].sensors.Values) {
-					ConfigNode node_sensor = new ConfigNode("Sensor");
-					node_sensor.AddValue("type", (int)sensor.sensor);
-					node_sensor.AddValue("fov", sensor.fov);
-					node_sensor.AddValue("min_alt", sensor.min_alt);
-					node_sensor.AddValue("max_alt", sensor.max_alt);
-					node_sensor.AddValue("best_alt", sensor.best_alt);
-					node_vessel.AddNode(node_sensor);
-				}
-				node_vessels.AddNode(node_vessel);
-			}
-			node.AddNode(node_vessels);
-			ConfigNode node_progress = new ConfigNode("Progress");
-			foreach (string body_name in SCANcontroller.body_data.Keys)
+			if (HighLogic.LoadedScene != GameScenes.SPH && HighLogic.LoadedScene != GameScenes.EDITOR)
 			{
-				ConfigNode node_body = new ConfigNode("Body");
-				SCANdata body_scan = SCANcontroller.body_data[body_name];
-				node_body.AddValue("Name", body_name);
-				node_body.AddValue("Disabled", body_scan.disabled);
-				node_body.AddValue("Map", SCANUtil.integerSerialize(body_scan));
-				node_progress.AddNode(node_body);
+				ConfigNode node_vessels = new ConfigNode("Scanners");
+				foreach (Guid id in knownVessels.Keys)
+				{
+					ConfigNode node_vessel = new ConfigNode("Vessel");
+					node_vessel.AddValue("guid", id.ToString());
+					if (knownVessels[id].vessel != null) node_vessel.AddValue("name", knownVessels[id].vessel.vesselName); // not read
+					foreach (SCANsensor sensor in knownVessels[id].sensors.Values)
+					{
+						ConfigNode node_sensor = new ConfigNode("Sensor");
+						node_sensor.AddValue("type", (int)sensor.sensor);
+						node_sensor.AddValue("fov", sensor.fov);
+						node_sensor.AddValue("min_alt", sensor.min_alt);
+						node_sensor.AddValue("max_alt", sensor.max_alt);
+						node_sensor.AddValue("best_alt", sensor.best_alt);
+						node_vessel.AddNode(node_sensor);
+					}
+					node_vessels.AddNode(node_vessel);
+				}
+				node.AddNode(node_vessels);
+				ConfigNode node_progress = new ConfigNode("Progress");
+				foreach (string body_name in SCANcontroller.body_data.Keys)
+				{
+					ConfigNode node_body = new ConfigNode("Body");
+					SCANdata body_scan = SCANcontroller.body_data[body_name];
+					node_body.AddValue("Name", body_name);
+					node_body.AddValue("Disabled", body_scan.disabled);
+					node_body.AddValue("Map", SCANUtil.integerSerialize(body_scan));
+					node_progress.AddNode(node_body);
+				}
+				node.AddNode(node_progress);
 			}
-			node.AddNode(node_progress);
 		}
 
 		public void Update()
 		{
-			if (scan_background) {
+			if (scan_background)
+			{
 				scanFromAllVessels();
-				if (HighLogic.LoadedScene == GameScenes.FLIGHT) {
+				if (HighLogic.LoadedScene == GameScenes.FLIGHT)
+				{
 					SCANui.gui_ping(false);
 					SCANui.gui_ping_maptraq();
 				}
