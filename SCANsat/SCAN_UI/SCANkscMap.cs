@@ -23,7 +23,7 @@ namespace SCANsat.SCAN_UI
 
 		protected override void Awake()
 		{
-			WindowCaption = string.Format("Map of {0}", b.theName);
+			WindowCaption = "Map of ";
 			WindowRect = new Rect(250, 120, 740, 420);
 			WindowOptions = new GUILayoutOption[2] { GUILayout.Width(740), GUILayout.Height(420) };
 			WindowStyle = SCANskins.SCAN_window;
@@ -49,6 +49,7 @@ namespace SCANsat.SCAN_UI
 				SCANcontroller.controller.map_x = (int)WindowRect.x;
 				SCANcontroller.controller.map_y = (int)WindowRect.y;
 			}
+			WindowCaption = string.Format("Map of {0}", b.theName);
 			bigmap.setBody(b);
 		}
 
@@ -66,7 +67,9 @@ namespace SCANsat.SCAN_UI
 		{
 			growS();
 
-			Texture2D map = bigmap.getPartialMap(); 
+			Texture2D map = bigmap.getPartialMap();
+
+			GUILayout.Label("", GUILayout.Width(map.width), GUILayout.Height(map.height));
 
 			Rect maprect = GUILayoutUtility.GetLastRect();
 			maprect.width = bigmap.mapwidth;
@@ -88,6 +91,8 @@ namespace SCANsat.SCAN_UI
 				overlay_static.Apply();
 				overlay_static_dirty = false;
 			}
+
+			GUI.DrawTexture(maprect, map);
 
 			stopS();
 		}
