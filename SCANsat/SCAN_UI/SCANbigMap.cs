@@ -302,6 +302,10 @@ namespace SCANsat.SCAN_UI
 			float my = Event.current.mousePosition.y - maprect.y;
 			bool in_map = false, in_spotmap = false;
 			double mlon = 0, mlat = 0;
+			
+			
+			info = SCANuiUtil.mouseOverInfo(mx, my, bigmap, map, data, maprect, v);
+
 
 			#region if (mouse inside bigmap)
 			if (mx >= 0 && my >= 0 && mx < map.width && my < map.height && !bigmap_dragging)

@@ -579,6 +579,102 @@ namespace SCANsat.SCAN_UI
 			return (dist / 1000d).ToString("N3") + "km";
 		}
 
+		internal static string mouseOverInfo(float lon, float lat, SCANmap mapObj, Texture2D mapTex, SCANdata data, Rect maprect, Vessel v)
+		{
+			string info = "";
+
+			if (lon >= 0 && lat >= 0 && lon < mapTex.width && lat < mapTex.height)
+			{
+				double mlo = (lon * 360f / mapTex.width) - 180;
+				double mla = 90 - (lat * 180f / mapTex.height);
+				double mlon = mapObj.unprojectLongitude(mlo, mla);
+				double mlat = mapObj.unprojectLatitude(mlo, mla);
+
+				if (mlon >= -180 && mlon <= 180 && mlat >= -90 && mlat <= 90)
+				{
+					//in_map = true;
+					if (SCANUtil.isCovered(mlon, mlat, data, SCANdata.SCANtype.AltimetryLoRes))
+					{
+						if (v.mainBody.pqsController == null)
+							info += palette.colored(palette.c_ugly, "LO ");
+						else
+							info += palette.colored(palette.c_good, "LO ");
+					}
+					else
+						info += "<color=\"grey\">LO</color> ";
+					if (SCANUtil.isCovered(mlon, mlat, data, SCANdata.SCANtype.AltimetryHiRes))
+					{
+						if (v.mainBody.pqsController == null)
+							info += palette.colored(palette.c_ugly, "HI ");
+						else
+							info += palette.colored(palette.c_good, "HI ");
+					}
+					else
+						info += "<color=\"grey\">HI</color> ";
+					if (SCANUtil.isCovered(mlon, mlat, data, SCANdata.SCANtype.Biome))
+					{
+						if (v.mainBody.BiomeMap == null || v.mainBody.BiomeMap.Map == null)
+							info += palette.colored(palette.c_ugly, "BIO ");
+						else
+							info += palette.colored(palette.c_good, "BIO ");
+					}
+					else
+						info += "<color=\"grey\">BIO</color> ";
+					if (SCANUtil.isCovered(mlon, mlat, data, SCANdata.SCANtype.Anomaly))
+						info += palette.colored(palette.c_good, "ANOM ");
+					else
+						info += "<color=\"grey\">ANOM</color> ";
+					if (SCANUtil.isCovered(mlon, mlat, data, SCANdata.SCANtype.AnomalyDetail))
+						info += palette.colored(palette.c_good, "BTDT ");
+					else
+						info += "<color=\"grey\">BTDT</color> ";
+					if (SCANUtil.isCovered(mlon, mlat, data, SCANdata.SCANtype.AltimetryHiRes))
+					{
+						info += "<b>" + SCANUtil.getElevation(v.mainBody, mlon, mlat).ToString("N2") + "m</b> ";
+					}
+					else if (SCANUtil.isCovered(mlon, mlat, data, SCANdata.SCANtype.AltimetryLoRes))
+					{
+						info += "<b>~" + (((int)SCANUtil.getElevation(v.mainBody, mlon, mlat) / 500) * 500).ToString() + "m</b> ";
+					}
+					if (SCANUtil.isCovered(mlon, mlat, data, SCANdata.SCANtype.Biome))
+					{
+						info += SCANUtil.getBiomeName(v.mainBody, mlon, mlat) + " ";
+					}
+					info += "\n" + SCANuiUtil.toDMS(mlat, mlon) + " (lat: " + mlat.ToString("F2") + " lon: " + mlon.ToString("F2") + ") ";
+					if (SCANcontroller.controller.map_ResourceOverlay && SCANcontroller.controller.globalOverlay) //Adds selected resource amount to big map legend
+					{
+						if (SCANcontroller.controller.resourceOverlayType == 0 && SCANreflection.ORSXFound)
+						{
+							if (SCANUtil.isCovered(mlon, mlat, data, mapObj.resource.type))
+							{
+								double amount = SCANUtil.ORSOverlay(mlon, mlat, mapObj.body.flightGlobalsIndex, mapObj.resource.name);
+								string label;
+								if (mapObj.resource.linear) //Make sure that ORS values are handled correctly based on which scale type they use
+									label = (amount * 100).ToString("N1") + " %";
+								else
+									label = (amount * 1000000).ToString("N1") + " ppm";
+								info += palette.colored(mapObj.resource.fullColor, "\n<b>" + mapObj.resource.name + ": " + label + "</b>");
+							}
+						}
+						else if (SCANcontroller.controller.resourceOverlayType == 1)
+						{
+							if (SCANUtil.isCovered(mlon, mlat, data, mapObj.resource.type))
+							{
+								double amount = data.kethaneValueMap[SCANUtil.icLON(mlon), SCANUtil.icLAT(mlat)];
+								if (amount < 0) amount = 0d;
+								info += palette.colored(mapObj.resource.fullColor, "\n<b>" + mapObj.resource.name + ": " + amount.ToString("N1") + "</b>");
+							}
+						}
+					}
+				}
+				else
+				{
+					info += " " + mlat.ToString("F") + " " + mlon.ToString("F"); // uncomment for debugging projections
+				}
+			}
+			return info;
+		}
+
 		internal static void resetMainMapPos()
 		{
 
