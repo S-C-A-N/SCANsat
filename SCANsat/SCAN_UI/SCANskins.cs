@@ -53,6 +53,10 @@ namespace SCANsat.SCAN_UI
 		internal static GUIStyle SCAN_orbitalLabelOn;
 		internal static GUIStyle SCAN_orbitalLabelOff;
 
+		//Drop down menu styles
+		internal static GUIStyle SCAN_dropDownButton;
+		internal static GUIStyle SCAN_dropDownBox;
+
 		internal static Font dotty;
 
 		protected override void OnGUI_FirstRun()
@@ -100,6 +104,21 @@ namespace SCANsat.SCAN_UI
 			SCAN_closeButton = new GUIStyle(SCAN_buttonBorderless);
 			SCAN_closeButton.name = "SCAN_CloseButton";
 			SCAN_closeButton.normal.textColor = palette.cb_vermillion;
+
+			//Initialize drop down menu styles
+			SCAN_dropDownBox = new GUIStyle(SCAN_SkinsLibrary.DefUnitySkin.box);
+			SCAN_dropDownBox.name = "SCAN_DropDownBox";
+
+			SCAN_dropDownButton = new GUIStyle(SCAN_label);
+			SCAN_dropDownButton.name = "SCAN_DropDownButton";
+			SCAN_dropDownButton.padding = new RectOffset(2, 2, 2, 2);
+			SCAN_dropDownButton.normal.textColor = palette.xkcd_PukeGreen;
+			SCAN_dropDownButton.hover.textColor = palette.xkcd_PukeGreen;
+			Texture2D sortBackground = new Texture2D(1, 1);
+			sortBackground.SetPixel(1, 1, palette.xkcd_White);
+			sortBackground.Apply();
+			SCAN_dropDownButton.hover.background = sortBackground;
+			SCAN_dropDownButton.alignment = TextAnchor.MiddleLeft;
 
 			//Initialize info readout styles
 			SCAN_colorLabel = new GUIStyle(SCAN_label);
