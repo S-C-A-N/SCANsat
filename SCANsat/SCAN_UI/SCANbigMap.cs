@@ -29,7 +29,7 @@ namespace SCANsat.SCAN_UI
 
 		protected override void Awake()
 		{
-			WindowCaption = string.Format("Map of {0}", b.theName);
+			WindowCaption = "Map of ";
 			WindowRect = new Rect(250, 55, 380, 180);
 			WindowOptions = new GUILayoutOption[2] { GUILayout.Width(360), GUILayout.Height(180) };
 			WindowStyle = SCANskins.SCAN_window;
@@ -54,7 +54,9 @@ namespace SCANsat.SCAN_UI
 				SCANcontroller.controller.map_x = (int)WindowRect.x;
 				SCANcontroller.controller.map_y = (int)WindowRect.y;
 			}
-			bigmap.setBody(FlightGlobals.currentMainBody);
+			b = FlightGlobals.currentMainBody;
+			WindowCaption = string.Format("Map of {0}", b.theName);
+			bigmap.setBody(b);
 		}
 
 		internal override void OnDestroy()

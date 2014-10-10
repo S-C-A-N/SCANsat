@@ -572,7 +572,7 @@ namespace SCANsat.SCAN_UI
 			tex.SetPixels(pix);
 		}
 
-		internal static string distanceString(double dist)
+		internal static string distanceStringA(double dist)
 		{
 			if (dist < 5000)
 				return dist.ToString("N1") + "m";
