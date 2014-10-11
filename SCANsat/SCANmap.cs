@@ -17,8 +17,15 @@ namespace SCANsat
 {
 	public class SCANmap
 	{
+		internal SCANmap (CelestialBody Body)
+		{
+			body = Body;
+		}
 
+		internal SCANmap()
+		{
 
+		}
 
 		/* MAP: legends */
 
@@ -49,6 +56,13 @@ namespace SCANsat
 			KavrayskiyVII = 1,
 			Polar = 2,
 		}
+		public enum mapType
+		{
+			Altimetry = 0,
+			Slope = 1,
+			Biome = 2,
+		}
+
 		private static string [] getProjectionNames () {
 			MapProjection[] v = (MapProjection[])Enum.GetValues (typeof(MapProjection));
 			string[] r = new string[v.Length];
@@ -56,16 +70,26 @@ namespace SCANsat
 				r [i] = v [i].ToString ();
 			return r;
 		}
+
+		private static string[] getMapTypeNames()
+		{
+			mapType[] v = (mapType[])Enum.GetValues(typeof(mapType));
+			string[] r = new string[v.Length];
+			for (int i = 0; i < v.Length; i++)
+				r[i] = v[i].ToString();
+			return r;
+		}
 		public static string[] projectionNames = getProjectionNames ();
+		public static string[] mapTypeNames = getMapTypeNames();
 		public MapProjection projection = MapProjection.Rectangular;
 
 		/* MAP: Big Map height map caching */
 		protected float[,,] big_heightmap;
 		protected CelestialBody big_heightmap_body;
-		protected int mapType;
+		internal mapType mType;
 
 
-        	public void heightMapArray (float height, int line, int i, int type)
+        	public void heightMapArray (float height, int line, int i, mapType type)
         	{
                 if (type == 0)
                 {
@@ -281,7 +305,7 @@ namespace SCANsat
 		}
 		public void resetMap ( int mode, int maptype ) {
 			mapmode = mode;
-            	mapType = maptype;
+            	mType = (mapType)maptype;
                 resetMap ();
 		}
         	public void setResource (string s) { //Used when a different resource is selected
@@ -321,7 +345,7 @@ namespace SCANsat
 
 			/* init cache if necessary */
 			if (body != big_heightmap_body) {
-				switch (mapType) {
+				switch (mType) {
 					case 0: {
 					    for (int x = 0; x < mapwidth; x++) { //Save memory by not unnecessarily making a new cache
                             for (int y = 0; y < mapwidth/2; y++) {
@@ -379,7 +403,7 @@ namespace SCANsat
 					else if (SCANUtil.isCovered(lon, lat, data, SCANdata.SCANtype.Altimetry))
                     {
                         float val = 0f;
-                        if (mapType == 0)
+                        if (mType == 0)
                             val = big_heightmap[i, mapstep, SCANcontroller.controller.projection];
                         if (val == 0)
                         {
@@ -389,7 +413,7 @@ namespace SCANsat
                                 val = (float)SCANUtil.getElevation(body, lon, lat);
                                 baseColor = palette.heightToColor(val, scheme); //use temporary color to store pixel value
                                 if (val == 0f) val = -0.001f;
-                                heightMapArray(val, mapstep, i, mapType);
+                                heightMapArray(val, mapstep, i, mType);
                             }
                             else
                             {
@@ -397,7 +421,7 @@ namespace SCANsat
 								val = (float)SCANUtil.getElevation(body, ((int)(lon * 5)) / 5, ((int)(lat * 5)) / 5);
                                 baseColor = palette.heightToColor(val, 1);
                                 if (val == 0f) val = -0.001f;
-                                heightMapArray(val, mapstep, i, mapType);
+                                heightMapArray(val, mapstep, i, mType);
                             }
                         }
                         else if (val != 0)
@@ -478,7 +502,7 @@ namespace SCANsat
 					else if (SCANUtil.isCovered(lon, lat, data, SCANdata.SCANtype.Altimetry))
                     {
                         float val = 0f;
-                        if (mapType == 0)
+                        if (mType == 0)
                             val = big_heightmap[i, mapstep, SCANcontroller.controller.projection];
                         if (val == 0)
                         {
@@ -486,13 +510,13 @@ namespace SCANsat
                             {
 								val = (float)SCANUtil.getElevation(body, lon, lat);
                                 if (val == 0f) val = -0.001f;
-                                heightMapArray(val, mapstep, i, mapType);
+                                heightMapArray(val, mapstep, i, mType);
                             }
                             else
                             {
 								val = (float)SCANUtil.getElevation(body, ((int)(lon * 5)) / 5, ((int)(lat * 5)) / 5);
                                 if (val == 0f) val = -0.001f;
-                                heightMapArray(val, mapstep, i, mapType);
+                                heightMapArray(val, mapstep, i, mType);
                             }
                         }
                         if (mapstep == 0)
@@ -613,7 +637,7 @@ namespace SCANsat
 							else if (SCANUtil.isCovered(lon, lat, data, SCANdata.SCANtype.Altimetry))
                             {
                                 float val = 0f;
-                                if (mapType == 0)
+                                if (mType == 0)
                                     val = big_heightmap[i, mapstep, SCANcontroller.controller.projection];
                                 if (val == 0)
                                 {
@@ -621,13 +645,13 @@ namespace SCANsat
                                     {
 										val = (float)SCANUtil.getElevation(body, lon, lat);
                                         if (val == 0f) val = -0.001f;
-                                        heightMapArray(val, mapstep, i, mapType);
+                                        heightMapArray(val, mapstep, i, mType);
                                     }
                                     else
                                     {
 										val = (float)SCANUtil.getElevation(body, ((int)(lon * 5)) / 5, ((int)(lat * 5)) / 5);
                                         if (val == 0f) val = -0.001f;
-                                        heightMapArray(val, mapstep, i, mapType);
+                                        heightMapArray(val, mapstep, i, mType);
                                     }
                                 }
                                 elevation = palette.lerp(palette.black, palette.white, Mathf.Clamp(val + 1500f, 0, 9000) / 9000f);
