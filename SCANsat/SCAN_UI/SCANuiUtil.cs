@@ -579,7 +579,7 @@ namespace SCANsat.SCAN_UI
 			return (dist / 1000d).ToString("N3") + "km";
 		}
 
-		internal static string mouseOverInfo(float lon, float lat, SCANmap mapObj, Texture2D mapTex, SCANdata data, Rect maprect, Vessel v)
+		internal static string mouseOverInfo(float lon, float lat, SCANmap mapObj, Texture2D mapTex, SCANdata data, Rect maprect, CelestialBody body)
 		{
 			string info = "";
 
@@ -595,7 +595,7 @@ namespace SCANsat.SCAN_UI
 					//in_map = true;
 					if (SCANUtil.isCovered(mlon, mlat, data, SCANdata.SCANtype.AltimetryLoRes))
 					{
-						if (v.mainBody.pqsController == null)
+						if (body.pqsController == null)
 							info += palette.colored(palette.c_ugly, "LO ");
 						else
 							info += palette.colored(palette.c_good, "LO ");
@@ -604,7 +604,7 @@ namespace SCANsat.SCAN_UI
 						info += "<color=\"grey\">LO</color> ";
 					if (SCANUtil.isCovered(mlon, mlat, data, SCANdata.SCANtype.AltimetryHiRes))
 					{
-						if (v.mainBody.pqsController == null)
+						if (body.pqsController == null)
 							info += palette.colored(palette.c_ugly, "HI ");
 						else
 							info += palette.colored(palette.c_good, "HI ");
@@ -613,7 +613,7 @@ namespace SCANsat.SCAN_UI
 						info += "<color=\"grey\">HI</color> ";
 					if (SCANUtil.isCovered(mlon, mlat, data, SCANdata.SCANtype.Biome))
 					{
-						if (v.mainBody.BiomeMap == null || v.mainBody.BiomeMap.Map == null)
+						if (body.BiomeMap == null || body.BiomeMap.Map == null)
 							info += palette.colored(palette.c_ugly, "BIO ");
 						else
 							info += palette.colored(palette.c_good, "BIO ");
@@ -630,15 +630,15 @@ namespace SCANsat.SCAN_UI
 						info += "<color=\"grey\">BTDT</color> ";
 					if (SCANUtil.isCovered(mlon, mlat, data, SCANdata.SCANtype.AltimetryHiRes))
 					{
-						info += "<b>" + SCANUtil.getElevation(v.mainBody, mlon, mlat).ToString("N2") + "m</b> ";
+						info += "<b>" + SCANUtil.getElevation(body, mlon, mlat).ToString("N2") + "m</b> ";
 					}
 					else if (SCANUtil.isCovered(mlon, mlat, data, SCANdata.SCANtype.AltimetryLoRes))
 					{
-						info += "<b>~" + (((int)SCANUtil.getElevation(v.mainBody, mlon, mlat) / 500) * 500).ToString() + "m</b> ";
+						info += "<b>~" + (((int)SCANUtil.getElevation(body, mlon, mlat) / 500) * 500).ToString() + "m</b> ";
 					}
 					if (SCANUtil.isCovered(mlon, mlat, data, SCANdata.SCANtype.Biome))
 					{
-						info += SCANUtil.getBiomeName(v.mainBody, mlon, mlat) + " ";
+						info += SCANUtil.getBiomeName(body, mlon, mlat) + " ";
 					}
 					info += "\n" + SCANuiUtil.toDMS(mlat, mlon) + " (lat: " + mlat.ToString("F2") + " lon: " + mlon.ToString("F2") + ") ";
 					if (SCANcontroller.controller.map_ResourceOverlay && SCANcontroller.controller.globalOverlay) //Adds selected resource amount to big map legend
