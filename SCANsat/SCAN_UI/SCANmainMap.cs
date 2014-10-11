@@ -122,14 +122,14 @@ namespace SCANsat.SCAN_UI
 
 		private void scannerInfo(int id, bool Repainting)
 		{
-			GUILayout.Space(-6);
+			fillS(-6);
 			if (!Repainting)
 				infoText = InfoText();
 
 			if (infoText != null)
 				SCANuiUtil.readableLabel(infoText, false);
 
-			GUILayout.Space(-8);
+			fillS(-8);
 		}
 
 		private void vesselInfo(int id, Rect MapRect)
@@ -170,7 +170,7 @@ namespace SCANsat.SCAN_UI
 						}
 						SCANuiUtil.drawVesselLabel(MapRect, null, count, sV.vessel);
 						count++;
-						GUILayout.Space(-10);
+						fillS(-10);
 					}
 				}
 			}

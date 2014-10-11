@@ -44,25 +44,25 @@ namespace SCANsat.SCAN_UI
 			closeBox(id);
 
 			growS();
-				GUILayout.Space(8);
+				fillS(8);
 				gui_settings_xmarks(id); 				/* X marker selection */
-				GUILayout.Space(16);
+				fillS(16);
 				gui_settings_resources(id);				/* resource details sub-window */
-				GUILayout.Space(16);
+				fillS(16);
 				gui_settings_toggle_body_scanning(id);		/* background and body scanning toggles */
 				gui_settings_rebuild_kethane(id);
-				GUILayout.Space(16);
+				fillS(16);
 				gui_settings_timewarp(id);				/* time warp resolution settings */
-				GUILayout.Space(8);
+				fillS(8);
 				GUILayout.Label(gui_settings_numbers(id), SCANskins.SCAN_whiteLabel);/* sensor/scanning		statistics */
-				GUILayout.Space(16);
+				fillS(16);
 				gui_settings_data_resets(id);			/* reset data and/or reset resources */
-				GUILayout.Space(8);
+				fillS(8);
 				gui_settings_window_resets(id);			/* reset windows and positions */
-				GUILayout.Space(8);
+				fillS(8);
 				# if DEBUG
 					gui_settings_window_mapFill(id);
-					GUILayout.Space(8);
+					fillS(8);
 				#endif
 			stopS();
 		}
@@ -138,7 +138,7 @@ namespace SCANsat.SCAN_UI
 			stopE();
 			if (SCANcontroller.ResourcesList.Count == 0)
 			{
-				GUILayout.Space(5);
+				fillS(5);
 				GUILayout.Label("No Resources Found", SCANskins.SCAN_headline);
 			}
 			growE();

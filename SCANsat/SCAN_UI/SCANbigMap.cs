@@ -24,6 +24,7 @@ namespace SCANsat.SCAN_UI
 		private Rect rc = new Rect(0, 0, 0, 0);
 		private Rect pos_spotmap = new Rect(10f, 10f, 10f, 10f);
 		private Rect pos_spotmap_x = new Rect(10f, 10f, 25f, 25f);
+		private GUIStyle tempStyle;
 
 		private float fps_time_passed, fps, fps_sum, fps_frames;
 
@@ -302,9 +303,8 @@ namespace SCANsat.SCAN_UI
 			float my = Event.current.mousePosition.y - maprect.y;
 			bool in_map = false, in_spotmap = false;
 			double mlon = 0, mlat = 0;
-			
-			
-			info = SCANuiUtil.mouseOverInfo(mx, my, bigmap, map, data, maprect, v);
+
+			//info = SCANuiUtil.mouseOverInfo(mx, my, bigmap, map, data, maprect, v.mainBody);
 
 
 			#region if (mouse inside bigmap)

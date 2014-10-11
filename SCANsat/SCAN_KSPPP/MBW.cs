@@ -165,6 +165,8 @@ namespace SCANsat.Platform
 		public static void growS(GUIContent c, string s) { GUILayout.BeginVertical(c, s); }
 		public static void growE(params GUILayoutOption[] options) { GUILayout.BeginHorizontal(options); }
 		public static void growS(params GUILayoutOption[] options) { GUILayout.BeginVertical(options); }
+		public static void fillS() { GUILayout.FlexibleSpace(); }
+		public static void fillS(float f) { GUILayout.Space(f); }
 
 		public static GUILayoutOption GoE() { return GUILayout.ExpandWidth(true); }
 		public static GUILayoutOption GoS() { return GUILayout.ExpandHeight(true); }
