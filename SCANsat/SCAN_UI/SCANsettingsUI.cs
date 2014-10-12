@@ -20,10 +20,12 @@ namespace SCANsat.SCAN_UI
 		private string[] twnames = { "Off", "Low", "Medium", "High" };
 		private int[] twvals = { 1, 7, 11, 20 };
 
+		internal static Rect defaultRect = new Rect(500, 55, 360, 300);
+
 		protected override void Awake()
 		{
 			WindowCaption = "S.C.A.N. Settings";
-			WindowRect = new Rect(100, 55, 360, 300);
+			WindowRect = defaultRect;
 			WindowStyle = SCANskins.SCAN_window;
 			WindowOptions = new GUILayoutOption[2] { GUILayout.Width(360), GUILayout.Height(300) };
 			Visible = true;
@@ -54,7 +56,7 @@ namespace SCANsat.SCAN_UI
 				fillS(16);
 				gui_settings_timewarp(id);				/* time warp resolution settings */
 				fillS(8);
-				GUILayout.Label(gui_settings_numbers(id), SCANskins.SCAN_whiteLabel);/* sensor/scanning		statistics */
+				GUILayout.Label(gui_settings_numbers(id), SCANskins.SCAN_whiteReadoutLabel);/* sensor/scanning		statistics */
 				fillS(16);
 				gui_settings_data_resets(id);			/* reset data and/or reset resources */
 				fillS(8);
@@ -70,7 +72,7 @@ namespace SCANsat.SCAN_UI
 		private void versionLabel(int id)
 		{
 			Rect r = new Rect(6, 0, 40, 18);
-			GUI.Label(r, SCANversions.SCANsatVersion, SCANskins.SCAN_whiteLabel);
+			GUI.Label(r, SCANversions.SCANsatVersion, SCANskins.SCAN_whiteReadoutLabel);
 		}
 
 		private void closeBox(int id)
@@ -86,9 +88,8 @@ namespace SCANsat.SCAN_UI
 		private void gui_settings_xmarks(int id)
 		{
 			// anomaly marker & close widget
-			GUILayout.Label("X Marks", SCANskins.SCAN_headline);
+			GUILayout.Label("Anomaly Marker", SCANskins.SCAN_headline);
 			growE();
-			GUILayout.Label("Anomaly Marker", SCANskins.SCAN_whiteLabel);
 			for (int i = 0; i < exmarks.Length; ++i)
 			{
 				if (SCANcontroller.controller.anomalyMarker == exmarks[i])
@@ -239,22 +240,12 @@ namespace SCANsat.SCAN_UI
 					SCANuiUtil.resetMainMapPos();
 					SCANuiUtil.resetBigMapPos();
 					SCANuiUtil.resetInstUIPos();
+					SCANuiUtil.resetSettingsUIPos();
 				}
 				else
 				{
 					SCANuiUtil.resetKSCMapPos();
 				}
-				SCANuiUtil.resetSettingsUIPos();
-
-				//pos_bigmap.x = 0;
-				//pos_bigmap.y = 0;
-				//SCANcontroller.controller.map_x = 100;
-				//SCANcontroller.controller.map_y = 50;
-				//SCANcontroller.controller.map_width = 0;
-				//pos_infobox.x = 0;
-				//pos_infobox.y = 0;
-				//pos_instruments.x = -1;
-				//pos_instruments.y = 0;
 			}
 		}
 
