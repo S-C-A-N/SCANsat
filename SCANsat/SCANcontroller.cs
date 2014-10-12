@@ -1,3 +1,4 @@
+#region license
 /* 
  * [Scientific Committee on Advanced Navigation]
  * 			S.C.A.N. Satellite
@@ -9,7 +10,7 @@
  * Copyright (c)2014 technogeeky <technogeeky@gmail.com>;
  * Copyright (c)2014 (Your Name Here) <your email here>; see LICENSE.txt for licensing details.
  */
-
+#endregion
 using System;
 using System.Linq;
 using System.Collections.Generic;

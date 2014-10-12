@@ -1,4 +1,5 @@
-﻿/*
+﻿#region license
+/*
  *  [Scientific Committee on Advanced Navigation]
  * 			S.C.A.N. Satellite
  *
@@ -10,7 +11,7 @@
  *
  * Created by David to allow the SCANsat plugin to function through the toolbar interface
  */
-
+#endregion
 using System.IO;
 using UnityEngine;
 

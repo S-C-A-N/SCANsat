@@ -1,3 +1,19 @@
+#region license
+/* 
+ * [Scientific Committee on Advanced Navigation]
+ * 			S.C.A.N. Satellite
+ *
+ * SCANsat - RPM - A class to handle RasterPropMonitor integration; IVA maps
+ * 
+ * Based on Mihara's original SCANsatRPM code:
+ * https://github.com/Mihara/RasterPropMonitor
+ * 
+ * Copyright (c)2013 damny;
+ * Copyright (c)2014 David Grandy <david.grandy@gmail.com>;
+ * Copyright (c)2014 technogeeky <technogeeky@gmail.com>;
+ * Copyright (c)2014 (Your Name Here) <your email here>; see LICENSE.txt for licensing details.
+ */
+#endregion
 using UnityEngine;
 using System;
 using System.Linq;

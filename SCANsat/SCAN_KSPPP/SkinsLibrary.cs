@@ -1,4 +1,21 @@
-﻿using System;
+﻿#region license
+/* 
+ *  [Scientific Committee on Advanced Navigation]
+ * 			S.C.A.N. Satellite
+ *
+ * SCANsat - Skins Library; For adding, copying and modifying GUI Skins and Styles
+ *  * 
+ * A modified form of TriggerAu's Skins Library class:
+ * http://forum.kerbalspaceprogram.com/threads/66503-KSP-Plugin-Framework
+ * 
+ * Copyright (c)2013 damny;
+ * Copyright (c)2014 David Grandy <david.grandy@gmail.com>;
+ * Copyright (c)2014 technogeeky <technogeeky@gmail.com>;
+ * Copyright (c)2014 (Your Name Here) <your email here>; see LICENSE.txt for licensing details.
+ *
+ */
+#endregion
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
