@@ -148,6 +148,10 @@ namespace SCANsat.Platform
 		protected Rect WindowRect_Min;
 		protected Rect WindowRect_Max;
 
+		internal void resetWindowPos(Rect r)
+		{
+			WindowRect = r;
+		}
 
 		private static float dragX, dragY;
 		private static float resizeW = 0, resizeH = 0;
