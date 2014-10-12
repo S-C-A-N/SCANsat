@@ -16,21 +16,21 @@ namespace SCANsat.SCAN_UI
 		{
 			string textpoor = Regex.Replace(text, "<[^>]*>", "");
 			GUI.color = palette.black;
-			GUILayout.Label(textpoor, SCANskins.SCAN_shadowLabel);
+			GUILayout.Label(textpoor, SCANskins.SCAN_shadowReadoutLabel);
 			Rect r = GUILayoutUtility.GetLastRect();
 			r.x += 2;
-			GUI.Label(r, textpoor, SCANskins.SCAN_shadowLabel);
+			GUI.Label(r, textpoor, SCANskins.SCAN_shadowReadoutLabel);
 			r.x -= 1;
 			r.y -= 1;
-			GUI.Label(r, textpoor, SCANskins.SCAN_shadowLabel);
+			GUI.Label(r, textpoor, SCANskins.SCAN_shadowReadoutLabel);
 			r.y += 2;
-			GUI.Label(r, textpoor, SCANskins.SCAN_shadowLabel);
+			GUI.Label(r, textpoor, SCANskins.SCAN_shadowReadoutLabel);
 			r.y -= 1;
 			GUI.color = palette.white;
 			if (active)
-				GUI.Label(r, text, SCANskins.SCAN_colorLabel);
+				GUI.Label(r, text, SCANskins.SCAN_readoutLabel);
 			else
-				GUI.Label(r, text, SCANskins.SCAN_inactiveLabel);
+				GUI.Label(r, text, SCANskins.SCAN_whiteReadoutLabel);
 			if (!Event.current.isMouse)
 				return false;
 			return r.Contains(Event.current.mousePosition);
@@ -89,14 +89,14 @@ namespace SCANsat.SCAN_UI
 			if (outline)
 			{
 				r.x -= 1;
-				GUI.Label(r, txt, SCANskins.SCAN_shadowLabel);
+				GUI.Label(r, txt, SCANskins.SCAN_shadowReadoutLabel);
 				r.x += 2;
-				GUI.Label(r, txt, SCANskins.SCAN_shadowLabel);
+				GUI.Label(r, txt, SCANskins.SCAN_shadowReadoutLabel);
 				r.x -= 1;
 				r.y -= 1;
-				GUI.Label(r, txt, SCANskins.SCAN_shadowLabel);
+				GUI.Label(r, txt, SCANskins.SCAN_shadowReadoutLabel);
 				r.y += 2;
-				GUI.Label(r, txt, SCANskins.SCAN_shadowLabel);
+				GUI.Label(r, txt, SCANskins.SCAN_shadowReadoutLabel);
 				r.y -= 1;
 			}
 			if (Flash)
@@ -498,7 +498,7 @@ namespace SCANsat.SCAN_UI
 			drawLabel(lr, "|", true, true, false);
 			string txt = val.ToString("N0");
 			GUIContent c = new GUIContent(txt);
-			Vector2 dim = SCANskins.SCAN_whiteLabel.CalcSize(c);
+			Vector2 dim = SCANskins.SCAN_whiteReadoutLabel.CalcSize(c);
 			lr.y += dim.y * 0.25f;
 			lr.x -= dim.x / 2;
 			if (lr.x < r.x)
@@ -546,11 +546,11 @@ namespace SCANsat.SCAN_UI
 			return toDMS(lat, "S", "N") + " " + toDMS(lon, "W", "E");
 		}
 
-		internal static string distanceString(double dist)
+		internal static string distanceString(double dist, double cutoff)
 		{
-			if (dist < 5000)
-				return dist.ToString("N1") + "m";
-			return (dist / 1000d).ToString("N3") + "km";
+			if (dist < cutoff)
+				return string.Format("{0:N1}m", dist);
+			return string.Format("{0:N2}km", dist / 1000d);
 		}
 
 		internal static double meanForTrue(double TA, double e)
@@ -675,29 +675,30 @@ namespace SCANsat.SCAN_UI
 			return info;
 		}
 
+		//Reset window positions;
 		internal static void resetMainMapPos()
 		{
-
+			SCANcontroller.controller.mainMap.resetWindowPos(SCANmainMap.defaultRect);
 		}
 
 		internal static void resetSettingsUIPos()
 		{
-
+			SCANcontroller.controller.settingsWindow.resetWindowPos(SCANsettingsUI.defaultRect);
 		}
 
 		internal static void resetInstUIPos()
 		{
-
+			SCANcontroller.controller.instrumentsWindow.resetWindowPos(SCANinstrumentUI.defaultRect);
 		}
 
 		internal static void resetBigMapPos()
 		{
-
+			SCANcontroller.controller.bigMap.resetWindowPos(SCANbigMap.defaultRect);
 		}
 
 		internal static void resetKSCMapPos()
 		{
-
+			SCANcontroller.controller.kscMap.resetWindowPos(SCANkscMap.defaultRect);
 		}
 
 	}
