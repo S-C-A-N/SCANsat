@@ -1,5 +1,17 @@
-﻿
-
+﻿#region license
+/* 
+ *  [Scientific Committee on Advanced Navigation]
+ * 			S.C.A.N. Satellite
+ *
+ * SCANsat - KSC map window object
+ * 
+ * Copyright (c)2013 damny;
+ * Copyright (c)2014 David Grandy <david.grandy@gmail.com>;
+ * Copyright (c)2014 technogeeky <technogeeky@gmail.com>;
+ * Copyright (c)2014 (Your Name Here) <your email here>; see LICENSE.txt for licensing details.
+ *
+ */
+#endregion
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -282,11 +294,12 @@ namespace SCANsat.SCAN_UI
 			growE();
 			fillS(110);
 			growS();
-			SCANuiUtil.drawLegend(bigmap);
 			float mx = Event.current.mousePosition.x - maprect.x;
 			float my = Event.current.mousePosition.y - maprect.y;
 			string info = SCANuiUtil.mouseOverInfo(mx, my, bigmap, map, data, maprect, b);
 			SCANuiUtil.readableLabel(info, true);
+			if (bigmap.mapmode == 0 && SCANcontroller.controller.legend)
+				SCANuiUtil.drawLegend();
 			stopS();
 			stopE();
 		}
