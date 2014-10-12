@@ -25,13 +25,14 @@ namespace SCANsat.SCAN_UI
 		private Rect pos_spotmap = new Rect(10f, 10f, 10f, 10f);
 		private Rect pos_spotmap_x = new Rect(10f, 10f, 25f, 25f);
 		private GUIStyle tempStyle;
+		internal static Rect defaultRect = new Rect(350, 55, 380, 180);
 
 		private float fps_time_passed, fps, fps_sum, fps_frames;
 
 		protected override void Awake()
 		{
 			WindowCaption = "Map of ";
-			WindowRect = new Rect(250, 55, 380, 180);
+			WindowRect = defaultRect;
 			WindowOptions = new GUILayoutOption[2] { GUILayout.Width(360), GUILayout.Height(180) };
 			WindowStyle = SCANskins.SCAN_window;
 			Visible = true;
