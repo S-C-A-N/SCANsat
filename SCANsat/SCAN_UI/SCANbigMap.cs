@@ -1,5 +1,17 @@
-﻿
-
+﻿#region license
+/* 
+ *  [Scientific Committee on Advanced Navigation]
+ * 			S.C.A.N. Satellite
+ *
+ * SCANsat - Big map window object
+ * 
+ * Copyright (c)2013 damny;
+ * Copyright (c)2014 David Grandy <david.grandy@gmail.com>;
+ * Copyright (c)2014 technogeeky <technogeeky@gmail.com>;
+ * Copyright (c)2014 (Your Name Here) <your email here>; see LICENSE.txt for licensing details.
+ *
+ */
+#endregion
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,7 +25,8 @@ namespace SCANsat.SCAN_UI
 {
 	class SCANbigMap : MBW
 	{
-		private SCANmap bigmap, spotmap;
+		private static SCANmap bigmap;
+		private SCANmap spotmap;
 		private Vessel v;
 		private CelestialBody b;
 		private SCANdata data;
@@ -21,13 +34,14 @@ namespace SCANsat.SCAN_UI
 		private bool bigmap_dragging, overlay_static_dirty, notMappingToday;
 		private float bigmap_drag_w, bigmap_drag_x;
 		private Texture2D overlay_static;
-		private Rect rc = new Rect(0, 0, 0, 0);
+		private Rect rc = new Rect(0, 0, 20, 20);
 		private Rect pos_spotmap = new Rect(10f, 10f, 10f, 10f);
-		private Rect pos_spotmap_x = new Rect(10f, 10f, 25f, 25f);
-		private GUIStyle tempStyle;
 		internal static Rect defaultRect = new Rect(350, 55, 380, 180);
+		internal static int[] eq_an_map, eq_dn_map;
+		internal static Texture2D eq_map;
+		internal static int eq_frame;
 
-		private float fps_time_passed, fps, fps_sum, fps_frames;
+		//private float fps_time_passed, fps, fps_sum, fps_frames;
 
 		protected override void Awake()
 		{
@@ -43,6 +57,7 @@ namespace SCANsat.SCAN_UI
 
 		internal override void Start()
 		{
+			GameEvents.onVesselSOIChanged.Add(soiChanged);
 			if (bigmap == null)
 			{
 				bigmap = new SCANmap();
@@ -53,8 +68,8 @@ namespace SCANsat.SCAN_UI
 			}
 			else
 			{
-				SCANcontroller.controller.map_x = (int)WindowRect.x;
-				SCANcontroller.controller.map_y = (int)WindowRect.y;
+				WindowRect.x = SCANcontroller.controller.map_x;
+				WindowRect.y = SCANcontroller.controller.map_y;
 			}
 			b = FlightGlobals.currentMainBody;
 			WindowCaption = string.Format("Map of {0}", b.theName);
@@ -63,7 +78,7 @@ namespace SCANsat.SCAN_UI
 
 		internal override void OnDestroy()
 		{
-
+			GameEvents.onVesselSOIChanged.Remove(soiChanged);
 		}
 
 		protected override void DrawWindowPre(int id)
@@ -97,16 +112,17 @@ namespace SCANsat.SCAN_UI
 			v = FlightGlobals.ActiveVessel;
 			b = v.mainBody;
 			data = SCANUtil.getData(b);
-
 		}
 
 		protected override void DrawWindow(int id)
 		{
+			versionLabel(id);
+
 			growS();
-			growE(); // added to put colors on the right of map
 
 			Texture2D map = bigmap.getPartialMap(); // this is the expensive call
 
+			//Makes sure the window re-sizes correctly
 			float dw = bigmap_drag_w;
 			if (dw < 450) dw = 450;	// changed to prevent resizer from overlapping with buttons
 			float dh = dw / 2f;
@@ -119,17 +135,18 @@ namespace SCANsat.SCAN_UI
 				GUILayout.Label("", GUILayout.Width(map.width), GUILayout.Height(map.height));
 			}
 
-
 			Rect maprect = GUILayoutUtility.GetLastRect();
 			maprect.width = bigmap.mapwidth;
 			maprect.height = bigmap.mapheight;
 
+			//The background texture for the map
 			if (overlay_static == null)
 			{
 				overlay_static = new Texture2D((int)bigmap.mapwidth, (int)bigmap.mapheight, TextureFormat.ARGB32, false);
 				overlay_static_dirty = true;
 			}
 
+			//Generate the grid texture
 			if (overlay_static_dirty)
 			{
 				SCANuiUtil.clearTexture(overlay_static);
@@ -141,6 +158,7 @@ namespace SCANsat.SCAN_UI
 				overlay_static_dirty = false;
 			}
 
+			//Stretches the existing map while re-sizing
 			if (bigmap_dragging)
 			{
 				maprect.width = dw;
@@ -157,21 +175,22 @@ namespace SCANsat.SCAN_UI
 				GUI.DrawTexture(maprect, overlay_static, ScaleMode.StretchToFill);
 			}
 
+			//Add the North/South labels to the polar projection
 			if (bigmap.projection == SCANmap.MapProjection.Polar)
 			{
 				rc.x = maprect.x + maprect.width / 2 - maprect.width / 8;
 				rc.y = maprect.y + maprect.height / 8;
-				SCANuiUtil.drawLabel(rc, "S", true, true, false);
+				SCANuiUtil.drawLabel(rc, "S", false, true, true);
 				rc.x = maprect.x + maprect.width / 2 + maprect.width / 8;
-				SCANuiUtil.drawLabel(rc, "N", true, true, false);
+				SCANuiUtil.drawLabel(rc, "N", false, true, true);
 			}
 
+			//Draw the orbit overlays
 			if (SCANcontroller.controller.map_orbit && !notMappingToday)
 			{
 				SCANuiUtil.drawOrbit(maprect, bigmap, v, startUT, overlay_static);
 			}
 
-			stopE(); // draw colors before here
 			growE(GUILayout.ExpandWidth(true));
 			growE(GUILayout.Width(300));
 
@@ -182,7 +201,8 @@ namespace SCANsat.SCAN_UI
 				Visible = false;
 			}
 
-			GUILayout.FlexibleSpace();
+			fillS();
+
 			if (GUILayout.Button("Export PNG", SCANskins.SCAN_buttonFixed))
 			{
 				if (bigmap.isMapComplete())
@@ -196,81 +216,188 @@ namespace SCANsat.SCAN_UI
 			growS();
 
 			#region buttons: grey / color / legend
-			if (GUILayout.Button("Grey"))
+			if (SCANcontroller.controller.colours == 1)
 			{
-				SCANcontroller.controller.colours = 1;
-				data.resetImages();
-				bigmap.resetMap();
+				if (GUILayout.Button("Grey", SCANskins.SCAN_buttonActive))
+				{
+					SCANcontroller.controller.colours = 1;
+				}
+
+				if (GUILayout.Button("Colour"))
+				{
+					SCANcontroller.controller.colours = 0;
+					data.resetImages();
+					bigmap.resetMap();
+				}
 			}
-			if (GUILayout.Button("Colour"))
+			else
 			{
-				SCANcontroller.controller.colours = 0;
-				data.resetImages();
-				bigmap.resetMap();
+				if (GUILayout.Button("Grey"))
+				{
+					SCANcontroller.controller.colours = 1;
+					data.resetImages();
+					bigmap.resetMap();
+				}
+
+				if (GUILayout.Button("Colour", SCANskins.SCAN_buttonActive))
+				{
+					SCANcontroller.controller.colours = 0;
+				}
 			}
-			if (GUILayout.Button("Legend"))
+
+			if (SCANcontroller.controller.legend)
 			{
-				SCANcontroller.controller.legend = !SCANcontroller.controller.legend;
+				if (GUILayout.Button("Legend", SCANskins.SCAN_buttonActive))
+					SCANcontroller.controller.legend = !SCANcontroller.controller.legend;
 			}
+			else
+			{
+				if (GUILayout.Button("Legend"))
+					SCANcontroller.controller.legend = !SCANcontroller.controller.legend;
+			}
+
 			#endregion
 			stopS();
 			growS();
 			#region buttons: altimetry / slope / biome
-			if (GUILayout.Button("Altimetry"))
+			if (bigmap.mapmode == 0)
 			{
-				bigmap.resetMap(0, 0);
+				if (GUILayout.Button("Altimetry", SCANskins.SCAN_buttonActive))
+				{
+					bigmap.resetMap(0, 0);
+				}
+				if (GUILayout.Button("Slope"))
+				{
+					bigmap.resetMap(1, 0);
+				}
+				if (GUILayout.Button("Biome"))
+				{
+					bigmap.resetMap(2, 0);
+				}
 			}
-			if (GUILayout.Button("Slope"))
+			else if (bigmap.mapmode == 1)
 			{
-				bigmap.resetMap(1, 0);
+				if (GUILayout.Button("Altimetry"))
+				{
+					bigmap.resetMap(0, 0);
+				}
+				if (GUILayout.Button("Slope", SCANskins.SCAN_buttonActive))
+				{
+					bigmap.resetMap(1, 0);
+				}
+				if (GUILayout.Button("Biome"))
+				{
+					bigmap.resetMap(2, 0);
+				}
 			}
-			if (GUILayout.Button("Biome"))
+			else if (bigmap.mapmode == 2)
 			{
-				bigmap.resetMap(2, 0);
+				if (GUILayout.Button("Altimetry"))
+				{
+					bigmap.resetMap(0, 0);
+				}
+				if (GUILayout.Button("Slope"))
+				{
+					bigmap.resetMap(1, 0);
+				}
+				if (GUILayout.Button("Biome", SCANskins.SCAN_buttonActive))
+				{
+					bigmap.resetMap(2, 0);
+				}
 			}
 			#endregion
 			stopS();
 			growS();
 			growE();
-			#region buttons: markers / flags / orbit / asteroids
-			if (GUILayout.Button("Markers"))
+			#region buttons: anomaly markers / flags / orbit / asteroids
+			if (SCANcontroller.controller.map_markers)
 			{
-				SCANcontroller.controller.map_markers = !SCANcontroller.controller.map_markers;
+				if (GUILayout.Button("Markers", SCANskins.SCAN_buttonActive))
+					SCANcontroller.controller.map_markers = !SCANcontroller.controller.map_markers;
 			}
-			if (GUILayout.Button("Flags"))
+			else
 			{
-				SCANcontroller.controller.map_flags = !SCANcontroller.controller.map_flags;
+				if (GUILayout.Button("Markers"))
+					SCANcontroller.controller.map_markers = !SCANcontroller.controller.map_markers;
 			}
+
+			if (SCANcontroller.controller.map_flags)
+			{
+				if (GUILayout.Button("Flags", SCANskins.SCAN_buttonActive))
+					SCANcontroller.controller.map_flags = !SCANcontroller.controller.map_flags;
+			}
+			else
+			{
+				if (GUILayout.Button("Flags"))
+					SCANcontroller.controller.map_flags = !SCANcontroller.controller.map_flags;
+			}
+
 			stopE();
 			growE();
 
-			if (GUILayout.Button("Orbit"))
+			if (SCANcontroller.controller.map_orbit)
 			{
-				SCANcontroller.controller.map_orbit = !SCANcontroller.controller.map_orbit;
+				if (GUILayout.Button("Orbit", SCANskins.SCAN_buttonActive))
+					SCANcontroller.controller.map_orbit = !SCANcontroller.controller.map_orbit;
+			}
+			else
+			{
+				if (GUILayout.Button("Orbit"))
+					SCANcontroller.controller.map_orbit = !SCANcontroller.controller.map_orbit;
 			}
 
-			if (GUILayout.Button("Asteroids"))
+			if (SCANcontroller.controller.map_asteroids)
 			{
-				SCANcontroller.controller.map_asteroids = !SCANcontroller.controller.map_asteroids;
+				if (GUILayout.Button("Asteroids", SCANskins.SCAN_buttonActive))
+					SCANcontroller.controller.map_asteroids = !SCANcontroller.controller.map_asteroids;
 			}
+			else
+			{
+				if (GUILayout.Button("Asteroids"))
+					SCANcontroller.controller.map_asteroids = !SCANcontroller.controller.map_asteroids;
+			}
+
 			#endregion
 			stopE();
 			growE();
 			#region buttons: grid / [resources]
-			if (GUILayout.Button("Grid"))
+
+			if (SCANcontroller.controller.map_grid)
 			{
-				SCANcontroller.controller.map_grid = !SCANcontroller.controller.map_grid;
-				overlay_static_dirty = true;
+				if (GUILayout.Button("Grid", SCANskins.SCAN_buttonActive))
+				{
+					SCANcontroller.controller.map_grid = !SCANcontroller.controller.map_grid;
+					overlay_static_dirty = true;
+				}
+			}
+			else
+			{
+				if (GUILayout.Button("Grid"))
+				{
+					SCANcontroller.controller.map_grid = !SCANcontroller.controller.map_grid;
+					overlay_static_dirty = true;
+				}
 			}
 
 			if (SCANcontroller.controller.globalOverlay) //Button to turn on/off resource overlay
 			{
 				if (!SCANcontroller.controller.kethaneBusy || SCANcontroller.controller.resourceOverlayType == 0)
 				{
-					if (GUILayout.Button(SCANcontroller.ResourcesList[SCANcontroller.controller.gridSelection].name))
+					if (SCANcontroller.controller.map_ResourceOverlay)
 					{
-						SCANcontroller.controller.map_ResourceOverlay = !SCANcontroller.controller.map_ResourceOverlay;
-						bigmap.resetMap();
+						if (GUILayout.Button(SCANcontroller.ResourcesList[SCANcontroller.controller.gridSelection].name, SCANskins.SCAN_buttonActive))
+						{
+							SCANcontroller.controller.map_ResourceOverlay = !SCANcontroller.controller.map_ResourceOverlay;
+							bigmap.resetMap();
+						}
+					}
+					else
+					{
+						if (GUILayout.Button(SCANcontroller.ResourcesList[SCANcontroller.controller.gridSelection].name))
+						{
+							SCANcontroller.controller.map_ResourceOverlay = !SCANcontroller.controller.map_ResourceOverlay;
+							bigmap.resetMap();
+						}
 					}
 				}
 				else
@@ -278,6 +405,7 @@ namespace SCANsat.SCAN_UI
 					GUILayout.Button("Rebuilding...");
 				}
 			}
+
 			#endregion
 
 			stopE();
@@ -287,11 +415,23 @@ namespace SCANsat.SCAN_UI
 			#region buttons: projections
 			for (int i = 0; i < SCANmap.projectionNames.Length; ++i)
 			{
-				if (GUILayout.Button(SCANmap.projectionNames[i]))
+				if (bigmap.projection.ToString() == SCANmap.projectionNames[i])
 				{
-					bigmap.setProjection((SCANmap.MapProjection)i);
-					SCANcontroller.controller.projection = i;
-					overlay_static_dirty = true;
+					if (GUILayout.Button(SCANmap.projectionNames[i], SCANskins.SCAN_buttonActive))
+					{
+						bigmap.setProjection((SCANmap.MapProjection)i);
+						SCANcontroller.controller.projection = i;
+						overlay_static_dirty = true;
+					}
+				}
+				else
+				{
+					if (GUILayout.Button(SCANmap.projectionNames[i]))
+					{
+						bigmap.setProjection((SCANmap.MapProjection)i);
+						SCANcontroller.controller.projection = i;
+						overlay_static_dirty = true;
+					}
 				}
 			}
 			#endregion
@@ -299,7 +439,9 @@ namespace SCANsat.SCAN_UI
 			stopS();
 			stopE();
 
-			string info = "";
+			string scanInfo = "";
+			string posInfo = "";
+			string resourceInfo = "";
 			float mx = Event.current.mousePosition.x - maprect.x;
 			float my = Event.current.mousePosition.y - maprect.y;
 			bool in_map = false, in_spotmap = false;
@@ -342,53 +484,45 @@ namespace SCANsat.SCAN_UI
 					if (SCANUtil.isCovered(mlon, mlat, data, SCANdata.SCANtype.AltimetryLoRes))
 					{
 						if (v.mainBody.pqsController == null)
-							info += palette.colored(palette.c_ugly, "LO ");
+							scanInfo += palette.colored(palette.c_ugly, "LO ");
 						else
-							info += palette.colored(palette.c_good, "LO ");
+							scanInfo += palette.colored(palette.c_good, "LO ");
 					}
 					else
-						info += "<color=\"grey\">LO</color> ";
+						scanInfo += "<color=\"grey\">LO</color> ";
 					if (SCANUtil.isCovered(mlon, mlat, data, SCANdata.SCANtype.AltimetryHiRes))
 					{
 						if (v.mainBody.pqsController == null)
-							info += palette.colored(palette.c_ugly, "HI ");
+							scanInfo += palette.colored(palette.c_ugly, "HI ");
 						else
-							info += palette.colored(palette.c_good, "HI ");
+							scanInfo += palette.colored(palette.c_good, "HI ");
 					}
 					else
-						info += "<color=\"grey\">HI</color> ";
+						scanInfo += "<color=\"grey\">HI</color> ";
 					if (SCANUtil.isCovered(mlon, mlat, data, SCANdata.SCANtype.Biome))
 					{
 						if (v.mainBody.BiomeMap == null || v.mainBody.BiomeMap.Map == null)
-							info += palette.colored(palette.c_ugly, "BIO ");
+							scanInfo += palette.colored(palette.c_ugly, "MULTI ");
 						else
-							info += palette.colored(palette.c_good, "BIO ");
+							scanInfo += palette.colored(palette.c_good, "MULTI ");
 					}
 					else
-						info += "<color=\"grey\">BIO</color> ";
-					if (SCANUtil.isCovered(mlon, mlat, data, SCANdata.SCANtype.Anomaly))
-						info += palette.colored(palette.c_good, "ANOM ");
-					else
-						info += "<color=\"grey\">ANOM</color> ";
-					if (SCANUtil.isCovered(mlon, mlat, data, SCANdata.SCANtype.AnomalyDetail))
-						info += palette.colored(palette.c_good, "BTDT ");
-					else
-						info += "<color=\"grey\">BTDT</color> ";
+						scanInfo += "<color=\"grey\">MULTI</color> ";
 					if (SCANUtil.isCovered(mlon, mlat, data, SCANdata.SCANtype.AltimetryHiRes))
 					{
-						info += "<b>" + SCANUtil.getElevation(v.mainBody, mlon, mlat).ToString("N2") + "m</b> ";
+						scanInfo += SCANUtil.getElevation(v.mainBody, mlon, mlat).ToString("N2") + "m ";
 					}
 					else if (SCANUtil.isCovered(mlon, mlat, data, SCANdata.SCANtype.AltimetryLoRes))
 					{
-						info += "<b>~" + (((int)SCANUtil.getElevation(v.mainBody, mlon, mlat) / 500) * 500).ToString() + "m</b> ";
+						scanInfo += (((int)SCANUtil.getElevation(v.mainBody, mlon, mlat) / 500) * 500).ToString() + "m ";
 					}
 					if (SCANUtil.isCovered(mlon, mlat, data, SCANdata.SCANtype.Biome))
 					{
-						info += SCANUtil.getBiomeName(v.mainBody, mlon, mlat) + " ";
+						scanInfo += SCANUtil.getBiomeName(v.mainBody, mlon, mlat) + " ";
 					}
-					info += "\n" + SCANuiUtil.toDMS(mlat, mlon) + " (lat: " + mlat.ToString("F2") + " lon: " + mlon.ToString("F2") + ") ";
+					posInfo += SCANuiUtil.toDMS(mlat, mlon) + " (lat: " + mlat.ToString("F2") + " lon: " + mlon.ToString("F2") + ") ";
 					if (in_spotmap)
-						info += " " + spotmap.mapscale.ToString("F1") + "x";
+						posInfo += " " + spotmap.mapscale.ToString("F1") + "x";
 					if (SCANcontroller.controller.map_ResourceOverlay && SCANcontroller.controller.globalOverlay) //Adds selected resource amount to big map legend
 					{
 						if (SCANcontroller.controller.resourceOverlayType == 0 && SCANreflection.ORSXFound)
@@ -401,7 +535,7 @@ namespace SCANsat.SCAN_UI
 									label = (amount * 100).ToString("N1") + " %";
 								else
 									label = (amount * 1000000).ToString("N1") + " ppm";
-								info += palette.colored(bigmap.resource.fullColor, "\n<b>" + bigmap.resource.name + ": " + label + "</b>");
+								resourceInfo += palette.colored(bigmap.resource.fullColor, bigmap.resource.name + ": " + label);
 							}
 						}
 						else if (SCANcontroller.controller.resourceOverlayType == 1)
@@ -410,15 +544,15 @@ namespace SCANsat.SCAN_UI
 							{
 								double amount = data.kethaneValueMap[SCANUtil.icLON(mlon), SCANUtil.icLAT(mlat)];
 								if (amount < 0) amount = 0d;
-								info += palette.colored(bigmap.resource.fullColor, "\n<b>" + bigmap.resource.name + ": " + amount.ToString("N1") + "</b>");
+								resourceInfo += palette.colored(bigmap.resource.fullColor, bigmap.resource.name + ": " + amount.ToString("N1"));
 							}
 						}
 					}
 				}
-				else
-				{
-					info += " " + mlat.ToString("F") + " " + mlon.ToString("F"); // uncomment for debugging projections
-				}
+				//else
+				//{
+				//	info += " " + mlat.ToString("F") + " " + mlon.ToString("F"); // uncomment for debugging projections
+				//}
 			}
 			#endregion
 
@@ -426,14 +560,24 @@ namespace SCANsat.SCAN_UI
 			if (maprect.width < 720)
 			{
 				stopE();
-				SCANuiUtil.readableLabel(info, true);
-				SCANuiUtil.drawLegend(bigmap);
+				SCANuiUtil.readableLabel(scanInfo, false);
+				fillS(-10);
+				SCANuiUtil.readableLabel(posInfo, false);
+				fillS(-10);
+				SCANuiUtil.readableLabel(resourceInfo, true);
+				if (bigmap.mapmode == 0 && SCANcontroller.controller.legend)
+					SCANuiUtil.drawLegend();
 			}
 			else
 			{
 				growS();
-				SCANuiUtil.readableLabel(info, true);
-				SCANuiUtil.drawLegend(bigmap);
+				SCANuiUtil.readableLabel(scanInfo, false);
+				fillS(-10);
+				SCANuiUtil.readableLabel(posInfo, false);
+				fillS(-10);
+				SCANuiUtil.readableLabel(resourceInfo, true);
+				if (bigmap.mapmode == 0 && SCANcontroller.controller.legend)
+					SCANuiUtil.drawLegend();
 				stopS();
 				stopE();
 			}
@@ -456,21 +600,12 @@ namespace SCANsat.SCAN_UI
 					SCANuiUtil.drawOrbit(pos_spotmap, spotmap, v, startUT, overlay_static);
 					SCANuiUtil.drawMapLabels(pos_spotmap, v, spotmap, data);
 				}
-				pos_spotmap_x.x = pos_spotmap.x + pos_spotmap.width + 4;
-				pos_spotmap_x.y = pos_spotmap.y;
-				if (GUI.Button(pos_spotmap_x, SCANcontroller.controller.closeBox, SCANskins.SCAN_closeButton))
+				Rect sC = new Rect(pos_spotmap.x + 160, pos_spotmap.y, 18, 18);
+				if (GUI.Button(sC, SCANcontroller.controller.closeBox, SCANskins.SCAN_closeButton))
 				{
 					spotmap = null;
 				}
 			}
-			#endregion
-			#region big map fps counter, version label
-			Rect fpswidget = new Rect(maprect.x + maprect.width - 32, maprect.y + maprect.height + 32, 32, 24);
-			GUI.Label(fpswidget, fps.ToString("N1"));
-			#endregion
-			#region version label
-			Rect versionLabel = new Rect(maprect.x + maprect.width - 44, maprect.y + maprect.height + 50, 54, 24);
-			GUI.Label(versionLabel, SCANversions.SCANsatVersion);
 			#endregion
 			#region big map resizing
 			Rect resizer = new Rect(maprect.x + maprect.width - 24, maprect.y + maprect.height + 8, 24, 24);
@@ -557,7 +692,30 @@ namespace SCANsat.SCAN_UI
 
 		protected override void DrawWindowPost(int id)
 		{
+			string titleText = "";
+			if (bigmap_dragging)
+				titleText = string.Format(" [{0}x{1}]", bigmap_drag_w, (bigmap_drag_w / 2));
+			if (!bigmap.isMapComplete())
+				titleText += " [rendering]";
 
+			WindowCaption = string.Format("Map of {0}{1}", b.theName, titleText);
+
+			SCANcontroller.controller.map_x = (int)WindowRect.x;
+			SCANcontroller.controller.map_y = (int)WindowRect.y;
+		}
+
+		//Print the version number
+		private void versionLabel(int id)
+		{
+			Rect vR = new Rect(6, 0, 40, 18);
+			GUI.Label(vR, SCANversions.SCANsatVersion, SCANskins.SCAN_whiteReadoutLabel);
+		}
+
+		private void soiChanged(GameEvents.HostedFromToAction<Vessel, CelestialBody> VC)
+		{
+			b = VC.to;
+			bigmap.setBody(b);
+			WindowCaption = string.Format("Map of {0}", b.theName);
 		}
 
 	}
