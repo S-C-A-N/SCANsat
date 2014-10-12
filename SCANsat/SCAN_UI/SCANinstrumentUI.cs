@@ -17,13 +17,14 @@ namespace SCANsat.SCAN_UI
 		private RemoteView anomalyView;
 		private SCANdata.SCANtype sensors;
 		private SCANdata data;
+		internal static Rect defaultRect = new Rect(30, 600, 260, 60);
 
 		protected override void Awake()
 		{
 			WindowCaption = "S.C.A.N. Instruments";
-			WindowRect = new Rect(20, 455, 200, 60);
+			WindowRect = defaultRect;
 			WindowStyle = SCANskins.SCAN_window;
-			WindowOptions = new GUILayoutOption[2] { GUILayout.Width(200), GUILayout.Height(60) };
+			WindowOptions = new GUILayoutOption[2] { GUILayout.Width(260), GUILayout.Height(60) };
 			Visible = true;
 			DragEnabled = true;
 
@@ -72,11 +73,13 @@ namespace SCANsat.SCAN_UI
 				{
 					biomeInfo(id);
 					++parts;
+					fillS(-10);
 				}
 				if ((sensors & SCANdata.SCANtype.AltimetryHiRes) != SCANdata.SCANtype.Nothing)
 				{
 					altInfo(id);
 					++parts;
+					fillS(-10);
 				}
 				if ((sensors & SCANdata.SCANtype.AnomalyDetail) != SCANdata.SCANtype.Nothing)
 				{
@@ -94,7 +97,7 @@ namespace SCANsat.SCAN_UI
 		private void versionLabel(int id)
 		{
 			Rect r = new Rect(4, 0, 40, 18);
-			GUI.Label(r, SCANversions.SCANsatVersion, SCANskins.SCAN_whiteLabel);
+			GUI.Label(r, SCANversions.SCANsatVersion, SCANskins.SCAN_whiteReadoutLabel);
 		}
 
 		private void closeBox(int id)
@@ -109,7 +112,7 @@ namespace SCANsat.SCAN_UI
 
 		private void biomeInfo(int id)
 		{
-			GUILayout.Label(SCANUtil.getBiomeName(FlightGlobals.ActiveVessel.mainBody, FlightGlobals.ActiveVessel.longitude, FlightGlobals.ActiveVessel.latitude), SCANskins.SCAN_insColorLabel);
+			GUILayout.Label(string.Format("Biome:  {0}", SCANUtil.getBiomeName(FlightGlobals.ActiveVessel.mainBody, FlightGlobals.ActiveVessel.longitude, FlightGlobals.ActiveVessel.latitude)), SCANskins.SCAN_insColorLabel);
 		}
 
 		private void altInfo(int id)
@@ -117,7 +120,7 @@ namespace SCANsat.SCAN_UI
 			double h = FlightGlobals.ActiveVessel.heightFromTerrain;
 			if (h < 0)
 				h = FlightGlobals.ActiveVessel.altitude;
-			GUILayout.Label(h.ToString("N2") + "m", SCANskins.SCAN_insColorLabel);
+			GUILayout.Label(string.Format("Altitude:  {0}", SCANuiUtil.distanceString(h, 100000)), SCANskins.SCAN_insColorLabel);
 		}
 
 		private void anomalyInfo(int id)
@@ -143,8 +146,9 @@ namespace SCANsat.SCAN_UI
 				string txt = "Anomaly";
 				if (nearest.detail)
 					txt = nearest.name;
-				txt += " " + SCANuiUtil.distanceString(nearest_dist);
+				txt += ":  " + SCANuiUtil.distanceString(nearest_dist, 5000);
 				GUILayout.Label(txt, SCANskins.SCAN_insColorLabel);
+
 				if (anomalyView == null)
 					anomalyView = new RemoteView();
 				if (anomalyView != null)
