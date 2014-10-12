@@ -40,6 +40,7 @@ public class Debug_AutoLoadPersistentSaveOnStartup : MonoBehaviour {
 					switch (allVessels [vId].vesselType) {
 						case VesselType.SpaceObject: 	continue;  // asteroids
 						case VesselType.Unknown: 	continue;  // asteroids in facepaint
+						case VesselType.EVA: continue;  //Don't spawn rescue Kerbals
 						default:					suitableVessel = vId;
 												break; // this one will do
                          }
@@ -48,7 +49,8 @@ public class Debug_AutoLoadPersistentSaveOnStartup : MonoBehaviour {
                       *   will want to do it here.
                       */
                     }
-				FlightDriver.StartAndFocusVessel (game , suitableVessel);
+
+				FlightDriver.StartAndFocusVessel(game, suitableVessel);
 				CheatOptions.InfiniteFuel = true;
                }
           }
