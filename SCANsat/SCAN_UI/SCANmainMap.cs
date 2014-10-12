@@ -19,11 +19,12 @@ namespace SCANsat.SCAN_UI
 		private SCANdata data;
 		private SCANdata.SCANtype sensors;
 		private bool notMappingToday, showVesselInfo;
+		internal static Rect defaultRect = new Rect(10, 55, 380, 260);
 
 		protected override void Awake()
 		{
 			WindowCaption = "S.C.A.N. Planetary Mapping";
-			WindowRect = new Rect(10, 55, 380, 260);
+			WindowRect = defaultRect;
 			//WindowOptions = new GUILayoutOption[2] { GUILayout.Width(420), GUILayout.Height(32) };
 			WindowStyle = SCANskins.SCAN_window;
 			Visible = true;
@@ -56,6 +57,7 @@ namespace SCANsat.SCAN_UI
 			versionLabel(id);
 			topMenu(id);
 			growS();
+				fillS(4);
 				topButtons(id);
 				mainMap(id);
 				Rect mapRect = GUILayoutUtility.GetLastRect();
@@ -64,12 +66,14 @@ namespace SCANsat.SCAN_UI
 			stopS();
 		}
 
+		//Print the version number
 		private void versionLabel(int id)
 		{
 			Rect r = new Rect(6, 0, 40, 18);
-			GUI.Label(r, SCANversions.SCANsatVersion, SCANskins.SCAN_whiteLabel);
+			GUI.Label(r, SCANversions.SCANsatVersion, SCANskins.SCAN_whiteReadoutLabel);
 		}
 
+		//Draw the top menu items
 		private void topMenu(int id)
 		{
 			Rect r = new Rect(WindowRect.width - 40, 0, 18, 18);
@@ -94,6 +98,7 @@ namespace SCANsat.SCAN_UI
 				SCANUtil.SCANlog("Close Map");
 		}
 
+		//Draw the buttons to control other windows
 		private void topButtons(int id)
 		{
 			growE();
@@ -115,11 +120,13 @@ namespace SCANsat.SCAN_UI
 			stopE();
 		}
 
+		//Draw the map texture
 		private void mainMap(int id)
 		{
 			GUILayout.Label(data.map_small);
 		}
 
+		//Draw the active scanner display
 		private void scannerInfo(int id, bool Repainting)
 		{
 			fillS(-6);
@@ -132,61 +139,73 @@ namespace SCANsat.SCAN_UI
 			fillS(-8);
 		}
 
+		//Draw the vessel location and alt info
 		private void vesselInfo(int id, Rect MapRect)
 		{
 			if (!notMappingToday)
 			{
-				int count = 1;
-				bool active = false;
+				int count = 2;
+				vesselInfo(v, MapRect, 1, true);
 				foreach (SCANcontroller.SCANvessel sV in SCANcontroller.controller.knownVessels.Values)
 				{
-					if (sV.vessel == null)
+					if (sV.vessel == FlightGlobals.ActiveVessel)
 						continue;
-					if (sV.vessel.mainBody == v.mainBody)
-					{
-						if (!showVesselInfo)
-						{
-							SCANuiUtil.drawVesselLabel(MapRect, null, -1, sV.vessel);
-							continue;
-						}
-						float lon = (float)SCANUtil.fixLonShift(sV.vessel.longitude);
-						float lat = (float)SCANUtil.fixLatShift(sV.vessel.latitude);
-						float alt = sV.vessel.heightFromTerrain;
-						if (alt < 0)
-							alt = (float)sV.vessel.altitude;
-						string text = string.Format("[{0}] <b>{1}</b> ({2:F1}°,{3:F1}°; {4:N1}m)", count, sV.vessel.vesselName, lat, lon, alt);
-						if (sV.vessel == FlightGlobals.ActiveVessel)
-							active = true;
-						else
-							active = false;
-						if (SCANuiUtil.readableLabel(text, active))
-						{
-							if (Event.current.clickCount > 1)
-							{
-								Event.current.Use();
-								FlightGlobals.SetActiveVessel(sV.vessel);
-								ScreenMessages.PostScreenMessage(sV.vessel.vesselName, 5, ScreenMessageStyle.UPPER_CENTER);
-							}
-						}
-						SCANuiUtil.drawVesselLabel(MapRect, null, count, sV.vessel);
+					if (vesselInfo(sV.vessel, MapRect, count, false))
 						count++;
-						fillS(-10);
-					}
 				}
 			}
 		}
 
+		//Method to handle vessel info
+		private bool vesselInfo(Vessel V, Rect r, int i, bool b)
+		{
+			if (V == null)
+				return false;
+			if (V.mainBody == V.mainBody)
+			{
+				if (!showVesselInfo)
+				{
+					SCANuiUtil.drawVesselLabel(r, null, -1, V);
+					return false;
+				}
+				float lon = (float)SCANUtil.fixLonShift(V.longitude);
+				float lat = (float)SCANUtil.fixLatShift(V.latitude);
+				float alt = V.heightFromTerrain;
+				if (alt < 0)
+					alt = (float)V.altitude;
+				string text = string.Format("[{0}] {1} ({2:F1}°,{3:F1}°; {4:N1}m)", i, V.vesselName, lat, lon, alt);
+				if (SCANuiUtil.readableLabel(text, b))
+				{
+					if (Event.current.clickCount > 1)
+					{
+						Event.current.Use();
+						FlightGlobals.SetActiveVessel(V);
+						ScreenMessages.PostScreenMessage(V.vesselName, 5, ScreenMessageStyle.UPPER_CENTER);
+					}
+				}
+				SCANuiUtil.drawVesselLabel(r, null, i, V);
+				fillS(-10);
+				return true;
+			}
+			return false;
+		}
+
+		//Method to handle active scanner display
 		private string InfoText()
 		{
 			string infotext = "";
+			//Some strings to specify text color
 			string aoff = "<color=\"grey\">";
 			string aon = "<color=\"" + palette.colorHex(palette.c_good) + "\">";
 			string abad = "<color=\"" + palette.colorHex(palette.c_bad) + "\">";
-			string ac = "</color> ";
+			//Close the color syntax
+			string ac = "</color>";
+			//Strings for each sensor type
 			string stat_alo = aon, stat_ahi = aon, stat_biome = aon;
 
 			SCANcontroller.SCANsensor s;
 
+			//Check here for each sensor; if active, in range, and at the ideal altitude
 			s = SCANcontroller.controller.getSensorStatus(v, SCANdata.SCANtype.AltimetryLoRes);
 			if (s == null)
 				stat_alo = aoff;
@@ -211,16 +230,17 @@ namespace SCANsat.SCAN_UI
 			else if (!s.bestRange && (Time.realtimeSinceStartup % 2 < 1))
 				stat_biome = abad;
 
-			infotext = stat_alo + "LO" + ac + stat_ahi + "HI" + ac + stat_biome + "MULTI" + ac;
+			infotext = string.Format("{0}LO{1} {2}HI{3} {4}MULTI{5}", stat_alo, ac, stat_ahi, ac, stat_biome, ac);
 
+			//Get coverage percentage for all active scanners on the vessel
 			SCANdata.SCANtype active = SCANcontroller.controller.activeSensorsOnVessel(v.id);
 			if (active != SCANdata.SCANtype.Nothing)
 			{
 				double cov = data.getCoveragePercentage(active);
-				infotext += " " + cov.ToString("N1") + "%";
+				infotext += string.Format(" {0:N1}%", cov);
 				if (notMappingToday)
 				{
-					infotext = abad + "NO POWER" + ac;
+					infotext = string.Format("{0}NO POWER{1}", abad, ac);
 				}
 			}
 
