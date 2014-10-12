@@ -1,5 +1,17 @@
-﻿
-
+﻿#region license
+/* 
+ *  [Scientific Committee on Advanced Navigation]
+ * 			S.C.A.N. Satellite
+ *
+ * SCANsat - Skins and Styles setup
+ * 
+ * Copyright (c)2013 damny;
+ * Copyright (c)2014 David Grandy <david.grandy@gmail.com>;
+ * Copyright (c)2014 technogeeky <technogeeky@gmail.com>;
+ * Copyright (c)2014 (Your Name Here) <your email here>; see LICENSE.txt for licensing details.
+ *
+ */
+#endregion
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,7 +28,6 @@ namespace SCANsat.SCAN_UI
 		internal static GUISkin SCAN_skin;
 
 		internal static GUIStyle SCAN_window;
-		internal static GUIStyle SCAN_readout;
 		internal static GUIStyle SCAN_toggle;
 		internal static GUIStyle SCAN_tooltip;
 		internal static GUIStyle SCAN_label;
@@ -40,7 +51,6 @@ namespace SCANsat.SCAN_UI
 		internal static GUIStyle SCAN_insColorLabel;
 		internal static GUIStyle SCAN_insWhiteLabel;
 		internal static GUIStyle SCAN_anomalyOverlay;
-		internal static GUIStyle SCAN_overlay;
 
 		//Resource overlay styles
 		internal static GUIStyle SCAN_resource;
@@ -170,12 +180,6 @@ namespace SCANsat.SCAN_UI
 			SCAN_headline.fontSize = 40;
 			SCAN_headline.font = dotty;
 
-			SCAN_readout = new GUIStyle(SCAN_SkinsLibrary.DefUnitySkin.label);
-			SCAN_readout.font = dotty;
-
-			SCAN_overlay = new GUIStyle(SCAN_SkinsLibrary.DefUnitySkin.label);
-			SCAN_overlay.font = dotty;
-
 			SCAN_toggle = new GUIStyle(SCAN_SkinsLibrary.DefUnitySkin.toggle);
 			SCAN_toggle.name = "SCAN_Toggle";
 
@@ -185,6 +189,7 @@ namespace SCANsat.SCAN_UI
 			SCAN_orbitalLabelOn = new GUIStyle(SCAN_label);
 			SCAN_orbitalLabelOn.name = "SCAN_OrbitalLabelOn";
 			SCAN_orbitalLabelOn.fontSize = 13;
+			SCAN_orbitalLabelOn.fontStyle = FontStyle.Bold;
 			SCAN_orbitalLabelOn.normal.textColor = palette.cb_yellow;
 
 			SCAN_orbitalLabelOff = new GUIStyle(SCAN_orbitalLabelOn);
@@ -202,8 +207,6 @@ namespace SCANsat.SCAN_UI
 			SCAN_SkinsLibrary.AddStyle(SCAN_toggle, "SCAN_Unity");
 			SCAN_SkinsLibrary.AddStyle(SCAN_label, "SCAN_Unity");
 			SCAN_SkinsLibrary.AddStyle(SCAN_tooltip, "SCAN_Unity");
-			SCAN_SkinsLibrary.AddStyle(SCAN_inactiveReadoutLabel, "SCAN_Unity");
-			SCAN_SkinsLibrary.AddStyle(SCAN_shadowReadoutLabel, "SCAN_Unity");
 		}
 	}
 }
