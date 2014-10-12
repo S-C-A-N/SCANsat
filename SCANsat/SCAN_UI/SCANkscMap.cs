@@ -23,7 +23,7 @@ namespace SCANsat.SCAN_UI
 {
 	class SCANkscMap: MBW
 	{
-		private SCANmap bigmap; //, spotmap;
+		private static SCANmap bigmap;
 		private CelestialBody b;
 		private SCANdata data;
 		//private double startUT;
@@ -296,8 +296,43 @@ namespace SCANsat.SCAN_UI
 			growS();
 			float mx = Event.current.mousePosition.x - maprect.x;
 			float my = Event.current.mousePosition.y - maprect.y;
-			string info = SCANuiUtil.mouseOverInfo(mx, my, bigmap, map, data, maprect, b);
-			SCANuiUtil.readableLabel(info, true);
+			bool in_map = false, in_spotmap = false;
+			double mlon = 0, mlat = 0;
+
+			if (mx >= 0 && my >= 0 && mx < map.width && my < map.height)
+			{
+				double mlo = (mx * 360f / map.width) - 180;
+				double mla = 90 - (my * 180f / map.height);
+				mlon = bigmap.unprojectLongitude(mlo, mla);
+				mlat = bigmap.unprojectLatitude(mlo, mla);
+
+				//if (spotmap != null)
+				//{
+				//	if (mx >= pos_spotmap.x - maprect.x && my >= pos_spotmap.y - maprect.y && mx <= pos_spotmap.x + pos_spotmap.width - maprect.x && my <= pos_spotmap.y + pos_spotmap.height - maprect.y)
+				//	{
+				//		in_spotmap = true;
+				//		mlon = spotmap.lon_offset + ((mx - pos_spotmap.x + maprect.x) / spotmap.mapscale) - 180;
+				//		mlat = spotmap.lat_offset + ((pos_spotmap.height - (my - pos_spotmap.y + maprect.y)) / spotmap.mapscale) - 90;
+				//		if (mlat > 90)
+				//		{
+				//			mlon = (mlon + 360) % 360 - 180;
+				//			mlat = 180 - mlat;
+				//		}
+				//		else if (mlat < -90)
+				//		{
+				//			mlon = (mlon + 360) % 360 - 180;
+				//			mlat = -180 - mlat;
+				//		}
+				//	}
+				//}
+
+				if (mlon >= -180 && mlon <= 180 && mlat >= -90 && mlat <= 90)
+				{
+					in_map = true;
+				}
+			}
+			
+			SCANuiUtil.mouseOverInfo(mlon, mlat, bigmap, data, b, in_map);
 			if (bigmap.mapmode == 0 && SCANcontroller.controller.legend)
 				SCANuiUtil.drawLegend();
 			stopS();

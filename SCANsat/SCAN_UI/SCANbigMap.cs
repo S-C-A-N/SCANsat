@@ -439,18 +439,14 @@ namespace SCANsat.SCAN_UI
 			stopS();
 			stopE();
 
-			string scanInfo = "";
-			string posInfo = "";
-			string resourceInfo = "";
+			//string scanInfo = "";
+			//string posInfo = "";
+			//string resourceInfo = "";
 			float mx = Event.current.mousePosition.x - maprect.x;
 			float my = Event.current.mousePosition.y - maprect.y;
 			bool in_map = false, in_spotmap = false;
 			double mlon = 0, mlat = 0;
 
-			//info = SCANuiUtil.mouseOverInfo(mx, my, bigmap, map, data, maprect, v.mainBody);
-
-
-			#region if (mouse inside bigmap)
 			if (mx >= 0 && my >= 0 && mx < map.width && my < map.height && !bigmap_dragging)
 			{
 				double mlo = (mx * 360f / map.width) - 180;
@@ -481,101 +477,103 @@ namespace SCANsat.SCAN_UI
 				if (mlon >= -180 && mlon <= 180 && mlat >= -90 && mlat <= 90)
 				{
 					in_map = true;
-					if (SCANUtil.isCovered(mlon, mlat, data, SCANdata.SCANtype.AltimetryLoRes))
-					{
-						if (v.mainBody.pqsController == null)
-							scanInfo += palette.colored(palette.c_ugly, "LO ");
-						else
-							scanInfo += palette.colored(palette.c_good, "LO ");
-					}
-					else
-						scanInfo += "<color=\"grey\">LO</color> ";
-					if (SCANUtil.isCovered(mlon, mlat, data, SCANdata.SCANtype.AltimetryHiRes))
-					{
-						if (v.mainBody.pqsController == null)
-							scanInfo += palette.colored(palette.c_ugly, "HI ");
-						else
-							scanInfo += palette.colored(palette.c_good, "HI ");
-					}
-					else
-						scanInfo += "<color=\"grey\">HI</color> ";
-					if (SCANUtil.isCovered(mlon, mlat, data, SCANdata.SCANtype.Biome))
-					{
-						if (v.mainBody.BiomeMap == null || v.mainBody.BiomeMap.Map == null)
-							scanInfo += palette.colored(palette.c_ugly, "MULTI ");
-						else
-							scanInfo += palette.colored(palette.c_good, "MULTI ");
-					}
-					else
-						scanInfo += "<color=\"grey\">MULTI</color> ";
-					if (SCANUtil.isCovered(mlon, mlat, data, SCANdata.SCANtype.AltimetryHiRes))
-					{
-						scanInfo += SCANUtil.getElevation(v.mainBody, mlon, mlat).ToString("N2") + "m ";
-					}
-					else if (SCANUtil.isCovered(mlon, mlat, data, SCANdata.SCANtype.AltimetryLoRes))
-					{
-						scanInfo += (((int)SCANUtil.getElevation(v.mainBody, mlon, mlat) / 500) * 500).ToString() + "m ";
-					}
-					if (SCANUtil.isCovered(mlon, mlat, data, SCANdata.SCANtype.Biome))
-					{
-						scanInfo += SCANUtil.getBiomeName(v.mainBody, mlon, mlat) + " ";
-					}
-					posInfo += SCANuiUtil.toDMS(mlat, mlon) + " (lat: " + mlat.ToString("F2") + " lon: " + mlon.ToString("F2") + ") ";
-					if (in_spotmap)
-						posInfo += " " + spotmap.mapscale.ToString("F1") + "x";
-					if (SCANcontroller.controller.map_ResourceOverlay && SCANcontroller.controller.globalOverlay) //Adds selected resource amount to big map legend
-					{
-						if (SCANcontroller.controller.resourceOverlayType == 0 && SCANreflection.ORSXFound)
-						{
-							if (SCANUtil.isCovered(mlon, mlat, data, bigmap.resource.type))
-							{
-								double amount = SCANUtil.ORSOverlay(mlon, mlat, bigmap.body.flightGlobalsIndex, bigmap.resource.name);
-								string label;
-								if (bigmap.resource.linear) //Make sure that ORS values are handled correctly based on which scale type they use
-									label = (amount * 100).ToString("N1") + " %";
-								else
-									label = (amount * 1000000).ToString("N1") + " ppm";
-								resourceInfo += palette.colored(bigmap.resource.fullColor, bigmap.resource.name + ": " + label);
-							}
-						}
-						else if (SCANcontroller.controller.resourceOverlayType == 1)
-						{
-							if (SCANUtil.isCovered(mlon, mlat, data, bigmap.resource.type))
-							{
-								double amount = data.kethaneValueMap[SCANUtil.icLON(mlon), SCANUtil.icLAT(mlat)];
-								if (amount < 0) amount = 0d;
-								resourceInfo += palette.colored(bigmap.resource.fullColor, bigmap.resource.name + ": " + amount.ToString("N1"));
-							}
-						}
-					}
 				}
-				//else
-				//{
-				//	info += " " + mlat.ToString("F") + " " + mlon.ToString("F"); // uncomment for debugging projections
-				//}
 			}
+
+			#region if (mouse inside bigmap)
+			//	if (mlon >= -180 && mlon <= 180 && mlat >= -90 && mlat <= 90)
+			//	{
+			//		in_map = true;
+			//		if (SCANUtil.isCovered(mlon, mlat, data, SCANdata.SCANtype.AltimetryLoRes))
+			//		{
+			//			if (v.mainBody.pqsController == null)
+			//				scanInfo += palette.colored(palette.c_ugly, "LO ");
+			//			else
+			//				scanInfo += palette.colored(palette.c_good, "LO ");
+			//		}
+			//		else
+			//			scanInfo += "<color=\"grey\">LO</color> ";
+			//		if (SCANUtil.isCovered(mlon, mlat, data, SCANdata.SCANtype.AltimetryHiRes))
+			//		{
+			//			if (v.mainBody.pqsController == null)
+			//				scanInfo += palette.colored(palette.c_ugly, "HI ");
+			//			else
+			//				scanInfo += palette.colored(palette.c_good, "HI ");
+			//		}
+			//		else
+			//			scanInfo += "<color=\"grey\">HI</color> ";
+			//		if (SCANUtil.isCovered(mlon, mlat, data, SCANdata.SCANtype.Biome))
+			//		{
+			//			if (v.mainBody.BiomeMap == null || v.mainBody.BiomeMap.Map == null)
+			//				scanInfo += palette.colored(palette.c_ugly, "MULTI ");
+			//			else
+			//				scanInfo += palette.colored(palette.c_good, "MULTI ");
+			//		}
+			//		else
+			//			scanInfo += "<color=\"grey\">MULTI</color> ";
+			//		if (SCANUtil.isCovered(mlon, mlat, data, SCANdata.SCANtype.AltimetryHiRes))
+			//		{
+			//			scanInfo += SCANUtil.getElevation(v.mainBody, mlon, mlat).ToString("N2") + "m ";
+			//		}
+			//		else if (SCANUtil.isCovered(mlon, mlat, data, SCANdata.SCANtype.AltimetryLoRes))
+			//		{
+			//			scanInfo += (((int)SCANUtil.getElevation(v.mainBody, mlon, mlat) / 500) * 500).ToString() + "m ";
+			//		}
+			//		if (SCANUtil.isCovered(mlon, mlat, data, SCANdata.SCANtype.Biome))
+			//		{
+			//			scanInfo += SCANUtil.getBiomeName(v.mainBody, mlon, mlat) + " ";
+			//		}
+			//		posInfo += SCANuiUtil.toDMS(mlat, mlon) + " (lat: " + mlat.ToString("F2") + " lon: " + mlon.ToString("F2") + ") ";
+			//		if (in_spotmap)
+			//			posInfo += " " + spotmap.mapscale.ToString("F1") + "x";
+			//		if (SCANcontroller.controller.map_ResourceOverlay && SCANcontroller.controller.globalOverlay) //Adds selected resource amount to big map legend
+			//		{
+			//			if (SCANcontroller.controller.resourceOverlayType == 0 && SCANreflection.ORSXFound)
+			//			{
+			//				if (SCANUtil.isCovered(mlon, mlat, data, bigmap.resource.type))
+			//				{
+			//					double amount = SCANUtil.ORSOverlay(mlon, mlat, bigmap.body.flightGlobalsIndex, bigmap.resource.name);
+			//					string label;
+			//					if (bigmap.resource.linear) //Make sure that ORS values are handled correctly based on which scale type they use
+			//						label = (amount * 100).ToString("N1") + " %";
+			//					else
+			//						label = (amount * 1000000).ToString("N1") + " ppm";
+			//					resourceInfo += palette.colored(bigmap.resource.fullColor, bigmap.resource.name + ": " + label);
+			//				}
+			//			}
+			//			else if (SCANcontroller.controller.resourceOverlayType == 1)
+			//			{
+			//				if (SCANUtil.isCovered(mlon, mlat, data, bigmap.resource.type))
+			//				{
+			//					double amount = data.kethaneValueMap[SCANUtil.icLON(mlon), SCANUtil.icLAT(mlat)];
+			//					if (amount < 0) amount = 0d;
+			//					resourceInfo += palette.colored(bigmap.resource.fullColor, bigmap.resource.name + ": " + amount.ToString("N1"));
+			//				}
+			//			}
+			//		}
+			//	}
+			//	//else
+			//	//{
+			//	//	info += " " + mlat.ToString("F") + " " + mlon.ToString("F"); // uncomment for debugging projections
+			//	//}
+			//}
 			#endregion
 
+			bool repainting = Event.current.type == EventType.Repaint;
+
 			#region bigmap mouseover info and legend
+
 			if (maprect.width < 720)
 			{
 				stopE();
-				SCANuiUtil.readableLabel(scanInfo, false);
-				fillS(-10);
-				SCANuiUtil.readableLabel(posInfo, false);
-				fillS(-10);
-				SCANuiUtil.readableLabel(resourceInfo, true);
+				SCANuiUtil.mouseOverInfo(mlon, mlat, bigmap, data, v.mainBody, in_map);
 				if (bigmap.mapmode == 0 && SCANcontroller.controller.legend)
 					SCANuiUtil.drawLegend();
 			}
 			else
 			{
 				growS();
-				SCANuiUtil.readableLabel(scanInfo, false);
-				fillS(-10);
-				SCANuiUtil.readableLabel(posInfo, false);
-				fillS(-10);
-				SCANuiUtil.readableLabel(resourceInfo, true);
+				SCANuiUtil.mouseOverInfo(mlon, mlat, bigmap, data, v.mainBody, in_map);
 				if (bigmap.mapmode == 0 && SCANcontroller.controller.legend)
 					SCANuiUtil.drawLegend();
 				stopS();

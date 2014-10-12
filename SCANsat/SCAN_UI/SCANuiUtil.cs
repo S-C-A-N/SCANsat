@@ -16,6 +16,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
+using SCANsat.Platform;
 using palette = SCANsat.SCANpalette;
 using UnityEngine;
 
@@ -87,100 +88,90 @@ namespace SCANsat.SCAN_UI
 		#region UI Utilities
 
 		//Generates a string with info from mousing over the map
-		internal static string mouseOverInfo(float lon, float lat, SCANmap mapObj, Texture2D mapTex, SCANdata data, Rect maprect, CelestialBody body)
+		internal static void mouseOverInfo(double lon, double lat, SCANmap mapObj, SCANdata data, CelestialBody body, bool b)
 		{
 			string info = "";
+			string posInfo = "";
 
-			if (lon >= 0 && lat >= 0 && lon < mapTex.width && lat < mapTex.height)
+			if (b)
 			{
-				double mlo = (lon * 360f / mapTex.width) - 180;
-				double mla = 90 - (lat * 180f / mapTex.height);
-				double mlon = mapObj.unprojectLongitude(mlo, mla);
-				double mlat = mapObj.unprojectLatitude(mlo, mla);
-
-				if (mlon >= -180 && mlon <= 180 && mlat >= -90 && mlat <= 90)
+				if (SCANUtil.isCovered(lon, lat, data, SCANdata.SCANtype.AltimetryLoRes))
 				{
-					//in_map = true;
-					if (SCANUtil.isCovered(mlon, mlat, data, SCANdata.SCANtype.AltimetryLoRes))
-					{
-						if (body.pqsController == null)
-							info += palette.colored(palette.c_ugly, "LO ");
-						else
-							info += palette.colored(palette.c_good, "LO ");
-					}
+					if (body.pqsController == null)
+						info += palette.colored(palette.c_ugly, "LO ");
 					else
-						info += "<color=\"grey\">LO</color> ";
-					if (SCANUtil.isCovered(mlon, mlat, data, SCANdata.SCANtype.AltimetryHiRes))
-					{
-						if (body.pqsController == null)
-							info += palette.colored(palette.c_ugly, "HI ");
-						else
-							info += palette.colored(palette.c_good, "HI ");
-					}
-					else
-						info += "<color=\"grey\">HI</color> ";
-					if (SCANUtil.isCovered(mlon, mlat, data, SCANdata.SCANtype.Biome))
-					{
-						if (body.BiomeMap == null || body.BiomeMap.Map == null)
-							info += palette.colored(palette.c_ugly, "BIO ");
-						else
-							info += palette.colored(palette.c_good, "BIO ");
-					}
-					else
-						info += "<color=\"grey\">BIO</color> ";
-					if (SCANUtil.isCovered(mlon, mlat, data, SCANdata.SCANtype.Anomaly))
-						info += palette.colored(palette.c_good, "ANOM ");
-					else
-						info += "<color=\"grey\">ANOM</color> ";
-					if (SCANUtil.isCovered(mlon, mlat, data, SCANdata.SCANtype.AnomalyDetail))
-						info += palette.colored(palette.c_good, "BTDT ");
-					else
-						info += "<color=\"grey\">BTDT</color> ";
-					if (SCANUtil.isCovered(mlon, mlat, data, SCANdata.SCANtype.AltimetryHiRes))
-					{
-						info += "<b>" + SCANUtil.getElevation(body, mlon, mlat).ToString("N2") + "m</b> ";
-					}
-					else if (SCANUtil.isCovered(mlon, mlat, data, SCANdata.SCANtype.AltimetryLoRes))
-					{
-						info += "<b>~" + (((int)SCANUtil.getElevation(body, mlon, mlat) / 500) * 500).ToString() + "m</b> ";
-					}
-					if (SCANUtil.isCovered(mlon, mlat, data, SCANdata.SCANtype.Biome))
-					{
-						info += SCANUtil.getBiomeName(body, mlon, mlat) + " ";
-					}
-					info += "\n" + SCANuiUtil.toDMS(mlat, mlon) + " (lat: " + mlat.ToString("F2") + " lon: " + mlon.ToString("F2") + ") ";
-					if (SCANcontroller.controller.map_ResourceOverlay && SCANcontroller.controller.globalOverlay) //Adds selected resource amount to big map legend
-					{
-						if (SCANcontroller.controller.resourceOverlayType == 0 && SCANreflection.ORSXFound)
-						{
-							if (SCANUtil.isCovered(mlon, mlat, data, mapObj.resource.type))
-							{
-								double amount = SCANUtil.ORSOverlay(mlon, mlat, mapObj.body.flightGlobalsIndex, mapObj.resource.name);
-								string label;
-								if (mapObj.resource.linear) //Make sure that ORS values are handled correctly based on which scale type they use
-									label = (amount * 100).ToString("N1") + " %";
-								else
-									label = (amount * 1000000).ToString("N1") + " ppm";
-								info += palette.colored(mapObj.resource.fullColor, "\n<b>" + mapObj.resource.name + ": " + label + "</b>");
-							}
-						}
-						else if (SCANcontroller.controller.resourceOverlayType == 1)
-						{
-							if (SCANUtil.isCovered(mlon, mlat, data, mapObj.resource.type))
-							{
-								double amount = data.kethaneValueMap[SCANUtil.icLON(mlon), SCANUtil.icLAT(mlat)];
-								if (amount < 0) amount = 0d;
-								info += palette.colored(mapObj.resource.fullColor, "\n<b>" + mapObj.resource.name + ": " + amount.ToString("N1") + "</b>");
-							}
-						}
-					}
+						info += palette.colored(palette.c_good, "LO ");
 				}
 				else
+					info += palette.colored(palette.grey, "LO ");
+				if (SCANUtil.isCovered(lon, lat, data, SCANdata.SCANtype.AltimetryHiRes))
 				{
-					info += " " + mlat.ToString("F") + " " + mlon.ToString("F"); // uncomment for debugging projections
+					if (body.pqsController == null)
+						info += palette.colored(palette.c_ugly, "HI ");
+					else
+						info += palette.colored(palette.c_good, "HI ");
 				}
+				else
+					info += palette.colored(palette.grey, "HI ");
+				if (SCANUtil.isCovered(lon, lat, data, SCANdata.SCANtype.Biome))
+				{
+					if (body.BiomeMap == null || body.BiomeMap.Map == null)
+						info += palette.colored(palette.c_ugly, "MULTI ");
+					else
+						info += palette.colored(palette.c_good, "MULTI ");
+				}
+				else
+					info += palette.colored(palette.grey, "MULTI ");
+				if (SCANUtil.isCovered(lon, lat, data, SCANdata.SCANtype.AltimetryHiRes))
+				{
+					info += SCANUtil.getElevation(body, lon, lat).ToString("N2") + "m ";
+				}
+				else if (SCANUtil.isCovered(lon, lat, data, SCANdata.SCANtype.AltimetryLoRes))
+				{
+					info += (((int)SCANUtil.getElevation(body, lon, lat) / 500) * 500).ToString() + "m ";
+				}
+				if (SCANUtil.isCovered(lon, lat, data, SCANdata.SCANtype.Biome))
+				{
+					info += SCANUtil.getBiomeName(body, lon, lat) + " ";
+				}
+
+				if (SCANcontroller.controller.map_ResourceOverlay && SCANcontroller.controller.globalOverlay) //Adds selected resource amount to big map legend
+				{
+					if (SCANcontroller.controller.resourceOverlayType == 0 && SCANreflection.ORSXFound)
+					{
+						if (SCANUtil.isCovered(lon, lat, data, mapObj.resource.type))
+						{
+							double amount = SCANUtil.ORSOverlay(lon, lat, mapObj.body.flightGlobalsIndex, mapObj.resource.name);
+							string label;
+							if (mapObj.resource.linear) //Make sure that ORS values are handled correctly based on which scale type they use
+								label = (amount * 100).ToString("N1") + " %";
+							else
+								label = (amount * 1000000).ToString("N1") + " ppm";
+							info += palette.colored(mapObj.resource.fullColor, mapObj.resource.name + ": " + label);
+						}
+					}
+					else if (SCANcontroller.controller.resourceOverlayType == 1)
+					{
+						if (SCANUtil.isCovered(lon, lat, data, mapObj.resource.type))
+						{
+							double amount = data.kethaneValueMap[SCANUtil.icLON(lon), SCANUtil.icLAT(lat)];
+							if (amount < 0) amount = 0d;
+							info += palette.colored(mapObj.resource.fullColor, mapObj.resource.name + ": " + amount.ToString("N1"));
+						}
+					}
+				}
+
+				posInfo += string.Format("{0} (lat: {1:F2} lon: {2:F2})", toDMS(lat, lon), lat, lon);
 			}
-			return info;
+			//else
+			//{
+			//	info += " " + mlat.ToString("F") + " " + mlon.ToString("F"); // uncomment for debugging projections
+			//}
+
+			//Draw the readout info labels
+			readableLabel(info, false);
+			MBW.fillS(-10);
+			readableLabel(posInfo, false);
 		}
 
 		/* UI: conversions to and from DMS */
@@ -202,7 +193,7 @@ namespace SCANsat.SCAN_UI
 
 		internal static string toDMS(double lat, double lon)
 		{
-			return toDMS(lat, "S", "N") + " " + toDMS(lon, "W", "E");
+			return string.Format("{0} {1}", toDMS(lat, "S", "N"), toDMS(lon, "W", "E"));
 		}
 
 		internal static string distanceString(double dist, double cutoff)
