@@ -22,11 +22,12 @@ namespace SCANsat.SCAN_UI
 		//private Rect rc = new Rect(0, 0, 0, 0);
 		//private Rect pos_spotmap = new Rect(10f, 10f, 10f, 10f);
 		//private Rect pos_spotmap_x = new Rect(10f, 10f, 25f, 25f);
+		internal static Rect defaultRect = new Rect(250, 60, 780, 460);
 
 		protected override void Awake()
 		{
 			WindowCaption = "Map of ";
-			WindowRect = new Rect(250, 120, 740, 420);
+			WindowRect = defaultRect;
 			WindowOptions = new GUILayoutOption[2] { GUILayout.Width(740), GUILayout.Height(420) };
 			WindowStyle = SCANskins.SCAN_window;
 			Visible = true;
@@ -112,7 +113,7 @@ namespace SCANsat.SCAN_UI
 		private void versionLabel(int id)
 		{
 			Rect r = new Rect(6, 0, 40, 18);
-			GUI.Label(r, SCANversions.SCANsatVersion, SCANskins.SCAN_whiteLabel);
+			GUI.Label(r, SCANversions.SCANsatVersion, SCANskins.SCAN_whiteReadoutLabel);
 		}
 
 		private void closeBox(int id)
