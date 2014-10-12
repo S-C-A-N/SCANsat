@@ -30,11 +30,11 @@ namespace SCANsat.SCAN_UI
 		internal static GUIStyle SCAN_closeButton;
 
 		//Map info readout styles
-		internal static GUIStyle SCAN_colorLabel;
-		internal static GUIStyle SCAN_whiteLabel;
-		internal static GUIStyle SCAN_activeLabel;
-		internal static GUIStyle SCAN_inactiveLabel;
-		internal static GUIStyle SCAN_shadowLabel;
+		internal static GUIStyle SCAN_readoutLabel;
+		internal static GUIStyle SCAN_whiteReadoutLabel;
+		internal static GUIStyle SCAN_activeReadoutLabel;
+		internal static GUIStyle SCAN_inactiveReadoutLabel;
+		internal static GUIStyle SCAN_shadowReadoutLabel;
 
 		//Instrument readout styles
 		internal static GUIStyle SCAN_insColorLabel;
@@ -121,42 +121,44 @@ namespace SCANsat.SCAN_UI
 			SCAN_dropDownButton.alignment = TextAnchor.MiddleLeft;
 
 			//Initialize info readout styles
-			SCAN_colorLabel = new GUIStyle(SCAN_label);
-			SCAN_colorLabel.name = "SCAN_ColorLabel";
+			SCAN_readoutLabel = new GUIStyle(SCAN_label);
+			SCAN_readoutLabel.name = "SCAN_ReadoutLabel";
+			SCAN_readoutLabel.fontStyle = FontStyle.Bold;
 
-			SCAN_whiteLabel = new GUIStyle(SCAN_label);
-			SCAN_whiteLabel.name = "SCAN_WhiteLabel";
-			SCAN_whiteLabel.normal.textColor = palette.white;
+			SCAN_whiteReadoutLabel = new GUIStyle(SCAN_readoutLabel);
+			SCAN_whiteReadoutLabel.name = "SCAN_WhiteLabel";
+			SCAN_whiteReadoutLabel.normal.textColor = palette.white;
 
-			SCAN_activeLabel = new GUIStyle(SCAN_label);
-			SCAN_activeLabel.name = "SCAN_ActiveLabel";
-			SCAN_activeLabel.normal.textColor = palette.xkcd_PukeGreen;
+			SCAN_activeReadoutLabel = new GUIStyle(SCAN_readoutLabel);
+			SCAN_activeReadoutLabel.name = "SCAN_ActiveLabel";
+			SCAN_activeReadoutLabel.normal.textColor = palette.cb_bluishGreen;
 
-			SCAN_inactiveLabel = new GUIStyle(SCAN_label);
-			SCAN_inactiveLabel.name = "SCAN_InactiveLabel";
-			SCAN_inactiveLabel.normal.textColor = palette.xkcd_LightGrey;
+			SCAN_inactiveReadoutLabel = new GUIStyle(SCAN_readoutLabel);
+			SCAN_inactiveReadoutLabel.name = "SCAN_InactiveLabel";
+			SCAN_inactiveReadoutLabel.normal.textColor = palette.xkcd_LightGrey;
 
-			SCAN_shadowLabel = new GUIStyle(SCAN_label);
-			SCAN_shadowLabel.name = "SCAN_ShadowLabel";
-			SCAN_shadowLabel.normal.textColor = palette.black;
+			SCAN_shadowReadoutLabel = new GUIStyle(SCAN_readoutLabel);
+			SCAN_shadowReadoutLabel.name = "SCAN_ShadowLabel";
+			SCAN_shadowReadoutLabel.normal.textColor = palette.black;
 
 			//Initialize instrument styles
-			SCAN_insColorLabel = new GUIStyle(SCAN_colorLabel);
+			SCAN_insColorLabel = new GUIStyle(SCAN_label);
 			SCAN_insColorLabel.name = "SCAN_InsColorLabel";
 			SCAN_insColorLabel.alignment = TextAnchor.MiddleCenter;
 			SCAN_insColorLabel.font = dotty;
-			SCAN_insColorLabel.fontSize = 40;
+			SCAN_insColorLabel.fontSize = 36;
 
-			SCAN_insWhiteLabel = new GUIStyle(SCAN_whiteLabel);
+			SCAN_insWhiteLabel = new GUIStyle(SCAN_whiteReadoutLabel);
 			SCAN_insWhiteLabel.name = "SCAN_InsWhiteLabel";
 			SCAN_insWhiteLabel.alignment = TextAnchor.MiddleCenter;
+			SCAN_insWhiteLabel.fontStyle = FontStyle.Normal;
 			SCAN_insWhiteLabel.font = dotty;
-			SCAN_insWhiteLabel.fontSize = 40;
+			SCAN_insWhiteLabel.fontSize = 36;
 
 			SCAN_anomalyOverlay = new GUIStyle(SCAN_SkinsLibrary.DefUnitySkin.label);
 			SCAN_anomalyOverlay.name = "SCAN_AnomalyOverlay";
 			SCAN_anomalyOverlay.font = dotty;
-			SCAN_anomalyOverlay.fontSize = 36;
+			SCAN_anomalyOverlay.fontSize = 32;
 			SCAN_anomalyOverlay.fontStyle = FontStyle.Bold;
 			SCAN_anomalyOverlay.normal.textColor = palette.cb_skyBlue;
 
@@ -200,8 +202,8 @@ namespace SCANsat.SCAN_UI
 			SCAN_SkinsLibrary.AddStyle(SCAN_toggle, "SCAN_Unity");
 			SCAN_SkinsLibrary.AddStyle(SCAN_label, "SCAN_Unity");
 			SCAN_SkinsLibrary.AddStyle(SCAN_tooltip, "SCAN_Unity");
-			SCAN_SkinsLibrary.AddStyle(SCAN_inactiveLabel, "SCAN_Unity");
-			SCAN_SkinsLibrary.AddStyle(SCAN_shadowLabel, "SCAN_Unity");
+			SCAN_SkinsLibrary.AddStyle(SCAN_inactiveReadoutLabel, "SCAN_Unity");
+			SCAN_SkinsLibrary.AddStyle(SCAN_shadowReadoutLabel, "SCAN_Unity");
 		}
 	}
 }
