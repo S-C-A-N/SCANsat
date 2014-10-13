@@ -222,11 +222,13 @@ namespace SCANsat
 			if (scan_background)
 			{
 				scanFromAllVessels();
+#if DEBUG
 				if (HighLogic.LoadedScene == GameScenes.FLIGHT)
 				{
 					SCANui.gui_ping(false);
 					SCANui.gui_ping_maptraq();
 				}
+#endif
 			}
 		}
 
