@@ -52,14 +52,10 @@ namespace SCANsat.SCAN_UI
 		internal static GUIStyle SCAN_insWhiteLabel;
 		internal static GUIStyle SCAN_anomalyOverlay;
 
-		//Resource overlay styles
-		internal static GUIStyle SCAN_resource;
-		internal static GUIStyle SCAN_resourceReadout;
-
 		//Settings menu styles
 		internal static GUIStyle SCAN_headline;
 
-		//Styles for vessel overlay icons
+		//Styles for map overlay icons
 		internal static GUIStyle SCAN_orbitalLabelOn;
 		internal static GUIStyle SCAN_orbitalLabelOff;
 
@@ -208,5 +204,6 @@ namespace SCANsat.SCAN_UI
 			SCAN_SkinsLibrary.AddStyle(SCAN_label, "SCAN_Unity");
 			SCAN_SkinsLibrary.AddStyle(SCAN_tooltip, "SCAN_Unity");
 		}
+
 	}
 }
