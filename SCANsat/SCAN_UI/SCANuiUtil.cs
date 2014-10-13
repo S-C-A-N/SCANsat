@@ -371,7 +371,8 @@ namespace SCANsat.SCAN_UI
 					drawAnomalyLabel(maprect, map, anomaly);
 				}
 			}
-			drawVesselLabel(maprect, map, 0, vessel);
+			if (vessel != null)
+				drawVesselLabel(maprect, map, 0, vessel);
 		}
 
 		//Method to draw anomaly labels on the map
