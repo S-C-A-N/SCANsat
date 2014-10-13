@@ -37,10 +37,11 @@ namespace SCANsat.SCAN_UI
 		{
 			WindowCaption = "S.C.A.N. Planetary Mapping";
 			WindowRect = defaultRect;
-			//WindowOptions = new GUILayoutOption[2] { GUILayout.Width(420), GUILayout.Height(32) };
+			WindowOptions = new GUILayoutOption[2] { GUILayout.Width(380), GUILayout.Height(260) };
 			WindowStyle = SCANskins.SCAN_window;
 			Visible = true;
 			DragEnabled = true;
+			ClampToScreenOffset = new RectOffset(-300, -300, -200, -200);
 
 			SCAN_SkinsLibrary.SetCurrent("SCAN_Unity");
 		}
@@ -92,18 +93,12 @@ namespace SCANsat.SCAN_UI
 			if (showVesselInfo)
 			{
 				if (GUI.Button(r, "-", SCANskins.SCAN_buttonBorderless))
-				{
-					WindowRect.height -= (SCANcontroller.controller.knownVessels.Count * 16);
 					showVesselInfo = !showVesselInfo;
-				}
 			}
 			else
 			{
 				if (GUI.Button(r, "+", SCANskins.SCAN_buttonBorderless))
-				{
-					WindowRect.height += (SCANcontroller.controller.knownVessels.Count * 16);
 					showVesselInfo = !showVesselInfo;
-				}
 			}
 			r.x += 16;
 			if (GUI.Button(r, SCANcontroller.controller.closeBox, SCANskins.SCAN_closeButton))
@@ -143,11 +138,10 @@ namespace SCANsat.SCAN_UI
 		{
 			fillS(-6);
 			if (!Repainting)
-				infoText = InfoText();
+				infoText = SCANuiUtil.InfoText(v, data, notMappingToday);
 
 			if (infoText != null)
 				SCANuiUtil.readableLabel(infoText, false);
-
 			fillS(-8);
 		}
 
@@ -178,7 +172,7 @@ namespace SCANsat.SCAN_UI
 				if (!showVesselInfo)
 				{
 					SCANuiUtil.drawVesselLabel(r, null, -1, V);
-					return false;
+					return true;
 				}
 				float lon = (float)SCANUtil.fixLonShift(V.longitude);
 				float lat = (float)SCANUtil.fixLatShift(V.latitude);
@@ -201,64 +195,6 @@ namespace SCANsat.SCAN_UI
 			}
 			return false;
 		}
-
-		//Method to handle active scanner display
-		private string InfoText()
-		{
-			string infotext = "";
-			//Some strings to specify text color
-			string aoff = "<color=\"grey\">";
-			string aon = "<color=\"" + palette.colorHex(palette.c_good) + "\">";
-			string abad = "<color=\"" + palette.colorHex(palette.c_bad) + "\">";
-			//Close the color syntax
-			string ac = "</color>";
-			//Strings for each sensor type
-			string stat_alo = aon, stat_ahi = aon, stat_biome = aon;
-
-			SCANcontroller.SCANsensor s;
-
-			//Check here for each sensor; if active, in range, and at the ideal altitude
-			s = SCANcontroller.controller.getSensorStatus(v, SCANdata.SCANtype.AltimetryLoRes);
-			if (s == null)
-				stat_alo = aoff;
-			else if (!s.inRange)
-				stat_alo = abad;
-			else if (!s.bestRange && (Time.realtimeSinceStartup % 2 < 1))
-				stat_alo = abad;
-
-			s = SCANcontroller.controller.getSensorStatus(v, SCANdata.SCANtype.AltimetryHiRes);
-			if (s == null)
-				stat_ahi = aoff;
-			else if (!s.inRange)
-				stat_ahi = abad;
-			else if (!s.bestRange && (Time.realtimeSinceStartup % 2 < 1))
-				stat_ahi = abad;
-
-			s = SCANcontroller.controller.getSensorStatus(v, SCANdata.SCANtype.Biome);
-			if (s == null)
-				stat_biome = aoff;
-			else if (!s.inRange)
-				stat_biome = abad;
-			else if (!s.bestRange && (Time.realtimeSinceStartup % 2 < 1))
-				stat_biome = abad;
-
-			infotext = string.Format("{0}LO{1} {2}HI{3} {4}MULTI{5}", stat_alo, ac, stat_ahi, ac, stat_biome, ac);
-
-			//Get coverage percentage for all active scanners on the vessel
-			SCANdata.SCANtype active = SCANcontroller.controller.activeSensorsOnVessel(v.id);
-			if (active != SCANdata.SCANtype.Nothing)
-			{
-				double cov = data.getCoveragePercentage(active);
-				infotext += string.Format(" {0:N1}%", cov);
-				if (notMappingToday)
-				{
-					infotext = string.Format("{0}NO POWER{1}", abad, ac);
-				}
-			}
-
-			return infotext;
-		}
-
 
 	}
 }

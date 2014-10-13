@@ -174,6 +174,69 @@ namespace SCANsat.SCAN_UI
 			readableLabel(posInfo, false);
 		}
 
+		//Method to handle active scanner display
+		internal static string InfoText(Vessel v, SCANdata data, bool b)
+		{
+			string infotext = "";
+
+			SCANcontroller.SCANsensor s;
+
+			//Check here for each sensor; if active, in range, and at the ideal altitude
+			s = SCANcontroller.controller.getSensorStatus(v, SCANdata.SCANtype.AltimetryLoRes);
+			if (s == null)
+				infotext += palette.colored(palette.grey, "LO");
+			else if (!s.inRange)
+				infotext += palette.colored(palette.c_bad, "LO");
+			else if (!s.bestRange && (Time.realtimeSinceStartup % 2 < 1))
+				infotext += palette.colored(palette.c_bad, "LO");
+			else
+				infotext += palette.colored(palette.c_good, "LO");
+
+			s = SCANcontroller.controller.getSensorStatus(v, SCANdata.SCANtype.AltimetryHiRes);
+			if (s == null)
+				infotext += palette.colored(palette.grey, " HI");
+			else if (!s.inRange)
+				infotext += palette.colored(palette.c_bad, " HI");
+			else if (!s.bestRange && (Time.realtimeSinceStartup % 2 < 1))
+				infotext += palette.colored(palette.c_bad, " HI");
+			else
+				infotext += palette.colored(palette.c_good, " HI");
+
+			s = SCANcontroller.controller.getSensorStatus(v, SCANdata.SCANtype.Biome);
+			if (s == null)
+				infotext += palette.colored(palette.grey, " MULTI");
+			else if (!s.inRange)
+				infotext += palette.colored(palette.c_bad, " MULTI");
+			else if (!s.bestRange && (Time.realtimeSinceStartup % 2 < 1))
+				infotext += palette.colored(palette.c_bad, " MULTI");
+			else
+				infotext += palette.colored(palette.c_good, " MULTI");
+
+			s = SCANcontroller.controller.getSensorStatus(v, SCANdata.SCANtype.AnomalyDetail);
+			if (s == null)
+				infotext += palette.colored(palette.grey, " BTDT");
+			else if (!s.inRange)
+				infotext += palette.colored(palette.c_bad, " BTDT");
+			else if (!s.bestRange && (Time.realtimeSinceStartup % 2 < 1))
+				infotext += palette.colored(palette.c_bad, " BTDT");
+			else
+				infotext += palette.colored(palette.c_good, " BTDT");
+
+			//Get coverage percentage for all active scanners on the vessel
+			SCANdata.SCANtype active = SCANcontroller.controller.activeSensorsOnVessel(v.id);
+			if (active != SCANdata.SCANtype.Nothing)
+			{
+				double cov = data.getCoveragePercentage(active);
+				infotext += string.Format(" {0:N1}%", cov);
+				if (b)
+				{
+					infotext = palette.colored(palette.c_bad, "NO POWER");
+				}
+			}
+
+			return infotext;
+		}
+
 		/* UI: conversions to and from DMS */
 		/* FIXME: These do not belong here. And they are only used once! */
 		internal static string toDMS(double thing, string neg, string pos)
