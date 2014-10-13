@@ -5,6 +5,9 @@
  *
  * SCANsat - Big map window object
  * 
+ * This is all essentially place-holder code to be replaced by a version
+ * of the SCANkscMap
+ * 
  * Copyright (c)2013 damny;
  * Copyright (c)2014 David Grandy <david.grandy@gmail.com>;
  * Copyright (c)2014 technogeeky <technogeeky@gmail.com>;
@@ -696,6 +699,9 @@ namespace SCANsat.SCAN_UI
 				titleText += " [rendering]";
 
 			WindowCaption = string.Format("Map of {0}{1}", b.theName, titleText);
+
+			if (SCANcontroller.controller.globalOverlay) //Update selected resource
+				bigmap.setResource(SCANcontroller.ResourcesList[SCANcontroller.controller.gridSelection].name);
 
 			SCANcontroller.controller.map_x = (int)WindowRect.x;
 			SCANcontroller.controller.map_y = (int)WindowRect.y;
