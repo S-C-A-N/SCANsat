@@ -27,7 +27,7 @@ namespace SCANsat.SCAN_UI
 		private CelestialBody b;
 		private SCANdata data;
 		//private double startUT;
-		private bool drawGrid;
+		private bool drawGrid, spaceCenterLock, trackingStationLock;
 		private bool drop_down_open, projection_drop_down, mapType_drop_down, resources_drop_down, planetoid_drop_down;
 		private Texture2D overlay_static, map;
 		private Rect ddRect, maprect;
@@ -35,6 +35,7 @@ namespace SCANsat.SCAN_UI
 		//private Rect pos_spotmap = new Rect(10f, 10f, 10f, 10f);
 		//private Rect pos_spotmap_x = new Rect(10f, 10f, 25f, 25f);
 		internal static Rect defaultRect = new Rect(250, 60, 780, 460);
+		private const string lockID = "SCANksc_LOCK";
 
 		protected override void Awake()
 		{
@@ -44,9 +45,11 @@ namespace SCANsat.SCAN_UI
 			WindowStyle = SCANskins.SCAN_window;
 			Visible = true;
 			DragEnabled = true;
-			ClampEnabled = false;
+			ClampToScreenOffset = new RectOffset(-600, -600, -400, -400);
 
 			SCAN_SkinsLibrary.SetCurrent("SCAN_Unity");
+
+			InputLockManager.RemoveControlLock(lockID);
 		}
 
 		internal override void Start()
@@ -72,7 +75,8 @@ namespace SCANsat.SCAN_UI
 
 		internal override void OnDestroy()
 		{
-			
+			if (InputLockManager.lockStack.ContainsKey(lockID))
+				EditorLogic.fetch.Unlock(lockID);
 		}
 
 		protected override void DrawWindowPre(int id)
@@ -88,6 +92,40 @@ namespace SCANsat.SCAN_UI
 				resources_drop_down = false;
 				planetoid_drop_down = false;
 			}
+
+			//Lock space center click through
+			if (HighLogic.LoadedScene == GameScenes.SPACECENTER)
+			{
+				Vector2 mousePos = Input.mousePosition;
+				mousePos.y = Screen.height - mousePos.y;
+				if (WindowRect.Contains(mousePos) && !spaceCenterLock)
+				{
+					InputLockManager.SetControlLock(ControlTypes.CAMERACONTROLS | ControlTypes.KSC_FACILITIES | ControlTypes.KSC_UI, lockID);
+					spaceCenterLock = true;
+				}
+				else if (!WindowRect.Contains(mousePos) && spaceCenterLock)
+				{
+					InputLockManager.RemoveControlLock(lockID);
+					spaceCenterLock = false;
+				}
+			}
+
+			//Lock tracking scene click through
+			if (HighLogic.LoadedScene == GameScenes.TRACKSTATION)
+			{
+				Vector2 mousePos = Input.mousePosition;
+				mousePos.y = Screen.height - mousePos.y;
+				if (WindowRect.Contains(mousePos) && !trackingStationLock)
+				{
+					InputLockManager.SetControlLock(ControlTypes.CAMERACONTROLS | ControlTypes.TRACKINGSTATION_ALL, lockID);
+					trackingStationLock = true;
+				}
+				else if (!WindowRect.Contains(mousePos) && trackingStationLock)
+				{
+					InputLockManager.RemoveControlLock(lockID);
+					trackingStationLock = false;
+				}
+			}
 		}
 
 		//The primary GUI method
@@ -97,21 +135,15 @@ namespace SCANsat.SCAN_UI
 			closeBox(id);
 
 			growS();
-
-			topMenu(id);
-
-			growE();
-
-			toggleBar(id);
-
-			mapDraw(id);
-
-			stopE();
-
-			legendBar(id);
-
+				topMenu(id);
+				growE();
+					toggleBar(id);
+					mapDraw(id);
+				stopE();
+				legendBar(id);
 			stopS();
 
+			mapLabels(id);
 			if (drop_down_open)
 				dropDown(id);
 		}
@@ -121,21 +153,25 @@ namespace SCANsat.SCAN_UI
 			//Close the drop down menu if the window is clicked anywhere else
 			if (drop_down_open && Event.current.type == EventType.mouseDown && !ddRect.Contains(Event.current.mousePosition))
 				drop_down_open = false;
+
+			if (SCANcontroller.controller.globalOverlay) //Update selected resource
+				bigmap.setResource(SCANcontroller.ResourcesList[SCANcontroller.controller.gridSelection].name);
 		}
 
+		//Draw version label in upper left corner
 		private void versionLabel(int id)
 		{
 			Rect r = new Rect(6, 0, 40, 18);
 			GUI.Label(r, SCANversions.SCANsatVersion, SCANskins.SCAN_whiteReadoutLabel);
 		}
 
+		//Draw the close button in upper right corner
 		private void closeBox(int id)
 		{
 			Rect r = new Rect(WindowRect.width - 20, 0, 18, 18);
 			if (GUI.Button(r, SCANcontroller.controller.closeBox, SCANskins.SCAN_closeButton))
 			{
 				Visible = false;
-				SCANUtil.SCANlog("Close KSC Map");
 			}
 		}
 
@@ -160,15 +196,30 @@ namespace SCANsat.SCAN_UI
 				drop_down_open = !drop_down_open;
 			}
 
-			GUILayout.FlexibleSpace();
+			fillS(60);
 
-			if (GUILayout.Button("Resources", SCANskins.SCAN_buttonFixed, GUILayout.MaxWidth(100)))
+			if (GUILayout.Button("Update Map", SCANskins.SCAN_buttonFixed, GUILayout.MaxWidth(120)))
 			{
-				resources_drop_down = !resources_drop_down;
-				drop_down_open = !drop_down_open;
+				bigmap.resetMap();
 			}
 
-			fillS(40);
+			fillS(60);
+
+			if (SCANcontroller.controller.globalOverlay)
+			{
+				if (HighLogic.LoadedScene == GameScenes.TRACKSTATION || SCANcontroller.controller.resourceOverlayType == 0)
+				{
+					if (GUILayout.Button("Resources", SCANskins.SCAN_buttonFixed, GUILayout.MaxWidth(100)))
+					{
+						resources_drop_down = !resources_drop_down;
+						drop_down_open = !drop_down_open;
+					}
+
+					fillS(40);
+				}
+			}
+			else
+				fillS(150);
 
 			if (GUILayout.Button("Planetoid", SCANskins.SCAN_buttonFixed, GUILayout.MaxWidth(100)))
 			{
@@ -297,7 +348,7 @@ namespace SCANsat.SCAN_UI
 			growS();
 			float mx = Event.current.mousePosition.x - maprect.x;
 			float my = Event.current.mousePosition.y - maprect.y;
-			bool in_map = false, in_spotmap = false;
+			bool in_map = false;//, in_spotmap = false;
 			double mlon = 0, mlat = 0;
 
 			if (mx >= 0 && my >= 0 && mx < map.width && my < map.height)
@@ -338,6 +389,12 @@ namespace SCANsat.SCAN_UI
 				SCANuiUtil.drawLegend();
 			stopS();
 			stopE();
+		}
+
+		//Draw the map overlay labels
+		private void mapLabels (int id)
+		{
+			SCANuiUtil.drawMapLabels(maprect, null, bigmap, data);
 		}
 
 		//Draw the drop down menus if any have been opened
