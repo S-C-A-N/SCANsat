@@ -1,3 +1,5 @@
+#if DEBUG
+
 #region license
 /* 
  *  [Scientific Committee on Advanced Navigation]
@@ -1789,3 +1791,4 @@ namespace SCANsat
 		}
 	}
 }
+#endif

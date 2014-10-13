@@ -139,7 +139,7 @@ namespace SCANsat
 				//SCANcontroller.controller.scanFromAllVessels ();
 				if (vessel == FlightGlobals.ActiveVessel)
 				{
-					SCANui.gui_ping(powerIsProblem);
+					//SCANui.gui_ping(powerIsProblem);
 					if (powerIsProblem)
 					{
 						addStatic();
@@ -254,8 +254,9 @@ namespace SCANsat
 		[KSPEvent(guiActive = true, guiName = "Start RADAR Scan", active = true)]
 		public void startScan()
 		{
-			if (!ToolbarManager.ToolbarAvailable)
-				SCANui.minimode = (SCANui.minimode > 0 ? 2 : -SCANui.minimode);
+#if DEBUG
+			SCANui.minimode = (SCANui.minimode > 0 ? 2 : -SCANui.minimode);
+#endif
 			registerScanner();
 			animate(1, 0);
 		}
