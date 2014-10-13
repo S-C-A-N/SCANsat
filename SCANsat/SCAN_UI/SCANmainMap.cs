@@ -30,7 +30,8 @@ namespace SCANsat.SCAN_UI
 		private Vessel v;
 		private SCANdata data;
 		private SCANdata.SCANtype sensors;
-		private bool notMappingToday, showVesselInfo;
+		private bool notMappingToday;
+		private static bool showVesselInfo = true;
 		internal static Rect defaultRect = new Rect(10, 55, 380, 260);
 
 		protected override void Awake()
@@ -102,7 +103,7 @@ namespace SCANsat.SCAN_UI
 			}
 			r.x += 16;
 			if (GUI.Button(r, SCANcontroller.controller.closeBox, SCANskins.SCAN_closeButton))
-				SCANUtil.SCANlog("Close Map");
+				Visible = false;
 		}
 
 		//Draw the buttons to control other windows
@@ -112,17 +113,14 @@ namespace SCANsat.SCAN_UI
 			if (GUILayout.Button("Big Map", SCANskins.SCAN_buttonFixed))
 			{
 				SCANcontroller.controller.bigMap.Visible = !SCANcontroller.controller.bigMap.Visible;
-				SCANUtil.SCANlog("Open Big Map");
 			}
 			if (GUILayout.Button("Instruments", SCANskins.SCAN_buttonFixed))
 			{
 				SCANcontroller.controller.instrumentsWindow.Visible = !SCANcontroller.controller.instrumentsWindow.Visible;
-				SCANUtil.SCANlog("Open Instrument");
 			}
 			if (GUILayout.Button("Settings", SCANskins.SCAN_buttonFixed))
 			{
 				SCANcontroller.controller.settingsWindow.Visible = !SCANcontroller.controller.settingsWindow.Visible;
-				SCANUtil.SCANlog("Open Settings");
 			}
 			stopE();
 		}
