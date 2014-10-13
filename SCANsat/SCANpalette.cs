@@ -136,7 +136,13 @@ namespace SCANsat
 				else 								return cb_skyBlue;
 			}
 		}
-		public static Color c_bad = cb_orange;
+		public static Color c_bad
+		{
+			get
+			{
+				return cb_orange;
+			}
+		}
 		public static Color c_ugly {
 			get {
 				if (SCANcontroller.controller.colours != 1)	return xkcd_LightRed;
