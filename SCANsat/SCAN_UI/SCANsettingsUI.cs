@@ -52,7 +52,6 @@ namespace SCANsat.SCAN_UI
 			
 		}
 
-
 		protected override void DrawWindow(int id)
 		{
 			versionLabel(id);
@@ -82,25 +81,26 @@ namespace SCANsat.SCAN_UI
 			stopS();
 		}
 
+		//Draw the version label in the upper left corner
 		private void versionLabel(int id)
 		{
 			Rect r = new Rect(6, 0, 40, 18);
 			GUI.Label(r, SCANversions.SCANsatVersion, SCANskins.SCAN_whiteReadoutLabel);
 		}
 
+		//Draw the close button in the upper right corner
 		private void closeBox(int id)
 		{
 			Rect r = new Rect(WindowRect.width - 20, 0, 18, 18);
 			if (GUI.Button(r, SCANcontroller.controller.closeBox, SCANskins.SCAN_closeButton))
 			{
 				Visible = false;
-				SCANUtil.SCANlog("Close Settings Window");
 			}
 		}
 
+		//Choose anomaly marker icon
 		private void gui_settings_xmarks(int id)
 		{
-			// anomaly marker & close widget
 			GUILayout.Label("Anomaly Marker", SCANskins.SCAN_headline);
 			growE();
 			for (int i = 0; i < exmarks.Length; ++i)
@@ -119,6 +119,7 @@ namespace SCANsat.SCAN_UI
 			stopE();
 		}
 
+		//Control resource options - *Will be moved into big map*
 		private void gui_settings_resources(int id)
 		{
 			GUILayout.Label("Resources Overlay", SCANskins.SCAN_headline);
@@ -160,6 +161,7 @@ namespace SCANsat.SCAN_UI
 			stopE();
 		}
 
+		//Control background scanning options
 		private void gui_settings_toggle_body_scanning(int id)
 		{
 
@@ -186,8 +188,9 @@ namespace SCANsat.SCAN_UI
 
 		}
 
+		//Update the Kethane database to reset the map grid
 		private void gui_settings_rebuild_kethane(int id)
-		{ //Move this function into the settings menu
+		{
 			if (SCANcontroller.controller.resourceOverlayType == 1 && SCANcontroller.controller.globalOverlay)
 			{ //Rebuild the Kethane database
 				if (GUILayout.Button("Rebuild Kethane Grid Database"))
@@ -195,6 +198,7 @@ namespace SCANsat.SCAN_UI
 			}
 		}
 
+		//Display the total number of SCANsat sensors and scanning passes
 		private String gui_settings_numbers(int id)
 		{
 			return "Sensors: " + SCANcontroller.activeSensors +
@@ -202,6 +206,7 @@ namespace SCANsat.SCAN_UI
 					" Passes: " + SCANcontroller.controller.actualPasses.ToString();
 		}
 
+		//Control scanning resolution
 		private void gui_settings_timewarp(int id)
 		{
 			GUILayout.Label("Time Warp Resolution", SCANskins.SCAN_headline);
@@ -224,6 +229,7 @@ namespace SCANsat.SCAN_UI
 			stopE();
 		}
 
+		//Reset databases - *Needs confirmation box*
 		private void gui_settings_data_resets(int id)
 		{
 			CelestialBody thisBody = FlightGlobals.currentMainBody;
@@ -244,6 +250,7 @@ namespace SCANsat.SCAN_UI
 			stopE();
 		}
 
+		//Resets all window positions
 		private void gui_settings_window_resets(int id)
 		{
 			if (GUILayout.Button("Reset window positions", SCANskins.SCAN_buttonFixed))
@@ -262,6 +269,7 @@ namespace SCANsat.SCAN_UI
 			}
 		}
 
+		//Debugging option to fill in SCAN maps
 		private void gui_settings_window_mapFill(int id)
 		{
 			growE();

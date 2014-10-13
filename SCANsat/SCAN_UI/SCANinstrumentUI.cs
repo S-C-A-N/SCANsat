@@ -51,12 +51,14 @@ namespace SCANsat.SCAN_UI
 
 		protected override void DrawWindowPre(int id)
 		{
+			//Grab the active scanners on this vessel
 			sensors = SCANcontroller.controller.activeSensorsOnVessel(FlightGlobals.ActiveVessel.id);
 			data = SCANUtil.getData(FlightGlobals.currentMainBody);
 
-			//if (maptraq_frame >= Time.frameCount - 5)
+			//if (maptraq_frame >= Time.frameCount - 5) //Still not sure what this actually does
 			if (true)
 			{
+				//Check if region below the vessel is scanned
 				if (SCANUtil.isCovered(FlightGlobals.ActiveVessel.longitude, FlightGlobals.ActiveVessel.latitude, data, SCANdata.SCANtype.AltimetryHiRes))
 				{
 					sensors |= SCANdata.SCANtype.Altimetry;
@@ -107,27 +109,30 @@ namespace SCANsat.SCAN_UI
 			stopS();
 		}
 
+		//Draw the version label in the upper left corner
 		private void versionLabel(int id)
 		{
 			Rect r = new Rect(4, 0, 40, 18);
 			GUI.Label(r, SCANversions.SCANsatVersion, SCANskins.SCAN_whiteReadoutLabel);
 		}
 
+		//Draw the close button in the upper right corner
 		private void closeBox(int id)
 		{
 			Rect r = new Rect(WindowRect.width - 20, 0, 18, 18);
 			if (GUI.Button(r, SCANcontroller.controller.closeBox, SCANskins.SCAN_closeButton))
 			{
 				Visible = false;
-				SCANUtil.SCANlog("Close Info Box");
 			}
 		}
 
+		//Display current biome info
 		private void biomeInfo(int id)
 		{
 			GUILayout.Label(string.Format("Biome:  {0}", SCANUtil.getBiomeName(FlightGlobals.ActiveVessel.mainBody, FlightGlobals.ActiveVessel.longitude, FlightGlobals.ActiveVessel.latitude)), SCANskins.SCAN_insColorLabel);
 		}
 
+		//Display the current vessel altitude *Needs to be fixed to display accurate alt*
 		private void altInfo(int id)
 		{
 			double h = FlightGlobals.ActiveVessel.heightFromTerrain;
@@ -136,6 +141,7 @@ namespace SCANsat.SCAN_UI
 			GUILayout.Label(string.Format("Altitude:  {0}", SCANuiUtil.distanceString(h, 100000)), SCANskins.SCAN_insColorLabel);
 		}
 
+		//Display info on the nearest anomaly *Need to separate the BTDT display*
 		private void anomalyInfo(int id)
 		{
 			SCANdata.SCANanomaly nearest = null;
