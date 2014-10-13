@@ -42,6 +42,7 @@ namespace SCANsat.SCAN_UI
 			WindowOptions = new GUILayoutOption[2] { GUILayout.Width(360), GUILayout.Height(300) };
 			Visible = true;
 			DragEnabled = true;
+			ClampToScreenOffset = new RectOffset(-280, -280, -600, -600);
 
 			SCAN_SkinsLibrary.SetCurrent("SCAN_Unity");
 		}

@@ -41,8 +41,6 @@ namespace SCANsat.SCAN_UI
 		internal static Texture2D eq_map;
 		internal static int eq_frame;
 
-		//private float fps_time_passed, fps, fps_sum, fps_frames;
-
 		protected override void Awake()
 		{
 			WindowCaption = "Map of ";
@@ -51,6 +49,7 @@ namespace SCANsat.SCAN_UI
 			WindowStyle = SCANskins.SCAN_window;
 			Visible = true;
 			DragEnabled = true;
+			ClampEnabled = false;
 
 			SCAN_SkinsLibrary.SetCurrent("SCAN_Unity");
 		}
@@ -599,7 +598,7 @@ namespace SCANsat.SCAN_UI
 					SCANuiUtil.drawMapLabels(pos_spotmap, v, spotmap, data);
 				}
 				Rect sC = new Rect(pos_spotmap.x + 160, pos_spotmap.y, 18, 18);
-				if (GUI.Button(sC, SCANcontroller.controller.closeBox, SCANskins.SCAN_closeButton))
+				if (GUI.Button(sC, palette.colored(palette.cb_vermillion, SCANcontroller.controller.closeBox)))
 				{
 					spotmap = null;
 				}

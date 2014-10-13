@@ -44,6 +44,7 @@ namespace SCANsat.SCAN_UI
 			WindowStyle = SCANskins.SCAN_window;
 			Visible = true;
 			DragEnabled = true;
+			ClampEnabled = false;
 
 			SCAN_SkinsLibrary.SetCurrent("SCAN_Unity");
 		}
