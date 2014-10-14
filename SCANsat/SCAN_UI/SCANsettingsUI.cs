@@ -30,9 +30,9 @@ namespace SCANsat.SCAN_UI
 
 		/* UI: time warp names and settings */
 		private string[] twnames = { "Off", "Low", "Medium", "High" };
-		private int[] twvals = { 1, 7, 11, 20 };
+		private int[] twvals = { 1, 6, 9, 15 };
 
-		internal static Rect defaultRect = new Rect(500, 55, 360, 300);
+		internal static Rect defaultRect = new Rect(Screen.width - (Screen.width / 2) - 180, 100, 360, 300);
 
 		protected override void Awake()
 		{
