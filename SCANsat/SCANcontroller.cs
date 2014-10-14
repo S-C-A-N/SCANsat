@@ -73,7 +73,7 @@ namespace SCANsat
 		public int map_y = 50;
 		[KSPField(isPersistant = true)]
 		public string anomalyMarker = "✗";
-		[KSPField(isPersistant = true)]
+		//[KSPField(isPersistant = true)]
 		public string closeBox = "✖";
 		[KSPField(isPersistant = true)]
 		public bool legend = false;
