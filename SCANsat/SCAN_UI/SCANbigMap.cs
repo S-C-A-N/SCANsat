@@ -50,7 +50,7 @@ namespace SCANsat.SCAN_UI
 			WindowRect = defaultRect;
 			WindowOptions = new GUILayoutOption[2] { GUILayout.Width(360), GUILayout.Height(180) };
 			WindowStyle = SCANskins.SCAN_window;
-			Visible = true;
+			Visible = false;
 			DragEnabled = true;
 			ClampEnabled = false;
 
@@ -584,7 +584,7 @@ namespace SCANsat.SCAN_UI
 			#endregion
 
 			if (!notMappingToday)
-				SCANuiUtil.drawMapLabels(maprect, v, bigmap, data);
+				SCANuiUtil.drawMapLabels(maprect, v, bigmap, data, v.mainBody);
 
 			#region zoom map
 			if (spotmap != null)
@@ -598,7 +598,7 @@ namespace SCANsat.SCAN_UI
 				if (!notMappingToday)
 				{
 					SCANuiUtil.drawOrbit(pos_spotmap, spotmap, v, startUT, overlay_static);
-					SCANuiUtil.drawMapLabels(pos_spotmap, v, spotmap, data);
+					SCANuiUtil.drawMapLabels(pos_spotmap, v, spotmap, data, v.mainBody);
 				}
 				Rect sC = new Rect(pos_spotmap.x + 160, pos_spotmap.y, 18, 18);
 				if (GUI.Button(sC, palette.colored(palette.cb_vermillion, SCANcontroller.controller.closeBox)))

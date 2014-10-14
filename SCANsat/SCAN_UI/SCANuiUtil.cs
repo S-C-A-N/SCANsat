@@ -346,12 +346,12 @@ namespace SCANsat.SCAN_UI
 		}
 
 		//Handles various map labels; probably should be split up into multiple methods
-		internal static void drawMapLabels(Rect maprect, Vessel vessel, SCANmap map, SCANdata data)
+		internal static void drawMapLabels(Rect maprect, Vessel vessel, SCANmap map, SCANdata data, CelestialBody body)
 		{
 			//This section handles flag and asteroid labels
 			foreach (Vessel v in FlightGlobals.Vessels)
 			{
-				if (v.mainBody == vessel.mainBody)
+				if (v.mainBody == body)
 				{
 					if (v.vesselType == VesselType.Flag && SCANcontroller.controller.map_flags)
 					{
