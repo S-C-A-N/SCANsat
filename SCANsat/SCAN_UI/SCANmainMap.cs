@@ -50,17 +50,19 @@ namespace SCANsat.SCAN_UI
 		internal override void Start()
 		{
 			Visible = SCANcontroller.controller.mainMapVisible;
+			GameEvents.onVesselSOIChanged.Add(soiChanged);
+			v = FlightGlobals.ActiveVessel;
+			data = SCANUtil.getData(v.mainBody);
 		}
 
 		internal override void OnDestroy()
 		{
-			
+			GameEvents.onVesselSOIChanged.Remove(soiChanged);
 		}
 
 		protected override void DrawWindowPre(int id)
 		{
 			v = FlightGlobals.ActiveVessel;
-			data = SCANUtil.getData(v.mainBody);
 			sensors = SCANcontroller.controller.activeSensorsOnVessel(v.id);
 			data.updateImages(sensors);
 		}
@@ -197,6 +199,11 @@ namespace SCANsat.SCAN_UI
 				return true;
 			}
 			return false;
+		}
+
+		private void soiChanged(GameEvents.HostedFromToAction<Vessel, CelestialBody> VC)
+		{
+			data = SCANUtil.getData(VC.to);
 		}
 
 	}

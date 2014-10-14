@@ -74,6 +74,7 @@ namespace SCANsat.SCAN_UI
 			if (SCANcontroller.controller.resourceOverlayType == 1)
 				SCANcontroller.controller.map_ResourceOverlay = false;
 			WindowCaption = string.Format("Map of {0}", b.theName);
+			data = SCANUtil.getData(b);
 			bigmap.setBody(b);
 		}
 
@@ -86,7 +87,6 @@ namespace SCANsat.SCAN_UI
 		protected override void DrawWindowPre(int id)
 		{
 			WindowCaption = string.Format("Map of {0}", b.theName);
-			data = SCANUtil.getData(b);
 
 			//Disable any errant drop down menus
 			if (!drop_down_open)
@@ -450,7 +450,7 @@ namespace SCANsat.SCAN_UI
 
 			else if (planetoid_drop_down)
 			{
-				ddRect = new Rect(WindowRect.width - 130, 45, 100, FlightGlobals.Bodies.Count * 21);
+				ddRect = new Rect(WindowRect.width - 130, 45, 100, FlightGlobals.Bodies.Count * 20);
 				GUI.Box(ddRect, "", SCANskins.SCAN_dropDownBox);
 				for (int i = 0; i < FlightGlobals.Bodies.Count; i++)
 				{
