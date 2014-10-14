@@ -55,8 +55,16 @@ namespace SCANsat
 				SmallButton.ToolTip = "SCANsat Small Map";
 
 				SCANButton.OnClick += (e) => toggleMenu(SCANButton);
-				MapButton.OnClick += (e) => SCANcontroller.controller.bigMap.Visible = !SCANcontroller.controller.bigMap.Visible;
-				SmallButton.OnClick += (e) => SCANcontroller.controller.mainMap.Visible = !SCANcontroller.controller.mainMap.Visible;
+				MapButton.OnClick += (e) =>
+				{
+					SCANcontroller.controller.bigMap.Visible = !SCANcontroller.controller.bigMap.Visible;
+					SCANcontroller.controller.bigMapVisible = !SCANcontroller.controller.bigMapVisible;
+				};
+				SmallButton.OnClick += (e) =>
+				{
+					SCANcontroller.controller.mainMap.Visible = !SCANcontroller.controller.mainMap.Visible;
+					SCANcontroller.controller.mainMapVisible = !SCANcontroller.controller.mainMapVisible;
+				};
 			}
 			else if (HighLogic.LoadedScene == GameScenes.SPACECENTER || HighLogic.LoadedScene == GameScenes.TRACKSTATION)
 			{
@@ -69,7 +77,11 @@ namespace SCANsat
 
 				KSCButton.ToolTip = "SCANsat KSC Map";
 
-				KSCButton.OnClick += (e) => SCANcontroller.controller.kscMap.Visible = !SCANcontroller.controller.kscMap.Visible;
+				KSCButton.OnClick += (e) =>
+					{
+						SCANcontroller.controller.kscMap.Visible = !SCANcontroller.controller.kscMap.Visible;
+						SCANcontroller.controller.kscMapVisible = !SCANcontroller.controller.kscMapVisible;
+					};
 			}
 		}
 
@@ -93,9 +105,17 @@ namespace SCANsat
 			IButton bigMap = list.AddOption("Big Map");
 			IButton settings = list.AddOption("Settings");
 
-			smallMap.OnClick += (e2) => SCANcontroller.controller.mainMap.Visible = !SCANcontroller.controller.mainMap.Visible;
+			smallMap.OnClick += (e2) =>
+				{
+					SCANcontroller.controller.mainMap.Visible = !SCANcontroller.controller.mainMap.Visible;
+					SCANcontroller.controller.mainMapVisible = !SCANcontroller.controller.mainMapVisible;
+				};
 			instrument.OnClick += (e2) => SCANcontroller.controller.instrumentsWindow.Visible = !SCANcontroller.controller.instrumentsWindow.Visible;
-			bigMap.OnClick += (e2) => SCANcontroller.controller.bigMap.Visible = !SCANcontroller.controller.bigMap.Visible;
+			bigMap.OnClick += (e2) =>
+				{
+					SCANcontroller.controller.bigMap.Visible = !SCANcontroller.controller.bigMap.Visible;
+					SCANcontroller.controller.bigMapVisible = !SCANcontroller.controller.bigMapVisible;
+				};
 			settings.OnClick += (e2) =>
 			{
 				if (!SCANcontroller.controller.settingsWindow.Visible)

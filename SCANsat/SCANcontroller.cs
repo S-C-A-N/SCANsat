@@ -89,6 +89,12 @@ namespace SCANsat
         public int resourceOverlayType = 0; //0 for ORS, 1 for Kethane
         [KSPField(isPersistant = true)]
         public bool dataRebuild = true;
+		[KSPField(isPersistant = true)]
+		public bool mainMapVisible = false;
+		[KSPField(isPersistant = true)]
+		public bool bigMapVisible = false;
+		[KSPField(isPersistant = true)]
+		public bool kscMapVisible = false;
 
 
 		public static List<SCANdata.SCANResource> ResourcesList = new List<SCANdata.SCANResource>(); //The list of all relevant resources

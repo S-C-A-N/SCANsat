@@ -49,7 +49,7 @@ namespace SCANsat.SCAN_UI
 
 		internal override void Start()
 		{
-			
+			Visible = SCANcontroller.controller.mainMapVisible;
 		}
 
 		internal override void OnDestroy()
@@ -104,7 +104,10 @@ namespace SCANsat.SCAN_UI
 			}
 			r.x += 16;
 			if (GUI.Button(r, SCANcontroller.controller.closeBox, SCANskins.SCAN_closeButton))
+			{
 				Visible = false;
+				SCANcontroller.controller.mainMapVisible = Visible;
+			}
 		}
 
 		//Draw the buttons to control other windows
@@ -114,6 +117,7 @@ namespace SCANsat.SCAN_UI
 			if (GUILayout.Button("Big Map", SCANskins.SCAN_buttonFixed))
 			{
 				SCANcontroller.controller.bigMap.Visible = !SCANcontroller.controller.bigMap.Visible;
+				SCANcontroller.controller.bigMapVisible = !SCANcontroller.controller.bigMapVisible;
 			}
 			if (GUILayout.Button("Instruments", SCANskins.SCAN_buttonFixed))
 			{

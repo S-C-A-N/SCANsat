@@ -59,6 +59,7 @@ namespace SCANsat.SCAN_UI
 
 		internal override void Start()
 		{
+			Visible = SCANcontroller.controller.bigMapVisible;
 			GameEvents.onVesselSOIChanged.Add(soiChanged);
 			if (bigmap == null)
 			{
@@ -201,6 +202,7 @@ namespace SCANsat.SCAN_UI
 			if (GUILayout.Button("Close", SCANskins.SCAN_buttonFixed))
 			{
 				Visible = false;
+				SCANcontroller.controller.bigMapVisible = Visible;
 			}
 
 			fillS();

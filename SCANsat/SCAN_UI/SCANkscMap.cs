@@ -24,7 +24,7 @@ namespace SCANsat.SCAN_UI
 	class SCANkscMap: MBW
 	{
 		private static SCANmap bigmap;
-		private CelestialBody b;
+		private static CelestialBody b;
 		private SCANdata data;
 		//private double startUT;
 		private bool drawGrid, spaceCenterLock, trackingStationLock;
@@ -55,20 +55,24 @@ namespace SCANsat.SCAN_UI
 		internal override void Start()
 		{
 			//Initialize the map object
-			b = Planetarium.fetch.Home;
+			Visible = SCANcontroller.controller.kscMapVisible;
+			if (b == null)
+				b = Planetarium.fetch.Home;
 			if (bigmap == null)
 			{
 				bigmap = new SCANmap(b);
 				bigmap.setProjection((SCANmap.MapProjection)SCANcontroller.controller.projection);
 				bigmap.setWidth(720);
-				WindowRect.x = SCANcontroller.controller.map_x;
-				WindowRect.y = SCANcontroller.controller.map_y;
+				//WindowRect.x = SCANcontroller.controller.map_x;
+				//WindowRect.y = SCANcontroller.controller.map_y;
 			}
 			else
 			{
-				SCANcontroller.controller.map_x = (int)WindowRect.x;
-				SCANcontroller.controller.map_y = (int)WindowRect.y;
+				//SCANcontroller.controller.map_x = (int)WindowRect.x;
+				//SCANcontroller.controller.map_y = (int)WindowRect.y;
 			}
+			if (SCANcontroller.controller.resourceOverlayType == 1)
+				SCANcontroller.controller.map_ResourceOverlay = false;
 			WindowCaption = string.Format("Map of {0}", b.theName);
 			bigmap.setBody(b);
 		}
@@ -172,6 +176,7 @@ namespace SCANsat.SCAN_UI
 			if (GUI.Button(r, SCANcontroller.controller.closeBox, SCANskins.SCAN_closeButton))
 			{
 				Visible = false;
+				SCANcontroller.controller.kscMapVisible = Visible;
 			}
 		}
 
@@ -453,6 +458,7 @@ namespace SCANsat.SCAN_UI
 					if (GUI.Button(r, FlightGlobals.Bodies[i].name, SCANskins.SCAN_dropDownButton))
 					{
 						b = FlightGlobals.Bodies[i];
+						data = SCANUtil.getData(b);
 						bigmap.setBody(b);
 						drop_down_open = false;
 					}
