@@ -40,7 +40,7 @@ namespace SCANsat.SCAN_UI
 			WindowRect = defaultRect;
 			WindowOptions = new GUILayoutOption[2] { GUILayout.Width(380), GUILayout.Height(260) };
 			WindowStyle = SCANskins.SCAN_window;
-			Visible = true;
+			Visible = false;
 			DragEnabled = true;
 			ClampToScreenOffset = new RectOffset(-300, -300, -200, -200);
 
@@ -62,6 +62,7 @@ namespace SCANsat.SCAN_UI
 			v = FlightGlobals.ActiveVessel;
 			data = SCANUtil.getData(v.mainBody);
 			sensors = SCANcontroller.controller.activeSensorsOnVessel(v.id);
+			data.updateImages(sensors);
 		}
 
 		protected override void DrawWindow(int id)
@@ -161,33 +162,33 @@ namespace SCANsat.SCAN_UI
 		}
 
 		//Method to handle vessel info
-		private bool vesselInfo(Vessel V, Rect r, int i, bool b)
+		private bool vesselInfo(Vessel scanV, Rect r, int i, bool b)
 		{
-			if (V == null)
+			if (scanV == null)
 				return false;
-			if (V.mainBody == V.mainBody)
+			if (scanV.mainBody == v.mainBody)
 			{
 				if (!showVesselInfo)
 				{
-					SCANuiUtil.drawVesselLabel(r, null, -1, V);
+					SCANuiUtil.drawVesselLabel(r, null, -1, scanV);
 					return true;
 				}
-				float lon = (float)SCANUtil.fixLonShift(V.longitude);
-				float lat = (float)SCANUtil.fixLatShift(V.latitude);
-				float alt = V.heightFromTerrain;
+				float lon = (float)SCANUtil.fixLonShift(scanV.longitude);
+				float lat = (float)SCANUtil.fixLatShift(scanV.latitude);
+				float alt = scanV.heightFromTerrain;
 				if (alt < 0)
-					alt = (float)V.altitude;
-				string text = string.Format("[{0}] {1} ({2:F1}°,{3:F1}°; {4:N1}m)", i, V.vesselName, lat, lon, alt);
+					alt = (float)scanV.altitude;
+				string text = string.Format("[{0}] {1} ({2:F1}°,{3:F1}°; {4:N1}m)", i, scanV.vesselName, lat, lon, alt);
 				if (SCANuiUtil.readableLabel(text, b))
 				{
 					if (Event.current.clickCount > 1)
 					{
 						Event.current.Use();
-						FlightGlobals.SetActiveVessel(V);
-						ScreenMessages.PostScreenMessage(V.vesselName, 5, ScreenMessageStyle.UPPER_CENTER);
+						FlightGlobals.SetActiveVessel(scanV);
+						ScreenMessages.PostScreenMessage(scanV.vesselName, 5, ScreenMessageStyle.UPPER_CENTER);
 					}
 				}
-				SCANuiUtil.drawVesselLabel(r, null, i, V);
+				SCANuiUtil.drawVesselLabel(r, null, i, scanV);
 				fillS(-10);
 				return true;
 			}
