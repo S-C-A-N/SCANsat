@@ -31,7 +31,7 @@ namespace SCANsat.SCAN_UI
 		private bool drop_down_open, projection_drop_down, mapType_drop_down, resources_drop_down, planetoid_drop_down;
 		private Texture2D overlay_static, map;
 		private Rect ddRect, maprect;
-		//private Rect rc = new Rect(0, 0, 0, 0);
+		private Rect rc = new Rect(0, 0, 20, 20);
 		//private Rect pos_spotmap = new Rect(10f, 10f, 10f, 10f);
 		//private Rect pos_spotmap_x = new Rect(10f, 10f, 25f, 25f);
 		internal static Rect defaultRect = new Rect(250, 60, 780, 460);
@@ -43,7 +43,7 @@ namespace SCANsat.SCAN_UI
 			WindowRect = defaultRect;
 			WindowOptions = new GUILayoutOption[2] { GUILayout.Width(740), GUILayout.Height(420) };
 			WindowStyle = SCANskins.SCAN_window;
-			Visible = true;
+			Visible = false;
 			DragEnabled = true;
 			ClampToScreenOffset = new RectOffset(-600, -600, -400, -400);
 
@@ -198,28 +198,22 @@ namespace SCANsat.SCAN_UI
 
 			fillS(60);
 
-			if (GUILayout.Button("Update Map", SCANskins.SCAN_buttonFixed, GUILayout.MaxWidth(120)))
+			if (GUILayout.Button("Update Map", SCANskins.SCAN_buttonFixed, GUILayout.MaxWidth(90)))
 			{
 				bigmap.resetMap();
 			}
 
-			fillS(60);
-
-			if (SCANcontroller.controller.globalOverlay)
+			if (SCANcontroller.controller.globalOverlay && SCANcontroller.controller.resourceOverlayType == 0)
 			{
-				if (HighLogic.LoadedScene == GameScenes.TRACKSTATION || SCANcontroller.controller.resourceOverlayType == 0)
+				fillS(60);
+				if (GUILayout.Button("Resources", SCANskins.SCAN_buttonFixed, GUILayout.MaxWidth(100)))
 				{
-					if (GUILayout.Button("Resources", SCANskins.SCAN_buttonFixed, GUILayout.MaxWidth(100)))
-					{
-						resources_drop_down = !resources_drop_down;
-						drop_down_open = !drop_down_open;
-					}
-
-					fillS(40);
+					resources_drop_down = !resources_drop_down;
+					drop_down_open = !drop_down_open;
 				}
 			}
-			else
-				fillS(150);
+
+			fillS();
 
 			if (GUILayout.Button("Planetoid", SCANskins.SCAN_buttonFixed, GUILayout.MaxWidth(100)))
 			{
@@ -285,10 +279,13 @@ namespace SCANsat.SCAN_UI
 
 			fillS();
 
-			if (GUILayout.Button("Res_Overlay", SCANskins.SCAN_buttonFixed))
+			if (SCANcontroller.controller.globalOverlay && SCANcontroller.controller.resourceOverlayType == 0)
 			{
-				SCANcontroller.controller.map_ResourceOverlay = !SCANcontroller.controller.map_ResourceOverlay;
-				bigmap.resetMap();
+				if (GUILayout.Button("Res_Overlay", SCANskins.SCAN_buttonFixed))
+				{
+					SCANcontroller.controller.map_ResourceOverlay = !SCANcontroller.controller.map_ResourceOverlay;
+					bigmap.resetMap();
+				}
 			}
 
 			stopS();
@@ -331,12 +328,11 @@ namespace SCANsat.SCAN_UI
 
 			if (bigmap.projection == SCANmap.MapProjection.Polar)
 			{
-				Rect rc = new Rect();
 				rc.x = maprect.x + maprect.width / 2 - maprect.width / 8;
 				rc.y = maprect.y + maprect.height / 8;
-				SCANuiUtil.drawLabel(rc, "S", true, true, false);
+				SCANuiUtil.drawLabel(rc, "S", false, true, true);
 				rc.x = maprect.x + maprect.width / 2 + maprect.width / 8;
-				SCANuiUtil.drawLabel(rc, "N", true, true, false);
+				SCANuiUtil.drawLabel(rc, "N", false, true, true);
 			}
 		}
 
@@ -394,7 +390,7 @@ namespace SCANsat.SCAN_UI
 		//Draw the map overlay labels
 		private void mapLabels (int id)
 		{
-			SCANuiUtil.drawMapLabels(maprect, null, bigmap, data);
+			SCANuiUtil.drawMapLabels(maprect, null, bigmap, data, b);
 		}
 
 		//Draw the drop down menus if any have been opened
