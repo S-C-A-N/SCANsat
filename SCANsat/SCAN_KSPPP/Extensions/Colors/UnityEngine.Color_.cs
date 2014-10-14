@@ -86,10 +86,10 @@ namespace UnityEngine
 				if (knownColors.ContainsKey (col)) {
 					var collision = "";
 					if (knownColors.TryGetValue (col, out collision))
-						Log.Now("{0} -> {1} and {2}", col, collision, name);
+						Log.Debug("{0} -> {1} and {2}", col, collision, name);
 				} else {
 					knownColors.Add (col,name);
-					Log.Now("{0} -> {1}", col, name);
+					Log.Debug("{0} -> {1}", col, name);
 				}
 			}
 			
@@ -103,10 +103,10 @@ namespace UnityEngine
 				if (knownColors.ContainsKey (col)) {
 					var collision = "";
 					if (knownColors.TryGetValue (col, out collision))
-						Log.Now("{0} -> {1} and {2}", col, collision, name);
+						Log.Debug("{0} -> {1} and {2}", col, collision, name);
 				} else {
 					knownColors.Add (col,name);
-					Log.Now("{0} -> {1}", col, name);
+					Log.Debug("{0} -> {1}", col, name);
 				}
 			}
 			

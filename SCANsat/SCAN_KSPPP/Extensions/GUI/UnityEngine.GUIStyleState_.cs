@@ -41,9 +41,9 @@ namespace UnityEngine
 			if (s.background != null) bkg = s.background.ToString ();
 			
 			if (Color_.knownColors.TryGetValue (s.textColor, out colorName)) {
-				Log.Now ("{0} {{ GUIss: textColor: {1} bkg: {2} }}",breadcrumbs, colorName,bkg);
+				Log.Debug("{0} {{ GUIss: textColor: {1} bkg: {2} }}", breadcrumbs, colorName, bkg);
 			} else {
-				Log.Now ("{0} {{ GUIss: textColor: {1} bkg: {2} }}",breadcrumbs, s.textColor.ToString (),bkg);
+				Log.Debug("{0} {{ GUIss: textColor: {1} bkg: {2} }}", breadcrumbs, s.textColor.ToString(), bkg);
 			}
 		}
 	}
