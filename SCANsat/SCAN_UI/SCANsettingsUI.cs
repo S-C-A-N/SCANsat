@@ -58,25 +58,16 @@ namespace SCANsat.SCAN_UI
 			closeBox(id);
 
 			growS();
-				fillS(8);
 				gui_settings_xmarks(id); 				/* X marker selection */
-				fillS(16);
 				gui_settings_resources(id);				/* resource details sub-window */
-				fillS(16);
-				gui_settings_toggle_body_scanning(id);		/* background and body scanning toggles */
-				gui_settings_rebuild_kethane(id);
-				fillS(16);
+				gui_settings_toggle_body_scanning(id);	/* background and body scanning toggles */
+				gui_settings_rebuild_kethane(id);		/* rebuild Kethane database with SCANsat info */
 				gui_settings_timewarp(id);				/* time warp resolution settings */
-				fillS(8);
-				GUILayout.Label(gui_settings_numbers(id), SCANskins.SCAN_whiteReadoutLabel);/* sensor/scanning		statistics */
-				fillS(16);
+				gui_settings_numbers(id);				/* sensor/scanning		statistics */
 				gui_settings_data_resets(id);			/* reset data and/or reset resources */
-				fillS(8);
 				gui_settings_window_resets(id);			/* reset windows and positions */
-				fillS(8);
 				# if DEBUG
-					gui_settings_window_mapFill(id);
-					fillS(8);
+					gui_settings_window_mapFill(id);	/* debug option to fill in maps */
 				#endif
 			stopS();
 		}
@@ -101,6 +92,7 @@ namespace SCANsat.SCAN_UI
 		//Choose anomaly marker icon
 		private void gui_settings_xmarks(int id)
 		{
+			fillS(8);
 			GUILayout.Label("Anomaly Marker", SCANskins.SCAN_headline);
 			growE();
 			for (int i = 0; i < exmarks.Length; ++i)
@@ -117,6 +109,7 @@ namespace SCANsat.SCAN_UI
 				}
 			}
 			stopE();
+			fillS(16);
 		}
 
 		//Control resource options - *Will be moved into big map*
@@ -159,6 +152,7 @@ namespace SCANsat.SCAN_UI
 			growE();
 			SCANcontroller.controller.gridSelection = GUILayout.SelectionGrid(SCANcontroller.controller.gridSelection, SCANcontroller.ResourcesList.Select(a => a.name).ToArray(), 4); //select resource to display
 			stopE();
+			fillS(16);
 		}
 
 		//Control background scanning options
@@ -185,7 +179,6 @@ namespace SCANsat.SCAN_UI
 			if (count != 0)
 				stopS(); ;
 			stopE();
-
 		}
 
 		//Update the Kethane database to reset the map grid
@@ -196,14 +189,7 @@ namespace SCANsat.SCAN_UI
 				if (GUILayout.Button("Rebuild Kethane Grid Database"))
 					SCANcontroller.controller.kethaneRebuild = !SCANcontroller.controller.kethaneRebuild;
 			}
-		}
-
-		//Display the total number of SCANsat sensors and scanning passes
-		private String gui_settings_numbers(int id)
-		{
-			return "Sensors: " + SCANcontroller.activeSensors +
-					" Vessels: " + SCANcontroller.activeVessels.ToString() +
-					" Passes: " + SCANcontroller.controller.actualPasses.ToString();
+			fillS(16);
 		}
 
 		//Control scanning resolution
@@ -225,8 +211,18 @@ namespace SCANsat.SCAN_UI
 						SCANcontroller.controller.timeWarpResolution = twvals[i];
 				}
 			}
-
 			stopE();
+			fillS(8);
+		}
+
+		//Display the total number of SCANsat sensors and scanning passes
+		private void gui_settings_numbers(int id)
+		{
+			string s = "Sensors: " + SCANcontroller.activeSensors +
+					" Vessels: " + SCANcontroller.activeVessels.ToString() +
+					" Passes: " + SCANcontroller.controller.actualPasses.ToString();
+			GUILayout.Label(s, SCANskins.SCAN_whiteReadoutLabel);
+			fillS(16);
 		}
 
 		//Reset databases - *Needs confirmation box*
@@ -248,6 +244,7 @@ namespace SCANsat.SCAN_UI
 				}
 			}
 			stopE();
+			fillS(8);
 		}
 
 		//Resets all window positions
@@ -267,6 +264,7 @@ namespace SCANsat.SCAN_UI
 					SCANuiUtil.resetKSCMapPos();
 				}
 			}
+			fillS(8);
 		}
 
 		//Debugging option to fill in SCAN maps
@@ -288,6 +286,7 @@ namespace SCANsat.SCAN_UI
 				}
 			}
 			stopE();
+			fillS(8);
 		}
 
 	}

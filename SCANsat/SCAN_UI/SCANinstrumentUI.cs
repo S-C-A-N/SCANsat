@@ -44,16 +44,21 @@ namespace SCANsat.SCAN_UI
 			SCAN_SkinsLibrary.SetCurrent("SCAN_Unity");
 		}
 
+		internal override void Start()
+		{
+			GameEvents.onVesselSOIChanged.Add(soiChange);
+			data = SCANUtil.getData(FlightGlobals.currentMainBody);
+		}
+
 		internal override void OnDestroy()
 		{
-			
+			GameEvents.onVesselSOIChanged.Remove(soiChange);
 		}
 
 		protected override void DrawWindowPre(int id)
 		{
 			//Grab the active scanners on this vessel
 			sensors = SCANcontroller.controller.activeSensorsOnVessel(FlightGlobals.ActiveVessel.id);
-			data = SCANUtil.getData(FlightGlobals.currentMainBody);
 
 			//if (maptraq_frame >= Time.frameCount - 5) //Still not sure what this actually does
 			if (true)
@@ -63,7 +68,7 @@ namespace SCANsat.SCAN_UI
 				{
 					sensors |= SCANdata.SCANtype.Altimetry;
 				}
-				if (SCANUtil.isCovered(FlightGlobals.ActiveVessel.longitude, FlightGlobals.ActiveVessel.latitude, data, SCANdata.SCANtype.AltimetryHiRes))
+				else if (SCANUtil.isCovered(FlightGlobals.ActiveVessel.longitude, FlightGlobals.ActiveVessel.latitude, data, SCANdata.SCANtype.AltimetryHiRes))
 				{
 					sensors |= SCANdata.SCANtype.Altimetry;
 				}
@@ -82,13 +87,13 @@ namespace SCANsat.SCAN_UI
 			int parts = 0;
 
 			growS();
-			if (notMappingToday) noData(id);
+			if (notMappingToday) noData(id);		/* to be shown when power is out *FixMe - non-functional */
 			else
 			{
-				if (biomeInfo(id)) ++parts;
-				if (altInfo(id)) ++parts;
-				if (anomalyInfo(id)) ++parts;
-				if (parts <= 0) noData(id);
+				if (biomeInfo(id)) ++parts;			/* show current biome info */
+				if (altInfo(id)) ++parts;			/* show current altitude *FixMe - inaccurate* */
+				if (anomalyInfo(id)) ++parts;		/* show nearest anomaly detail - including BTDT view */
+				if (parts <= 0) noData(id);			/* nothing to show */
 			}
 			stopS();
 		}
@@ -192,6 +197,11 @@ namespace SCANsat.SCAN_UI
 				return false;
 			}
 			return false;
+		}
+
+		private void soiChange (GameEvents.HostedFromToAction<Vessel, CelestialBody> VC)
+		{
+			data = SCANUtil.getData(VC.to);
 		}
 
 	}

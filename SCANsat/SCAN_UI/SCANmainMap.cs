@@ -31,6 +31,7 @@ namespace SCANsat.SCAN_UI
 		private SCANdata data;
 		private SCANdata.SCANtype sensors;
 		private bool notMappingToday;
+		private Rect mapRect;
 		private static bool showVesselInfo = true;
 		internal static Rect defaultRect = new Rect(10, 55, 380, 260);
 
@@ -69,17 +70,13 @@ namespace SCANsat.SCAN_UI
 
 		protected override void DrawWindow(int id)
 		{
-			bool repainting = Event.current.type == EventType.Repaint;
-
 			versionLabel(id);
 			topMenu(id);
 			growS();
-				fillS(4);
-				topButtons(id);
-				mainMap(id);
-				Rect mapRect = GUILayoutUtility.GetLastRect();
-				scannerInfo(id, repainting);
-				vesselInfo(id, mapRect);
+				topButtons(id);				/* Buttons for other SCANsat windows */
+				mainMap(id);				/* Draws the main map texture */
+				scannerInfo(id);			/* Draws the scanner indicators */
+				vesselInfo(id);				/* Shows info for any SCANsat vessels */
 			stopS();
 		}
 
@@ -115,6 +112,7 @@ namespace SCANsat.SCAN_UI
 		//Draw the buttons to control other windows
 		private void topButtons(int id)
 		{
+			fillS(4);
 			growE();
 			if (GUILayout.Button("Big Map", SCANskins.SCAN_buttonFixed))
 			{
@@ -136,13 +134,15 @@ namespace SCANsat.SCAN_UI
 		private void mainMap(int id)
 		{
 			GUILayout.Label(data.map_small);
+			mapRect = GUILayoutUtility.GetLastRect();
 		}
 
 		//Draw the active scanner display
-		private void scannerInfo(int id, bool Repainting)
+		private void scannerInfo(int id)
 		{
+			bool repainting = Event.current.type == EventType.Repaint;
 			fillS(-6);
-			if (!Repainting)
+			if (!repainting)
 				infoText = SCANuiUtil.InfoText(v, data, notMappingToday);
 
 			if (infoText != null)
@@ -151,17 +151,17 @@ namespace SCANsat.SCAN_UI
 		}
 
 		//Draw the vessel location and alt info
-		private void vesselInfo(int id, Rect MapRect)
+		private void vesselInfo(int id)
 		{
 			if (!notMappingToday)
 			{
 				int count = 2;
-				vesselInfo(v, MapRect, 1, true);
+				vesselInfo(v, mapRect, 1, true);
 				foreach (SCANcontroller.SCANvessel sV in SCANcontroller.controller.knownVessels.Values)
 				{
 					if (sV.vessel == FlightGlobals.ActiveVessel)
 						continue;
-					if (vesselInfo(sV.vessel, MapRect, count, false))
+					if (vesselInfo(sV.vessel, mapRect, count, false))
 						count++;
 				}
 			}

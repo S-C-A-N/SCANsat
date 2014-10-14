@@ -139,17 +139,17 @@ namespace SCANsat.SCAN_UI
 			closeBox(id);
 
 			growS();
-				topMenu(id);
+				topMenu(id);		/* Top row of buttons - used to control the map types */
 				growE();
-					toggleBar(id);
-					mapDraw(id);
+					toggleBar(id);	/* Toggle options along left side - control overlay options - *Replace buttons with textures* */
+					mapDraw(id);	/* Draw the main map texture */
 				stopE();
-				legendBar(id);
+				legendBar(id);		/* Draw the mouseover info and legend bar along the bottom */
 			stopS();
 
-			mapLabels(id);
+			mapLabels(id);			/* Draw the vessel/anomaly icons on the map */
 			if (drop_down_open)
-				dropDown(id);
+				dropDown(id);		/* Draw the drop down menus if any are open */
 		}
 
 		protected override void DrawWindowPost(int id)
