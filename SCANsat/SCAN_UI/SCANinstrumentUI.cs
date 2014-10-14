@@ -59,6 +59,10 @@ namespace SCANsat.SCAN_UI
 			if (true)
 			{
 				//Check if region below the vessel is scanned
+				if (SCANUtil.isCovered(FlightGlobals.ActiveVessel.longitude, FlightGlobals.ActiveVessel.latitude, data, SCANdata.SCANtype.AltimetryLoRes))
+				{
+					sensors |= SCANdata.SCANtype.Altimetry;
+				}
 				if (SCANUtil.isCovered(FlightGlobals.ActiveVessel.longitude, FlightGlobals.ActiveVessel.latitude, data, SCANdata.SCANtype.AltimetryHiRes))
 				{
 					sensors |= SCANdata.SCANtype.Altimetry;
@@ -78,33 +82,13 @@ namespace SCANsat.SCAN_UI
 			int parts = 0;
 
 			growS();
-			if (notMappingToday)
-			{
-				GUILayout.Label("NO DATA", SCANskins.SCAN_insWhiteLabel);
-			}
+			if (notMappingToday) noData(id);
 			else
 			{
-				if ((sensors & SCANdata.SCANtype.Biome) != SCANdata.SCANtype.Nothing)
-				{
-					biomeInfo(id);
-					++parts;
-					fillS(-10);
-				}
-				if ((sensors & SCANdata.SCANtype.AltimetryHiRes) != SCANdata.SCANtype.Nothing)
-				{
-					altInfo(id);
-					++parts;
-					fillS(-10);
-				}
-				if ((sensors & SCANdata.SCANtype.AnomalyDetail) != SCANdata.SCANtype.Nothing)
-				{
-					anomalyInfo(id);
-					++parts;
-				}
-				if (parts <= 0)
-				{
-					GUILayout.Label("NO DATA", SCANskins.SCAN_insWhiteLabel);
-				}
+				if (biomeInfo(id)) ++parts;
+				if (altInfo(id)) ++parts;
+				if (anomalyInfo(id)) ++parts;
+				if (parts <= 0) noData(id);
 			}
 			stopS();
 		}
@@ -126,65 +110,88 @@ namespace SCANsat.SCAN_UI
 			}
 		}
 
-		//Display current biome info
-		private void biomeInfo(int id)
+		private void noData(int id)
 		{
-			GUILayout.Label(string.Format("Biome:  {0}", SCANUtil.getBiomeName(FlightGlobals.ActiveVessel.mainBody, FlightGlobals.ActiveVessel.longitude, FlightGlobals.ActiveVessel.latitude)), SCANskins.SCAN_insColorLabel);
+			GUILayout.Label("NO DATA", SCANskins.SCAN_insWhiteLabel);
+		}
+
+		//Display current biome info
+		private bool biomeInfo(int id)
+		{
+			if ((sensors & SCANdata.SCANtype.Biome) != SCANdata.SCANtype.Nothing)
+			{
+				GUILayout.Label(string.Format("Biome:  {0}", SCANUtil.getBiomeName(FlightGlobals.ActiveVessel.mainBody, FlightGlobals.ActiveVessel.longitude, FlightGlobals.ActiveVessel.latitude)), SCANskins.SCAN_insColorLabel);
+				fillS(-10);
+				return true;
+			}
+			return false;
 		}
 
 		//Display the current vessel altitude *Needs to be fixed to display accurate alt*
-		private void altInfo(int id)
+		private bool altInfo(int id)
 		{
-			double h = FlightGlobals.ActiveVessel.heightFromTerrain;
-			if (h < 0)
-				h = FlightGlobals.ActiveVessel.altitude;
-			GUILayout.Label(string.Format("Altitude:  {0}", SCANuiUtil.distanceString(h, 100000)), SCANskins.SCAN_insColorLabel);
+			if ((sensors & SCANdata.SCANtype.Altimetry) != SCANdata.SCANtype.Nothing)
+			{
+				double h = FlightGlobals.ActiveVessel.heightFromTerrain;
+				if (h < 0)
+					h = FlightGlobals.ActiveVessel.altitude;
+				GUILayout.Label(string.Format("Altitude:  {0}", SCANuiUtil.distanceString(h, 100000)), SCANskins.SCAN_insColorLabel);
+				fillS(-10);
+				return true;
+			}
+			return false;
 		}
 
 		//Display info on the nearest anomaly *Need to separate the BTDT display*
-		private void anomalyInfo(int id)
+		private bool anomalyInfo(int id)
 		{
-			SCANdata.SCANanomaly nearest = null;
-			double nearest_dist = -1;
-			foreach (SCANdata.SCANanomaly a in data.getAnomalies())
+			if ((sensors & SCANdata.SCANtype.AnomalyDetail) != SCANdata.SCANtype.Nothing)
 			{
-				if (!a.known)
-					continue;
-				double d = (a.mod.transform.position - FlightGlobals.ActiveVessel.transform.position).magnitude;
-				if (d < nearest_dist || nearest_dist < 0)
+				SCANdata.SCANanomaly nearest = null;
+				double nearest_dist = -1;
+				foreach (SCANdata.SCANanomaly a in data.getAnomalies())
 				{
-					if (d < 50000)
+					if (!a.known)
+						continue;
+					double d = (a.mod.transform.position - FlightGlobals.ActiveVessel.transform.position).magnitude;
+					if (d < nearest_dist || nearest_dist < 0)
 					{
-						nearest = a;
-						nearest_dist = d;
-					}
-				}
-			}
-			if (nearest != null)
-			{
-				string txt = "Anomaly";
-				if (nearest.detail)
-					txt = nearest.name;
-				txt += ":  " + SCANuiUtil.distanceString(nearest_dist, 5000);
-				GUILayout.Label(txt, SCANskins.SCAN_insColorLabel);
-
-				if (anomalyView == null)
-					anomalyView = new RemoteView();
-				if (anomalyView != null)
-				{
-					if (nearest.mod != null)
-					{
-						if (anomalyView.lookat != nearest.mod.gameObject)
-							anomalyView.setup(320, 240, nearest.mod.gameObject);
-						Texture t = anomalyView.getTexture();
-						if (t != null)
+						if (d < 50000)
 						{
-							GUILayout.Label(anomalyView.getTexture());
-							anomalyView.drawOverlay(GUILayoutUtility.GetLastRect(), SCANskins.SCAN_anomalyOverlay, nearest.detail);
+							nearest = a;
+							nearest_dist = d;
 						}
 					}
 				}
+				if (nearest != null)
+				{
+					string txt = "Anomaly";
+					if (nearest.detail)
+						txt = nearest.name;
+					txt += ":  " + SCANuiUtil.distanceString(nearest_dist, 5000);
+					GUILayout.Label(txt, SCANskins.SCAN_insColorLabel);
+
+					if (anomalyView == null)
+						anomalyView = new RemoteView();
+					if (anomalyView != null)
+					{
+						if (nearest.mod != null)
+						{
+							if (anomalyView.lookat != nearest.mod.gameObject)
+								anomalyView.setup(320, 240, nearest.mod.gameObject);
+							Texture t = anomalyView.getTexture();
+							if (t != null)
+							{
+								GUILayout.Label(anomalyView.getTexture());
+								anomalyView.drawOverlay(GUILayoutUtility.GetLastRect(), SCANskins.SCAN_anomalyOverlay, nearest.detail);
+							}
+						}
+					}
+					return true;
+				}
+				return false;
 			}
+			return false;
 		}
 
 	}
