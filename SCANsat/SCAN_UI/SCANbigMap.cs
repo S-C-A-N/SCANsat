@@ -60,7 +60,7 @@ namespace SCANsat.SCAN_UI
 		internal override void Start()
 		{
 			Visible = SCANcontroller.controller.bigMapVisible;
-			GameEvents.onVesselSOIChanged.Add(soiChanged);
+			//GameEvents.onVesselSOIChanged.Add(soiChanged);
 			if (bigmap == null)
 			{
 				bigmap = new SCANmap();
@@ -75,13 +75,14 @@ namespace SCANsat.SCAN_UI
 				WindowRect.y = SCANcontroller.controller.map_y;
 			}
 			b = FlightGlobals.currentMainBody;
+			data = SCANUtil.getData(b);
 			WindowCaption = string.Format("Map of {0}", b.theName);
 			bigmap.setBody(b);
 		}
 
 		internal override void OnDestroy()
 		{
-			GameEvents.onVesselSOIChanged.Remove(soiChanged);
+			//GameEvents.onVesselSOIChanged.Remove(soiChanged);
 		}
 
 		protected override void DrawWindowPre(int id)
@@ -113,8 +114,12 @@ namespace SCANsat.SCAN_UI
 			}
 
 			v = FlightGlobals.ActiveVessel;
-			b = v.mainBody;
-			data = SCANUtil.getData(b);
+			if (b != v.mainBody)
+			{
+				b = v.mainBody;
+				data = SCANUtil.getData(b);
+				bigmap.setBody(b);
+			}
 		}
 
 		protected override void DrawWindow(int id)
@@ -716,12 +721,12 @@ namespace SCANsat.SCAN_UI
 			GUI.Label(vR, SCANversions.SCANsatVersion, SCANskins.SCAN_whiteReadoutLabel);
 		}
 
-		private void soiChanged(GameEvents.HostedFromToAction<Vessel, CelestialBody> VC)
-		{
-			b = VC.to;
-			bigmap.setBody(b);
-			WindowCaption = string.Format("Map of {0}", b.theName);
-		}
+		//private void soiChanged(GameEvents.HostedFromToAction<Vessel, CelestialBody> VC)
+		//{
+		//	b = VC.to;
+		//	bigmap.setBody(b);
+		//	WindowCaption = string.Format("Map of {0}", b.theName);
+		//}
 
 	}
 }
