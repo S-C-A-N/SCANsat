@@ -44,6 +44,17 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SCAN_KSPPP\Attributes\Bounds.cs" />
+    <Compile Include="SCAN_KSPPP\ColorModels\CMYK.cs" />
+    <Compile Include="SCAN_KSPPP\ColorModels\HSBA.cs" />
+    <Compile Include="SCAN_KSPPP\ColorModels\HSLA.cs" />
+    <Compile Include="SCAN_KSPPP\ColorModels\HSVA.cs" />
+    <Compile Include="SCAN_KSPPP\ColorModels\RGBAb.cs" />
+    <Compile Include="SCAN_KSPPP\ColorModels\RGBAf.cs" />
+    <Compile Include="SCAN_KSPPP\Palettes\ColorBrewer\ColorBrewer.cs" />
+    <Compile Include="SCAN_KSPPP\Palettes\ColorBrewer\Include\Original.cs" />
+    <Compile Include="SCAN_KSPPP\Palettes\Palette.cs" />
+    <Compile Include="SCAN_KSPPP\Palettes\Swatches.cs" />
     <Compile Include="SCAN_KSPPP\SCAN_CLZF2.cs" />
     <Compile Include="SCAN_UI\UI_Framework\SCANremoteView.cs" />
     <Compile Include="SCANcontroller.cs" />
