@@ -175,6 +175,7 @@ namespace SCANsat.SCAN_UI
 			Rect r = new Rect(WindowRect.width - 20, 0, 18, 18);
 			if (GUI.Button(r, SCANcontroller.controller.closeBox, SCANskins.SCAN_closeButton))
 			{
+				InputLockManager.RemoveControlLock(lockID);
 				Visible = false;
 				SCANcontroller.controller.kscMapVisible = Visible;
 			}
@@ -439,7 +440,7 @@ namespace SCANsat.SCAN_UI
 				GUI.Box(ddRect, "", SCANskins.SCAN_dropDownBox);
 				for (int i = 0; i < SCANcontroller.ResourcesList.Count; i++)
 				{
-					Rect r = new Rect(ddRect.x + 2, ddRect.y + (24 * i), ddRect.width - 4, 20);
+					Rect r = new Rect(ddRect.x + 2, ddRect.y + (20 * i), ddRect.width - 4, 20);
 					if (GUI.Button(r, SCANcontroller.ResourcesList[i].name, SCANskins.SCAN_dropDownButton))
 					{
 						SCANcontroller.controller.gridSelection = i;
