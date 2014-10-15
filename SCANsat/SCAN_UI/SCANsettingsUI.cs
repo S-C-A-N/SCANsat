@@ -19,11 +19,11 @@ using SCANsat.Platform;
 using SCANsat;
 using UnityEngine;
 
-using palette = SCANsat.SCANpalette;
+using palette = SCANsat.SCAN_UI.SCANpalette;
 
 namespace SCANsat.SCAN_UI
 {
-	class SCANsettingsUI: MBW
+	class SCANsettingsUI: SCAN_MBW
 	{
 		/* UI: a list of glyphs that are used for something */
 		private string[] exmarks = { "✗", "✘", "×", "✖", "x", "X", "∇", "☉", "★", "*", "•", "º", "+" };

@@ -14,7 +14,7 @@ using System;
 //using System.Text.RegularExpressions;
 using UnityEngine;
 
-namespace SCANsat
+namespace SCANsat.SCAN_UI
 {
 	public class SCANpalette
 	{

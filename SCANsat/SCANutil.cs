@@ -19,7 +19,8 @@ using UnityEngine;
 using System.Linq;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
-using palette = SCANsat.SCANpalette;
+using SCANsat.Platform;
+using palette = SCANsat.SCAN_UI.SCANpalette;
 
 namespace SCANsat
 {
@@ -417,7 +418,7 @@ namespace SCANsat
 			MemoryStream mem = new MemoryStream();
 			BinaryFormatter binf = new BinaryFormatter();
 			binf.Serialize(mem, bytes);
-			string blob = Convert.ToBase64String(CLZF2.Compress(mem.ToArray()));
+			string blob = Convert.ToBase64String(SCAN_CLZF2.Compress(mem.ToArray()));
 			return blob.Replace("/", "-").Replace("=", "_");
 		}
 
@@ -426,7 +427,7 @@ namespace SCANsat
 			try {
 				blob = blob.Replace("-", "/").Replace("_", "=");
 				byte[] bytes = Convert.FromBase64String(blob);
-				bytes = CLZF2.Decompress(bytes);
+				bytes = SCAN_CLZF2.Decompress(bytes);
 				MemoryStream mem = new MemoryStream(bytes, false);
 				BinaryFormatter binf = new BinaryFormatter();
 				if (b) {

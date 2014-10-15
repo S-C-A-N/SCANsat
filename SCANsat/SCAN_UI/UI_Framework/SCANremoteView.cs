@@ -11,12 +11,12 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
-using palette = SCANsat.SCANpalette;
+using palette = SCANsat.SCAN_UI.SCANpalette;
 
 
-namespace SCANsat
+namespace SCANsat.SCAN_UI
 {
-	public class RemoteView {
+	public class SCANremoteView {
 
 		private static Camera cam;
 		private static GameObject camgo;

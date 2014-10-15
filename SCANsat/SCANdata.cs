@@ -16,7 +16,7 @@ using System.Runtime.Serialization.Formatters.Binary;
 using System.Linq;
 using System.Collections.Generic;
 using UnityEngine;
-using palette = SCANsat.SCANpalette;
+using palette = SCANsat.SCAN_UI.SCANpalette;
 
 namespace SCANsat
 {

@@ -18,7 +18,8 @@ using System;
 using System.Linq;
 using UnityEngine;
 using System.Text.RegularExpressions;
-using palette = SCANsat.SCANpalette;
+using SCANsat.SCAN_UI;
+using palette = SCANsat.SCAN_UI.SCANpalette;
 
 namespace SCANsat
 {
@@ -484,7 +485,7 @@ namespace SCANsat
 		}
 
 		/* UI: RemoteView only seems to be used for anomalies, not for other mapping */
-		private static RemoteView anomalyView;
+		private static SCANremoteView anomalyView;
 
 		/* UI: This is a table of sensing instruments and their current data.
 		 * 		It would be more useful in IVA, but it's also easier to just
@@ -549,7 +550,7 @@ namespace SCANsat
 						++parts;
 
 						if (anomalyView == null)
-							anomalyView = new RemoteView ();
+							anomalyView = new SCANremoteView ();
 						if (anomalyView != null) {
 							if (nearest.mod != null) {
 								if (anomalyView.lookat != nearest.mod.gameObject)
@@ -1435,7 +1436,8 @@ namespace SCANsat
 						info += " " + spotmap.mapscale.ToString ("F1") + "x";
 					if (SCANcontroller.controller.map_ResourceOverlay && SCANcontroller.controller.globalOverlay) //Adds selected resource amount to big map legend
 					{
-						if (SCANcontroller.controller.resourceOverlayType == 0 && SCANreflection.ORSXFound) {
+						if (SCANcontroller.controller.resourceOverlayType == 0 && SCANversions.ORSXFound)
+						{
 							if (SCANUtil.isCovered(mlon, mlat, data, bigmap.resource.type))
 							{
                                 double amount = SCANUtil.ORSOverlay(mlon, mlat, bigmap.body.flightGlobalsIndex, bigmap.resource.name);

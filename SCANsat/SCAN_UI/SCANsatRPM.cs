@@ -20,7 +20,7 @@ using System.Linq;
 using System.Collections.Generic;
 using System.Globalization;
 
-namespace SCANsat
+namespace SCANsat.SCAN_UI
 {
 	public class JSISCANsatRPM: InternalModule
 	{

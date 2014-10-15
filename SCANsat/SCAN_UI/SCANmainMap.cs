@@ -19,11 +19,11 @@ using System.Text.RegularExpressions;
 using SCANsat.Platform;
 using SCANsat;
 using UnityEngine;
-using palette = SCANsat.SCANpalette;
+using palette = SCANsat.SCAN_UI.SCANpalette;
 
 namespace SCANsat.SCAN_UI
 {
-	class SCANmainMap: MBW
+	class SCANmainMap: SCAN_MBW
 	{
 		private const string SCANlockID = "SCANmainMapLock";
 		private string infoText;

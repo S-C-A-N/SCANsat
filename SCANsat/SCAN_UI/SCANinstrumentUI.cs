@@ -19,14 +19,14 @@ using SCANsat.Platform;
 using SCANsat;
 using UnityEngine;
 
-using palette = SCANsat.SCANpalette;
+using palette = SCANsat.SCAN_UI.SCANpalette;
 
 namespace SCANsat.SCAN_UI
 {
-	class SCANinstrumentUI: MBW
+	class SCANinstrumentUI: SCAN_MBW
 	{
 		private bool notMappingToday;
-		private RemoteView anomalyView;
+		private SCANremoteView anomalyView;
 		private SCANdata.SCANtype sensors;
 		private SCANdata data;
 		internal static Rect defaultRect = new Rect(30, 600, 260, 60);
@@ -177,7 +177,7 @@ namespace SCANsat.SCAN_UI
 					GUILayout.Label(txt, SCANskins.SCAN_insColorLabel);
 
 					if (anomalyView == null)
-						anomalyView = new RemoteView();
+						anomalyView = new SCANremoteView();
 					if (anomalyView != null)
 					{
 						if (nearest.mod != null)

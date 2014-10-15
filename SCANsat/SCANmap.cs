@@ -12,7 +12,7 @@
 #endregion
 using System;
 using UnityEngine;
-using palette = SCANsat.SCANpalette;
+using palette = SCANsat.SCAN_UI.SCANpalette;
 
 namespace SCANsat
 {
@@ -440,7 +440,7 @@ namespace SCANsat
                     }
                     if (SCANcontroller.controller.map_ResourceOverlay && SCANcontroller.controller.globalOverlay)
                     {
-						if (SCANcontroller.controller.resourceOverlayType == 0 && SCANreflection.ORSXFound)
+						if (SCANcontroller.controller.resourceOverlayType == 0 && SCANversions.ORSXFound)
                         {
 							if (SCANUtil.isCovered(lon, lat, data, resource.type)) //check our new resource coverage map
                             {
@@ -555,7 +555,7 @@ namespace SCANsat
                     }
                     if (SCANcontroller.controller.map_ResourceOverlay && SCANcontroller.controller.globalOverlay)
                     {
-						if (SCANcontroller.controller.resourceOverlayType == 0 && SCANreflection.ORSXFound)
+						if (SCANcontroller.controller.resourceOverlayType == 0 && SCANversions.ORSXFound)
                         {
 							if (SCANUtil.isCovered(lon, lat, data, resource.type)) //check our new resource coverage map
                             {
@@ -675,7 +675,7 @@ namespace SCANsat
                     }
                     if (SCANcontroller.controller.map_ResourceOverlay && SCANcontroller.controller.globalOverlay)
                     {
-						if (SCANcontroller.controller.resourceOverlayType == 0 && SCANreflection.ORSXFound)
+						if (SCANcontroller.controller.resourceOverlayType == 0 && SCANversions.ORSXFound)
                         {
 							if (SCANUtil.isCovered(lon, lat, data, resource.type)) //check our new resource coverage map
                             {

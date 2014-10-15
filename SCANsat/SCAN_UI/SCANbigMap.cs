@@ -22,11 +22,11 @@ using SCANsat.Platform;
 using SCANsat;
 using UnityEngine;
 
-using palette = SCANsat.SCANpalette;
+using palette = SCANsat.SCAN_UI.SCANpalette;
 
 namespace SCANsat.SCAN_UI
 {
-	class SCANbigMap : MBW
+	class SCANbigMap : SCAN_MBW
 	{
 		private static SCANmap bigmap;
 		private SCANmap spotmap;

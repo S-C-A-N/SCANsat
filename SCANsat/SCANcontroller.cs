@@ -17,7 +17,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using SCANsat.SCAN_UI;
 using SCANsat.Platform;
-using palette = SCANsat.SCANpalette;
+using palette = SCANsat.SCAN_UI.SCANpalette;
 
 namespace SCANsat
 {
@@ -105,11 +105,11 @@ namespace SCANsat
         public bool kethaneReset = false;
         public bool kethaneBusy = false;
 
-		internal MBW mainMap;
-		internal MBW settingsWindow;
-		internal MBW instrumentsWindow;
-		internal MBW bigMap;
-		internal MBW kscMap;
+		internal SCAN_MBW mainMap;
+		internal SCAN_MBW settingsWindow;
+		internal SCAN_MBW instrumentsWindow;
+		internal SCAN_MBW bigMap;
+		internal SCAN_MBW kscMap;
 
 		public override void OnLoad(ConfigNode node)
 		{
@@ -277,7 +277,7 @@ namespace SCANsat
 		public void Resources(CelestialBody b) //Repopulates the master resources list with data from config nodes
 		{
 			ResourcesList.Clear();
-			if (resourceOverlayType == 0 && SCANreflection.ORSXFound)
+			if (resourceOverlayType == 0 && SCANversions.ORSXFound)
 			{
 				foreach (ConfigNode node in GameDatabase.Instance.GetConfigNodes("ORSX_PLANETARY_RESOURCE"))
 				{

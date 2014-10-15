@@ -21,7 +21,7 @@ using UnityEngine;
 
 namespace SCANsat.SCAN_UI
 {
-	class SCANkscMap: MBW
+	class SCANkscMap: SCAN_MBW
 	{
 		private static SCANmap bigmap;
 		private static CelestialBody b;
