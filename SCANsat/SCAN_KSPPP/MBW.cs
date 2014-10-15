@@ -1,4 +1,21 @@
-﻿using System;
+﻿#region license
+/* 
+ *  [Scientific Committee on Advanced Navigation]
+ * 			S.C.A.N. Satellite
+ *
+ * SCANsat - MonoBehaviour Window
+ *  * 
+ * A modified form of TriggerAu's MonoBehaviour Window class:
+ * http://forum.kerbalspaceprogram.com/threads/66503-KSP-Plugin-Framework
+ * 
+ * Copyright (c)2013 damny;
+ * Copyright (c)2014 David Grandy <david.grandy@gmail.com>;
+ * Copyright (c)2014 technogeeky <technogeeky@gmail.com>;
+ * Copyright (c)2014 (Your Name Here) <your email here>; see LICENSE.txt for licensing details.
+ *
+ */
+#endregion
+using System;
 using UnityEngine;
 
 using Log = SCANsat.Platform.Logging.ConsoleLogger;
@@ -148,6 +165,10 @@ namespace SCANsat.Platform
 		protected Rect WindowRect_Min;
 		protected Rect WindowRect_Max;
 
+		internal void resetWindowPos(Rect r)
+		{
+			WindowRect = r;
+		}
 
 		private static float dragX, dragY;
 		private static float resizeW = 0, resizeH = 0;
@@ -165,6 +186,8 @@ namespace SCANsat.Platform
 		public static void growS(GUIContent c, string s) { GUILayout.BeginVertical(c, s); }
 		public static void growE(params GUILayoutOption[] options) { GUILayout.BeginHorizontal(options); }
 		public static void growS(params GUILayoutOption[] options) { GUILayout.BeginVertical(options); }
+		public static void fillS() { GUILayout.FlexibleSpace(); }
+		public static void fillS(float f) { GUILayout.Space(f); }
 
 		public static GUILayoutOption GoE() { return GUILayout.ExpandWidth(true); }
 		public static GUILayoutOption GoS() { return GUILayout.ExpandHeight(true); }

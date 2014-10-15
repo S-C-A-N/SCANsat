@@ -175,6 +175,7 @@
     <Compile Include="SCAN_KSPPP\Extensions\Time\UnityEngine.Time_.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="SCAN_KSPPP\KSPAddonImproved.cs" />
     <Compile Include="SCAN_UI\Icons.cs" />
     <Compile Include="SCAN_UI\SCANbigMap.cs" />
     <Compile Include="SCAN_UI\SCANinstrumentUI.cs" />

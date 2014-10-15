@@ -15,8 +15,8 @@ namespace UnityEngine
 			foreach (Object f in fonts) {
 				msg += "found a font: " + ((UnityEngine.Font) f).name + "\n";
 			}
-			
-			Log.Now("----------------------------------\n{0}",msg);
+
+			Log.Debug("----------------------------------\n{0}", msg);
 			
 			foreach (KeyValuePair<string,GUISkin> e in SCAN_SkinsLibrary.knownSkins) {
 				string k = e.Key;
@@ -47,7 +47,7 @@ namespace UnityEngine
 				GUIStyle_.knownStyles.Add (v.verticalScrollbarThumb.dumpStyle(prefix + k + ".VScrollbarThumb"));
 
 				int i = 0;
-				Log.Now("GUISkin {0}.customStyles contains {1} custom styles:",k,cs.Length);
+				Log.Debug("GUISkin {0}.customStyles contains {1} custom styles:", k, cs.Length);
 				foreach(GUIStyle sty in cs) {
 					string csi = ".customStyles[" + i++ + "]";
 					GUIStyle_.knownStyles.Add (sty.dumpStyle(prefix + k + csi));

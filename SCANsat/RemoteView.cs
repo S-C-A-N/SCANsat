@@ -130,7 +130,7 @@ namespace SCANsat
 			}
 			ticking = false;
 			int chars = (int)((Time.realtimeSinceStartup - switchTime) * tickRate);
-			Rect r = new Rect (0 , 0 , 200 , 20);
+			Rect r = new Rect (0 , 0 , 240 , 30);
 			string info = "no structures found";
 			if (cons.Count == 1) {
 				info = "identified 1 structure";

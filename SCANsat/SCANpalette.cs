@@ -1,3 +1,4 @@
+#region license
 /*
  * [Scientific Committee on Advanced Navigation]
  * 			S.C.A.N. Satellite
@@ -7,6 +8,7 @@
  * Copyright (c)2014 technogeeky <technogeeky@gmail.com>;
  * Copyright (c)2014 (Your Name Here) <your email here>; see LICENSE.txt for licensing details.
 */
+#endregion
 using System;
 //using System.Collections.Generic;
 //using System.Text.RegularExpressions;
@@ -52,7 +54,7 @@ namespace SCANsat
 		public static Color xkcd_LightGrey		= XKCDColors.LightGrey;
 		public static Color xkcd_PurplyPink	= XKCDColors.PurplyPink;
 		public static Color xkcd_Magenta		= XKCDColors.Magenta;
-		public static Color	xkcd_YellowGreen	= XKCDColors.YellowGreen;
+		public static Color xkcd_YellowGreen	= XKCDColors.YellowGreen;
 		public static Color xkcd_LightRed		= XKCDColors.LightRed;
 		public static Color xkcd_Cerulean		= XKCDColors.Cerulean;
 		public static Color xkcd_Yellow		= XKCDColors.Yellow;
@@ -134,7 +136,13 @@ namespace SCANsat
 				else 								return cb_skyBlue;
 			}
 		}
-		public static Color c_bad = cb_orange;
+		public static Color c_bad
+		{
+			get
+			{
+				return cb_orange;
+			}
+		}
 		public static Color c_ugly {
 			get {
 				if (SCANcontroller.controller.colours != 1)	return xkcd_LightRed;

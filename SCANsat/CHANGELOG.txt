@@ -1,32 +1,33 @@
-Build 8 - 2014-08-02
+Version 9 - 2014-10-14
+------------------------
+
+- Total UI replacement
+	- All UI elements have been overhauled
+	- Each window is its own Object
+	- UI support moved to Technogeeky's modification of TriggerAu's KSP Platform
+- KSP Map added
+	- A map similar to the standard big map
+	- Available in Space center and tracking station scenes
+- All textures replaced with .mbm format files
+
+
+Version 8 - 2014-10-8
 ---------------------
 
-- Updated for KSP 0.24.2
+- Updated for KSP 0.25
 
 Resource Scanning:
 - Planetary resource overlay for big map
-	- Supports latest Kethane version - 0.8.8.1
-	- Supports ORS resources
+	- Supports ORSX resources
 	- All resources types can be scanned in the background; no need to remain in control of a vessel while scanning
 	- All resource scanning data is persistent; no different from standard SCANsat sensors
 	- Resource types controlled through the SCANsat settings menu
-	- Resources require explicit support from SCANsat
-		- Users cannot add or change which resource types are supported
-	
-- Module Manager configs included for Kethane, Extraplanetary Launchpad and Interstellar resources
+	- Resources scanner types defined through included config file	
 	- Support for Modular Kolonization System and Karbonite are provided in their respective packages
 	
-- ORS resources
-	- Resources displayed on the big map with a place holder color overlay
-	- ORS plugin included with SCANsat package; compatible with any version of ORS included in other mods
-	
-- Kethane resources
-	- Background scanning requires using the SCANsat modules added through the included Module Manager configs
-		- This function is separate from standard Kethane scanning; both are accessed through the right-click context menu
-	- SCANsat will read existing Kethane scanning data if present; no SCANsat scanners are required for this
-	- Kethane grid can be updated through the SCANsat settings menu
-		- Grid must be forced to reset before changes become visible; saving/loading or switching which resource type is displayed works
-	- Kethane resources displayed with their specified color values based on deposit concentration
+- ORSX resources
+	- Resources displayed on the big map
+	- Overlay colors can be defined in the included resource scanner config file
 
 Parts:
 - MapTraq deprecated
@@ -65,7 +66,7 @@ Bug Fixes:
 - Active scanners no longer play through their animation on startup; they start fully deployed
 - Toolbar icons fallback to place holder textures if the default SCANsat icons are moved/altered/deleted
 - Prevent small map from opening improperly in non-toolbar version
-
+- Prevent debug spam on EVA science collection
 - Improved support for command pods/cockpits using Raster Prop Monitor
 	- Possibly prevent problems such as issue #63
 

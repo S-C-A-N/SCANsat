@@ -1,5 +1,5 @@
-/* 
- *  [Scientific Committee on Advanced Navigation]
+#region license
+/*  [Scientific Committee on Advanced Navigation]
  * 			S.C.A.N. Satellite
  *
  * SCANsat - SCAN RADAR Altimetry Sensor part (& More)
@@ -8,12 +8,12 @@
  * Copyright (c)2014 technogeeky <technogeeky@gmail.com>;
  * Copyright (c)2014 (Your Name Here) <your email here>; see LICENSE.txt for licensing details.
  */
+#endregion
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using palette = SCANsat.SCANpalette;
-
 
 namespace SCANsat
 {
@@ -139,7 +139,7 @@ namespace SCANsat
 				//SCANcontroller.controller.scanFromAllVessels ();
 				if (vessel == FlightGlobals.ActiveVessel)
 				{
-					SCANui.gui_ping(powerIsProblem);
+					//SCANui.gui_ping(powerIsProblem);
 					if (powerIsProblem)
 					{
 						addStatic();
@@ -255,7 +255,10 @@ namespace SCANsat
 		public void startScan()
 		{
 			if (!ToolbarManager.ToolbarAvailable)
-				SCANui.minimode = (SCANui.minimode > 0 ? 2 : -SCANui.minimode);
+				SCANcontroller.controller.mainMap.Visible = true;
+#if DEBUG
+			SCANui.minimode = (SCANui.minimode > 0 ? 2 : -SCANui.minimode);
+#endif
 			registerScanner();
 			animate(1, 0);
 		}
