@@ -353,13 +353,16 @@ namespace SCANsat.SCAN_UI
 			{
 				if (v.mainBody == body)
 				{
-					if (v.vesselType == VesselType.Flag && SCANcontroller.controller.map_flags)
+					if (MapView.OrbitIconsMap != null)
 					{
-						drawVesselLabel(maprect, map, 0, v);
-					}
-					if (v.vesselType == VesselType.SpaceObject && SCANcontroller.controller.map_asteroids)
-					{
-						drawVesselLabel(maprect, map, 0, v);
+						if (v.vesselType == VesselType.Flag && SCANcontroller.controller.map_flags)
+						{
+							drawVesselLabel(maprect, map, 0, v);
+						}
+						if (v.vesselType == VesselType.SpaceObject && SCANcontroller.controller.map_asteroids)
+						{
+							drawVesselLabel(maprect, map, 0, v);
+						}
 					}
 				}
 			}
