@@ -28,9 +28,10 @@ namespace SCANsat.SCAN_UI
 		internal static GUISkin SCAN_skin;
 
 		internal static GUIStyle SCAN_window;
-		internal static GUIStyle SCAN_toggle;
 		internal static GUIStyle SCAN_tooltip;
 		internal static GUIStyle SCAN_label;
+
+		internal static GUIStyle SCAN_toggle;
 
 		//Button styles
 		internal static GUIStyle SCAN_button;
@@ -65,7 +66,21 @@ namespace SCANsat.SCAN_UI
 
 		internal static Font dotty;
 
+		//Some UI Textures
+		internal static Texture2D SCAN_toggleOn;
+
 		protected override void OnGUI_FirstRun()
+		{
+			initializeTextures();
+			initializeSkins();
+		}
+
+		private static void initializeTextures()
+		{
+			SCAN_toggleOn = GameDatabase.Instance.GetTexture("SCANsat/Icons/SCAN_Toggle", false);
+		}
+
+		private static void initializeSkins()
 		{
 			SCAN_skin = SCAN_SkinsLibrary.CopySkin("Unity");
 			SCAN_SkinsLibrary.AddSkin("SCAN_Unity", SCAN_skin);
@@ -178,6 +193,8 @@ namespace SCANsat.SCAN_UI
 
 			SCAN_toggle = new GUIStyle(SCAN_SkinsLibrary.DefUnitySkin.toggle);
 			SCAN_toggle.name = "SCAN_Toggle";
+			SCAN_toggle.onNormal.background = SCAN_toggleOn;
+			SCAN_toggle.onNormal.background.wrapMode = TextureWrapMode.Clamp;
 
 			SCAN_tooltip = new GUIStyle(SCAN_SkinsLibrary.DefUnitySkin.label);
 			SCAN_tooltip.name = "SCAN_Tooltip";
