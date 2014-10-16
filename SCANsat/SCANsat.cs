@@ -258,7 +258,7 @@ namespace SCANsat
 			if (!ToolbarManager.ToolbarAvailable)
 				SCANcontroller.controller.mainMap.Visible = true;
 #if DEBUG
-			SCANui.minimode = (SCANui.minimode > 0 ? 2 : -SCANui.minimode);
+			//SCANui.minimode = (SCANui.minimode > 0 ? 2 : -SCANui.minimode);
 #endif
 			registerScanner();
 			animate(1, 0);
