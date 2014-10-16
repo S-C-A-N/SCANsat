@@ -31,6 +31,8 @@ namespace SCANsat.SCAN_UI
 		/* UI: time warp names and settings */
 		private string[] twnames = { "Off", "Low", "Medium", "High" };
 		private int[] twvals = { 1, 6, 9, 15 };
+		private bool warningBoxOne, warningBoxAll;
+		private Rect warningRect;
 
 		internal static Rect defaultRect = new Rect(Screen.width - (Screen.width / 2) - 180, 100, 360, 300);
 
@@ -70,6 +72,17 @@ namespace SCANsat.SCAN_UI
 					gui_settings_window_mapFill(id);	/* debug option to fill in maps */
 				#endif
 			stopS();
+
+			warningBox(id);
+		}
+
+		protected override void DrawWindowPost(int id)
+		{
+			if ((warningBoxOne || warningBoxAll) && Event.current.type == EventType.mouseDown && !warningRect.Contains(Event.current.mousePosition))
+			{
+				warningBoxOne = false;
+				warningBoxAll = false;
+			}
 		}
 
 		//Draw the version label in the upper left corner
@@ -231,16 +244,20 @@ namespace SCANsat.SCAN_UI
 			CelestialBody thisBody = FlightGlobals.currentMainBody;
 			GUILayout.Label("Data Management", SCANskins.SCAN_headline);
 			growE();
-			if (GUILayout.Button("Reset map of " + thisBody.theName))
+			if (warningBoxOne || warningBoxAll)
 			{
-				SCANdata data = SCANUtil.getData(thisBody);
-				data.reset();
+				GUILayout.Label("Reset map of " + thisBody.theName, SCANskins.SCAN_button);
+				GUILayout.Label("Reset <b>all</b> data", SCANskins.SCAN_button);
 			}
-			if (GUILayout.Button("Reset <b>all</b> data"))
+			else
 			{
-				foreach (SCANdata data in SCANcontroller.body_data.Values)
+				if (GUILayout.Button("Reset map of " + thisBody.theName))
 				{
-					data.reset();
+					warningBoxOne = true;
+				}
+				if (GUILayout.Button("Reset <b>all</b> data"))
+				{
+					warningBoxAll = true;
 				}
 			}
 			stopE();
@@ -287,6 +304,46 @@ namespace SCANsat.SCAN_UI
 			}
 			stopE();
 			fillS(8);
+		}
+
+		//Confirmation boxes for map resets
+		private void warningBox(int id)
+		{
+			if (warningBoxOne)
+			{
+				warningBoxOne = false;
+				CelestialBody thisBody = FlightGlobals.currentMainBody;
+				warningRect = new Rect(WindowRect.width - (WindowRect.width / 2), WindowRect.height - 80, 180, 80);
+				GUI.Box(warningRect, "", SCANskins.SCAN_dropDownBox);
+				Rect r = new Rect(warningRect.x + 10, warningRect.y + 5, 160, 30);
+				GUI.Label(r, "Erase all data for " + thisBody.theName + "?", SCANskins.SCAN_whiteReadoutLabel);
+				r.x += 80;
+				r.y += 35;
+				r.width = 80;
+				if (GUI.Button(r, "Confirm", SCANskins.SCAN_buttonFixed))
+				{
+					SCANdata data = SCANUtil.getData(thisBody);
+					data.reset();
+				}
+			}
+			else if (warningBoxAll)
+			{
+				warningBoxAll = false;
+				warningRect = new Rect(WindowRect.width - (WindowRect.width / 2), WindowRect.height - 80, 180, 80);
+				GUI.Box(warningRect, "Erase <b>all</b> data ?", SCANskins.SCAN_dropDownBox);
+				Rect r = new Rect(warningRect.x + 10, warningRect.y + 5, 160, 30);
+				GUI.Label(r, "", SCANskins.SCAN_whiteReadoutLabel);
+				r.x += 80;
+				r.y += 35;
+				r.width = 80;
+				if (GUI.Button(r, "Confirm", SCANskins.SCAN_buttonFixed))
+				{
+					foreach (SCANdata data in SCANcontroller.body_data.Values)
+					{
+						data.reset();
+					}
+				}
+			}
 		}
 
 	}
