@@ -54,6 +54,8 @@
     <Compile Include="SCAN_KSPPP\Palettes\ColorBrewer\ColorBrewer.cs" />
     <Compile Include="SCAN_KSPPP\Palettes\ColorBrewer\Include\Original.cs" />
     <Compile Include="SCAN_KSPPP\Palettes\Palette.cs" />
+    <Compile Include="SCAN_KSPPP\Palettes\PaletteLoader.cs" />
+    <Compile Include="SCAN_KSPPP\Palettes\Palettes.cs" />
     <Compile Include="SCAN_KSPPP\Palettes\Swatches.cs" />
     <Compile Include="SCAN_KSPPP\SCAN_CLZF2.cs" />
     <Compile Include="SCAN_UI\UI_Framework\SCANremoteView.cs" />
