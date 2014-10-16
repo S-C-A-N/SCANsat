@@ -32,6 +32,7 @@ namespace SCANsat.SCAN_UI
 		private Texture2D overlay_static, map;
 		private Rect ddRect, maprect;
 		private Rect rc = new Rect(0, 0, 20, 20);
+		private Vector2 scrollP, scrollR;
 		//private Rect pos_spotmap = new Rect(10f, 10f, 10f, 10f);
 		//private Rect pos_spotmap_x = new Rect(10f, 10f, 25f, 25f);
 		internal static Rect defaultRect = new Rect(250, 60, 780, 460);
@@ -436,26 +437,29 @@ namespace SCANsat.SCAN_UI
 
 			else if (resources_drop_down)
 			{
-				ddRect = new Rect(WindowRect.width - 274, 45, 100, SCANcontroller.ResourcesList.Count * 20);
+				ddRect = new Rect(WindowRect.width - 290, 45, 120, 160);
 				GUI.Box(ddRect, "", SCANskins.SCAN_dropDownBox);
 				for (int i = 0; i < SCANcontroller.ResourcesList.Count; i++)
 				{
-					Rect r = new Rect(ddRect.x + 2, ddRect.y + (20 * i), ddRect.width - 4, 20);
+					scrollR = GUI.BeginScrollView(ddRect, scrollR, new Rect(0, 0, 100, 20 * SCANcontroller.ResourcesList.Count));
+					Rect r = new Rect(2, 20 * i, 96, 20);
 					if (GUI.Button(r, SCANcontroller.ResourcesList[i].name, SCANskins.SCAN_dropDownButton))
 					{
 						SCANcontroller.controller.gridSelection = i;
 						drop_down_open = false;
 					}
+					GUI.EndScrollView();
 				}
 			}
 
 			else if (planetoid_drop_down)
 			{
-				ddRect = new Rect(WindowRect.width - 130, 45, 100, FlightGlobals.Bodies.Count * 20);
+				ddRect = new Rect(WindowRect.width - 140, 45, 100, 160);
 				GUI.Box(ddRect, "", SCANskins.SCAN_dropDownBox);
 				for (int i = 0; i < FlightGlobals.Bodies.Count; i++)
 				{
-					Rect r = new Rect(ddRect.x + 2, ddRect.y + (20 * i), ddRect.width - 4, 20);
+					scrollP = GUI.BeginScrollView(ddRect, scrollP, new Rect(0, 0, 80, 20 * FlightGlobals.Bodies.Count));
+					Rect r = new Rect(2, 20 * i, 76, 20);
 					if (GUI.Button(r, FlightGlobals.Bodies[i].name, SCANskins.SCAN_dropDownButton))
 					{
 						b = FlightGlobals.Bodies[i];
@@ -463,6 +467,7 @@ namespace SCANsat.SCAN_UI
 						bigmap.setBody(b);
 						drop_down_open = false;
 					}
+					GUI.EndScrollView();
 				}
 			}
 
