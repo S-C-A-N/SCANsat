@@ -16,6 +16,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using SCANsat.Platform;
+using SCANsat.Platform.Palettes;
 using SCANsat;
 using UnityEngine;
 
@@ -31,8 +32,8 @@ namespace SCANsat.SCAN_UI
 		/* UI: time warp names and settings */
 		private string[] twnames = { "Off", "Low", "Medium", "High" };
 		private int[] twvals = { 1, 6, 9, 15 };
-		private bool warningBoxOne, warningBoxAll;
-		private Rect warningRect;
+		private bool warningBoxOne, warningBoxAll, paletteBox;
+		private Rect warningRect, paletteRect;
 
 		internal static Rect defaultRect = new Rect(Screen.width - (Screen.width / 2) - 180, 100, 360, 300);
 
@@ -62,6 +63,7 @@ namespace SCANsat.SCAN_UI
 			growS();
 				gui_settings_xmarks(id); 				/* X marker selection */
 				gui_settings_resources(id);				/* resource details sub-window */
+				gui_settings_color_palette(id);			/* display color palettes */
 				gui_settings_toggle_body_scanning(id);	/* background and body scanning toggles */
 				gui_settings_rebuild_kethane(id);		/* rebuild Kethane database with SCANsat info */
 				gui_settings_timewarp(id);				/* time warp resolution settings */
@@ -74,6 +76,7 @@ namespace SCANsat.SCAN_UI
 			stopS();
 
 			warningBox(id);
+			paletteSelectionBox(id);
 		}
 
 		protected override void DrawWindowPost(int id)
@@ -165,6 +168,32 @@ namespace SCANsat.SCAN_UI
 			growE();
 			SCANcontroller.controller.gridSelection = GUILayout.SelectionGrid(SCANcontroller.controller.gridSelection, SCANcontroller.ResourcesList.Select(a => a.name).ToArray(), 4); //select resource to display
 			stopE();
+			fillS(16);
+		}
+
+		private void gui_settings_color_palette(int id)
+		{
+			growE();
+			if (GUILayout.Button("Palette Style:", SCANskins.SCAN_buttonFixed))
+			{
+				paletteBox = true;
+			}
+			GUILayout.Label("--", SCANskins.SCAN_whiteReadoutLabel);
+			stopE();
+
+			growE();
+			for (int i = 0; i < 4; i++)
+			{
+				if (i % 3 == 0)
+				{
+					stopE();
+					growE();
+				}
+				Palette p = SCANpalette.currentPaletteSet.availablePalettes[i];
+				GUILayout.Label("");
+			}
+			stopE();
+
 			fillS(16);
 		}
 
@@ -343,6 +372,25 @@ namespace SCANsat.SCAN_UI
 					foreach (SCANdata data in SCANcontroller.body_data.Values)
 					{
 						data.reset();
+					}
+				}
+			}
+		}
+
+		//Drop down menu for palette selection
+		private void paletteSelectionBox(int id)
+		{
+			if (paletteBox)
+			{
+				paletteRect = new Rect(WindowRect.x + 50, WindowRect.y + 200, 120, 80);
+				GUI.Box(paletteRect, "", SCANskins.SCAN_dropDownBox);
+				for (int i = 0; i < Palette.kindNames.Length; i++)
+				{
+					Rect r = new Rect(paletteRect.x + 10, paletteRect.y + 5 + (i * 20), 100, i * 20);
+					if (GUI.Button(r, Palette.kindNames[i], SCANskins.SCAN_dropDownButton))
+					{
+						paletteBox = false;
+						palette.setCurrentPalette(palette.generatePaletteSet(5, (Palette.Kind)i));
 					}
 				}
 			}

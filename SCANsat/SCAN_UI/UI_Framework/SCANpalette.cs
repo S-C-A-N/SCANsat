@@ -13,6 +13,7 @@ using System;
 //using System.Collections.Generic;
 //using System.Text.RegularExpressions;
 using UnityEngine;
+using SCANsat.Platform.Palettes;
 
 namespace SCANsat.SCAN_UI
 {
@@ -178,6 +179,19 @@ namespace SCANsat.SCAN_UI
 			GUILayout.Label (tex);
 			GUI.color = Color.white;
 			GUILayout.EndVertical ();
+		}
+
+		internal static Palettes currentPaletteSet;
+
+		internal static Palettes generatePaletteSet(int size, Palette.Kind type)
+		{
+			PaletteLoader.generatePalettes(type, size);
+			return new Palettes(PaletteLoader.palettes.ToArray(), type, size);
+		}
+
+		internal static void setCurrentPalette(Palettes p)
+		{
+			currentPaletteSet = p;
 		}
 
 
