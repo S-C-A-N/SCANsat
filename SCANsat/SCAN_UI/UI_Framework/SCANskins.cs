@@ -55,6 +55,8 @@ namespace SCANsat.SCAN_UI
 
 		//Settings menu styles
 		internal static GUIStyle SCAN_headline;
+		internal static GUIStyle SCAN_headlineSmall;
+		internal static GUIStyle SCAN_buttonWarning;
 
 		//Styles for map overlay icons
 		internal static GUIStyle SCAN_orbitalLabelOn;
@@ -68,6 +70,7 @@ namespace SCANsat.SCAN_UI
 
 		//Some UI Textures
 		internal static Texture2D SCAN_toggleOn;
+		internal static Texture2D SCAN_toggleOnHover;
 
 		protected override void OnGUI_FirstRun()
 		{
@@ -78,6 +81,7 @@ namespace SCANsat.SCAN_UI
 		private static void initializeTextures()
 		{
 			SCAN_toggleOn = GameDatabase.Instance.GetTexture("SCANsat/Icons/SCAN_Toggle", false);
+			SCAN_toggleOnHover = GameDatabase.Instance.GetTexture("SCANsat/Icons/SCAN_Toggle_Hover", false);
 		}
 
 		private static void initializeSkins()
@@ -99,7 +103,6 @@ namespace SCANsat.SCAN_UI
 			SCAN_button = new GUIStyle(SCAN_SkinsLibrary.DefUnitySkin.button);
 			SCAN_button.name = "SCAN_Button";
 			SCAN_button.alignment = TextAnchor.MiddleCenter;
-			SCAN_button.normal.textColor = palette.white;
 			SCAN_button.active.textColor = palette.xkcd_PukeGreen;
 
 			SCAN_buttonActive = new GUIStyle(SCAN_button);
@@ -191,10 +194,23 @@ namespace SCANsat.SCAN_UI
 			SCAN_headline.fontSize = 40;
 			SCAN_headline.font = dotty;
 
+			SCAN_headlineSmall = new GUIStyle(SCAN_headline);
+			SCAN_headlineSmall.name = "SCAN_HeadlineSmall";
+			SCAN_headlineSmall.fontSize = 30;
+
+			SCAN_buttonWarning = new GUIStyle(SCAN_button);
+			SCAN_buttonWarning.name = "SCAN_ButtonWarning";
+			SCAN_buttonWarning.fontSize = 16;
+			SCAN_buttonWarning.fontStyle = FontStyle.Bold;
+			SCAN_buttonWarning.normal.textColor = palette.cb_vermillion;
+
 			SCAN_toggle = new GUIStyle(SCAN_SkinsLibrary.DefUnitySkin.toggle);
 			SCAN_toggle.name = "SCAN_Toggle";
 			SCAN_toggle.onNormal.background = SCAN_toggleOn;
+			SCAN_toggle.onHover.background = SCAN_toggleOnHover;
 			SCAN_toggle.onNormal.background.wrapMode = TextureWrapMode.Clamp;
+			SCAN_toggle.onHover.background.wrapMode = TextureWrapMode.Clamp;
+			SCAN_toggle.border = new RectOffset(15, 0, 1, 1);
 
 			SCAN_tooltip = new GUIStyle(SCAN_SkinsLibrary.DefUnitySkin.label);
 			SCAN_tooltip.name = "SCAN_Tooltip";
