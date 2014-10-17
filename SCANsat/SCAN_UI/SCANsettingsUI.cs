@@ -231,9 +231,9 @@ namespace SCANsat.SCAN_UI
 		//Display the total number of SCANsat sensors and scanning passes
 		private void gui_settings_numbers(int id)
 		{
-			string s = "Sensors: " + SCANcontroller.activeSensors +
-					" Vessels: " + SCANcontroller.activeVessels.ToString() +
-					" Passes: " + SCANcontroller.controller.actualPasses.ToString();
+			string s = 	"Vessels: " + SCANcontroller.activeVessels.ToString() +
+						" Sensors: " + SCANcontroller.activeSensors +
+						" Passes: " + SCANcontroller.controller.actualPasses.ToString();
 			GUILayout.Label(s, SCANskins.SCAN_whiteReadoutLabel);
 			fillS(16);
 		}
@@ -311,33 +311,35 @@ namespace SCANsat.SCAN_UI
 		{
 			if (warningBoxOne)
 			{
-				warningBoxOne = false;
 				CelestialBody thisBody = FlightGlobals.currentMainBody;
-				warningRect = new Rect(WindowRect.width - (WindowRect.width / 2), WindowRect.height - 80, 180, 80);
+				warningRect = new Rect(WindowRect.width - (WindowRect.width / 2)- 150, WindowRect.height - 190, 300, 90);
 				GUI.Box(warningRect, "", SCANskins.SCAN_dropDownBox);
-				Rect r = new Rect(warningRect.x + 10, warningRect.y + 5, 160, 30);
-				GUI.Label(r, "Erase all data for " + thisBody.theName + "?", SCANskins.SCAN_whiteReadoutLabel);
-				r.x += 80;
-				r.y += 35;
+				Rect r = new Rect(warningRect.x + 10, warningRect.y + 5, 280, 40);
+				GUI.Label(r, "Erase all data for " + thisBody.theName + "?", SCANskins.SCAN_headlineSmall);
+				r.x += 90;
+				r.y += 45;
 				r.width = 80;
-				if (GUI.Button(r, "Confirm", SCANskins.SCAN_buttonFixed))
+				r.height = 30;
+				if (GUI.Button(r, "Confirm", SCANskins.SCAN_buttonWarning))
 				{
+					warningBoxOne = false;
 					SCANdata data = SCANUtil.getData(thisBody);
 					data.reset();
 				}
 			}
 			else if (warningBoxAll)
 			{
-				warningBoxAll = false;
-				warningRect = new Rect(WindowRect.width - (WindowRect.width / 2), WindowRect.height - 80, 180, 80);
-				GUI.Box(warningRect, "Erase <b>all</b> data ?", SCANskins.SCAN_dropDownBox);
-				Rect r = new Rect(warningRect.x + 10, warningRect.y + 5, 160, 30);
-				GUI.Label(r, "", SCANskins.SCAN_whiteReadoutLabel);
-				r.x += 80;
-				r.y += 35;
+				warningRect = new Rect(WindowRect.width - (WindowRect.width / 2) - 120, WindowRect.height - 190, 240, 90);
+				GUI.Box(warningRect, "", SCANskins.SCAN_dropDownBox);
+				Rect r = new Rect(warningRect.x + 10, warningRect.y + 5, 220, 40);
+				GUI.Label(r, "Erase <b>all</b> data ?", SCANskins.SCAN_headlineSmall);
+				r.x += 70;
+				r.y += 45;
 				r.width = 80;
-				if (GUI.Button(r, "Confirm", SCANskins.SCAN_buttonFixed))
+				r.height = 30;
+				if (GUI.Button(r, "Confirm", SCANskins.SCAN_buttonWarning))
 				{
+					warningBoxAll = false;
 					foreach (SCANdata data in SCANcontroller.body_data.Values)
 					{
 						data.reset();
