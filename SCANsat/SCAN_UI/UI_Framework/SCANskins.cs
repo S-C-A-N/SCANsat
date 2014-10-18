@@ -16,6 +16,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using SCANsat.Platform;
+using SCANsat.Platform.Palettes;
 using palette = SCANsat.SCAN_UI.SCANpalette;
 using UnityEngine;
 
@@ -76,12 +77,19 @@ namespace SCANsat.SCAN_UI
 		{
 			initializeTextures();
 			initializeSkins();
+			initializeColors();
 		}
 
 		private static void initializeTextures()
 		{
 			SCAN_toggleOn = GameDatabase.Instance.GetTexture("SCANsat/Icons/SCAN_Toggle", false);
 			SCAN_toggleOnHover = GameDatabase.Instance.GetTexture("SCANsat/Icons/SCAN_Toggle_Hover", false);
+		}
+
+		private static void initializeColors()
+		{
+			SCANpalette.CurrentPalettes = SCANpalette.generatePaletteSet(7, Palette.Kind.Diverging);
+			SCANpalette.CurrentPalette = PaletteLoader.generateDefaultPalette();
 		}
 
 		private static void initializeSkins()
