@@ -34,6 +34,8 @@ namespace SCANsat.SCAN_UI
 		private int[] twvals = { 1, 6, 9, 15 };
 		private bool warningBoxOne, warningBoxAll, paletteBox;
 		private Rect warningRect, paletteRect;
+		private Palettes currentPalettes;
+		private string paletteSize = "5";
 
 		internal static Rect defaultRect = new Rect(Screen.width - (Screen.width / 2) - 180, 100, 360, 300);
 
@@ -53,6 +55,11 @@ namespace SCANsat.SCAN_UI
 		internal override void OnDestroy()
 		{
 			
+		}
+
+		internal override void Start()
+		{
+			currentPalettes = SCANpalette.CurrentPalettes;
 		}
 
 		protected override void DrawWindow(int id)
@@ -85,6 +92,11 @@ namespace SCANsat.SCAN_UI
 			{
 				warningBoxOne = false;
 				warningBoxAll = false;
+			}
+
+			if (paletteBox && Event.current.type == EventType.mouseDown && !paletteRect.Contains(Event.current.mousePosition))
+			{
+				paletteBox = false;
 			}
 		}
 
@@ -174,23 +186,40 @@ namespace SCANsat.SCAN_UI
 		private void gui_settings_color_palette(int id)
 		{
 			growE();
-			if (GUILayout.Button("Palette Style:", SCANskins.SCAN_buttonFixed))
+			if (GUILayout.Button("Palette Style:", SCANskins.SCAN_buttonFixed, GUILayout.MaxWidth(120)))
 			{
 				paletteBox = true;
 			}
-			GUILayout.Label("--", SCANskins.SCAN_whiteReadoutLabel);
+			fillS(10);
+			GUILayout.Label(SCANpalette.getPaletteType, SCANskins.SCAN_whiteReadoutLabel);
+			fillS(10);
+			paletteSize = GUILayout.TextField(paletteSize, 1, SCANskins.SCAN_whiteReadoutLabel);
 			stopE();
 
 			growE();
-			for (int i = 0; i < 4; i++)
+			int j = 9;
+			if (currentPalettes.paletteType == Palette.Kind.Qualitative)
+				j = 6;
+			else if (currentPalettes.paletteType == Palette.Kind.Invertable || currentPalettes.paletteType == Palette.Kind.Unknown)
+				j = 0;
+			for (int i = 0; i < j; i++)
 			{
 				if (i % 3 == 0)
 				{
 					stopE();
 					growE();
 				}
-				Palette p = SCANpalette.currentPaletteSet.availablePalettes[i];
-				GUILayout.Label("");
+				growE();
+				Texture2D t = currentPalettes.paletteSwatch[i];
+				if (GUILayout.Button("", SCANskins.SCAN_buttonBorderless, GUILayout.Width(110), GUILayout.Height(25)))
+				{
+					SCANpalette.CurrentPalette = currentPalettes.availablePalettes[i];
+				}
+				Rect r = GUILayoutUtility.GetLastRect();
+				r.width -= 10;
+				GUI.DrawTexture(r, t);
+
+				stopE();
 			}
 			stopE();
 
@@ -382,15 +411,15 @@ namespace SCANsat.SCAN_UI
 		{
 			if (paletteBox)
 			{
-				paletteRect = new Rect(WindowRect.x + 50, WindowRect.y + 200, 120, 80);
+				paletteRect = new Rect(WindowRect.width - 350, WindowRect.height - 580, 100, 120);
 				GUI.Box(paletteRect, "", SCANskins.SCAN_dropDownBox);
 				for (int i = 0; i < Palette.kindNames.Length; i++)
 				{
-					Rect r = new Rect(paletteRect.x + 10, paletteRect.y + 5 + (i * 20), 100, i * 20);
+					Rect r = new Rect(paletteRect.x + 10, paletteRect.y + 5 + (i * 23), 80, 22);
 					if (GUI.Button(r, Palette.kindNames[i], SCANskins.SCAN_dropDownButton))
 					{
 						paletteBox = false;
-						palette.setCurrentPalette(palette.generatePaletteSet(5, (Palette.Kind)i));
+						currentPalettes = palette.CurrentPalettes = palette.generatePaletteSet(int.Parse(paletteSize), (Palette.Kind)i);
 					}
 				}
 			}
