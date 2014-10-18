@@ -102,6 +102,8 @@ namespace SCANsat.SCAN_UI
 			xkcd_White
 		};
 
+		private static Palette currentHeightPalette;
+
 		public static Color[] redline;
         	public static Color gridFull; // resource colors
         	public static Color gridEmpty; //empty resource color
@@ -113,14 +115,19 @@ namespace SCANsat.SCAN_UI
 				return lerp (black , white , Mathf.Clamp ((val + 1500f) / 9000f , 0 , 1));
 			}
 			Color c = black;
-			int sealevel = 0;
-			if (val <= sealevel) {
-				val = (Mathf.Clamp (val , -1500 , sealevel) + 1500) / 1000f;
-				c = lerp (xkcd_DarkPurple , xkcd_Cerulean , val);
-			} else {
-				val = (heightGradient.Length - 2) * Mathf.Clamp (val , sealevel , (sealevel + 7500)) / (sealevel + 7500.0f);
-				c = lerp (heightGradient [(int)val] , heightGradient [(int)val + 1] , val - (int)val);
-			}
+			val += 1500;
+			val = (currentHeightPalette.colors.Length - 1) * Mathf.Clamp(val, 0, 9000) / 9000;
+			if ((int)val > currentHeightPalette.colors.Length - 2) val = currentHeightPalette.colors.Length - 2;
+			c = lerp(currentHeightPalette.colors[(int)val], currentHeightPalette.colors[(int)val + 1], val - (int)val);
+
+			//int sealevel = 0;
+			//if (val <= sealevel) {
+			//	val = (Mathf.Clamp (val , -1500 , sealevel) + 1500) / 1000f;
+			//	c = lerp (xkcd_DarkPurple , xkcd_Cerulean , val);
+			//} else {
+			//	val = (heightGradient.Length - 2) * Mathf.Clamp (val , sealevel , (sealevel + 7500)) / (sealevel + 7500.0f);
+			//	c = lerp (heightGradient [(int)val] , heightGradient [(int)val + 1] , val - (int)val);
+			//}
 			return c;
 		}
 
@@ -131,20 +138,20 @@ namespace SCANsat.SCAN_UI
 			return "<color=\"" + colorHex (c) + "\">" + text + "</color>";
 		}
 
-		public static Color c_good {
+		internal static Color c_good {
 			get {
 				if (SCANcontroller.controller.colours != 1) 	return xkcd_PukeGreen;
 				else 								return cb_skyBlue;
 			}
 		}
-		public static Color c_bad
+		internal static Color c_bad
 		{
 			get
 			{
 				return cb_orange;
 			}
 		}
-		public static Color c_ugly {
+		internal static Color c_ugly {
 			get {
 				if (SCANcontroller.controller.colours != 1)	return xkcd_LightRed;
 				else 								return cb_yellow;
@@ -181,7 +188,8 @@ namespace SCANsat.SCAN_UI
 			GUILayout.EndVertical ();
 		}
 
-		internal static Palettes currentPaletteSet;
+		private static Palettes currentPaletteSet;
+		private static string currentPaletteType;
 
 		internal static Palettes generatePaletteSet(int size, Palette.Kind type)
 		{
@@ -189,9 +197,26 @@ namespace SCANsat.SCAN_UI
 			return new Palettes(PaletteLoader.palettes.ToArray(), type, size);
 		}
 
-		internal static void setCurrentPalette(Palettes p)
+		internal static Palettes CurrentPalettes
 		{
-			currentPaletteSet = p;
+			get { return currentPaletteSet; }
+			set
+			{
+				currentPaletteSet = value;
+				currentPaletteType = value.paletteType.ToString();
+			}
+		}
+
+		internal static string getPaletteType
+		{
+			get { return currentPaletteType; }
+			private set { }
+		}
+
+		internal static Palette CurrentPalette
+		{
+			get { return currentHeightPalette; }
+			set { currentHeightPalette = value; }
 		}
 
 
