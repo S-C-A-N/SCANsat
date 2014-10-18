@@ -9,17 +9,13 @@ namespace SCANsat.Platform.Palettes
 	static class PaletteLoader
 	{
 		internal static List<Palette> palettes = new List<Palette>();
+		private static Palette defaultPalette = generateDefaultPalette();
 
-		internal static Palette defaultPalette()
+		internal static Palette generateDefaultPalette()
 		{
 			Color32[] c;
 			c = new[] { (Color32)palette.xkcd_DarkPurple, (Color32)palette.xkcd_Cerulean, (Color32)palette.xkcd_ArmyGreen, (Color32)palette.xkcd_Yellow, (Color32)palette.xkcd_Red, (Color32)palette.xkcd_Magenta, (Color32)palette.xkcd_White };
 			return new Palette(c, Palette.Kind.Diverging, (Palette.Is)2, (Palette.Is)2, (Palette.Is)2, (Palette.Is)2);
-		}
-
-		internal static void generateDefaultPalette()
-		{
-			palettes.Add(defaultPalette());
 		}
 
 		internal static void generatePalettes(Palette.Kind Kind, int Size)
@@ -27,6 +23,7 @@ namespace SCANsat.Platform.Palettes
 			palettes.Clear();
 			if (Kind == Palette.Kind.Diverging)
 			{
+				palettes.Add(defaultPalette);
 				palettes.Add(ColorBrewer.Palettes.Spectral(Size));
 				palettes.Add(ColorBrewer.Palettes.RdYlGn(Size));
 				palettes.Add(ColorBrewer.Palettes.RdBu(Size));
