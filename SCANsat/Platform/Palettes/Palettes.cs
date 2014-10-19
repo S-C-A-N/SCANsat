@@ -9,13 +9,11 @@ namespace SCANsat.Platform.Palettes
 		internal Palette[] availablePalettes;
 		internal Palette.Kind paletteType;
 		internal Texture2D[] paletteSwatch;
-		private int paletteSize;
 
-		internal Palettes (Palette[] p, Palette.Kind pK, int i)
+		internal Palettes (Palette[] p, Palette.Kind pK)
 		{
 			availablePalettes = p;
 			paletteType = pK;
-			paletteSize = i;
 			generateSwatches();
 		}
 
@@ -28,6 +26,7 @@ namespace SCANsat.Platform.Palettes
 				{
 					int k = 0;
 					int m = 120;
+					int paletteSize = availablePalettes[i].colors.Length;
 					if (paletteSize == 11) m = 121;
 					else if (paletteSize == 9) m = 117;
 					else if (paletteSize == 7) m = 119;
