@@ -425,15 +425,21 @@ namespace SCANsat.SCAN_UI
 		}
 
 		/* FIXME: This uses assumed, shared, static constants with Legend stuff in other SCANsat files */
-		internal static void drawLegend()
+		internal static void drawLegend(float min, float max)
 		{
 			GUILayout.Label("", GUILayout.ExpandWidth(true));
 			Rect r = GUILayoutUtility.GetLastRect();
 			r.width -= 64;
-			GUI.DrawTexture(r, SCANmap.getLegend(-1500f, 9000f, SCANcontroller.controller.colours));
-			for (float val = -1000f; val < 9000f; val += 1000f)
+			GUI.DrawTexture(r, SCANmap.getLegend(min, max, SCANcontroller.controller.colours));
+			float minLabel = min;
+			float maxLabel = max;
+			if (min % 1000 != 0)
+				minLabel += 500;
+			if (max % 1000 != 0)
+				maxLabel -= 500;
+			for (float val = minLabel; val < maxLabel; val += 1000f)
 			{
-				drawLegendLabel(r, val, -1500f, 9000f);
+				drawLegendLabel(r, val, min, max);
 			}
 		}
 

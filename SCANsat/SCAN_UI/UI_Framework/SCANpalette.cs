@@ -110,13 +110,15 @@ namespace SCANsat.SCAN_UI
 
 		public static Color[] small_redline;
 
-		public static Color heightToColor ( float val , int scheme ) {
-			if (scheme == 1 || SCANcontroller.controller.colours == 1) {
-				return lerp (black , white , Mathf.Clamp ((val + 1500f) / 9000f , 0 , 1));
+		public static Color heightToColor(float val, int scheme, float min, float max)
+		{
+			if (scheme == 1 || SCANcontroller.controller.colours == 1)
+			{
+				return lerp(black, white, Mathf.Clamp((val - min) / (max - min), 0, 1));
 			}
 			Color c = black;
-			val += 1500;
-			val = (currentHeightPalette.colors.Length - 1) * Mathf.Clamp(val, 0, 9000) / 9000;
+			val -= min;
+			val = (currentHeightPalette.colors.Length - 1) * Mathf.Clamp(val, 0, (max - min)) / (max - min);
 			if ((int)val > currentHeightPalette.colors.Length - 2) val = currentHeightPalette.colors.Length - 2;
 			c = lerp(currentHeightPalette.colors[(int)val], currentHeightPalette.colors[(int)val + 1], val - (int)val);
 
@@ -194,7 +196,7 @@ namespace SCANsat.SCAN_UI
 		internal static Palettes generatePaletteSet(int size, Palette.Kind type)
 		{
 			PaletteLoader.generatePalettes(type, size);
-			return new Palettes(PaletteLoader.palettes.ToArray(), type, size);
+			return new Palettes(PaletteLoader.palettes.ToArray(), type);
 		}
 
 		internal static Palettes CurrentPalettes

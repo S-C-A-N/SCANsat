@@ -389,7 +389,7 @@ namespace SCANsat.SCAN_UI
 			
 			SCANuiUtil.mouseOverInfo(mlon, mlat, bigmap, data, b, in_map);
 			if (bigmap.mapmode == 0 && SCANcontroller.controller.legend)
-				SCANuiUtil.drawLegend();
+				SCANuiUtil.drawLegend(data.MinHeight, data.MaxHeight);
 			stopS();
 			stopE();
 		}

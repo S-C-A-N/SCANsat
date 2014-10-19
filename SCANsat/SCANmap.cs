@@ -45,7 +45,7 @@ namespace SCANsat
 			for (int x = 0; x < 256; ++x)
 			{
 				float val = (x * (max - min)) / 256f + min;
-				pix[x] = palette.heightToColor(val, scheme);
+				pix[x] = palette.heightToColor(val, scheme, min, max);
 			}
 			legend.SetPixels(pix);
 			legend.Apply();
@@ -474,7 +474,7 @@ namespace SCANsat
 							{
 								// high resolution gets a coloured pixel for the actual position
 								val = (float)SCANUtil.getElevation(body, lon, lat);
-								baseColor = palette.heightToColor(val, scheme); //use temporary color to store pixel value
+								baseColor = palette.heightToColor(val, scheme, data.MinHeight, data.MaxHeight); //use temporary color to store pixel value
 								if (val == 0f) val = -0.001f;
 								heightMapArray(val, mapstep, i, mType);
 							}
@@ -482,7 +482,7 @@ namespace SCANsat
 							{
 								// basic altimetry gets forced greyscale with lower resolution
 								val = (float)SCANUtil.getElevation(body, ((int)(lon * 5)) / 5, ((int)(lat * 5)) / 5);
-								baseColor = palette.heightToColor(val, 1);
+								baseColor = palette.heightToColor(val, 1, data.MinHeight, data.MaxHeight);
 								if (val == 0f) val = -0.001f;
 								heightMapArray(val, mapstep, i, mType);
 							}
@@ -491,11 +491,11 @@ namespace SCANsat
 						{
 							if (SCANUtil.isCovered(lon, lat, data, SCANdata.SCANtype.AltimetryHiRes))
 							{
-								baseColor = palette.heightToColor(val, scheme);
+								baseColor = palette.heightToColor(val, scheme, data.MinHeight, data.MaxHeight);
 							}
 							else
 							{
-								baseColor = palette.heightToColor(val, 1);
+								baseColor = palette.heightToColor(val, 1, data.MinHeight, data.MaxHeight);
 							}
 						}
 						mapline[i] = val;

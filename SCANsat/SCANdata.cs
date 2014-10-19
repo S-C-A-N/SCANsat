@@ -29,10 +29,43 @@ namespace SCANsat
 		public CelestialBody body;
 		public Texture2D map_small = new Texture2D (360 , 180 , TextureFormat.RGB24 , false);
 		public bool disabled;
+		private float minHeight, maxHeight;
+
+		private static float[,] bodyHeightRange = new float[17, 2]
+		{
+			{ 0, 1000 }, { -1500, 7000 }, { -500, 7500 }, { -500, 6000 },
+			{ 0, 7000 }, { -2000, 8000 }, { 0, 8500 }, { 0, 13000 }, { 0, 1000 },
+			{ -3000, 6500 }, { -500, 8000 }, { 2000, 22000 }, { -500, 11500 },
+			{ 1000, 6500 }, { 500, 6000 }, { 0, 6000 }, { -500, 4000 }
+		};
+		private static float defaultMinHeight = -1000f;
+		private static float defaultMaxHeight = 8000f;
 
 		internal SCANdata(CelestialBody b)
 		{
 			body = b;
+			if (b.flightGlobalsIndex <= 16)
+			{
+				minHeight = bodyHeightRange[b.flightGlobalsIndex, 0];
+				maxHeight = bodyHeightRange[b.flightGlobalsIndex, 1];
+			}
+			else
+			{
+				minHeight = defaultMinHeight;
+				maxHeight = defaultMaxHeight;
+			}
+		}
+
+		internal float MinHeight
+		{
+			get { return minHeight; }
+			private set { }
+		}
+
+		internal float MaxHeight
+		{
+			get { return maxHeight; }
+			private set { }
 		}
 
 		/* MAP: known types of data */
@@ -213,9 +246,9 @@ namespace SCANsat
 				if (SCANUtil.isCovered(ilon, scanline, this, SCANtype.Altimetry))
 				{ //We check for coverage down here now, after elevation data is collected
 					if (SCANUtil.isCovered(ilon, scanline, this, SCANtype.AltimetryHiRes))
-						c = palette.heightToColor (val , scheme);
+						c = palette.heightToColor (val , scheme, minHeight, maxHeight);
 					else
-						c = palette.heightToColor (val , 1);
+						c = palette.heightToColor (val , 1, minHeight, maxHeight);
 				} else {
 					c = palette.grey;
 					if (scanline % 30 == 0 && ilon % 3 == 0) {
