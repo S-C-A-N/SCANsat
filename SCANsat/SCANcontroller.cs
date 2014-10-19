@@ -110,6 +110,7 @@ namespace SCANsat
 		internal SCAN_MBW instrumentsWindow;
 		internal SCAN_MBW bigMap;
 		internal SCAN_MBW kscMap;
+		internal SCAN_MBW colorManager;
 
 		public override void OnLoad(ConfigNode node)
 		{
@@ -178,12 +179,15 @@ namespace SCANsat
 				settingsWindow = gameObject.AddComponent<SCANsettingsUI>();
 				instrumentsWindow = gameObject.AddComponent<SCANinstrumentUI>();
 				bigMap = gameObject.AddComponent<SCANbigMap>();
+				colorManager = gameObject.AddComponent<SCANcolorSelection>();
 			}
 			else if (HighLogic.LoadedScene == GameScenes.SPACECENTER || HighLogic.LoadedScene == GameScenes.TRACKSTATION)
 			{
 				SCANUtil.loadSCANtypes();
 				Resources(Planetarium.fetch.Home);
 				kscMap = gameObject.AddComponent<SCANkscMap>();
+				settingsWindow = gameObject.AddComponent<SCANsettingsUI>();
+				colorManager = gameObject.AddComponent<SCANcolorSelection>();
 			}
 		}
 
