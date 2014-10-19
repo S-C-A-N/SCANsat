@@ -58,6 +58,8 @@ namespace SCANsat.SCAN_UI
 		internal static GUIStyle SCAN_headline;
 		internal static GUIStyle SCAN_headlineSmall;
 		internal static GUIStyle SCAN_buttonWarning;
+		//internal static GUIStyle SCAN_texButton;
+		internal static GUIStyle SCAN_legendTex;
 
 		//Styles for map overlay icons
 		internal static GUIStyle SCAN_orbitalLabelOn;
@@ -72,6 +74,7 @@ namespace SCANsat.SCAN_UI
 		//Some UI Textures
 		internal static Texture2D SCAN_toggleOn;
 		internal static Texture2D SCAN_toggleOnHover;
+		internal static Texture2D SCAN_dropDownTex;
 
 		protected override void OnGUI_FirstRun()
 		{
@@ -84,6 +87,7 @@ namespace SCANsat.SCAN_UI
 		{
 			SCAN_toggleOn = GameDatabase.Instance.GetTexture("SCANsat/Icons/SCAN_Toggle", false);
 			SCAN_toggleOnHover = GameDatabase.Instance.GetTexture("SCANsat/Icons/SCAN_Toggle_Hover", false);
+			SCAN_dropDownTex = GameDatabase.Instance.GetTexture("SCANsat/Icons/DropDownTex", false);
 		}
 
 		private static void initializeColors()
@@ -125,6 +129,8 @@ namespace SCANsat.SCAN_UI
 			SCAN_texButton.name = "SCAN_TexButton";
 			SCAN_texButton.padding = new RectOffset(0, 0, 1, 1);
 			SCAN_texButton.normal.background = SCAN_SkinsLibrary.DefUnitySkin.label.normal.background;
+			SCAN_texButton.hover.background = SCAN_SkinsLibrary.DefUnitySkin.label.normal.background;
+			SCAN_texButton.active.background = SCAN_SkinsLibrary.DefUnitySkin.label.normal.background;
 
 			SCAN_buttonBorderless = new GUIStyle(SCAN_button);
 			SCAN_buttonBorderless.name = "SCAN_ButtonBorderless";
@@ -140,12 +146,13 @@ namespace SCANsat.SCAN_UI
 			//Initialize drop down menu styles
 			SCAN_dropDownBox = new GUIStyle(SCAN_SkinsLibrary.DefUnitySkin.box);
 			SCAN_dropDownBox.name = "SCAN_DropDownBox";
+			SCAN_dropDownBox.normal.background = SCAN_dropDownTex;
 
 			SCAN_dropDownButton = new GUIStyle(SCAN_label);
 			SCAN_dropDownButton.name = "SCAN_DropDownButton";
 			SCAN_dropDownButton.padding = new RectOffset(2, 2, 2, 2);
 			SCAN_dropDownButton.normal.textColor = palette.xkcd_PukeGreen;
-			SCAN_dropDownButton.hover.textColor = palette.xkcd_PukeGreen;
+			SCAN_dropDownButton.hover.textColor = palette.black;
 			Texture2D sortBackground = new Texture2D(1, 1);
 			sortBackground.SetPixel(1, 1, palette.xkcd_White);
 			sortBackground.Apply();
@@ -219,6 +226,10 @@ namespace SCANsat.SCAN_UI
 			SCAN_toggle.onNormal.background.wrapMode = TextureWrapMode.Clamp;
 			SCAN_toggle.onHover.background.wrapMode = TextureWrapMode.Clamp;
 			SCAN_toggle.border = new RectOffset(15, 0, 1, 1);
+
+			SCAN_legendTex = new GUIStyle(SCAN_label);
+			SCAN_legendTex.name = "SCAN_LegendTex";
+			SCAN_legendTex.alignment = TextAnchor.MiddleCenter;
 
 			SCAN_tooltip = new GUIStyle(SCAN_SkinsLibrary.DefUnitySkin.label);
 			SCAN_tooltip.name = "SCAN_Tooltip";
