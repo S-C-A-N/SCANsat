@@ -17,7 +17,6 @@ using System.Collections.Generic;
 using System.Linq;
 using SCANsat.Platform;
 using SCANsat.Platform.Palettes;
-using SCANsat;
 using UnityEngine;
 
 using palette = SCANsat.SCAN_UI.SCANpalette;
@@ -83,7 +82,7 @@ namespace SCANsat.SCAN_UI
 			stopS();
 
 			warningBox(id);
-			paletteSelectionBox(id);
+			//paletteSelectionBox(id);
 		}
 
 		protected override void DrawWindowPost(int id)
@@ -185,45 +184,59 @@ namespace SCANsat.SCAN_UI
 
 		private void gui_settings_color_palette(int id)
 		{
-			growE();
-			if (GUILayout.Button("Palette Style:", SCANskins.SCAN_buttonFixed, GUILayout.MaxWidth(120)))
+			if (GUILayout.Button("Open Color Options"))
 			{
-				paletteBox = true;
+				SCANcontroller.controller.colorManager.Visible = !SCANcontroller.controller.colorManager.Visible;
 			}
-			fillS(10);
-			GUILayout.Label(SCANpalette.getPaletteType, SCANskins.SCAN_whiteReadoutLabel);
-			fillS(10);
-			paletteSize = GUILayout.TextField(paletteSize, 1, SCANskins.SCAN_whiteReadoutLabel);
-			stopE();
-
-			growE();
-			int j = 9;
-			if (currentPalettes.paletteType == Palette.Kind.Qualitative)
-				j = 6;
-			else if (currentPalettes.paletteType == Palette.Kind.Invertable || currentPalettes.paletteType == Palette.Kind.Unknown)
-				j = 0;
-			for (int i = 0; i < j; i++)
-			{
-				if (i % 3 == 0)
-				{
-					stopE();
-					growE();
-				}
-				growE();
-				Texture2D t = currentPalettes.paletteSwatch[i];
-				if (GUILayout.Button("", SCANskins.SCAN_buttonBorderless, GUILayout.Width(110), GUILayout.Height(25)))
-				{
-					SCANpalette.CurrentPalette = currentPalettes.availablePalettes[i];
-				}
-				Rect r = GUILayoutUtility.GetLastRect();
-				r.width -= 10;
-				GUI.DrawTexture(r, t);
-
-				stopE();
-			}
-			stopE();
-
 			fillS(16);
+			//growE();
+			//if (GUILayout.Button("Palette Style:", SCANskins.SCAN_buttonFixed, GUILayout.MaxWidth(120)))
+			//{
+			//	paletteBox = !paletteBox;
+			//}
+			//fillS(10);
+			//GUILayout.Label(SCANpalette.getPaletteType, SCANskins.SCAN_whiteReadoutLabel);
+			//fillS(10);
+			//paletteSize = GUILayout.TextField(paletteSize, 2, SCANskins.SCAN_whiteReadoutLabel);
+			//stopE();
+
+			//growE();
+			//int j = 9;
+			//if (currentPalettes.paletteType == Palette.Kind.Qualitative)
+			//	j = 8;
+			//else if (currentPalettes.paletteType == Palette.Kind.Sequential)
+			//	j = 17;
+			//else if (currentPalettes.paletteType == Palette.Kind.Invertable || currentPalettes.paletteType == Palette.Kind.Unknown)
+			//	j = 0;
+			//for (int i = 0; i < j; i++)
+			//{
+			//	if (i % 3 == 0)
+			//	{
+			//		stopE();
+			//		growE();
+			//	}
+			//	growE();
+			//	Texture2D t = currentPalettes.paletteSwatch[i];
+			//	if (paletteBox)
+			//	{
+			//		GUILayout.Label("", GUILayout.Width(110), GUILayout.Height(25));
+			//	}
+			//	else
+			//	{
+			//		if (GUILayout.Button("", SCANskins.SCAN_texButton, GUILayout.Width(110), GUILayout.Height(25)))
+			//		{
+			//			SCANpalette.CurrentPalette = currentPalettes.availablePalettes[i];
+			//		}
+			//	}
+			//	Rect r = GUILayoutUtility.GetLastRect();
+			//	r.width -= 10;
+			//	GUI.DrawTexture(r, t);
+
+			//	stopE();
+			//}
+			//stopE();
+
+			//fillS(16);
 		}
 
 		//Control background scanning options
@@ -411,7 +424,7 @@ namespace SCANsat.SCAN_UI
 		{
 			if (paletteBox)
 			{
-				paletteRect = new Rect(WindowRect.width - 350, WindowRect.height - 580, 100, 120);
+				paletteRect = new Rect(WindowRect.width - 350, WindowRect.height - 580, 100, 80);
 				GUI.Box(paletteRect, "", SCANskins.SCAN_dropDownBox);
 				for (int i = 0; i < Palette.kindNames.Length; i++)
 				{
