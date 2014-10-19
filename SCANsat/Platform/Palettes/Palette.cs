@@ -30,8 +30,8 @@ namespace SCANsat.Platform.Palettes
 		private static string[] getKindNames()
 		{
 			Kind[] v = (Kind[])Enum.GetValues(typeof(Kind));
-			string[] r = new string[v.Length];
-			for (int i = 0; i < v.Length; ++i)
+			string[] r = new string[v.Length - 2];
+			for (int i = 0; i < v.Length - 2; ++i)
 				r[i] = v[i].ToString();
 			return r;
 		}
