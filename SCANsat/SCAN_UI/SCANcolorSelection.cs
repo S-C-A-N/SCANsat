@@ -72,18 +72,16 @@ namespace SCANsat.SCAN_UI
 			closeBox(id);
 
 			growS();
-
-			growE();
-				paletteTextures(id);
-				paletteOptions(id);
-			stopE();
-			fillS(16);
-			growE();
-				palettePreview(id);
-				fillS(20);
-				paletteConfirmation(id);
-			stopE();
-
+				growE();
+					paletteTextures(id);
+					paletteOptions(id);
+				stopE();
+				fillS(16);
+				growE();
+					palettePreview(id);
+					fillS(20);
+					paletteConfirmation(id);
+				stopE();
 			stopS();
 
 			paletteSelectionBox(id);
@@ -114,6 +112,7 @@ namespace SCANsat.SCAN_UI
 			}
 		}
 
+		//Draw the palette selection field
 		private void paletteTextures(int id)
 		{
 			growS();
@@ -163,6 +162,7 @@ namespace SCANsat.SCAN_UI
 			stopS();
 		}
 
+		//Main palette option settings
 		private void paletteOptions(int id)
 		{
 			growS();
@@ -171,11 +171,13 @@ namespace SCANsat.SCAN_UI
 				GUILayout.Label("Terrain Height Range", SCANskins.SCAN_headlineSmall);
 				growE();
 					fillS();
-					GUILayout.Label("Min:", SCANskins.SCAN_whiteReadoutLabel, GUILayout.Width(40));
-					lowRange = GUILayout.TextField(lowRange, 5, SCANskins.SCAN_whiteReadoutLabel, GUILayout.Width(40));
+					lowRangeInt = drawInputBox(lowRange, SCANskins.SCAN_whiteReadoutLabel, 40, 40, "Min:", SCANskins.SCAN_whiteReadoutLabel);
+					//GUILayout.Label("Min:", SCANskins.SCAN_whiteReadoutLabel, GUILayout.Width(40));
+					//lowRange = GUILayout.TextField(lowRange, 5, SCANskins.SCAN_whiteReadoutLabel, GUILayout.Width(40));
 					fillS(10);
-					GUILayout.Label("Max:", SCANskins.SCAN_whiteReadoutLabel, GUILayout.Width(40));
-					highRange = GUILayout.TextField(highRange, 5, SCANskins.SCAN_whiteReadoutLabel, GUILayout.Width(40));
+					highRangeInt = drawInputBox(highRange, SCANskins.SCAN_whiteReadoutLabel, 40, 40, "Max:", SCANskins.SCAN_whiteReadoutLabel);
+					//GUILayout.Label("Max:", SCANskins.SCAN_whiteReadoutLabel, GUILayout.Width(40));
+					//highRange = GUILayout.TextField(highRange, 5, SCANskins.SCAN_whiteReadoutLabel, GUILayout.Width(40));
 					fillS();
 				stopE();
 				growE();
@@ -184,7 +186,8 @@ namespace SCANsat.SCAN_UI
 					if (clampTerrain)
 					{
 						fillS(5);
-						clampLevel = GUILayout.TextField(clampLevel, 5, SCANskins.SCAN_whiteReadoutLabel, GUILayout.Width(40));
+						clampLevelInt = drawInputBox(clampLevel, SCANskins.SCAN_whiteReadoutLabel, 40);
+						//clampLevel = GUILayout.TextField(clampLevel, 5, SCANskins.SCAN_whiteReadoutLabel, GUILayout.Width(40));
 					}
 					fillS();
 				stopE();
@@ -198,6 +201,7 @@ namespace SCANsat.SCAN_UI
 			stopS();
 		}
 
+		//Two boxes to show the current and new palettes as they appear on the legend
 		private void palettePreview(int id)
 		{
 			growS();
@@ -217,6 +221,7 @@ namespace SCANsat.SCAN_UI
 			stopS();
 		}
 
+		//Buttons to apply the new palette or cancel and return to the original
 		private void paletteConfirmation(int id)
 		{
 			growS();
@@ -250,6 +255,22 @@ namespace SCANsat.SCAN_UI
 					}
 				}
 			}
+		}
+
+		private int drawInputBox(string oldVal, GUIStyle boxStyle, float boxWidth, float labelWidth = 0, string title = "", GUIStyle labelStyle = null)
+		{
+			int newInt = int.Parse(oldVal);
+			string newVal = oldVal;
+			growE();
+				if (!string.IsNullOrEmpty(title))
+					GUILayout.Label(title, labelStyle, GUILayout.Width(labelWidth));
+				newVal = GUILayout.TextField(newVal, boxStyle, GUILayout.Width(boxWidth));
+			stopE();
+
+			int.TryParse(newVal, out newInt);
+
+			return newInt;
+
 		}
 
 	}
