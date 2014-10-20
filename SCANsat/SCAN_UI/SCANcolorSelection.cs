@@ -26,7 +26,7 @@ namespace SCANsat.SCAN_UI
 	{
 		private bool paletteBox, reversePalette, discretePalette, clampTerrain;
 		private Rect paletteRect;
-		private Palettes currentPalettes;
+		private _Palettes currentPalettes;
 		private string paletteSize = "5";
 		private Texture2D currentLegend, previewLegend;
 		private string lowRange = "-500";
@@ -35,7 +35,7 @@ namespace SCANsat.SCAN_UI
 		private int lowRangeInt = -500;
 		private int highRangeInt = 8000;
 		private int clampLevelInt = 0;
-		internal static Rect defaultRect = new Rect(100, 300, 600, 300);
+		internal static Rect defaultRect = new Rect(100, 400, 600, 300);
 
 		protected override void Awake()
 		{

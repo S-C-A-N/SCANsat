@@ -93,7 +93,7 @@ namespace SCANsat.SCAN_UI
 		private static void initializeColors()
 		{
 			SCANpalette.CurrentPalettes = SCANpalette.generatePaletteSet(7, Palette.Kind.Diverging);
-			SCANpalette.CurrentPalette = PaletteLoader.generateDefaultPalette();
+			SCANpalette.CurrentPalette = PaletteLoader.defaultPalette;
 		}
 
 		private static void initializeSkins()

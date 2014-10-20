@@ -4,13 +4,13 @@ using UnityEngine;
 
 namespace SCANsat.Platform.Palettes
 {
-	public class Palettes
+	public class _Palettes
 	{
 		internal Palette[] availablePalettes;
 		internal Palette.Kind paletteType;
 		internal Texture2D[] paletteSwatch;
 
-		internal Palettes (Palette[] p, Palette.Kind pK)
+		internal _Palettes (Palette[] p, Palette.Kind pK)
 		{
 			availablePalettes = p;
 			paletteType = pK;

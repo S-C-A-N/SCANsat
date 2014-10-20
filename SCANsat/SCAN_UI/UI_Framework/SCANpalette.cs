@@ -190,16 +190,16 @@ namespace SCANsat.SCAN_UI
 			GUILayout.EndVertical ();
 		}
 
-		private static Palettes currentPaletteSet;
+		private static _Palettes currentPaletteSet;
 		private static string currentPaletteType;
 
-		internal static Palettes generatePaletteSet(int size, Palette.Kind type)
+		internal static _Palettes generatePaletteSet(int size, Palette.Kind type)
 		{
 			PaletteLoader.generatePalettes(type, size);
-			return new Palettes(PaletteLoader.palettes.ToArray(), type);
+			return new _Palettes(PaletteLoader.palettes.ToArray(), type);
 		}
 
-		internal static Palettes CurrentPalettes
+		internal static _Palettes CurrentPalettes
 		{
 			get { return currentPaletteSet; }
 			set
