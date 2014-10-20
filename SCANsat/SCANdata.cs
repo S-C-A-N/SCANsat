@@ -11,11 +11,10 @@
  */
 #endregion
 using System;
-using System.IO;
-using System.Runtime.Serialization.Formatters.Binary;
 using System.Linq;
 using System.Collections.Generic;
 using UnityEngine;
+using SCANsat.Platform.Palettes;
 using palette = SCANsat.SCAN_UI.SCANpalette;
 
 namespace SCANsat
@@ -23,24 +22,32 @@ namespace SCANsat
 	public class SCANdata
 	{
 		/* MAP: state */
-		public Int32[,] coverage = new Int32[360 , 180];
-		internal float[,] heightmap = new float[360 , 180];
-		public float[,] kethaneValueMap = new float[360, 180]; //Store kethane cell data in here
-		public CelestialBody body;
-		public Texture2D map_small = new Texture2D (360 , 180 , TextureFormat.RGB24 , false);
-		public bool disabled;
-		private float minHeight, maxHeight;
+		private Int32[,] coverage = new Int32[360, 180];
+		private float[,] heightmap = new float[360, 180];
+		private float[,] kethaneValueMap = new float[360, 180]; //Store kethane cell data in here
+		private CelestialBody body;
+		private Texture2D map_small = new Texture2D(360, 180, TextureFormat.RGB24, false);
 
-		private static float[,] bodyHeightRange = new float[17, 2]
+		/* MAP: options */
+		private float minHeight, maxHeight, clampHeight;
+		private string paletteName = "Default";
+		private int paletteSize = 7;
+		private bool paletteReverse, paletteDiscrete, disabled;
+		private Palette colorPalette;
+
+		/* MAP: default values */
+		private static float[,] bodyHeightRange = new float[17, 3]
 		{
-			{ 0, 1000 }, { -1500, 7000 }, { -500, 7500 }, { -500, 6000 },
-			{ 0, 7000 }, { -2000, 8000 }, { 0, 8500 }, { 0, 13000 }, { 0, 1000 },
-			{ -3000, 6500 }, { -500, 8000 }, { 2000, 22000 }, { -500, 11500 },
-			{ 1000, 6500 }, { 500, 6000 }, { 0, 6000 }, { -500, 4000 }
+			{ 0, 1000, 0 }, { -1500, 7000, 0 }, { -500, 7500, 0 }, { -500, 6000, 0 },
+			{ 0, 7000, 0 }, { -2000, 8000, 0 }, { 0, 8500, 0 }, { 0, 13000, 0 }, { 0, 1000, 0 },
+			{ -3000, 6500, 0 }, { -500, 8000, 0 }, { 2000, 22000, 0 }, { -500, 11500, 0 },
+			{ 1000, 6500, 0 }, { 500, 6000, 0 }, { 0, 6000, 0 }, { -500, 4000, 0 }
 		};
-		private static float defaultMinHeight = -1000f;
-		private static float defaultMaxHeight = 8000f;
+		private const float defaultMinHeight = -1000f;
+		private const float defaultMaxHeight = 8000f;
+		private const float defaultClampHeight = 0f;
 
+		/* MAP: constructor */
 		internal SCANdata(CelestialBody b)
 		{
 			body = b;
@@ -48,90 +55,183 @@ namespace SCANsat
 			{
 				minHeight = bodyHeightRange[b.flightGlobalsIndex, 0];
 				maxHeight = bodyHeightRange[b.flightGlobalsIndex, 1];
+				clampHeight = bodyHeightRange[b.flightGlobalsIndex, 2];
 			}
 			else
 			{
 				minHeight = defaultMinHeight;
 				maxHeight = defaultMaxHeight;
+				clampHeight = defaultClampHeight;
 			}
 		}
 
-		internal float MinHeight
+		#region Public accessors
+		/* Accessors: body-specific variables */
+		public Int32[,] Coverage
+		{
+			get { return coverage; }
+			internal set { coverage = value; }
+		}
+
+		public float[,] HeightMap
+		{
+			get { return heightmap; }
+			internal set { heightmap = value; }
+		}
+
+		public CelestialBody Body
+		{
+			get { return body; }
+			internal set { body = value; }
+		}
+
+		public Texture2D Map
+		{
+			get { return map_small; }
+			internal set { map_small = value; }
+		}
+
+		public float[,] KethaneValueMap
+		{
+			get { return kethaneValueMap; }
+			set { kethaneValueMap = value; }
+		}
+
+		public float MinHeight
 		{
 			get { return minHeight; }
-			private set { }
+			internal set { minHeight = value; }
 		}
 
-		internal float MaxHeight
+		public float MaxHeight
 		{
 			get { return maxHeight; }
-			private set { }
+			internal set { maxHeight = value; }
 		}
 
-		/* MAP: known types of data */
-		public enum SCANtype: int
+		public float ClampHeight
+		{
+			get { return clampHeight; }
+			internal set { clampHeight = value; }
+		}
+
+		public bool PaletteReverse
+		{
+			get { return paletteReverse; }
+			internal set { paletteReverse = value; }
+		}
+
+		public bool PaletteDiscrete
+		{
+			get { return paletteDiscrete; }
+			internal set { paletteDiscrete = value; }
+		}
+
+		public string PaletteName
+		{
+			get { return paletteName; }
+			internal set { paletteName = value; }
+		}
+
+		public Palette ColorPalette
+		{
+			get { return colorPalette; }
+			internal set { colorPalette = value; }
+		}
+
+		public int PaletteSize
+		{
+			get { return paletteSize; }
+			internal set { paletteSize = value; }
+		}
+
+		public bool Disabled
+		{
+			get { return disabled; }
+			internal set { disabled = value; }
+		}
+		#endregion
+
+		#region SCANtype enum
+		/* DATA: known types of data */
+		public enum SCANtype : int
 		{
 			Nothing = 0, 		    // no data (MapTraq)
-			AltimetryLoRes = 1<<0,  // low resolution altimetry (limited zoom)
-			AltimetryHiRes = 1<<1,  // high resolution altimetry (unlimited zoom)
-			Altimetry = (1<<2)-1, 	        // both (setting) or either (testing) altimetry
-			SCANsat_1 = 1<<2,		// Unused, reserved for future SCANsat scanner
-			Biome = 1<<3,		    // biome data
-			Anomaly = 1<<4,		    // anomalies (position of anomaly)
-			AnomalyDetail = 1<<5,	// anomaly detail (name of anomaly, etc.)
-            Kethane = 1<<6,         // Kethane - K-type - Kethane
-            Ore = 1<<7,             // Ore - ORS & K-type - EPL & MKS
-            Kethane_3 = 1<<8,       // Reserved - K-type
-            Kethane_4 = 1<<9,       // Reserved - K-type
-            Uranium = 1<<10,        // Uranium - ORS - KSPI
-            Thorium = 1<<11,        // Thorium - ORS - KSPI
-            Alumina = 1<<12,        // Alumina - ORS - KSPI
-            Water = 1<<13,          // Water - ORS - KSPI
-            Aquifer = 1<<14,        // Aquifer - ORS & K-type - MKS
-            Minerals = 1<<15,       // Minerals - ORS & K-type - MKS
-            Substrate = 1<<16,      // Substrate - ORS & K-type - MKS
-            KEEZO = 1<<17,          // KEEZO - ORS - Kass Effect
+			AltimetryLoRes = 1 << 0,  // low resolution altimetry (limited zoom)
+			AltimetryHiRes = 1 << 1,  // high resolution altimetry (unlimited zoom)
+			Altimetry = (1 << 2) - 1, 	        // both (setting) or either (testing) altimetry
+			SCANsat_1 = 1 << 2,		// Unused, reserved for future SCANsat scanner
+			Biome = 1 << 3,		    // biome data
+			Anomaly = 1 << 4,		    // anomalies (position of anomaly)
+			AnomalyDetail = 1 << 5,	// anomaly detail (name of anomaly, etc.)
+			Kethane = 1 << 6,         // Kethane - K-type - Kethane
+			Ore = 1 << 7,             // Ore - ORS & K-type - EPL & MKS
+			Kethane_3 = 1 << 8,       // Reserved - K-type
+			Kethane_4 = 1 << 9,       // Reserved - K-type
+			Uranium = 1 << 10,        // Uranium - ORS - KSPI
+			Thorium = 1 << 11,        // Thorium - ORS - KSPI
+			Alumina = 1 << 12,        // Alumina - ORS - KSPI
+			Water = 1 << 13,          // Water - ORS - KSPI
+			Aquifer = 1 << 14,        // Aquifer - ORS & K-type - MKS
+			Minerals = 1 << 15,       // Minerals - ORS & K-type - MKS
+			Substrate = 1 << 16,      // Substrate - ORS & K-type - MKS
+			KEEZO = 1 << 17,          // KEEZO - ORS - Kass Effect
 			Karbonite = 1 << 18,    // Karbonite - ORS
-            ORS_10 = 1<<19,         // Reserved - ORS
+			ORS_10 = 1 << 19,         // Reserved - ORS
 
-			Everything_SCAN = (1<<6)-1,	// All default SCANsat scanners
-            Everything = Int32.MaxValue      // All scanner types
+			Everything_SCAN = (1 << 6) - 1,	// All default SCANsat scanners
+			Everything = Int32.MaxValue      // All scanner types
 		}
+		#endregion
 
+		#region Resource classes
 		/* DATA: resources */
-        public class SCANResource //The new class to store resource information stored in the respective config nodes
-        {
-            public SCANResource (string n, string Body, Color full, Color empty, bool sc, double scalar, double mult, double threshold, float max, SCANresourceType t)
-            {
-                name = n;
+		public class SCANResource //The new class to store resource information stored in the respective config nodes
+		{
+			public SCANResource(string n, string Body, Color full, Color empty, bool sc, double scalar, double mult, double threshold, float max, SCANresourceType t)
+			{
+				name = n;
 				body = Body;
-                fullColor = full;
-                emptyColor = empty;
-                linear = sc;
-                ORS_Scalar = scalar;
-                ORS_Multiplier = mult;
-                ORS_Threshold = threshold;
-                maxValue = max;
+				fullColor = full;
+				emptyColor = empty;
+				linear = sc;
+				ORS_Scalar = scalar;
+				ORS_Multiplier = mult;
+				ORS_Threshold = threshold;
+				maxValue = max;
 				resourceType = t;
 				type = resourceType.type;
-            }
+			}
 
-            public string name, body;
-            public double ORS_Scalar, ORS_Multiplier, ORS_Threshold;
-            public Color fullColor, emptyColor;
-            public bool linear;
-            public float maxValue;
-            public SCANtype type;
-			public SCANresourceType resourceType;
-        }
+			internal string name;
+			internal string body;
+			internal double ORS_Scalar, ORS_Multiplier, ORS_Threshold;
+			internal Color fullColor, emptyColor;
+			internal bool linear;
+			internal float maxValue;
+			internal SCANtype type;
+			internal SCANresourceType resourceType;
+
+			public string Name
+			{
+				get { return name; }
+				private set { }
+			}
+
+			public SCANtype Type
+			{
+				get { return type; }
+				private set { }
+			}
+		}
 
 		public class SCANresourceType
 		{
-			public string name;
-			public SCANtype type;
-			public Color colorFull, colorEmpty;
+			internal string name;
+			internal SCANtype type;
+			internal Color colorFull, colorEmpty;
 
-			internal SCANresourceType (string s, int i, string Full, string Empty)
+			internal SCANresourceType(string s, int i, string Full, string Empty)
 			{
 				name = s;
 				type = (SCANtype)i;
@@ -144,92 +244,155 @@ namespace SCANsat
 				colorEmpty = ConfigNode.ParseColor(Empty);
 			}
 		}
+		#endregion
 
+		#region Anomalies
+		/* DATA: anomalies and such */
+		internal class SCANanomaly
+		{
+			internal SCANanomaly(string s, double lon, double lat, PQSMod m)
+			{
+				name = s;
+				longitude = lon;
+				latitude = lat;
+				known = false;
+				mod = m;
+			}
+
+			internal bool known;
+			internal bool detail;
+			internal string name;
+			internal double longitude;
+			internal double latitude;
+			internal PQSMod mod;
+		}
+
+		private SCANanomaly[] anomalies;
+
+		internal SCANanomaly[] Anomalies
+		{
+			get
+			{
+				if (anomalies == null)
+				{
+					PQSCity[] sites = body.GetComponentsInChildren<PQSCity>(true);
+					anomalies = new SCANanomaly[sites.Length];
+					for (int i = 0; i < sites.Length; ++i)
+					{
+						anomalies[i] = new SCANanomaly(sites[i].name, body.GetLongitude(sites[i].transform.position), body.GetLatitude(sites[i].transform.position), sites[i]);
+					}
+				}
+				for (int i = 0; i < anomalies.Length; ++i)
+				{
+					anomalies[i].known = SCANUtil.isCovered(anomalies[i].longitude, anomalies[i].latitude, this, SCANtype.Anomaly);
+					anomalies[i].detail = SCANUtil.isCovered(anomalies[i].longitude, anomalies[i].latitude, this, SCANtype.AnomalyDetail);
+				}
+				return anomalies;
+			}
+			private set { }
+		}
+		#endregion
+
+		#region Scanning coverage
 		/* DATA: coverage */
-        public int[] coverage_count = new int[32];
-		public void updateCoverage () {
-            for (int i=0; i<32; ++i) {
-                SCANtype t = (SCANtype)(1 << i);
+		internal int[] coverage_count = new int[32];
+		internal void updateCoverage()
+		{
+			for (int i = 0; i < 32; ++i)
+			{
+				SCANtype t = (SCANtype)(1 << i);
 				int cc = 0;
-				for (int x=0; x<360; ++x) {
-					for (int y=0; y<180; ++y) {
-						if ((coverage [x, y] & (Int32)t) == 0)
+				for (int x = 0; x < 360; ++x)
+				{
+					for (int y = 0; y < 180; ++y)
+					{
+						if ((coverage[x, y] & (Int32)t) == 0)
 							++cc;
 					}
 				}
-                coverage_count [i] = cc;
-            }
+				coverage_count[i] = cc;
+			}
 		}
-		public int getCoverage ( SCANtype type ) {
+		internal int getCoverage(SCANtype type)
+		{
 			int uncov = 0;
 			if ((type & SCANtype.AltimetryLoRes) != SCANtype.Nothing)
-                uncov += coverage_count[0];
-            if ((type & SCANtype.AltimetryHiRes) != SCANtype.Nothing)
-                uncov += coverage_count [1];
-            if ((type & SCANtype.Biome) != SCANtype.Nothing)
-                uncov += coverage_count [3];
-            if ((type & SCANtype.Anomaly) != SCANtype.Nothing)
-                uncov += coverage_count [4];
-            if ((type & SCANtype.AnomalyDetail) != SCANtype.Nothing)
-                uncov += coverage_count [5];
-            if ((type & SCANtype.Kethane) != SCANtype.Nothing)
-                uncov += coverage_count [6];
-            if ((type & SCANtype.Ore) != SCANtype.Nothing)
-                uncov += coverage_count [7];
-            if ((type & SCANtype.Kethane_3) != SCANtype.Nothing)
-                uncov += coverage_count [8];
-            if ((type & SCANtype.Kethane_4) != SCANtype.Nothing)
-                uncov += coverage_count [9];
-            if ((type & SCANtype.Uranium) != SCANtype.Nothing)
-                uncov += coverage_count [10];
-            if ((type & SCANtype.Thorium) != SCANtype.Nothing)
-                uncov += coverage_count [11];
-            if ((type & SCANtype.Alumina) != SCANtype.Nothing)
-                uncov += coverage_count [12];
-            if ((type & SCANtype.Water) != SCANtype.Nothing)
-                uncov += coverage_count [13];
-            if ((type & SCANtype.Aquifer) != SCANtype.Nothing)
-                uncov += coverage_count [14];
-            if ((type & SCANtype.Minerals) != SCANtype.Nothing)
-                uncov += coverage_count [15];
-            if ((type & SCANtype.Substrate) != SCANtype.Nothing)
-                uncov += coverage_count [16];
-            if ((type & SCANtype.KEEZO) != SCANtype.Nothing)
-                uncov += coverage_count [17];
-            if ((type & SCANtype.Karbonite) != SCANtype.Nothing)
-                uncov += coverage_count [18];
-            if ((type & SCANtype.ORS_10) != SCANtype.Nothing)
-                uncov += coverage_count [19];
+				uncov += coverage_count[0];
+			if ((type & SCANtype.AltimetryHiRes) != SCANtype.Nothing)
+				uncov += coverage_count[1];
+			if ((type & SCANtype.Biome) != SCANtype.Nothing)
+				uncov += coverage_count[3];
+			if ((type & SCANtype.Anomaly) != SCANtype.Nothing)
+				uncov += coverage_count[4];
+			if ((type & SCANtype.AnomalyDetail) != SCANtype.Nothing)
+				uncov += coverage_count[5];
+			if ((type & SCANtype.Kethane) != SCANtype.Nothing)
+				uncov += coverage_count[6];
+			if ((type & SCANtype.Ore) != SCANtype.Nothing)
+				uncov += coverage_count[7];
+			if ((type & SCANtype.Kethane_3) != SCANtype.Nothing)
+				uncov += coverage_count[8];
+			if ((type & SCANtype.Kethane_4) != SCANtype.Nothing)
+				uncov += coverage_count[9];
+			if ((type & SCANtype.Uranium) != SCANtype.Nothing)
+				uncov += coverage_count[10];
+			if ((type & SCANtype.Thorium) != SCANtype.Nothing)
+				uncov += coverage_count[11];
+			if ((type & SCANtype.Alumina) != SCANtype.Nothing)
+				uncov += coverage_count[12];
+			if ((type & SCANtype.Water) != SCANtype.Nothing)
+				uncov += coverage_count[13];
+			if ((type & SCANtype.Aquifer) != SCANtype.Nothing)
+				uncov += coverage_count[14];
+			if ((type & SCANtype.Minerals) != SCANtype.Nothing)
+				uncov += coverage_count[15];
+			if ((type & SCANtype.Substrate) != SCANtype.Nothing)
+				uncov += coverage_count[16];
+			if ((type & SCANtype.KEEZO) != SCANtype.Nothing)
+				uncov += coverage_count[17];
+			if ((type & SCANtype.Karbonite) != SCANtype.Nothing)
+				uncov += coverage_count[18];
+			if ((type & SCANtype.ORS_10) != SCANtype.Nothing)
+				uncov += coverage_count[19];
 			return uncov;
 
 		}
-		public double getCoveragePercentage ( SCANtype type ) {
+		internal double getCoveragePercentage(SCANtype type)
+		{
 			double cov = 0d;
-            if (type == SCANtype.Nothing) 
-                type = SCANtype.AltimetryLoRes | SCANtype.AltimetryHiRes | SCANtype.Biome | SCANtype.Anomaly;          
-            cov = getCoverage (type);
-            if (cov <= 0)
-			    cov = 100;
+			if (type == SCANtype.Nothing)
+				type = SCANtype.AltimetryLoRes | SCANtype.AltimetryHiRes | SCANtype.Biome | SCANtype.Anomaly;
+			cov = getCoverage(type);
+			if (cov <= 0)
+				cov = 100;
 			else
-				cov = Math.Min (99.9d , 100 - cov * 100d / (360d * 180d * SCANUtil.countBits ((int)type)));
+				cov = Math.Min(99.9d, 100 - cov * 100d / (360d * 180d * SCANUtil.countBits((int)type)));
 			return cov;
 		}
+		#endregion
 
+		#region Map Texture
 		/* DATA: all hail the red line of scanning */
-
-		protected int scanline = 0;
-		protected int scanstep = 0;
-		public void drawHeightScanline ( SCANtype type ) {
-			Color[] cols_height_map_small = map_small.GetPixels (0 , scanline , 360 , 1);
-			for (int ilon=0; ilon<360; ilon+=1) {
+		private int scanline = 0;
+		private int scanstep = 0;
+		//Draws the actual map texture
+		internal void drawHeightScanline(SCANtype type)
+		{
+			Color[] cols_height_map_small = map_small.GetPixels(0, scanline, 360, 1);
+			for (int ilon = 0; ilon < 360; ilon += 1)
+			{
 				int scheme = 0;
-				float val = heightmap [ilon, scanline];
-                if (val == 0) { //Some preparation for bigger changes in map caching, automatically calculate elevation for every point on the small map, only display scanned areas
-					if (body.pqsController == null) {
-						heightmap [ilon, scanline] = 0;
-						cols_height_map_small [ilon] = palette.lerp (palette.black , palette.white , UnityEngine.Random.value);
+				float val = heightmap[ilon, scanline];
+				if (val == 0)
+				{ //Some preparation for bigger changes in map caching, automatically calculate elevation for every point on the small map, only display scanned areas
+					if (body.pqsController == null)
+					{
+						heightmap[ilon, scanline] = 0;
+						cols_height_map_small[ilon] = palette.lerp(palette.black, palette.white, UnityEngine.Random.value);
 						continue;
-					} else {
+					}
+					else
+					{
 						// convert to radial vector
 						val = (float)SCANUtil.getElevation(body, ilon - 180, scanline - 90);
 						//double rlon = Mathf.Deg2Rad * (ilon - 180);
@@ -239,113 +402,102 @@ namespace SCANsat
 						//val = (float)Math.Round (body.pqsController.GetSurfaceHeight (rad) - body.pqsController.radius , 1);
 						if (val == 0)
 							val = -0.001f; // this is terrible
-						heightmap [ilon, scanline] = val;
+						heightmap[ilon, scanline] = val;
 					}
 				}
 				Color c = palette.black;
 				if (SCANUtil.isCovered(ilon, scanline, this, SCANtype.Altimetry))
 				{ //We check for coverage down here now, after elevation data is collected
 					if (SCANUtil.isCovered(ilon, scanline, this, SCANtype.AltimetryHiRes))
-						c = palette.heightToColor (val , scheme, minHeight, maxHeight);
+						c = palette.heightToColor(val, scheme, minHeight, maxHeight);
 					else
-						c = palette.heightToColor (val , 1, minHeight, maxHeight);
-				} else {
+						c = palette.heightToColor(val, 1, minHeight, maxHeight);
+				}
+				else
+				{
 					c = palette.grey;
-					if (scanline % 30 == 0 && ilon % 3 == 0) {
+					if (scanline % 30 == 0 && ilon % 3 == 0)
+					{
 						c = palette.white;
-					} else if (ilon % 30 == 0 && scanline % 3 == 0) {
+					}
+					else if (ilon % 30 == 0 && scanline % 3 == 0)
+					{
 						c = palette.white;
 					}
 				}
-				if (type != SCANtype.Nothing) {
+				if (type != SCANtype.Nothing)
+				{
 					if (!SCANUtil.isCoveredByAll(ilon, scanline, this, type))
 					{
-						c = palette.lerp (c , palette.black , 0.5f);
+						c = palette.lerp(c, palette.black, 0.5f);
 					}
 				}
-				cols_height_map_small [ilon] = c;
+				cols_height_map_small[ilon] = c;
 			}
-			map_small.SetPixels (0 , scanline , 360 , 1 , cols_height_map_small);
+			map_small.SetPixels(0, scanline, 360, 1, cols_height_map_small);
 			scanline = scanline + 1;
-			if (scanline >= 180) {
+			if (scanline >= 180)
+			{
 				scanstep += 1;
 				scanline = 0;
 			}
 		}
-		public void updateImages ( SCANtype type ) {
-			if (palette.small_redline == null) {
-				palette.small_redline = new Color[360];
-				for (int i=0; i<360; i++)
-					palette.small_redline [i] = palette.red;
-			}
-			drawHeightScanline (type);
-			if (scanline < 179) {
-				map_small.SetPixels (0 , scanline + 1 , 360 , 1 , palette.small_redline);
-			}
-			map_small.Apply ();
-		}
 
-		/* DATA: anomalies and such */
-		public class SCANanomaly
+		//Updates the red scanning line
+		internal void updateImages(SCANtype type)
 		{
-			public SCANanomaly ( string s , double lon , double lat , PQSMod m )
+			if (palette.small_redline == null)
 			{
-				name = s;
-				longitude = lon;
-				latitude = lat;
-				known = false;
-				mod = m;
+				palette.small_redline = new Color[360];
+				for (int i = 0; i < 360; i++)
+					palette.small_redline[i] = palette.red;
 			}
-
-			public bool known;
-			public bool detail;
-			public string name;
-			public double longitude;
-			public double latitude;
-			public PQSMod mod;
+			drawHeightScanline(type);
+			if (scanline < 179)
+			{
+				map_small.SetPixels(0, scanline + 1, 360, 1, palette.small_redline);
+			}
+			map_small.Apply();
 		}
-		SCANanomaly[] anomalies;
-		public SCANanomaly[] getAnomalies () {
-			if (anomalies == null) {
-				PQSCity[] sites = body.GetComponentsInChildren<PQSCity> (true);
-				anomalies = new SCANanomaly[sites.Length];
-				for (int i=0; i<sites.Length; ++i) {
-					anomalies [i] = new SCANanomaly (sites [i].name , body.GetLongitude (sites [i].transform.position) , body.GetLatitude (sites [i].transform.position) , sites [i]);
+		#endregion
+
+		/* DATA: debug option to fill in the map */
+		internal void fillMap()
+		{
+			for (int i = 0; i < 360; i++)
+			{
+				for (int j = 0; j < 180; j++)
+				{
+					coverage[i, j] |= (Int32)SCANtype.Everything;
 				}
 			}
-			for (int i=0; i<anomalies.Length; ++i) {
-				anomalies[i].known = SCANUtil.isCovered(anomalies[i].longitude, anomalies[i].latitude, this, SCANtype.Anomaly);
-				anomalies[i].detail = SCANUtil.isCovered(anomalies[i].longitude, anomalies[i].latitude, this, SCANtype.AnomalyDetail);
-			}
-			return anomalies;
 		}
-
-        public void fillMap () {
-            for (int i = 0; i < 360; i++) {
-                for (int j = 0; j < 180; j++) { 
-                    coverage[i,j] |= (Int32)SCANtype.Everything;
-                }
-            }
-        }
 
 		/* DATA: reset the map */
-		public void reset () {
-			coverage = new Int32[360 , 180];
-			heightmap = new float[360 , 180];
-			resetImages ();
+		internal void reset()
+		{
+			coverage = new Int32[360, 180];
+			heightmap = new float[360, 180];
+			resetImages();
 		}
-		public void resetImages () {
+		internal void resetImages()
+		{
 			// Just draw a simple grid to initialize the image; the map will appear on top of it
-			for (int y=0; y<map_small.height; y++) {
-				for (int x=0; x<map_small.width; x++) {
-					if ((x % 30 == 0 && y % 3 > 0) || (y % 30 == 0 && x % 3 > 0)) {
-						map_small.SetPixel (x , y , palette.white);
-					} else {
-						map_small.SetPixel (x , y , palette.grey);
+			for (int y = 0; y < map_small.height; y++)
+			{
+				for (int x = 0; x < map_small.width; x++)
+				{
+					if ((x % 30 == 0 && y % 3 > 0) || (y % 30 == 0 && x % 3 > 0))
+					{
+						map_small.SetPixel(x, y, palette.white);
+					}
+					else
+					{
+						map_small.SetPixel(x, y, palette.grey);
 					}
 				}
 			}
-			map_small.Apply ();
+			map_small.Apply();
 		}
 
 
