@@ -13,10 +13,13 @@
 #endregion
 using System;
 using System.Linq;
+using System.Reflection;
 using System.Collections.Generic;
 using UnityEngine;
 using SCANsat.SCAN_UI;
 using SCANsat.Platform;
+using SCANsat.Platform.Palettes;
+using SCANsat.Platform.Palettes.ColorBrewer;
 using palette = SCANsat.SCAN_UI.SCANpalette;
 
 namespace SCANsat
@@ -141,6 +144,9 @@ namespace SCANsat
 			{
 				foreach (ConfigNode node_body in node_progress.GetNodes("Body"))
 				{
+					float min, max, clamp;
+					int pSize;
+					bool pRev, pDis, disabled;
 					string body_name = node_body.GetValue("Name");
 					print("SCANsat Controller: Loading map for " + body_name);
 					CelestialBody body = FlightGlobals.Bodies.FirstOrDefault(b => b.name == body_name);
@@ -166,7 +172,23 @@ namespace SCANsat
 							print(e.StackTrace);
 							// fail somewhat gracefully; don't make the save unloadable 
 						}
-						data.disabled = Convert.ToBoolean(node_body.GetValue("Disabled"));
+						//Verify that saved data types can be converted, revert to default values otherwise
+						if (bool.TryParse(node_body.GetValue("Disabled"), out disabled))
+							data.Disabled = disabled;
+						if (float.TryParse(node_body.GetValue("MinHeightRange"), out min))
+							data.MinHeight = min;
+						if (float.TryParse(node_body.GetValue("MaxHeightRange"), out max))
+							data.MaxHeight = max;
+						if (float.TryParse(node_body.GetValue("ClampHeight"), out clamp))
+							data.ClampHeight = clamp;
+						if (int.TryParse(node_body.GetValue("PaletteSize"), out pSize))
+							data.PaletteSize = pSize;
+						if (bool.TryParse(node_body.GetValue("PaletteReverse"), out pRev))
+							data.PaletteReverse = pRev;
+						if (bool.TryParse(node_body.GetValue("PaletteDiscrete"), out pDis))
+							data.PaletteDiscrete = pDis;
+						data.PaletteName = node_body.GetValue("PaletteName");
+						paletteLoad(data);
 					}
 				}
 			}
@@ -219,7 +241,14 @@ namespace SCANsat
 					ConfigNode node_body = new ConfigNode("Body");
 					SCANdata body_scan = SCANcontroller.body_data[body_name];
 					node_body.AddValue("Name", body_name);
-					node_body.AddValue("Disabled", body_scan.disabled);
+					node_body.AddValue("Disabled", body_scan.Disabled);
+					node_body.AddValue("MinHeightRange", body_scan.MinHeight);
+					node_body.AddValue("MaxHeightRange", body_scan.MaxHeight);
+					node_body.AddValue("ClampHeight", body_scan.ClampHeight);
+					node_body.AddValue("PaletteName", body_scan.PaletteName);
+					node_body.AddValue("PaletteSize", body_scan.PaletteSize);
+					node_body.AddValue("PaletteReverse", body_scan.PaletteReverse);
+					node_body.AddValue("PaletteDiscrete", body_scan.PaletteDiscrete);
 					node_body.AddValue("Map", SCANUtil.integerSerialize(body_scan));
 					node_progress.AddNode(node_body);
 				}
@@ -254,6 +283,27 @@ namespace SCANsat
 				Destroy(bigMap);
 			if (kscMap != null)
 				Destroy(kscMap);
+		}
+
+		//Method to handle loading of the saved color palette
+		private void paletteLoad(SCANdata data)
+		{
+			if (data.PaletteName == "Default")
+				data.ColorPalette = PaletteLoader.defaultPalette;
+			else
+			{
+				try
+				{
+					var brewer = typeof(BrewerPalettes);
+					var colorP = brewer.GetType().InvokeMember(data.PaletteName, BindingFlags.Public | BindingFlags.Static, null, null, new object[] { data.PaletteSize });
+					data.ColorPalette = colorP as Palette;
+				}
+				catch (Exception e)
+				{
+					SCANUtil.SCANlog("Error Loading Color Palett; Revert To Default: {0}", e);
+					data.ColorPalette = PaletteLoader.defaultPalette;
+				}
+			}
 		}
 
 		public class SCANsensor
@@ -467,7 +517,7 @@ namespace SCANsat
 				SCANdata data = SCANUtil.getData(v.mainBody);
 				vessel.vessel = v;
 			
-				if(!data.disabled) {
+				if(!data.Disabled) {
 					if(v.mainBody == FlightGlobals.currentMainBody || scan_background) {
 						if(isVesselKnown(v)) {
 							doScanPass(knownVessels[v.id], scan_UT, scan_UT, vessel.lastUT, vessel.latitude, vessel.longitude);
