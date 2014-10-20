@@ -154,7 +154,7 @@ namespace SCANsat.SCAN_UI
 			{
 				SCANdata.SCANanomaly nearest = null;
 				double nearest_dist = -1;
-				foreach (SCANdata.SCANanomaly a in data.getAnomalies())
+				foreach (SCANdata.SCANanomaly a in data.Anomalies)
 				{
 					if (!a.known)
 						continue;

@@ -584,7 +584,7 @@ namespace SCANsat.SCAN_UI
 			mapSizeScale = new Vector2d(360.0 * map.mapscale / map.mapwidth, 180.0 * map.mapscale / map.mapheight);
 			redrawDeviation = redrawEdge * 180 / (zoomLevel * zoomLevel + zoomModifier);
 			try {
-				localAnomalies = SCANUtil.getData(vessel.mainBody).getAnomalies();
+				localAnomalies = SCANUtil.getData(vessel.mainBody).Anomalies;
 			} catch {
 				Debug.Log("JSISCANsatRPM: Could not get a list of anomalies, what happened?");
 			}

@@ -134,7 +134,7 @@ namespace SCANsat.SCAN_UI
 		//Draw the map texture
 		private void mainMap(int id)
 		{
-			GUILayout.Label(data.map_small);
+			GUILayout.Label(data.Map);
 			mapRect = GUILayoutUtility.GetLastRect();
 		}
 

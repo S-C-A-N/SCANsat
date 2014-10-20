@@ -33,7 +33,7 @@ namespace SCANsat.SCAN_UI
 		private int[] twvals = { 1, 6, 9, 15 };
 		private bool warningBoxOne, warningBoxAll, paletteBox;
 		private Rect warningRect, paletteRect;
-		private Palettes currentPalettes;
+		private _Palettes currentPalettes;
 		private string paletteSize = "5";
 
 		internal static Rect defaultRect = new Rect(Screen.width - (Screen.width / 2) - 180, 100, 360, 300);
@@ -253,7 +253,7 @@ namespace SCANsat.SCAN_UI
 			{
 				if (count == 0) growS();
 				SCANdata data = SCANUtil.getData(body);
-				data.disabled = !GUILayout.Toggle(!data.disabled, body.bodyName + " (" + data.getCoveragePercentage(SCANdata.SCANtype.Nothing).ToString("N1") + "%)"); //No longer updates while the suttings menu is open
+				data.Disabled = !GUILayout.Toggle(!data.Disabled, body.bodyName + " (" + data.getCoveragePercentage(SCANdata.SCANtype.Nothing).ToString("N1") + "%)"); //No longer updates while the suttings menu is open
 				switch (count)
 				{
 					case 5: stopS(); count = 0; break;

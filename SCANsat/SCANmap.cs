@@ -537,7 +537,7 @@ namespace SCANsat
 							{
 								int ilon = SCANUtil.icLON(lon);
 								int ilat = SCANUtil.icLAT(lat);
-								float amount = data.kethaneValueMap[ilon, ilat]; //Fetch Kethane resource values from cached array
+								float amount = data.KethaneValueMap[ilon, ilat]; //Fetch Kethane resource values from cached array
 								if (amount <= 0) pix[i] = palette.lerp(baseColor, palette.grey, 0.4f);
 								else
 								{
@@ -657,7 +657,7 @@ namespace SCANsat
 							{
 								int ilon = SCANUtil.icLON(lon);
 								int ilat = SCANUtil.icLAT(lat);
-								float amount = data.kethaneValueMap[ilon, ilat];
+								float amount = data.KethaneValueMap[ilon, ilat];
 								if (amount <= 0) pix[i] = palette.lerp(baseColor, palette.grey, 0.4f);
 								else
 								{
@@ -780,7 +780,7 @@ namespace SCANsat
 							{
 								int ilon = SCANUtil.icLON(lon);
 								int ilat = SCANUtil.icLAT(lat);
-								float amount = data.kethaneValueMap[ilon, ilat];
+								float amount = data.KethaneValueMap[ilon, ilat];
 								if (amount <= 0) pix[i] = palette.lerp(baseColor, palette.grey, 0.4f);
 								else
 								{

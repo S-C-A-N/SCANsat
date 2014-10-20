@@ -154,7 +154,7 @@ namespace SCANsat.SCAN_UI
 					{
 						if (SCANUtil.isCovered(lon, lat, data, mapObj.resource.type))
 						{
-							double amount = data.kethaneValueMap[SCANUtil.icLON(lon), SCANUtil.icLAT(lat)];
+							double amount = data.KethaneValueMap[SCANUtil.icLON(lon), SCANUtil.icLAT(lat)];
 							if (amount < 0) amount = 0d;
 							info += palette.colored(mapObj.resource.fullColor, mapObj.resource.name + ": " + amount.ToString("N1"));
 						}
@@ -369,7 +369,7 @@ namespace SCANsat.SCAN_UI
 			//This section handles anomaly labels
 			if (SCANcontroller.controller.map_markers)
 			{
-				foreach (SCANdata.SCANanomaly anomaly in data.getAnomalies())
+				foreach (SCANdata.SCANanomaly anomaly in data.Anomalies)
 				{
 					drawAnomalyLabel(maprect, map, anomaly);
 				}

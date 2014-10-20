@@ -41,7 +41,7 @@ namespace SCANsat
 			int ilat = icLAT(lat);
 			if (badLonLat (ilon, ilat)) return false;
 			SCANdata data = getData(body);
-			return (data.coverage[ilon, ilat] & SCANtype) != 0;
+			return (data.Coverage[ilon, ilat] & SCANtype) != 0;
 		}
 
 		/// <summary>
@@ -56,7 +56,19 @@ namespace SCANsat
 		{
 			if (badLonLat(lon, lat)) return false;
 			SCANdata data = getData(body);
-			return (data.coverage[lon, lat] & SCANtype) != 0;
+			return (data.Coverage[lon, lat] & SCANtype) != 0;
+		}
+
+		/// <summary>
+		/// Public method to return the scanning coverage for a given sensor type on a give body
+		/// </summary>
+		/// <param name="SCANtype">Integer corresponding to the desired SCANtype</param>
+		/// <param name="Body">Desired Celestial Body</param>
+		/// <returns>Scanning percentage as a double from 0-100</returns>
+		public static double GetCoverage(int SCANtype, CelestialBody Body)
+		{
+			SCANdata data = getData(Body);
+			return data.getCoveragePercentage((SCANdata.SCANtype)SCANtype);
 		}
 
 		internal static bool isCovered(double lon, double lat, SCANdata data, SCANdata.SCANtype type)
@@ -64,26 +76,26 @@ namespace SCANsat
 			int ilon = icLON(lon);
 			int ilat = icLAT(lat);
 			if (badLonLat(ilon, ilat)) return false;
-			return (data.coverage[ilon, ilat] & (Int32)type) != 0;
+			return (data.Coverage[ilon, ilat] & (Int32)type) != 0;
 		}
 
 		internal static bool isCovered(int lon, int lat, SCANdata data, SCANdata.SCANtype type)
 		{
 			if (badLonLat(lon, lat)) return false;
-			return (data.coverage[lon, lat] & (Int32)type) != 0;
+			return (data.Coverage[lon, lat] & (Int32)type) != 0;
 		}
 
 		internal static bool isCoveredByAll (int lon, int lat, SCANdata data, SCANdata.SCANtype type)
 		{
 			if (badLonLat(lon,lat)) return false;
-			return (data.coverage[lon, lat] & (Int32)type) == (Int32)type;
+			return (data.Coverage[lon, lat] & (Int32)type) == (Int32)type;
 		}
 
 		internal static void registerPass ( double lon, double lat, SCANdata data, SCANdata.SCANtype type ) {
 			int ilon = SCANUtil.icLON(lon);
 			int ilat = SCANUtil.icLAT(lat);
 			if (SCANUtil.badLonLat(ilon, ilat)) return;
-			data.coverage [ilon, ilat] |= (Int32)type;
+			data.Coverage[ilon, ilat] |= (Int32)type;
 		}
 
 		internal static double getCoveragePercentage(CelestialBody body, SCANdata.SCANtype type )
@@ -414,7 +426,7 @@ namespace SCANsat
 		/* DATA: serialization and compression */
 		internal static string integerSerialize(SCANdata data)
 		{
-			byte[] bytes = ConvertToByte(data.coverage);
+			byte[] bytes = ConvertToByte(data.Coverage);
 			MemoryStream mem = new MemoryStream();
 			BinaryFormatter binf = new BinaryFormatter();
 			binf.Serialize(mem, bytes);
@@ -433,16 +445,16 @@ namespace SCANsat
 				if (b) {
 					byte[,] bRecover = new byte[360, 180];
 					bRecover = (byte[,])binf.Deserialize(mem);
-					data.coverage = RecoverToInt(bRecover);
+					data.Coverage = RecoverToInt(bRecover);
 				}
 				else {
 					byte[] bArray = (byte[])binf.Deserialize(mem);
-					data.coverage = ConvertToInt(bArray);
+					data.Coverage = ConvertToInt(bArray);
 				}
 			}
 			catch (Exception e) {
-				data.coverage = new Int32[360, 180];
-				data.heightmap = new float[360, 180];
+				data.Coverage = new Int32[360, 180];
+				data.HeightMap = new float[360, 180];
 				throw e;
 			}
 			data.resetImages();
