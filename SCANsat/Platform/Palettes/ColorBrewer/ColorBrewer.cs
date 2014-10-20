@@ -5,7 +5,7 @@ using UnityEngine;
 
 
 namespace SCANsat.Platform.Palettes.ColorBrewer {
-	public static class Palettes {
+	public static class BrewerPalettes {
 		static Func<byte,byte,byte,Color32> RGB = (r,g,b) => new Color32(r,g,b,255);
 
 		/*** Diverging ***/
