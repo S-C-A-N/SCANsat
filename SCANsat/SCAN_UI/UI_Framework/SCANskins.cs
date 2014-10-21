@@ -60,6 +60,7 @@ namespace SCANsat.SCAN_UI
 		internal static GUIStyle SCAN_buttonWarning;
 		//internal static GUIStyle SCAN_texButton;
 		internal static GUIStyle SCAN_legendTex;
+		internal static GUIStyle SCAN_textBox;
 
 		//Styles for map overlay icons
 		internal static GUIStyle SCAN_orbitalLabelOn;
@@ -226,6 +227,9 @@ namespace SCANsat.SCAN_UI
 			SCAN_toggle.onNormal.background.wrapMode = TextureWrapMode.Clamp;
 			SCAN_toggle.onHover.background.wrapMode = TextureWrapMode.Clamp;
 			SCAN_toggle.border = new RectOffset(15, 0, 1, 1);
+
+			SCAN_textBox = new GUIStyle(SCAN_SkinsLibrary.DefUnitySkin.textField);
+			SCAN_textBox.name = "SCAN_TextBox";
 
 			SCAN_legendTex = new GUIStyle(SCAN_label);
 			SCAN_legendTex.name = "SCAN_LegendTex";
