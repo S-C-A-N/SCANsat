@@ -110,17 +110,29 @@ namespace SCANsat.SCAN_UI
 
 		public static Color[] small_redline;
 
-		public static Color heightToColor(float val, int scheme, float min, float max, SCANdata data)
+		public static Color heightToColor(float val, int scheme, SCANdata data)
 		{
+			float range = data.MaxHeight - data.MinHeight;
 			if (scheme == 1 || SCANcontroller.controller.colours == 1)
 			{
-				return lerp(black, white, Mathf.Clamp((val - min) / (max - min), 0, 1));
+				return lerp(black, white, Mathf.Clamp((val - data.MinHeight) / range, 0, 1));
 			}
 			Color c = black;
-			val -= min;
-			val = (data.ColorPalette.colors.Length - 1) * Mathf.Clamp(val, 0, (max - min)) / (max - min);
-			if ((int)val > data.ColorPalette.colors.Length - 2) val = data.ColorPalette.colors.Length - 2;
-			c = lerp(data.ColorPalette.colors[(int)val], data.ColorPalette.colors[(int)val + 1], val - (int)val);
+			if (data.ClampHeight != null)
+			{
+				if (val <= (float)data.ClampHeight)
+				{
+					val = (Mathf.Clamp(val, data.MinHeight, (float)data.ClampHeight) - data.MinHeight / ((float)data.ClampHeight - data.MinHeight));
+					c = lerp(data.ColorPalette.colors[0], data.ColorPalette.colors[1], val);
+				}
+			}
+			else
+			{
+				val -= data.MinHeight;
+				val = (data.ColorPalette.colors.Length - 1) * Mathf.Clamp(val, 0, range) / range;
+				if ((int)val > data.ColorPalette.colors.Length - 2) val = data.ColorPalette.colors.Length - 2;
+				c = lerp(data.ColorPalette.colors[(int)val], data.ColorPalette.colors[(int)val + 1], val - (int)val);
+			}
 
 			//int sealevel = 0;
 			//if (val <= sealevel) {
