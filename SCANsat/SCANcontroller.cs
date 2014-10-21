@@ -64,8 +64,8 @@ namespace SCANsat
 		public bool map_asteroids = true;
 		[KSPField(isPersistant = true)]
 		public bool map_grid = true;
-        [KSPField(isPersistant = true)]
-        public bool map_ResourceOverlay = false; //Is the overlay activated for the selected resource
+		[KSPField(isPersistant = true)]
+		public bool map_ResourceOverlay = false; //Is the overlay activated for the selected resource
 		[KSPField(isPersistant = true)]
 		public int projection = 0;
 		[KSPField(isPersistant = true)]
@@ -84,14 +84,14 @@ namespace SCANsat
 		public bool scan_background = true;
 		[KSPField(isPersistant = true)]
 		public int timeWarpResolution = 20;
-        [KSPField(isPersistant = true)]
-        public bool globalOverlay = false; //Global resource overlay toggle
-        [KSPField(isPersistant = true)]
-        public int gridSelection = 0; //Which resource type is selected in the settings menu
-        [KSPField(isPersistant = true)]
-        public int resourceOverlayType = 0; //0 for ORS, 1 for Kethane
-        [KSPField(isPersistant = true)]
-        public bool dataRebuild = true;
+		[KSPField(isPersistant = true)]
+		public bool globalOverlay = false; //Global resource overlay toggle
+		[KSPField(isPersistant = true)]
+		public int gridSelection = 0; //Which resource type is selected in the settings menu
+		[KSPField(isPersistant = true)]
+		public int resourceOverlayType = 0; //0 for ORS, 1 for Kethane
+		[KSPField(isPersistant = true)]
+		public bool dataRebuild = true;
 		[KSPField(isPersistant = true)]
 		public bool mainMapVisible = false;
 		[KSPField(isPersistant = true)]
@@ -100,13 +100,12 @@ namespace SCANsat
 		public bool kscMapVisible = false;
 
 
-		public static List<SCANdata.SCANResource> ResourcesList = new List<SCANdata.SCANResource>(); //The list of all relevant resources
-		internal static Dictionary<string, SCANdata> body_data = new Dictionary<string, SCANdata>();
-		internal static Dictionary<string, SCANdata.SCANresourceType> ResourceTypes = new Dictionary<string, SCANdata.SCANresourceType>();
+		private List<SCANdata.SCANResource> resourcesList = new List<SCANdata.SCANResource>();
+		private Dictionary<string, SCANdata> body_data = new Dictionary<string, SCANdata>();
+		private Dictionary<string, SCANdata.SCANresourceType> resourceTypes = new Dictionary<string, SCANdata.SCANresourceType>();
+		private Dictionary<Guid, SCANvessel> knownVessels = new Dictionary<Guid, SCANvessel>();
 
-		public bool kethaneRebuild = false; //these three used by the kethane watcher
-        public bool kethaneReset = false;
-        public bool kethaneBusy = false;
+		private bool kethaneRebuild, kethaneReset, kethaneBusy = false;
 
 		internal SCAN_MBW mainMap;
 		internal SCAN_MBW settingsWindow;
@@ -115,11 +114,69 @@ namespace SCANsat
 		internal SCAN_MBW kscMap;
 		internal SCAN_MBW colorManager;
 
+		#region Public Accessors
+
+		public List<SCANdata.SCANResource> ResourcesList
+		{
+			get { return resourcesList; }
+		}
+
+		public Dictionary<string, SCANdata> Body_Data
+		{
+			get { return body_data; }
+			internal set { }
+		}
+
+		public Dictionary<string, SCANdata.SCANresourceType> ResourceTypes
+		{
+			get { return resourceTypes; }
+			internal set { }
+		}
+
+		public Dictionary<Guid, SCANvessel> Known_Vessels
+		{
+			get { return knownVessels; }
+		}
+
+		public bool KethaneBusy
+		{
+			get { return kethaneBusy; }
+			set { kethaneBusy = value; }
+		}
+
+		public bool KethaneReset
+		{
+			get { return kethaneReset; }
+			internal set { }
+		}
+
+		public bool KethaneRebuild
+		{
+			get { return kethaneRebuild; }
+			internal set { }
+		}
+
+		public int ActiveSensors
+		{
+			get { return activeSensors; }
+		}
+
+		public int ActiveVessels
+		{
+			get { return activeVessels; }
+		}
+
+		public int ActualPasses
+		{
+			get { return actualPasses; }
+		}
+		#endregion
+
 		public override void OnLoad(ConfigNode node)
 		{
-			body_data.Clear();
-			ResourcesList.Clear();
-			ResourceTypes.Clear();
+			//body_data.Clear();
+			//ResourcesList.Clear();
+			//ResourceTypes.Clear();
 			ConfigNode node_vessels = node.GetNode("Scanners");
 			if (node_vessels != null)
 			{
@@ -189,6 +246,10 @@ namespace SCANsat
 							data.PaletteDiscrete = pDis;
 						data.PaletteName = node_body.GetValue("PaletteName");
 						paletteLoad(data);
+						if (!body_data.ContainsKey(body_name))
+							body_data.Add(body_name, data);
+						else
+							body_data[body_name] = data;
 					}
 				}
 			}
@@ -213,7 +274,8 @@ namespace SCANsat
 			}
 		}
 
-		public override void OnSave(ConfigNode node) {
+		public override void OnSave(ConfigNode node)
+		{
 			if (HighLogic.LoadedScene != GameScenes.SPH && HighLogic.LoadedScene != GameScenes.EDITOR)
 			{
 				ConfigNode node_vessels = new ConfigNode("Scanners");
@@ -236,10 +298,10 @@ namespace SCANsat
 				}
 				node.AddNode(node_vessels);
 				ConfigNode node_progress = new ConfigNode("Progress");
-				foreach (string body_name in SCANcontroller.body_data.Keys)
+				foreach (string body_name in body_data.Keys)
 				{
 					ConfigNode node_body = new ConfigNode("Body");
-					SCANdata body_scan = SCANcontroller.body_data[body_name];
+					SCANdata body_scan = body_data[body_name];
 					node_body.AddValue("Name", body_name);
 					node_body.AddValue("Disabled", body_scan.Disabled);
 					node_body.AddValue("MinHeightRange", body_scan.MinHeight);
@@ -256,7 +318,7 @@ namespace SCANsat
 			}
 		}
 
-		public void Update()
+		private void Update()
 		{
 			if (scan_background)
 			{
@@ -330,16 +392,16 @@ namespace SCANsat
 			public Guid id;
 			public Vessel vessel;
 			public Dictionary<SCANdata.SCANtype, SCANsensor> sensors = new Dictionary<SCANdata.SCANtype, SCANsensor>();
-            
+
 			public CelestialBody body;
 			public double latitude, longitude;
 			public int frame;
 			public double lastUT;
 		}
 
-		public void Resources(CelestialBody b) //Repopulates the master resources list with data from config nodes
+		internal void Resources(CelestialBody b) //Repopulates the master resources list with data from config nodes
 		{
-			ResourcesList.Clear();
+			resourcesList.Clear();
 			if (resourceOverlayType == 0 && SCANversions.ORSXFound)
 			{
 				foreach (ConfigNode node in GameDatabase.Instance.GetConfigNodes("ORSX_PLANETARY_RESOURCE"))
@@ -368,7 +430,7 @@ namespace SCANsat
 							}
 						}
 						if (!resourceAdded)
-							ResourcesList.Add(resource);
+							resourcesList.Add(resource);
 					}
 				}
 			}
@@ -402,27 +464,27 @@ namespace SCANsat
 								}
 							}
 						}
-						ResourcesList.Add(new SCANdata.SCANResource(name, "", full, empty, true, 1d, 1d, 1d, max, type));
+						resourcesList.Add(new SCANdata.SCANResource(name, "", full, empty, true, 1d, 1d, 1d, max, type));
 					}
 				}
 			}
-			if (ResourcesList.Count == 0)
+			if (resourcesList.Count == 0)
 				globalOverlay = false;
-			if (gridSelection > ResourcesList.Count - 1)
+			if (gridSelection > resourcesList.Count - 1)
 				gridSelection = 0;
 		}
 
-		internal Dictionary<Guid, SCANvessel> knownVessels = new Dictionary<Guid, SCANvessel>();
-
-		public void registerSensor(Vessel v, SCANdata.SCANtype sensors, double fov, double min_alt, double max_alt, double best_alt) {
+		internal void registerSensor(Vessel v, SCANdata.SCANtype sensors, double fov, double min_alt, double max_alt, double best_alt)
+		{
 			registerSensor(v.id, sensors, fov, min_alt, max_alt, best_alt);
 			knownVessels[v.id].vessel = v;
 			knownVessels[v.id].latitude = SCANUtil.fixLatShift(v.latitude);
 			knownVessels[v.id].longitude = SCANUtil.fixLonShift(v.longitude);
 		}
 
-		public void registerSensor(Guid id, SCANdata.SCANtype sensors, double fov, double min_alt, double max_alt, double best_alt) {
-			if(!knownVessels.ContainsKey(id)) knownVessels[id] = new SCANvessel();
+		private void registerSensor(Guid id, SCANdata.SCANtype sensors, double fov, double min_alt, double max_alt, double best_alt)
+		{
+			if (!knownVessels.ContainsKey(id)) knownVessels[id] = new SCANvessel();
 			SCANvessel sv = knownVessels[id];
 			sv.id = id;
 			sv.vessel = FlightGlobals.Vessels.FirstOrDefault(a => a.id == id);
@@ -431,24 +493,27 @@ namespace SCANsat
 				knownVessels.Remove(id);
 				return;
 			}
-			foreach(SCANdata.SCANtype sensor in Enum.GetValues(typeof(SCANdata.SCANtype))) {
-				if(SCANUtil.countBits((int)sensor) != 1) continue;
-				if((sensor & sensors) == SCANdata.SCANtype.Nothing) continue;
+			foreach (SCANdata.SCANtype sensor in Enum.GetValues(typeof(SCANdata.SCANtype)))
+			{
+				if (SCANUtil.countBits((int)sensor) != 1) continue;
+				if ((sensor & sensors) == SCANdata.SCANtype.Nothing) continue;
 				double this_fov = fov, this_min_alt = min_alt, this_max_alt = max_alt, this_best_alt = best_alt;
-				if(this_max_alt <= 0) {
+				if (this_max_alt <= 0)
+				{
 					this_min_alt = 5000;
 					this_max_alt = 500000;
 					this_best_alt = 200000;
 					this_fov = 5;
-					if((sensor & SCANdata.SCANtype.AltimetryHiRes) != SCANdata.SCANtype.Nothing) this_fov = 3;
-					if((sensor & SCANdata.SCANtype.AnomalyDetail) != SCANdata.SCANtype.Nothing) {
+					if ((sensor & SCANdata.SCANtype.AltimetryHiRes) != SCANdata.SCANtype.Nothing) this_fov = 3;
+					if ((sensor & SCANdata.SCANtype.AnomalyDetail) != SCANdata.SCANtype.Nothing)
+					{
 						this_min_alt = 0;
 						this_max_alt = 2000;
 						this_best_alt = 0;
 						this_fov = 1;
 					}
 				}
-				if(!sv.sensors.ContainsKey(sensor)) sv.sensors[sensor] = new SCANsensor();
+				if (!sv.sensors.ContainsKey(sensor)) sv.sensors[sensor] = new SCANsensor();
 				SCANsensor s = sv.sensors[sensor];
 				s.sensor = sensor;
 				s.fov = this_fov;
@@ -458,57 +523,65 @@ namespace SCANsat
 			}
 		}
 
-		public void unregisterSensor(Vessel v, SCANdata.SCANtype sensors) {
-			if(!knownVessels.ContainsKey(v.id)) return;
+		internal void unregisterSensor(Vessel v, SCANdata.SCANtype sensors)
+		{
+			if (!knownVessels.ContainsKey(v.id)) return;
 			SCANvessel sv = knownVessels[v.id];
 			sv.id = v.id;
 			sv.vessel = v;
-			foreach(SCANdata.SCANtype sensor in Enum.GetValues(typeof(SCANdata.SCANtype))) {
-				if((sensors & sensor) == SCANdata.SCANtype.Nothing) continue;
-				if(!sv.sensors.ContainsKey(sensor)) continue;
+			foreach (SCANdata.SCANtype sensor in Enum.GetValues(typeof(SCANdata.SCANtype)))
+			{
+				if ((sensors & sensor) == SCANdata.SCANtype.Nothing) continue;
+				if (!sv.sensors.ContainsKey(sensor)) continue;
 				sv.sensors.Remove(sensor);
 			}
 		}
 
-		public bool isVesselKnown(Guid id, SCANdata.SCANtype sensor) {
-			if(!knownVessels.ContainsKey(id)) return false;
+		internal bool isVesselKnown(Guid id, SCANdata.SCANtype sensor)
+		{
+			if (!knownVessels.ContainsKey(id)) return false;
 			SCANdata.SCANtype all = SCANdata.SCANtype.Nothing;
-			foreach(SCANdata.SCANtype s in knownVessels[id].sensors.Keys) all |= s;
+			foreach (SCANdata.SCANtype s in knownVessels[id].sensors.Keys) all |= s;
 			return (all & sensor) != SCANdata.SCANtype.Nothing;
 		}
 
-		public bool isVesselKnown(Guid id) {
-			if(!knownVessels.ContainsKey(id)) return false;
+		private bool isVesselKnown(Guid id)
+		{
+			if (!knownVessels.ContainsKey(id)) return false;
 			return knownVessels[id].sensors.Count > 0;
 		}
 
-		public bool isVesselKnown(Vessel v) {
-			if(v.vesselType == VesselType.Debris) return false;
+		private bool isVesselKnown(Vessel v)
+		{
+			if (v.vesselType == VesselType.Debris) return false;
 			return isVesselKnown(v.id);
 		}
 
-		public SCANsensor getSensorStatus(Vessel v, SCANdata.SCANtype sensor) {
-			if(!knownVessels.ContainsKey(v.id)) return null;
-			if(!knownVessels[v.id].sensors.ContainsKey(sensor)) return null;
+		internal SCANsensor getSensorStatus(Vessel v, SCANdata.SCANtype sensor)
+		{
+			if (!knownVessels.ContainsKey(v.id)) return null;
+			if (!knownVessels[v.id].sensors.ContainsKey(sensor)) return null;
 			return knownVessels[v.id].sensors[sensor];
 		}
 
-		public SCANdata.SCANtype activeSensorsOnVessel(Guid id) {
-			if(!knownVessels.ContainsKey(id)) return SCANdata.SCANtype.Nothing;
+		internal SCANdata.SCANtype activeSensorsOnVessel(Guid id)
+		{
+			if (!knownVessels.ContainsKey(id)) return SCANdata.SCANtype.Nothing;
 			SCANdata.SCANtype sensors = SCANdata.SCANtype.Nothing;
-			foreach(SCANdata.SCANtype s in knownVessels[id].sensors.Keys) sensors |= s;
+			foreach (SCANdata.SCANtype s in knownVessels[id].sensors.Keys) sensors |= s;
 			return sensors;
 		}
 
 		private int i = 0;
-		protected static int last_scan_frame;
-		protected static float last_scan_time;
-		protected static double scan_UT;
-		public static int activeSensors, activeVessels;
+		private static int last_scan_frame;
+		private static float last_scan_time;
+		private static double scan_UT;
+		private int activeSensors, activeVessels;
 		private static int currentActiveSensor, currentActiveVessel;
-		public void scanFromAllVessels() {
-			if(Time.realtimeSinceStartup - last_scan_time < 1 && Time.realtimeSinceStartup > last_scan_time) return;
-			if(last_scan_frame == Time.frameCount) return;
+		internal void scanFromAllVessels()
+		{
+			if (Time.realtimeSinceStartup - last_scan_time < 1 && Time.realtimeSinceStartup > last_scan_time) return;
+			if (last_scan_frame == Time.frameCount) return;
 			last_scan_frame = Time.frameCount;
 			last_scan_time = Time.realtimeSinceStartup;
 			scan_UT = Planetarium.GetUniversalTime();
@@ -516,19 +589,23 @@ namespace SCANsat
 			currentActiveVessel = 0;
 			actualPasses = 0;
 			maxRes = 0;
-            SCANdata bdata = SCANUtil.getData (FlightGlobals.Bodies[i]); //Update coverage for planets one at a time, rather than all together
-            bdata.updateCoverage();
-            i++;
-            if (i >= FlightGlobals.Bodies.Count) i = 0;
-			foreach(Vessel v in FlightGlobals.Vessels) {
-				if(!knownVessels.ContainsKey(v.id)) continue;
+			var bdata = body_data.ElementAt(i);     //SCANUtil.getData(FlightGlobals.Bodies[i]); //Update coverage for planets one at a time, rather than all together
+			bdata.Value.updateCoverage();
+			i++;
+			if (i >= FlightGlobals.Bodies.Count) i = 0;
+			foreach (Vessel v in FlightGlobals.Vessels)
+			{
+				if (!knownVessels.ContainsKey(v.id)) continue;
 				SCANvessel vessel = knownVessels[v.id];
 				SCANdata data = SCANUtil.getData(v.mainBody);
 				vessel.vessel = v;
-			
-				if(!data.Disabled) {
-					if(v.mainBody == FlightGlobals.currentMainBody || scan_background) {
-						if(isVesselKnown(v)) {
+
+				if (!data.Disabled)
+				{
+					if (v.mainBody == FlightGlobals.currentMainBody || scan_background)
+					{
+						if (isVesselKnown(v))
+						{
 							doScanPass(knownVessels[v.id], scan_UT, scan_UT, vessel.lastUT, vessel.latitude, vessel.longitude);
 							++currentActiveVessel;
 							currentActiveSensor += knownVessels[v.id].sensors.Count;
@@ -546,9 +623,10 @@ namespace SCANsat
 			activeSensors = currentActiveSensor;
 		}
 
-		public int actualPasses, maxRes;
-		protected static Queue<double> scanQueue;
-		protected void doScanPass(SCANvessel vessel, double UT, double startUT, double lastUT, double llat, double llon) {
+		private int actualPasses, maxRes;
+		private static Queue<double> scanQueue;
+		private void doScanPass(SCANvessel vessel, double UT, double startUT, double lastUT, double llat, double llon)
+		{
 			Vessel v = vessel.vessel;
 			SCANdata data = SCANUtil.getData(v.mainBody);
 			double soi_radius = v.mainBody.sphereOfInfluence - v.mainBody.Radius;
@@ -557,73 +635,81 @@ namespace SCANsat
 			Orbit o = v.orbit;
 			bool uncovered;
 
-			if(scanQueue == null) scanQueue = new Queue<double>();
-			if(scanQueue.Count != 0) scanQueue.Clear();
+			if (scanQueue == null) scanQueue = new Queue<double>();
+			if (scanQueue.Count != 0) scanQueue.Clear();
 
 		loop: // don't look at me like that, I just unrolled the recursion
-			if(res > 0) {
-				if(double.IsNaN(UT)) goto dequeue;
-				if(o.ObT <= 0) goto dequeue;
-				if(double.IsNaN(o.getObtAtUT(UT))) goto dequeue;
+			if (res > 0)
+			{
+				if (double.IsNaN(UT)) goto dequeue;
+				if (o.ObT <= 0) goto dequeue;
+				if (double.IsNaN(o.getObtAtUT(UT))) goto dequeue;
 				Vector3d pos = o.getPositionAtUT(UT);
 				double rotation = 0;
-				if(v.mainBody.rotates) {
+				if (v.mainBody.rotates)
+				{
 					rotation = (360 * ((UT - scan_UT) / v.mainBody.rotationPeriod)) % 360;
 				}
 				alt = v.mainBody.GetAltitude(pos);
 				lat = SCANUtil.fixLatShift(v.mainBody.GetLatitude(pos));
 				lon = SCANUtil.fixLonShift(v.mainBody.GetLongitude(pos) - rotation);
-				if(alt < 0) alt = 0;
-				if(res > maxRes) maxRes = (int)res;
-			} else {
+				if (alt < 0) alt = 0;
+				if (res > maxRes) maxRes = (int)res;
+			}
+			else
+			{
 				alt = v.heightFromTerrain;
-				if(alt < 0) alt = v.altitude;
+				if (alt < 0) alt = v.altitude;
 			}
 
-			if(Math.Abs(lat - llat) < 1 && Math.Abs(lon - llon) < 1 && res > 0) goto dequeue;
+			if (Math.Abs(lat - llat) < 1 && Math.Abs(lon - llon) < 1 && res > 0) goto dequeue;
 			actualPasses++;
 
 			uncovered = res <= 0;
-			foreach(SCANsensor sensor in knownVessels[v.id].sensors.Values) {
-				if(res <= 0) {
-					if(data.getCoverage(sensor.sensor) > 0) uncovered = false;
+			foreach (SCANsensor sensor in knownVessels[v.id].sensors.Values)
+			{
+				if (res <= 0)
+				{
+					if (data.getCoverage(sensor.sensor) > 0) uncovered = false;
 				}
 
 				sensor.inRange = false;
 				sensor.bestRange = false;
-				if(alt < sensor.min_alt) continue;
-				if(alt > Math.Min(sensor.max_alt, soi_radius)) continue;
+				if (alt < sensor.min_alt) continue;
+				if (alt > Math.Min(sensor.max_alt, soi_radius)) continue;
 				sensor.inRange = true;
 
 				double fov = sensor.fov;
 				double ba = Math.Min(sensor.best_alt, soi_radius);
-				if(alt < ba) fov = (alt / ba) * fov;
+				if (alt < ba) fov = (alt / ba) * fov;
 				else sensor.bestRange = true;
 
-				double surfscale = 600000d/v.mainBody.Radius;
-				if(surfscale < 1) surfscale = 1;
+				double surfscale = 600000d / v.mainBody.Radius;
+				if (surfscale < 1) surfscale = 1;
 				surfscale = Math.Sqrt(surfscale);
 				fov *= surfscale;
-				if(fov > 20) fov = 20;
+				if (fov > 20) fov = 20;
 
 				int f = (int)Math.Truncate(fov);
 				int f1 = f + (int)Math.Round(fov - f);
-				
+
 				double clampLat;
 				double clampLon;
-				for(int x=-f; x<=f1; ++x) {
+				for (int x = -f; x <= f1; ++x)
+				{
 					clampLon = lon + x;	// longitude does not need clamping
 					/*if (clampLon < 0  ) clampLon = 0; */
 					/*if (clampLon > 360) clampLon = 360; */
-					for(int y=-f; y<=f1; ++y) {
+					for (int y = -f; y <= f1; ++y)
+					{
 						clampLat = lat + y;
 						if (clampLat > 90) clampLat = 90;
 						if (clampLat < -90) clampLat = -90;
-                        SCANUtil.registerPass(clampLon, clampLat, data, sensor.sensor);
-                    }
+						SCANUtil.registerPass(clampLon, clampLat, data, sensor.sensor);
+					}
 				}
 			}
-			if(uncovered) return;
+			if (uncovered) return;
 			/* 
 			if(v.mainBody == FlightGlobals.currentMainBody) {
 				if(res > 0) data.map_small.SetPixel((int)Math.Round(lon) + 180, (int)Math.Round(lat) + 90, palette.magenta);
@@ -631,12 +717,13 @@ namespace SCANsat
 			}
 			*/
 
-			if(vessel.lastUT <= 0) return;
-			if(vessel.frame <= 0) return;
-			if(v.LandedOrSplashed) return;
-			if(res >= timeWarpResolution) goto dequeue;
+			if (vessel.lastUT <= 0) return;
+			if (vessel.frame <= 0) return;
+			if (v.LandedOrSplashed) return;
+			if (res >= timeWarpResolution) goto dequeue;
 
-			if(startUT > UT) {
+			if (startUT > UT)
+			{
 				scanQueue.Enqueue((startUT + UT) / 2);
 				scanQueue.Enqueue(startUT);
 				scanQueue.Enqueue(UT);
@@ -650,9 +737,9 @@ namespace SCANsat
 			llon = lon;
 			res = res + 1;
 			goto loop;
-		
+
 		dequeue:
-			if(scanQueue.Count <= 0) return;
+			if (scanQueue.Count <= 0) return;
 			UT = scanQueue.Dequeue();
 			startUT = scanQueue.Dequeue();
 			lastUT = scanQueue.Dequeue();
