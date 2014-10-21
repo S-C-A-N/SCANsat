@@ -30,7 +30,7 @@ namespace SCANsat.Platform.Palettes.ColorBrewer {
 			var @xerox = new[] {1, 1, 1, 0, 0, 0, 0, 0, 0};
 			var @panel = new[] {1, 1, 2, 0, 0, 0, 0, 0, 0};
 
-			return new Palette(c, @type, (Palette.Is) @blind[size-3], (Palette.Is) @print[size-3], (Palette.Is) @xerox[size-3], (Palette.Is) @panel[size-3]);
+			return new Palette(c, "Spectral", @type, (Palette.Is) @blind[size-3], (Palette.Is) @print[size-3], (Palette.Is) @xerox[size-3], (Palette.Is) @panel[size-3]);
 
 		}
 		public static Palette RdYlGn (int size) {
@@ -54,7 +54,7 @@ namespace SCANsat.Platform.Palettes.ColorBrewer {
 			var @xerox = new[] {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 			var @panel = new[] {1, 1, 1, 0, 0, 0, 0, 0, 0};
 
-			return new Palette(c, @type, (Palette.Is) @blind[size-3], (Palette.Is) @print[size-3], (Palette.Is) @xerox[size-3], (Palette.Is) @panel[size-3]);
+			return new Palette(c, "RdYlGn", @type, (Palette.Is) @blind[size-3], (Palette.Is) @print[size-3], (Palette.Is) @xerox[size-3], (Palette.Is) @panel[size-3]);
 
 		}
 		public static Palette RdBu (int size) {
@@ -78,7 +78,7 @@ namespace SCANsat.Platform.Palettes.ColorBrewer {
 			var @xerox = new[] {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 			var @panel = new[] {1, 1, 1, 0, 0, 0, 0, 0, 0};
 
-			return new Palette(c, @type, (Palette.Is) @blind[size-3], (Palette.Is) @print[size-3], (Palette.Is) @xerox[size-3], (Palette.Is) @panel[size-3]);
+			return new Palette(c, "RdBu", @type, (Palette.Is) @blind[size-3], (Palette.Is) @print[size-3], (Palette.Is) @xerox[size-3], (Palette.Is) @panel[size-3]);
 
 		}
 		public static Palette PiYG (int size) {
@@ -102,7 +102,7 @@ namespace SCANsat.Platform.Palettes.ColorBrewer {
 			var @xerox = new[] {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 			var @panel = new[] {1, 1, 2, 0, 0, 0, 0, 0, 0};
 
-			return new Palette(c, @type, (Palette.Is) @blind[size-3], (Palette.Is) @print[size-3], (Palette.Is) @xerox[size-3], (Palette.Is) @panel[size-3]);
+			return new Palette(c, "PiYG", @type, (Palette.Is) @blind[size-3], (Palette.Is) @print[size-3], (Palette.Is) @xerox[size-3], (Palette.Is) @panel[size-3]);
 
 		}
 		public static Palette PRGn (int size) {
@@ -126,7 +126,7 @@ namespace SCANsat.Platform.Palettes.ColorBrewer {
 			var @xerox = new[] {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 			var @panel = new[] {1, 1, 2, 2, 0, 0, 0, 0, 0};
 
-			return new Palette(c, @type, (Palette.Is) @blind[size-3], (Palette.Is) @print[size-3], (Palette.Is) @xerox[size-3], (Palette.Is) @panel[size-3]);
+			return new Palette(c, "PRGn", @type, (Palette.Is) @blind[size-3], (Palette.Is) @print[size-3], (Palette.Is) @xerox[size-3], (Palette.Is) @panel[size-3]);
 
 		}
 		public static Palette RdYlBu (int size) {
@@ -150,7 +150,7 @@ namespace SCANsat.Platform.Palettes.ColorBrewer {
 			var @xerox = new[] {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 			var @panel = new[] {1, 1, 1, 2, 0, 0, 0, 0, 0};
 
-			return new Palette(c, @type, (Palette.Is) @blind[size-3], (Palette.Is) @print[size-3], (Palette.Is) @xerox[size-3], (Palette.Is) @panel[size-3]);
+			return new Palette(c, "RdYlBu", @type, (Palette.Is) @blind[size-3], (Palette.Is) @print[size-3], (Palette.Is) @xerox[size-3], (Palette.Is) @panel[size-3]);
 
 		}
 		public static Palette BrBG (int size) {
@@ -174,7 +174,7 @@ namespace SCANsat.Platform.Palettes.ColorBrewer {
 			var @xerox = new[] {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 			var @panel = new[] {1, 1, 1, 1, 0, 0, 0, 0, 0};
 
-			return new Palette(c, @type, (Palette.Is) @blind[size-3], (Palette.Is) @print[size-3], (Palette.Is) @xerox[size-3], (Palette.Is) @panel[size-3]);
+			return new Palette(c, "BrBg", @type, (Palette.Is) @blind[size-3], (Palette.Is) @print[size-3], (Palette.Is) @xerox[size-3], (Palette.Is) @panel[size-3]);
 
 		}
 		public static Palette RdGy (int size) {
@@ -198,7 +198,7 @@ namespace SCANsat.Platform.Palettes.ColorBrewer {
 			var @xerox = new[] {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 			var @panel = new[] {1, 1, 2, 0, 0, 0, 0, 0, 0};
 
-			return new Palette(c, @type, (Palette.Is) @blind[size-3], (Palette.Is) @print[size-3], (Palette.Is) @xerox[size-3], (Palette.Is) @panel[size-3]);
+			return new Palette(c, "RdGy", @type, (Palette.Is) @blind[size-3], (Palette.Is) @print[size-3], (Palette.Is) @xerox[size-3], (Palette.Is) @panel[size-3]);
 
 		}
 		public static Palette PuOr (int size) {
@@ -222,7 +222,7 @@ namespace SCANsat.Platform.Palettes.ColorBrewer {
 			var @xerox = new[] {1, 1, 0, 0, 0, 0, 0, 0, 0};
 			var @panel = new[] {1, 1, 1, 1, 0, 0, 0, 0, 0};
 
-			return new Palette(c, @type, (Palette.Is) @blind[size-3], (Palette.Is) @print[size-3], (Palette.Is) @xerox[size-3], (Palette.Is) @panel[size-3]);
+			return new Palette(c, "PuOr", @type, (Palette.Is) @blind[size-3], (Palette.Is) @print[size-3], (Palette.Is) @xerox[size-3], (Palette.Is) @panel[size-3]);
 
 		}
 		/*** Qualitative ***/
@@ -244,7 +244,7 @@ namespace SCANsat.Platform.Palettes.ColorBrewer {
 			var @xerox = new[] {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 			var @panel = new[] {1, 1, 2, 2, 2, 2};
 
-			return new Palette(c, @type, (Palette.Is) @blind[size-3], (Palette.Is) @print[size-3], (Palette.Is) @xerox[size-3], (Palette.Is) @panel[size-3]);
+			return new Palette(c, "Set2", @type, (Palette.Is) @blind[size-3], (Palette.Is) @print[size-3], (Palette.Is) @xerox[size-3], (Palette.Is) @panel[size-3]);
 
 		}
 		public static Palette Accent (int size) {
@@ -265,7 +265,7 @@ namespace SCANsat.Platform.Palettes.ColorBrewer {
 			var @xerox = new[] {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 			var @panel = new[] {1, 1, 1, 2, 2, 2};
 
-			return new Palette(c, @type, (Palette.Is) @blind[size-3], (Palette.Is) @print[size-3], (Palette.Is) @xerox[size-3], (Palette.Is) @panel[size-3]);
+			return new Palette(c, "Accent", @type, (Palette.Is) @blind[size-3], (Palette.Is) @print[size-3], (Palette.Is) @xerox[size-3], (Palette.Is) @panel[size-3]);
 
 		}
 		public static Palette Set1 (int size) {
@@ -287,7 +287,7 @@ namespace SCANsat.Platform.Palettes.ColorBrewer {
 			var @xerox = new[] {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 			var @panel = new[] {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1};
 
-			return new Palette(c, @type, (Palette.Is) @blind[size-3], (Palette.Is) @print[size-3], (Palette.Is) @xerox[size-3], (Palette.Is) @panel[size-3]);
+			return new Palette(c, "Set1", @type, (Palette.Is) @blind[size-3], (Palette.Is) @print[size-3], (Palette.Is) @xerox[size-3], (Palette.Is) @panel[size-3]);
 
 		}
 		public static Palette Set3 (int size) {
@@ -312,7 +312,7 @@ namespace SCANsat.Platform.Palettes.ColorBrewer {
 			var @xerox = new[] {1, 2, 2, 2, 2, 2, 2, 0, 0, 0};
 			var @panel = new[] {1, 1, 1, 2, 2, 2, 0, 0, 0, 0};
 
-			return new Palette(c, @type, (Palette.Is) @blind[size-3], (Palette.Is) @print[size-3], (Palette.Is) @xerox[size-3], (Palette.Is) @panel[size-3]);
+			return new Palette(c, "Set3", @type, (Palette.Is) @blind[size-3], (Palette.Is) @print[size-3], (Palette.Is) @xerox[size-3], (Palette.Is) @panel[size-3]);
 
 		}
 		public static Palette Dark2 (int size) {
@@ -333,7 +333,7 @@ namespace SCANsat.Platform.Palettes.ColorBrewer {
 			var @xerox = new[] {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 			var @panel = new[] {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1};
 
-			return new Palette(c, @type, (Palette.Is) @blind[size-3], (Palette.Is) @print[size-3], (Palette.Is) @xerox[size-3], (Palette.Is) @panel[size-3]);
+			return new Palette(c, "Dark2", @type, (Palette.Is) @blind[size-3], (Palette.Is) @print[size-3], (Palette.Is) @xerox[size-3], (Palette.Is) @panel[size-3]);
 
 		}
 		public static Palette Paired (int size) {
@@ -358,7 +358,7 @@ namespace SCANsat.Platform.Palettes.ColorBrewer {
 			var @xerox = new[] {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 			var @panel = new[] {1, 1, 1, 1, 1, 1, 1, 1, 2, 2};
 
-			return new Palette(c, @type, (Palette.Is) @blind[size-3], (Palette.Is) @print[size-3], (Palette.Is) @xerox[size-3], (Palette.Is) @panel[size-3]);
+			return new Palette(c, "Paired", @type, (Palette.Is) @blind[size-3], (Palette.Is) @print[size-3], (Palette.Is) @xerox[size-3], (Palette.Is) @panel[size-3]);
 
 		}
 		public static Palette Pastel2 (int size) {
@@ -379,7 +379,7 @@ namespace SCANsat.Platform.Palettes.ColorBrewer {
 			var @xerox = new[] {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 			var @panel = new[] {2, 2, 0, 0, 0, 0};
 
-			return new Palette(c, @type, (Palette.Is) @blind[size-3], (Palette.Is) @print[size-3], (Palette.Is) @xerox[size-3], (Palette.Is) @panel[size-3]);
+			return new Palette(c, "Pastel2", @type, (Palette.Is) @blind[size-3], (Palette.Is) @print[size-3], (Palette.Is) @xerox[size-3], (Palette.Is) @panel[size-3]);
 
 		}
 		public static Palette Pastel1 (int size) {
@@ -401,7 +401,7 @@ namespace SCANsat.Platform.Palettes.ColorBrewer {
 			var @xerox = new[] {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 			var @panel = new[] {2, 2, 2, 2, 0, 0, 0};
 
-			return new Palette(c, @type, (Palette.Is) @blind[size-3], (Palette.Is) @print[size-3], (Palette.Is) @xerox[size-3], (Palette.Is) @panel[size-3]);
+			return new Palette(c, "Pastel1", @type, (Palette.Is) @blind[size-3], (Palette.Is) @print[size-3], (Palette.Is) @xerox[size-3], (Palette.Is) @panel[size-3]);
 
 		}
 		/*** Sequential ***/
@@ -424,7 +424,7 @@ namespace SCANsat.Platform.Palettes.ColorBrewer {
 			var @xerox = new[] {1, 1, 2, 0, 0, 0, 0};
 			var @panel = new[] {1, 1, 1, 0, 0, 0, 0};
 
-			return new Palette(c, @type, (Palette.Is) @blind[size-3], (Palette.Is) @print[size-3], (Palette.Is) @xerox[size-3], (Palette.Is) @panel[size-3]);
+			return new Palette(c, "OrRd", @type, (Palette.Is) @blind[size-3], (Palette.Is) @print[size-3], (Palette.Is) @xerox[size-3], (Palette.Is) @panel[size-3]);
 
 		}
 		public static Palette PuBu (int size) {
@@ -446,7 +446,7 @@ namespace SCANsat.Platform.Palettes.ColorBrewer {
 			var @xerox = new[] {1, 2, 0, 0, 0, 0, 0};
 			var @panel = new[] {1, 1, 2, 0, 0, 0, 0};
 
-			return new Palette(c, @type, (Palette.Is) @blind[size-3], (Palette.Is) @print[size-3], (Palette.Is) @xerox[size-3], (Palette.Is) @panel[size-3]);
+			return new Palette(c, "PuBu", @type, (Palette.Is) @blind[size-3], (Palette.Is) @print[size-3], (Palette.Is) @xerox[size-3], (Palette.Is) @panel[size-3]);
 
 		}
 		public static Palette BuPu (int size) {
@@ -468,7 +468,7 @@ namespace SCANsat.Platform.Palettes.ColorBrewer {
 			var @xerox = new[] {1, 2, 0, 0, 0, 0, 0};
 			var @panel = new[] {1, 1, 1, 0, 0, 0, 0};
 
-			return new Palette(c, @type, (Palette.Is) @blind[size-3], (Palette.Is) @print[size-3], (Palette.Is) @xerox[size-3], (Palette.Is) @panel[size-3]);
+			return new Palette(c, "BuPu", @type, (Palette.Is) @blind[size-3], (Palette.Is) @print[size-3], (Palette.Is) @xerox[size-3], (Palette.Is) @panel[size-3]);
 
 		}
 		public static Palette Oranges (int size) {
@@ -490,7 +490,7 @@ namespace SCANsat.Platform.Palettes.ColorBrewer {
 			var @xerox = new[] {1, 2, 2, 0, 0, 0, 0};
 			var @panel = new[] {1, 1, 1, 0, 0, 0, 0};
 
-			return new Palette(c, @type, (Palette.Is) @blind[size-3], (Palette.Is) @print[size-3], (Palette.Is) @xerox[size-3], (Palette.Is) @panel[size-3]);
+			return new Palette(c, "Oranges", @type, (Palette.Is) @blind[size-3], (Palette.Is) @print[size-3], (Palette.Is) @xerox[size-3], (Palette.Is) @panel[size-3]);
 
 		}
 		public static Palette BuGn (int size) {
@@ -512,7 +512,7 @@ namespace SCANsat.Platform.Palettes.ColorBrewer {
 			var @xerox = new[] {1, 2, 0, 0, 0, 0, 0};
 			var @panel = new[] {1, 2, 0, 0, 0, 0, 0};
 
-			return new Palette(c, @type, (Palette.Is) @blind[size-3], (Palette.Is) @print[size-3], (Palette.Is) @xerox[size-3], (Palette.Is) @panel[size-3]);
+			return new Palette(c, "BuGn", @type, (Palette.Is) @blind[size-3], (Palette.Is) @print[size-3], (Palette.Is) @xerox[size-3], (Palette.Is) @panel[size-3]);
 
 		}
 		public static Palette YlOrBr (int size) {
@@ -534,7 +534,7 @@ namespace SCANsat.Platform.Palettes.ColorBrewer {
 			var @xerox = new[] {1, 2, 2, 0, 0, 0, 0};
 			var @panel = new[] {1, 2, 0, 0, 0, 0, 0};
 
-			return new Palette(c, @type, (Palette.Is) @blind[size-3], (Palette.Is) @print[size-3], (Palette.Is) @xerox[size-3], (Palette.Is) @panel[size-3]);
+			return new Palette(c, "YlOrBr", @type, (Palette.Is) @blind[size-3], (Palette.Is) @print[size-3], (Palette.Is) @xerox[size-3], (Palette.Is) @panel[size-3]);
 
 		}
 		public static Palette YlGn (int size) {
@@ -556,7 +556,7 @@ namespace SCANsat.Platform.Palettes.ColorBrewer {
 			var @xerox = new[] {1, 2, 0, 0, 0, 0, 0};
 			var @panel = new[] {1, 1, 1, 0, 0, 0, 0};
 
-			return new Palette(c, @type, (Palette.Is) @blind[size-3], (Palette.Is) @print[size-3], (Palette.Is) @xerox[size-3], (Palette.Is) @panel[size-3]);
+			return new Palette(c, "YlGn", @type, (Palette.Is) @blind[size-3], (Palette.Is) @print[size-3], (Palette.Is) @xerox[size-3], (Palette.Is) @panel[size-3]);
 
 		}
 		public static Palette Reds (int size) {
@@ -578,7 +578,7 @@ namespace SCANsat.Platform.Palettes.ColorBrewer {
 			var @xerox = new[] {1, 2, 0, 0, 0, 0, 0};
 			var @panel = new[] {1, 2, 0, 0, 0, 0, 0};
 
-			return new Palette(c, @type, (Palette.Is) @blind[size-3], (Palette.Is) @print[size-3], (Palette.Is) @xerox[size-3], (Palette.Is) @panel[size-3]);
+			return new Palette(c, "Reds", @type, (Palette.Is) @blind[size-3], (Palette.Is) @print[size-3], (Palette.Is) @xerox[size-3], (Palette.Is) @panel[size-3]);
 
 		}
 		public static Palette RdPu (int size) {
@@ -600,7 +600,7 @@ namespace SCANsat.Platform.Palettes.ColorBrewer {
 			var @xerox = new[] {1, 2, 0, 0, 0, 0, 0};
 			var @panel = new[] {1, 1, 1, 0, 0, 0, 0};
 
-			return new Palette(c, @type, (Palette.Is) @blind[size-3], (Palette.Is) @print[size-3], (Palette.Is) @xerox[size-3], (Palette.Is) @panel[size-3]);
+			return new Palette(c, "RdPu", @type, (Palette.Is) @blind[size-3], (Palette.Is) @print[size-3], (Palette.Is) @xerox[size-3], (Palette.Is) @panel[size-3]);
 
 		}
 		public static Palette Greens (int size) {
@@ -622,7 +622,7 @@ namespace SCANsat.Platform.Palettes.ColorBrewer {
 			var @xerox = new[] {1, 2, 0, 0, 0, 0, 0};
 			var @panel = new[] {1, 2, 0, 0, 0, 0, 0};
 
-			return new Palette(c, @type, (Palette.Is) @blind[size-3], (Palette.Is) @print[size-3], (Palette.Is) @xerox[size-3], (Palette.Is) @panel[size-3]);
+			return new Palette(c, "Greens", @type, (Palette.Is) @blind[size-3], (Palette.Is) @print[size-3], (Palette.Is) @xerox[size-3], (Palette.Is) @panel[size-3]);
 
 		}
 		public static Palette YlGnBu (int size) {
@@ -644,7 +644,7 @@ namespace SCANsat.Platform.Palettes.ColorBrewer {
 			var @xerox = new[] {1, 2, 0, 0, 0, 0, 0};
 			var @panel = new[] {1, 1, 2, 0, 0, 0, 0};
 
-			return new Palette(c, @type, (Palette.Is) @blind[size-3], (Palette.Is) @print[size-3], (Palette.Is) @xerox[size-3], (Palette.Is) @panel[size-3]);
+			return new Palette(c, "YlGnBu", @type, (Palette.Is) @blind[size-3], (Palette.Is) @print[size-3], (Palette.Is) @xerox[size-3], (Palette.Is) @panel[size-3]);
 
 		}
 		public static Palette Purples (int size) {
@@ -666,7 +666,7 @@ namespace SCANsat.Platform.Palettes.ColorBrewer {
 			var @xerox = new[] {1, 2, 0, 0, 0, 0, 0};
 			var @panel = new[] {1, 0, 0, 0, 0, 0, 0};
 
-			return new Palette(c, @type, (Palette.Is) @blind[size-3], (Palette.Is) @print[size-3], (Palette.Is) @xerox[size-3], (Palette.Is) @panel[size-3]);
+			return new Palette(c, "Purples", @type, (Palette.Is) @blind[size-3], (Palette.Is) @print[size-3], (Palette.Is) @xerox[size-3], (Palette.Is) @panel[size-3]);
 
 		}
 		public static Palette GnBu (int size) {
@@ -688,7 +688,7 @@ namespace SCANsat.Platform.Palettes.ColorBrewer {
 			var @xerox = new[] {1, 2, 0, 0, 0, 0, 0};
 			var @panel = new[] {1, 1, 2, 0, 0, 0, 0};
 
-			return new Palette(c, @type, (Palette.Is) @blind[size-3], (Palette.Is) @print[size-3], (Palette.Is) @xerox[size-3], (Palette.Is) @panel[size-3]);
+			return new Palette(c, "GnBu", @type, (Palette.Is) @blind[size-3], (Palette.Is) @print[size-3], (Palette.Is) @xerox[size-3], (Palette.Is) @panel[size-3]);
 
 		}
 		public static Palette Greys (int size) {
@@ -710,7 +710,7 @@ namespace SCANsat.Platform.Palettes.ColorBrewer {
 			var @xerox = new[] {1, 0, 0, 0, 0, 0, 0};
 			var @panel = new[] {1, 2, 0, 0, 0, 0, 0};
 
-			return new Palette(c, @type, (Palette.Is) @blind[size-3], (Palette.Is) @print[size-3], (Palette.Is) @xerox[size-3], (Palette.Is) @panel[size-3]);
+			return new Palette(c, "Greys", @type, (Palette.Is) @blind[size-3], (Palette.Is) @print[size-3], (Palette.Is) @xerox[size-3], (Palette.Is) @panel[size-3]);
 
 		}
 		public static Palette YlOrRd (int size) {
@@ -732,7 +732,7 @@ namespace SCANsat.Platform.Palettes.ColorBrewer {
 			var @xerox = new[] {1, 2, 2, 0, 0, 0, 0};
 			var @panel = new[] {1, 2, 2, 0, 0, 0, 0};
 
-			return new Palette(c, @type, (Palette.Is) @blind[size-3], (Palette.Is) @print[size-3], (Palette.Is) @xerox[size-3], (Palette.Is) @panel[size-3]);
+			return new Palette(c, "YlOrRd", @type, (Palette.Is) @blind[size-3], (Palette.Is) @print[size-3], (Palette.Is) @xerox[size-3], (Palette.Is) @panel[size-3]);
 
 		}
 		public static Palette PuRd (int size) {
@@ -754,7 +754,7 @@ namespace SCANsat.Platform.Palettes.ColorBrewer {
 			var @xerox = new[] {1, 2, 0, 0, 0, 0, 0};
 			var @panel = new[] {1, 1, 1, 0, 0, 0, 0};
 
-			return new Palette(c, @type, (Palette.Is) @blind[size-3], (Palette.Is) @print[size-3], (Palette.Is) @xerox[size-3], (Palette.Is) @panel[size-3]);
+			return new Palette(c, "PuRd", @type, (Palette.Is) @blind[size-3], (Palette.Is) @print[size-3], (Palette.Is) @xerox[size-3], (Palette.Is) @panel[size-3]);
 
 		}
 		public static Palette Blues (int size) {
@@ -776,7 +776,7 @@ namespace SCANsat.Platform.Palettes.ColorBrewer {
 			var @xerox = new[] {1, 0, 0, 0, 0, 0, 0};
 			var @panel = new[] {1, 2, 0, 0, 0, 0, 0};
 
-			return new Palette(c, @type, (Palette.Is) @blind[size-3], (Palette.Is) @print[size-3], (Palette.Is) @xerox[size-3], (Palette.Is) @panel[size-3]);
+			return new Palette(c, "Blues", @type, (Palette.Is) @blind[size-3], (Palette.Is) @print[size-3], (Palette.Is) @xerox[size-3], (Palette.Is) @panel[size-3]);
 
 		}
 		public static Palette PuBuGn (int size) {
@@ -798,7 +798,7 @@ namespace SCANsat.Platform.Palettes.ColorBrewer {
 			var @xerox = new[] {1, 2, 0, 0, 0, 0, 0};
 			var @panel = new[] {1, 1, 2, 0, 0, 0, 0};
 
-			return new Palette(c, @type, (Palette.Is) @blind[size-3], (Palette.Is) @print[size-3], (Palette.Is) @xerox[size-3], (Palette.Is) @panel[size-3]);
+			return new Palette(c, "PuBuGn", @type, (Palette.Is) @blind[size-3], (Palette.Is) @print[size-3], (Palette.Is) @xerox[size-3], (Palette.Is) @panel[size-3]);
 		}
 
 
