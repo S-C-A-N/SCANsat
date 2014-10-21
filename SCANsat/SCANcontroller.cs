@@ -288,20 +288,29 @@ namespace SCANsat
 		//Method to handle loading of the saved color palette
 		private void paletteLoad(SCANdata data)
 		{
-			if (data.PaletteName == "Default")
+			if (data.PaletteName == "Default" || data.PaletteName == "")
+			{
 				data.ColorPalette = PaletteLoader.defaultPalette;
+				data.PaletteName = "Default";
+				data.PaletteSize = 7;
+			}
 			else
 			{
 				try
 				{
+					//Load the ColorBrewer method by name through reflection
 					var brewer = typeof(BrewerPalettes);
-					var colorP = brewer.GetType().InvokeMember(data.PaletteName, BindingFlags.Public | BindingFlags.Static, null, null, new object[] { data.PaletteSize });
-					data.ColorPalette = colorP as Palette;
+					var paletteMethod = brewer.GetMethod(data.PaletteName);
+					var colorP = paletteMethod.Invoke(null, new object[] { data.PaletteSize });
+					data.ColorPalette = (Palette)colorP;
+					SCANUtil.SCANlog("Successfully Loaded Palette Info");
 				}
 				catch (Exception e)
 				{
-					SCANUtil.SCANlog("Error Loading Color Palett; Revert To Default: {0}", e);
+					SCANUtil.SCANlog("Error Loading Color Palette; Revert To Default: {0}", e);
 					data.ColorPalette = PaletteLoader.defaultPalette;
+					data.PaletteName = "Default";
+					data.PaletteSize = 7;
 				}
 			}
 		}
