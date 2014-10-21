@@ -11,6 +11,7 @@ namespace SCANsat.Platform.Palettes
 	{
 		public string name;
 		public Kind kind;
+		public int size;
 
 		public Swatches Swatches { get; private set; }
 
@@ -72,6 +73,7 @@ namespace SCANsat.Platform.Palettes
 			this.print = printSafe;
 			this.xerox = xeroxSafe;
 			this.panel = panelSafe;
+			this.size = cs.Length;
 		}
 		public Palette(Color32[] cs, string name, Kind k, Is blindSafe, Is printSafe, Is xeroxSafe, Is panelSafe) {
 			this.colors = cs;
@@ -81,6 +83,7 @@ namespace SCANsat.Platform.Palettes
 			this.print = printSafe;
 			this.xerox = xeroxSafe;
 			this.panel = panelSafe;
+			this.size = cs.Length;
 		}
 	}
 
