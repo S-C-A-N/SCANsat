@@ -22,30 +22,31 @@ namespace SCANsat
 	public class SCANdata
 	{
 		/* MAP: state */
-		public Int32[,] coverage = new Int32[360, 180];
+		private Int32[,] coverage = new Int32[360, 180];
 		private float[,] heightmap = new float[360, 180];
-		public float[,] kethaneValueMap = new float[360, 180]; //Store kethane cell data in here
+		private float[,] kethaneValueMap = new float[360, 180]; //Store kethane cell data in here
 		private CelestialBody body;
 		private Texture2D map_small = new Texture2D(360, 180, TextureFormat.RGB24, false);
 
 		/* MAP: options */
-		private float minHeight, maxHeight, clampHeight;
+		private float minHeight, maxHeight;
+		private float? clampHeight;
 		private string paletteName = "Default";
 		private int paletteSize = 7;
 		private bool paletteReverse, paletteDiscrete, disabled;
 		private Palette colorPalette;
 
 		/* MAP: default values */
-		private static float[,] bodyHeightRange = new float[17, 3]
+		private static float?[,] bodyHeightRange = new float?[17, 3]
 		{
-			{ 0, 1000, 0 }, { -1500, 7000, 0 }, { -500, 7500, 0 }, { -500, 6000, 0 },
-			{ 0, 7000, 0 }, { -2000, 8000, 0 }, { 0, 8500, 0 }, { 0, 13000, 0 }, { 0, 1000, 0 },
-			{ -3000, 6500, 0 }, { -500, 8000, 0 }, { 2000, 22000, 0 }, { -500, 11500, 0 },
-			{ 1000, 6500, 0 }, { 500, 6000, 0 }, { 0, 6000, 0 }, { -500, 4000, 0 }
+			{ 0, 1000, null }, { -1500, 7000, 0 }, { -500, 7500, null }, { -500, 6000, null },
+			{ 0, 7000, null }, { -2000, 8000, 0 }, { 0, 8500, null }, { 0, 13000, null }, { 0, 1000, null },
+			{ -3000, 6500, 0 }, { -500, 8000, null }, { 2000, 22000, null }, { -500, 11500, null },
+			{ 1000, 6500, null }, { 500, 6000, null }, { 0, 6000, null }, { -500, 4000, null }
 		};
 		private const float defaultMinHeight = -1000f;
 		private const float defaultMaxHeight = 8000f;
-		private const float defaultClampHeight = 0f;
+		private float? defaultClampHeight = null;
 
 		/* MAP: constructor */
 		internal SCANdata(CelestialBody b)
@@ -53,15 +54,18 @@ namespace SCANsat
 			body = b;
 			if (b.flightGlobalsIndex <= 16)
 			{
-				minHeight = bodyHeightRange[b.flightGlobalsIndex, 0];
-				maxHeight = bodyHeightRange[b.flightGlobalsIndex, 1];
+				minHeight = (float)bodyHeightRange[b.flightGlobalsIndex, 0];
+				maxHeight = (float)bodyHeightRange[b.flightGlobalsIndex, 1];
 				clampHeight = bodyHeightRange[b.flightGlobalsIndex, 2];
 			}
 			else
 			{
 				minHeight = defaultMinHeight;
 				maxHeight = defaultMaxHeight;
-				clampHeight = defaultClampHeight;
+				if (b.ocean)
+					clampHeight = 0;
+				else
+					clampHeight = defaultClampHeight;
 			}
 		}
 
@@ -100,19 +104,31 @@ namespace SCANsat
 		public float MinHeight
 		{
 			get { return minHeight; }
-			internal set { minHeight = value; }
+			internal set
+			{
+				if (value < maxHeight)
+					minHeight = value;
+			}
 		}
 
 		public float MaxHeight
 		{
 			get { return maxHeight; }
-			internal set { maxHeight = value; }
+			internal set
+			{
+				if (value > minHeight)
+					maxHeight = value;
+			}
 		}
 
-		public float ClampHeight
+		public float? ClampHeight
 		{
 			get { return clampHeight; }
-			internal set { clampHeight = value; }
+			internal set
+			{
+				if (value > minHeight && value < maxHeight)
+					clampHeight = value;
+			}
 		}
 
 		public bool PaletteReverse
@@ -142,7 +158,11 @@ namespace SCANsat
 		public int PaletteSize
 		{
 			get { return paletteSize; }
-			internal set { paletteSize = value; }
+			internal set
+			{
+				if (value >= 3)
+					paletteSize = value;
+			}
 		}
 
 		public bool Disabled
@@ -409,9 +429,9 @@ namespace SCANsat
 				if (SCANUtil.isCovered(ilon, scanline, this, SCANtype.Altimetry))
 				{ //We check for coverage down here now, after elevation data is collected
 					if (SCANUtil.isCovered(ilon, scanline, this, SCANtype.AltimetryHiRes))
-						c = palette.heightToColor(val, scheme, minHeight, maxHeight, this);
+						c = palette.heightToColor(val, scheme, this);
 					else
-						c = palette.heightToColor(val, 1, minHeight, maxHeight, this);
+						c = palette.heightToColor(val, 1, this);
 				}
 				else
 				{
