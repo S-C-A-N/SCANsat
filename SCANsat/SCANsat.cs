@@ -29,6 +29,7 @@ namespace SCANsat
 		/* SAT: KSP entry points */
 		public override void OnStart(StartState state)
 		{
+			GameEvents.onVesselSOIChanged.Add(SOIChange);
 			if (state == StartState.Editor)
 			{
 				print("[SCANsat] start: in editor");
@@ -225,6 +226,18 @@ namespace SCANsat
 			return str;
 		}
 
+		private void OnDestroy()
+		{
+			GameEvents.onVesselSOIChanged.Remove(SOIChange);
+		}
+
+		private void SOIChange(GameEvents.HostedFromToAction<Vessel, CelestialBody> VC)
+		{
+			if (scanning)
+				if (!SCANcontroller.controller.Body_Data.ContainsKey(VC.to.name))
+					SCANcontroller.controller.Body_Data.Add(VC.to.name, new SCANdata(VC.to));
+		}
+
 		/* SAT: KSP fields */
 		[KSPField]
 		public int sensorType;
@@ -260,6 +273,8 @@ namespace SCANsat
 #if DEBUG
 			//SCANui.minimode = (SCANui.minimode > 0 ? 2 : -SCANui.minimode);
 #endif
+			if (!SCANcontroller.controller.Body_Data.ContainsKey(vessel.mainBody.name))
+				SCANcontroller.controller.Body_Data.Add(vessel.mainBody.name, new SCANdata(vessel.mainBody));
 			registerScanner();
 			animate(1, 0);
 		}
