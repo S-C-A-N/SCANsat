@@ -25,7 +25,7 @@ namespace SCANsat.SCAN_UI
 	{
 		private static SCANmap bigmap;
 		private static CelestialBody b;
-		private SCANdata data;
+		internal SCANdata data;
 		//private double startUT;
 		private bool drawGrid, spaceCenterLock, trackingStationLock;
 		private bool drop_down_open, projection_drop_down, mapType_drop_down, resources_drop_down, planetoid_drop_down;
@@ -177,6 +177,8 @@ namespace SCANsat.SCAN_UI
 			if (GUI.Button(r, SCANcontroller.controller.closeBox, SCANskins.SCAN_closeButton))
 			{
 				InputLockManager.RemoveControlLock(lockID);
+				spaceCenterLock = false;
+				trackingStationLock = false;
 				Visible = false;
 				SCANcontroller.controller.kscMapVisible = Visible;
 			}
@@ -389,7 +391,7 @@ namespace SCANsat.SCAN_UI
 			
 			SCANuiUtil.mouseOverInfo(mlon, mlat, bigmap, data, b, in_map);
 			if (bigmap.mapmode == 0 && SCANcontroller.controller.legend)
-				SCANuiUtil.drawLegend(data.MinHeight, data.MaxHeight);
+				SCANuiUtil.drawLegend(data.MinHeight, data.MaxHeight, data);
 			stopS();
 			stopE();
 		}

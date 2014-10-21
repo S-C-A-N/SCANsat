@@ -577,14 +577,14 @@ namespace SCANsat.SCAN_UI
 				stopE();
 				SCANuiUtil.mouseOverInfo(mlon, mlat, bigmap, data, v.mainBody, in_map);
 				if (bigmap.mapmode == 0 && SCANcontroller.controller.legend)
-					SCANuiUtil.drawLegend(data.MinHeight, data.MaxHeight);
+					SCANuiUtil.drawLegend(data.MinHeight, data.MaxHeight, data);
 			}
 			else
 			{
 				growS();
 				SCANuiUtil.mouseOverInfo(mlon, mlat, bigmap, data, v.mainBody, in_map);
 				if (bigmap.mapmode == 0 && SCANcontroller.controller.legend)
-					SCANuiUtil.drawLegend(data.MinHeight, data.MaxHeight);
+					SCANuiUtil.drawLegend(data.MinHeight, data.MaxHeight, data);
 				stopS();
 				stopE();
 			}

@@ -110,7 +110,7 @@ namespace SCANsat.SCAN_UI
 
 		public static Color[] small_redline;
 
-		public static Color heightToColor(float val, int scheme, float min, float max)
+		public static Color heightToColor(float val, int scheme, float min, float max, SCANdata data)
 		{
 			if (scheme == 1 || SCANcontroller.controller.colours == 1)
 			{
@@ -118,9 +118,9 @@ namespace SCANsat.SCAN_UI
 			}
 			Color c = black;
 			val -= min;
-			val = (currentHeightPalette.colors.Length - 1) * Mathf.Clamp(val, 0, (max - min)) / (max - min);
-			if ((int)val > currentHeightPalette.colors.Length - 2) val = currentHeightPalette.colors.Length - 2;
-			c = lerp(currentHeightPalette.colors[(int)val], currentHeightPalette.colors[(int)val + 1], val - (int)val);
+			val = (data.ColorPalette.colors.Length - 1) * Mathf.Clamp(val, 0, (max - min)) / (max - min);
+			if ((int)val > data.ColorPalette.colors.Length - 2) val = data.ColorPalette.colors.Length - 2;
+			c = lerp(data.ColorPalette.colors[(int)val], data.ColorPalette.colors[(int)val + 1], val - (int)val);
 
 			//int sealevel = 0;
 			//if (val <= sealevel) {
