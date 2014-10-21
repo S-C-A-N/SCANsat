@@ -22,9 +22,9 @@ namespace SCANsat
 	public class SCANdata
 	{
 		/* MAP: state */
-		private Int32[,] coverage = new Int32[360, 180];
+		public Int32[,] coverage = new Int32[360, 180];
 		private float[,] heightmap = new float[360, 180];
-		private float[,] kethaneValueMap = new float[360, 180]; //Store kethane cell data in here
+		public float[,] kethaneValueMap = new float[360, 180]; //Store kethane cell data in here
 		private CelestialBody body;
 		private Texture2D map_small = new Texture2D(360, 180, TextureFormat.RGB24, false);
 
@@ -203,13 +203,13 @@ namespace SCANsat
 				type = resourceType.type;
 			}
 
-			internal string name;
+			public string name;
 			internal string body;
 			internal double ORS_Scalar, ORS_Multiplier, ORS_Threshold;
 			internal Color fullColor, emptyColor;
 			internal bool linear;
 			internal float maxValue;
-			internal SCANtype type;
+			public SCANtype type;
 			internal SCANresourceType resourceType;
 
 			public string Name
@@ -231,7 +231,7 @@ namespace SCANsat
 			internal SCANtype type;
 			internal Color colorFull, colorEmpty;
 
-			internal SCANresourceType(string s, int i, string Full, string Empty)
+			public SCANresourceType(string s, int i, string Full, string Empty)
 			{
 				name = s;
 				type = (SCANtype)i;
@@ -409,9 +409,9 @@ namespace SCANsat
 				if (SCANUtil.isCovered(ilon, scanline, this, SCANtype.Altimetry))
 				{ //We check for coverage down here now, after elevation data is collected
 					if (SCANUtil.isCovered(ilon, scanline, this, SCANtype.AltimetryHiRes))
-						c = palette.heightToColor(val, scheme, minHeight, maxHeight);
+						c = palette.heightToColor(val, scheme, minHeight, maxHeight, this);
 					else
-						c = palette.heightToColor(val, 1, minHeight, maxHeight);
+						c = palette.heightToColor(val, 1, minHeight, maxHeight, this);
 				}
 				else
 				{
