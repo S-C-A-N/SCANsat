@@ -143,7 +143,7 @@ namespace SCANsat.SCAN_UI
 		private void gui_settings_resources(int id)
 		{
 			GUILayout.Label("Resources Overlay", SCANskins.SCAN_headline);
-			if (SCANcontroller.ResourcesList.Count > 0)
+			if (SCANcontroller.controller.ResourcesList.Count > 0)
 			{
 				if (SCANcontroller.controller.globalOverlay != GUILayout.Toggle(SCANcontroller.controller.globalOverlay, "Activate Resource Overlay"))
 				{ //global toggle for resource overlay
@@ -157,7 +157,7 @@ namespace SCANsat.SCAN_UI
 			{
 				SCANcontroller.controller.resourceOverlayType = 1;
 				SCANcontroller.controller.Resources(FlightGlobals.currentMainBody);
-				if (SCANcontroller.ResourcesList.Count > 0)
+				if (SCANcontroller.controller.ResourcesList.Count > 0)
 					SCANcontroller.controller.globalOverlay = true;
 				//if (bigmap != null) bigmap.resetMap();
 			}
@@ -166,18 +166,18 @@ namespace SCANsat.SCAN_UI
 			{
 				SCANcontroller.controller.resourceOverlayType = 0;
 				SCANcontroller.controller.Resources(FlightGlobals.currentMainBody);
-				if (SCANcontroller.ResourcesList.Count > 0)
+				if (SCANcontroller.controller.ResourcesList.Count > 0)
 					SCANcontroller.controller.globalOverlay = true;
 				//if (bigmap != null) bigmap.resetMap();
 			}
 			stopE();
-			if (SCANcontroller.ResourcesList.Count == 0)
+			if (SCANcontroller.controller.ResourcesList.Count == 0)
 			{
 				fillS(5);
 				GUILayout.Label("No Resources Found", SCANskins.SCAN_headline);
 			}
 			growE();
-			SCANcontroller.controller.gridSelection = GUILayout.SelectionGrid(SCANcontroller.controller.gridSelection, SCANcontroller.ResourcesList.Select(a => a.name).ToArray(), 4); //select resource to display
+			SCANcontroller.controller.gridSelection = GUILayout.SelectionGrid(SCANcontroller.controller.gridSelection, SCANcontroller.controller.ResourcesList.Select(a => a.name).ToArray(), 4); //select resource to display
 			stopE();
 			fillS(16);
 		}
@@ -249,11 +249,19 @@ namespace SCANsat.SCAN_UI
 			// scanning for individual SoIs
 			growE();
 			int count = 0;
-			foreach (CelestialBody body in FlightGlobals.Bodies)
+			//foreach (CelestialBody body in FlightGlobals.Bodies)
+			//{
+			foreach (var data in SCANcontroller.controller.Body_Data)
 			{
 				if (count == 0) growS();
-				SCANdata data = SCANUtil.getData(body);
-				data.Disabled = !GUILayout.Toggle(!data.Disabled, body.bodyName + " (" + data.getCoveragePercentage(SCANdata.SCANtype.Nothing).ToString("N1") + "%)"); //No longer updates while the suttings menu is open
+				//SCANdata data = SCANUtil.getDataNullable(body);
+				//if (data != null)
+				//{
+					data.Value.Disabled = !GUILayout.Toggle(!data.Value.Disabled, string.Format("{0} ({1:N1}%)", data.Key, data.Value.getCoveragePercentage(SCANdata.SCANtype.Nothing)));
+					//)body.bodyName + " (" + data.getCoveragePercentage(SCANdata.SCANtype.Nothing).ToString("N1") + "%)"); //No longer updates while the suttings menu is open
+				//}
+				//else
+				//	GUILayout.Toggle(false, string.Format("{0} (0%)", body.bodyName));
 				switch (count)
 				{
 					case 5: stopS(); count = 0; break;
@@ -271,7 +279,7 @@ namespace SCANsat.SCAN_UI
 			if (SCANcontroller.controller.resourceOverlayType == 1 && SCANcontroller.controller.globalOverlay)
 			{ //Rebuild the Kethane database
 				if (GUILayout.Button("Rebuild Kethane Grid Database"))
-					SCANcontroller.controller.kethaneRebuild = !SCANcontroller.controller.kethaneRebuild;
+					SCANcontroller.controller.KethaneRebuild = !SCANcontroller.controller.KethaneRebuild;
 			}
 			fillS(16);
 		}
@@ -302,9 +310,9 @@ namespace SCANsat.SCAN_UI
 		//Display the total number of SCANsat sensors and scanning passes
 		private void gui_settings_numbers(int id)
 		{
-			string s = 	"Vessels: " + SCANcontroller.activeVessels.ToString() +
-						" Sensors: " + SCANcontroller.activeSensors +
-						" Passes: " + SCANcontroller.controller.actualPasses.ToString();
+			string s = 	"Vessels: " + SCANcontroller.controller.ActiveVessels.ToString() +
+						" Sensors: " + SCANcontroller.controller.ActiveSensors +
+						" Passes: " + SCANcontroller.controller.ActualPasses.ToString();
 			GUILayout.Label(s, SCANskins.SCAN_whiteReadoutLabel);
 			fillS(16);
 		}
@@ -411,7 +419,7 @@ namespace SCANsat.SCAN_UI
 				if (GUI.Button(r, "Confirm", SCANskins.SCAN_buttonWarning))
 				{
 					warningBoxAll = false;
-					foreach (SCANdata data in SCANcontroller.body_data.Values)
+					foreach (SCANdata data in SCANcontroller.controller.Body_Data.Values)
 					{
 						data.reset();
 					}

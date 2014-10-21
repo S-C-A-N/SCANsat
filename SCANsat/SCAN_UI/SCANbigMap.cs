@@ -390,11 +390,11 @@ namespace SCANsat.SCAN_UI
 
 			if (SCANcontroller.controller.globalOverlay) //Button to turn on/off resource overlay
 			{
-				if (!SCANcontroller.controller.kethaneBusy || SCANcontroller.controller.resourceOverlayType == 0)
+				if (!SCANcontroller.controller.KethaneBusy || SCANcontroller.controller.resourceOverlayType == 0)
 				{
 					if (SCANcontroller.controller.map_ResourceOverlay)
 					{
-						if (GUILayout.Button(SCANcontroller.ResourcesList[SCANcontroller.controller.gridSelection].name, SCANskins.SCAN_buttonActive))
+						if (GUILayout.Button(SCANcontroller.controller.ResourcesList[SCANcontroller.controller.gridSelection].name, SCANskins.SCAN_buttonActive))
 						{
 							SCANcontroller.controller.map_ResourceOverlay = !SCANcontroller.controller.map_ResourceOverlay;
 							bigmap.resetMap();
@@ -402,7 +402,7 @@ namespace SCANsat.SCAN_UI
 					}
 					else
 					{
-						if (GUILayout.Button(SCANcontroller.ResourcesList[SCANcontroller.controller.gridSelection].name))
+						if (GUILayout.Button(SCANcontroller.controller.ResourcesList[SCANcontroller.controller.gridSelection].name))
 						{
 							SCANcontroller.controller.map_ResourceOverlay = !SCANcontroller.controller.map_ResourceOverlay;
 							bigmap.resetMap();
@@ -599,7 +599,7 @@ namespace SCANsat.SCAN_UI
 				spotmap.setBody(v.mainBody);
 
 				if (SCANcontroller.controller.globalOverlay) //make sure resources show up in zoom map
-					spotmap.setResource(SCANcontroller.ResourcesList[SCANcontroller.controller.gridSelection].name);
+					spotmap.setResource(SCANcontroller.controller.ResourcesList[SCANcontroller.controller.gridSelection].name);
 
 				GUI.Box(pos_spotmap, spotmap.getPartialMap());
 				if (!notMappingToday)
@@ -708,7 +708,7 @@ namespace SCANsat.SCAN_UI
 			WindowCaption = string.Format("Map of {0}{1}", b.theName, titleText);
 
 			if (SCANcontroller.controller.globalOverlay) //Update selected resource
-				bigmap.setResource(SCANcontroller.ResourcesList[SCANcontroller.controller.gridSelection].name);
+				bigmap.setResource(SCANcontroller.controller.ResourcesList[SCANcontroller.controller.gridSelection].name);
 
 			SCANcontroller.controller.map_x = (int)WindowRect.x;
 			SCANcontroller.controller.map_y = (int)WindowRect.y;
