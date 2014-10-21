@@ -45,7 +45,7 @@ namespace SCANsat
 			for (int x = 0; x < 256; ++x)
 			{
 				float val = (x * (max - min)) / 256f + min;
-				pix[x] = palette.heightToColor(val, scheme, min, max, data);
+				pix[x] = palette.heightToColor(val, scheme, data);
 			}
 			legend.SetPixels(pix);
 			legend.Apply();
@@ -325,7 +325,7 @@ namespace SCANsat
 			body = b;
 			SCANcontroller.controller.Resources(b); //Repopulate resource list when changing SOI
 			if (SCANcontroller.controller.globalOverlay)
-				resource = SCANcontroller.ResourcesList[SCANcontroller.controller.gridSelection];
+				resource = SCANcontroller.controller.ResourcesList[SCANcontroller.controller.gridSelection];
 			resetMap();
 		}
 		public bool isMapComplete()
@@ -340,9 +340,9 @@ namespace SCANsat
 			mapsaved = false;
 			if (SCANcontroller.controller.globalOverlay)
 			{ //Make sure that a resource is initialized if necessary
-				if (resource == null) resource = SCANcontroller.ResourcesList[SCANcontroller.controller.gridSelection];
+				if (resource == null) resource = SCANcontroller.controller.ResourcesList[SCANcontroller.controller.gridSelection];
 				if (SCANcontroller.controller.resourceOverlayType == 1)
-					SCANcontroller.controller.kethaneReset = !SCANcontroller.controller.kethaneReset;
+					SCANcontroller.controller.KethaneReset = !SCANcontroller.controller.KethaneReset;
 			}
 		}
 		public void resetMap(int mode, int maptype)
@@ -353,10 +353,10 @@ namespace SCANsat
 		}
 		public void setResource(string s)
 		{ //Used when a different resource is selected
-			if (resource == null) resource = SCANcontroller.ResourcesList[SCANcontroller.controller.gridSelection];
+			if (resource == null) resource = SCANcontroller.controller.ResourcesList[SCANcontroller.controller.gridSelection];
 			else if (resource.name == s)
 				return;
-			resource = SCANcontroller.ResourcesList[SCANcontroller.controller.gridSelection];
+			resource = SCANcontroller.controller.ResourcesList[SCANcontroller.controller.gridSelection];
 			resetMap();
 		}
 
@@ -474,7 +474,7 @@ namespace SCANsat
 							{
 								// high resolution gets a coloured pixel for the actual position
 								val = (float)SCANUtil.getElevation(body, lon, lat);
-								baseColor = palette.heightToColor(val, scheme, data.MinHeight, data.MaxHeight, data); //use temporary color to store pixel value
+								baseColor = palette.heightToColor(val, scheme, data); //use temporary color to store pixel value
 								if (val == 0f) val = -0.001f;
 								heightMapArray(val, mapstep, i, mType);
 							}
@@ -482,7 +482,7 @@ namespace SCANsat
 							{
 								// basic altimetry gets forced greyscale with lower resolution
 								val = (float)SCANUtil.getElevation(body, ((int)(lon * 5)) / 5, ((int)(lat * 5)) / 5);
-								baseColor = palette.heightToColor(val, 1, data.MinHeight, data.MaxHeight, data);
+								baseColor = palette.heightToColor(val, 1, data);
 								if (val == 0f) val = -0.001f;
 								heightMapArray(val, mapstep, i, mType);
 							}
@@ -491,11 +491,11 @@ namespace SCANsat
 						{
 							if (SCANUtil.isCovered(lon, lat, data, SCANdata.SCANtype.AltimetryHiRes))
 							{
-								baseColor = palette.heightToColor(val, scheme, data.MinHeight, data.MaxHeight, data);
+								baseColor = palette.heightToColor(val, scheme, data);
 							}
 							else
 							{
-								baseColor = palette.heightToColor(val, 1, data.MinHeight, data.MaxHeight, data);
+								baseColor = palette.heightToColor(val, 1, data);
 							}
 						}
 						mapline[i] = val;
