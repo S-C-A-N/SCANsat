@@ -25,9 +25,11 @@ namespace SCANsat.SCAN_UI
 	class SCANcolorSelection: SCAN_MBW
 	{
 		private bool paletteBox, reversePalette, discretePalette, clampTerrain;
+		private bool spaceCenterLock, trackingStationLock;
 		private Rect paletteRect;
 		private _Palettes currentPalettes;
 		private string paletteSize = "5";
+		private int paletteSizeInt = 5;
 		private Texture2D currentLegend, previewLegend;
 		private string lowRange = "-500";
 		private string highRange = "8000";
@@ -35,7 +37,10 @@ namespace SCANsat.SCAN_UI
 		private int lowRangeInt = -500;
 		private int highRangeInt = 8000;
 		private int clampLevelInt = 0;
+		private const string lockID = "colorLockID";
 		internal static Rect defaultRect = new Rect(100, 400, 600, 300);
+
+		private SCANdata data;
 
 		protected override void Awake()
 		{
@@ -48,6 +53,8 @@ namespace SCANsat.SCAN_UI
 			ClampToScreenOffset = new RectOffset(-400, -400, -250, -250);
 
 			SCAN_SkinsLibrary.SetCurrent("SCAN_Unity");
+
+			InputLockManager.RemoveControlLock(lockID);
 		}
 
 		internal override void Start()
@@ -57,13 +64,49 @@ namespace SCANsat.SCAN_UI
 
 		internal override void OnDestroy()
 		{
-			
+			if (InputLockManager.lockStack.ContainsKey(lockID))
+				EditorLogic.fetch.Unlock(lockID);
 		}
 
 		protected override void DrawWindowPre(int id)
 		{
 			currentLegend = currentPalettes.paletteSwatch[0];
 			previewLegend = currentPalettes.paletteSwatch[1];
+			data = ((SCANkscMap)SCANcontroller.controller.kscMap).data;
+
+						//Lock space center click through
+			if (HighLogic.LoadedScene == GameScenes.SPACECENTER)
+			{
+				Vector2 mousePos = Input.mousePosition;
+				mousePos.y = Screen.height - mousePos.y;
+				if (WindowRect.Contains(mousePos) && !spaceCenterLock)
+				{
+					InputLockManager.SetControlLock(ControlTypes.CAMERACONTROLS | ControlTypes.KSC_FACILITIES | ControlTypes.KSC_UI, lockID);
+					spaceCenterLock = true;
+				}
+				else if (!WindowRect.Contains(mousePos) && spaceCenterLock)
+				{
+					InputLockManager.RemoveControlLock(lockID);
+					spaceCenterLock = false;
+				}
+			}
+
+			//Lock tracking scene click through
+			if (HighLogic.LoadedScene == GameScenes.TRACKSTATION)
+			{
+				Vector2 mousePos = Input.mousePosition;
+				mousePos.y = Screen.height - mousePos.y;
+				if (WindowRect.Contains(mousePos) && !trackingStationLock)
+				{
+					InputLockManager.SetControlLock(ControlTypes.CAMERACONTROLS | ControlTypes.TRACKINGSTATION_ALL, lockID);
+					trackingStationLock = true;
+				}
+				else if (!WindowRect.Contains(mousePos) && trackingStationLock)
+				{
+					InputLockManager.RemoveControlLock(lockID);
+					trackingStationLock = false;
+				}
+			}
 		}
 
 		protected override void DrawWindow(int id)
@@ -108,6 +151,9 @@ namespace SCANsat.SCAN_UI
 			Rect r = new Rect(WindowRect.width - 20, 0, 18, 18);
 			if (GUI.Button(r, SCANcontroller.controller.closeBox, SCANskins.SCAN_closeButton))
 			{
+				InputLockManager.RemoveControlLock(lockID);
+				spaceCenterLock = false;
+				trackingStationLock = false;
 				Visible = false;
 			}
 		}
@@ -152,6 +198,9 @@ namespace SCANsat.SCAN_UI
 							if (GUILayout.Button("", SCANskins.SCAN_texButton, GUILayout.Width(110), GUILayout.Height(25)))
 							{
 								SCANpalette.CurrentPalette = currentPalettes.availablePalettes[i];
+								data.ColorPalette = SCANpalette.CurrentPalette;
+								data.PaletteName = SCANpalette.CurrentPalette.name;
+								data.PaletteSize = SCANpalette.CurrentPalette.size;
 							}
 						}
 						Rect r = GUILayoutUtility.GetLastRect();
@@ -171,11 +220,11 @@ namespace SCANsat.SCAN_UI
 				GUILayout.Label("Terrain Height Range", SCANskins.SCAN_headlineSmall);
 				growE();
 					fillS();
-					lowRangeInt = drawInputBox(lowRange, SCANskins.SCAN_whiteReadoutLabel, 40, 40, "Min:", SCANskins.SCAN_whiteReadoutLabel);
+					lowRangeInt = drawInputBox(ref lowRange, SCANskins.SCAN_textBox, 40, 40, "Min:", SCANskins.SCAN_whiteReadoutLabel);
 					//GUILayout.Label("Min:", SCANskins.SCAN_whiteReadoutLabel, GUILayout.Width(40));
 					//lowRange = GUILayout.TextField(lowRange, 5, SCANskins.SCAN_whiteReadoutLabel, GUILayout.Width(40));
 					fillS(10);
-					highRangeInt = drawInputBox(highRange, SCANskins.SCAN_whiteReadoutLabel, 40, 40, "Max:", SCANskins.SCAN_whiteReadoutLabel);
+					highRangeInt = drawInputBox(ref highRange, SCANskins.SCAN_textBox, 40, 40, "Max:", SCANskins.SCAN_whiteReadoutLabel);
 					//GUILayout.Label("Max:", SCANskins.SCAN_whiteReadoutLabel, GUILayout.Width(40));
 					//highRange = GUILayout.TextField(highRange, 5, SCANskins.SCAN_whiteReadoutLabel, GUILayout.Width(40));
 					fillS();
@@ -186,13 +235,13 @@ namespace SCANsat.SCAN_UI
 					if (clampTerrain)
 					{
 						fillS(5);
-						clampLevelInt = drawInputBox(clampLevel, SCANskins.SCAN_whiteReadoutLabel, 40);
+						clampLevelInt = drawInputBox(ref clampLevel, SCANskins.SCAN_textBox, 40);
 						//clampLevel = GUILayout.TextField(clampLevel, 5, SCANskins.SCAN_whiteReadoutLabel, GUILayout.Width(40));
 					}
 					fillS();
 				stopE();
 				GUILayout.Label("Palette Size", SCANskins.SCAN_headlineSmall);
-
+				paletteSizeInt = drawInputBox(ref paletteSize, SCANskins.SCAN_textBox, 35, 40, "Size:", SCANskins.SCAN_whiteReadoutLabel);
 				growE();
 					reversePalette = GUILayout.Toggle(reversePalette, "Reverse Order");
 					fillS(10);
@@ -257,18 +306,17 @@ namespace SCANsat.SCAN_UI
 			}
 		}
 
-		private int drawInputBox(string oldVal, GUIStyle boxStyle, float boxWidth, float labelWidth = 0, string title = "", GUIStyle labelStyle = null)
+		private int drawInputBox(ref string oldVal, GUIStyle boxStyle, float boxWidth, float labelWidth = 0, string title = "", GUIStyle labelStyle = null)
 		{
-			int newInt = int.Parse(oldVal);
-			string newVal = oldVal;
+			int newInt = 0;
+			int.TryParse(oldVal, out newInt);
 			growE();
 				if (!string.IsNullOrEmpty(title))
 					GUILayout.Label(title, labelStyle, GUILayout.Width(labelWidth));
-				newVal = GUILayout.TextField(newVal, boxStyle, GUILayout.Width(boxWidth));
+				oldVal = GUILayout.TextField(oldVal, boxStyle, GUILayout.Width(boxWidth));
 			stopE();
 
-			int.TryParse(newVal, out newInt);
-
+			int.TryParse(oldVal, out newInt);
 			return newInt;
 
 		}
