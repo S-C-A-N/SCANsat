@@ -99,15 +99,25 @@ namespace SCANsat
 		[KSPField(isPersistant = true)]
 		public bool kscMapVisible = false;
 
+		/* Needs Fixing: Available resources for overlays; loaded from resource addon configs */
 		private List<SCANdata.SCANResource> resourcesList = new List<SCANdata.SCANResource>();
+
+		/* Primary SCANsat vessel dictionary; loaded every time */
 		private Dictionary<Guid, SCANvessel> knownVessels = new Dictionary<Guid, SCANvessel>();
 
+		/* Primary SCANdata dictionary; only loaded once unless reloading from an earlier save or a new game */
 		private static Dictionary<string, SCANdata> body_data = null;
+
+		/* Resource types loaded from configs; only needs to be loaded once */
 		private static Dictionary<string, SCANdata.SCANresourceType> resourceTypes = null;
 
-		private bool kethaneRebuild, kethaneReset, kethaneBusy = false;
-		private Game thisGame = null;
+		/* Game tracking; used for resetting SCANdata dictionary */
+		private static Game thisGame = null;
 
+		/* Kethane integration */
+		private bool kethaneRebuild, kethaneReset, kethaneBusy = false;
+
+		/* UI window objects */
 		internal SCAN_MBW mainMap;
 		internal SCAN_MBW settingsWindow;
 		internal SCAN_MBW instrumentsWindow;
@@ -148,13 +158,13 @@ namespace SCANsat
 		public bool KethaneReset
 		{
 			get { return kethaneReset; }
-			internal set { }
+			internal set { kethaneReset = value; }
 		}
 
 		public bool KethaneRebuild
 		{
 			get { return kethaneRebuild; }
-			internal set { }
+			internal set { kethaneRebuild = value; }
 		}
 
 		public int ActiveSensors
@@ -220,7 +230,6 @@ namespace SCANsat
 								if (dataRebuild)
 								{ //On the first load deserialize the "Map" value to both coverage arrays
 									SCANUtil.integerDeserialize(mapdata, true, data);
-									//data.deserialize(mapdata);
 								}
 								else
 								{
@@ -378,6 +387,8 @@ namespace SCANsat
 					var paletteMethod = brewer.GetMethod(data.PaletteName);
 					var colorP = paletteMethod.Invoke(null, new object[] { data.PaletteSize });
 					data.ColorPalette = (Palette)colorP;
+					if (data.PaletteReverse)
+						Array.Reverse(data.ColorPalette.colors);
 					SCANUtil.SCANlog("Successfully Loaded Palette Info");
 				}
 				catch (Exception e)
