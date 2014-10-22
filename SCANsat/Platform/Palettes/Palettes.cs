@@ -42,6 +42,7 @@ namespace SCANsat.Platform.Palettes
 					t.SetPixels(pix);
 					t.Apply();
 					paletteSwatch[i] = t;
+					availablePalettes[i].swatch = t;
 				}
 				return paletteSwatch;
 			}

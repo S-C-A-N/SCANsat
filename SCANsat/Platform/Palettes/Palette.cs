@@ -12,6 +12,7 @@ namespace SCANsat.Platform.Palettes
 		public string name;
 		public Kind kind;
 		public int size;
+		public Texture2D swatch;
 
 		public Swatches Swatches { get; private set; }
 
