@@ -52,6 +52,20 @@ namespace SCANsat
 			return legend;
 		}
 
+		public static Texture2D getLegend(float max, float min, float? clamp, Platform.Palettes.Palette p)
+		{
+			Texture2D t = new Texture2D(128, 1, TextureFormat.RGB24, false);
+			Color[] pix = t.GetPixels();
+			for (int x = 0; x < 128; x++ )
+			{
+				float val = (x * (max - min)) / 128f + min;
+				pix[x] = palette.heightToColor(val, 0, max, min, clamp, p);
+			}
+			t.SetPixels(pix);
+			t.Apply();
+			return t;
+		}
+
 		/* MAP: projections */
 		public enum MapProjection
 		{
