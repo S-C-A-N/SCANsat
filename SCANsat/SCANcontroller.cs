@@ -197,7 +197,7 @@ namespace SCANsat
 				}
 			}
 
-			if (body_data == null || thisGame != HighLogic.CurrentGame)
+			if (body_data == null || thisGame != HighLogic.CurrentGame || scan_UT > Planetarium.GetUniversalTime())
 			{
 				body_data = new Dictionary<string, SCANdata>();
 				ConfigNode node_progress = node.GetNode("Progress");
@@ -591,7 +591,7 @@ namespace SCANsat
 		private static double scan_UT;
 		private int activeSensors, activeVessels;
 		private static int currentActiveSensor, currentActiveVessel;
-		internal void scanFromAllVessels()
+		private void scanFromAllVessels()
 		{
 			if (Time.realtimeSinceStartup - last_scan_time < 1 && Time.realtimeSinceStartup > last_scan_time) return;
 			if (last_scan_frame == Time.frameCount) return;
