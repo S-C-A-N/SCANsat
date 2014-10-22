@@ -109,7 +109,7 @@ namespace SCANsat.SCAN_UI
 			growS();
 				gui_settings_xmarks(id); 				/* X marker selection */
 				gui_settings_resources(id);				/* resource details sub-window */
-				gui_settings_color_palette(id);			/* display color palettes */
+				//gui_settings_color_palette(id);			/* display color palettes */
 				gui_settings_toggle_body_scanning(id);	/* background and body scanning toggles */
 				gui_settings_rebuild_kethane(id);		/* rebuild Kethane database with SCANsat info */
 				gui_settings_timewarp(id);				/* time warp resolution settings */
@@ -227,11 +227,11 @@ namespace SCANsat.SCAN_UI
 
 		private void gui_settings_color_palette(int id)
 		{
-			if (GUILayout.Button("Open Color Options"))
-			{
-				SCANcontroller.controller.colorManager.Visible = !SCANcontroller.controller.colorManager.Visible;
-			}
-			fillS(16);
+			//if (GUILayout.Button("Open Color Options"))
+			//{
+			//	SCANcontroller.controller.colorManager.Visible = !SCANcontroller.controller.colorManager.Visible;
+			//}
+			//fillS(16);
 			//growE();
 			//if (GUILayout.Button("Palette Style:", SCANskins.SCAN_buttonFixed, GUILayout.MaxWidth(120)))
 			//{
