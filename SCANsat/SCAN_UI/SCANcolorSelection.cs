@@ -24,10 +24,11 @@ namespace SCANsat.SCAN_UI
 {
 	class SCANcolorSelection: SCAN_MBW
 	{
-		private bool paletteBox, reversePalette, discretePalette, clampTerrain;
-		private bool spaceCenterLock, trackingStationLock;
+		private bool paletteBox, reversePalette, discretePalette, clampTerrain, previewClamp, previewReverse, previewDiscrete;
+		private bool spaceCenterLock, trackingStationLock, dataClamp, dataReverse, dataDiscrete;
 		private Rect paletteRect;
 		private _Palettes currentPalettes;
+		private Palette dataPalette, previewPalette;
 		private string paletteSize = "5";
 		private int paletteSizeInt = 5;
 		private Texture2D currentLegend, previewLegend;
@@ -69,13 +70,18 @@ namespace SCANsat.SCAN_UI
 
 		protected override void DrawWindowPre(int id)
 		{
-			currentLegend = currentPalettes.paletteSwatch[0];
-			previewLegend = currentPalettes.paletteSwatch[1];
-			data = ((SCANkscMap)SCANcontroller.controller.kscMap).data;
-
-						//Lock space center click through
-			if (HighLogic.LoadedScene == GameScenes.SPACECENTER)
+			if (HighLogic.LoadedSceneIsFlight)
 			{
+				if (data == null)
+					data = SCANUtil.getData(FlightGlobals.currentMainBody);
+				else if (data.Body != FlightGlobals.currentMainBody)
+					data = SCANUtil.getData(FlightGlobals.currentMainBody);
+			}
+
+			//Lock space center click through - Sync SCANdata
+			else if (HighLogic.LoadedScene == GameScenes.SPACECENTER)
+			{
+				data = ((SCANkscMap)SCANcontroller.controller.kscMap).data;
 				Vector2 mousePos = Input.mousePosition;
 				mousePos.y = Screen.height - mousePos.y;
 				if (WindowRect.Contains(mousePos) && !spaceCenterLock)
@@ -90,9 +96,10 @@ namespace SCANsat.SCAN_UI
 				}
 			}
 
-			//Lock tracking scene click through
-			if (HighLogic.LoadedScene == GameScenes.TRACKSTATION)
+			//Lock tracking scene click through - Sync SCANdata
+			else if (HighLogic.LoadedScene == GameScenes.TRACKSTATION)
 			{
+				data = ((SCANkscMap)SCANcontroller.controller.kscMap).data;
 				Vector2 mousePos = Input.mousePosition;
 				mousePos.y = Screen.height - mousePos.y;
 				if (WindowRect.Contains(mousePos) && !trackingStationLock)
@@ -105,6 +112,28 @@ namespace SCANsat.SCAN_UI
 					InputLockManager.RemoveControlLock(lockID);
 					trackingStationLock = false;
 				}
+			}
+
+			//currentLegend = data.ColorPalette.swatch;
+			//previewLegend = palette.CurrentPalette.swatch;
+
+			if (data.ColorPalette != dataPalette || data.PaletteReverse != dataReverse || data.PaletteDiscrete != dataDiscrete || (data.ClampHeight != null) != dataClamp)
+			{
+				dataPalette = data.ColorPalette;
+				dataReverse = data.PaletteReverse;
+				dataDiscrete = data.PaletteDiscrete;
+				dataClamp = data.ClampHeight != null;
+				currentLegend = SCANmap.getLegend(data.MinHeight, data.MaxHeight, 0, data);
+			}
+			if (palette.CurrentPalette != previewPalette || previewClamp != clampTerrain || previewDiscrete != discretePalette || previewReverse != reversePalette)
+			{
+				previewPalette = palette.CurrentPalette;
+				previewClamp = clampTerrain;
+				previewDiscrete = discretePalette;
+				previewReverse = reversePalette;
+				if (reversePalette)
+					Array.Reverse(palette.CurrentPalette.colors);
+				previewLegend = SCANmap.getLegend(lowRangeInt, highRangeInt, clampLevelInt, palette.CurrentPalette);
 			}
 		}
 
@@ -197,9 +226,9 @@ namespace SCANsat.SCAN_UI
 							if (GUILayout.Button("", SCANskins.SCAN_texButton, GUILayout.Width(110), GUILayout.Height(25)))
 							{
 								SCANpalette.CurrentPalette = currentPalettes.availablePalettes[i];
-								data.ColorPalette = SCANpalette.CurrentPalette;
-								data.PaletteName = SCANpalette.CurrentPalette.name;
-								data.PaletteSize = SCANpalette.CurrentPalette.size;
+								//data.ColorPalette = SCANpalette.CurrentPalette;
+								//data.PaletteName = SCANpalette.CurrentPalette.name;
+								//data.PaletteSize = SCANpalette.CurrentPalette.size;
 							}
 						}
 						Rect r = GUILayoutUtility.GetLastRect();
@@ -220,12 +249,8 @@ namespace SCANsat.SCAN_UI
 				growE();
 					fillS();
 					lowRangeInt = drawInputBox(ref lowRange, SCANskins.SCAN_textBox, 40, 40, "Min:", SCANskins.SCAN_whiteReadoutLabel);
-					//GUILayout.Label("Min:", SCANskins.SCAN_whiteReadoutLabel, GUILayout.Width(40));
-					//lowRange = GUILayout.TextField(lowRange, 5, SCANskins.SCAN_whiteReadoutLabel, GUILayout.Width(40));
 					fillS(10);
 					highRangeInt = drawInputBox(ref highRange, SCANskins.SCAN_textBox, 40, 40, "Max:", SCANskins.SCAN_whiteReadoutLabel);
-					//GUILayout.Label("Max:", SCANskins.SCAN_whiteReadoutLabel, GUILayout.Width(40));
-					//highRange = GUILayout.TextField(highRange, 5, SCANskins.SCAN_whiteReadoutLabel, GUILayout.Width(40));
 					fillS();
 				stopE();
 				growE();
@@ -276,12 +301,33 @@ namespace SCANsat.SCAN_UI
 			fillS(16);
 			if (GUILayout.Button("Apply", GUILayout.Width(80)))
 			{
+				if (lowRangeInt < highRangeInt)
+				{
+					data.MinHeight = lowRangeInt;
+					data.MaxHeight = highRangeInt;
+				}
+				if (clampTerrain)
+				{
+					if (clampLevelInt > lowRangeInt && clampLevelInt < highRangeInt)
+						data.ClampHeight = clampLevelInt;
+				}
+				else
+					data.ClampHeight = null;
 
+				data.ColorPalette = SCANpalette.CurrentPalette;
+				data.PaletteName = SCANpalette.CurrentPalette.name;
+				data.PaletteSize = SCANpalette.CurrentPalette.size;
+				data.PaletteDiscrete = discretePalette;
+				data.PaletteReverse = reversePalette;
 			}
 			fillS(8);
 			if (GUILayout.Button("Cancel", GUILayout.Width(80)))
 			{
-
+				palette.CurrentPalette = data.ColorPalette;
+				InputLockManager.RemoveControlLock(lockID);
+				spaceCenterLock = false;
+				trackingStationLock = false;
+				Visible = false;
 			}
 			stopS();
 		}
