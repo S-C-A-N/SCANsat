@@ -348,7 +348,15 @@ namespace SCANsat.SCAN_UI
 		private void legendBar (int id)
 		{
 			growE();
-			fillS(110);
+			fillS(10);
+			growS();
+			fillS();
+			if (GUILayout.Button("Color Management", SCANskins.SCAN_buttonFixed, GUILayout.Width(90)))
+			{
+				SCANcontroller.controller.colorManager.Visible = true;
+			}
+			stopS();
+			fillS(10);
 			growS();
 			float mx = Event.current.mousePosition.x - maprect.x;
 			float my = Event.current.mousePosition.y - maprect.y;

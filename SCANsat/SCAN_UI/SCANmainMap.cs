@@ -128,6 +128,10 @@ namespace SCANsat.SCAN_UI
 			{
 				SCANcontroller.controller.settingsWindow.Visible = !SCANcontroller.controller.settingsWindow.Visible;
 			}
+			if (GUILayout.Button("Colors", SCANskins.SCAN_buttonFixed))
+			{
+				SCANcontroller.controller.colorManager.Visible = !SCANcontroller.controller.colorManager.Visible;
+			}
 			stopE();
 		}
 

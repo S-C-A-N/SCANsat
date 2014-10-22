@@ -210,7 +210,10 @@ namespace SCANsat.SCAN_UI
 				SCANcontroller.controller.bigMapVisible = Visible;
 			}
 
-			fillS();
+			if (GUILayout.Button("Colors", SCANskins.SCAN_buttonFixed))
+			{
+				SCANcontroller.controller.colorManager.Visible = !SCANcontroller.controller.colorManager.Visible;
+			}
 
 			if (GUILayout.Button("Export PNG", SCANskins.SCAN_buttonFixed))
 			{
