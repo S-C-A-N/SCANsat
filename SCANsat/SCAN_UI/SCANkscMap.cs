@@ -81,8 +81,7 @@ namespace SCANsat.SCAN_UI
 
 		internal override void OnDestroy()
 		{
-			if (InputLockManager.lockStack.ContainsKey(lockID))
-				EditorLogic.fetch.Unlock(lockID);
+			InputLockManager.RemoveControlLock(lockID);
 		}
 
 		protected override void DrawWindowPre(int id)
