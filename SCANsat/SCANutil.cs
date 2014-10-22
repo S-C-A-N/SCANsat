@@ -154,24 +154,20 @@ namespace SCANsat
 
 		public static SCANdata getData(CelestialBody body)
 		{
-			if (SCANcontroller.controller == null)
-				return new SCANdata(body);
-			if (!SCANcontroller.controller.Body_Data.ContainsKey(body.name))
+			if (!SCANcontroller.Body_Data.ContainsKey(body.name))
 			{
 				return new SCANdata(body);
 				//SCANcontroller.controller.Body_Data[body.name] = new SCANdata(body);
 			}
-			SCANdata data = SCANcontroller.controller.Body_Data[body.name];
+			SCANdata data = SCANcontroller.Body_Data[body.name];
 			return data;
 		}
 
 		internal static SCANdata getDataNullable(CelestialBody body)
 		{
-			if (SCANcontroller.controller == null)
+			if (!SCANcontroller.Body_Data.ContainsKey(body.name))
 				return null;
-			if (!SCANcontroller.controller.Body_Data.ContainsKey(body.name))
-				return null;
-			return SCANcontroller.controller.Body_Data[body.name];
+			return SCANcontroller.Body_Data[body.name];
 		}
 
 		internal static double getElevation(CelestialBody body, double lon, double lat)
@@ -328,6 +324,7 @@ namespace SCANsat
 
 		internal static void loadSCANtypes()
 		{
+			SCANcontroller.ResourceTypes = new Dictionary<string, SCANdata.SCANresourceType>();
 			foreach (ConfigNode node in GameDatabase.Instance.GetConfigNodes("SCANSAT_SENSOR"))
 			{
 				string name = "";
@@ -343,14 +340,14 @@ namespace SCANsat
 					colorFull = node.GetValue("ColorFull");
 				if (node.HasValue("ColorEmpty"))
 					colorEmpty = node.GetValue("ColorEmpty");
-				if (!SCANcontroller.controller.ResourceTypes.ContainsKey(name))
-					SCANcontroller.controller.ResourceTypes.Add(name, new SCANdata.SCANresourceType(name, i, colorFull, colorEmpty));
+				if (!SCANcontroller.ResourceTypes.ContainsKey(name))
+					SCANcontroller.ResourceTypes.Add(name, new SCANdata.SCANresourceType(name, i, colorFull, colorEmpty));
 			}
 		}
 
 		internal static SCANdata.SCANresourceType OverlayResourceType(string s)
 		{
-			var resourceType = SCANcontroller.controller.ResourceTypes.FirstOrDefault(r => r.Value.name == s).Value;
+			var resourceType = SCANcontroller.ResourceTypes.FirstOrDefault(r => r.Value.name == s).Value;
 			return resourceType;
 		}
 
