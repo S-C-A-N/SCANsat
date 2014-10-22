@@ -99,11 +99,11 @@ namespace SCANsat
 		[KSPField(isPersistant = true)]
 		public bool kscMapVisible = false;
 
-
 		private List<SCANdata.SCANResource> resourcesList = new List<SCANdata.SCANResource>();
-		private Dictionary<string, SCANdata> body_data = new Dictionary<string, SCANdata>();
-		private Dictionary<string, SCANdata.SCANresourceType> resourceTypes = new Dictionary<string, SCANdata.SCANresourceType>();
 		private Dictionary<Guid, SCANvessel> knownVessels = new Dictionary<Guid, SCANvessel>();
+
+		private static Dictionary<string, SCANdata> body_data = null;
+		private static Dictionary<string, SCANdata.SCANresourceType> resourceTypes = null;
 
 		private bool kethaneRebuild, kethaneReset, kethaneBusy = false;
 
@@ -121,16 +121,16 @@ namespace SCANsat
 			get { return resourcesList; }
 		}
 
-		public Dictionary<string, SCANdata> Body_Data
+		public static Dictionary<string, SCANdata> Body_Data
 		{
 			get { return body_data; }
-			internal set { }
+			internal set { body_data = value; }
 		}
 
-		public Dictionary<string, SCANdata.SCANresourceType> ResourceTypes
+		public static Dictionary<string, SCANdata.SCANresourceType> ResourceTypes
 		{
 			get { return resourceTypes; }
-			internal set { }
+			internal set { resourceTypes = value; }
 		}
 
 		public Dictionary<Guid, SCANvessel> Known_Vessels
@@ -196,67 +196,75 @@ namespace SCANsat
 				}
 			}
 
-			ConfigNode node_progress = node.GetNode("Progress");
-			if (node_progress != null)
+			if (body_data == null)
 			{
-				foreach (ConfigNode node_body in node_progress.GetNodes("Body"))
+				body_data = new Dictionary<string, SCANdata>();
+				ConfigNode node_progress = node.GetNode("Progress");
+				if (node_progress != null)
 				{
-					float min, max, clamp;
-					int pSize;
-					bool pRev, pDis, disabled;
-					string body_name = node_body.GetValue("Name");
-					print("SCANsat Controller: Loading map for " + body_name);
-					CelestialBody body = FlightGlobals.Bodies.FirstOrDefault(b => b.name == body_name);
-					if (body != null)
+					foreach (ConfigNode node_body in node_progress.GetNodes("Body"))
 					{
-						SCANdata data = SCANUtil.getData(body);
-						try
+						float min, max, clamp;
+						int pSize;
+						bool pRev, pDis, disabled;
+						string body_name = node_body.GetValue("Name");
+						print("SCANsat Controller: Loading map for " + body_name);
+						CelestialBody body = FlightGlobals.Bodies.FirstOrDefault(b => b.name == body_name);
+						if (body != null)
 						{
-							string mapdata = node_body.GetValue("Map");
-							if (dataRebuild)
-							{ //On the first load deserialize the "Map" value to both coverage arrays
-								SCANUtil.integerDeserialize(mapdata, true, data);
-								//data.deserialize(mapdata);
-							}
-							else
+							SCANdata data = SCANUtil.getData(body);
+							try
 							{
-								SCANUtil.integerDeserialize(mapdata, false, data);
+								string mapdata = node_body.GetValue("Map");
+								if (dataRebuild)
+								{ //On the first load deserialize the "Map" value to both coverage arrays
+									SCANUtil.integerDeserialize(mapdata, true, data);
+									//data.deserialize(mapdata);
+								}
+								else
+								{
+									SCANUtil.integerDeserialize(mapdata, false, data);
+								}
 							}
+							catch (Exception e)
+							{
+								print(e.ToString());
+								print(e.StackTrace);
+								// fail somewhat gracefully; don't make the save unloadable 
+							}
+							//Verify that saved data types can be converted, revert to default values otherwise
+							if (bool.TryParse(node_body.GetValue("Disabled"), out disabled))
+								data.Disabled = disabled;
+							if (float.TryParse(node_body.GetValue("MinHeightRange"), out min))
+								data.MinHeight = min;
+							if (float.TryParse(node_body.GetValue("MaxHeightRange"), out max))
+								data.MaxHeight = max;
+							if (node_body.HasValue("ClampHeight"))
+							{
+								if (float.TryParse(node_body.GetValue("ClampHeight"), out clamp))
+									data.ClampHeight = clamp;
+							}
+							if (int.TryParse(node_body.GetValue("PaletteSize"), out pSize))
+								data.PaletteSize = pSize;
+							if (bool.TryParse(node_body.GetValue("PaletteReverse"), out pRev))
+								data.PaletteReverse = pRev;
+							if (bool.TryParse(node_body.GetValue("PaletteDiscrete"), out pDis))
+								data.PaletteDiscrete = pDis;
+							data.PaletteName = node_body.GetValue("PaletteName");
+							paletteLoad(data);
+							if (!body_data.ContainsKey(body_name))
+								body_data.Add(body_name, data);
+							else
+								body_data[body_name] = data;
 						}
-						catch (Exception e)
-						{
-							print(e.ToString());
-							print(e.StackTrace);
-							// fail somewhat gracefully; don't make the save unloadable 
-						}
-						//Verify that saved data types can be converted, revert to default values otherwise
-						if (bool.TryParse(node_body.GetValue("Disabled"), out disabled))
-							data.Disabled = disabled;
-						if (float.TryParse(node_body.GetValue("MinHeightRange"), out min))
-							data.MinHeight = min;
-						if (float.TryParse(node_body.GetValue("MaxHeightRange"), out max))
-							data.MaxHeight = max;
-						if (float.TryParse(node_body.GetValue("ClampHeight"), out clamp))
-							data.ClampHeight = clamp;
-						if (int.TryParse(node_body.GetValue("PaletteSize"), out pSize))
-							data.PaletteSize = pSize;
-						if (bool.TryParse(node_body.GetValue("PaletteReverse"), out pRev))
-							data.PaletteReverse = pRev;
-						if (bool.TryParse(node_body.GetValue("PaletteDiscrete"), out pDis))
-							data.PaletteDiscrete = pDis;
-						data.PaletteName = node_body.GetValue("PaletteName");
-						paletteLoad(data);
-						if (!body_data.ContainsKey(body_name))
-							body_data.Add(body_name, data);
-						else
-							body_data[body_name] = data;
 					}
 				}
 			}
 			dataRebuild = false; //Used for the one-time update to the new integer array
+			if (resourceTypes == null)
+				SCANUtil.loadSCANtypes();
 			if (HighLogic.LoadedScene == GameScenes.FLIGHT)
 			{
-				SCANUtil.loadSCANtypes();
 				Resources(FlightGlobals.currentMainBody);
 				mainMap = gameObject.AddComponent<SCANmainMap>();
 				settingsWindow = gameObject.AddComponent<SCANsettingsUI>();
@@ -266,7 +274,6 @@ namespace SCANsat
 			}
 			else if (HighLogic.LoadedScene == GameScenes.SPACECENTER || HighLogic.LoadedScene == GameScenes.TRACKSTATION)
 			{
-				SCANUtil.loadSCANtypes();
 				Resources(Planetarium.fetch.Home);
 				kscMap = gameObject.AddComponent<SCANkscMap>();
 				settingsWindow = gameObject.AddComponent<SCANsettingsUI>();
@@ -297,24 +304,28 @@ namespace SCANsat
 					node_vessels.AddNode(node_vessel);
 				}
 				node.AddNode(node_vessels);
-				ConfigNode node_progress = new ConfigNode("Progress");
-				foreach (string body_name in body_data.Keys)
+				if (body_data != null)
 				{
-					ConfigNode node_body = new ConfigNode("Body");
-					SCANdata body_scan = body_data[body_name];
-					node_body.AddValue("Name", body_name);
-					node_body.AddValue("Disabled", body_scan.Disabled);
-					node_body.AddValue("MinHeightRange", body_scan.MinHeight);
-					node_body.AddValue("MaxHeightRange", body_scan.MaxHeight);
-					node_body.AddValue("ClampHeight", body_scan.ClampHeight);
-					node_body.AddValue("PaletteName", body_scan.PaletteName);
-					node_body.AddValue("PaletteSize", body_scan.PaletteSize);
-					node_body.AddValue("PaletteReverse", body_scan.PaletteReverse);
-					node_body.AddValue("PaletteDiscrete", body_scan.PaletteDiscrete);
-					node_body.AddValue("Map", SCANUtil.integerSerialize(body_scan));
-					node_progress.AddNode(node_body);
+					ConfigNode node_progress = new ConfigNode("Progress");
+					foreach (string body_name in body_data.Keys)
+					{
+						ConfigNode node_body = new ConfigNode("Body");
+						SCANdata body_scan = body_data[body_name];
+						node_body.AddValue("Name", body_name);
+						node_body.AddValue("Disabled", body_scan.Disabled);
+						node_body.AddValue("MinHeightRange", body_scan.MinHeight);
+						node_body.AddValue("MaxHeightRange", body_scan.MaxHeight);
+						if (body_scan.ClampHeight != null)
+							node_body.AddValue("ClampHeight", body_scan.ClampHeight);
+						node_body.AddValue("PaletteName", body_scan.PaletteName);
+						node_body.AddValue("PaletteSize", body_scan.PaletteSize);
+						node_body.AddValue("PaletteReverse", body_scan.PaletteReverse);
+						node_body.AddValue("PaletteDiscrete", body_scan.PaletteDiscrete);
+						node_body.AddValue("Map", SCANUtil.integerSerialize(body_scan));
+						node_progress.AddNode(node_body);
+					}
+					node.AddNode(node_progress);
 				}
-				node.AddNode(node_progress);
 			}
 		}
 
