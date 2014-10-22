@@ -122,15 +122,23 @@ namespace SCANsat.SCAN_UI
 			{
 				if (val <= (float)data.ClampHeight)
 				{
-					val = (Mathf.Clamp(val, data.MinHeight, (float)data.ClampHeight) - data.MinHeight / ((float)data.ClampHeight - data.MinHeight));
+					val = (Mathf.Clamp(val, data.MinHeight, (float)data.ClampHeight) - data.MinHeight) / ((float)data.ClampHeight - data.MinHeight);
 					c = lerp(data.ColorPalette.colors[0], data.ColorPalette.colors[1], val);
+				}
+				else
+				{
+					float newRange = data.MaxHeight - (float)data.ClampHeight;
+					val -= (float)data.ClampHeight;
+					val = (data.ColorPalette.colors.Length - 3) * Mathf.Clamp(val, 0, newRange) / newRange;
+					if ((int)val > data.ColorPalette.colors.Length - 3) val = data.ColorPalette.colors.Length - 3.01f;
+					c = lerp(data.ColorPalette.colors[(int)val + 2], data.ColorPalette.colors[(int)val + 3], val - (int)val);
 				}
 			}
 			else
 			{
 				val -= data.MinHeight;
 				val = (data.ColorPalette.colors.Length - 1) * Mathf.Clamp(val, 0, range) / range;
-				if ((int)val > data.ColorPalette.colors.Length - 2) val = data.ColorPalette.colors.Length - 2;
+				if ((int)val > data.ColorPalette.colors.Length - 2) val = data.ColorPalette.colors.Length - 2.01f;
 				c = lerp(data.ColorPalette.colors[(int)val], data.ColorPalette.colors[(int)val + 1], val - (int)val);
 			}
 
