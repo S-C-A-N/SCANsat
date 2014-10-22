@@ -31,10 +31,11 @@ namespace SCANsat.SCAN_UI
 		/* UI: time warp names and settings */
 		private string[] twnames = { "Off", "Low", "Medium", "High" };
 		private int[] twvals = { 1, 6, 9, 15 };
-		private bool warningBoxOne, warningBoxAll, paletteBox;
+		private bool warningBoxOne, warningBoxAll, paletteBox, spaceCenterLock, trackingStationLock;
 		private Rect warningRect, paletteRect;
 		private _Palettes currentPalettes;
 		private string paletteSize = "5";
+		private const string lockID = "settingLockID";
 
 		internal static Rect defaultRect = new Rect(Screen.width - (Screen.width / 2) - 180, 100, 360, 300);
 
@@ -49,16 +50,55 @@ namespace SCANsat.SCAN_UI
 			ClampToScreenOffset = new RectOffset(-280, -280, -600, -600);
 
 			SCAN_SkinsLibrary.SetCurrent("SCAN_Unity");
+
+			InputLockManager.RemoveControlLock(lockID);
 		}
 
 		internal override void OnDestroy()
 		{
-			
+			InputLockManager.RemoveControlLock(lockID);
 		}
 
 		internal override void Start()
 		{
 			currentPalettes = SCANpalette.CurrentPalettes;
+		}
+
+		protected override void DrawWindowPre(int id)
+		{
+			//Lock space center click through
+			if (HighLogic.LoadedScene == GameScenes.SPACECENTER)
+			{
+				Vector2 mousePos = Input.mousePosition;
+				mousePos.y = Screen.height - mousePos.y;
+				if (WindowRect.Contains(mousePos) && !spaceCenterLock)
+				{
+					InputLockManager.SetControlLock(ControlTypes.CAMERACONTROLS | ControlTypes.KSC_FACILITIES | ControlTypes.KSC_UI, lockID);
+					spaceCenterLock = true;
+				}
+				else if (!WindowRect.Contains(mousePos) && spaceCenterLock)
+				{
+					InputLockManager.RemoveControlLock(lockID);
+					spaceCenterLock = false;
+				}
+			}
+
+			//Lock tracking scene click through
+			if (HighLogic.LoadedScene == GameScenes.TRACKSTATION)
+			{
+				Vector2 mousePos = Input.mousePosition;
+				mousePos.y = Screen.height - mousePos.y;
+				if (WindowRect.Contains(mousePos) && !trackingStationLock)
+				{
+					InputLockManager.SetControlLock(ControlTypes.CAMERACONTROLS | ControlTypes.TRACKINGSTATION_ALL, lockID);
+					trackingStationLock = true;
+				}
+				else if (!WindowRect.Contains(mousePos) && trackingStationLock)
+				{
+					InputLockManager.RemoveControlLock(lockID);
+					trackingStationLock = false;
+				}
+			}
 		}
 
 		protected override void DrawWindow(int id)
@@ -112,6 +152,9 @@ namespace SCANsat.SCAN_UI
 			Rect r = new Rect(WindowRect.width - 20, 0, 18, 18);
 			if (GUI.Button(r, SCANcontroller.controller.closeBox, SCANskins.SCAN_closeButton))
 			{
+				InputLockManager.RemoveControlLock(lockID);
+				trackingStationLock = false;
+				spaceCenterLock = false;
 				Visible = false;
 			}
 		}
@@ -251,7 +294,7 @@ namespace SCANsat.SCAN_UI
 			int count = 0;
 			//foreach (CelestialBody body in FlightGlobals.Bodies)
 			//{
-			foreach (var data in SCANcontroller.controller.Body_Data)
+			foreach (var data in SCANcontroller.Body_Data)
 			{
 				if (count == 0) growS();
 				//SCANdata data = SCANUtil.getDataNullable(body);
@@ -378,6 +421,8 @@ namespace SCANsat.SCAN_UI
 				foreach (CelestialBody b in FlightGlobals.Bodies)
 				{
 					SCANdata data = SCANUtil.getData(b);
+					if (!SCANcontroller.Body_Data.ContainsKey(b.name))
+						SCANcontroller.Body_Data.Add(b.name, data);
 					data.fillMap();
 				}
 			}
@@ -419,7 +464,7 @@ namespace SCANsat.SCAN_UI
 				if (GUI.Button(r, "Confirm", SCANskins.SCAN_buttonWarning))
 				{
 					warningBoxAll = false;
-					foreach (SCANdata data in SCANcontroller.controller.Body_Data.Values)
+					foreach (SCANdata data in SCANcontroller.Body_Data.Values)
 					{
 						data.reset();
 					}
@@ -427,24 +472,24 @@ namespace SCANsat.SCAN_UI
 			}
 		}
 
-		//Drop down menu for palette selection
-		private void paletteSelectionBox(int id)
-		{
-			if (paletteBox)
-			{
-				paletteRect = new Rect(WindowRect.width - 350, WindowRect.height - 580, 100, 80);
-				GUI.Box(paletteRect, "", SCANskins.SCAN_dropDownBox);
-				for (int i = 0; i < Palette.kindNames.Length; i++)
-				{
-					Rect r = new Rect(paletteRect.x + 10, paletteRect.y + 5 + (i * 23), 80, 22);
-					if (GUI.Button(r, Palette.kindNames[i], SCANskins.SCAN_dropDownButton))
-					{
-						paletteBox = false;
-						currentPalettes = palette.CurrentPalettes = palette.generatePaletteSet(int.Parse(paletteSize), (Palette.Kind)i);
-					}
-				}
-			}
-		}
+		////Drop down menu for palette selection
+		//private void paletteSelectionBox(int id)
+		//{
+		//	if (paletteBox)
+		//	{
+		//		paletteRect = new Rect(WindowRect.width - 350, WindowRect.height - 580, 100, 80);
+		//		GUI.Box(paletteRect, "", SCANskins.SCAN_dropDownBox);
+		//		for (int i = 0; i < Palette.kindNames.Length; i++)
+		//		{
+		//			Rect r = new Rect(paletteRect.x + 10, paletteRect.y + 5 + (i * 23), 80, 22);
+		//			if (GUI.Button(r, Palette.kindNames[i], SCANskins.SCAN_dropDownButton))
+		//			{
+		//				paletteBox = false;
+		//				currentPalettes = palette.CurrentPalettes = palette.generatePaletteSet(int.Parse(paletteSize), (Palette.Kind)i);
+		//			}
+		//		}
+		//	}
+		//}
 
 	}
 }
