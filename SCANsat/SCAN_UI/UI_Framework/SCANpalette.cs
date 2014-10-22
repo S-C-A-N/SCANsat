@@ -112,34 +112,39 @@ namespace SCANsat.SCAN_UI
 
 		public static Color heightToColor(float val, int scheme, SCANdata data)
 		{
-			float range = data.MaxHeight - data.MinHeight;
+			return heightToColor(val, scheme, data.MaxHeight, data.MinHeight, data.ClampHeight, data.ColorPalette);
+		}
+
+		public static Color heightToColor(float val, int scheme, float max, float min, float? clamp, Palette p)
+		{
+			float range = max - min;
 			if (scheme == 1 || SCANcontroller.controller.colours == 1)
 			{
-				return lerp(black, white, Mathf.Clamp((val - data.MinHeight) / range, 0, 1));
+				return lerp(black, white, Mathf.Clamp((val - min) / range, 0, 1));
 			}
 			Color c = black;
-			if (data.ClampHeight != null)
+			if (clamp != null)
 			{
-				if (val <= (float)data.ClampHeight)
+				if (val <= (float)clamp)
 				{
-					val = (Mathf.Clamp(val, data.MinHeight, (float)data.ClampHeight) - data.MinHeight) / ((float)data.ClampHeight - data.MinHeight);
-					c = lerp(data.ColorPalette.colors[0], data.ColorPalette.colors[1], val);
+					val = (Mathf.Clamp(val, min, (float)clamp) - min) / ((float)clamp - min);
+					c = lerp(p.colors[0], p.colors[1], val);
 				}
 				else
 				{
-					float newRange = data.MaxHeight - (float)data.ClampHeight;
-					val -= (float)data.ClampHeight;
-					val = (data.ColorPalette.colors.Length - 3) * Mathf.Clamp(val, 0, newRange) / newRange;
-					if ((int)val > data.ColorPalette.colors.Length - 3) val = data.ColorPalette.colors.Length - 3.01f;
-					c = lerp(data.ColorPalette.colors[(int)val + 2], data.ColorPalette.colors[(int)val + 3], val - (int)val);
+					float newRange = max - (float)clamp;
+					val -= (float)clamp;
+					val = (p.colors.Length - 3) * Mathf.Clamp(val, 0, newRange) / newRange;
+					if ((int)val > p.colors.Length - 3) val = p.colors.Length - 3.01f;
+					c = lerp(p.colors[(int)val + 2], p.colors[(int)val + 3], val - (int)val);
 				}
 			}
 			else
 			{
-				val -= data.MinHeight;
-				val = (data.ColorPalette.colors.Length - 1) * Mathf.Clamp(val, 0, range) / range;
-				if ((int)val > data.ColorPalette.colors.Length - 2) val = data.ColorPalette.colors.Length - 2.01f;
-				c = lerp(data.ColorPalette.colors[(int)val], data.ColorPalette.colors[(int)val + 1], val - (int)val);
+				val -= min;
+				val = (p.colors.Length - 1) * Mathf.Clamp(val, 0, range) / range;
+				if ((int)val >p.colors.Length - 2) val = p.colors.Length - 2.01f;
+				c = lerp(p.colors[(int)val], p.colors[(int)val + 1], val - (int)val);
 			}
 
 			//int sealevel = 0;
