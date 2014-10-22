@@ -106,6 +106,7 @@ namespace SCANsat
 		private static Dictionary<string, SCANdata.SCANresourceType> resourceTypes = null;
 
 		private bool kethaneRebuild, kethaneReset, kethaneBusy = false;
+		private Game thisGame = null;
 
 		internal SCAN_MBW mainMap;
 		internal SCAN_MBW settingsWindow;
@@ -196,7 +197,7 @@ namespace SCANsat
 				}
 			}
 
-			if (body_data == null)
+			if (body_data == null || thisGame != HighLogic.CurrentGame)
 			{
 				body_data = new Dictionary<string, SCANdata>();
 				ConfigNode node_progress = node.GetNode("Progress");
@@ -259,6 +260,7 @@ namespace SCANsat
 						}
 					}
 				}
+				thisGame = HighLogic.CurrentGame;
 			}
 			dataRebuild = false; //Used for the one-time update to the new integer array
 			if (resourceTypes == null)
