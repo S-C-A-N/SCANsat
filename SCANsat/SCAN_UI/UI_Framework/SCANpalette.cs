@@ -112,16 +112,26 @@ namespace SCANsat.SCAN_UI
 
 		public static Color heightToColor(float val, int scheme, SCANdata data)
 		{
-			return heightToColor(val, scheme, data.MaxHeight, data.MinHeight, data.ClampHeight, data.ColorPalette);
+			Color32[] c = data.ColorPalette.colors;
+			if (data.PaletteReverse)
+				c = data.ColorPalette.colorsReverse;
+			if (scheme == 0)
+				return heightToColor(val, data.MaxHeight, data.MinHeight, data.ClampHeight, data.PaletteDiscrete, c);
+			else
+				return heightToColor(val, data.MaxHeight, data.MinHeight, data.PaletteDiscrete);
 		}
 
-		public static Color heightToColor(float val, int scheme, float max, float min, float? clamp, Palette p)
+		public static Color heightToColor(float val, float max, float min, bool discrete)
 		{
 			float range = max - min;
-			if (scheme == 1 || SCANcontroller.controller.colours == 1)
-			{
+			if (!discrete)
 				return lerp(black, white, Mathf.Clamp((val - min) / range, 0, 1));
-			}
+			else
+				return lerp(black, white, Mathf.Clamp((val - min) / range, 0, 1));
+		}
+
+		public static Color heightToColor(float val, float max, float min, float? clamp, bool discrete, Color32[] p)
+		{
 			Color c = black;
 			if (clamp != null)
 			{
@@ -129,24 +139,42 @@ namespace SCANsat.SCAN_UI
 				{
 					val -= min;
 					val = Mathf.Clamp(val, 0, (float)clamp - min) / ((float)clamp - min);
-					c = lerp(p.colors[0], p.colors[1], val);
+					if (discrete)
+						c = p[(int)Math.Round(val)];
+					else
+						c = lerp(p[0], p[1], val);
 				}
 				else
 				{
 					float newRange = max - (float)clamp;
 					val -= (float)clamp;
-					val = (p.colors.Length - 3) * Mathf.Clamp(val, 0, newRange) / newRange;
-					if (Math.Floor(val) > p.colors.Length - 4) val = p.colors.Length - 3.01f;
-					c = lerp(p.colors[(int)Math.Floor(val) + 2], p.colors[(int)Math.Floor(val) + 3], val - (int)Math.Floor(val));
+					val = (p.Length - 3) * Mathf.Clamp(val, 0, newRange) / newRange;
+					if (discrete)
+						c = p[(int)Math.Floor(val) + 2];
+					else
+					{
+						if (Math.Floor(val) > p.Length - 4)
+							val = p.Length - 3.01f;
+						c = lerp(p[(int)Math.Floor(val) + 2], p[(int)Math.Floor(val) + 3], val - (int)Math.Floor(val));
+					}
 				}
 			}
 			else
 			{
+				float range = max - min;
 				val -= min;
-				val = (p.colors.Length - 1) * Mathf.Clamp(val, 0, range) / range;
-				if (Math.Floor(val) > p.colors.Length - 2) val = p.colors.Length - 1.01f;
-				c = lerp(p.colors[(int)Math.Floor(val)], p.colors[(int)Math.Floor(val) + 1], val - (int)Math.Floor(val));
+				val = (p.Length - 1) * Mathf.Clamp(val, 0, range) / range;
+				if (discrete)
+					c = p[(int)Math.Floor(val)];
+				else
+				{
+					if (Math.Floor(val) > p.Length - 2)
+						val = p.Length - 1.01f;
+					c = lerp(p[(int)Math.Floor(val)], p[(int)Math.Floor(val) + 1], val - (int)Math.Floor(val));
+				}
 			}
+			return c;
+		}
 
 			//int sealevel = 0;
 			//if (val <= sealevel) {
@@ -156,8 +184,8 @@ namespace SCANsat.SCAN_UI
 			//	val = (heightGradient.Length - 2) * Mathf.Clamp (val , sealevel , (sealevel + 7500)) / (sealevel + 7500.0f);
 			//	c = lerp (heightGradient [(int)val] , heightGradient [(int)val + 1] , val - (int)val);
 			//}
-			return c;
-		}
+		//	return c;
+		//}
 
 		public static string colorHex ( Color32 c ) {
 			return "#" + c.r.ToString ("x2") + c.g.ToString ("x2") + c.b.ToString ("x2");
@@ -186,10 +214,7 @@ namespace SCANsat.SCAN_UI
 			}
 		}
 
-
 		public static Color picker(Rect r, Color c) {
-
-
 			GUILayout.BeginArea (r,"","Box");
 			GUILayout.BeginHorizontal ();
 			// R
@@ -217,39 +242,71 @@ namespace SCANsat.SCAN_UI
 		}
 
 		private static _Palettes currentPaletteSet;
+		private static _Palettes divPaletteSet;
+		private static _Palettes qualPaletteSet;
+		private static _Palettes seqPaletteSet;
 		private static string currentPaletteType;
+		private static int currentPaletteSetSize;
 
 		internal static _Palettes generatePaletteSet(int size, Palette.Kind type)
 		{
 			PaletteLoader.generatePalettes(type, size);
-			return new _Palettes(PaletteLoader.palettes.ToArray(), type);
+			return new _Palettes(PaletteLoader.palettes.ToArray(), type, size);
 		}
 
-		internal static _Palettes CurrentPalettes
+		internal static void setCurrentPalettes(Palette.Kind type)
 		{
-			get { return currentPaletteSet; }
-			set
+			switch (type)
 			{
-				currentPaletteSet = value;
-				currentPaletteType = value.paletteType.ToString();
+				case Palette.Kind.Diverging:
+					currentPaletteSet = divPaletteSet; break;
+				case Palette.Kind.Qualitative:
+					currentPaletteSet = qualPaletteSet; break;
+				case Palette.Kind.Sequential:
+					currentPaletteSet = seqPaletteSet; break;
 			}
 		}
 
-		internal static string getPaletteType
+		public static _Palettes CurrentPalettes
+		{
+			get { return currentPaletteSet; }
+			internal set
+			{
+				currentPaletteSet = value;
+				currentPaletteType = value.paletteType.ToString();
+				currentPaletteSetSize = value.size;
+			}
+		}
+
+		public static string getPaletteType
 		{
 			get { return currentPaletteType; }
-			private set { }
+		}
+		
+		public static _Palettes DivPaletteSet
+		{
+			get { return divPaletteSet; }
+			internal set { divPaletteSet = value; }
 		}
 
-		internal static Palette CurrentPalette
+		public static _Palettes QualPaletteSet
+		{
+			get { return qualPaletteSet; }
+			internal set { qualPaletteSet = value; }
+		}
+
+		public static _Palettes SeqPaletteSet
+		{
+			get { return seqPaletteSet; }
+			internal set { seqPaletteSet = value; }
+		}
+
+		public static Palette CurrentPalette
 		{
 			get { return currentHeightPalette; }
-			set { currentHeightPalette = value; }
+			internal set { currentHeightPalette = value; }
 		}
 
-
 	}
-
-
 }
 
