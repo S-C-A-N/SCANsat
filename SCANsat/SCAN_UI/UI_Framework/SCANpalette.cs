@@ -127,7 +127,8 @@ namespace SCANsat.SCAN_UI
 			{
 				if (val <= (float)clamp)
 				{
-					val = (Mathf.Clamp(val, min, (float)clamp) - min) / ((float)clamp - min);
+					val -= min;
+					val = Mathf.Clamp(val, 0, (float)clamp - min) / ((float)clamp - min);
 					c = lerp(p.colors[0], p.colors[1], val);
 				}
 				else
@@ -135,16 +136,16 @@ namespace SCANsat.SCAN_UI
 					float newRange = max - (float)clamp;
 					val -= (float)clamp;
 					val = (p.colors.Length - 3) * Mathf.Clamp(val, 0, newRange) / newRange;
-					if ((int)val > p.colors.Length - 3) val = p.colors.Length - 3.01f;
-					c = lerp(p.colors[(int)val + 2], p.colors[(int)val + 3], val - (int)val);
+					if (Math.Floor(val) > p.colors.Length - 4) val = p.colors.Length - 3.01f;
+					c = lerp(p.colors[(int)Math.Floor(val) + 2], p.colors[(int)Math.Floor(val) + 3], val - (int)Math.Floor(val));
 				}
 			}
 			else
 			{
 				val -= min;
 				val = (p.colors.Length - 1) * Mathf.Clamp(val, 0, range) / range;
-				if ((int)val >p.colors.Length - 2) val = p.colors.Length - 2.01f;
-				c = lerp(p.colors[(int)val], p.colors[(int)val + 1], val - (int)val);
+				if (Math.Floor(val) > p.colors.Length - 2) val = p.colors.Length - 1.01f;
+				c = lerp(p.colors[(int)Math.Floor(val)], p.colors[(int)Math.Floor(val) + 1], val - (int)Math.Floor(val));
 			}
 
 			//int sealevel = 0;
