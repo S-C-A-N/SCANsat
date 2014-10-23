@@ -111,43 +111,48 @@ namespace SCANsat
 					Fields["alt_indicator"].guiActive = scanning;
 				if (scanning)
 				{
-					if (sensorType == 0 || SCANcontroller.controller.isVesselKnown(vessel.id, (SCANdata.SCANtype)sensorType))
+					if (SCANcontroller.controller == null)
 					{
-						if (TimeWarp.CurrentRate < 1500)
+						scanning = false;
+						Debug.LogError("[SCANsat] Warning: SCANsat scenario module not initialized; Shutting down");
+					}
+					else
+					{
+						if (sensorType == 0 || SCANcontroller.controller.isVesselKnown(vessel.id, (SCANdata.SCANtype)sensorType))
 						{
-							float p = power * TimeWarp.deltaTime;
-							float e = part.RequestResource("ElectricCharge", p);
-							if (e < p)
+							if (TimeWarp.CurrentRate < 1500)
 							{
-								unregisterScanner();
-								powerIsProblem = true;
+								float p = power * TimeWarp.deltaTime;
+								float e = part.RequestResource("ElectricCharge", p);
+								if (e < p)
+								{
+									unregisterScanner();
+									powerIsProblem = true;
+								}
+								else
+								{
+									registerScanner();
+									powerIsProblem = false;
+								}
 							}
-							else
+							else if (powerIsProblem)
 							{
 								registerScanner();
 								powerIsProblem = false;
 							}
 						}
-						else if (powerIsProblem)
-						{
-							registerScanner();
-							powerIsProblem = false;
-						}
+						else
+							unregisterScanner();
+						alt_indicator = scanAlt();
 					}
-					else
-						unregisterScanner();
-					alt_indicator = scanAlt();
 				}
-				//SCANcontroller.controller.scanFromAllVessels ();
 				if (vessel == FlightGlobals.ActiveVessel)
 				{
-					//SCANui.gui_ping(powerIsProblem);
 					if (powerIsProblem)
 					{
 						addStatic();
-						registerScanner();
-						//} else if (sensorType == 0 && scanning) {
-						//    SCANui.gui_ping_maptraq ();
+						if (SCANcontroller.controller != null)
+							registerScanner();
 					}
 				}
 			}

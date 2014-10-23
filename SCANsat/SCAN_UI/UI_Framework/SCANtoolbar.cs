@@ -30,7 +30,11 @@ namespace SCANsat.SCAN_UI
 		internal SCANtoolbar()
 		{
 			if (!ToolbarManager.ToolbarAvailable) return; // bail if we don't have a toolbar
-
+			//if (SCANcontroller.controller == null)
+			//{
+			//	Debug.LogError("[SCANsat] Warning: SCANsat scenario module not initialized; Shutting down toolbar interface");
+			//	return;
+			//}
 			if (HighLogic.LoadedSceneIsFlight)
 			{
 				SCANButton = ToolbarManager.Instance.add("SCANsat", "UIMenu");
