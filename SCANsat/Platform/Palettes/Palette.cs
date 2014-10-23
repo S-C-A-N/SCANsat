@@ -17,6 +17,7 @@ namespace SCANsat.Platform.Palettes
 		public Swatches Swatches { get; private set; }
 
 		public Color32[] colors;
+		public Color32[] colorsReverse;
 
 		public List<Color> colors4;
 		//public List<uint32> _hexCodes = new List<uint32>();
@@ -69,6 +70,8 @@ namespace SCANsat.Platform.Palettes
 		}
 		public Palette(Color32[] cs, Kind k, Is blindSafe, Is printSafe, Is xeroxSafe, Is panelSafe) {
 			this.colors = cs;
+			this.colorsReverse = cs;
+			Array.Reverse(this.colorsReverse);
 			this.kind = k;
 			this.blind = blindSafe;
 			this.print = printSafe;
@@ -78,6 +81,8 @@ namespace SCANsat.Platform.Palettes
 		}
 		public Palette(Color32[] cs, string name, Kind k, Is blindSafe, Is printSafe, Is xeroxSafe, Is panelSafe) {
 			this.colors = cs;
+			this.colorsReverse = cs;
+			Array.Reverse(this.colorsReverse);
 			this.name = name;
 			this.kind = k;
 			this.blind = blindSafe;
