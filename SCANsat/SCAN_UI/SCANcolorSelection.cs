@@ -24,20 +24,20 @@ namespace SCANsat.SCAN_UI
 {
 	class SCANcolorSelection: SCAN_MBW
 	{
-		private bool paletteBox, reversePalette, discretePalette, clampTerrain, previewClamp, previewReverse, previewDiscrete;
-		private bool spaceCenterLock, trackingStationLock, dataClamp, dataReverse, dataDiscrete;
+		private bool paletteBox, reversePalette, oldReverseState, discretePalette, oldDiscreteState;
+		private bool spaceCenterLock, trackingStationLock, clampHeight, oldClampState;
 		private Rect paletteRect;
 		private _Palettes currentPalettes;
 		private Palette dataPalette, previewPalette;
 		private string paletteSize = "6";
-		private int paletteSizeInt = 6;
+		private int paletteSizeInt, oldPaletteSizeInt = 6;
 		private Texture2D currentLegend, previewLegend;
-		private string lowRange = "-500";
-		private string highRange = "8000";
-		private string clampLevel = "0";
-		private int lowRangeInt = -500;
-		private int highRangeInt = 8000;
-		private int clampLevelInt = 0;
+		private string minHeightS = "-500";
+		private string maxHeightS = "8000";
+		private string clampHeightS = "0";
+		private float minHeightF = -500;
+		private float maxHeightF = 8000;
+		private float clampHeightF = 0;
 		private const string lockID = "colorLockID";
 		internal static Rect defaultRect = new Rect(100, 400, 600, 300);
 
@@ -60,7 +60,9 @@ namespace SCANsat.SCAN_UI
 
 		internal override void Start()
 		{
-			currentPalettes = SCANpalette.CurrentPalettes;
+			currentPalettes = palette.CurrentPalettes;
+			paletteSizeInt = currentPalettes.size;
+			paletteSize = paletteSizeInt.ToString();
 		}
 
 		internal override void OnDestroy()
@@ -117,37 +119,35 @@ namespace SCANsat.SCAN_UI
 			//currentLegend = data.ColorPalette.swatch;
 			//previewLegend = palette.CurrentPalette.swatch;
 
-			if (currentLegend == null || data.ColorPalette != dataPalette || data.PaletteReverse != dataReverse || data.PaletteDiscrete != dataDiscrete || (data.ClampHeight != null) != dataClamp)
+			if (currentLegend == null || data.ColorPalette != dataPalette)// || data.PaletteReverse != dataReverse || data.PaletteDiscrete != dataDiscrete || (data.ClampHeight != null) != dataClamp)
 			{
-				lowRangeInt = (int)data.MinHeight;
-				lowRange = lowRangeInt.ToString();
-				highRangeInt = (int)data.MaxHeight;
-				highRange = highRangeInt.ToString();
-				dataClamp = clampTerrain = data.ClampHeight != null;
-				if (clampTerrain)
-				{
-					clampLevelInt = (int)data.ClampHeight;
-					clampLevel = clampLevelInt.ToString();
-				}
 				dataPalette = data.ColorPalette;
-				dataReverse = data.PaletteReverse;
-				dataDiscrete = data.PaletteDiscrete;
-				currentLegend = SCANmap.getLegend(data.MinHeight, data.MaxHeight, 0, data);
-			}
-			if (previewLegend == null || palette.CurrentPalette != previewPalette || previewClamp != clampTerrain || previewDiscrete != discretePalette || previewReverse != reversePalette)
-			{
-				float? clamp = null;
-				previewPalette = palette.CurrentPalette;
-				previewClamp = clampTerrain;
-				previewDiscrete = discretePalette;
-				if (reversePalette != previewReverse)
+				minHeightF = data.MinHeight;
+				minHeightS = minHeightF.ToString();
+				maxHeightF = data.MaxHeight;
+				maxHeightS = maxHeightF.ToString();
+				clampHeight = data.ClampHeight != null;
+				if (clampHeight)
 				{
-					Array.Reverse(palette.CurrentPalette.colors);
-					previewReverse = reversePalette;
+					clampHeightF = (float)data.ClampHeight;
+					clampHeightS = clampHeightF.ToString();
 				}
-				if (clampTerrain)
-					clamp = (float?)clampLevelInt;
-				previewLegend = SCANmap.getLegend((float)highRangeInt, (float)lowRangeInt, clamp, palette.CurrentPalette);
+				drawCurrentLegend();
+			}
+			if (previewLegend == null)// || palette.CurrentPalette != previewPalette || previewClamp != clampHeight || previewDiscrete != discretePalette || previewReverse != reversePalette)
+			{
+				//float? clamp = null;
+				//previewPalette = palette.CurrentPalette;
+				//previewClamp = clampHeight;
+				//previewDiscrete = discretePalette;
+				//if (reversePalette != previewReverse)
+				//{
+				//	Array.Reverse(palette.CurrentPalette.colors);
+				//	previewReverse = reversePalette;
+				//}
+				//if (clampHeight)
+				//	clamp = (float?)clampHeightF;
+				drawPreviewLegend();
 			}
 		}
 
@@ -161,7 +161,7 @@ namespace SCANsat.SCAN_UI
 					paletteTextures(id);
 					paletteOptions(id);
 				stopE();
-				fillS(16);
+				fillS(8);
 				growE();
 					palettePreview(id);
 					fillS(20);
@@ -175,8 +175,34 @@ namespace SCANsat.SCAN_UI
 		protected override void DrawWindowPost(int id)
 		{
 			if (paletteBox && Event.current.type == EventType.mouseDown && !paletteRect.Contains(Event.current.mousePosition))
-			{
 				paletteBox = false;
+
+			//if (reversePalette != oldReverseState)
+			//{
+			//	oldReverseState = reversePalette;
+			//	foreach (Palette p in currentPalettes.availablePalettes)
+			//			Array.Reverse(p.colors);
+			//	drawPreviewLegend();
+			//}
+
+			if (discretePalette != oldDiscreteState)
+			{
+				oldDiscreteState = discretePalette;
+				drawPreviewLegend();
+			}
+
+			if (clampHeight != oldClampState)
+			{
+				oldClampState = clampHeight;
+				drawPreviewLegend();
+			}
+
+			if (paletteSizeInt != oldPaletteSizeInt)
+			{
+				oldPaletteSizeInt = paletteSizeInt;
+				palette.CurrentPalettes = palette.generatePaletteSet(paletteSizeInt, currentPalettes.paletteType);
+				currentPalettes = palette.CurrentPalettes;
+				drawPreviewLegend();
 			}
 		}
 
@@ -212,7 +238,7 @@ namespace SCANsat.SCAN_UI
 						paletteBox = !paletteBox;
 					}
 					fillS(10);
-					GUILayout.Label(SCANpalette.getPaletteType, SCANskins.SCAN_whiteReadoutLabel);
+					GUILayout.Label(palette.getPaletteType, SCANskins.SCAN_whiteReadoutLabel);
 				stopE();
 				growE();
 					int j = 9;
@@ -239,12 +265,10 @@ namespace SCANsat.SCAN_UI
 						{
 							if (GUILayout.Button("", SCANskins.SCAN_texButton, GUILayout.Width(110), GUILayout.Height(25)))
 							{
-								if (reversePalette)
-									Array.Reverse(currentPalettes.availablePalettes[i].colors);
+								//if (reversePalette)
+								//	Array.Reverse(currentPalettes.availablePalettes[i].colors);
 								SCANpalette.CurrentPalette = currentPalettes.availablePalettes[i];
-								//data.ColorPalette = SCANpalette.CurrentPalette;
-								//data.PaletteName = SCANpalette.CurrentPalette.name;
-								//data.PaletteSize = SCANpalette.CurrentPalette.size;
+								drawPreviewLegend();
 							}
 						}
 						Rect r = GUILayoutUtility.GetLastRect();
@@ -262,31 +286,35 @@ namespace SCANsat.SCAN_UI
 				GUILayout.Label("Palette Options", SCANskins.SCAN_headline);
 				fillS(8);
 				GUILayout.Label("Terrain Height Range", SCANskins.SCAN_headlineSmall);
+
 				growE();
 					fillS();
-					lowRangeInt = drawInputBox(ref lowRange, SCANskins.SCAN_textBox, 40, 40, "Min:", SCANskins.SCAN_whiteReadoutLabel);
+					minHeightF = drawInputBox(ref minHeightS, SCANskins.SCAN_textBox, 40, 40, "Min:", SCANskins.SCAN_whiteReadoutLabel);
 					fillS(10);
-					highRangeInt = drawInputBox(ref highRange, SCANskins.SCAN_textBox, 40, 40, "Max:", SCANskins.SCAN_whiteReadoutLabel);
+					maxHeightF = drawInputBox(ref maxHeightS, SCANskins.SCAN_textBox, 40, 40, "Max:", SCANskins.SCAN_whiteReadoutLabel);
 					fillS();
 				stopE();
+
 				growE();
 					fillS();
-					clampTerrain = GUILayout.Toggle(clampTerrain, "Clamp Terrain", GUILayout.Width(100));
-					if (clampTerrain)
+					clampHeight = GUILayout.Toggle(clampHeight, "Clamp Terrain", GUILayout.Width(100));
+					if (clampHeight)
 					{
 						fillS(5);
-						clampLevelInt = drawInputBox(ref clampLevel, SCANskins.SCAN_textBox, 40);
-						//clampLevel = GUILayout.TextField(clampLevel, 5, SCANskins.SCAN_whiteReadoutLabel, GUILayout.Width(40));
+						clampHeightF = drawInputBox(ref clampHeightS, SCANskins.SCAN_textBox, 40);
 					}
 					fillS();
 				stopE();
+
 				GUILayout.Label("Palette Size", SCANskins.SCAN_headlineSmall);
-				paletteSizeInt = drawInputBox(ref paletteSize, SCANskins.SCAN_textBox, 35, 40, "Size:", SCANskins.SCAN_whiteReadoutLabel);
+				paletteSizeInt = (int)drawInputBox(ref paletteSize, SCANskins.SCAN_textBox, 35, 40, "Size:", SCANskins.SCAN_whiteReadoutLabel);
+
 				growE();
 					reversePalette = GUILayout.Toggle(reversePalette, "Reverse Order");
 					fillS(10);
 					discretePalette = GUILayout.Toggle(discretePalette, "Discrete Gradient");
 				stopE();
+
 			stopS();
 		}
 
@@ -317,24 +345,25 @@ namespace SCANsat.SCAN_UI
 			fillS(16);
 			if (GUILayout.Button("Apply", GUILayout.Width(80)))
 			{
-				if (lowRangeInt < highRangeInt)
+				if (minHeightF < maxHeightF)
 				{
-					data.MinHeight = lowRangeInt;
-					data.MaxHeight = highRangeInt;
+					data.MinHeight = minHeightF;
+					data.MaxHeight = maxHeightF;
 				}
-				if (clampTerrain)
+				if (clampHeight)
 				{
-					if (clampLevelInt > lowRangeInt && clampLevelInt < highRangeInt)
-						data.ClampHeight = clampLevelInt;
+					if (clampHeightF > minHeightF && clampHeightF < maxHeightF)
+						data.ClampHeight = clampHeightF;
 				}
 				else
 					data.ClampHeight = null;
 
-				data.ColorPalette = SCANpalette.CurrentPalette;
-				data.PaletteName = SCANpalette.CurrentPalette.name;
-				data.PaletteSize = SCANpalette.CurrentPalette.size;
+				data.ColorPalette = palette.CurrentPalette;
+				data.PaletteName = palette.CurrentPalette.name;
+				data.PaletteSize = palette.CurrentPalette.size;
 				data.PaletteDiscrete = discretePalette;
 				data.PaletteReverse = reversePalette;
+				drawCurrentLegend();
 			}
 			fillS(8);
 			if (GUILayout.Button("Cancel", GUILayout.Width(80)))
@@ -361,25 +390,41 @@ namespace SCANsat.SCAN_UI
 					if (GUI.Button(r, Palette.kindNames[i], SCANskins.SCAN_dropDownButton))
 					{
 						paletteBox = false;
-						currentPalettes = palette.CurrentPalettes = palette.generatePaletteSet(int.Parse(paletteSize), (Palette.Kind)i);
+						palette.setCurrentPalettes((Palette.Kind)i);
+						currentPalettes = palette.CurrentPalettes;
 					}
 				}
 			}
 		}
 
-		private int drawInputBox(ref string oldVal, GUIStyle boxStyle, float boxWidth, float labelWidth = 0, string title = "", GUIStyle labelStyle = null)
+		private float drawInputBox(ref string oldVal, GUIStyle boxStyle, float boxWidth, float labelWidth = 0, string title = "", GUIStyle labelStyle = null)
 		{
-			int newInt = 0;
-			int.TryParse(oldVal, out newInt);
+			float newVal = 0;
+			float.TryParse(oldVal, out newVal);
 			growE();
 				if (!string.IsNullOrEmpty(title))
 					GUILayout.Label(title, labelStyle, GUILayout.Width(labelWidth));
 				oldVal = GUILayout.TextField(oldVal, boxStyle, GUILayout.Width(boxWidth));
 			stopE();
 
-			int.TryParse(oldVal, out newInt);
-			return newInt;
+			float.TryParse(oldVal, out newVal);
+			return newVal;
+		}
 
+		private void drawCurrentLegend()
+		{
+			currentLegend = SCANmap.getLegend(data.MinHeight, data.MaxHeight, 0, data);
+		}
+
+		private void drawPreviewLegend()
+		{
+			float? clamp = null;
+			Color32[] c = palette.CurrentPalette.colors;
+			if (clampHeight)
+				clamp = (float?)clampHeightF;
+			if (reversePalette)
+				c = palette.CurrentPalette.colorsReverse;
+			previewLegend = SCANmap.getLegend(maxHeightF, minHeightF, clamp, discretePalette, c);
 		}
 
 	}
