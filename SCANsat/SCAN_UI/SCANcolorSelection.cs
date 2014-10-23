@@ -29,8 +29,8 @@ namespace SCANsat.SCAN_UI
 		private Rect paletteRect;
 		private _Palettes currentPalettes;
 		private Palette dataPalette, previewPalette;
-		private string paletteSize = "5";
-		private int paletteSizeInt = 5;
+		private string paletteSize = "6";
+		private int paletteSizeInt = 6;
 		private Texture2D currentLegend, previewLegend;
 		private string lowRange = "-500";
 		private string highRange = "8000";
@@ -117,23 +117,37 @@ namespace SCANsat.SCAN_UI
 			//currentLegend = data.ColorPalette.swatch;
 			//previewLegend = palette.CurrentPalette.swatch;
 
-			if (data.ColorPalette != dataPalette || data.PaletteReverse != dataReverse || data.PaletteDiscrete != dataDiscrete || (data.ClampHeight != null) != dataClamp)
+			if (currentLegend == null || data.ColorPalette != dataPalette || data.PaletteReverse != dataReverse || data.PaletteDiscrete != dataDiscrete || (data.ClampHeight != null) != dataClamp)
 			{
+				lowRangeInt = (int)data.MinHeight;
+				lowRange = lowRangeInt.ToString();
+				highRangeInt = (int)data.MaxHeight;
+				highRange = highRangeInt.ToString();
+				dataClamp = clampTerrain = data.ClampHeight != null;
+				if (clampTerrain)
+				{
+					clampLevelInt = (int)data.ClampHeight;
+					clampLevel = clampLevelInt.ToString();
+				}
 				dataPalette = data.ColorPalette;
 				dataReverse = data.PaletteReverse;
 				dataDiscrete = data.PaletteDiscrete;
-				dataClamp = data.ClampHeight != null;
 				currentLegend = SCANmap.getLegend(data.MinHeight, data.MaxHeight, 0, data);
 			}
-			if (palette.CurrentPalette != previewPalette || previewClamp != clampTerrain || previewDiscrete != discretePalette || previewReverse != reversePalette)
+			if (previewLegend == null || palette.CurrentPalette != previewPalette || previewClamp != clampTerrain || previewDiscrete != discretePalette || previewReverse != reversePalette)
 			{
+				float? clamp = null;
 				previewPalette = palette.CurrentPalette;
 				previewClamp = clampTerrain;
 				previewDiscrete = discretePalette;
-				previewReverse = reversePalette;
-				if (reversePalette)
+				if (reversePalette != previewReverse)
+				{
 					Array.Reverse(palette.CurrentPalette.colors);
-				previewLegend = SCANmap.getLegend(lowRangeInt, highRangeInt, clampLevelInt, palette.CurrentPalette);
+					previewReverse = reversePalette;
+				}
+				if (clampTerrain)
+					clamp = (float?)clampLevelInt;
+				previewLegend = SCANmap.getLegend((float)highRangeInt, (float)lowRangeInt, clamp, palette.CurrentPalette);
 			}
 		}
 
@@ -225,6 +239,8 @@ namespace SCANsat.SCAN_UI
 						{
 							if (GUILayout.Button("", SCANskins.SCAN_texButton, GUILayout.Width(110), GUILayout.Height(25)))
 							{
+								if (reversePalette)
+									Array.Reverse(currentPalettes.availablePalettes[i].colors);
 								SCANpalette.CurrentPalette = currentPalettes.availablePalettes[i];
 								//data.ColorPalette = SCANpalette.CurrentPalette;
 								//data.PaletteName = SCANpalette.CurrentPalette.name;
