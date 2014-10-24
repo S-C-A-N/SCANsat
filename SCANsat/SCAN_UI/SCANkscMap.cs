@@ -351,7 +351,7 @@ namespace SCANsat.SCAN_UI
 			fillS(10);
 			growS();
 			fillS();
-			if (GUILayout.Button("Color Management", SCANskins.SCAN_buttonFixed, GUILayout.Width(90)))
+			if (GUILayout.Button("Color\n Management", SCANskins.SCAN_buttonFixed, GUILayout.Width(90), GUILayout.Height(50)))
 			{
 				SCANcontroller.controller.colorManager.Visible = true;
 			}
