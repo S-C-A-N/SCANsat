@@ -59,7 +59,7 @@ namespace SCANsat.Platform.Palettes
 				palettes.Add(ColorBrewer.BrewerPalettes.YlGnBu(Size));
 				palettes.Add(ColorBrewer.BrewerPalettes.Purples(Size));
 				palettes.Add(ColorBrewer.BrewerPalettes.GnBu(Size));
-				palettes.Add(ColorBrewer.BrewerPalettes.Greys(Size));
+				//palettes.Add(ColorBrewer.BrewerPalettes.Greys(Size));
 				palettes.Add(ColorBrewer.BrewerPalettes.YlOrRd(Size));
 				palettes.Add(ColorBrewer.BrewerPalettes.PuRd(Size));
 				palettes.Add(ColorBrewer.BrewerPalettes.Blues(Size));
