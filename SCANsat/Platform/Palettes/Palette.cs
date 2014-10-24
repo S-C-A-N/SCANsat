@@ -13,6 +13,7 @@ namespace SCANsat.Platform.Palettes
 		public Kind kind;
 		public int size;
 		public Texture2D swatch;
+		public int index;
 
 		public Swatches Swatches { get; private set; }
 
@@ -70,7 +71,8 @@ namespace SCANsat.Platform.Palettes
 		}
 		public Palette(Color32[] cs, Kind k, Is blindSafe, Is printSafe, Is xeroxSafe, Is panelSafe) {
 			this.colors = cs;
-			this.colorsReverse = cs;
+			this.colorsReverse = new Color32[cs.Length];
+			this.colors.CopyTo(this.colorsReverse, 0);
 			Array.Reverse(this.colorsReverse);
 			this.kind = k;
 			this.blind = blindSafe;
@@ -81,7 +83,8 @@ namespace SCANsat.Platform.Palettes
 		}
 		public Palette(Color32[] cs, string name, Kind k, Is blindSafe, Is printSafe, Is xeroxSafe, Is panelSafe) {
 			this.colors = cs;
-			this.colorsReverse = cs;
+			this.colorsReverse = new Color32[cs.Length];
+			this.colors.CopyTo(this.colorsReverse, 0);
 			Array.Reverse(this.colorsReverse);
 			this.name = name;
 			this.kind = k;
