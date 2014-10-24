@@ -15,6 +15,7 @@ using System.Linq;
 using System.Collections.Generic;
 using UnityEngine;
 using SCANsat.Platform.Palettes;
+using SCANsat.Platform.Palettes.ColorBrewer;
 using palette = SCANsat.SCAN_UI.SCANpalette;
 
 namespace SCANsat
@@ -31,22 +32,27 @@ namespace SCANsat
 		/* MAP: options */
 		private float minHeight, maxHeight;
 		private float? clampHeight;
-		private string paletteName = "Default";
-		private int paletteSize = 7;
+		private string paletteName;
+		private int paletteSize;
 		private bool paletteReverse, paletteDiscrete, disabled;
 		private Palette colorPalette;
 
 		/* MAP: default values */
 		private static float?[,] bodyHeightRange = new float?[17, 3]
 		{
-			{ 0, 1000, null }, { -1500, 7000, 0 }, { -500, 7500, null }, { -500, 6000, null },
-			{ 0, 7000, null }, { -2000, 8000, 0 }, { 0, 8500, null }, { 0, 13000, null }, { 0, 1000, null },
-			{ -3000, 6500, 0 }, { -500, 8000, null }, { 2000, 22000, null }, { -500, 11500, null },
-			{ 1000, 6500, null }, { 500, 6000, null }, { 0, 6000, null }, { -500, 4000, null }
+			{ 0, 1000, null }, { -1500, 6500, 0 }, { -500, 7000, null }, { -500, 5500, null },
+			{ 0, 6500, null }, { -2000, 7000, 0 }, { 0, 7500, null }, { 0, 12000, null }, { 0, 1000, null },
+			{ -3000, 6000, 0 }, { -500, 7500, null }, { 2000, 21500, null }, { -500, 11000, null },
+			{ 1500, 6000, null }, { 500, 5500, null }, { 0, 5500, null }, { -500, 3500, null }
 		};
+		//private static string[] paletteNameDefaults = { "Default", "Default", "RdYlGn", "Paired", "PuBuGn", "Purples", "BuGn", "BrBG", "Default", "BuGn", "Set1", "PuOr", "Dark2", "YlOrBr", "Spectral", "Pastel2" };
+		//private static int[] paletteSizeDefaults = { 7, 7, 8, 9, 6, 7, 9, 8, 7, 8, 9, 7, 6, 7, 8, 9 };
+		private static Palette[] paletteDefaults = { PaletteLoader.defaultPalette, PaletteLoader.defaultPalette, BrewerPalettes.RdYlGn(8), BrewerPalettes.Paired(9), BrewerPalettes.PuBuGn(6), BrewerPalettes.Purples(7), BrewerPalettes.BuGn(9), BrewerPalettes.BrBG(8), PaletteLoader.defaultPalette, BrewerPalettes.BuGn(8), BrewerPalettes.Set1(9), BrewerPalettes.PuOr(7), BrewerPalettes.Dark2(6), BrewerPalettes.YlOrBr(7), BrewerPalettes.Spectral(8), BrewerPalettes.Pastel2(9) };
+		private static bool[] paletteReverseDefaults = { false, false, true, false, false, false, false, false, false, true, false, false, false, false, true, false };
 		private const float defaultMinHeight = -1000f;
 		private const float defaultMaxHeight = 8000f;
 		private float? defaultClampHeight = null;
+		private Palette defaultPalette = PaletteLoader.defaultPalette;
 
 		/* MAP: constructor */
 		internal SCANdata(CelestialBody b)
@@ -57,9 +63,16 @@ namespace SCANsat
 				minHeight = (float)bodyHeightRange[b.flightGlobalsIndex, 0];
 				maxHeight = (float)bodyHeightRange[b.flightGlobalsIndex, 1];
 				clampHeight = bodyHeightRange[b.flightGlobalsIndex, 2];
+				colorPalette = paletteDefaults[b.flightGlobalsIndex];
+				paletteName = colorPalette.name;
+				paletteSize = colorPalette.size;
+				paletteReverse = paletteReverseDefaults[b.flightGlobalsIndex];
 			}
 			else
 			{
+				colorPalette = defaultPalette;
+				paletteName = colorPalette.name;
+				paletteSize = colorPalette.size;
 				minHeight = defaultMinHeight;
 				maxHeight = defaultMaxHeight;
 				if (b.ocean)
@@ -483,6 +496,7 @@ namespace SCANsat
 		}
 		#endregion
 
+		#region Map Utilities
 		/* DATA: debug option to fill in the map */
 		internal void fillMap()
 		{
@@ -521,7 +535,7 @@ namespace SCANsat
 			}
 			map_small.Apply();
 		}
-
+		#endregion
 
 		#region Unused code
 
