@@ -126,7 +126,9 @@ namespace SCANsat
 			get { return clampHeight; }
 			internal set
 			{
-				if (value > minHeight && value < maxHeight)
+				if (value == null)
+					clampHeight = null;
+				else if (value > minHeight && value < maxHeight)
 					clampHeight = value;
 			}
 		}
