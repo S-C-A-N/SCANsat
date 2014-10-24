@@ -102,8 +102,6 @@ namespace SCANsat.SCAN_UI
 			xkcd_White
 		};
 
-		private static Palette currentHeightPalette;
-
 		public static Color[] redline;
         	public static Color gridFull; // resource colors
         	public static Color gridEmpty; //empty resource color
@@ -148,11 +146,16 @@ namespace SCANsat.SCAN_UI
 				{
 					float newRange = max - (float)clamp;
 					val -= (float)clamp;
-					val = (p.Length - 3) * Mathf.Clamp(val, 0, newRange) / newRange;
 					if (discrete)
+					{
+						val = (p.Length - 2) * Mathf.Clamp(val, 0, newRange) / newRange;
+						if (Math.Floor(val) > p.Length - 3)
+							val = p.Length - 0.01f;
 						c = p[(int)Math.Floor(val) + 2];
+					}
 					else
 					{
+						val = (p.Length - 3) * Mathf.Clamp(val, 0, newRange) / newRange;
 						if (Math.Floor(val) > p.Length - 4)
 							val = p.Length - 3.01f;
 						c = lerp(p[(int)Math.Floor(val) + 2], p[(int)Math.Floor(val) + 3], val - (int)Math.Floor(val));
@@ -163,11 +166,16 @@ namespace SCANsat.SCAN_UI
 			{
 				float range = max - min;
 				val -= min;
-				val = (p.Length - 1) * Mathf.Clamp(val, 0, range) / range;
 				if (discrete)
+				{
+					val = (p.Length) * Mathf.Clamp(val, 0, range) / range;
+					if (Math.Floor(val) > p.Length - 1)
+						val = p.Length - 0.01f;
 					c = p[(int)Math.Floor(val)];
+				}
 				else
 				{
+					val = (p.Length - 1) * Mathf.Clamp(val, 0, range) / range;
 					if (Math.Floor(val) > p.Length - 2)
 						val = p.Length - 1.01f;
 					c = lerp(p[(int)Math.Floor(val)], p[(int)Math.Floor(val) + 1], val - (int)Math.Floor(val));
@@ -247,6 +255,7 @@ namespace SCANsat.SCAN_UI
 		private static _Palettes seqPaletteSet;
 		private static string currentPaletteType;
 		private static int currentPaletteSetSize;
+		private static Palette currentHeightPalette;
 
 		internal static _Palettes generatePaletteSet(int size, Palette.Kind type)
 		{
