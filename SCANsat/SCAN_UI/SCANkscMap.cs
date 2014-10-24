@@ -289,7 +289,7 @@ namespace SCANsat.SCAN_UI
 
 			if (SCANcontroller.controller.globalOverlay && SCANcontroller.controller.resourceOverlayType == 0)
 			{
-				if (GUILayout.Button("Res_Overlay", SCANskins.SCAN_buttonFixed))
+				if (GUILayout.Button("Resources", SCANskins.SCAN_buttonFixed))
 				{
 					SCANcontroller.controller.map_ResourceOverlay = !SCANcontroller.controller.map_ResourceOverlay;
 					bigmap.resetMap();
@@ -350,11 +350,11 @@ namespace SCANsat.SCAN_UI
 			growE();
 			fillS(10);
 			growS();
-			fillS();
-			if (GUILayout.Button("Color\n Management", SCANskins.SCAN_buttonFixed, GUILayout.Width(90), GUILayout.Height(50)))
-			{
-				SCANcontroller.controller.colorManager.Visible = true;
-			}
+				fillS();
+				if (GUILayout.Button("Color\nManagement", SCANskins.SCAN_buttonFixed, GUILayout.Width(90), GUILayout.Height (50)))
+				{
+					SCANcontroller.controller.colorManager.Visible = true;
+				}
 			stopS();
 			fillS(10);
 			growS();
@@ -398,7 +398,7 @@ namespace SCANsat.SCAN_UI
 			
 			SCANuiUtil.mouseOverInfo(mlon, mlat, bigmap, data, b, in_map);
 			if (bigmap.mapmode == 0 && SCANcontroller.controller.legend)
-				SCANuiUtil.drawLegend(data.MinHeight, data.MaxHeight, data);
+				SCANuiUtil.drawLegend(data);
 			stopS();
 			stopE();
 		}
