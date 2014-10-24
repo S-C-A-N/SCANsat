@@ -14,6 +14,12 @@ namespace SCANsat.Platform.Palettes
 		internal _Palettes (Palette[] p, Palette.Kind pK, int i)
 		{
 			availablePalettes = p;
+			int j = 0;
+			foreach (Palette pa in availablePalettes)
+			{
+				pa.index = j;
+				j++;
+			}
 			paletteType = pK;
 			size = i;
 			generateSwatches();
