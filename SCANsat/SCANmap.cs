@@ -52,6 +52,22 @@ namespace SCANsat
 			return legend;
 		}
 
+		public static Texture2D getLegend(int scheme, SCANdata data)
+		{
+			//if (legend != null && legendMin == min && legendMax == max && legendScheme == scheme)
+			//	return legend;
+			Texture2D t = new Texture2D(256, 1, TextureFormat.RGB24, false);
+			Color[] pix = t.GetPixels();
+			for (int x = 0; x < 256; ++x)
+			{
+				float val = (x * (data.MaxHeight - data.MinHeight)) / 256f + data.MinHeight;
+				pix[x] = palette.heightToColor(val, scheme, data);
+			}
+			t.SetPixels(pix);
+			t.Apply();
+			return t;
+		}
+
 		public static Texture2D getLegend(float max, float min, float? clamp, bool discrete, Color32[] c)
 		{
 			Texture2D t = new Texture2D(128, 1, TextureFormat.RGB24, false);
@@ -459,7 +475,7 @@ namespace SCANsat
 			for (int i = 0; i < map.width; i++)
 			{
 				Color baseColor = palette.grey; //default pixel color 
-				int scheme = 0;
+				int scheme = SCANcontroller.controller.colours;
 				double lat = (mapstep * 1.0f / mapscale) - 90f + lat_offset;
 				double lon = (i * 1.0f / mapscale) - 180f + lon_offset;
 				double la = lat, lo = lon;
