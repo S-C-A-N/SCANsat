@@ -14,6 +14,7 @@ using System;
 //using System.Text.RegularExpressions;
 using UnityEngine;
 using SCANsat.Platform.Palettes;
+using SCANsat.Platform.Palettes.ColorBrewer;
 
 namespace SCANsat.SCAN_UI
 {
@@ -121,11 +122,24 @@ namespace SCANsat.SCAN_UI
 
 		public static Color heightToColor(float val, float max, float min, bool discrete)
 		{
+			Color c = black;
 			float range = max - min;
-			if (!discrete)
-				return lerp(black, white, Mathf.Clamp((val - min) / range, 0, 1));
+			val -= min;
+			if (discrete)
+			{
+				val = (greyScalePalette.colors.Length) * Mathf.Clamp(val, 0, range) / range;
+				if (Math.Floor(val) > greyScalePalette.colors.Length - 1)
+					val = greyScalePalette.colors.Length - 0.01f;
+				c = greyScalePalette.colors[(int)Math.Floor(val)];
+			}
 			else
-				return lerp(black, white, Mathf.Clamp((val - min) / range, 0, 1));
+			{
+				val = (greyScalePalette.colors.Length - 1) * Mathf.Clamp(val, 0, range) / range;
+				if (Math.Floor(val) > greyScalePalette.colors.Length - 2)
+					val = greyScalePalette.colors.Length - 1.01f;
+				c = lerp(greyScalePalette.colors[(int)Math.Floor(val)], greyScalePalette.colors[(int)Math.Floor(val) + 1], val - (int)Math.Floor(val));
+			}
+			return c;
 		}
 
 		public static Color heightToColor(float val, float max, float min, float? clamp, bool discrete, Color32[] p)
@@ -253,9 +267,11 @@ namespace SCANsat.SCAN_UI
 		private static _Palettes divPaletteSet;
 		private static _Palettes qualPaletteSet;
 		private static _Palettes seqPaletteSet;
-		private static string currentPaletteType;
+		private static Palette.Kind currentPaletteType;
+		private static string currentPaletteTypeName;
 		private static int currentPaletteSetSize;
 		private static Palette currentHeightPalette;
+		private static Palette greyScalePalette = BrewerPalettes.Greys(9);
 
 		internal static _Palettes generatePaletteSet(int size, Palette.Kind type)
 		{
@@ -263,17 +279,24 @@ namespace SCANsat.SCAN_UI
 			return new _Palettes(PaletteLoader.palettes.ToArray(), type, size);
 		}
 
-		internal static void setCurrentPalettes(Palette.Kind type)
+		internal static _Palettes setCurrentPalettesType(Palette.Kind type)
 		{
 			switch (type)
 			{
 				case Palette.Kind.Diverging:
-					currentPaletteSet = divPaletteSet; break;
+					return divPaletteSet; 
 				case Palette.Kind.Qualitative:
-					currentPaletteSet = qualPaletteSet; break;
+					return qualPaletteSet;
 				case Palette.Kind.Sequential:
-					currentPaletteSet = seqPaletteSet; break;
+					return seqPaletteSet;
+				default:
+					return divPaletteSet;
 			}
+		}
+
+		public static Palette GreyScalePalette
+		{
+			get { return greyScalePalette; }
 		}
 
 		public static _Palettes CurrentPalettes
@@ -282,12 +305,18 @@ namespace SCANsat.SCAN_UI
 			internal set
 			{
 				currentPaletteSet = value;
-				currentPaletteType = value.paletteType.ToString();
+				currentPaletteTypeName = value.paletteType.ToString();
+				currentPaletteType = value.paletteType;
 				currentPaletteSetSize = value.size;
 			}
 		}
 
-		public static string getPaletteType
+		public static string getPaletteTypeName
+		{
+			get { return currentPaletteTypeName; }
+		}
+
+		public static Palette.Kind getPaletteType
 		{
 			get { return currentPaletteType; }
 		}
