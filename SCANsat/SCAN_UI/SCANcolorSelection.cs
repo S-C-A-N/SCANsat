@@ -28,9 +28,10 @@ namespace SCANsat.SCAN_UI
 		private bool spaceCenterLock, trackingStationLock, clampHeight, oldClampState;
 		private Rect paletteRect;
 		private _Palettes currentPalettes;
-		private Palette dataPalette, previewPalette;
+		private Palette dataPalette;
 		private string paletteSize = "6";
 		private int paletteSizeInt, oldPaletteSizeInt = 6;
+		private int paletteIndex;
 		private Texture2D currentLegend, previewLegend;
 		private string minHeightS = "-500";
 		private string maxHeightS = "8000";
@@ -116,12 +117,10 @@ namespace SCANsat.SCAN_UI
 				}
 			}
 
-			//currentLegend = data.ColorPalette.swatch;
-			//previewLegend = palette.CurrentPalette.swatch;
-
 			if (currentLegend == null || data.ColorPalette != dataPalette)// || data.PaletteReverse != dataReverse || data.PaletteDiscrete != dataDiscrete || (data.ClampHeight != null) != dataClamp)
 			{
 				dataPalette = data.ColorPalette;
+				paletteIndex = data.ColorPalette.index;
 				minHeightF = data.MinHeight;
 				minHeightS = minHeightF.ToString();
 				maxHeightF = data.MaxHeight;
@@ -177,13 +176,11 @@ namespace SCANsat.SCAN_UI
 			if (paletteBox && Event.current.type == EventType.mouseDown && !paletteRect.Contains(Event.current.mousePosition))
 				paletteBox = false;
 
-			//if (reversePalette != oldReverseState)
-			//{
-			//	oldReverseState = reversePalette;
-			//	foreach (Palette p in currentPalettes.availablePalettes)
-			//			Array.Reverse(p.colors);
-			//	drawPreviewLegend();
-			//}
+			if (reversePalette != oldReverseState)
+			{
+				oldReverseState = reversePalette;
+				drawPreviewLegend();
+			}
 
 			if (discretePalette != oldDiscreteState)
 			{
@@ -199,10 +196,17 @@ namespace SCANsat.SCAN_UI
 
 			if (paletteSizeInt != oldPaletteSizeInt)
 			{
-				oldPaletteSizeInt = paletteSizeInt;
-				palette.CurrentPalettes = palette.generatePaletteSet(paletteSizeInt, currentPalettes.paletteType);
-				currentPalettes = palette.CurrentPalettes;
-				drawPreviewLegend();
+				if (paletteSizeInt > 2)
+				{
+					oldPaletteSizeInt = paletteSizeInt;
+					palette.DivPaletteSet = palette.generatePaletteSet(paletteSizeInt, Palette.Kind.Diverging);
+					palette.QualPaletteSet = palette.generatePaletteSet(paletteSizeInt, Palette.Kind.Qualitative);
+					palette.SeqPaletteSet = palette.generatePaletteSet(paletteSizeInt, Palette.Kind.Sequential);
+					palette.CurrentPalettes = palette.generatePaletteSet(paletteSizeInt, currentPalettes.paletteType);
+					currentPalettes = palette.CurrentPalettes;
+					palette.CurrentPalette = currentPalettes.availablePalettes[paletteIndex];
+					drawPreviewLegend();
+				}
 			}
 		}
 
@@ -265,9 +269,8 @@ namespace SCANsat.SCAN_UI
 						{
 							if (GUILayout.Button("", SCANskins.SCAN_texButton, GUILayout.Width(110), GUILayout.Height(25)))
 							{
-								//if (reversePalette)
-								//	Array.Reverse(currentPalettes.availablePalettes[i].colors);
-								SCANpalette.CurrentPalette = currentPalettes.availablePalettes[i];
+								palette.CurrentPalette = currentPalettes.availablePalettes[i];
+								paletteIndex = palette.CurrentPalette.index;
 								drawPreviewLegend();
 							}
 						}
@@ -353,7 +356,7 @@ namespace SCANsat.SCAN_UI
 				if (clampHeight)
 				{
 					if (clampHeightF > minHeightF && clampHeightF < maxHeightF)
-						data.ClampHeight = clampHeightF;
+						data.ClampHeight = (float?)clampHeightF;
 				}
 				else
 					data.ClampHeight = null;
@@ -413,7 +416,7 @@ namespace SCANsat.SCAN_UI
 
 		private void drawCurrentLegend()
 		{
-			currentLegend = SCANmap.getLegend(data.MinHeight, data.MaxHeight, 0, data);
+			currentLegend = SCANmap.getLegend(0, data);
 		}
 
 		private void drawPreviewLegend()
