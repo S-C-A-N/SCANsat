@@ -411,7 +411,7 @@ namespace SCANsat.SCAN_UI
 			float scale = r.width * 1f / (max - min);
 			float x = r.x + scale * (val - min);
 			Rect lr = new Rect(x, r.y + r.height / 4, r.width - x, r.height);
-			drawLabel(lr, "|", false, false, true);
+			drawLabel(lr, "|", false, true, true);
 			string txt = val.ToString("N0");
 			GUIContent c = new GUIContent(txt);
 			Vector2 dim = SCANskins.SCAN_whiteReadoutLabel.CalcSize(c);
@@ -421,25 +421,31 @@ namespace SCANsat.SCAN_UI
 				lr.x = r.x;
 			if (lr.x + dim.x > r.x + r.width)
 				lr.x = r.x + r.width - dim.x;
-			drawLabel(lr, txt, false, false, true);
+			drawLabel(lr, txt, false, true, true);
 		}
 
 		/* FIXME: This uses assumed, shared, static constants with Legend stuff in other SCANsat files */
-		internal static void drawLegend(float min, float max, SCANdata data)
+		internal static void drawLegend(SCANdata data)
 		{
 			GUILayout.Label("", GUILayout.ExpandWidth(true));
 			Rect r = GUILayoutUtility.GetLastRect();
 			r.width -= 64;
-			GUI.DrawTexture(r, SCANmap.getLegend(min, max, SCANcontroller.controller.colours, data));
-			float minLabel = min;
-			float maxLabel = max;
-			if (min % 1000 != 0)
+			GUI.DrawTexture(r, SCANmap.getLegend(data.MinHeight, data.MaxHeight, SCANcontroller.controller.colours, data));
+			float minLabel = data.MinHeight;
+			float maxLabel = data.MaxHeight;
+			if (data.MinHeight % 1000 != 0)
 				minLabel += 500;
-			if (max % 1000 != 0)
+			if (data.MaxHeight % 1000 != 0)
 				maxLabel -= 500;
-			for (float val = minLabel; val < maxLabel; val += 1000f)
+			float range = data.MaxHeight - data.MinHeight;
+			float step = 1000f;
+			if (range > 10000)
+				step = 2000;
+			else if (range < 4000)
+				step = 500;
+			for (float val = minLabel; val < maxLabel; val += step)
 			{
-				drawLegendLabel(r, val, min, max);
+				drawLegendLabel(r, val, data.MinHeight, data.MaxHeight);
 			}
 		}
 
