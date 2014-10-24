@@ -106,10 +106,10 @@ namespace SCANsat
 		private Dictionary<Guid, SCANvessel> knownVessels = new Dictionary<Guid, SCANvessel>();
 
 		/* Primary SCANdata dictionary; only loaded once unless reloading from an earlier save or a new game */
-		private static Dictionary<string, SCANdata> body_data = null;
+		private static Dictionary<string, SCANdata> body_data;
 
 		/* Resource types loaded from configs; only needs to be loaded once */
-		private static Dictionary<string, SCANdata.SCANresourceType> resourceTypes = null;
+		private static Dictionary<string, SCANdata.SCANresourceType> resourceTypes;
 
 		/* Game tracking; used for resetting SCANdata dictionary */
 		private static Game thisGame = null;
