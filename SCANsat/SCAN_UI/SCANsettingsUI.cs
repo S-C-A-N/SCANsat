@@ -31,10 +31,8 @@ namespace SCANsat.SCAN_UI
 		/* UI: time warp names and settings */
 		private string[] twnames = { "Off", "Low", "Medium", "High" };
 		private int[] twvals = { 1, 6, 9, 15 };
-		private bool warningBoxOne, warningBoxAll, paletteBox, spaceCenterLock, trackingStationLock;
-		private Rect warningRect, paletteRect;
-		private _Palettes currentPalettes;
-		private string paletteSize = "5";
+		private bool warningBoxOne, warningBoxAll, spaceCenterLock, trackingStationLock;
+		private Rect warningRect;
 		private const string lockID = "settingLockID";
 
 		internal static Rect defaultRect = new Rect(Screen.width - (Screen.width / 2) - 180, 100, 360, 300);
@@ -61,7 +59,6 @@ namespace SCANsat.SCAN_UI
 
 		internal override void Start()
 		{
-			currentPalettes = SCANpalette.CurrentPalettes;
 		}
 
 		protected override void DrawWindowPre(int id)
@@ -109,7 +106,6 @@ namespace SCANsat.SCAN_UI
 			growS();
 				gui_settings_xmarks(id); 				/* X marker selection */
 				gui_settings_resources(id);				/* resource details sub-window */
-				//gui_settings_color_palette(id);			/* display color palettes */
 				gui_settings_toggle_body_scanning(id);	/* background and body scanning toggles */
 				gui_settings_rebuild_kethane(id);		/* rebuild Kethane database with SCANsat info */
 				gui_settings_timewarp(id);				/* time warp resolution settings */
@@ -122,7 +118,6 @@ namespace SCANsat.SCAN_UI
 			stopS();
 
 			warningBox(id);
-			//paletteSelectionBox(id);
 		}
 
 		protected override void DrawWindowPost(int id)
@@ -131,11 +126,6 @@ namespace SCANsat.SCAN_UI
 			{
 				warningBoxOne = false;
 				warningBoxAll = false;
-			}
-
-			if (paletteBox && Event.current.type == EventType.mouseDown && !paletteRect.Contains(Event.current.mousePosition))
-			{
-				paletteBox = false;
 			}
 		}
 
@@ -223,63 +213,6 @@ namespace SCANsat.SCAN_UI
 			SCANcontroller.controller.gridSelection = GUILayout.SelectionGrid(SCANcontroller.controller.gridSelection, SCANcontroller.controller.ResourcesList.Select(a => a.name).ToArray(), 4); //select resource to display
 			stopE();
 			fillS(16);
-		}
-
-		private void gui_settings_color_palette(int id)
-		{
-			//if (GUILayout.Button("Open Color Options"))
-			//{
-			//	SCANcontroller.controller.colorManager.Visible = !SCANcontroller.controller.colorManager.Visible;
-			//}
-			//fillS(16);
-			//growE();
-			//if (GUILayout.Button("Palette Style:", SCANskins.SCAN_buttonFixed, GUILayout.MaxWidth(120)))
-			//{
-			//	paletteBox = !paletteBox;
-			//}
-			//fillS(10);
-			//GUILayout.Label(SCANpalette.getPaletteType, SCANskins.SCAN_whiteReadoutLabel);
-			//fillS(10);
-			//paletteSize = GUILayout.TextField(paletteSize, 2, SCANskins.SCAN_whiteReadoutLabel);
-			//stopE();
-
-			//growE();
-			//int j = 9;
-			//if (currentPalettes.paletteType == Palette.Kind.Qualitative)
-			//	j = 8;
-			//else if (currentPalettes.paletteType == Palette.Kind.Sequential)
-			//	j = 17;
-			//else if (currentPalettes.paletteType == Palette.Kind.Invertable || currentPalettes.paletteType == Palette.Kind.Unknown)
-			//	j = 0;
-			//for (int i = 0; i < j; i++)
-			//{
-			//	if (i % 3 == 0)
-			//	{
-			//		stopE();
-			//		growE();
-			//	}
-			//	growE();
-			//	Texture2D t = currentPalettes.paletteSwatch[i];
-			//	if (paletteBox)
-			//	{
-			//		GUILayout.Label("", GUILayout.Width(110), GUILayout.Height(25));
-			//	}
-			//	else
-			//	{
-			//		if (GUILayout.Button("", SCANskins.SCAN_texButton, GUILayout.Width(110), GUILayout.Height(25)))
-			//		{
-			//			SCANpalette.CurrentPalette = currentPalettes.availablePalettes[i];
-			//		}
-			//	}
-			//	Rect r = GUILayoutUtility.GetLastRect();
-			//	r.width -= 10;
-			//	GUI.DrawTexture(r, t);
-
-			//	stopE();
-			//}
-			//stopE();
-
-			//fillS(16);
 		}
 
 		//Control background scanning options
@@ -471,25 +404,6 @@ namespace SCANsat.SCAN_UI
 				}
 			}
 		}
-
-		////Drop down menu for palette selection
-		//private void paletteSelectionBox(int id)
-		//{
-		//	if (paletteBox)
-		//	{
-		//		paletteRect = new Rect(WindowRect.width - 350, WindowRect.height - 580, 100, 80);
-		//		GUI.Box(paletteRect, "", SCANskins.SCAN_dropDownBox);
-		//		for (int i = 0; i < Palette.kindNames.Length; i++)
-		//		{
-		//			Rect r = new Rect(paletteRect.x + 10, paletteRect.y + 5 + (i * 23), 80, 22);
-		//			if (GUI.Button(r, Palette.kindNames[i], SCANskins.SCAN_dropDownButton))
-		//			{
-		//				paletteBox = false;
-		//				currentPalettes = palette.CurrentPalettes = palette.generatePaletteSet(int.Parse(paletteSize), (Palette.Kind)i);
-		//			}
-		//		}
-		//	}
-		//}
 
 	}
 }
