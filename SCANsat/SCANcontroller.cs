@@ -112,7 +112,7 @@ namespace SCANsat
 		private static Dictionary<string, SCANdata.SCANresourceType> resourceTypes;
 
 		/* Game tracking; used for resetting SCANdata dictionary */
-		private static Game thisGame = null;
+		//private static Game thisGame = null;
 
 		/* Kethane integration */
 		private bool kethaneRebuild, kethaneReset, kethaneBusy = false;
@@ -185,9 +185,6 @@ namespace SCANsat
 
 		public override void OnLoad(ConfigNode node)
 		{
-			//body_data.Clear();
-			//ResourcesList.Clear();
-			//ResourceTypes.Clear();
 			ConfigNode node_vessels = node.GetNode("Scanners");
 			if (node_vessels != null)
 			{
@@ -207,8 +204,8 @@ namespace SCANsat
 				}
 			}
 
-			if (body_data == null || thisGame != HighLogic.CurrentGame || scan_UT > Planetarium.GetUniversalTime())
-			{
+			//if (body_data == null || thisGame != HighLogic.CurrentGame || scan_UT > Planetarium.GetUniversalTime())
+			//{
 				body_data = new Dictionary<string, SCANdata>();
 				ConfigNode node_progress = node.GetNode("Progress");
 				if (node_progress != null)
@@ -224,6 +221,12 @@ namespace SCANsat
 						if (body != null)
 						{
 							SCANdata data = SCANUtil.getData(body);
+							if (data == null)
+								data = new SCANdata(body);
+							if (!body_data.ContainsKey(body_name))
+								body_data.Add(body_name, data);
+							else
+								body_data[body_name] = data;
 							try
 							{
 								string mapdata = node_body.GetValue("Map");
@@ -263,15 +266,11 @@ namespace SCANsat
 							if (node_body.HasValue("PaletteName"))
 								data.PaletteName = node_body.GetValue("PaletteName");
 							paletteLoad(data);
-							if (!body_data.ContainsKey(body_name))
-								body_data.Add(body_name, data);
-							else
-								body_data[body_name] = data;
 						}
 					}
 				}
-				thisGame = HighLogic.CurrentGame;
-			}
+			//	thisGame = HighLogic.CurrentGame;
+			//}
 			dataRebuild = false; //Used for the one-time update to the new integer array
 			if (resourceTypes == null)
 				SCANUtil.loadSCANtypes();
@@ -341,6 +340,22 @@ namespace SCANsat
 			}
 		}
 
+		private void Start()
+		{
+			GameEvents.onVesselSOIChanged.Add(SOIChange);
+			if (HighLogic.LoadedScene == GameScenes.FLIGHT)
+			{
+				if (!body_data.ContainsKey(FlightGlobals.currentMainBody.name))
+				body_data.Add(FlightGlobals.currentMainBody.name, new SCANdata(FlightGlobals.currentMainBody));
+			}
+			else if (HighLogic.LoadedScene == GameScenes.SPACECENTER || HighLogic.LoadedScene == GameScenes.TRACKSTATION)
+			{
+				if (!body_data.ContainsKey(Planetarium.fetch.Home.name))
+					body_data.Add(Planetarium.fetch.Home.name, new SCANdata(Planetarium.fetch.Home));
+			}
+			
+		}
+
 		private void Update()
 		{
 			if (scan_background)
@@ -358,6 +373,7 @@ namespace SCANsat
 
 		private void OnDestroy()
 		{
+			GameEvents.onVesselSOIChanged.Remove(SOIChange);
 			if (mainMap != null)
 				Destroy(mainMap);
 			if (settingsWindow != null)
@@ -368,6 +384,12 @@ namespace SCANsat
 				Destroy(bigMap);
 			if (kscMap != null)
 				Destroy(kscMap);
+		}
+
+		private void SOIChange(GameEvents.HostedFromToAction<Vessel, CelestialBody> VC)
+		{
+			if (!body_data.ContainsKey(VC.to.name))
+				body_data.Add(VC.to.name, new SCANdata(VC.to));
 		}
 
 		//Method to handle loading of the saved color palette
@@ -388,9 +410,6 @@ namespace SCANsat
 					var paletteMethod = brewer.GetMethod(data.PaletteName);
 					var colorP = paletteMethod.Invoke(null, new object[] { data.PaletteSize });
 					data.ColorPalette = (Palette)colorP;
-					if (data.PaletteReverse)
-						Array.Reverse(data.ColorPalette.colors);
-					SCANUtil.SCANlog("Successfully Loaded Palette Info");
 				}
 				catch (Exception e)
 				{
@@ -614,10 +633,13 @@ namespace SCANsat
 			currentActiveVessel = 0;
 			actualPasses = 0;
 			maxRes = 0;
-			var bdata = body_data.ElementAt(i);     //SCANUtil.getData(FlightGlobals.Bodies[i]); //Update coverage for planets one at a time, rather than all together
-			bdata.Value.updateCoverage();
-			i++;
-			if (i >= FlightGlobals.Bodies.Count) i = 0;
+			if (body_data.Count > 0)
+			{
+				var bdata = body_data.ElementAt(i);     //SCANUtil.getData(FlightGlobals.Bodies[i]); //Update coverage for planets one at a time, rather than all together
+				bdata.Value.updateCoverage();
+				i++;
+				if (i >= body_data.Count) i = 0;
+			}
 			foreach (Vessel v in FlightGlobals.Vessels)
 			{
 				if (!knownVessels.ContainsKey(v.id)) continue;
