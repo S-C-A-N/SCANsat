@@ -25,16 +25,11 @@ namespace SCANsat.SCAN_UI
 		private IButton MapButton;
 		private IButton SmallButton;
 		private IButton KSCButton;
-		//private IButton SettingsButton;
 
 		internal SCANtoolbar()
 		{
 			if (!ToolbarManager.ToolbarAvailable) return; // bail if we don't have a toolbar
-			//if (SCANcontroller.controller == null)
-			//{
-			//	Debug.LogError("[SCANsat] Warning: SCANsat scenario module not initialized; Shutting down toolbar interface");
-			//	return;
-			//}
+
 			if (HighLogic.LoadedSceneIsFlight)
 			{
 				SCANButton = ToolbarManager.Instance.add("SCANsat", "UIMenu");
@@ -59,46 +54,49 @@ namespace SCANsat.SCAN_UI
 				MapButton.ToolTip = "SCANsat Big Map";
 				SmallButton.ToolTip = "SCANsat Small Map";
 
-				SCANButton.OnClick += (e) => toggleMenu(SCANButton);
+				SCANButton.OnClick += (e) => 
+					{
+						if (SCANcontroller.controller != null)
+						{
+							toggleMenu(SCANButton);
+						}
+					};
 				MapButton.OnClick += (e) =>
 				{
-					SCANcontroller.controller.bigMap.Visible = !SCANcontroller.controller.bigMap.Visible;
-					SCANcontroller.controller.bigMapVisible = !SCANcontroller.controller.bigMapVisible;
+					if (SCANcontroller.controller != null)
+					{
+						SCANcontroller.controller.bigMap.Visible = !SCANcontroller.controller.bigMap.Visible;
+						SCANcontroller.controller.bigMapVisible = !SCANcontroller.controller.bigMapVisible;
+					}
 				};
 				SmallButton.OnClick += (e) =>
 				{
-					SCANcontroller.controller.mainMap.Visible = !SCANcontroller.controller.mainMap.Visible;
-					SCANcontroller.controller.mainMapVisible = !SCANcontroller.controller.mainMapVisible;
+					if (SCANcontroller.controller != null)
+					{
+						SCANcontroller.controller.mainMap.Visible = !SCANcontroller.controller.mainMap.Visible;
+						SCANcontroller.controller.mainMapVisible = !SCANcontroller.controller.mainMapVisible;
+					}
 				};
 			}
 			else if (HighLogic.LoadedScene == GameScenes.SPACECENTER || HighLogic.LoadedScene == GameScenes.TRACKSTATION)
 			{
 				KSCButton = ToolbarManager.Instance.add("SCANsat", "KSCMap");
-				//SettingsButton = ToolbarManager.Instance.add("SCANsat", "KSCSettings");
 
 				if (File.Exists(Path.Combine(new DirectoryInfo(KSPUtil.ApplicationRootPath).FullName, "GameData/SCANsat/Icons/SCANsat_Map_Icon.png").Replace("\\", "/")))
 					KSCButton.TexturePath = "SCANsat/Icons/SCANsat_Map_Icon"; // from in-game biome map of Kerbin
 				else
 					KSCButton.TexturePath = "000_Toolbar/move-cursor";
-				//if (File.Exists(Path.Combine(new DirectoryInfo(KSPUtil.ApplicationRootPath).FullName, "GameData/SCANsat/Icons/SCANsat_Icon.png").Replace("\\", "/")))
-				//	SettingsButton.TexturePath = "SCANsat/Icons/SCANsat_Icon"; // S.C.A.N
-				//else
-				//	SettingsButton.TexturePath = "000_Toolbar/toolbar-dropdown";
 
 				KSCButton.ToolTip = "SCANsat KSC Map";
-				//SettingsButton.ToolTip = "Settings Menu";
 
 				KSCButton.OnClick += (e) =>
 					{
-						SCANcontroller.controller.kscMap.Visible = !SCANcontroller.controller.kscMap.Visible;
-						SCANcontroller.controller.kscMapVisible = !SCANcontroller.controller.kscMapVisible;
+						if (SCANcontroller.controller != null)
+						{
+							SCANcontroller.controller.kscMap.Visible = !SCANcontroller.controller.kscMap.Visible;
+							SCANcontroller.controller.kscMapVisible = !SCANcontroller.controller.kscMapVisible;
+						}
 					};
-				//SettingsButton.OnClick += (e) =>
-				//	{
-				//		if (!SCANcontroller.controller.settingsWindow.Visible)
-				//			SCANcontroller.controller.Resources(FlightGlobals.currentMainBody);
-				//		SCANcontroller.controller.settingsWindow.Visible = !SCANcontroller.controller.settingsWindow.Visible;
-				//	};
 			}
 		}
 
@@ -161,8 +159,6 @@ namespace SCANsat.SCAN_UI
 				SmallButton.Destroy();
 			if (KSCButton != null)
 				KSCButton.Destroy();
-			//if (SettingsButton != null)
-			//	SettingsButton.Destroy();
 		}
 
 	}

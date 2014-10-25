@@ -20,7 +20,6 @@ namespace SCANsat
 {
 	public class SCANsat : PartModule, IScienceDataContainer
 	{
-		protected SCANcontroller con = SCANcontroller.controller;
 		protected bool powerIsProblem;
 		protected Animation anim = null;
 		protected List<ScienceData> storedData = new List<ScienceData>();
@@ -151,8 +150,7 @@ namespace SCANsat
 					if (powerIsProblem)
 					{
 						addStatic();
-						if (SCANcontroller.controller != null)
-							registerScanner();
+						registerScanner();
 					}
 				}
 			}
@@ -273,7 +271,7 @@ namespace SCANsat
 		[KSPEvent(guiActive = true, guiName = "Start RADAR Scan", active = true)]
 		public void startScan()
 		{
-			if (!ToolbarManager.ToolbarAvailable)
+			if (!ToolbarManager.ToolbarAvailable && SCANcontroller.controller != null)
 				SCANcontroller.controller.mainMap.Visible = true;
 #if DEBUG
 			//SCANui.minimode = (SCANui.minimode > 0 ? 2 : -SCANui.minimode);
@@ -409,14 +407,14 @@ namespace SCANsat
 		public void registerScanner()
 		{
 			scanning = true;
-			if (sensorType > 0)
+			if (sensorType > 0 && SCANcontroller.controller != null)
 				SCANcontroller.controller.registerSensor(vessel, (SCANdata.SCANtype)sensorType, fov, min_alt, max_alt, best_alt);
 		}
 
 		public void unregisterScanner()
 		{
 			scanning = false;
-			if (sensorType > 0)
+			if (sensorType > 0 && SCANcontroller.controller != null)
 				SCANcontroller.controller.unregisterSensor(vessel, (SCANdata.SCANtype)sensorType);
 		}
 
