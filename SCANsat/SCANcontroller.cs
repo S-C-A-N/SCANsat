@@ -260,7 +260,8 @@ namespace SCANsat
 								data.PaletteReverse = pRev;
 							if (bool.TryParse(node_body.GetValue("PaletteDiscrete"), out pDis))
 								data.PaletteDiscrete = pDis;
-							data.PaletteName = node_body.GetValue("PaletteName");
+							if (node_body.HasValue("PaletteName"))
+								data.PaletteName = node_body.GetValue("PaletteName");
 							paletteLoad(data);
 							if (!body_data.ContainsKey(body_name))
 								body_data.Add(body_name, data);
@@ -372,7 +373,7 @@ namespace SCANsat
 		//Method to handle loading of the saved color palette
 		private void paletteLoad(SCANdata data)
 		{
-			if (data.PaletteName == "Default" || data.PaletteName == "")
+			if (data.PaletteName == "Default" || string.IsNullOrEmpty(data.PaletteName))
 			{
 				data.ColorPalette = PaletteLoader.defaultPalette;
 				data.PaletteName = "Default";
