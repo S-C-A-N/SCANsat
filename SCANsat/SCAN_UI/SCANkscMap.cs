@@ -469,18 +469,28 @@ namespace SCANsat.SCAN_UI
 
 			else if (planetoid_drop_down)
 			{
+				int j = 0;
 				ddRect = new Rect(WindowRect.width - 140, 45, 100, 160);
 				GUI.Box(ddRect, "", SCANskins.SCAN_dropDownBox);
 				for (int i = 0; i < FlightGlobals.Bodies.Count; i++)
 				{
-					scrollP = GUI.BeginScrollView(ddRect, scrollP, new Rect(0, 0, 80, 20 * FlightGlobals.Bodies.Count));
-					Rect r = new Rect(2, 20 * i, 76, 20);
-					if (GUI.Button(r, FlightGlobals.Bodies[i].name, SCANskins.SCAN_dropDownButton))
+					scrollP = GUI.BeginScrollView(ddRect, scrollP, new Rect(0, 0, 80, (20 * SCANcontroller.Body_Data.Count) + 1));
+					if (SCANcontroller.Body_Data.ContainsKey(FlightGlobals.Bodies[i].name))
 					{
-						b = FlightGlobals.Bodies[i];
-						data = SCANUtil.getData(b);
-						bigmap.setBody(b);
-						drop_down_open = false;
+						Rect r = new Rect(2, 20 * j, 76, 20);
+						if (GUI.Button(r, FlightGlobals.Bodies[i].name, SCANskins.SCAN_dropDownButton))
+						{
+							CelestialBody newB = FlightGlobals.Bodies[i];
+							SCANdata newData = SCANUtil.getData(newB);
+							if (newData != null)
+							{
+								data = newData;
+								b = newB;
+								bigmap.setBody(b);
+							}
+							drop_down_open = false;
+						}
+						j++;
 					}
 					GUI.EndScrollView();
 				}
