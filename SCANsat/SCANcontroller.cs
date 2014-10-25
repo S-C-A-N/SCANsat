@@ -105,14 +105,11 @@ namespace SCANsat
 		/* Primary SCANsat vessel dictionary; loaded every time */
 		private Dictionary<Guid, SCANvessel> knownVessels = new Dictionary<Guid, SCANvessel>();
 
-		/* Primary SCANdata dictionary; only loaded once unless reloading from an earlier save or a new game */
-		private static Dictionary<string, SCANdata> body_data;
+		/* Primary SCANdata dictionary; loaded every time; static to protect against null SCANcontroller instance */
+		private static Dictionary<string, SCANdata> body_data = new Dictionary<string,SCANdata>();
 
 		/* Resource types loaded from configs; only needs to be loaded once */
 		private static Dictionary<string, SCANdata.SCANresourceType> resourceTypes;
-
-		/* Game tracking; used for resetting SCANdata dictionary */
-		//private static Game thisGame = null;
 
 		/* Kethane integration */
 		private bool kethaneRebuild, kethaneReset, kethaneBusy = false;
@@ -126,7 +123,7 @@ namespace SCANsat
 		internal SCAN_MBW colorManager;
 
 		#region Public Accessors
-
+		/* Use these to access private members of this class */
 		public List<SCANdata.SCANResource> ResourcesList
 		{
 			get { return resourcesList; }
@@ -135,7 +132,15 @@ namespace SCANsat
 		public static Dictionary<string, SCANdata> Body_Data
 		{
 			get { return body_data; }
-			internal set { body_data = value; }
+		}
+
+		/* Use this method to protect against duplicate dictionary keys */
+		public void addToBodyData (CelestialBody b, SCANdata data)
+		{
+			if (!body_data.ContainsKey(b.name))
+				body_data.Add(b.name, data);
+			else
+				Debug.LogError("[SCANsat] Warning: SCANdata Dictionary Already Contains Key of This Type");
 		}
 
 		public static Dictionary<string, SCANdata.SCANresourceType> ResourceTypes
@@ -188,6 +193,8 @@ namespace SCANsat
 			ConfigNode node_vessels = node.GetNode("Scanners");
 			if (node_vessels != null)
 			{
+				body_data = new Dictionary<string, SCANdata>();
+
 				print("SCANsat Controller: Loading " + node_vessels.CountNodes.ToString() + " known vessels");
 				foreach (ConfigNode node_vessel in node_vessels.GetNodes("Vessel"))
 				{
@@ -204,73 +211,68 @@ namespace SCANsat
 				}
 			}
 
-			//if (body_data == null || thisGame != HighLogic.CurrentGame || scan_UT > Planetarium.GetUniversalTime())
-			//{
-				body_data = new Dictionary<string, SCANdata>();
-				ConfigNode node_progress = node.GetNode("Progress");
-				if (node_progress != null)
+			ConfigNode node_progress = node.GetNode("Progress");
+			if (node_progress != null)
+			{
+				foreach (ConfigNode node_body in node_progress.GetNodes("Body"))
 				{
-					foreach (ConfigNode node_body in node_progress.GetNodes("Body"))
+					float min, max, clamp;
+					int pSize;
+					bool pRev, pDis, disabled;
+					string body_name = node_body.GetValue("Name");
+					print("SCANsat Controller: Loading map for " + body_name);
+					CelestialBody body = FlightGlobals.Bodies.FirstOrDefault(b => b.name == body_name);
+					if (body != null)
 					{
-						float min, max, clamp;
-						int pSize;
-						bool pRev, pDis, disabled;
-						string body_name = node_body.GetValue("Name");
-						print("SCANsat Controller: Loading map for " + body_name);
-						CelestialBody body = FlightGlobals.Bodies.FirstOrDefault(b => b.name == body_name);
-						if (body != null)
+						SCANdata data = SCANUtil.getData(body);
+						if (data == null)
+							data = new SCANdata(body);
+						if (!body_data.ContainsKey(body_name))
+							body_data.Add(body_name, data);
+						else
+							body_data[body_name] = data;
+						try
 						{
-							SCANdata data = SCANUtil.getData(body);
-							if (data == null)
-								data = new SCANdata(body);
-							if (!body_data.ContainsKey(body_name))
-								body_data.Add(body_name, data);
+							string mapdata = node_body.GetValue("Map");
+							if (dataRebuild)
+							{ //On the first load deserialize the "Map" value to both coverage arrays
+								SCANUtil.integerDeserialize(mapdata, true, data);
+							}
 							else
-								body_data[body_name] = data;
-							try
 							{
-								string mapdata = node_body.GetValue("Map");
-								if (dataRebuild)
-								{ //On the first load deserialize the "Map" value to both coverage arrays
-									SCANUtil.integerDeserialize(mapdata, true, data);
-								}
-								else
-								{
-									SCANUtil.integerDeserialize(mapdata, false, data);
-								}
+								SCANUtil.integerDeserialize(mapdata, false, data);
 							}
-							catch (Exception e)
-							{
-								print(e.ToString());
-								print(e.StackTrace);
-								// fail somewhat gracefully; don't make the save unloadable 
-							}
-							//Verify that saved data types can be converted, revert to default values otherwise
-							if (bool.TryParse(node_body.GetValue("Disabled"), out disabled))
-								data.Disabled = disabled;
-							if (float.TryParse(node_body.GetValue("MinHeightRange"), out min))
-								data.MinHeight = min;
-							if (float.TryParse(node_body.GetValue("MaxHeightRange"), out max))
-								data.MaxHeight = max;
-							if (node_body.HasValue("ClampHeight"))
-							{
-								if (float.TryParse(node_body.GetValue("ClampHeight"), out clamp))
-									data.ClampHeight = clamp;
-							}
-							if (int.TryParse(node_body.GetValue("PaletteSize"), out pSize))
-								data.PaletteSize = pSize;
-							if (bool.TryParse(node_body.GetValue("PaletteReverse"), out pRev))
-								data.PaletteReverse = pRev;
-							if (bool.TryParse(node_body.GetValue("PaletteDiscrete"), out pDis))
-								data.PaletteDiscrete = pDis;
-							if (node_body.HasValue("PaletteName"))
-								data.PaletteName = node_body.GetValue("PaletteName");
-							paletteLoad(data);
 						}
+						catch (Exception e)
+						{
+							print(e.ToString());
+							print(e.StackTrace);
+							// fail somewhat gracefully; don't make the save unloadable 
+						}
+						//Verify that saved data types can be converted, revert to default values otherwise
+						if (bool.TryParse(node_body.GetValue("Disabled"), out disabled))
+							data.Disabled = disabled;
+						if (float.TryParse(node_body.GetValue("MinHeightRange"), out min))
+							data.MinHeight = min;
+						if (float.TryParse(node_body.GetValue("MaxHeightRange"), out max))
+							data.MaxHeight = max;
+						if (node_body.HasValue("ClampHeight"))
+						{
+							if (float.TryParse(node_body.GetValue("ClampHeight"), out clamp))
+								data.ClampHeight = clamp;
+						}
+						if (int.TryParse(node_body.GetValue("PaletteSize"), out pSize))
+							data.PaletteSize = pSize;
+						if (bool.TryParse(node_body.GetValue("PaletteReverse"), out pRev))
+							data.PaletteReverse = pRev;
+						if (bool.TryParse(node_body.GetValue("PaletteDiscrete"), out pDis))
+							data.PaletteDiscrete = pDis;
+						if (node_body.HasValue("PaletteName"))
+							data.PaletteName = node_body.GetValue("PaletteName");
+						paletteLoad(data);
 					}
 				}
-			//	thisGame = HighLogic.CurrentGame;
-			//}
+			}
 			dataRebuild = false; //Used for the one-time update to the new integer array
 			if (resourceTypes == null)
 				SCANUtil.loadSCANtypes();
@@ -645,6 +647,8 @@ namespace SCANsat
 				if (!knownVessels.ContainsKey(v.id)) continue;
 				SCANvessel vessel = knownVessels[v.id];
 				SCANdata data = SCANUtil.getData(v.mainBody);
+				if (data == null)
+					continue;
 				vessel.vessel = v;
 
 				if (!data.Disabled)
@@ -676,6 +680,8 @@ namespace SCANsat
 		{
 			Vessel v = vessel.vessel;
 			SCANdata data = SCANUtil.getData(v.mainBody);
+			if (data == null)
+				return;
 			double soi_radius = v.mainBody.sphereOfInfluence - v.mainBody.Radius;
 			double alt = v.altitude, lat = SCANUtil.fixLatShift(v.latitude), lon = SCANUtil.fixLonShift(v.longitude);
 			double res = 0;
