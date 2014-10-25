@@ -118,18 +118,23 @@ namespace SCANsat.SCAN_UI
 			if (currentLegend == null || data.ColorPalette != dataPalette)
 			{
 				dataPalette = data.ColorPalette;
-				paletteIndex = data.ColorPalette.index;
-				regenPaletteSets();
 				minHeightF = data.MinHeight;
 				minHeightS = minHeightF.ToString();
 				maxHeightF = data.MaxHeight;
 				maxHeightS = maxHeightF.ToString();
-				clampHeight = data.ClampHeight != null;
+				oldPaletteSizeInt= paletteSizeInt = data.PaletteSize;
+				paletteSize = paletteSizeInt.ToString();
+				oldReverseState = reversePalette = data.PaletteReverse;
+				oldDiscreteState = discretePalette = data.PaletteDiscrete;
+				oldClampState = clampHeight = data.ClampHeight != null;
 				if (clampHeight)
 				{
 					clampHeightF = (float)data.ClampHeight;
 					clampHeightS = clampHeightF.ToString();
 				}
+				palette.CurrentPalettes = palette.setCurrentPalettesType(dataPalette.kind);
+				palette.CurrentPalette = palette.CurrentPalettes.availablePalettes[0];
+				regenPaletteSets();
 				drawCurrentLegend();
 			}
 			if (previewLegend == null)
@@ -188,6 +193,8 @@ namespace SCANsat.SCAN_UI
 				{
 					oldPaletteSizeInt = paletteSizeInt;
 					regenPaletteSets();
+					palette.CurrentPalette = palette.CurrentPalettes.availablePalettes[paletteIndex];
+					drawPreviewLegend();
 				}
 			}
 		}
@@ -228,10 +235,8 @@ namespace SCANsat.SCAN_UI
 				stopE();
 				growE();
 					int j = 9;
-					if (palette.CurrentPalettes.paletteType == Palette.Kind.Qualitative)
-						j = 8;
-					else if (palette.CurrentPalettes.paletteType == Palette.Kind.Sequential)
-						j = 17;
+					if (palette.CurrentPalettes.paletteType == Palette.Kind.Sequential)
+						j = 12;
 					else if (palette.CurrentPalettes.paletteType == Palette.Kind.Invertable || palette.CurrentPalettes.paletteType == Palette.Kind.Unknown)
 						j = 0;
 					for (int i = 0; i < j; i++)
@@ -417,8 +422,6 @@ namespace SCANsat.SCAN_UI
 			palette.QualPaletteSet = palette.generatePaletteSet(paletteSizeInt, Palette.Kind.Qualitative);
 			palette.SeqPaletteSet = palette.generatePaletteSet(paletteSizeInt, Palette.Kind.Sequential);
 			palette.CurrentPalettes = palette.setCurrentPalettesType(palette.getPaletteType);
-			palette.CurrentPalette = palette.CurrentPalettes.availablePalettes[paletteIndex];
-			drawPreviewLegend();
 		}
 
 	}
