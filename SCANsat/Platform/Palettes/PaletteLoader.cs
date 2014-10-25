@@ -15,7 +15,7 @@ namespace SCANsat.Platform.Palettes
 		{
 			Color32[] c;
 			c = new[] { (Color32)palette.xkcd_DarkPurple, (Color32)palette.xkcd_Cerulean, (Color32)palette.xkcd_ArmyGreen, (Color32)palette.xkcd_Yellow, (Color32)palette.xkcd_Red, (Color32)palette.xkcd_Magenta, (Color32)palette.xkcd_White };
-			return new Palette(c, "Default", Palette.Kind.Diverging, (Palette.Is)2, (Palette.Is)2, (Palette.Is)2, (Palette.Is)2);
+			return new Palette(c, "Default", Palette.Kind.Qualitative, (Palette.Is)2, (Palette.Is)2, (Palette.Is)2, (Palette.Is)2);
 		}
 
 		internal static void generatePalettes(Palette.Kind Kind, int Size)
@@ -23,7 +23,6 @@ namespace SCANsat.Platform.Palettes
 			palettes.Clear();
 			if (Kind == Palette.Kind.Diverging)
 			{
-				palettes.Add(defaultPalette);
 				palettes.Add(ColorBrewer.BrewerPalettes.Spectral(Size));
 				palettes.Add(ColorBrewer.BrewerPalettes.RdYlGn(Size));
 				palettes.Add(ColorBrewer.BrewerPalettes.RdBu(Size));
@@ -36,6 +35,7 @@ namespace SCANsat.Platform.Palettes
 			}
 			else if (Kind == Palette.Kind.Qualitative)
 			{
+				palettes.Add(defaultPalette);
 				palettes.Add(ColorBrewer.BrewerPalettes.Set2(Size));
 				palettes.Add(ColorBrewer.BrewerPalettes.Accent(Size));
 				palettes.Add(ColorBrewer.BrewerPalettes.Set1(Size));
@@ -49,16 +49,16 @@ namespace SCANsat.Platform.Palettes
 			{
 				palettes.Add(ColorBrewer.BrewerPalettes.OrRd(Size));
 				palettes.Add(ColorBrewer.BrewerPalettes.BuPu(Size));
-				palettes.Add(ColorBrewer.BrewerPalettes.Oranges(Size));
+				//palettes.Add(ColorBrewer.BrewerPalettes.Oranges(Size));
 				palettes.Add(ColorBrewer.BrewerPalettes.BuGn(Size));
 				palettes.Add(ColorBrewer.BrewerPalettes.YlOrBr(Size));
 				palettes.Add(ColorBrewer.BrewerPalettes.YlGn(Size));
 				palettes.Add(ColorBrewer.BrewerPalettes.Reds(Size));
 				palettes.Add(ColorBrewer.BrewerPalettes.RdPu(Size));
-				palettes.Add(ColorBrewer.BrewerPalettes.Greens(Size));
+				//palettes.Add(ColorBrewer.BrewerPalettes.Greens(Size));
 				palettes.Add(ColorBrewer.BrewerPalettes.YlGnBu(Size));
-				palettes.Add(ColorBrewer.BrewerPalettes.Purples(Size));
-				palettes.Add(ColorBrewer.BrewerPalettes.GnBu(Size));
+				//palettes.Add(ColorBrewer.BrewerPalettes.Purples(Size));
+				//palettes.Add(ColorBrewer.BrewerPalettes.GnBu(Size));
 				//palettes.Add(ColorBrewer.BrewerPalettes.Greys(Size));
 				palettes.Add(ColorBrewer.BrewerPalettes.YlOrRd(Size));
 				palettes.Add(ColorBrewer.BrewerPalettes.PuRd(Size));
