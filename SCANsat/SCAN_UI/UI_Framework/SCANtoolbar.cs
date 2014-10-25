@@ -25,7 +25,7 @@ namespace SCANsat.SCAN_UI
 		private IButton MapButton;
 		private IButton SmallButton;
 		private IButton KSCButton;
-		private IButton SettingsButton;
+		//private IButton SettingsButton;
 
 		internal SCANtoolbar()
 		{
@@ -74,31 +74,31 @@ namespace SCANsat.SCAN_UI
 			else if (HighLogic.LoadedScene == GameScenes.SPACECENTER || HighLogic.LoadedScene == GameScenes.TRACKSTATION)
 			{
 				KSCButton = ToolbarManager.Instance.add("SCANsat", "KSCMap");
-				SettingsButton = ToolbarManager.Instance.add("SCANsat", "KSCSettings");
+				//SettingsButton = ToolbarManager.Instance.add("SCANsat", "KSCSettings");
 
 				if (File.Exists(Path.Combine(new DirectoryInfo(KSPUtil.ApplicationRootPath).FullName, "GameData/SCANsat/Icons/SCANsat_Map_Icon.png").Replace("\\", "/")))
 					KSCButton.TexturePath = "SCANsat/Icons/SCANsat_Map_Icon"; // from in-game biome map of Kerbin
 				else
 					KSCButton.TexturePath = "000_Toolbar/move-cursor";
-				if (File.Exists(Path.Combine(new DirectoryInfo(KSPUtil.ApplicationRootPath).FullName, "GameData/SCANsat/Icons/SCANsat_Icon.png").Replace("\\", "/")))
-					SettingsButton.TexturePath = "SCANsat/Icons/SCANsat_Icon"; // S.C.A.N
-				else
-					SettingsButton.TexturePath = "000_Toolbar/toolbar-dropdown";
+				//if (File.Exists(Path.Combine(new DirectoryInfo(KSPUtil.ApplicationRootPath).FullName, "GameData/SCANsat/Icons/SCANsat_Icon.png").Replace("\\", "/")))
+				//	SettingsButton.TexturePath = "SCANsat/Icons/SCANsat_Icon"; // S.C.A.N
+				//else
+				//	SettingsButton.TexturePath = "000_Toolbar/toolbar-dropdown";
 
 				KSCButton.ToolTip = "SCANsat KSC Map";
-				SettingsButton.ToolTip = "Settings Menu";
+				//SettingsButton.ToolTip = "Settings Menu";
 
 				KSCButton.OnClick += (e) =>
 					{
 						SCANcontroller.controller.kscMap.Visible = !SCANcontroller.controller.kscMap.Visible;
 						SCANcontroller.controller.kscMapVisible = !SCANcontroller.controller.kscMapVisible;
 					};
-				SettingsButton.OnClick += (e) =>
-					{
-						if (!SCANcontroller.controller.settingsWindow.Visible)
-							SCANcontroller.controller.Resources(FlightGlobals.currentMainBody);
-						SCANcontroller.controller.settingsWindow.Visible = !SCANcontroller.controller.settingsWindow.Visible;
-					};
+				//SettingsButton.OnClick += (e) =>
+				//	{
+				//		if (!SCANcontroller.controller.settingsWindow.Visible)
+				//			SCANcontroller.controller.Resources(FlightGlobals.currentMainBody);
+				//		SCANcontroller.controller.settingsWindow.Visible = !SCANcontroller.controller.settingsWindow.Visible;
+				//	};
 			}
 		}
 
@@ -161,8 +161,8 @@ namespace SCANsat.SCAN_UI
 				SmallButton.Destroy();
 			if (KSCButton != null)
 				KSCButton.Destroy();
-			if (SettingsButton != null)
-				SettingsButton.Destroy();
+			//if (SettingsButton != null)
+			//	SettingsButton.Destroy();
 		}
 
 	}
