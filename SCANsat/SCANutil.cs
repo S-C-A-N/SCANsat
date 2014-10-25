@@ -43,7 +43,10 @@ namespace SCANsat
 			if (SCANcontroller.controller != null)
 			{
 				SCANdata data = getData(body);
-				return (data.Coverage[ilon, ilat] & SCANtype) != 0;
+				if (data != null)
+					return (data.Coverage[ilon, ilat] & SCANtype) != 0;
+				else
+					return false;
 			}
 			else
 				return false;
@@ -63,7 +66,10 @@ namespace SCANsat
 			if (SCANcontroller.controller != null)
 			{
 				SCANdata data = getData(body);
-				return (data.Coverage[lon, lat] & SCANtype) != 0;
+				if (data != null)
+					return (data.Coverage[lon, lat] & SCANtype) != 0;
+				else
+					return false;
 			}
 			else
 				return false;
@@ -80,7 +86,10 @@ namespace SCANsat
 			if (SCANcontroller.controller != null)
 			{
 				SCANdata data = getData(Body);
-				return data.getCoveragePercentage((SCANdata.SCANtype)SCANtype);
+				if (data != null)
+					return data.getCoveragePercentage((SCANdata.SCANtype)SCANtype);
+				else
+					return 0;
 			}
 			else
 				return 0;
@@ -156,7 +165,8 @@ namespace SCANsat
 		{
 			if (!SCANcontroller.Body_Data.ContainsKey(body.name))
 			{
-				return new SCANdata(body);
+				return null;
+				//return new SCANdata(body);
 				//SCANcontroller.controller.Body_Data[body.name] = new SCANdata(body);
 			}
 			SCANdata data = SCANcontroller.Body_Data[body.name];
