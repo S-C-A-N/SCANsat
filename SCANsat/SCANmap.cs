@@ -418,6 +418,8 @@ namespace SCANsat
 		public Texture2D getPartialMap()
 		{
 			SCANdata data = SCANUtil.getData(body);
+			if (data == null)
+				return new Texture2D(1, 1);
 			Color[] pix;
 
 			/* init cache if necessary */

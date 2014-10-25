@@ -378,6 +378,8 @@ namespace SCANsat
 		public void addStatic()
 		{
 			SCANdata data = SCANUtil.getData(vessel.mainBody);
+			if (data == null)
+				return;
 			Texture2D map = data.Map;
 			if (map != null)
 			{

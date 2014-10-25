@@ -76,6 +76,11 @@ namespace SCANsat.SCAN_UI
 			}
 			b = FlightGlobals.currentMainBody;
 			data = SCANUtil.getData(b);
+			if (data == null)
+			{
+				data = new SCANdata(b);
+				SCANcontroller.controller.addToBodyData(b, data);
+			}
 			WindowCaption = string.Format("Map of {0}", b.theName);
 			bigmap.setBody(b);
 		}
@@ -118,6 +123,11 @@ namespace SCANsat.SCAN_UI
 			{
 				b = v.mainBody;
 				data = SCANUtil.getData(b);
+				if (data == null)
+				{
+					data = new SCANdata(b);
+					SCANcontroller.controller.addToBodyData(b, data);
+				}
 				bigmap.setBody(b);
 			}
 		}

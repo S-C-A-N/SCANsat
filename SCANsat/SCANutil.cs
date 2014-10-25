@@ -125,6 +125,8 @@ namespace SCANsat
 		internal static double getCoveragePercentage(CelestialBody body, SCANdata.SCANtype type )
 		{
 			SCANdata data = getData(body);
+			if (data == null)
+				return 0;
 			double cov = 0d;
 			if (type == SCANdata.SCANtype.Nothing)
 				type = SCANdata.SCANtype.AltimetryLoRes | SCANdata.SCANtype.AltimetryHiRes | SCANdata.SCANtype.Biome | SCANdata.SCANtype.Anomaly;          
@@ -166,18 +168,9 @@ namespace SCANsat
 			if (!SCANcontroller.Body_Data.ContainsKey(body.name))
 			{
 				return null;
-				//return new SCANdata(body);
-				//SCANcontroller.controller.Body_Data[body.name] = new SCANdata(body);
 			}
 			SCANdata data = SCANcontroller.Body_Data[body.name];
 			return data;
-		}
-
-		internal static SCANdata getDataNullable(CelestialBody body)
-		{
-			if (!SCANcontroller.Body_Data.ContainsKey(body.name))
-				return null;
-			return SCANcontroller.Body_Data[body.name];
 		}
 
 		internal static double getElevation(CelestialBody body, double lon, double lat)
@@ -212,6 +205,8 @@ namespace SCANsat
 		internal static ScienceData getAvailableScience(Vessel v, SCANdata.SCANtype sensor, bool notZero)
 		{
 			SCANdata data = getData(v.mainBody);
+			if (data == null)
+				return null;
 			ScienceData sd = null;
 			ScienceExperiment se = null;
 			ScienceSubject su = null;

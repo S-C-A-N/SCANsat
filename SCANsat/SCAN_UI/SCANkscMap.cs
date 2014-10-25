@@ -76,6 +76,11 @@ namespace SCANsat.SCAN_UI
 				SCANcontroller.controller.map_ResourceOverlay = false;
 			WindowCaption = string.Format("Map of {0}", b.theName);
 			data = SCANUtil.getData(b);
+			if (data == null)
+			{
+				data = new SCANdata(b);
+				SCANcontroller.controller.addToBodyData(b, data);
+			}
 			bigmap.setBody(b);
 		}
 

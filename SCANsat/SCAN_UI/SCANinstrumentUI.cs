@@ -48,6 +48,11 @@ namespace SCANsat.SCAN_UI
 		{
 			GameEvents.onVesselSOIChanged.Add(soiChange);
 			data = SCANUtil.getData(FlightGlobals.currentMainBody);
+			if (data == null)
+			{
+				data = new SCANdata(FlightGlobals.currentMainBody);
+				SCANcontroller.controller.addToBodyData(FlightGlobals.currentMainBody, data);
+			}
 		}
 
 		internal override void OnDestroy()
@@ -202,6 +207,11 @@ namespace SCANsat.SCAN_UI
 		private void soiChange (GameEvents.HostedFromToAction<Vessel, CelestialBody> VC)
 		{
 			data = SCANUtil.getData(VC.to);
+			if (data == null)
+			{
+				data = new SCANdata(VC.to);
+				SCANcontroller.controller.addToBodyData(VC.to, data);
+			}
 		}
 
 	}

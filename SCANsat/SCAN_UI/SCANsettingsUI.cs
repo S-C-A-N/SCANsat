@@ -225,19 +225,10 @@ namespace SCANsat.SCAN_UI
 			// scanning for individual SoIs
 			growE();
 			int count = 0;
-			//foreach (CelestialBody body in FlightGlobals.Bodies)
-			//{
 			foreach (var data in SCANcontroller.Body_Data)
 			{
 				if (count == 0) growS();
-				//SCANdata data = SCANUtil.getDataNullable(body);
-				//if (data != null)
-				//{
 					data.Value.Disabled = !GUILayout.Toggle(!data.Value.Disabled, string.Format("{0} ({1:N1}%)", data.Key, data.Value.getCoveragePercentage(SCANdata.SCANtype.Nothing)));
-					//)body.bodyName + " (" + data.getCoveragePercentage(SCANdata.SCANtype.Nothing).ToString("N1") + "%)"); //No longer updates while the suttings menu is open
-				//}
-				//else
-				//	GUILayout.Toggle(false, string.Format("{0} (0%)", body.bodyName));
 				switch (count)
 				{
 					case 5: stopS(); count = 0; break;
@@ -347,6 +338,11 @@ namespace SCANsat.SCAN_UI
 			if (GUILayout.Button("Fill SCAN map of " + thisBody.theName, SCANskins.SCAN_buttonFixed))
 			{
 				SCANdata data = SCANUtil.getData(thisBody);
+				if (data == null)
+				{
+					data = new SCANdata(thisBody);
+					SCANcontroller.controller.addToBodyData(thisBody, data);
+				}
 				data.fillMap();
 			}
 			if (GUILayout.Button("Fill SCAN map for all planets", SCANskins.SCAN_buttonFixed))
@@ -354,8 +350,11 @@ namespace SCANsat.SCAN_UI
 				foreach (CelestialBody b in FlightGlobals.Bodies)
 				{
 					SCANdata data = SCANUtil.getData(b);
-					if (!SCANcontroller.Body_Data.ContainsKey(b.name))
-						SCANcontroller.Body_Data.Add(b.name, data);
+					if (data == null)
+					{
+						data = new SCANdata(b);
+						SCANcontroller.controller.addToBodyData(b, data);
+					}
 					data.fillMap();
 				}
 			}
@@ -381,7 +380,8 @@ namespace SCANsat.SCAN_UI
 				{
 					warningBoxOne = false;
 					SCANdata data = SCANUtil.getData(thisBody);
-					data.reset();
+					if (data != null)
+						data.reset();
 				}
 			}
 			else if (warningBoxAll)

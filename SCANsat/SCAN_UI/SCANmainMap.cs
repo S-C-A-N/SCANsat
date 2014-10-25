@@ -54,6 +54,11 @@ namespace SCANsat.SCAN_UI
 			//GameEvents.onVesselSOIChanged.Add(soiChanged);
 			v = FlightGlobals.ActiveVessel;
 			data = SCANUtil.getData(v.mainBody);
+			if (data == null)
+			{
+				data = new SCANdata(v.mainBody);
+				SCANcontroller.controller.addToBodyData(v.mainBody, data);
+			}
 		}
 
 		internal override void OnDestroy()
@@ -65,6 +70,11 @@ namespace SCANsat.SCAN_UI
 		{
 			v = FlightGlobals.ActiveVessel;
 			data = SCANUtil.getData(v.mainBody);
+			if (data == null)
+			{
+				data = new SCANdata(v.mainBody);
+				SCANcontroller.controller.addToBodyData(v.mainBody, data);
+			}
 			sensors = SCANcontroller.controller.activeSensorsOnVessel(v.id);
 			data.updateImages(sensors);
 		}

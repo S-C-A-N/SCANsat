@@ -74,9 +74,23 @@ namespace SCANsat.SCAN_UI
 			if (HighLogic.LoadedSceneIsFlight)
 			{
 				if (data == null)
+				{
 					data = SCANUtil.getData(FlightGlobals.currentMainBody);
+					if (data == null)
+					{
+						data = new SCANdata(FlightGlobals.currentMainBody);
+						SCANcontroller.controller.addToBodyData(FlightGlobals.currentMainBody, data);
+					}
+				}
 				else if (data.Body != FlightGlobals.currentMainBody)
+				{
 					data = SCANUtil.getData(FlightGlobals.currentMainBody);
+					if (data == null)
+					{
+						data = new SCANdata(FlightGlobals.currentMainBody);
+						SCANcontroller.controller.addToBodyData(FlightGlobals.currentMainBody, data);
+					}
+				}
 			}
 
 			//Lock space center click through - Sync SCANdata
