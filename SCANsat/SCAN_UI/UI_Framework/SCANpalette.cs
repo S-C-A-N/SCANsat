@@ -120,29 +120,29 @@ namespace SCANsat.SCAN_UI
 				return heightToColor(val, data.MaxHeight, data.MinHeight, data.PaletteDiscrete);
 		}
 
-		public static Color heightToColor(float val, float max, float min, bool discrete)
+		private static Color heightToColor(float val, float max, float min, bool discrete)
 		{
 			Color c = black;
 			float range = max - min;
 			val -= min;
 			if (discrete)
 			{
-				val = (greyScalePalette.colors.Length) * Mathf.Clamp(val, 0, range) / range;
-				if (Math.Floor(val) > greyScalePalette.colors.Length - 1)
-					val = greyScalePalette.colors.Length - 0.01f;
-				c = greyScalePalette.colors[(int)Math.Floor(val)];
+				val = (greyScalePalette.colorsReverse.Length) * Mathf.Clamp(val, 0, range) / range;
+				if (Math.Floor(val) > greyScalePalette.colorsReverse.Length - 1)
+					val = greyScalePalette.colorsReverse.Length - 0.01f;
+				c = greyScalePalette.colorsReverse[(int)Math.Floor(val)];
 			}
 			else
 			{
-				val = (greyScalePalette.colors.Length - 1) * Mathf.Clamp(val, 0, range) / range;
-				if (Math.Floor(val) > greyScalePalette.colors.Length - 2)
-					val = greyScalePalette.colors.Length - 1.01f;
-				c = lerp(greyScalePalette.colors[(int)Math.Floor(val)], greyScalePalette.colors[(int)Math.Floor(val) + 1], val - (int)Math.Floor(val));
+				val = (greyScalePalette.colorsReverse.Length - 1) * Mathf.Clamp(val, 0, range) / range;
+				if (Math.Floor(val) > greyScalePalette.colorsReverse.Length - 2)
+					val = greyScalePalette.colorsReverse.Length - 1.01f;
+				c = lerp(greyScalePalette.colorsReverse[(int)Math.Floor(val)], greyScalePalette.colorsReverse[(int)Math.Floor(val) + 1], val - (int)Math.Floor(val));
 			}
 			return c;
 		}
 
-		public static Color heightToColor(float val, float max, float min, float? clamp, bool discrete, Color32[] p)
+		internal static Color heightToColor(float val, float max, float min, float? clamp, bool discrete, Color32[] p)
 		{
 			Color c = black;
 			if (clamp != null)
