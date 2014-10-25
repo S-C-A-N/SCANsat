@@ -45,10 +45,15 @@ namespace SCANsat
 			{ -3000, 6000, 0 }, { -500, 7500, null }, { 2000, 21500, null }, { -500, 11000, null },
 			{ 1500, 6000, null }, { 500, 5500, null }, { 0, 5500, null }, { -500, 3500, null }
 		};
-		//private static string[] paletteNameDefaults = { "Default", "Default", "RdYlGn", "Paired", "PuBuGn", "Purples", "BuGn", "BrBG", "Default", "BuGn", "Set1", "PuOr", "Dark2", "YlOrBr", "Spectral", "Pastel2" };
-		//private static int[] paletteSizeDefaults = { 7, 7, 8, 9, 6, 7, 9, 8, 7, 8, 9, 7, 6, 7, 8, 9 };
-		private static Palette[] paletteDefaults = { PaletteLoader.defaultPalette, PaletteLoader.defaultPalette, BrewerPalettes.RdYlGn(8), BrewerPalettes.Paired(9), BrewerPalettes.PuBuGn(6), BrewerPalettes.Purples(7), BrewerPalettes.BuGn(9), BrewerPalettes.BrBG(8), PaletteLoader.defaultPalette, BrewerPalettes.BuGn(8), BrewerPalettes.Set1(9), BrewerPalettes.PuOr(7), BrewerPalettes.Dark2(6), BrewerPalettes.YlOrBr(7), BrewerPalettes.Spectral(8), BrewerPalettes.Pastel2(9) };
-		private static bool[] paletteReverseDefaults = { false, false, true, false, false, false, false, false, false, true, false, false, false, false, true, false };
+		//private static string[] paletteNameDefaults = { "Default", "Default", "RdYlGn", "Paired", "PuBuGn", "Purples", "BuGn", "BrBG", "Default", "BuGn", "Set1", "PuOr", "Dark2", "YlOrBr", "Spectral", "Pastel2", "PiYG" };
+		//private static int[] paletteSizeDefaults = { 7, 7, 8, 9, 6, 7, 9, 8, 7, 8, 9, 7, 6, 7, 8, 9, 8 };
+		private static Palette[] paletteDefaults = { PaletteLoader.defaultPalette, PaletteLoader.defaultPalette,
+				BrewerPalettes.RdGy(11), BrewerPalettes.Paired(9), BrewerPalettes.PuBuGn(6), BrewerPalettes.BuPu(7),
+				BrewerPalettes.BuGn(9), BrewerPalettes.BrBG(8), PaletteLoader.defaultPalette, BrewerPalettes.YlGnBu(8),
+				BrewerPalettes.Set1(9), BrewerPalettes.PuOr(7), BrewerPalettes.Set3(8), BrewerPalettes.Accent(7),
+				BrewerPalettes.Spectral(8), BrewerPalettes.Pastel1(9), BrewerPalettes.RdYlGn(10) };
+		private static bool[] paletteReverseDefaults = { false, false, true, false, false, true, false, false,
+					false, true, false, false, false, false, true, false, false };
 		private const float defaultMinHeight = -1000f;
 		private const float defaultMaxHeight = 8000f;
 		private float? defaultClampHeight = null;
