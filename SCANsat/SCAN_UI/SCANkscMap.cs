@@ -144,7 +144,10 @@ namespace SCANsat.SCAN_UI
 					toggleBar(id);	/* Toggle options along left side - control overlay options - *Replace buttons with textures* */
 					mapDraw(id);	/* Draw the main map texture */
 				stopE();
-				legendBar(id);		/* Draw the mouseover info and legend bar along the bottom */
+				growE();
+					fillS(120);
+					legendBar(id);	/* Draw the mouseover info and legend bar along the bottom */
+				stopE();
 			stopS();
 
 			mapLabels(id);			/* Draw the vessel/anomaly icons on the map */
@@ -296,6 +299,20 @@ namespace SCANsat.SCAN_UI
 				}
 			}
 
+			fillS();
+
+			if (GUILayout.Button("Settings", SCANskins.SCAN_buttonFixed))
+			{
+				SCANcontroller.controller.settingsWindow.Visible = !SCANcontroller.controller.settingsWindow.Visible;
+			}
+
+			fillS();
+
+			if (GUILayout.Button("Color\nControl", SCANskins.SCAN_buttonFixed, GUILayout.Height(36)))
+			{
+				SCANcontroller.controller.colorManager.Visible = !SCANcontroller.controller.colorManager.Visible;
+			}
+
 			stopS();
 		}
 
@@ -347,16 +364,6 @@ namespace SCANsat.SCAN_UI
 		//Draw the altitude legend bar along the bottom
 		private void legendBar (int id)
 		{
-			growE();
-			fillS(10);
-			growS();
-				fillS();
-				if (GUILayout.Button("Color\nManagement", SCANskins.SCAN_buttonFixed, GUILayout.Width(90), GUILayout.Height (50)))
-				{
-					SCANcontroller.controller.colorManager.Visible = true;
-				}
-			stopS();
-			fillS(10);
 			growS();
 			float mx = Event.current.mousePosition.x - maprect.x;
 			float my = Event.current.mousePosition.y - maprect.y;
@@ -400,7 +407,6 @@ namespace SCANsat.SCAN_UI
 			if (bigmap.mapmode == 0 && SCANcontroller.controller.legend)
 				SCANuiUtil.drawLegend(data);
 			stopS();
-			stopE();
 		}
 
 		//Draw the map overlay labels
