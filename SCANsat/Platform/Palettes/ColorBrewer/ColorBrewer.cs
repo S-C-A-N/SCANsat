@@ -174,7 +174,7 @@ namespace SCANsat.Platform.Palettes.ColorBrewer {
 			var @xerox = new[] {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 			var @panel = new[] {1, 1, 1, 1, 0, 0, 0, 0, 0};
 
-			return new Palette(c, "BrBg", @type, (Palette.Is) @blind[size-3], (Palette.Is) @print[size-3], (Palette.Is) @xerox[size-3], (Palette.Is) @panel[size-3]);
+			return new Palette(c, "BrBG", @type, (Palette.Is) @blind[size-3], (Palette.Is) @print[size-3], (Palette.Is) @xerox[size-3], (Palette.Is) @panel[size-3]);
 
 		}
 		public static Palette RdGy (int size) {
