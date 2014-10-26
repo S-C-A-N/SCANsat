@@ -102,13 +102,11 @@ namespace SCANsat
 		public CelestialBody Body
 		{
 			get { return body; }
-			internal set { body = value; }
 		}
 
 		public Texture2D Map
 		{
 			get { return map_small; }
-			internal set { map_small = value; }
 		}
 
 		public float[,] KethaneValueMap
@@ -241,25 +239,23 @@ namespace SCANsat
 				type = resourceType.type;
 			}
 
-			public string name;
+			private string name;
 			internal string body;
 			internal double ORS_Scalar, ORS_Multiplier, ORS_Threshold;
 			internal Color fullColor, emptyColor;
 			internal bool linear;
 			internal float maxValue;
-			public SCANtype type;
+			private SCANtype type;
 			internal SCANresourceType resourceType;
 
 			public string Name
 			{
 				get { return name; }
-				private set { }
 			}
 
 			public SCANtype Type
 			{
 				get { return type; }
-				private set { }
 			}
 		}
 
@@ -278,8 +274,24 @@ namespace SCANsat
 					Debug.LogWarning("[SCANsat] Attempt To Override Default SCANsat Sensors; Resetting Resource Scanner Type To 0");
 					type = SCANtype.Nothing;
 				}
-				colorFull = ConfigNode.ParseColor(Full);
-				colorEmpty = ConfigNode.ParseColor(Empty);
+				try
+				{
+					colorFull = ConfigNode.ParseColor(Full);
+				}
+				catch (Exception e)
+				{
+					SCANUtil.SCANlog("Color Format Incorrect; Reverting To Default Full Resource Color: {0}", e);
+					colorFull = palette.cb_reddishPurple;
+				}
+				try
+				{
+					colorEmpty = ConfigNode.ParseColor(Empty);
+				}
+				catch (Exception e)
+				{
+					SCANUtil.SCANlog("Color Format Incorrect; Reverting To Default Empty Resource Color: {0}", e);
+					colorEmpty = palette.magenta;
+				}
 			}
 		}
 		#endregion
@@ -327,7 +339,6 @@ namespace SCANsat
 				}
 				return anomalies;
 			}
-			private set { }
 		}
 		#endregion
 
@@ -433,11 +444,6 @@ namespace SCANsat
 					{
 						// convert to radial vector
 						val = (float)SCANUtil.getElevation(body, ilon - 180, scanline - 90);
-						//double rlon = Mathf.Deg2Rad * (ilon - 180);
-						//double rlat = Mathf.Deg2Rad * (scanline - 90);
-						//Vector3d rad = new Vector3d (Math.Cos (rlat) * Math.Cos (rlon) , Math.Sin (rlat) , Math.Cos (rlat) * Math.Sin (rlon));
-						//// query terrain controller for elevation at this point
-						//val = (float)Math.Round (body.pqsController.GetSurfaceHeight (rad) - body.pqsController.radius , 1);
 						if (val == 0)
 							val = -0.001f; // this is terrible
 						heightmap[ilon, scanline] = val;
