@@ -345,7 +345,7 @@ namespace SCANsat
 					colorFull = node.GetValue("ColorFull");
 				if (node.HasValue("ColorEmpty"))
 					colorEmpty = node.GetValue("ColorEmpty");
-				if (!SCANcontroller.ResourceTypes.ContainsKey(name))
+				if (!SCANcontroller.ResourceTypes.ContainsKey(name) && !string.IsNullOrEmpty(name))
 					SCANcontroller.ResourceTypes.Add(name, new SCANdata.SCANresourceType(name, i, colorFull, colorEmpty));
 			}
 		}
