@@ -1,3 +1,22 @@
+Version 9.2 - 2014-10-26
+------------------------
+
+- Color selection and management window added
+	- Select from a variety of color palettes
+	- Manage map options for each individual planet
+	- Default colore palett, height range, and other options added for each planet
+	
+- Settings and Color Management window buttons added to KSC Map window
+
+- Numerous checks added to prevent errors caused by Scenario Module or SCANdata loading problems
+	- Several changes made to saving and loading process - Make backups
+	- Less log spam on scenario module failure
+	
+- Internal changes to SCANdata and SCANcontroller classes
+	- End user result should be similar; bugs may exist
+	- Data only loaded on first visit to a planet, rather than all at once; does not affect existing saves
+	- All explicit external interfaces should be unaffected
+
 Version 9 - 2014-10-14
 ------------------------
 

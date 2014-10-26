@@ -16,14 +16,14 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using SCANsat.Platform;
-using SCANsat;
+using SCANsat.Platform.Palettes;
 using UnityEngine;
 
-using palette = SCANsat.SCANpalette;
+using palette = SCANsat.SCAN_UI.SCANpalette;
 
 namespace SCANsat.SCAN_UI
 {
-	class SCANsettingsUI: MBW
+	class SCANsettingsUI: SCAN_MBW
 	{
 		/* UI: a list of glyphs that are used for something */
 		private string[] exmarks = { "✗", "✘", "×", "✖", "x", "X", "∇", "☉", "★", "*", "•", "º", "+" };
@@ -31,6 +31,9 @@ namespace SCANsat.SCAN_UI
 		/* UI: time warp names and settings */
 		private string[] twnames = { "Off", "Low", "Medium", "High" };
 		private int[] twvals = { 1, 6, 9, 15 };
+		private bool warningBoxOne, warningBoxAll, spaceCenterLock, trackingStationLock;
+		private Rect warningRect;
+		private const string lockID = "settingLockID";
 
 		internal static Rect defaultRect = new Rect(Screen.width - (Screen.width / 2) - 180, 100, 360, 300);
 
@@ -45,11 +48,54 @@ namespace SCANsat.SCAN_UI
 			ClampToScreenOffset = new RectOffset(-280, -280, -600, -600);
 
 			SCAN_SkinsLibrary.SetCurrent("SCAN_Unity");
+
+			InputLockManager.RemoveControlLock(lockID);
 		}
 
 		internal override void OnDestroy()
 		{
-			
+			InputLockManager.RemoveControlLock(lockID);
+		}
+
+		internal override void Start()
+		{
+		}
+
+		protected override void DrawWindowPre(int id)
+		{
+			//Lock space center click through
+			if (HighLogic.LoadedScene == GameScenes.SPACECENTER)
+			{
+				Vector2 mousePos = Input.mousePosition;
+				mousePos.y = Screen.height - mousePos.y;
+				if (WindowRect.Contains(mousePos) && !spaceCenterLock)
+				{
+					InputLockManager.SetControlLock(ControlTypes.CAMERACONTROLS | ControlTypes.KSC_FACILITIES | ControlTypes.KSC_UI, lockID);
+					spaceCenterLock = true;
+				}
+				else if (!WindowRect.Contains(mousePos) && spaceCenterLock)
+				{
+					InputLockManager.RemoveControlLock(lockID);
+					spaceCenterLock = false;
+				}
+			}
+
+			//Lock tracking scene click through
+			if (HighLogic.LoadedScene == GameScenes.TRACKSTATION)
+			{
+				Vector2 mousePos = Input.mousePosition;
+				mousePos.y = Screen.height - mousePos.y;
+				if (WindowRect.Contains(mousePos) && !trackingStationLock)
+				{
+					InputLockManager.SetControlLock(ControlTypes.CAMERACONTROLS | ControlTypes.TRACKINGSTATION_ALL, lockID);
+					trackingStationLock = true;
+				}
+				else if (!WindowRect.Contains(mousePos) && trackingStationLock)
+				{
+					InputLockManager.RemoveControlLock(lockID);
+					trackingStationLock = false;
+				}
+			}
 		}
 
 		protected override void DrawWindow(int id)
@@ -70,6 +116,17 @@ namespace SCANsat.SCAN_UI
 					gui_settings_window_mapFill(id);	/* debug option to fill in maps */
 				#endif
 			stopS();
+
+			warningBox(id);
+		}
+
+		protected override void DrawWindowPost(int id)
+		{
+			if ((warningBoxOne || warningBoxAll) && Event.current.type == EventType.mouseDown && !warningRect.Contains(Event.current.mousePosition))
+			{
+				warningBoxOne = false;
+				warningBoxAll = false;
+			}
 		}
 
 		//Draw the version label in the upper left corner
@@ -85,6 +142,9 @@ namespace SCANsat.SCAN_UI
 			Rect r = new Rect(WindowRect.width - 20, 0, 18, 18);
 			if (GUI.Button(r, SCANcontroller.controller.closeBox, SCANskins.SCAN_closeButton))
 			{
+				InputLockManager.RemoveControlLock(lockID);
+				trackingStationLock = false;
+				spaceCenterLock = false;
 				Visible = false;
 			}
 		}
@@ -116,7 +176,7 @@ namespace SCANsat.SCAN_UI
 		private void gui_settings_resources(int id)
 		{
 			GUILayout.Label("Resources Overlay", SCANskins.SCAN_headline);
-			if (SCANcontroller.ResourcesList.Count > 0)
+			if (SCANcontroller.controller.ResourcesList.Count > 0)
 			{
 				if (SCANcontroller.controller.globalOverlay != GUILayout.Toggle(SCANcontroller.controller.globalOverlay, "Activate Resource Overlay"))
 				{ //global toggle for resource overlay
@@ -130,7 +190,7 @@ namespace SCANsat.SCAN_UI
 			{
 				SCANcontroller.controller.resourceOverlayType = 1;
 				SCANcontroller.controller.Resources(FlightGlobals.currentMainBody);
-				if (SCANcontroller.ResourcesList.Count > 0)
+				if (SCANcontroller.controller.ResourcesList.Count > 0)
 					SCANcontroller.controller.globalOverlay = true;
 				//if (bigmap != null) bigmap.resetMap();
 			}
@@ -139,18 +199,18 @@ namespace SCANsat.SCAN_UI
 			{
 				SCANcontroller.controller.resourceOverlayType = 0;
 				SCANcontroller.controller.Resources(FlightGlobals.currentMainBody);
-				if (SCANcontroller.ResourcesList.Count > 0)
+				if (SCANcontroller.controller.ResourcesList.Count > 0)
 					SCANcontroller.controller.globalOverlay = true;
 				//if (bigmap != null) bigmap.resetMap();
 			}
 			stopE();
-			if (SCANcontroller.ResourcesList.Count == 0)
+			if (SCANcontroller.controller.ResourcesList.Count == 0)
 			{
 				fillS(5);
 				GUILayout.Label("No Resources Found", SCANskins.SCAN_headline);
 			}
 			growE();
-			SCANcontroller.controller.gridSelection = GUILayout.SelectionGrid(SCANcontroller.controller.gridSelection, SCANcontroller.ResourcesList.Select(a => a.name).ToArray(), 4); //select resource to display
+			SCANcontroller.controller.gridSelection = GUILayout.SelectionGrid(SCANcontroller.controller.gridSelection, SCANcontroller.controller.ResourcesList.Select(a => a.Name).ToArray(), 4); //select resource to display
 			stopE();
 			fillS(16);
 		}
@@ -165,11 +225,10 @@ namespace SCANsat.SCAN_UI
 			// scanning for individual SoIs
 			growE();
 			int count = 0;
-			foreach (CelestialBody body in FlightGlobals.Bodies)
+			foreach (var data in SCANcontroller.Body_Data)
 			{
 				if (count == 0) growS();
-				SCANdata data = SCANUtil.getData(body);
-				data.disabled = !GUILayout.Toggle(!data.disabled, body.bodyName + " (" + data.getCoveragePercentage(SCANdata.SCANtype.Nothing).ToString("N1") + "%)"); //No longer updates while the suttings menu is open
+					data.Value.Disabled = !GUILayout.Toggle(!data.Value.Disabled, string.Format("{0} ({1:N1}%)", data.Key, data.Value.getCoveragePercentage(SCANdata.SCANtype.Nothing)));
 				switch (count)
 				{
 					case 5: stopS(); count = 0; break;
@@ -187,7 +246,7 @@ namespace SCANsat.SCAN_UI
 			if (SCANcontroller.controller.resourceOverlayType == 1 && SCANcontroller.controller.globalOverlay)
 			{ //Rebuild the Kethane database
 				if (GUILayout.Button("Rebuild Kethane Grid Database"))
-					SCANcontroller.controller.kethaneRebuild = !SCANcontroller.controller.kethaneRebuild;
+					SCANcontroller.controller.KethaneRebuild = !SCANcontroller.controller.KethaneRebuild;
 			}
 			fillS(16);
 		}
@@ -218,9 +277,9 @@ namespace SCANsat.SCAN_UI
 		//Display the total number of SCANsat sensors and scanning passes
 		private void gui_settings_numbers(int id)
 		{
-			string s = "Sensors: " + SCANcontroller.activeSensors +
-					" Vessels: " + SCANcontroller.activeVessels.ToString() +
-					" Passes: " + SCANcontroller.controller.actualPasses.ToString();
+			string s = 	"Vessels: " + SCANcontroller.controller.ActiveVessels.ToString() +
+						" Sensors: " + SCANcontroller.controller.ActiveSensors +
+						" Passes: " + SCANcontroller.controller.ActualPasses.ToString();
 			GUILayout.Label(s, SCANskins.SCAN_whiteReadoutLabel);
 			fillS(16);
 		}
@@ -231,16 +290,20 @@ namespace SCANsat.SCAN_UI
 			CelestialBody thisBody = FlightGlobals.currentMainBody;
 			GUILayout.Label("Data Management", SCANskins.SCAN_headline);
 			growE();
-			if (GUILayout.Button("Reset map of " + thisBody.theName))
+			if (warningBoxOne || warningBoxAll)
 			{
-				SCANdata data = SCANUtil.getData(thisBody);
-				data.reset();
+				GUILayout.Label("Reset map of " + thisBody.theName, SCANskins.SCAN_button);
+				GUILayout.Label("Reset <b>all</b> data", SCANskins.SCAN_button);
 			}
-			if (GUILayout.Button("Reset <b>all</b> data"))
+			else
 			{
-				foreach (SCANdata data in SCANcontroller.body_data.Values)
+				if (GUILayout.Button("Reset map of " + thisBody.theName))
 				{
-					data.reset();
+					warningBoxOne = true;
+				}
+				if (GUILayout.Button("Reset <b>all</b> data"))
+				{
+					warningBoxAll = true;
 				}
 			}
 			stopE();
@@ -275,6 +338,11 @@ namespace SCANsat.SCAN_UI
 			if (GUILayout.Button("Fill SCAN map of " + thisBody.theName, SCANskins.SCAN_buttonFixed))
 			{
 				SCANdata data = SCANUtil.getData(thisBody);
+				if (data == null)
+				{
+					data = new SCANdata(thisBody);
+					SCANcontroller.controller.addToBodyData(thisBody, data);
+				}
 				data.fillMap();
 			}
 			if (GUILayout.Button("Fill SCAN map for all planets", SCANskins.SCAN_buttonFixed))
@@ -282,11 +350,59 @@ namespace SCANsat.SCAN_UI
 				foreach (CelestialBody b in FlightGlobals.Bodies)
 				{
 					SCANdata data = SCANUtil.getData(b);
+					if (data == null)
+					{
+						data = new SCANdata(b);
+						SCANcontroller.controller.addToBodyData(b, data);
+					}
 					data.fillMap();
 				}
 			}
 			stopE();
 			fillS(8);
+		}
+
+		//Confirmation boxes for map resets
+		private void warningBox(int id)
+		{
+			if (warningBoxOne)
+			{
+				CelestialBody thisBody = FlightGlobals.currentMainBody;
+				warningRect = new Rect(WindowRect.width - (WindowRect.width / 2)- 150, WindowRect.height - 190, 300, 90);
+				GUI.Box(warningRect, "", SCANskins.SCAN_dropDownBox);
+				Rect r = new Rect(warningRect.x + 10, warningRect.y + 5, 280, 40);
+				GUI.Label(r, "Erase all data for " + thisBody.theName + "?", SCANskins.SCAN_headlineSmall);
+				r.x += 90;
+				r.y += 45;
+				r.width = 80;
+				r.height = 30;
+				if (GUI.Button(r, "Confirm", SCANskins.SCAN_buttonWarning))
+				{
+					warningBoxOne = false;
+					SCANdata data = SCANUtil.getData(thisBody);
+					if (data != null)
+						data.reset();
+				}
+			}
+			else if (warningBoxAll)
+			{
+				warningRect = new Rect(WindowRect.width - (WindowRect.width / 2) - 120, WindowRect.height - 190, 240, 90);
+				GUI.Box(warningRect, "", SCANskins.SCAN_dropDownBox);
+				Rect r = new Rect(warningRect.x + 10, warningRect.y + 5, 220, 40);
+				GUI.Label(r, "Erase <b>all</b> data ?", SCANskins.SCAN_headlineSmall);
+				r.x += 70;
+				r.y += 45;
+				r.width = 80;
+				r.height = 30;
+				if (GUI.Button(r, "Confirm", SCANskins.SCAN_buttonWarning))
+				{
+					warningBoxAll = false;
+					foreach (SCANdata data in SCANcontroller.Body_Data.Values)
+					{
+						data.reset();
+					}
+				}
+			}
 		}
 
 	}

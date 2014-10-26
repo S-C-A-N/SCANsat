@@ -19,7 +19,8 @@ using UnityEngine;
 using System.Linq;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
-using palette = SCANsat.SCANpalette;
+using SCANsat.Platform;
+using palette = SCANsat.SCAN_UI.SCANpalette;
 
 namespace SCANsat
 {
@@ -39,8 +40,16 @@ namespace SCANsat
 			int ilon = icLON(lon);
 			int ilat = icLAT(lat);
 			if (badLonLat (ilon, ilat)) return false;
-			SCANdata data = getData(body);
-			return (data.coverage[ilon, ilat] & SCANtype) != 0;
+			if (SCANcontroller.controller != null)
+			{
+				SCANdata data = getData(body);
+				if (data != null)
+					return (data.Coverage[ilon, ilat] & SCANtype) != 0;
+				else
+					return false;
+			}
+			else
+				return false;
 		}
 
 		/// <summary>
@@ -54,8 +63,36 @@ namespace SCANsat
 		public static bool isCovered(int lon, int lat, CelestialBody body, int SCANtype)
 		{
 			if (badLonLat(lon, lat)) return false;
-			SCANdata data = getData(body);
-			return (data.coverage[lon, lat] & SCANtype) != 0;
+			if (SCANcontroller.controller != null)
+			{
+				SCANdata data = getData(body);
+				if (data != null)
+					return (data.Coverage[lon, lat] & SCANtype) != 0;
+				else
+					return false;
+			}
+			else
+				return false;
+		}
+
+		/// <summary>
+		/// Public method to return the scanning coverage for a given sensor type on a give body
+		/// </summary>
+		/// <param name="SCANtype">Integer corresponding to the desired SCANtype</param>
+		/// <param name="Body">Desired Celestial Body</param>
+		/// <returns>Scanning percentage as a double from 0-100</returns>
+		public static double GetCoverage(int SCANtype, CelestialBody Body)
+		{
+			if (SCANcontroller.controller != null)
+			{
+				SCANdata data = getData(Body);
+				if (data != null)
+					return data.getCoveragePercentage((SCANdata.SCANtype)SCANtype);
+				else
+					return 0;
+			}
+			else
+				return 0;
 		}
 
 		internal static bool isCovered(double lon, double lat, SCANdata data, SCANdata.SCANtype type)
@@ -63,31 +100,33 @@ namespace SCANsat
 			int ilon = icLON(lon);
 			int ilat = icLAT(lat);
 			if (badLonLat(ilon, ilat)) return false;
-			return (data.coverage[ilon, ilat] & (Int32)type) != 0;
+			return (data.Coverage[ilon, ilat] & (Int32)type) != 0;
 		}
 
 		internal static bool isCovered(int lon, int lat, SCANdata data, SCANdata.SCANtype type)
 		{
 			if (badLonLat(lon, lat)) return false;
-			return (data.coverage[lon, lat] & (Int32)type) != 0;
+			return (data.Coverage[lon, lat] & (Int32)type) != 0;
 		}
 
 		internal static bool isCoveredByAll (int lon, int lat, SCANdata data, SCANdata.SCANtype type)
 		{
 			if (badLonLat(lon,lat)) return false;
-			return (data.coverage[lon, lat] & (Int32)type) == (Int32)type;
+			return (data.Coverage[lon, lat] & (Int32)type) == (Int32)type;
 		}
 
 		internal static void registerPass ( double lon, double lat, SCANdata data, SCANdata.SCANtype type ) {
 			int ilon = SCANUtil.icLON(lon);
 			int ilat = SCANUtil.icLAT(lat);
 			if (SCANUtil.badLonLat(ilon, ilat)) return;
-			data.coverage [ilon, ilat] |= (Int32)type;
+			data.Coverage[ilon, ilat] |= (Int32)type;
 		}
 
 		internal static double getCoveragePercentage(CelestialBody body, SCANdata.SCANtype type )
 		{
 			SCANdata data = getData(body);
+			if (data == null)
+				return 0;
 			double cov = 0d;
 			if (type == SCANdata.SCANtype.Nothing)
 				type = SCANdata.SCANtype.AltimetryLoRes | SCANdata.SCANtype.AltimetryHiRes | SCANdata.SCANtype.Biome | SCANdata.SCANtype.Anomaly;          
@@ -126,10 +165,11 @@ namespace SCANsat
 
 		public static SCANdata getData(CelestialBody body)
 		{
-			if (!SCANcontroller.body_data.ContainsKey(body.name)) {
-				SCANcontroller.body_data[body.name] = new SCANdata(body);
+			if (!SCANcontroller.Body_Data.ContainsKey(body.name))
+			{
+				return null;
 			}
-			SCANdata data = SCANcontroller.body_data[body.name];
+			SCANdata data = SCANcontroller.Body_Data[body.name];
 			return data;
 		}
 
@@ -165,6 +205,8 @@ namespace SCANsat
 		internal static ScienceData getAvailableScience(Vessel v, SCANdata.SCANtype sensor, bool notZero)
 		{
 			SCANdata data = getData(v.mainBody);
+			if (data == null)
+				return null;
 			ScienceData sd = null;
 			ScienceExperiment se = null;
 			ScienceSubject su = null;
@@ -287,6 +329,7 @@ namespace SCANsat
 
 		internal static void loadSCANtypes()
 		{
+			SCANcontroller.ResourceTypes = new Dictionary<string, SCANdata.SCANresourceType>();
 			foreach (ConfigNode node in GameDatabase.Instance.GetConfigNodes("SCANSAT_SENSOR"))
 			{
 				string name = "";
@@ -302,7 +345,7 @@ namespace SCANsat
 					colorFull = node.GetValue("ColorFull");
 				if (node.HasValue("ColorEmpty"))
 					colorEmpty = node.GetValue("ColorEmpty");
-				if (!SCANcontroller.ResourceTypes.ContainsKey(name))
+				if (!SCANcontroller.ResourceTypes.ContainsKey(name) && !string.IsNullOrEmpty(name))
 					SCANcontroller.ResourceTypes.Add(name, new SCANdata.SCANresourceType(name, i, colorFull, colorEmpty));
 			}
 		}
@@ -413,11 +456,11 @@ namespace SCANsat
 		/* DATA: serialization and compression */
 		internal static string integerSerialize(SCANdata data)
 		{
-			byte[] bytes = ConvertToByte(data.coverage);
+			byte[] bytes = ConvertToByte(data.Coverage);
 			MemoryStream mem = new MemoryStream();
 			BinaryFormatter binf = new BinaryFormatter();
 			binf.Serialize(mem, bytes);
-			string blob = Convert.ToBase64String(CLZF2.Compress(mem.ToArray()));
+			string blob = Convert.ToBase64String(SCAN_CLZF2.Compress(mem.ToArray()));
 			return blob.Replace("/", "-").Replace("=", "_");
 		}
 
@@ -426,22 +469,22 @@ namespace SCANsat
 			try {
 				blob = blob.Replace("-", "/").Replace("_", "=");
 				byte[] bytes = Convert.FromBase64String(blob);
-				bytes = CLZF2.Decompress(bytes);
+				bytes = SCAN_CLZF2.Decompress(bytes);
 				MemoryStream mem = new MemoryStream(bytes, false);
 				BinaryFormatter binf = new BinaryFormatter();
 				if (b) {
 					byte[,] bRecover = new byte[360, 180];
 					bRecover = (byte[,])binf.Deserialize(mem);
-					data.coverage = RecoverToInt(bRecover);
+					data.Coverage = RecoverToInt(bRecover);
 				}
 				else {
 					byte[] bArray = (byte[])binf.Deserialize(mem);
-					data.coverage = ConvertToInt(bArray);
+					data.Coverage = ConvertToInt(bArray);
 				}
 			}
 			catch (Exception e) {
-				data.coverage = new Int32[360, 180];
-				data.heightmap = new float[360, 180];
+				data.Coverage = new Int32[360, 180];
+				data.HeightMap = new float[360, 180];
 				throw e;
 			}
 			data.resetImages();

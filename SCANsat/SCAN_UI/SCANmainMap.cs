@@ -19,11 +19,11 @@ using System.Text.RegularExpressions;
 using SCANsat.Platform;
 using SCANsat;
 using UnityEngine;
-using palette = SCANsat.SCANpalette;
+using palette = SCANsat.SCAN_UI.SCANpalette;
 
 namespace SCANsat.SCAN_UI
 {
-	class SCANmainMap: MBW
+	class SCANmainMap: SCAN_MBW
 	{
 		private const string SCANlockID = "SCANmainMapLock";
 		private string infoText;
@@ -54,6 +54,11 @@ namespace SCANsat.SCAN_UI
 			//GameEvents.onVesselSOIChanged.Add(soiChanged);
 			v = FlightGlobals.ActiveVessel;
 			data = SCANUtil.getData(v.mainBody);
+			if (data == null)
+			{
+				data = new SCANdata(v.mainBody);
+				SCANcontroller.controller.addToBodyData(v.mainBody, data);
+			}
 		}
 
 		internal override void OnDestroy()
@@ -65,6 +70,11 @@ namespace SCANsat.SCAN_UI
 		{
 			v = FlightGlobals.ActiveVessel;
 			data = SCANUtil.getData(v.mainBody);
+			if (data == null)
+			{
+				data = new SCANdata(v.mainBody);
+				SCANcontroller.controller.addToBodyData(v.mainBody, data);
+			}
 			sensors = SCANcontroller.controller.activeSensorsOnVessel(v.id);
 			data.updateImages(sensors);
 		}
@@ -128,13 +138,17 @@ namespace SCANsat.SCAN_UI
 			{
 				SCANcontroller.controller.settingsWindow.Visible = !SCANcontroller.controller.settingsWindow.Visible;
 			}
+			if (GUILayout.Button("Colors", SCANskins.SCAN_buttonFixed))
+			{
+				SCANcontroller.controller.colorManager.Visible = !SCANcontroller.controller.colorManager.Visible;
+			}
 			stopE();
 		}
 
 		//Draw the map texture
 		private void mainMap(int id)
 		{
-			GUILayout.Label(data.map_small);
+			GUILayout.Label(data.Map);
 			mapRect = GUILayoutUtility.GetLastRect();
 		}
 
@@ -158,7 +172,7 @@ namespace SCANsat.SCAN_UI
 			{
 				int count = 2;
 				vesselInfo(v, mapRect, 1, true);
-				foreach (SCANcontroller.SCANvessel sV in SCANcontroller.controller.knownVessels.Values)
+				foreach (SCANcontroller.SCANvessel sV in SCANcontroller.controller.Known_Vessels.Values)
 				{
 					if (sV.vessel == FlightGlobals.ActiveVessel)
 						continue;

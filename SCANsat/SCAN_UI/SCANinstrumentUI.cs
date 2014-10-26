@@ -19,14 +19,14 @@ using SCANsat.Platform;
 using SCANsat;
 using UnityEngine;
 
-using palette = SCANsat.SCANpalette;
+using palette = SCANsat.SCAN_UI.SCANpalette;
 
 namespace SCANsat.SCAN_UI
 {
-	class SCANinstrumentUI: MBW
+	class SCANinstrumentUI: SCAN_MBW
 	{
 		private bool notMappingToday;
-		private RemoteView anomalyView;
+		private SCANremoteView anomalyView;
 		private SCANdata.SCANtype sensors;
 		private SCANdata data;
 		internal static Rect defaultRect = new Rect(30, 600, 260, 60);
@@ -48,6 +48,11 @@ namespace SCANsat.SCAN_UI
 		{
 			GameEvents.onVesselSOIChanged.Add(soiChange);
 			data = SCANUtil.getData(FlightGlobals.currentMainBody);
+			if (data == null)
+			{
+				data = new SCANdata(FlightGlobals.currentMainBody);
+				SCANcontroller.controller.addToBodyData(FlightGlobals.currentMainBody, data);
+			}
 		}
 
 		internal override void OnDestroy()
@@ -154,7 +159,7 @@ namespace SCANsat.SCAN_UI
 			{
 				SCANdata.SCANanomaly nearest = null;
 				double nearest_dist = -1;
-				foreach (SCANdata.SCANanomaly a in data.getAnomalies())
+				foreach (SCANdata.SCANanomaly a in data.Anomalies)
 				{
 					if (!a.known)
 						continue;
@@ -177,7 +182,7 @@ namespace SCANsat.SCAN_UI
 					GUILayout.Label(txt, SCANskins.SCAN_insColorLabel);
 
 					if (anomalyView == null)
-						anomalyView = new RemoteView();
+						anomalyView = new SCANremoteView();
 					if (anomalyView != null)
 					{
 						if (nearest.mod != null)
@@ -202,6 +207,11 @@ namespace SCANsat.SCAN_UI
 		private void soiChange (GameEvents.HostedFromToAction<Vessel, CelestialBody> VC)
 		{
 			data = SCANUtil.getData(VC.to);
+			if (data == null)
+			{
+				data = new SCANdata(VC.to);
+				SCANcontroller.controller.addToBodyData(VC.to, data);
+			}
 		}
 
 	}

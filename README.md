@@ -491,7 +491,7 @@ sneaky then they can of course be sneaky.
 [SCANsat:rel-readme]: https://github.com/S-C-A-N/SCANsat/#table-of-contents
 
 [SCANsat:rel-thread]: http://forum.kerbalspaceprogram.com/threads/80369
-[SCANsat:dev-thread]: http://forum.kerbalspaceprogram.com/threads/80661
+[SCANsat:dev-thread]: http://forum.kerbalspaceprogram.com/threads/96859
 
 [SCANsat:dev-source]: https://github.com/S-C-A-N/SCANsat/tree/dev
 [SCANsat:rel-source]: https://github.com/S-C-A-N/SCANsat

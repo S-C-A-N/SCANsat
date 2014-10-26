@@ -18,11 +18,8 @@ using UnityEngine;
 
 namespace SCANsat
 {
-	[KSPAddon(KSPAddon.Startup.MainMenu, true)]
-	class SCANreflection : MonoBehaviour
+	static class SCANreflection
 	{
-		internal static bool ORSXFound;
-
 		private const string ORSXPlanetDataType = "ORSX.ORSX_PlanetaryResourceMapData";
 		private const string ORSXPixelAbundanceMethod = "getPixelAbundanceValue";
 		private const string ORSXAssemblyName = "ORSX";
@@ -30,8 +27,6 @@ namespace SCANsat
 		private static bool ORSXRun = false;
 
 		private delegate double ORSXpixelAbundance(int body, string resourceName, double lat, double lon);
-
-		private static AssemblyLoader.LoadedAssembly ORSXAssembly;
 
 		private static ORSXpixelAbundance _ORSXpixelAbundance;
 
@@ -42,32 +37,8 @@ namespace SCANsat
 			return _ORSXpixelAbundance(body, resourceName, lat, lon);
 		}
 
-		private void Start()
+		internal static bool ORSXReflectionMethod(Assembly ORSXAssembly)
 		{
-			ORSXFound = ORSXReflectionMethod();
-		}
-
-		private static bool ORSXAssemblyLoaded()
-		{
-			if (ORSXAssembly != null)
-				return true;
-
-			AssemblyLoader.LoadedAssembly assembly = AssemblyLoader.loadedAssemblies.FirstOrDefault(a => a.assembly.GetName().Name == ORSXAssemblyName);
-			if (assembly != null)
-			{
-				SCANUtil.SCANlog("ORSX Assembly Loaded");
-				ORSXAssembly = assembly;
-				return true;
-			}
-			SCANUtil.SCANlog("ORSX Assembly Not Found");
-			return false;
-		}
-
-		private static bool ORSXReflectionMethod()
-		{
-			if (ORSXAssemblyLoaded() == false)
-				return false;
-
 			if (_ORSXpixelAbundance != null)
 				return true;
 
@@ -78,7 +49,7 @@ namespace SCANsat
 
 			try
 			{
-				Type ORSXType = ORSXAssembly.assembly.GetExportedTypes()
+				Type ORSXType = ORSXAssembly.GetExportedTypes()
 					.SingleOrDefault(t => t.FullName == ORSXPlanetDataType);
 
 				if (ORSXType == null)
@@ -110,5 +81,6 @@ namespace SCANsat
 
 			return false;
 		}
+
 	}
 }

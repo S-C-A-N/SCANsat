@@ -20,10 +20,15 @@ using UnityEngine;
 namespace SCANsat
 {
 	[KSPAddon(KSPAddon.Startup.MainMenu, true)]
-	internal class SCANversions : MonoBehaviour
+	public class SCANversions : MonoBehaviour
 	{
-		private string[] Assemblies = new string[7] { "SCANsatRPM", "SCANsatKethane", "Kethane", "RasterPropMonitor", "MechJebRPM", "MechJeb2", "ORSX" };
+		private const string kVersion = "0.9.2";
+		private string[] Assemblies = new string[8] { "SCANsatRPM", "SCANsatKethane", "Kethane", "GeodesicGrid", "RasterPropMonitor", "MechJebRPM", "MechJeb2", "ORSX" };
+
 		internal static string SCANsatVersion = "";
+		public static bool kethaneLoaded = false;
+		internal static bool ORSXFound = false;
+
 		private List<AssemblyLog> assemblyList = new List<AssemblyLog>();
 
 		private void Start()
@@ -36,13 +41,25 @@ namespace SCANsat
 			assemblyList.Add(new AssemblyLog(AssemblyLoader.loadedAssemblies.GetByAssembly(Assembly.GetExecutingAssembly()))); //More reliable method for SCANsat.dll
 			foreach (string name in assemblies)
 			{ //Search for the relevant plugins among the loaded assemblies
-				AssemblyLoader.LoadedAssembly assembly = AssemblyLoader.loadedAssemblies.FirstOrDefault(a => a.assembly.GetName().Name == name);
+				var assembly = AssemblyLoader.loadedAssemblies.FirstOrDefault(a => a.assembly.GetName().Name == name);
 				if (assembly != null)
 					assemblyList.Add(new AssemblyLog(assembly));
 			}
 			if (assemblyList.Count > 0)
 			{
 				SCANsatVersion = assemblyList[0].infoVersion;
+				var kAssembly = assemblyList.FirstOrDefault(a => a.name == "Kethane");
+				if (kAssembly != null)
+				{
+					if (kAssembly.infoVersion == kVersion)
+						kethaneLoaded = true;
+				}
+				var ORSXAssembly = assemblyList.FirstOrDefault(a => a.name == "ORSX");
+				if (ORSXAssembly != null)
+				{
+					ORSXFound = SCANreflection.ORSXReflectionMethod(ORSXAssembly.assemblyLoaded);
+				}
+
 				debugWriter();
 			}
 		}
@@ -61,11 +78,13 @@ namespace SCANsat
 	internal class AssemblyLog
 	{
 		internal string name, version, fileVersion, infoVersion, location;
+		internal Assembly assemblyLoaded;
 
-		internal AssemblyLog(AssemblyLoader.LoadedAssembly assembly)
+		internal AssemblyLog(AssemblyLoader.LoadedAssembly Assembly)
 		{
-			var ainfoV = Attribute.GetCustomAttribute(assembly.assembly, typeof(AssemblyInformationalVersionAttribute)) as AssemblyInformationalVersionAttribute;
-			var afileV = Attribute.GetCustomAttribute(assembly.assembly, typeof(AssemblyFileVersionAttribute)) as AssemblyFileVersionAttribute;
+			assemblyLoaded = Assembly.assembly;
+			var ainfoV = Attribute.GetCustomAttribute(Assembly.assembly, typeof(AssemblyInformationalVersionAttribute)) as AssemblyInformationalVersionAttribute;
+			var afileV = Attribute.GetCustomAttribute(Assembly.assembly, typeof(AssemblyFileVersionAttribute)) as AssemblyFileVersionAttribute;
 
 			switch (afileV == null)
 			{
@@ -79,9 +98,9 @@ namespace SCANsat
 				default: infoVersion = ainfoV.InformationalVersion; break;
 			}
 
-			name = assembly.assembly.GetName().Name;
-			version = assembly.assembly.GetName().Version.ToString();
-			location = assembly.url.ToString();
+			name = Assembly.assembly.GetName().Name;
+			version = Assembly.assembly.GetName().Version.ToString();
+			location = Assembly.url.ToString();
 		}
 
 	}

@@ -12,14 +12,14 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using SCANsat.SCAN_UI;
 using UnityEngine;
-using palette = SCANsat.SCANpalette;
+using palette = SCANsat.SCAN_UI.SCANpalette;
 
 namespace SCANsat
 {
 	public class SCANsat : PartModule, IScienceDataContainer
 	{
-		protected SCANcontroller con = SCANcontroller.controller;
 		protected bool powerIsProblem;
 		protected Animation anim = null;
 		protected List<ScienceData> storedData = new List<ScienceData>();
@@ -109,43 +109,47 @@ namespace SCANsat
 					Fields["alt_indicator"].guiActive = scanning;
 				if (scanning)
 				{
-					if (sensorType == 0 || SCANcontroller.controller.isVesselKnown(vessel.id, (SCANdata.SCANtype)sensorType))
+					if (SCANcontroller.controller == null)
 					{
-						if (TimeWarp.CurrentRate < 1500)
+						scanning = false;
+						Debug.LogError("[SCANsat] Warning: SCANsat scenario module not initialized; Shutting down");
+					}
+					else
+					{
+						if (sensorType == 0 || SCANcontroller.controller.isVesselKnown(vessel.id, (SCANdata.SCANtype)sensorType))
 						{
-							float p = power * TimeWarp.deltaTime;
-							float e = part.RequestResource("ElectricCharge", p);
-							if (e < p)
+							if (TimeWarp.CurrentRate < 1500)
 							{
-								unregisterScanner();
-								powerIsProblem = true;
+								float p = power * TimeWarp.deltaTime;
+								float e = part.RequestResource("ElectricCharge", p);
+								if (e < p)
+								{
+									unregisterScanner();
+									powerIsProblem = true;
+								}
+								else
+								{
+									registerScanner();
+									powerIsProblem = false;
+								}
 							}
-							else
+							else if (powerIsProblem)
 							{
 								registerScanner();
 								powerIsProblem = false;
 							}
 						}
-						else if (powerIsProblem)
-						{
-							registerScanner();
-							powerIsProblem = false;
-						}
+						else
+							unregisterScanner();
+						alt_indicator = scanAlt();
 					}
-					else
-						unregisterScanner();
-					alt_indicator = scanAlt();
 				}
-				//SCANcontroller.controller.scanFromAllVessels ();
 				if (vessel == FlightGlobals.ActiveVessel)
 				{
-					//SCANui.gui_ping(powerIsProblem);
 					if (powerIsProblem)
 					{
 						addStatic();
 						registerScanner();
-						//} else if (sensorType == 0 && scanning) {
-						//    SCANui.gui_ping_maptraq ();
 					}
 				}
 			}
@@ -254,10 +258,10 @@ namespace SCANsat
 		[KSPEvent(guiActive = true, guiName = "Start RADAR Scan", active = true)]
 		public void startScan()
 		{
-			if (!ToolbarManager.ToolbarAvailable)
+			if (!ToolbarManager.ToolbarAvailable && SCANcontroller.controller != null)
 				SCANcontroller.controller.mainMap.Visible = true;
 #if DEBUG
-			SCANui.minimode = (SCANui.minimode > 0 ? 2 : -SCANui.minimode);
+			//SCANui.minimode = (SCANui.minimode > 0 ? 2 : -SCANui.minimode);
 #endif
 			registerScanner();
 			animate(1, 0);
@@ -374,7 +378,9 @@ namespace SCANsat
 		public void addStatic()
 		{
 			SCANdata data = SCANUtil.getData(vessel.mainBody);
-			Texture2D map = data.map_small;
+			if (data == null)
+				return;
+			Texture2D map = data.Map;
 			if (map != null)
 			{
 				for (int i = 0; i < 1000; ++i)
@@ -388,14 +394,14 @@ namespace SCANsat
 		public void registerScanner()
 		{
 			scanning = true;
-			if (sensorType > 0)
+			if (sensorType > 0 && SCANcontroller.controller != null)
 				SCANcontroller.controller.registerSensor(vessel, (SCANdata.SCANtype)sensorType, fov, min_alt, max_alt, best_alt);
 		}
 
 		public void unregisterScanner()
 		{
 			scanning = false;
-			if (sensorType > 0)
+			if (sensorType > 0 && SCANcontroller.controller != null)
 				SCANcontroller.controller.unregisterSensor(vessel, (SCANdata.SCANtype)sensorType);
 		}
 

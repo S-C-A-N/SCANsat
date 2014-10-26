@@ -22,11 +22,11 @@ using SCANsat.Platform;
 using SCANsat;
 using UnityEngine;
 
-using palette = SCANsat.SCANpalette;
+using palette = SCANsat.SCAN_UI.SCANpalette;
 
 namespace SCANsat.SCAN_UI
 {
-	class SCANbigMap : MBW
+	class SCANbigMap : SCAN_MBW
 	{
 		private static SCANmap bigmap;
 		private SCANmap spotmap;
@@ -76,6 +76,11 @@ namespace SCANsat.SCAN_UI
 			}
 			b = FlightGlobals.currentMainBody;
 			data = SCANUtil.getData(b);
+			if (data == null)
+			{
+				data = new SCANdata(b);
+				SCANcontroller.controller.addToBodyData(b, data);
+			}
 			WindowCaption = string.Format("Map of {0}", b.theName);
 			bigmap.setBody(b);
 		}
@@ -118,6 +123,11 @@ namespace SCANsat.SCAN_UI
 			{
 				b = v.mainBody;
 				data = SCANUtil.getData(b);
+				if (data == null)
+				{
+					data = new SCANdata(b);
+					SCANcontroller.controller.addToBodyData(b, data);
+				}
 				bigmap.setBody(b);
 			}
 		}
@@ -210,7 +220,10 @@ namespace SCANsat.SCAN_UI
 				SCANcontroller.controller.bigMapVisible = Visible;
 			}
 
-			fillS();
+			if (GUILayout.Button("Colors", SCANskins.SCAN_buttonFixed))
+			{
+				SCANcontroller.controller.colorManager.Visible = !SCANcontroller.controller.colorManager.Visible;
+			}
 
 			if (GUILayout.Button("Export PNG", SCANskins.SCAN_buttonFixed))
 			{
@@ -390,11 +403,11 @@ namespace SCANsat.SCAN_UI
 
 			if (SCANcontroller.controller.globalOverlay) //Button to turn on/off resource overlay
 			{
-				if (!SCANcontroller.controller.kethaneBusy || SCANcontroller.controller.resourceOverlayType == 0)
+				if (!SCANcontroller.controller.KethaneBusy || SCANcontroller.controller.resourceOverlayType == 0)
 				{
 					if (SCANcontroller.controller.map_ResourceOverlay)
 					{
-						if (GUILayout.Button(SCANcontroller.ResourcesList[SCANcontroller.controller.gridSelection].name, SCANskins.SCAN_buttonActive))
+						if (GUILayout.Button(SCANcontroller.controller.ResourcesList[SCANcontroller.controller.gridSelection].Name, SCANskins.SCAN_buttonActive))
 						{
 							SCANcontroller.controller.map_ResourceOverlay = !SCANcontroller.controller.map_ResourceOverlay;
 							bigmap.resetMap();
@@ -402,7 +415,7 @@ namespace SCANsat.SCAN_UI
 					}
 					else
 					{
-						if (GUILayout.Button(SCANcontroller.ResourcesList[SCANcontroller.controller.gridSelection].name))
+						if (GUILayout.Button(SCANcontroller.controller.ResourcesList[SCANcontroller.controller.gridSelection].Name))
 						{
 							SCANcontroller.controller.map_ResourceOverlay = !SCANcontroller.controller.map_ResourceOverlay;
 							bigmap.resetMap();
@@ -577,14 +590,14 @@ namespace SCANsat.SCAN_UI
 				stopE();
 				SCANuiUtil.mouseOverInfo(mlon, mlat, bigmap, data, v.mainBody, in_map);
 				if (bigmap.mapmode == 0 && SCANcontroller.controller.legend)
-					SCANuiUtil.drawLegend();
+					SCANuiUtil.drawLegend(data);
 			}
 			else
 			{
 				growS();
 				SCANuiUtil.mouseOverInfo(mlon, mlat, bigmap, data, v.mainBody, in_map);
 				if (bigmap.mapmode == 0 && SCANcontroller.controller.legend)
-					SCANuiUtil.drawLegend();
+					SCANuiUtil.drawLegend(data);
 				stopS();
 				stopE();
 			}
@@ -599,7 +612,7 @@ namespace SCANsat.SCAN_UI
 				spotmap.setBody(v.mainBody);
 
 				if (SCANcontroller.controller.globalOverlay) //make sure resources show up in zoom map
-					spotmap.setResource(SCANcontroller.ResourcesList[SCANcontroller.controller.gridSelection].name);
+					spotmap.setResource(SCANcontroller.controller.ResourcesList[SCANcontroller.controller.gridSelection].Name);
 
 				GUI.Box(pos_spotmap, spotmap.getPartialMap());
 				if (!notMappingToday)
@@ -708,7 +721,7 @@ namespace SCANsat.SCAN_UI
 			WindowCaption = string.Format("Map of {0}{1}", b.theName, titleText);
 
 			if (SCANcontroller.controller.globalOverlay) //Update selected resource
-				bigmap.setResource(SCANcontroller.ResourcesList[SCANcontroller.controller.gridSelection].name);
+				bigmap.setResource(SCANcontroller.controller.ResourcesList[SCANcontroller.controller.gridSelection].Name);
 
 			SCANcontroller.controller.map_x = (int)WindowRect.x;
 			SCANcontroller.controller.map_y = (int)WindowRect.y;

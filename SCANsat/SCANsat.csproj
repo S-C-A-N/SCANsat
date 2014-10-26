@@ -44,161 +44,123 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="CLZF2.cs" />
-    <Compile Include="RemoteView.cs" />
+    <Compile Include="Platform\Attributes\Bounds.cs" />
+    <Compile Include="Platform\ColorModels\CMYK.cs" />
+    <Compile Include="Platform\ColorModels\HSBA.cs" />
+    <Compile Include="Platform\ColorModels\HSLA.cs" />
+    <Compile Include="Platform\ColorModels\HSVA.cs" />
+    <Compile Include="Platform\ColorModels\RGBAb.cs" />
+    <Compile Include="Platform\ColorModels\RGBAf.cs" />
+    <Compile Include="Platform\Palettes\ColorBrewer\ColorBrewer.cs" />
+    <Compile Include="Platform\Palettes\ColorBrewer\Include\Original.cs" />
+    <Compile Include="Platform\Palettes\Palette.cs" />
+    <Compile Include="Platform\Palettes\PaletteLoader.cs" />
+    <Compile Include="Platform\Palettes\Palettes.cs" />
+    <Compile Include="Platform\Palettes\Swatches.cs" />
+    <Compile Include="Platform\SCAN_CLZF2.cs" />
+    <Compile Include="SCAN_UI\SCANcolorSelection.cs" />
+    <Compile Include="SCAN_UI\UI_Framework\SCANremoteView.cs" />
     <Compile Include="SCANcontroller.cs" />
     <Compile Include="SCANdata.cs" />
-    <Compile Include="SCAN_KSPPP\Extensions\Colors\UnityEngine.Color32_.cs">
+    <Compile Include="Platform\Extensions\Colors\UnityEngine.Color32_.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="SCAN_KSPPP\Extensions\Colors\UnityEngine.Color_.cs">
+    <Compile Include="Platform\Extensions\Colors\UnityEngine.Color_.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="SCAN_KSPPP\Extensions\Colors\UnityEngine.GradientAlphaKey_.cs" />
-    <Compile Include="SCAN_KSPPP\Extensions\Colors\UnityEngine.GradientColorKey_.cs" />
-    <Compile Include="SCAN_KSPPP\Extensions\Colors\UnityEngine.Gradient_.cs" />
-    <Compile Include="SCAN_KSPPP\Extensions\Data\UnityEngine.SerializeFIeld_.cs" />
-    <Compile Include="SCAN_KSPPP\Extensions\GUI\UnityEngine.GUIContent_.cs">
+    <Compile Include="Platform\Extensions\Colors\UnityEngine.GradientAlphaKey_.cs" />
+    <Compile Include="Platform\Extensions\Colors\UnityEngine.GradientColorKey_.cs" />
+    <Compile Include="Platform\Extensions\Colors\UnityEngine.Gradient_.cs" />
+    <Compile Include="Platform\Extensions\GUI\UnityEngine.GUIContent_.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="SCAN_KSPPP\Extensions\GUI\UnityEngine.GUIElement_.cs">
+    <Compile Include="Platform\Extensions\GUI\UnityEngine.GUIElement_.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="SCAN_KSPPP\Extensions\GUI\UnityEngine.GUILayer_.cs">
+    <Compile Include="Platform\Extensions\GUI\UnityEngine.GUILayer_.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="SCAN_KSPPP\Extensions\GUI\UnityEngine.GUILayoutOption_.cs">
+    <Compile Include="Platform\Extensions\GUI\UnityEngine.GUILayoutOption_.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="SCAN_KSPPP\Extensions\GUI\UnityEngine.GUILayoutUtility_.cs">
+    <Compile Include="Platform\Extensions\GUI\UnityEngine.GUILayoutUtility_.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="SCAN_KSPPP\Extensions\GUI\UnityEngine.GUILayout_.cs">
+    <Compile Include="Platform\Extensions\GUI\UnityEngine.GUILayout_.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="SCAN_KSPPP\Extensions\GUI\UnityEngine.GUISettings_.cs">
+    <Compile Include="Platform\Extensions\GUI\UnityEngine.GUISettings_.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="SCAN_KSPPP\Extensions\GUI\UnityEngine.GUISkin_.cs">
+    <Compile Include="Platform\Extensions\GUI\UnityEngine.GUISkin_.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="SCAN_KSPPP\Extensions\GUI\UnityEngine.GUIStyleState_.cs">
+    <Compile Include="Platform\Extensions\GUI\UnityEngine.GUIStyleState_.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="SCAN_KSPPP\Extensions\GUI\UnityEngine.GUIStyle_.cs">
+    <Compile Include="Platform\Extensions\GUI\UnityEngine.GUIStyle_.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="SCAN_KSPPP\Extensions\GUI\UnityEngine.GUITexture_.cs">
+    <Compile Include="Platform\Extensions\GUI\UnityEngine.GUITexture_.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="SCAN_KSPPP\Extensions\GUI\UnityEngine.GUIText_.cs">
+    <Compile Include="Platform\Extensions\GUI\UnityEngine.GUIText_.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="SCAN_KSPPP\Extensions\GUI\UnityEngine.GUIUtility_.cs">
+    <Compile Include="Platform\Extensions\GUI\UnityEngine.GUIUtility_.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="SCAN_KSPPP\Extensions\GUI\UnityEngine.GUI_.cs">
+    <Compile Include="Platform\Extensions\GUI\UnityEngine.GUI_.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="SCAN_KSPPP\Extensions\Math\UnityEngine.Mathf_.cs">
+    <Compile Include="Platform\Extensions\Math\UnityEngine.Mathf_.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="SCAN_KSPPP\Extensions\Math\UnityEngine.Matrix4x4_.cs">
+    <Compile Include="Platform\Extensions\Math\UnityEngine.Matrix4x4_.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="SCAN_KSPPP\Extensions\Math\UnityEngine.Random_.cs">
+    <Compile Include="Platform\Extensions\Math\UnityEngine.Random_.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="SCAN_KSPPP\Extensions\Math\UnityEngine.RectOffset_.cs">
+    <Compile Include="Platform\Extensions\Math\UnityEngine.RectOffset_.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="SCAN_KSPPP\Extensions\Math\UnityEngine.Rect_.cs">
+    <Compile Include="Platform\Extensions\Math\UnityEngine.Rect_.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="SCAN_KSPPP\Extensions\Math\UnityEngine.Vector2_.cs">
+    <Compile Include="Platform\Extensions\Math\UnityEngine.Vector2_.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="SCAN_KSPPP\Extensions\Math\UnityEngine.Vector3_.cs">
+    <Compile Include="Platform\Extensions\Math\UnityEngine.Vector3_.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="SCAN_KSPPP\Extensions\Math\UnityEngine.Vector4_.cs">
+    <Compile Include="Platform\Extensions\Math\UnityEngine.Vector4_.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="SCAN_KSPPP\Extensions\Rendering\UnityEngine.Mesh_.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="SCAN_KSPPP\Extensions\Rendering\UnityEngine.RenderSettings_.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="SCAN_KSPPP\Extensions\Rendering\UnityEngine.Screen_.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="SCAN_KSPPP\Extensions\Rendering\UnityEngine.Shader_.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="SCAN_KSPPP\Extensions\Rendering\UnityEngine.SparseTexture_.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="SCAN_KSPPP\Extensions\Rendering\UnityEngine.SpriteRenderer_.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="SCAN_KSPPP\Extensions\Rendering\UnityEngine.Texture2D_.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="SCAN_KSPPP\Extensions\Rendering\UnityEngine.Texture3D_.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="SCAN_KSPPP\Extensions\Rendering\UnityEngine.Texture_.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="SCAN_KSPPP\Extensions\Rendering\UnityEngine.TreeInstance_.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="SCAN_KSPPP\Extensions\Rendering\UnityEngine.UIVertex_.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="SCAN_KSPPP\Extensions\Text\UnityEngine.Font_.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="SCAN_KSPPP\Extensions\Text\UnityEngine.TextGenerationSettings_.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="SCAN_KSPPP\Extensions\Text\UnityEngine.TextGenerator_.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="SCAN_KSPPP\Extensions\Text\UnityEngine.TextMesh_.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="SCAN_KSPPP\Extensions\Time\UnityEngine.Event_.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="SCAN_KSPPP\Extensions\Time\UnityEngine.Time_.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="SCAN_KSPPP\KSPAddonImproved.cs" />
-    <Compile Include="SCAN_UI\Icons.cs" />
+    <Compile Include="Platform\SCAN_KSPAddonImproved.cs" />
+    <Compile Include="SCAN_UI\UI_Framework\SCANicon.cs" />
     <Compile Include="SCAN_UI\SCANbigMap.cs" />
     <Compile Include="SCAN_UI\SCANinstrumentUI.cs" />
-    <Compile Include="SCAN_KSPPP\Logging.cs" />
-    <Compile Include="SCAN_KSPPP\MBE.cs" />
-    <Compile Include="SCAN_KSPPP\MBW.cs" />
-    <Compile Include="SCAN_KSPPP\SkinsLibrary.cs" />
+    <Compile Include="Platform\Logging.cs" />
+    <Compile Include="Platform\SCAN_MBE.cs" />
+    <Compile Include="Platform\SCAN_MBW.cs" />
+    <Compile Include="Platform\SCAN_SkinsLibrary.cs" />
     <Compile Include="SCAN_UI\SCANkscMap.cs" />
     <Compile Include="SCAN_UI\SCANmainMap.cs" />
     <Compile Include="SCANmap.cs" />
-    <Compile Include="SCANpalette.cs" />
+    <Compile Include="SCAN_UI\UI_Framework\SCANpalette.cs" />
     <Compile Include="SCANquickload.cs" />
     <Compile Include="SCANreflection.cs" />
     <Compile Include="SCANsat.cs" />
-    <Compile Include="SCANsatRPM.cs" />
+    <Compile Include="SCAN_UI\SCANsatRPM.cs" />
     <Compile Include="SCAN_UI\SCANsettingsUI.cs" />
-    <Compile Include="SCANtoolbar.cs" />
-    <Compile Include="SCANtoolbarwrapper.cs" />
+    <Compile Include="SCAN_UI\UI_Framework\SCANtoolbar.cs" />
+    <Compile Include="SCAN_UI\UI_Framework\SCANtoolbarwrapper.cs" />
     <Compile Include="SCANui.cs" />
     <Compile Include="SCANutil.cs" />
     <Compile Include="SCANversions.cs" />
-    <Compile Include="SCAN_UI\SCANskins.cs" />
-    <Compile Include="SCAN_UI\SCANuiUtil.cs" />
+    <Compile Include="SCAN_UI\UI_Framework\SCANskins.cs" />
+    <Compile Include="SCAN_UI\UI_Framework\SCANuiUtil.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>
