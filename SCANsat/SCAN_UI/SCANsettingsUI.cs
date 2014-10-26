@@ -210,7 +210,7 @@ namespace SCANsat.SCAN_UI
 				GUILayout.Label("No Resources Found", SCANskins.SCAN_headline);
 			}
 			growE();
-			SCANcontroller.controller.gridSelection = GUILayout.SelectionGrid(SCANcontroller.controller.gridSelection, SCANcontroller.controller.ResourcesList.Select(a => a.name).ToArray(), 4); //select resource to display
+			SCANcontroller.controller.gridSelection = GUILayout.SelectionGrid(SCANcontroller.controller.gridSelection, SCANcontroller.controller.ResourcesList.Select(a => a.Name).ToArray(), 4); //select resource to display
 			stopE();
 			fillS(16);
 		}

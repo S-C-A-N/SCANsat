@@ -167,7 +167,7 @@ namespace SCANsat.SCAN_UI
 				drop_down_open = false;
 
 			if (SCANcontroller.controller.globalOverlay) //Update selected resource
-				bigmap.setResource(SCANcontroller.controller.ResourcesList[SCANcontroller.controller.gridSelection].name);
+				bigmap.setResource(SCANcontroller.controller.ResourcesList[SCANcontroller.controller.gridSelection].Name);
 		}
 
 		//Draw version label in upper left corner
@@ -463,7 +463,7 @@ namespace SCANsat.SCAN_UI
 				{
 					scrollR = GUI.BeginScrollView(ddRect, scrollR, new Rect(0, 0, 100, 20 * SCANcontroller.controller.ResourcesList.Count));
 					Rect r = new Rect(2, 20 * i, 96, 20);
-					if (GUI.Button(r, SCANcontroller.controller.ResourcesList[i].name, SCANskins.SCAN_dropDownButton))
+					if (GUI.Button(r, SCANcontroller.controller.ResourcesList[i].Name, SCANskins.SCAN_dropDownButton))
 					{
 						SCANcontroller.controller.gridSelection = i;
 						drop_down_open = false;

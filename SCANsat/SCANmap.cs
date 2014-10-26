@@ -384,7 +384,7 @@ namespace SCANsat
 		public void setResource(string s)
 		{ //Used when a different resource is selected
 			if (resource == null) resource = SCANcontroller.controller.ResourcesList[SCANcontroller.controller.gridSelection];
-			else if (resource.name == s)
+			else if (resource.Name == s)
 				return;
 			resource = SCANcontroller.controller.ResourcesList[SCANcontroller.controller.gridSelection];
 			resetMap();
@@ -536,9 +536,9 @@ namespace SCANsat
 					{
 						if (SCANcontroller.controller.resourceOverlayType == 0 && SCANversions.ORSXFound)
 						{
-							if (SCANUtil.isCovered(lon, lat, data, resource.type)) //check our new resource coverage map
+							if (SCANUtil.isCovered(lon, lat, data, resource.Type)) //check our new resource coverage map
 							{
-								double amount = SCANUtil.ORSOverlay(lon, lat, body.flightGlobalsIndex, resource.name); //grab the resource amount for the current pixel
+								double amount = SCANUtil.ORSOverlay(lon, lat, body.flightGlobalsIndex, resource.Name); //grab the resource amount for the current pixel
 								double scalar = resource.ORS_Multiplier * resource.ORS_Scalar * resource.ORS_Threshold; //low cutoff value
 								if (resource.linear)
 								{ //linear resources are measured on 0-100% scale
@@ -565,7 +565,7 @@ namespace SCANsat
 						}
 						else if (SCANcontroller.controller.resourceOverlayType == 1) //Kethane overlay
 						{
-							if (SCANUtil.isCovered(lon, lat, data, resource.type))
+							if (SCANUtil.isCovered(lon, lat, data, resource.Type))
 							{
 								int ilon = SCANUtil.icLON(lon);
 								int ilat = SCANUtil.icLAT(lat);
@@ -656,9 +656,9 @@ namespace SCANsat
 					{
 						if (SCANcontroller.controller.resourceOverlayType == 0 && SCANversions.ORSXFound)
 						{
-							if (SCANUtil.isCovered(lon, lat, data, resource.type)) //check our new resource coverage map
+							if (SCANUtil.isCovered(lon, lat, data, resource.Type)) //check our new resource coverage map
 							{
-								double amount = SCANUtil.ORSOverlay(lon, lat, body.flightGlobalsIndex, resource.name); //grab the resource amount for the current pixel
+								double amount = SCANUtil.ORSOverlay(lon, lat, body.flightGlobalsIndex, resource.Name); //grab the resource amount for the current pixel
 								double scalar = resource.ORS_Multiplier * resource.ORS_Scalar * resource.ORS_Threshold;
 								if (resource.linear)
 								{
@@ -685,7 +685,7 @@ namespace SCANsat
 						}
 						else if (SCANcontroller.controller.resourceOverlayType == 1)
 						{
-							if (SCANUtil.isCovered(lon, lat, data, resource.type))
+							if (SCANUtil.isCovered(lon, lat, data, resource.Type))
 							{
 								int ilon = SCANUtil.icLON(lon);
 								int ilat = SCANUtil.icLAT(lat);
@@ -779,9 +779,9 @@ namespace SCANsat
 					{
 						if (SCANcontroller.controller.resourceOverlayType == 0 && SCANversions.ORSXFound)
 						{
-							if (SCANUtil.isCovered(lon, lat, data, resource.type)) //check our new resource coverage map
+							if (SCANUtil.isCovered(lon, lat, data, resource.Type)) //check our new resource coverage map
 							{
-								double amount = SCANUtil.ORSOverlay(lon, lat, body.flightGlobalsIndex, resource.name); //grab the resource amount for the current pixel
+								double amount = SCANUtil.ORSOverlay(lon, lat, body.flightGlobalsIndex, resource.Name); //grab the resource amount for the current pixel
 								double scalar = resource.ORS_Multiplier * resource.ORS_Scalar * resource.ORS_Threshold;
 								if (resource.linear)
 								{
@@ -808,7 +808,7 @@ namespace SCANsat
 						}
 						else if (SCANcontroller.controller.resourceOverlayType == 1)
 						{
-							if (SCANUtil.isCovered(lon, lat, data, resource.type))
+							if (SCANUtil.isCovered(lon, lat, data, resource.Type))
 							{
 								int ilon = SCANUtil.icLON(lon);
 								int ilat = SCANUtil.icLAT(lat);

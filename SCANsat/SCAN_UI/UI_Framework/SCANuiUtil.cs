@@ -139,24 +139,24 @@ namespace SCANsat.SCAN_UI
 				{
 					if (SCANcontroller.controller.resourceOverlayType == 0 && SCANversions.ORSXFound)
 					{
-						if (SCANUtil.isCovered(lon, lat, data, mapObj.resource.type))
+						if (SCANUtil.isCovered(lon, lat, data, mapObj.resource.Type))
 						{
-							double amount = SCANUtil.ORSOverlay(lon, lat, mapObj.body.flightGlobalsIndex, mapObj.resource.name);
+							double amount = SCANUtil.ORSOverlay(lon, lat, mapObj.body.flightGlobalsIndex, mapObj.resource.Name);
 							string label;
 							if (mapObj.resource.linear) //Make sure that ORS values are handled correctly based on which scale type they use
 								label = (amount * 100).ToString("N1") + " %";
 							else
 								label = (amount * 1000000).ToString("N1") + " ppm";
-							info += palette.colored(mapObj.resource.fullColor, mapObj.resource.name + ": " + label);
+							info += palette.colored(mapObj.resource.fullColor, mapObj.resource.Name + ": " + label);
 						}
 					}
 					else if (SCANcontroller.controller.resourceOverlayType == 1)
 					{
-						if (SCANUtil.isCovered(lon, lat, data, mapObj.resource.type))
+						if (SCANUtil.isCovered(lon, lat, data, mapObj.resource.Type))
 						{
 							double amount = data.KethaneValueMap[SCANUtil.icLON(lon), SCANUtil.icLAT(lat)];
 							if (amount < 0) amount = 0d;
-							info += palette.colored(mapObj.resource.fullColor, mapObj.resource.name + ": " + amount.ToString("N1"));
+							info += palette.colored(mapObj.resource.fullColor, mapObj.resource.Name + ": " + amount.ToString("N1"));
 						}
 					}
 				}
