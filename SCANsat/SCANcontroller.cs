@@ -47,11 +47,11 @@ namespace SCANsat
 					return null;
 				}
 			}
-			private set { }
 		}
 
 		public static int minScanAlt = 5000;
 		public static int maxScanAlt = 500000;
+		public static int bestScanAlt = 250000;
 		[KSPField(isPersistant = true)]
 		public int colours = 0;
 		[KSPField(isPersistant = true)]
@@ -122,6 +122,9 @@ namespace SCANsat
 		internal SCAN_MBW kscMap;
 		internal SCAN_MBW colorManager;
 
+		/* Used in case the loading process is interupted somehow */
+		private bool loaded = false;
+
 		#region Public Accessors
 		/* Use these to access private members of this class */
 		public List<SCANdata.SCANResource> ResourcesList
@@ -190,22 +193,37 @@ namespace SCANsat
 
 		public override void OnLoad(ConfigNode node)
 		{
+			body_data = new Dictionary<string, SCANdata>();
 			ConfigNode node_vessels = node.GetNode("Scanners");
 			if (node_vessels != null)
 			{
-				body_data = new Dictionary<string, SCANdata>();
-
-				print("SCANsat Controller: Loading " + node_vessels.CountNodes.ToString() + " known vessels");
+				SCANUtil.SCANlog("SCANsat Controller: Loading {0} known vessels", node_vessels.CountNodes);
 				foreach (ConfigNode node_vessel in node_vessels.GetNodes("Vessel"))
 				{
-					Guid id = new Guid(node_vessel.GetValue("guid"));
+					Guid id;
+					try
+					{
+						id = new Guid(node_vessel.GetValue("guid"));
+					}
+					catch (Exception e)
+					{
+						SCANUtil.SCANlog("Something Went Wrong Loading This SCAN Vessel; Moving On To The Next: {0}", e);
+						continue;
+					}
 					foreach (ConfigNode node_sensor in node_vessel.GetNodes("Sensor"))
 					{
-						int sensor = Convert.ToInt32(node_sensor.GetValue("type"));
-						double fov = Convert.ToDouble(node_sensor.GetValue("fov"));
-						double min_alt = Convert.ToDouble(node_sensor.GetValue("min_alt"));
-						double max_alt = Convert.ToDouble(node_sensor.GetValue("max_alt"));
-						double best_alt = Convert.ToDouble(node_sensor.GetValue("best_alt"));
+						int sensor;
+						double fov, min_alt, max_alt, best_alt;
+						if (!int.TryParse(node_sensor.GetValue("type"), out sensor))
+							sensor = 0;
+						if (!double.TryParse(node_sensor.GetValue("fov"), out fov))
+							fov = 3;
+						if (!double.TryParse(node_sensor.GetValue("min_alt"), out min_alt))
+							min_alt = minScanAlt;
+						if (!double.TryParse(node_sensor.GetValue("max_alt"), out max_alt))
+							max_alt = maxScanAlt;
+						if (!double.TryParse(node_sensor.GetValue("best_alt"), out best_alt))
+							best_alt = bestScanAlt;
 						registerSensor(id, (SCANdata.SCANtype)sensor, fov, min_alt, max_alt, best_alt);
 					}
 				}
@@ -220,7 +238,7 @@ namespace SCANsat
 					int pSize;
 					bool pRev, pDis, disabled;
 					string body_name = node_body.GetValue("Name");
-					print("SCANsat Controller: Loading map for " + body_name);
+					SCANUtil.SCANlog("SCANsat Controller: Loading map for {0}", body_name);
 					CelestialBody body = FlightGlobals.Bodies.FirstOrDefault(b => b.name == body_name);
 					if (body != null)
 					{
@@ -245,53 +263,75 @@ namespace SCANsat
 						}
 						catch (Exception e)
 						{
-							print(e.ToString());
-							print(e.StackTrace);
+							SCANUtil.SCANlog("Something Went Wrong Loading Scanning Data; Resetting Coverage: {0}", e);
+							data.reset();
 							// fail somewhat gracefully; don't make the save unloadable 
 						}
-						//Verify that saved data types can be converted, revert to default values otherwise
-						if (bool.TryParse(node_body.GetValue("Disabled"), out disabled))
-							data.Disabled = disabled;
-						if (float.TryParse(node_body.GetValue("MinHeightRange"), out min))
-							data.MinHeight = min;
-						if (float.TryParse(node_body.GetValue("MaxHeightRange"), out max))
-							data.MaxHeight = max;
-						if (node_body.HasValue("ClampHeight"))
+						try // Make doubly sure that nothing here can interup the Scenario Module loading process
 						{
-							if (float.TryParse(node_body.GetValue("ClampHeight"), out clamp))
-								data.ClampHeight = clamp;
+							//Verify that saved data types can be converted, revert to default values otherwise
+							if (bool.TryParse(node_body.GetValue("Disabled"), out disabled))
+								data.Disabled = disabled;
+							if (float.TryParse(node_body.GetValue("MinHeightRange"), out min))
+								data.MinHeight = min;
+							if (float.TryParse(node_body.GetValue("MaxHeightRange"), out max))
+								data.MaxHeight = max;
+							if (node_body.HasValue("ClampHeight"))
+							{
+								if (float.TryParse(node_body.GetValue("ClampHeight"), out clamp))
+									data.ClampHeight = clamp;
+							}
+							if (int.TryParse(node_body.GetValue("PaletteSize"), out pSize))
+								data.PaletteSize = pSize;
+							if (bool.TryParse(node_body.GetValue("PaletteReverse"), out pRev))
+								data.PaletteReverse = pRev;
+							if (bool.TryParse(node_body.GetValue("PaletteDiscrete"), out pDis))
+								data.PaletteDiscrete = pDis;
+							if (node_body.HasValue("PaletteName"))
+								data.PaletteName = node_body.GetValue("PaletteName");
+							paletteLoad(data);
 						}
-						if (int.TryParse(node_body.GetValue("PaletteSize"), out pSize))
-							data.PaletteSize = pSize;
-						if (bool.TryParse(node_body.GetValue("PaletteReverse"), out pRev))
-							data.PaletteReverse = pRev;
-						if (bool.TryParse(node_body.GetValue("PaletteDiscrete"), out pDis))
-							data.PaletteDiscrete = pDis;
-						if (node_body.HasValue("PaletteName"))
-							data.PaletteName = node_body.GetValue("PaletteName");
-						paletteLoad(data);
+						catch (Exception e)
+						{
+							SCANUtil.SCANlog("Error Loading SCANdata; Reverting To Default Settings: {0}", e);
+						}
 					}
 				}
 			}
 			dataRebuild = false; //Used for the one-time update to the new integer array
-			if (resourceTypes == null)
-				SCANUtil.loadSCANtypes();
-			if (HighLogic.LoadedScene == GameScenes.FLIGHT)
+			try
 			{
-				Resources(FlightGlobals.currentMainBody);
-				mainMap = gameObject.AddComponent<SCANmainMap>();
-				settingsWindow = gameObject.AddComponent<SCANsettingsUI>();
-				instrumentsWindow = gameObject.AddComponent<SCANinstrumentUI>();
-				bigMap = gameObject.AddComponent<SCANbigMap>();
-				colorManager = gameObject.AddComponent<SCANcolorSelection>();
+				if (resourceTypes == null)
+					SCANUtil.loadSCANtypes();
 			}
-			else if (HighLogic.LoadedScene == GameScenes.SPACECENTER || HighLogic.LoadedScene == GameScenes.TRACKSTATION)
+			catch (Exception e)
 			{
-				Resources(Planetarium.fetch.Home);
-				kscMap = gameObject.AddComponent<SCANkscMap>();
-				settingsWindow = gameObject.AddComponent<SCANsettingsUI>();
-				colorManager = gameObject.AddComponent<SCANcolorSelection>();
+				SCANUtil.SCANlog("Something Went Wrong Loading Resource Configs: {0}", e);
 			}
+			try
+			{
+				if (HighLogic.LoadedScene == GameScenes.FLIGHT)
+				{
+					Resources(FlightGlobals.currentMainBody);
+					mainMap = gameObject.AddComponent<SCANmainMap>();
+					settingsWindow = gameObject.AddComponent<SCANsettingsUI>();
+					instrumentsWindow = gameObject.AddComponent<SCANinstrumentUI>();
+					bigMap = gameObject.AddComponent<SCANbigMap>();
+					colorManager = gameObject.AddComponent<SCANcolorSelection>();
+				}
+				else if (HighLogic.LoadedScene == GameScenes.SPACECENTER || HighLogic.LoadedScene == GameScenes.TRACKSTATION)
+				{
+					Resources(Planetarium.fetch.Home);
+					kscMap = gameObject.AddComponent<SCANkscMap>();
+					settingsWindow = gameObject.AddComponent<SCANsettingsUI>();
+					colorManager = gameObject.AddComponent<SCANcolorSelection>();
+				}
+			}
+			catch (Exception e)
+			{
+				SCANUtil.SCANlog("Something Went Wrong Initializing UI Objects: {0}", e);
+			}
+			loaded = true;
 		}
 
 		public override void OnSave(ConfigNode node)
@@ -360,7 +400,7 @@ namespace SCANsat
 
 		private void Update()
 		{
-			if (scan_background)
+			if (scan_background && loaded)
 			{
 				scanFromAllVessels();
 #if DEBUG
@@ -460,7 +500,7 @@ namespace SCANsat
 							continue;
 						foreach (SCANdata.SCANResource res in ResourcesList)
 						{ //Check to see if the resource is already in the list
-							if (resource.name == res.name)
+							if (resource.Name == res.Name)
 							{
 								if (resource.body == b.name)
 								{
@@ -530,6 +570,8 @@ namespace SCANsat
 
 		private void registerSensor(Guid id, SCANdata.SCANtype sensors, double fov, double min_alt, double max_alt, double best_alt)
 		{
+			if (id == null)
+				return;
 			if (!knownVessels.ContainsKey(id)) knownVessels[id] = new SCANvessel();
 			SCANvessel sv = knownVessels[id];
 			sv.id = id;
