@@ -25,9 +25,10 @@ namespace SCANsat.SCAN_UI
 	{
 		private static SCANmap bigmap;
 		private static CelestialBody b;
+		private static string mapTypeTitle = "";
 		internal SCANdata data;
 		//private double startUT;
-		private bool drawGrid, spaceCenterLock, trackingStationLock;
+		private bool drawGrid, currentGrid, currentColor, lastColor, spaceCenterLock, trackingStationLock;
 		private bool drop_down_open, projection_drop_down, mapType_drop_down, resources_drop_down, planetoid_drop_down;
 		private Texture2D overlay_static, map;
 		private Rect ddRect, maprect;
@@ -74,6 +75,8 @@ namespace SCANsat.SCAN_UI
 			}
 			if (SCANcontroller.controller.resourceOverlayType == 1)
 				SCANcontroller.controller.map_ResourceOverlay = false;
+			currentColor = SCANcontroller.controller.colours == 0;
+			lastColor = currentColor;
 			WindowCaption = string.Format("Map of {0}", b.theName);
 			data = SCANUtil.getData(b);
 			if (data == null)
@@ -91,7 +94,12 @@ namespace SCANsat.SCAN_UI
 
 		protected override void DrawWindowPre(int id)
 		{
-			WindowCaption = string.Format("Map of {0}", b.theName);
+			if (bigmap != null)
+				mapTypeTitle = SCANmap.mapTypeNames[bigmap.mapmode];
+			else
+				mapTypeTitle = "";
+
+			WindowCaption = string.Format("{0} Map of {1}", mapTypeTitle, b.theName);
 
 			//Disable any errant drop down menus
 			if (!drop_down_open)
@@ -247,8 +255,22 @@ namespace SCANsat.SCAN_UI
 		{
 			growS();
 
-			if (GUILayout.Button("Color", SCANskins.SCAN_buttonFixed))
+			currentColor = GUILayout.Toggle(currentColor, "");
+
+			Rect d = GUILayoutUtility.GetLastRect();
+			d.x += 44;
+			d.y += 2;
+			d.width = 24;
+			d.height = 24;
+
+			if (GUI.Button(d, SCANskins.SCAN_ColorWheelIcon, SCANskins.SCAN_buttonBorderless))
 			{
+				currentColor = !currentColor;
+			}
+
+			if (lastColor != currentColor)
+			{
+				lastColor = currentColor;
 				if (SCANcontroller.controller.colours == 0)
 					SCANcontroller.controller.colours = 1;
 				else
@@ -259,36 +281,81 @@ namespace SCANsat.SCAN_UI
 
 			fillS();
 
-			if (GUILayout.Button("Grid", SCANskins.SCAN_buttonFixed))
+			SCANcontroller.controller.map_grid = GUILayout.Toggle(SCANcontroller.controller.map_grid, "");
+
+			d = GUILayoutUtility.GetLastRect();
+			d.x += 34;
+			d.y += 2;
+			d.width = 48;
+			d.height = 24;
+
+			if (GUI.Button(d, SCANskins.SCAN_GridIcon, SCANskins.SCAN_buttonBorderless))
 			{
 				SCANcontroller.controller.map_grid = !SCANcontroller.controller.map_grid;
+			}
+
+			if (currentGrid != SCANcontroller.controller.map_grid)
+			{
+				currentGrid = SCANcontroller.controller.map_grid;
 				drawGrid = true;
 			}
 
 			fillS();
 
-			if (GUILayout.Button("Markers", SCANskins.SCAN_buttonFixed))
+			SCANcontroller.controller.map_markers = GUILayout.Toggle(SCANcontroller.controller.map_markers, "");
+
+			d = GUILayoutUtility.GetLastRect();
+			d.x += 44;
+			d.y += 2;
+			d.width = 24;
+			d.height = 24;
+
+			if (GUI.Button(d, SCANcontroller.controller.anomalyMarker, SCANskins.SCAN_buttonBorderless))
 			{
 				SCANcontroller.controller.map_markers = !SCANcontroller.controller.map_markers;
 			}
 
 			fillS();
 
-			if (GUILayout.Button("Flags", SCANskins.SCAN_buttonFixed))
+			SCANcontroller.controller.map_flags = GUILayout.Toggle(SCANcontroller.controller.map_flags, "");
+
+			d = GUILayoutUtility.GetLastRect();
+			d.x += 44;
+			d.y += 2;
+			d.width = 24;
+			d.height = 24;
+
+			if (GUI.Button(d, SCANskins.SCAN_FlagIcon, SCANskins.SCAN_buttonBorderless))
 			{
 				SCANcontroller.controller.map_flags = !SCANcontroller.controller.map_flags;
 			}
 
 			fillS();
 
-			if (GUILayout.Button("Asteroids", SCANskins.SCAN_buttonFixed))
+			SCANcontroller.controller.map_asteroids = GUILayout.Toggle(SCANcontroller.controller.map_asteroids, "");
+
+			d = GUILayoutUtility.GetLastRect();
+			d.x += 34;
+			d.y += 2;
+			d.width = 60;
+			d.height = 24;
+
+			if (GUI.Button(d, "Asteroids", SCANskins.SCAN_buttonBorderless))
 			{
 				SCANcontroller.controller.map_asteroids = !SCANcontroller.controller.map_asteroids;
 			}
 
 			fillS();
 
-			if (GUILayout.Button("Legend", SCANskins.SCAN_buttonFixed))
+			SCANcontroller.controller.legend = GUILayout.Toggle(SCANcontroller.controller.legend, "");
+
+			d = GUILayoutUtility.GetLastRect();
+			d.x += 34;
+			d.y += 2;
+			d.width = 48;
+			d.height = 24;
+
+			if (GUI.Button(d, SCANskins.SCAN_LegendIcon, SCANskins.SCAN_buttonBorderless))
 			{
 				SCANcontroller.controller.legend = !SCANcontroller.controller.legend;
 			}
