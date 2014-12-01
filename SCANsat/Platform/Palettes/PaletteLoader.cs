@@ -35,7 +35,6 @@ namespace SCANsat.Platform.Palettes
 			}
 			else if (Kind == Palette.Kind.Qualitative)
 			{
-				palettes.Add(defaultPalette);
 				palettes.Add(ColorBrewer.BrewerPalettes.Set2(Size));
 				palettes.Add(ColorBrewer.BrewerPalettes.Accent(Size));
 				palettes.Add(ColorBrewer.BrewerPalettes.Set1(Size));
@@ -44,6 +43,7 @@ namespace SCANsat.Platform.Palettes
 				palettes.Add(ColorBrewer.BrewerPalettes.Paired(Size));
 				palettes.Add(ColorBrewer.BrewerPalettes.Pastel2(Size));
 				palettes.Add(ColorBrewer.BrewerPalettes.Pastel1(Size));
+
 			}
 			else if (Kind == Palette.Kind.Sequential)
 			{
@@ -64,6 +64,18 @@ namespace SCANsat.Platform.Palettes
 				palettes.Add(ColorBrewer.BrewerPalettes.PuRd(Size));
 				palettes.Add(ColorBrewer.BrewerPalettes.Blues(Size));
 				palettes.Add(ColorBrewer.BrewerPalettes.PuBuGn(Size));
+			}
+			else if (Kind == Palette.Kind.Fixed)
+			{
+				palettes.Add(defaultPalette);
+				palettes.Add(FixedColors.FixedColorPalettes.blackForest());
+				palettes.Add(FixedColors.FixedColorPalettes.mars());
+				palettes.Add(FixedColors.FixedColorPalettes.pakistan());
+				palettes.Add(FixedColors.FixedColorPalettes.lithuania());
+				palettes.Add(FixedColors.FixedColorPalettes.wiki2());
+				palettes.Add(FixedColors.FixedColorPalettes.plumbago());
+				palettes.Add(FixedColors.FixedColorPalettes.cw1_013());
+				palettes.Add(FixedColors.FixedColorPalettes.arctic());
 			}
 		}
 	}
