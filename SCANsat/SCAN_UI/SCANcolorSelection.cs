@@ -310,8 +310,11 @@ namespace SCANsat.SCAN_UI
 					fillS();
 				stopE();
 
-				GUILayout.Label("Palette Size", SCANskins.SCAN_headlineSmall);
-				paletteSizeInt = (int)drawInputBox(ref paletteSize, SCANskins.SCAN_textBox, 35, 40, "Size:", SCANskins.SCAN_whiteReadoutLabel);
+				if (palette.CurrentPalette.kind != Palette.Kind.Fixed)
+				{
+					GUILayout.Label("Palette Size", SCANskins.SCAN_headlineSmall);
+					paletteSizeInt = (int)drawInputBox(ref paletteSize, SCANskins.SCAN_textBox, 35, 40, "Size:", SCANskins.SCAN_whiteReadoutLabel);
+				}
 
 				growE();
 					reversePalette = GUILayout.Toggle(reversePalette, "Reverse Order");
