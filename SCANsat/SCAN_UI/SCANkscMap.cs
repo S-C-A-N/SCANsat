@@ -371,21 +371,33 @@ namespace SCANsat.SCAN_UI
 				}
 			}
 
-			fillS();
+			stopS();
 
-			if (GUILayout.Button("Settings", SCANskins.SCAN_buttonFixed))
+			//Make a 2x2 grid for all four windows using icons instead of text; use tooltips
+			Rect s = new Rect(WindowRect.x + 20, WindowRect.height - 100, 80, 20);
+
+			//if (GUI.Button(s, "Small Map", SCANskins.SCAN_buttonFixed))
+			//{
+			//	SCANcontroller.controller.mainMap.Visible = !SCANcontroller.controller.mainMap.Visible;
+			//}
+
+			//if (GUI.Button(s, "Instruments", SCANskins.SCAN_buttonFixed))
+			//{
+			//	SCANcontroller.controller.instrumentsWindow.Visible = !SCANcontroller.controller.instrumentsWindow.Visible;
+			//}
+
+			if (GUI.Button(s, "Settings", SCANskins.SCAN_buttonFixed))
 			{
 				SCANcontroller.controller.settingsWindow.Visible = !SCANcontroller.controller.settingsWindow.Visible;
 			}
 
-			fillS();
+			s.y += 50;
+			s.height = 38;
 
-			if (GUILayout.Button("Color\nControl", SCANskins.SCAN_buttonFixed, GUILayout.Height(36)))
+			if (GUI.Button(s, "Color\nControl", SCANskins.SCAN_buttonFixed))
 			{
 				SCANcontroller.controller.colorManager.Visible = !SCANcontroller.controller.colorManager.Visible;
 			}
-
-			stopS();
 		}
 
 		//Draw the actual map texture
