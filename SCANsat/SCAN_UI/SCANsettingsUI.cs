@@ -221,14 +221,14 @@ namespace SCANsat.SCAN_UI
 
 			GUILayout.Label("Background Scanning", SCANskins.SCAN_headline);
 			// scan background
-			SCANcontroller.controller.scan_background = GUILayout.Toggle(SCANcontroller.controller.scan_background, "Scan all active celestials");
+			SCANcontroller.controller.scan_background = GUILayout.Toggle(SCANcontroller.controller.scan_background, "Scan all active celestials", SCANskins.SCAN_settingsToggle);
 			// scanning for individual SoIs
 			growE();
 			int count = 0;
 			foreach (var data in SCANcontroller.Body_Data)
 			{
 				if (count == 0) growS();
-					data.Value.Disabled = !GUILayout.Toggle(!data.Value.Disabled, string.Format("{0} ({1:N1}%)", data.Key, data.Value.getCoveragePercentage(SCANdata.SCANtype.Nothing)));
+					data.Value.Disabled = !GUILayout.Toggle(!data.Value.Disabled, string.Format("{0} ({1:N1}%)", data.Key, data.Value.getCoveragePercentage(SCANdata.SCANtype.Nothing)), SCANskins.SCAN_settingsToggle);
 				switch (count)
 				{
 					case 5: stopS(); count = 0; break;
