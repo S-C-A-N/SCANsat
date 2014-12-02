@@ -21,7 +21,7 @@ using UnityEngine;
 
 namespace SCANsat.SCAN_UI
 {
-	class SCANkscMap: SCAN_MBW
+	class SCANkscMap : SCAN_MBW
 	{
 		private static SCANmap bigmap;
 		private static CelestialBody b;
@@ -176,6 +176,23 @@ namespace SCANsat.SCAN_UI
 
 			if (SCANcontroller.controller.globalOverlay) //Update selected resource
 				bigmap.setResource(SCANcontroller.controller.ResourcesList[SCANcontroller.controller.gridSelection].Name);
+
+			if (lastColor != currentColor)
+			{
+				lastColor = currentColor;
+				if (SCANcontroller.controller.colours == 0)
+					SCANcontroller.controller.colours = 1;
+				else
+					SCANcontroller.controller.colours = 0;
+				data.resetImages();
+				bigmap.resetMap();
+			}
+
+			if (currentGrid != SCANcontroller.controller.map_grid)
+			{
+				currentGrid = SCANcontroller.controller.map_grid;
+				drawGrid = true;
+			}
 		}
 
 		//Draw version label in upper left corner
@@ -268,17 +285,6 @@ namespace SCANsat.SCAN_UI
 				currentColor = !currentColor;
 			}
 
-			if (lastColor != currentColor)
-			{
-				lastColor = currentColor;
-				if (SCANcontroller.controller.colours == 0)
-					SCANcontroller.controller.colours = 1;
-				else
-					SCANcontroller.controller.colours = 0;
-				data.resetImages();
-				bigmap.resetMap();
-			}
-
 			fillS();
 
 			SCANcontroller.controller.map_grid = GUILayout.Toggle(SCANcontroller.controller.map_grid, "");
@@ -292,12 +298,6 @@ namespace SCANsat.SCAN_UI
 			if (GUI.Button(d, SCANskins.SCAN_GridIcon, SCANskins.SCAN_buttonBorderless))
 			{
 				SCANcontroller.controller.map_grid = !SCANcontroller.controller.map_grid;
-			}
-
-			if (currentGrid != SCANcontroller.controller.map_grid)
-			{
-				currentGrid = SCANcontroller.controller.map_grid;
-				drawGrid = true;
 			}
 
 			fillS();
