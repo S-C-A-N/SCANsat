@@ -135,6 +135,28 @@ namespace SCANsat
 			}
 		}
 
+		public float DefaultMinHeight
+		{
+			get
+			{
+				if (body.flightGlobalsIndex < 17)
+					return (float)bodyHeightRange[body.flightGlobalsIndex, 0];
+				else
+					return -1000f;
+			}
+		}
+
+		public float DefaultMaxHeight
+		{
+			get
+			{
+				if (body.flightGlobalsIndex < 17)
+					return (float)bodyHeightRange[body.flightGlobalsIndex, 1];
+				else
+					return 8000f;
+			}
+		}
+
 		public float? ClampHeight
 		{
 			get { return clampHeight; }
