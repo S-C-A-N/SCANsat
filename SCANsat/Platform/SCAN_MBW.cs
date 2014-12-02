@@ -164,6 +164,9 @@ namespace SCANsat.Platform
 		protected Rect WindowRect_Default;
 		protected Rect WindowRect_Min;
 		protected Rect WindowRect_Max;
+		protected Rect TextureRect;
+		protected Texture2D MapTexture;
+		protected float dW, dH;
 
 		internal void resetWindowPos(Rect r)
 		{
@@ -233,14 +236,14 @@ namespace SCANsat.Platform
 			// ...
 
 			#region middle of gui_build()
-			float dW = resizeW;
-			float dH = resizeH;
+			dW = resizeW;
+			dH = resizeH;
 			if (dW < WindowRect_Min.width) dW = WindowRect_Min.width;
 			if (dH < WindowRect_Min.height) dH = WindowRect_Min.height;
 			dH = dW / 2f; // aspect ratio fixing
 
 			//if (IsResizing) GUILayout.Label("", GUILayout.Width (dW), GUILayout.Height (dH));
-			//else 			GUILayout.Label("", map.width, map.height);
+			//else			GUILayout.Label("", GUILayout.Width(MapTexture.width), GUILayout.Height(MapTexture.height));
 
 			//Rect maprect = GUILayoutUtility.GetLastRect ();
 			//maprect.width = bigmap.mapwidth;
@@ -249,22 +252,22 @@ namespace SCANsat.Platform
 
 			// ...
 
-			#region later in gui_build()
-			if (IsResizing)
-			{
-				//maprect.width = dW;
-				//maprect.height = dH;
-				//GUI.DrawTexture (maprect, map, ScaleMode.StretchToFill);
-			}
-			else
-			{
-				//GUI.DrawTexture (maprect, map);
-			}
-			#endregion
+			//#region later in gui_build()
+			//if (IsResizing)
+			//{
+			//	TextureRect.width = dW;
+			//	TextureRect.height = dH;
+			//	GUI.DrawTexture(TextureRect, MapTexture, ScaleMode.StretchToFill);
+			//}
+			//else
+			//{
+			//	GUI.DrawTexture(TextureRect, MapTexture);
+			//}
+			//#endregion
 			// ...
 
-			//float mx = Event.current.mousePosition.x - maprect.x;
-			//float my = Event.current.mousePosition.y - maprect.y;
+			//float mx = Event.current.mousePosition.x - TextureRect.x;
+			//float my = Event.current.mousePosition.y - TextureRect.y;
 
 			// ...
 
@@ -293,8 +296,8 @@ namespace SCANsat.Platform
 				WindowRect_Last = WindowRect;
 				dragX = Input.mousePosition.x;
 				dragY = Input.mousePosition.y;
-				//resizeW = bigmap.mapwidth;
-				//resizeH = bigmap.mapheight;
+				resizeW = TextureRect.width;
+				resizeH = TextureRect.height;
 				Event.current.Use();
 			}
 			#endregion
