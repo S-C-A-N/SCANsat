@@ -119,6 +119,7 @@ namespace SCANsat
 		internal SCAN_MBW settingsWindow;
 		internal SCAN_MBW instrumentsWindow;
 		internal SCAN_MBW bigMap;
+		internal SCAN_MBW newBigMap;
 		internal SCAN_MBW kscMap;
 		internal SCAN_MBW colorManager;
 
@@ -318,6 +319,7 @@ namespace SCANsat
 					instrumentsWindow = gameObject.AddComponent<SCANinstrumentUI>();
 					bigMap = gameObject.AddComponent<SCANbigMap>();
 					colorManager = gameObject.AddComponent<SCANcolorSelection>();
+					newBigMap = gameObject.AddComponent<SCANnewBigMap>();
 				}
 				else if (HighLogic.LoadedScene == GameScenes.SPACECENTER || HighLogic.LoadedScene == GameScenes.TRACKSTATION)
 				{
@@ -426,6 +428,8 @@ namespace SCANsat
 				Destroy(bigMap);
 			if (kscMap != null)
 				Destroy(kscMap);
+			if (newBigMap != null)
+				Destroy(newBigMap);
 		}
 
 		private void SOIChange(GameEvents.HostedFromToAction<Vessel, CelestialBody> VC)
