@@ -111,6 +111,7 @@ namespace SCANsat.SCAN_UI
 			palette.DivPaletteSet = palette.generatePaletteSet(7, Palette.Kind.Diverging);
 			palette.QualPaletteSet = palette.generatePaletteSet(7, Palette.Kind.Qualitative);
 			palette.SeqPaletteSet = palette.generatePaletteSet(7, Palette.Kind.Sequential);
+			palette.FixedPaletteSet = palette.generatePaletteSet(0, Palette.Kind.Fixed);
 			palette.CurrentPalettes = palette.DivPaletteSet;
 			palette.CurrentPalette = PaletteLoader.defaultPalette;
 		}
