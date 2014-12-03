@@ -264,6 +264,8 @@ namespace SCANsat.SCAN_UI
 					int j = 9;
 					if (palette.CurrentPalettes.paletteType == Palette.Kind.Sequential)
 						j = 12;
+					else if (palette.CurrentPalettes.paletteType == Palette.Kind.Qualitative)
+						j = 8;
 					else if (palette.CurrentPalettes.paletteType == Palette.Kind.Invertable || palette.CurrentPalettes.paletteType == Palette.Kind.Unknown)
 						j = 0;
 					for (int i = 0; i < j; i++)
@@ -304,23 +306,27 @@ namespace SCANsat.SCAN_UI
 				fillS(8);
 				GUILayout.Label("Terrain Height Range", SCANskins.SCAN_headlineSmall);
 
-				growE();
-					fillS();
+				//growE();
+
+					growE();
+					fillS(20);
 					GUILayout.Label("Min: " + minHeightF, SCANskins.SCAN_whiteReadoutLabel);
 					minHeightF = Mathf.Round(GUILayout.HorizontalSlider(minHeightF, terrainSliderMinMin, terrainSliderMinMax));
-
+					stopE();
 					//minHeightF = drawInputBox(ref minHeightS, SCANskins.SCAN_textBox, 40, 40, "Min:", SCANskins.SCAN_whiteReadoutLabel);
-					fillS(10);
+
+					growE();
+					fillS(20);
 					GUILayout.Label("Max: " + maxHeightF, SCANskins.SCAN_whiteReadoutLabel);
 					maxHeightF = Mathf.Round(GUILayout.HorizontalSlider(maxHeightF, terrainSliderMaxMin, terrainSliderMaxMax));
-
+					stopE();
 					//maxHeightF = drawInputBox(ref maxHeightS, SCANskins.SCAN_textBox, 40, 40, "Max:", SCANskins.SCAN_whiteReadoutLabel);
-					fillS();
-				stopE();
+					//fillS();
+				//stopE();
 
 				growE();
-					fillS();
-					clampHeight = GUILayout.Toggle(clampHeight, "Clamp Terrain", GUILayout.Width(100));
+				fillS(20);
+					clampHeight = GUILayout.Toggle(clampHeight, "Clamp Terrain", SCANskins.SCAN_settingsToggle, GUILayout.Width(100));
 					if (clampHeight)
 					{
 						clampSliderMin = minHeightF;
@@ -332,10 +338,10 @@ namespace SCANsat.SCAN_UI
 						//fillS(5);
 						//clampHeightF = drawInputBox(ref clampHeightS, SCANskins.SCAN_textBox, 40);
 					}
-					fillS();
+					//fillS();
 				stopE();
 
-				if (palette.CurrentPalette.kind != Palette.Kind.Fixed)
+				if (palette.CurrentPalettes.paletteType != Palette.Kind.Fixed)
 				{
 					GUILayout.Label("Palette Size", SCANskins.SCAN_headlineSmall);
 					growE();
@@ -347,9 +353,9 @@ namespace SCANsat.SCAN_UI
 				}
 
 				growE();
-					reversePalette = GUILayout.Toggle(reversePalette, "Reverse Order");
+					reversePalette = GUILayout.Toggle(reversePalette, "Reverse Order", SCANskins.SCAN_settingsToggle);
 					fillS(10);
-					discretePalette = GUILayout.Toggle(discretePalette, "Discrete Gradient");
+					discretePalette = GUILayout.Toggle(discretePalette, "Discrete Gradient", SCANskins.SCAN_settingsToggle);
 				stopE();
 
 			stopS();
@@ -419,7 +425,7 @@ namespace SCANsat.SCAN_UI
 		{
 			if (paletteBox)
 			{
-				paletteRect = new Rect(40, 90, 100, 80);
+				paletteRect = new Rect(40, 90, 100, 100);
 				GUI.Box(paletteRect, "", SCANskins.SCAN_dropDownBox);
 				for (int i = 0; i < Palette.kindNames.Length; i++)
 				{
@@ -469,6 +475,7 @@ namespace SCANsat.SCAN_UI
 			palette.DivPaletteSet = palette.generatePaletteSet(paletteSizeInt, Palette.Kind.Diverging);
 			palette.QualPaletteSet = palette.generatePaletteSet(paletteSizeInt, Palette.Kind.Qualitative);
 			palette.SeqPaletteSet = palette.generatePaletteSet(paletteSizeInt, Palette.Kind.Sequential);
+			palette.FixedPaletteSet = palette.generatePaletteSet(0, Palette.Kind.Fixed);
 			palette.CurrentPalettes = palette.setCurrentPalettesType(palette.getPaletteType);
 		}
 
