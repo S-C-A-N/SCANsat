@@ -8,6 +8,7 @@ namespace SCANsat.Platform.Palettes.FixedColors
 	{
 		static Func<byte, byte, byte, Color32> RGB = (r, g, b) => new Color32(r, g, b, 255);
 
+		//Size *15*
 		public static Palette blackForest()
 		{
 			Color32[] c;
@@ -15,6 +16,7 @@ namespace SCANsat.Platform.Palettes.FixedColors
 			return new Palette(c, "Black Forest", Palette.Kind.Fixed, (Palette.Is)3, (Palette.Is)3, (Palette.Is)3, (Palette.Is)3);
 		}
 
+		//Size *9*
 		public static Palette pakistan()
 		{
 			Color32[] c;
@@ -22,6 +24,7 @@ namespace SCANsat.Platform.Palettes.FixedColors
 			return new Palette(c, "Pakistan", Palette.Kind.Fixed, (Palette.Is)3, (Palette.Is)3, (Palette.Is)3, (Palette.Is)3);
 		}
 
+		//Size *8*
 		public static Palette lithuania()
 		{
 			Color32[] c;
@@ -29,6 +32,7 @@ namespace SCANsat.Platform.Palettes.FixedColors
 			return new Palette(c, "Lithuania", Palette.Kind.Fixed, (Palette.Is)3, (Palette.Is)3, (Palette.Is)3, (Palette.Is)3);
 		}
 
+		//Size *18*
 		public static Palette mars()
 		{
 			Color32[] c;
@@ -36,6 +40,7 @@ namespace SCANsat.Platform.Palettes.FixedColors
 			return new Palette(c, "Mars", Palette.Kind.Fixed, (Palette.Is)3, (Palette.Is)3, (Palette.Is)3, (Palette.Is)3);
 		}
 
+		//Size *6*
 		public static Palette wiki2()
 		{
 			Color32[] c;
@@ -43,6 +48,7 @@ namespace SCANsat.Platform.Palettes.FixedColors
 			return new Palette(c, "Wiki2", Palette.Kind.Fixed, (Palette.Is)3, (Palette.Is)3, (Palette.Is)3, (Palette.Is)3);
 		}
 
+		//Size *8*
 		public static Palette plumbago()
 		{
 			Color32[] c;
@@ -50,6 +56,7 @@ namespace SCANsat.Platform.Palettes.FixedColors
 			return new Palette(c, "Plumbago", Palette.Kind.Fixed, (Palette.Is)3, (Palette.Is)3, (Palette.Is)3, (Palette.Is)3);
 		}
 
+		//Size *5*
 		public static Palette cw1_013()
 		{
 			Color32[] c;
@@ -57,6 +64,7 @@ namespace SCANsat.Platform.Palettes.FixedColors
 			return new Palette(c, "cw1_013", Palette.Kind.Fixed, (Palette.Is)3, (Palette.Is)3, (Palette.Is)3, (Palette.Is)3);
 		}
 
+		//Size *12*
 		public static Palette arctic()
 		{
 			Color32[] c;
