@@ -15,7 +15,7 @@ namespace SCANsat.Platform.Palettes
 		{
 			Color32[] c;
 			c = new[] { (Color32)palette.xkcd_DarkPurple, (Color32)palette.xkcd_Cerulean, (Color32)palette.xkcd_ArmyGreen, (Color32)palette.xkcd_Yellow, (Color32)palette.xkcd_Red, (Color32)palette.xkcd_Magenta, (Color32)palette.xkcd_White };
-			return new Palette(c, "Default", Palette.Kind.Qualitative, (Palette.Is)2, (Palette.Is)2, (Palette.Is)2, (Palette.Is)2);
+			return new Palette(c, "Default", Palette.Kind.Fixed, (Palette.Is)2, (Palette.Is)2, (Palette.Is)2, (Palette.Is)2);
 		}
 
 		internal static void generatePalettes(Palette.Kind Kind, int Size)
