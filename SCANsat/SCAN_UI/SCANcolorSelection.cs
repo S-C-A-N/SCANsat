@@ -302,54 +302,100 @@ namespace SCANsat.SCAN_UI
 		private void paletteOptions(int id)
 		{
 			growS();
-				GUILayout.Label("Palette Options", SCANskins.SCAN_headline);
-				fillS(8);
-				GUILayout.Label("Terrain Height Range", SCANskins.SCAN_headlineSmall);
+				GUILayout.Label("Terrain Options", SCANskins.SCAN_headlineSmall);
 
-				//growE();
-
-					growE();
+				growE();
 					fillS(20);
-					GUILayout.Label("Min: " + minHeightF, SCANskins.SCAN_whiteReadoutLabel);
-					minHeightF = Mathf.Round(GUILayout.HorizontalSlider(minHeightF, terrainSliderMinMin, terrainSliderMinMax));
-					stopE();
-					//minHeightF = drawInputBox(ref minHeightS, SCANskins.SCAN_textBox, 40, 40, "Min:", SCANskins.SCAN_whiteReadoutLabel);
+					GUILayout.Label("Min: " + minHeightF + "m", SCANskins.SCAN_whiteReadoutLabel);
 
-					growE();
+					Rect r = GUILayoutUtility.GetLastRect();
+					r.x += 60;
+					r.width = 150;
+					
+					minHeightF = GUI.HorizontalSlider(r, minHeightF, terrainSliderMinMin, terrainSliderMinMax).Mathf_Round(-2);
+
+					r.x -= 20;
+					r.y += 5;
+					r.width = 60;
+
+					GUI.Label(r, terrainSliderMinMin + "|", SCANskins.SCAN_whiteReadoutLabel);
+
+					r.x += 140;
+
+					GUI.Label(r, "|" + terrainSliderMinMax, SCANskins.SCAN_whiteReadoutLabel);
+				stopE();
+
+				growE();
 					fillS(20);
-					GUILayout.Label("Max: " + maxHeightF, SCANskins.SCAN_whiteReadoutLabel);
-					maxHeightF = Mathf.Round(GUILayout.HorizontalSlider(maxHeightF, terrainSliderMaxMin, terrainSliderMaxMax));
-					stopE();
-					//maxHeightF = drawInputBox(ref maxHeightS, SCANskins.SCAN_textBox, 40, 40, "Max:", SCANskins.SCAN_whiteReadoutLabel);
-					//fillS();
-				//stopE();
+					GUILayout.Label("Max: " + maxHeightF + "m", SCANskins.SCAN_whiteReadoutLabel);
+
+					r = GUILayoutUtility.GetLastRect();
+					r.x += 50;
+					r.width = 150;
+
+					maxHeightF =GUI.HorizontalSlider(r, maxHeightF, terrainSliderMaxMin, terrainSliderMaxMax).Mathf_Round(-2);
+
+					r.x -= 30;
+					r.y += 10;
+					r.width = 70;
+
+					GUI.Label(r, terrainSliderMaxMin + "|", SCANskins.SCAN_whiteReadoutLabel);
+
+					r.x += 160;
+
+					GUI.Label(r, "|" + terrainSliderMaxMax, SCANskins.SCAN_whiteReadoutLabel);
+				stopE();
 
 				growE();
 				fillS(20);
 					clampHeight = GUILayout.Toggle(clampHeight, "Clamp Terrain", SCANskins.SCAN_settingsToggle, GUILayout.Width(100));
 					if (clampHeight)
 					{
-						clampSliderMin = minHeightF;
-						clampSliderMax = maxHeightF;
 						growE();
-							GUILayout.Label(clampHeightF.ToString(), SCANskins.SCAN_whiteReadoutLabel);
-							clampHeightF = Mathf.Round(GUILayout.HorizontalSlider(clampHeightF, clampSliderMin, clampSliderMax));
+							GUILayout.Label("Height: " + clampHeightF + "m", SCANskins.SCAN_whiteReadoutLabel);
+
+							r = GUILayoutUtility.GetLastRect();
+							r.x += 60;
+							r.width = 120;
+
+							clampHeightF = GUI.HorizontalSlider(r, clampHeightF, clampSliderMin, clampSliderMax).Mathf_Round(-1);
+
+							r.x -= 10;
+							r.y += 2;
+							r.width = 40;
+
+							GUI.Label(r, clampSliderMin + "|", SCANskins.SCAN_whiteReadoutLabel);
+
+							r.x += 110;
+
+							GUI.Label(r, "|" + clampSliderMax, SCANskins.SCAN_whiteReadoutLabel);
 						stopE();
-						//fillS(5);
-						//clampHeightF = drawInputBox(ref clampHeightS, SCANskins.SCAN_textBox, 40);
 					}
-					//fillS();
 				stopE();
 
 				if (palette.CurrentPalettes.paletteType != Palette.Kind.Fixed)
 				{
-					GUILayout.Label("Palette Size", SCANskins.SCAN_headlineSmall);
+					GUILayout.Label("Palette Options", SCANskins.SCAN_headlineSmall);
 					growE();
-						GUILayout.Label(paletteSizeInt.ToString(), SCANskins.SCAN_whiteReadoutLabel);
-						paletteSizeInt = Mathf.RoundToInt(GUILayout.HorizontalSlider(sizeSlider, sizeSliderMin, sizeSliderMax));
-					stopE();
+						fillS(20);
+						GUILayout.Label("Palette Size: " + paletteSizeInt, SCANskins.SCAN_whiteReadoutLabel);
 
-					//paletteSizeInt = (int)drawInputBox(ref paletteSize, SCANskins.SCAN_textBox, 35, 40, "Size:", SCANskins.SCAN_whiteReadoutLabel);
+						r = GUILayoutUtility.GetLastRect();
+						r.x += 70;
+						r.width = 140;
+
+						paletteSizeInt = (int)GUI.HorizontalSlider(r, sizeSlider, sizeSliderMin, sizeSliderMax).Mathf_Round(0);
+
+						r.x -= 20;
+						r.y += 5;
+						r.width = 20;
+
+						GUI.Label(r, sizeSliderMin + "|", SCANskins.SCAN_whiteReadoutLabel);
+
+						r.x += 110;
+
+						GUI.Label(r, "|" + sizeSliderMax, SCANskins.SCAN_whiteReadoutLabel);
+					stopE();
 				}
 
 				growE();
@@ -406,6 +452,7 @@ namespace SCANsat.SCAN_UI
 				data.PaletteSize = palette.CurrentPalette.size;
 				data.PaletteDiscrete = discretePalette;
 				data.PaletteReverse = reversePalette;
+				dataPalette = data.ColorPalette;
 				drawCurrentLegend();
 			}
 			fillS(8);
@@ -514,6 +561,8 @@ namespace SCANsat.SCAN_UI
 			terrainSliderMaxMax = data.DefaultMaxHeight + 10000f;
 			terrainSliderMinMax = maxHeightF - 100f;
 			terrainSliderMaxMin = minHeightF + 100f;
+			clampSliderMin = minHeightF;
+			clampSliderMax = maxHeightF;
 		}
 
 	}
