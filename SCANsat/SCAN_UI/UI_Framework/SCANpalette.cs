@@ -267,6 +267,7 @@ namespace SCANsat.SCAN_UI
 		private static _Palettes divPaletteSet;
 		private static _Palettes qualPaletteSet;
 		private static _Palettes seqPaletteSet;
+		private static _Palettes fixedPaletteSet;
 		private static Palette.Kind currentPaletteType;
 		private static string currentPaletteTypeName;
 		private static int currentPaletteSetSize;
@@ -289,6 +290,8 @@ namespace SCANsat.SCAN_UI
 					return qualPaletteSet;
 				case Palette.Kind.Sequential:
 					return seqPaletteSet;
+				case Palette.Kind.Fixed:
+					return fixedPaletteSet;
 				default:
 					return divPaletteSet;
 			}
@@ -337,6 +340,12 @@ namespace SCANsat.SCAN_UI
 		{
 			get { return seqPaletteSet; }
 			internal set { seqPaletteSet = value; }
+		}
+
+		public static _Palettes FixedPaletteSet
+		{
+			get { return fixedPaletteSet; }
+			internal set { fixedPaletteSet = value; }
 		}
 
 		public static Palette CurrentPalette
