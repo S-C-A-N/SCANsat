@@ -335,7 +335,7 @@ namespace SCANsat.SCAN_UI
 			stopS();
 
 			//Make a 2x2 grid for all four windows using icons instead of text; use tooltips
-			Rect s = new Rect(WindowRect.x + 20, WindowRect.height - 100, 80, 20);
+			Rect s = new Rect(20, WindowRect.height - 80, 80, 20);
 
 			//if (GUI.Button(s, "Small Map", SCANskins.SCAN_buttonFixed))
 			//{
@@ -352,7 +352,7 @@ namespace SCANsat.SCAN_UI
 				SCANcontroller.controller.settingsWindow.Visible = !SCANcontroller.controller.settingsWindow.Visible;
 			}
 
-			s.y += 50;
+			s.y += 30;
 			s.height = 38;
 
 			if (GUI.Button(s, "Color\nControl", SCANskins.SCAN_buttonFixed))
