@@ -83,6 +83,23 @@ namespace SCANsat.SCAN_UI
 				GUI.Label(r, txt, SCANskins.SCAN_orbitalLabelOff);
 		}
 
+		//A smaller font-size, simpler label method
+		internal static void drawLabel(Rect r, string txt, bool aligned, bool left)
+		{
+			if (txt.Length < 1)
+				return;
+			if (aligned)
+			{
+				Vector2 sz = SCANskins.SCAN_labelSmallLeft.CalcSize(new GUIContent(txt.Substring(0, 1)));
+				r.x -= sz.x / 2;
+				r.y -= sz.y / 2;
+			}
+			if (left)
+				GUI.Label(r, txt, SCANskins.SCAN_labelSmallLeft);
+			else
+				GUI.Label(r, txt, SCANskins.SCAN_labelSmallRight);
+		}
+
 		#endregion
 
 		#region UI Utilities
@@ -135,7 +152,7 @@ namespace SCANsat.SCAN_UI
 					info += SCANUtil.getBiomeName(body, lon, lat) + " ";
 				}
 
-				if (SCANcontroller.controller.map_ResourceOverlay && SCANcontroller.controller.globalOverlay) //Adds selected resource amount to big map legend
+				if (SCANcontroller.controller.map_ResourceOverlay && SCANcontroller.controller.GlobalResourceOverlay) //Adds selected resource amount to big map legend
 				{
 					if (SCANcontroller.controller.resourceOverlayType == 0 && SCANversions.ORSXFound)
 					{
@@ -422,6 +439,19 @@ namespace SCANsat.SCAN_UI
 			if (lr.x + dim.x > r.x + r.width)
 				lr.x = r.x + r.width - dim.x;
 			drawLabel(lr, txt, false, true, true);
+		}
+		
+		internal static void drawSliderLabel(Rect r, float min, float max)
+		{
+			Rect sr = new Rect(r.x + 5, r.y + 2, 10, 10);
+			drawLabel(sr, "|", true, false);
+			sr.x += r.width - 10;
+			drawLabel(sr, "|", true, false);
+			sr.x -= r.width + 30;
+			sr.y += 4;
+			drawLabel(sr, min + "m", true, false);
+			sr.x += r.width + 40;
+			drawLabel(sr, max + "m", true, true);
 		}
 
 		/* FIXME: This uses assumed, shared, static constants with Legend stuff in other SCANsat files */
