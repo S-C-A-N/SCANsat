@@ -354,8 +354,8 @@ namespace SCANsat
 				return;
 			body = b;
 			SCANcontroller.controller.Resources(b); //Repopulate resource list when changing SOI
-			if (SCANcontroller.controller.globalOverlay)
-				resource = SCANcontroller.controller.ResourcesList[SCANcontroller.controller.gridSelection];
+			if (SCANcontroller.controller.GlobalResourceOverlay)
+				resource = SCANcontroller.controller.ResourceList[SCANcontroller.controller.resourceSelection];
 			resetMap();
 		}
 		public bool isMapComplete()
@@ -368,9 +368,9 @@ namespace SCANsat
 		{
 			mapstep = 0;
 			mapsaved = false;
-			if (SCANcontroller.controller.globalOverlay)
+			if (SCANcontroller.controller.GlobalResourceOverlay)
 			{ //Make sure that a resource is initialized if necessary
-				if (resource == null) resource = SCANcontroller.controller.ResourcesList[SCANcontroller.controller.gridSelection];
+				if (resource == null) resource = SCANcontroller.controller.ResourceList[SCANcontroller.controller.resourceSelection];
 				if (SCANcontroller.controller.resourceOverlayType == 1)
 					SCANcontroller.controller.KethaneReset = !SCANcontroller.controller.KethaneReset;
 			}
@@ -381,14 +381,14 @@ namespace SCANsat
 			mType = (mapType)maptype;
 			resetMap();
 		}
-		public void setResource(string s)
-		{ //Used when a different resource is selected
-			if (resource == null) resource = SCANcontroller.controller.ResourcesList[SCANcontroller.controller.gridSelection];
-			else if (resource.Name == s)
-				return;
-			resource = SCANcontroller.controller.ResourcesList[SCANcontroller.controller.gridSelection];
-			resetMap();
-		}
+		//public void setResource(string s)
+		//{ //Used when a different resource is selected
+		//	if (resource == null) resource = SCANcontroller.controller.ResourceList[SCANcontroller.controller.resourceSelection];
+		//	if (resource.Name == s)
+		//		return;
+		//	resource = SCANcontroller.controller.ResourceList[SCANcontroller.controller.resourceSelection];
+		//	resetMap();
+		//}
 
 		/* MAP: export: PNG file */
 		public void exportPNG()
@@ -532,7 +532,7 @@ namespace SCANsat
 						}
 						mapline[i] = val;
 					}
-					if (SCANcontroller.controller.map_ResourceOverlay && SCANcontroller.controller.globalOverlay)
+					if (SCANcontroller.controller.map_ResourceOverlay && SCANcontroller.controller.GlobalResourceOverlay)
 					{
 						if (SCANcontroller.controller.resourceOverlayType == 0 && SCANversions.ORSXFound)
 						{
@@ -652,7 +652,7 @@ namespace SCANsat
 						}
 						mapline[i] = val;
 					}
-					if (SCANcontroller.controller.map_ResourceOverlay && SCANcontroller.controller.globalOverlay)
+					if (SCANcontroller.controller.map_ResourceOverlay && SCANcontroller.controller.GlobalResourceOverlay)
 					{
 						if (SCANcontroller.controller.resourceOverlayType == 0 && SCANversions.ORSXFound)
 						{
@@ -775,7 +775,7 @@ namespace SCANsat
 						baseColor = biome;
 						mapline[i] = bio;
 					}
-					if (SCANcontroller.controller.map_ResourceOverlay && SCANcontroller.controller.globalOverlay)
+					if (SCANcontroller.controller.map_ResourceOverlay && SCANcontroller.controller.GlobalResourceOverlay)
 					{
 						if (SCANcontroller.controller.resourceOverlayType == 0 && SCANversions.ORSXFound)
 						{
