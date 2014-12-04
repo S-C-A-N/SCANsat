@@ -243,10 +243,18 @@ namespace SCANsat
 		#endregion
 
 		#region Resource classes
+
+		public enum SCANResource_Source
+		{
+			Kethane = 1,
+			ORSX = 2,
+			Regolith = 3,
+		}
+
 		/* DATA: resources */
 		public class SCANResource //The new class to store resource information stored in the respective config nodes
 		{
-			public SCANResource(string n, string Body, Color full, Color empty, bool sc, double scalar, double mult, double threshold, float max, SCANresourceType t)
+			public SCANResource(string n, string Body, Color full, Color empty, bool sc, double scalar, double mult, double threshold, float max, SCANresourceType t, SCANResource_Source s)
 			{
 				name = n;
 				body = Body;
@@ -259,6 +267,7 @@ namespace SCANsat
 				maxValue = max;
 				resourceType = t;
 				type = resourceType.type;
+				source = s;
 			}
 
 			private string name;
@@ -269,6 +278,7 @@ namespace SCANsat
 			internal float maxValue;
 			private SCANtype type;
 			internal SCANresourceType resourceType;
+			private SCANResource_Source source;
 
 			public string Name
 			{
@@ -278,6 +288,11 @@ namespace SCANsat
 			public SCANtype Type
 			{
 				get { return type; }
+			}
+
+			public SCANResource_Source Source
+			{
+				get { return source; }
 			}
 		}
 

@@ -320,7 +320,7 @@ namespace SCANsat
 			if (node.HasValue("scaleMultiplier"))
 				double.TryParse(node.GetValue("scaleMultiplier"), out mult);
 
-			SCANdata.SCANResource SCANres = new SCANdata.SCANResource(name, body, type.colorFull, type.colorEmpty, scale, scalar, mult, Threshold, 1f, type);
+			SCANdata.SCANResource SCANres = new SCANdata.SCANResource(name, body, type.colorFull, type.colorEmpty, scale, scalar, mult, Threshold, 1f, type, SCANdata.SCANResource_Source.ORSX);
 			if (SCANres != null)
 				return SCANres;
 
