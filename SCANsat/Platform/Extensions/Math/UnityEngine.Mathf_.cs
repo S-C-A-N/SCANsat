@@ -17,7 +17,10 @@ namespace UnityEngine
 			else
 			{
 				precision = (int)Math.Pow(10, Math.Abs(precision));
-				f += (5 * precision / 10);
+				if (f >= 0)
+					f += (5 * precision / 10);
+				else
+					f -= (5 * precision / 10);
 				return (float)Math.Round(f - (f % precision), 0);
 			}
 		}
