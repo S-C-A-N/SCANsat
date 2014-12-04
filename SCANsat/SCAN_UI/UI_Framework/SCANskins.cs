@@ -247,8 +247,8 @@ namespace SCANsat.SCAN_UI
 			//SCAN_toggle.alignment = TextAnchor.MiddleCenter;
 			//SCAN_toggle.font = dotty;
 			//SCAN_toggle.fontSize = 22;
-			SCAN_toggle.fixedHeight = 24;
-			SCAN_toggle.fixedWidth = 24;
+			SCAN_toggle.fixedHeight = 28;
+			SCAN_toggle.fixedWidth = 28;
 			//SCAN_toggle.clipping = TextClipping.Clip;
 
 			//SCANUtil.SCANlog("Fixed Height: {0}", SCAN_toggle.fixedHeight);
