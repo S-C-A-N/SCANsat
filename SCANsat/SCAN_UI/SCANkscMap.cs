@@ -155,6 +155,7 @@ namespace SCANsat.SCAN_UI
 				topMenu(id);		/* Top row of buttons - used to control the map types */
 				growE();
 					toggleBar(id);	/* Toggle options along left side - control overlay options - *Replace buttons with textures* */
+					fillS(60);
 					mapDraw(id);	/* Draw the main map texture */
 				stopE();
 				growE();
