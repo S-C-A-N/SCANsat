@@ -316,15 +316,17 @@ namespace SCANsat.SCAN_UI
 					
 					minHeightF = GUI.HorizontalSlider(r, minHeightF, terrainSliderMinMin, terrainSliderMinMax).Mathf_Round(-2);
 
-					r.x -= 20;
-					r.y += 6;
-					r.width = 60;
+					SCANuiUtil.drawSliderLabel(r, terrainSliderMinMin, terrainSliderMinMax);
 
-					GUI.Label(r, terrainSliderMinMin + "m |", SCANskins.SCAN_whiteReadoutLabel);
+					//r.x -= 20;
+					//r.y += 6;
+					//r.width = 60;
 
-					r.x += 120;
+					//GUI.Label(r, terrainSliderMinMin + "m |", SCANskins.SCAN_whiteReadoutLabel);
 
-					GUI.Label(r, "|" + terrainSliderMinMax + "m", SCANskins.SCAN_whiteReadoutLabel);
+					//r.x += 120;
+
+					//GUI.Label(r, "|" + terrainSliderMinMax + "m", SCANskins.SCAN_whiteReadoutLabel);
 				stopE();
 				fillS(8);
 				growE();
@@ -337,15 +339,17 @@ namespace SCANsat.SCAN_UI
 
 					maxHeightF =GUI.HorizontalSlider(r, maxHeightF, terrainSliderMaxMin, terrainSliderMaxMax).Mathf_Round(-2);
 
-					r.x -= 20;
-					r.y += 6;
-					r.width = 60;
+					SCANuiUtil.drawSliderLabel(r, terrainSliderMaxMin, terrainSliderMaxMax);
 
-					GUI.Label(r, terrainSliderMaxMin + "m |", SCANskins.SCAN_whiteReadoutLabel);
+					//r.x -= 20;
+					//r.y += 6;
+					//r.width = 60;
 
-					r.x += 140;
+					//GUI.Label(r, terrainSliderMaxMin + "m |", SCANskins.SCAN_whiteReadoutLabel);
 
-					GUI.Label(r, "|" + terrainSliderMaxMax + "m", SCANskins.SCAN_whiteReadoutLabel);
+					//r.x += 140;
+
+					//GUI.Label(r, "|" + terrainSliderMaxMax + "m", SCANskins.SCAN_whiteReadoutLabel);
 				stopE();
 				fillS(8);
 				growE();
@@ -365,15 +369,17 @@ namespace SCANsat.SCAN_UI
 
 							clampHeightF = GUI.HorizontalSlider(r, clampHeightF, clampSliderMin, clampSliderMax).Mathf_Round(-1);
 
-							r.x -= 10;
-							r.y += 6;
-							r.width = 40;
+							SCANuiUtil.drawSliderLabel(r, clampSliderMin, clampSliderMax);
 
-							GUI.Label(r, clampSliderMin + "m |", SCANskins.SCAN_whiteReadoutLabel);
+							//r.x -= 10;
+							//r.y += 6;
+							//r.width = 40;
 
-							r.x += 110;
+							//GUI.Label(r, clampSliderMin + "m |", SCANskins.SCAN_whiteReadoutLabel);
 
-							GUI.Label(r, "|" + clampSliderMax + "m", SCANskins.SCAN_whiteReadoutLabel);
+							//r.x += 110;
+
+							//GUI.Label(r, "|" + clampSliderMax + "m", SCANskins.SCAN_whiteReadoutLabel);
 						stopE();
 					}
 				fillS(8);
@@ -390,15 +396,17 @@ namespace SCANsat.SCAN_UI
 
 						paletteSizeInt = Mathf.RoundToInt(GUI.HorizontalSlider(r, sizeSlider, sizeSliderMin, sizeSliderMax));
 
-						r.x -= 10;
-						r.y += 9;
-						r.width = 30;
+						SCANuiUtil.drawSliderLabel(r, sizeSliderMin, sizeSliderMax);
 
-						GUI.Label(r, sizeSliderMin + " |", SCANskins.SCAN_whiteReadoutLabel);
+						//r.x -= 10;
+						//r.y += 9;
+						//r.width = 30;
 
-						r.x += 130;
+						//GUI.Label(r, sizeSliderMin + " |", SCANskins.SCAN_whiteReadoutLabel);
 
-						GUI.Label(r, "| " + sizeSliderMax, SCANskins.SCAN_whiteReadoutLabel);
+						//r.x += 130;
+
+						//GUI.Label(r, "| " + sizeSliderMax, SCANskins.SCAN_whiteReadoutLabel);
 					stopE();
 				}
 
@@ -565,8 +573,8 @@ namespace SCANsat.SCAN_UI
 			terrainSliderMaxMax = data.DefaultMaxHeight + 10000f;
 			terrainSliderMinMax = maxHeightF - 100f;
 			terrainSliderMaxMin = minHeightF + 100f;
-			clampSliderMin = minHeightF;
-			clampSliderMax = maxHeightF;
+			clampSliderMin = minHeightF + 10f;
+			clampSliderMax = maxHeightF - 10f;
 		}
 
 	}
