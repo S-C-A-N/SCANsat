@@ -84,10 +84,12 @@ namespace SCANsat
 		public bool scan_background = true;
 		[KSPField(isPersistant = true)]
 		public int timeWarpResolution = 20;
+		//[KSPField(isPersistant = true)]
+		//public bool globalOverlay = false; //Global resource overlay toggle
+		//[KSPField(isPersistant = true)]
+		//public int gridSelection = 0; //Which resource type is selected in the settings menu
 		[KSPField(isPersistant = true)]
-		public bool globalOverlay = false; //Global resource overlay toggle
-		[KSPField(isPersistant = true)]
-		public int gridSelection = 0; //Which resource type is selected in the settings menu
+		public string resourceSelection;
 		[KSPField(isPersistant = true)]
 		public int resourceOverlayType = 0; //0 for ORS, 1 for Kethane
 		[KSPField(isPersistant = true)]
@@ -100,7 +102,9 @@ namespace SCANsat
 		public bool kscMapVisible = false;
 
 		/* Needs Fixing: Available resources for overlays; loaded from resource addon configs */
-		private List<SCANdata.SCANResource> resourcesList = new List<SCANdata.SCANResource>();
+		//private List<SCANdata.SCANResource> resourcesList = new List<SCANdata.SCANResource>();
+
+		private Dictionary<string, SCANdata.SCANResource> resourceList = new Dictionary<string, SCANdata.SCANResource>();
 
 		/* Primary SCANsat vessel dictionary; loaded every time */
 		private Dictionary<Guid, SCANvessel> knownVessels = new Dictionary<Guid, SCANvessel>();
@@ -126,12 +130,15 @@ namespace SCANsat
 		/* Used in case the loading process is interupted somehow */
 		private bool loaded = false;
 
+		private bool globalResourceOverlay = false;
+
 		#region Public Accessors
 		/* Use these to access private members of this class */
-		public List<SCANdata.SCANResource> ResourcesList
-		{
-			get { return resourcesList; }
-		}
+		//public List<SCANdata.SCANResource> ResourcesList
+		//{
+		//	//get { return resourcesList; }
+		//	get { return null; }
+		//}
 
 		public static Dictionary<string, SCANdata> Body_Data
 		{
@@ -145,6 +152,20 @@ namespace SCANsat
 				body_data.Add(b.name, data);
 			else
 				Debug.LogError("[SCANsat] Warning: SCANdata Dictionary Already Contains Key of This Type");
+		}
+
+		public Dictionary<string, SCANdata.SCANResource> ResourceList
+		{
+			get { return resourceList; }
+			internal set { resourceList = value; }
+		}
+		
+		public void addToResourceData (string name, SCANdata.SCANResource res)
+		{
+			if (!resourceList.ContainsKey(name))
+				resourceList.Add(name, res);
+			else
+				Debug.LogError("[SCANsat] Warning: SCANResource Dictionary Already Contains Key of This Type");
 		}
 
 		public static Dictionary<string, SCANdata.SCANresourceType> ResourceTypes
@@ -189,6 +210,11 @@ namespace SCANsat
 		public int ActualPasses
 		{
 			get { return actualPasses; }
+		}
+
+		public bool GlobalResourceOverlay
+		{
+			get { return globalResourceOverlay; }
 		}
 		#endregion
 
@@ -268,7 +294,7 @@ namespace SCANsat
 							data.reset();
 							// fail somewhat gracefully; don't make the save unloadable 
 						}
-						try // Make doubly sure that nothing here can interup the Scenario Module loading process
+						try // Make doubly sure that nothing here can interupt the Scenario Module loading process
 						{
 							//Verify that saved data types can be converted, revert to default values otherwise
 							if (bool.TryParse(node_body.GetValue("Disabled"), out disabled))
@@ -491,8 +517,8 @@ namespace SCANsat
 
 		internal void Resources(CelestialBody b) //Repopulates the master resources list with data from config nodes
 		{
-			resourcesList.Clear();
-			if (resourceOverlayType == 0 && SCANversions.ORSXFound)
+			resourceList.Clear();
+			if (SCANversions.ORSXFound)
 			{
 				foreach (ConfigNode node in GameDatabase.Instance.GetConfigNodes("ORSX_PLANETARY_RESOURCE"))
 				{
@@ -502,7 +528,7 @@ namespace SCANsat
 						SCANdata.SCANResource resource = null;
 						if ((resource = SCANUtil.ORSConfigLoad(node)) == null)
 							continue;
-						foreach (SCANdata.SCANResource res in ResourcesList)
+						foreach (SCANdata.SCANResource res in resourceList.Values)
 						{ //Check to see if the resource is already in the list
 							if (resource.Name == res.Name)
 							{
@@ -520,11 +546,11 @@ namespace SCANsat
 							}
 						}
 						if (!resourceAdded)
-							resourcesList.Add(resource);
+							addToResourceData(resource.Name, resource);
 					}
 				}
 			}
-			else if (resourceOverlayType == 1)
+			if (SCANversions.kethaneLoaded)
 			{
 				foreach (ConfigNode node in GameDatabase.Instance.GetConfigNodes("KethaneResource"))
 				{
@@ -554,14 +580,16 @@ namespace SCANsat
 								}
 							}
 						}
-						resourcesList.Add(new SCANdata.SCANResource(name, "", full, empty, true, 1d, 1d, 1d, max, type));
+						addToResourceData(name, new SCANdata.SCANResource(name, "", full, empty, true, 1d, 1d, 1d, max, type, SCANdata.SCANResource_Source.Kethane));
 					}
 				}
 			}
-			if (resourcesList.Count == 0)
-				globalOverlay = false;
-			if (gridSelection > resourcesList.Count - 1)
-				gridSelection = 0;
+			if (resourceList.Count == 0)
+				globalResourceOverlay = false;
+			else
+				globalResourceOverlay = true;
+			//if (gridSelection > resourceList.Count - 1)
+			//	gridSelection = 0;
 		}
 
 		internal void registerSensor(Vessel v, SCANdata.SCANtype sensors, double fov, double min_alt, double max_alt, double best_alt)
