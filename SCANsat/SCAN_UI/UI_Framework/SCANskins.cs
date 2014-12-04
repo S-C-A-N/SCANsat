@@ -62,6 +62,8 @@ namespace SCANsat.SCAN_UI
 		internal static GUIStyle SCAN_legendTex;
 		internal static GUIStyle SCAN_textBox;
 		internal static GUIStyle SCAN_settingsToggle;
+		internal static GUIStyle SCAN_labelSmallLeft;
+		internal static GUIStyle SCAN_labelSmallRight;
 
 		//Styles for map overlay icons
 		internal static GUIStyle SCAN_orbitalLabelOn;
@@ -76,7 +78,6 @@ namespace SCANsat.SCAN_UI
 		//Some UI Textures
 		internal static Texture2D SCAN_toggleOn;
 		internal static Texture2D SCAN_toggleOnHover;
-		//internal static Texture2D SCAN_toggleOff;
 		internal static Texture2D SCAN_dropDownTex;
 
 		//Map Icon Textures
@@ -98,7 +99,6 @@ namespace SCANsat.SCAN_UI
 		{
 			SCAN_toggleOn = GameDatabase.Instance.GetTexture("SCANsat/Icons/SCAN_Toggle", false);
 			SCAN_toggleOnHover = GameDatabase.Instance.GetTexture("SCANsat/Icons/SCAN_Toggle_Hover", false);
-			//SCAN_toggleOff = GameDatabase.Instance.GetTexture("SCANsat/Icons/SCAN_Toggle_Off", false);
 			SCAN_dropDownTex = GameDatabase.Instance.GetTexture("SCANsat/Icons/DropDownTex", false);
 			SCAN_GridIcon = GameDatabase.Instance.GetTexture("SCANsat/Icons/SCAN_Grid_Icon", false);
 			SCAN_OrbitIcon = GameDatabase.Instance.GetTexture("SCANsat/Icons/SCAN_Orbit_Icon", false);
@@ -235,6 +235,15 @@ namespace SCANsat.SCAN_UI
 			SCAN_headlineSmall.name = "SCAN_HeadlineSmall";
 			SCAN_headlineSmall.fontSize = 30;
 
+			SCAN_labelSmallLeft = new GUIStyle(SCAN_whiteReadoutLabel);
+			SCAN_labelSmallLeft.name = "SCAN_LabelSmallLeft";
+			SCAN_labelSmallLeft.fontSize = 10;
+			SCAN_labelSmallLeft.alignment = TextAnchor.MiddleLeft;
+
+			SCAN_labelSmallRight = new GUIStyle(SCAN_labelSmallLeft);
+			SCAN_labelSmallRight.name = "SCAN_LabelSmallRight";
+			SCAN_labelSmallRight.alignment = TextAnchor.MiddleRight;
+
 			SCAN_buttonWarning = new GUIStyle(SCAN_button);
 			SCAN_buttonWarning.name = "SCAN_ButtonWarning";
 			SCAN_buttonWarning.fontSize = 16;
@@ -242,32 +251,15 @@ namespace SCANsat.SCAN_UI
 			SCAN_buttonWarning.normal.textColor = palette.cb_vermillion;
 
 			SCAN_toggle = new GUIStyle(SCAN_SkinsLibrary.DefKSPSkin.toggle);
-
-			//SCAN_toggle = new GUIStyle(SCAN_SkinsLibrary.DefUnitySkin.toggle);
 			SCAN_toggle.name = "SCAN_Toggle";
-			//SCAN_toggle.border = new RectOffset(0, 0, 0, 0);
-			//SCAN_toggle.alignment = TextAnchor.MiddleCenter;
-			//SCAN_toggle.font = dotty;
-			//SCAN_toggle.fontSize = 22;
 			SCAN_toggle.fixedHeight = 28;
 			SCAN_toggle.fixedWidth = 28;
-			//SCAN_toggle.clipping = TextClipping.Clip;
-
-			//SCANUtil.SCANlog("Fixed Height: {0}", SCAN_toggle.fixedHeight);
-			//SCANUtil.SCANlog("Fixed Width: {0}", SCAN_toggle.fixedWidth);
-			//SCANUtil.SCANlog("Stretch Height: {0}", SCAN_toggle.stretchHeight);
-			//SCANUtil.SCANlog("Stretch Width: {0}", SCAN_toggle.stretchWidth);
-			//SCANUtil.SCANlog("Font: {0}", SCAN_toggle.font.name);
-			//SCANUtil.SCANlog("Height Depend Width: {0}", SCAN_toggle.isHeightDependantOnWidth);
-			//SCANUtil.SCANlog("Content Offset: {0}", SCAN_toggle.contentOffset);
 
 			SCAN_settingsToggle = new GUIStyle(SCAN_SkinsLibrary.DefUnitySkin.toggle);
-			//SCAN_settingsToggle.normal.background = SCAN_toggleOff;
 			SCAN_settingsToggle.onNormal.background = SCAN_toggleOn;
 			SCAN_settingsToggle.onHover.background = SCAN_toggleOnHover;
 			SCAN_settingsToggle.onNormal.background.wrapMode = TextureWrapMode.Clamp;
 			SCAN_settingsToggle.onHover.background.wrapMode = TextureWrapMode.Clamp;
-			//SCAN_settingsToggle.normal.background.wrapMode = TextureWrapMode.Clamp;
 			SCAN_settingsToggle.border = new RectOffset(15, 0, 1, 1);
 
 			SCAN_textBox = new GUIStyle(SCAN_SkinsLibrary.DefUnitySkin.textField);
