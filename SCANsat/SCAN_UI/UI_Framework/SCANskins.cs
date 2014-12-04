@@ -85,6 +85,7 @@ namespace SCANsat.SCAN_UI
 		internal static Texture2D SCAN_FlagIcon;
 		internal static Texture2D SCAN_LegendIcon;
 		internal static Texture2D SCAN_ColorWheelIcon;
+		internal static Texture2D SCAN_AsteroidIcon;
 
 		protected override void OnGUI_FirstRun()
 		{
@@ -104,6 +105,7 @@ namespace SCANsat.SCAN_UI
 			SCAN_FlagIcon = GameDatabase.Instance.GetTexture("SCANsat/Icons/SCAN_Flag_Icon", false);
 			SCAN_LegendIcon = GameDatabase.Instance.GetTexture("SCANsat/Icons/SCAN_Legend_Icon", false);
 			SCAN_ColorWheelIcon = GameDatabase.Instance.GetTexture("SCANsat/Icons/SCAN_ColorWheel_Icon", false);
+			SCAN_AsteroidIcon = GameDatabase.Instance.GetTexture("SCANsat/Icons/SCAN_Asteroid_Icon", false);
 		}
 
 		private static void initializeColors()

@@ -336,12 +336,12 @@ namespace SCANsat.SCAN_UI
 			SCANcontroller.controller.map_asteroids = GUILayout.Toggle(SCANcontroller.controller.map_asteroids, "");
 
 			d = GUILayoutUtility.GetLastRect();
-			d.x += 34;
+			d.x += 44;
 			d.y += 2;
-			d.width = 60;
+			d.width = 24;
 			d.height = 24;
 
-			if (GUI.Button(d, "Asteroids", SCANskins.SCAN_buttonBorderless))
+			if (GUI.Button(d, SCANskins.SCAN_AsteroidIcon, SCANskins.SCAN_buttonBorderless))
 			{
 				SCANcontroller.controller.map_asteroids = !SCANcontroller.controller.map_asteroids;
 			}
