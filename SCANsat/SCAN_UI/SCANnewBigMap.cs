@@ -27,7 +27,8 @@ namespace SCANsat.SCAN_UI
 		private static CelestialBody b;
 		private static string mapTypeTitle = "";
 		internal SCANdata data;
-		//private double startUT;
+		private Vessel v;
+		private double startUT;
 		private bool drawGrid, currentGrid, currentColor, lastColor;
 		private bool drop_down_open, projection_drop_down, mapType_drop_down, resources_drop_down, planetoid_drop_down;
 		private Texture2D overlay_static;
@@ -57,8 +58,10 @@ namespace SCANsat.SCAN_UI
 		{
 			//Initialize the map object
 			Visible = SCANcontroller.controller.bigMapVisible;
+			if (v == null)
+				v = FlightGlobals.ActiveVessel;
 			if (b == null)
-				b = FlightGlobals.currentMainBody;
+				b = v.mainBody;
 			if (bigmap == null)
 			{
 				bigmap = new SCANmap(b);
@@ -84,6 +87,7 @@ namespace SCANsat.SCAN_UI
 				SCANcontroller.controller.addToBodyData(b, data);
 			}
 			bigmap.setBody(b);
+			bigmap.resource = SCANcontroller.controller.ResourceList[SCANcontroller.controller.resourceSelection];
 		}
 
 		protected override void DrawWindowPre(int id)
@@ -135,8 +139,8 @@ namespace SCANsat.SCAN_UI
 			if (drop_down_open && Event.current.type == EventType.mouseDown && !ddRect.Contains(Event.current.mousePosition))
 				drop_down_open = false;
 
-			if (SCANcontroller.controller.globalOverlay) //Update selected resource
-				bigmap.setResource(SCANcontroller.controller.ResourcesList[SCANcontroller.controller.gridSelection].Name);
+			//if (SCANcontroller.controller.globalOverlay) //Update selected resource
+			//	bigmap.setResource(SCANcontroller.controller.ResourcesList[SCANcontroller.controller.gridSelection].Name);
 
 			if (lastColor != currentColor)
 			{
@@ -195,7 +199,7 @@ namespace SCANsat.SCAN_UI
 				{
 					bigmap.resetMap();
 				}
-				if (SCANcontroller.controller.globalOverlay && SCANcontroller.controller.resourceOverlayType == 0)
+				if (SCANcontroller.controller.GlobalResourceOverlay)
 				{
 					fillS(60);
 					if (GUILayout.Button("Resources", SCANskins.SCAN_buttonFixed, GUILayout.MaxWidth(100)))
@@ -324,7 +328,7 @@ namespace SCANsat.SCAN_UI
 
 				fillS();
 
-				if (SCANcontroller.controller.globalOverlay && SCANcontroller.controller.resourceOverlayType == 0)
+				if (SCANcontroller.controller.GlobalResourceOverlay)
 				{
 					if (GUILayout.Button("Resources", SCANskins.SCAN_buttonFixed))
 					{
@@ -366,18 +370,21 @@ namespace SCANsat.SCAN_UI
 		{
 			MapTexture = bigmap.getPartialMap();
 
+			//A blank label used as a template for the actual map texture
 			GUILayout.Label("", GUILayout.Width(MapTexture.width), GUILayout.Height(MapTexture.height));
 
 			TextureRect = GUILayoutUtility.GetLastRect();
 			TextureRect.width = bigmap.mapwidth;
 			TextureRect.height = bigmap.mapheight;
 
+			//The background texture for the map
 			if (overlay_static == null)
 			{
 				overlay_static = new Texture2D((int)bigmap.mapwidth, (int)bigmap.mapheight, TextureFormat.ARGB32, false);
 				drawGrid = true;
 			}
 
+			//Generate the grid texture
 			if (drawGrid)
 			{
 				SCANuiUtil.clearTexture(overlay_static);
@@ -389,6 +396,7 @@ namespace SCANsat.SCAN_UI
 				drawGrid = false;
 			}
 
+			//Stretches the existing map while re-sizing
 			if (IsDragging)
 			{
 				TextureRect.width = dW;
@@ -405,6 +413,7 @@ namespace SCANsat.SCAN_UI
 				GUI.DrawTexture(TextureRect, overlay_static, ScaleMode.StretchToFill);
 			}
 
+			//Add the North/South labels to the polar projection
 			if (bigmap.projection == SCANmap.MapProjection.Polar)
 			{
 				rc.x = TextureRect.x + TextureRect.width / 2 - TextureRect.width / 8;
@@ -412,6 +421,12 @@ namespace SCANsat.SCAN_UI
 				SCANuiUtil.drawLabel(rc, "S", false, true, true);
 				rc.x = TextureRect.x + TextureRect.width / 2 + TextureRect.width / 8;
 				SCANuiUtil.drawLabel(rc, "N", false, true, true);
+			}
+
+			//Draw the orbit overlays
+			if (SCANcontroller.controller.map_orbit)
+			{
+				SCANuiUtil.drawOrbit(TextureRect, bigmap, v, startUT, overlay_static);
 			}
 		}
 
@@ -508,13 +523,18 @@ namespace SCANsat.SCAN_UI
 			{
 				ddRect = new Rect(WindowRect.width - 290, 45, 120, 160);
 				GUI.Box(ddRect, "", SCANskins.SCAN_dropDownBox);
-				for (int i = 0; i < SCANcontroller.controller.ResourcesList.Count; i++)
+				for (int i = 0; i < SCANcontroller.controller.ResourceList.Count; i++)
 				{
-					scrollR = GUI.BeginScrollView(ddRect, scrollR, new Rect(0, 0, 100, 20 * SCANcontroller.controller.ResourcesList.Count));
+					scrollR = GUI.BeginScrollView(ddRect, scrollR, new Rect(0, 0, 100, 20 * SCANcontroller.controller.ResourceList.Count));
 					Rect r = new Rect(2, 20 * i, 96, 20);
-					if (GUI.Button(r, SCANcontroller.controller.ResourcesList[i].Name, SCANskins.SCAN_dropDownButton))
+					if (GUI.Button(r, SCANcontroller.controller.ResourceList.ElementAt(i).Key, SCANskins.SCAN_dropDownButton))
 					{
-						SCANcontroller.controller.gridSelection = i;
+						bigmap.resource = SCANcontroller.controller.ResourceList.ElementAt(i).Value;
+						SCANcontroller.controller.resourceSelection = bigmap.resource.Name;
+						if (SCANcontroller.controller.ResourceList.ElementAt(i).Value.Source == SCANdata.SCANResource_Source.Kethane)
+							SCANcontroller.controller.resourceOverlayType = 1;
+						else
+							SCANcontroller.controller.resourceOverlayType = 0;
 						drop_down_open = false;
 					}
 					GUI.EndScrollView();

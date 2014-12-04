@@ -85,6 +85,7 @@ namespace SCANsat.SCAN_UI
 				SCANcontroller.controller.addToBodyData(b, data);
 			}
 			bigmap.setBody(b);
+			bigmap.resource = SCANcontroller.controller.ResourceList[SCANcontroller.controller.resourceSelection];
 		}
 
 		internal override void OnDestroy()
@@ -175,8 +176,8 @@ namespace SCANsat.SCAN_UI
 			if (drop_down_open && Event.current.type == EventType.mouseDown && !ddRect.Contains(Event.current.mousePosition))
 				drop_down_open = false;
 
-			if (SCANcontroller.controller.globalOverlay) //Update selected resource
-				bigmap.setResource(SCANcontroller.controller.ResourcesList[SCANcontroller.controller.gridSelection].Name);
+			//if (SCANcontroller.controller.globalOverlay) //Update selected resource
+			//	bigmap.setResource(SCANcontroller.controller.ResourcesList[SCANcontroller.controller.gridSelection].Name);
 
 			if (lastColor != currentColor)
 			{
@@ -245,7 +246,7 @@ namespace SCANsat.SCAN_UI
 				bigmap.resetMap();
 			}
 
-			if (SCANcontroller.controller.globalOverlay && SCANcontroller.controller.resourceOverlayType == 0)
+			if (SCANcontroller.controller.GlobalResourceOverlay)
 			{
 				fillS(60);
 				if (GUILayout.Button("Resources", SCANskins.SCAN_buttonFixed, GUILayout.MaxWidth(100)))
@@ -363,7 +364,7 @@ namespace SCANsat.SCAN_UI
 
 			fillS();
 
-			if (SCANcontroller.controller.globalOverlay && SCANcontroller.controller.resourceOverlayType == 0)
+			if (SCANcontroller.controller.GlobalResourceOverlay)
 			{
 				if (GUILayout.Button("Resources", SCANskins.SCAN_buttonFixed))
 				{
@@ -539,13 +540,18 @@ namespace SCANsat.SCAN_UI
 			{
 				ddRect = new Rect(WindowRect.width - 290, 45, 120, 160);
 				GUI.Box(ddRect, "", SCANskins.SCAN_dropDownBox);
-				for (int i = 0; i < SCANcontroller.controller.ResourcesList.Count; i++)
+				for (int i = 0; i < SCANcontroller.controller.ResourceList.Count; i++)
 				{
-					scrollR = GUI.BeginScrollView(ddRect, scrollR, new Rect(0, 0, 100, 20 * SCANcontroller.controller.ResourcesList.Count));
+					scrollR = GUI.BeginScrollView(ddRect, scrollR, new Rect(0, 0, 100, 20 * SCANcontroller.controller.ResourceList.Count));
 					Rect r = new Rect(2, 20 * i, 96, 20);
-					if (GUI.Button(r, SCANcontroller.controller.ResourcesList[i].Name, SCANskins.SCAN_dropDownButton))
+					if (GUI.Button(r, SCANcontroller.controller.ResourceList.ElementAt(i).Key, SCANskins.SCAN_dropDownButton))
 					{
-						SCANcontroller.controller.gridSelection = i;
+						bigmap.resource = SCANcontroller.controller.ResourceList.ElementAt(i).Value;
+						SCANcontroller.controller.resourceSelection = bigmap.resource.Name;
+						if (SCANcontroller.controller.ResourceList.ElementAt(i).Value.Source == SCANdata.SCANResource_Source.Kethane)
+							SCANcontroller.controller.resourceOverlayType = 1;
+						else
+							SCANcontroller.controller.resourceOverlayType = 0;
 						drop_down_open = false;
 					}
 					GUI.EndScrollView();
