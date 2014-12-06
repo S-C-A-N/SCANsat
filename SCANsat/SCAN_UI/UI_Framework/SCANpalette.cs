@@ -147,6 +147,10 @@ namespace SCANsat.SCAN_UI
 			Color c = black;
 			if (clamp != null)
 			{
+				if (clamp < min + 10f)
+					clamp = min + 10f;
+				if (clamp > max - 10f)
+					clamp = max - 10f;
 				if (val <= (float)clamp)
 				{
 					val -= min;
