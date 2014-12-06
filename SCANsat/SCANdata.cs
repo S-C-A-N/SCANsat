@@ -169,6 +169,17 @@ namespace SCANsat
 			}
 		}
 
+		public float? DefaultClampHeight
+		{
+			get
+			{
+				if (body.flightGlobalsIndex < 17)
+					return bodyHeightRange[body.flightGlobalsIndex, 2];
+				else
+					return defaultClampHeight;
+			}
+		}
+
 		public bool PaletteReverse
 		{
 			get { return paletteReverse; }
@@ -191,6 +202,28 @@ namespace SCANsat
 		{
 			get { return colorPalette; }
 			internal set { colorPalette = value; }
+		}
+
+		public Palette DefaultColorPalette
+		{
+			get
+			{
+				if (body.flightGlobalsIndex < 17)
+					return paletteDefaults[body.flightGlobalsIndex];
+				else
+					return paletteDefaults[0];
+			}
+		}
+
+		public bool DefaultReversePalette
+		{
+			get
+			{
+				if (body.flightGlobalsIndex < 17)
+					return paletteReverseDefaults[body.flightGlobalsIndex];
+				else
+					return false;
+			}
 		}
 
 		public int PaletteSize
