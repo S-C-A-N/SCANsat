@@ -407,7 +407,7 @@ namespace SCANsat.SCAN_UI
 				{
 					if (SCANcontroller.controller.map_ResourceOverlay)
 					{
-						//if (GUILayout.Button(SCANcontroller.controller.ResourcesList[SCANcontroller.controller.gridSelection].Name, SCANskins.SCAN_buttonActive))
+						if (GUILayout.Button(SCANcontroller.controller.resourceSelection, SCANskins.SCAN_buttonActive))
 						{
 							SCANcontroller.controller.map_ResourceOverlay = !SCANcontroller.controller.map_ResourceOverlay;
 							bigmap.resetMap();
@@ -415,11 +415,11 @@ namespace SCANsat.SCAN_UI
 					}
 					else
 					{
-						//if (GUILayout.Button(SCANcontroller.controller.ResourcesList[SCANcontroller.controller.gridSelection].Name))
-						//{
-						//	SCANcontroller.controller.map_ResourceOverlay = !SCANcontroller.controller.map_ResourceOverlay;
-						//	bigmap.resetMap();
-						//}
+						if (GUILayout.Button(SCANcontroller.controller.resourceSelection))
+						{
+							SCANcontroller.controller.map_ResourceOverlay = !SCANcontroller.controller.map_ResourceOverlay;
+							bigmap.resetMap();
+						}
 					}
 				}
 				else
@@ -721,7 +721,7 @@ namespace SCANsat.SCAN_UI
 			WindowCaption = string.Format("Map of {0}{1}", b.theName, titleText);
 
 			//if (SCANcontroller.controller.globalOverlay) //Update selected resource
-			//	bigmap.setResource(SCANcontroller.controller.ResourcesList[SCANcontroller.controller.gridSelection].Name);
+			//	bigmap.setResource(SCANcontroller.controller.ResourceList[SCANcontroller.controller.gridSelection].Name);
 
 			SCANcontroller.controller.map_x = (int)WindowRect.x;
 			SCANcontroller.controller.map_y = (int)WindowRect.y;
