@@ -25,17 +25,13 @@ namespace SCANsat.SCAN_UI
 	class SCANcolorSelection: SCAN_MBW
 	{
 		private bool paletteBox, reversePalette, oldReverseState, discretePalette, oldDiscreteState;
-		private bool spaceCenterLock, trackingStationLock, clampHeight, oldClampState;
+		private bool spaceCenterLock, trackingStationLock, clampState, oldClampState;
 		private Rect paletteRect;
 		private Palette dataPalette;
-		//private string paletteSize = "6";
 		private int paletteSizeInt, oldPaletteSizeInt = 6;
 		private int paletteIndex;
 		private Texture2D currentLegend, previewLegend;
 		private float sizeSlider, sizeSliderMin, sizeSliderMax, terrainSliderMinMin, terrainSliderMinMax, terrainSliderMaxMin, terrainSliderMaxMax, clampSliderMin, clampSliderMax;
-		//private string minHeightS = "-500";
-		//private string maxHeightS = "8000";
-		//private string clampHeightS = "0";
 		private float minHeightF, oldMinHeightF = -500;
 		private float maxHeightF, oldMaxHeightF = 8000;
 		private float clampHeightF = 0;
@@ -62,7 +58,6 @@ namespace SCANsat.SCAN_UI
 		internal override void Start()
 		{
 			paletteSizeInt = palette.CurrentPalettes.size;
-			//paletteSize = paletteSizeInt.ToString();
 			setSizeSlider(palette.CurrentPalette.kind);
 		}
 
@@ -136,21 +131,18 @@ namespace SCANsat.SCAN_UI
 				dataPalette = data.ColorPalette;
 				minHeightF = data.MinHeight;
 				oldMinHeightF = minHeightF;
-				//minHeightS = minHeightF.ToString();
 				maxHeightF = data.MaxHeight;
 				oldMaxHeightF = maxHeightF;
 				setTerrainSliders();
-				//maxHeightS = maxHeightF.ToString();
 				oldPaletteSizeInt = paletteSizeInt = data.PaletteSize;
+				setSizeSlider(dataPalette.kind);
 				sizeSlider = (float)paletteSizeInt;
-				//paletteSize = paletteSizeInt.ToString();
 				oldReverseState = reversePalette = data.PaletteReverse;
 				oldDiscreteState = discretePalette = data.PaletteDiscrete;
-				oldClampState = clampHeight = data.ClampHeight != null;
-				if (clampHeight)
+				oldClampState = clampState = data.ClampHeight != null;
+				if (clampState)
 				{
 					clampHeightF = (float)data.ClampHeight;
-					//clampHeightS = clampHeightF.ToString();
 				}
 				palette.CurrentPalettes = palette.setCurrentPalettesType(dataPalette.kind);
 				palette.CurrentPalette = palette.CurrentPalettes.availablePalettes[0];
@@ -176,7 +168,7 @@ namespace SCANsat.SCAN_UI
 				fillS(8);
 				growE();
 					palettePreview(id);
-					fillS(20);
+					fillS(10);
 					paletteConfirmation(id);
 				stopE();
 			stopS();
@@ -208,9 +200,9 @@ namespace SCANsat.SCAN_UI
 				drawPreviewLegend();
 			}
 
-			if (clampHeight != oldClampState)
+			if (clampState != oldClampState)
 			{
-				oldClampState = clampHeight;
+				oldClampState = clampState;
 				drawPreviewLegend();
 			}
 
@@ -252,7 +244,7 @@ namespace SCANsat.SCAN_UI
 		{
 			growS();
 				GUILayout.Label("Palette Selection", SCANskins.SCAN_headline);
-				fillS(8);
+				fillS(12);
 				growE();
 					if (GUILayout.Button("Palette Style:", SCANskins.SCAN_buttonFixed, GUILayout.MaxWidth(120)))
 					{
@@ -274,7 +266,7 @@ namespace SCANsat.SCAN_UI
 						if (i % 3 == 0)
 						{
 							stopE();
-							fillS(8);
+							fillS(9);
 							growE();
 						}
 						Texture2D t = palette.CurrentPalettes.paletteSwatch[i];
@@ -303,7 +295,7 @@ namespace SCANsat.SCAN_UI
 		private void paletteOptions(int id)
 		{
 			growS();
-				fillS(10);
+				fillS(4);
 				GUILayout.Label("Terrain Options", SCANskins.SCAN_headlineSmall);
 
 				growE();
@@ -316,17 +308,7 @@ namespace SCANsat.SCAN_UI
 					
 					minHeightF = GUI.HorizontalSlider(r, minHeightF, terrainSliderMinMin, terrainSliderMinMax).Mathf_Round(-2);
 
-					SCANuiUtil.drawSliderLabel(r, terrainSliderMinMin, terrainSliderMinMax);
-
-					//r.x -= 20;
-					//r.y += 6;
-					//r.width = 60;
-
-					//GUI.Label(r, terrainSliderMinMin + "m |", SCANskins.SCAN_whiteReadoutLabel);
-
-					//r.x += 120;
-
-					//GUI.Label(r, "|" + terrainSliderMinMax + "m", SCANskins.SCAN_whiteReadoutLabel);
+					SCANuiUtil.drawSliderLabel(r, terrainSliderMinMin + "m", terrainSliderMinMax + "m");
 				stopE();
 				fillS(8);
 				growE();
@@ -339,25 +321,15 @@ namespace SCANsat.SCAN_UI
 
 					maxHeightF =GUI.HorizontalSlider(r, maxHeightF, terrainSliderMaxMin, terrainSliderMaxMax).Mathf_Round(-2);
 
-					SCANuiUtil.drawSliderLabel(r, terrainSliderMaxMin, terrainSliderMaxMax);
-
-					//r.x -= 20;
-					//r.y += 6;
-					//r.width = 60;
-
-					//GUI.Label(r, terrainSliderMaxMin + "m |", SCANskins.SCAN_whiteReadoutLabel);
-
-					//r.x += 140;
-
-					//GUI.Label(r, "|" + terrainSliderMaxMax + "m", SCANskins.SCAN_whiteReadoutLabel);
+					SCANuiUtil.drawSliderLabel(r, terrainSliderMaxMin + "m", terrainSliderMaxMax + "m");
 				stopE();
-				fillS(8);
+				fillS(6);
 				growE();
 					fillS();
-					clampHeight = GUILayout.Toggle(clampHeight, "Clamp Terrain", SCANskins.SCAN_settingsToggle, GUILayout.Width(100));
+					clampState = GUILayout.Toggle(clampState, "Clamp Terrain", SCANskins.SCAN_settingsToggle, GUILayout.Width(100));
 					fillS();
 				stopE();
-				if (clampHeight)
+				if (clampState)
 					{
 						growE();
 							fillS(10);
@@ -369,20 +341,10 @@ namespace SCANsat.SCAN_UI
 
 							clampHeightF = GUI.HorizontalSlider(r, clampHeightF, clampSliderMin, clampSliderMax).Mathf_Round(-1);
 
-							SCANuiUtil.drawSliderLabel(r, clampSliderMin, clampSliderMax);
-
-							//r.x -= 10;
-							//r.y += 6;
-							//r.width = 40;
-
-							//GUI.Label(r, clampSliderMin + "m |", SCANskins.SCAN_whiteReadoutLabel);
-
-							//r.x += 110;
-
-							//GUI.Label(r, "|" + clampSliderMax + "m", SCANskins.SCAN_whiteReadoutLabel);
+							SCANuiUtil.drawSliderLabel(r, clampSliderMin + "m", clampSliderMax +  "m");
 						stopE();
 					}
-				fillS(8);
+				fillS(6);
 				GUILayout.Label("Palette Options", SCANskins.SCAN_headlineSmall);
 				if (palette.CurrentPalettes.paletteType != Palette.Kind.Fixed)
 				{
@@ -396,17 +358,7 @@ namespace SCANsat.SCAN_UI
 
 						paletteSizeInt = Mathf.RoundToInt(GUI.HorizontalSlider(r, sizeSlider, sizeSliderMin, sizeSliderMax));
 
-						SCANuiUtil.drawSliderLabel(r, sizeSliderMin, sizeSliderMax);
-
-						//r.x -= 10;
-						//r.y += 9;
-						//r.width = 30;
-
-						//GUI.Label(r, sizeSliderMin + " |", SCANskins.SCAN_whiteReadoutLabel);
-
-						//r.x += 130;
-
-						//GUI.Label(r, "| " + sizeSliderMax, SCANskins.SCAN_whiteReadoutLabel);
+						SCANuiUtil.drawSliderLabel(r, sizeSliderMin + "  ", " " + sizeSliderMax);
 					stopE();
 				}
 
@@ -443,39 +395,63 @@ namespace SCANsat.SCAN_UI
 		private void paletteConfirmation(int id)
 		{
 			growS();
-			fillS(16);
-			if (GUILayout.Button("Apply", GUILayout.Width(80)))
-			{
-				if (minHeightF < maxHeightF)
+				fillS(6);
+				if (GUILayout.Button("Default Settings", GUILayout.Width(135)))
 				{
-					data.MinHeight = minHeightF;
-					data.MaxHeight = maxHeightF;
+					data.MinHeight = data.DefaultMinHeight;
+					data.MaxHeight = data.DefaultMaxHeight;
+					data.ClampHeight = data.DefaultClampHeight;
+					minHeightF = data.MinHeight;
+					maxHeightF = data.MaxHeight;
+					clampState = data.ClampHeight != null;
+					if (clampState)
+						clampHeightF = (float)data.ClampHeight;
+					else
+						clampHeightF = 0;
+					dataPalette = palette.CurrentPalette = data.ColorPalette = data.DefaultColorPalette;
+					palette.CurrentPalettes = palette.setCurrentPalettesType(dataPalette.kind);
+					paletteSizeInt = data.PaletteSize = dataPalette.size;
+					reversePalette = data.PaletteReverse = data.DefaultReversePalette;
+					discretePalette = data.PaletteDiscrete = false;
+					setSizeSlider(dataPalette.kind);
+					setTerrainSliders();
+					drawCurrentLegend();
 				}
-				if (clampHeight)
-				{
-					if (clampHeightF > minHeightF && clampHeightF < maxHeightF)
-						data.ClampHeight = (float?)clampHeightF;
-				}
-				else
-					data.ClampHeight = null;
+				fillS(6);
+				growE();
+					if (GUILayout.Button("Apply", GUILayout.Width(60)))
+					{
+						if (minHeightF < maxHeightF)
+						{
+							data.MinHeight = minHeightF;
+							data.MaxHeight = maxHeightF;
+						}
+						if (clampState)
+						{
+							if (clampHeightF > minHeightF && clampHeightF < maxHeightF)
+								data.ClampHeight = (float?)clampHeightF;
+						}
+						else
+							data.ClampHeight = null;
 
-				data.ColorPalette = palette.CurrentPalette;
-				data.PaletteName = palette.CurrentPalette.name;
-				data.PaletteSize = palette.CurrentPalette.size;
-				data.PaletteDiscrete = discretePalette;
-				data.PaletteReverse = reversePalette;
-				dataPalette = data.ColorPalette;
-				drawCurrentLegend();
-			}
-			fillS(8);
-			if (GUILayout.Button("Cancel", GUILayout.Width(80)))
-			{
-				palette.CurrentPalette = data.ColorPalette;
-				InputLockManager.RemoveControlLock(lockID);
-				spaceCenterLock = false;
-				trackingStationLock = false;
-				Visible = false;
-			}
+						data.ColorPalette = palette.CurrentPalette;
+						data.PaletteName = palette.CurrentPalette.name;
+						data.PaletteSize = palette.CurrentPalette.size;
+						data.PaletteDiscrete = discretePalette;
+						data.PaletteReverse = reversePalette;
+						dataPalette = data.ColorPalette;
+						drawCurrentLegend();
+					}
+					fillS(10);
+					if (GUILayout.Button("Cancel", GUILayout.Width(60)))
+					{
+						palette.CurrentPalette = data.ColorPalette;
+						InputLockManager.RemoveControlLock(lockID);
+						spaceCenterLock = false;
+						trackingStationLock = false;
+						Visible = false;
+					}
+				stopE();
 			stopS();
 		}
 
@@ -522,7 +498,7 @@ namespace SCANsat.SCAN_UI
 		{
 			float? clamp = null;
 			Color32[] c = palette.CurrentPalette.colors;
-			if (clampHeight)
+			if (clampState)
 				clamp = (float?)clampHeightF;
 			if (reversePalette)
 				c = palette.CurrentPalette.colorsReverse;
@@ -546,18 +522,24 @@ namespace SCANsat.SCAN_UI
 					{
 						sizeSliderMin = 3f;
 						sizeSliderMax = 11f;
+						if (paletteSizeInt > sizeSliderMax)
+							paletteSizeInt = (int)sizeSliderMax;
 						break;
 					}
 				case Palette.Kind.Qualitative:
 					{
 						sizeSliderMin = 3f;
 						sizeSliderMax = 12f;
+						if (paletteSizeInt > sizeSliderMax)
+							paletteSizeInt = (int)sizeSliderMax;
 						break;
 					}
 				case Palette.Kind.Sequential:
 					{
 						sizeSliderMin = 3f;
 						sizeSliderMax = 9f;
+						if (paletteSizeInt > sizeSliderMax)
+							paletteSizeInt = (int)sizeSliderMax;
 						break;
 					}
 				case Palette.Kind.Fixed:
@@ -565,6 +547,7 @@ namespace SCANsat.SCAN_UI
 						break;
 					}
 			}
+			
 		}
 
 		private void setTerrainSliders()
@@ -575,6 +558,10 @@ namespace SCANsat.SCAN_UI
 			terrainSliderMaxMin = minHeightF + 100f;
 			clampSliderMin = minHeightF + 10f;
 			clampSliderMax = maxHeightF - 10f;
+			if (clampHeightF < minHeightF + 10f)
+				clampHeightF = minHeightF + 10f;
+			else if (clampHeightF > maxHeightF - 10f)
+				clampHeightF = maxHeightF - 10f;
 		}
 
 	}
