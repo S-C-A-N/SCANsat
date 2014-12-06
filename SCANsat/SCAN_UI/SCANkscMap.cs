@@ -249,7 +249,7 @@ namespace SCANsat.SCAN_UI
 			if (SCANcontroller.controller.GlobalResourceOverlay)
 			{
 				fillS(60);
-				if (GUILayout.Button("Resources", SCANskins.SCAN_buttonFixed, GUILayout.MaxWidth(100)))
+				if (GUILayout.Button("Resources", SCANskins.SCAN_buttonFixed, GUILayout.MaxWidth(90)))
 				{
 					resources_drop_down = !resources_drop_down;
 					drop_down_open = !drop_down_open;
@@ -258,7 +258,7 @@ namespace SCANsat.SCAN_UI
 
 			fillS();
 
-			if (GUILayout.Button("Planetoid", SCANskins.SCAN_buttonFixed, GUILayout.MaxWidth(100)))
+			if (GUILayout.Button("Planetoid", SCANskins.SCAN_buttonFixed, GUILayout.MaxWidth(90)))
 			{
 				planetoid_drop_down = !planetoid_drop_down;
 				drop_down_open = !drop_down_open;
@@ -364,14 +364,27 @@ namespace SCANsat.SCAN_UI
 
 			fillS();
 
-			if (SCANcontroller.controller.GlobalResourceOverlay)
+			SCANcontroller.controller.map_ResourceOverlay = GUILayout.Toggle(SCANcontroller.controller.map_ResourceOverlay, "");
+
+			d = GUILayoutUtility.GetLastRect();
+			d.x += 24;
+			d.y += 2;
+			d.width = 60;
+			d.height = 24;
+
+			if (GUI.Button(d, "Resources", SCANskins.SCAN_buttonBorderless))
 			{
-				if (GUILayout.Button("Resources", SCANskins.SCAN_buttonFixed))
-				{
-					SCANcontroller.controller.map_ResourceOverlay = !SCANcontroller.controller.map_ResourceOverlay;
-					bigmap.resetMap();
-				}
+				SCANcontroller.controller.map_ResourceOverlay = !SCANcontroller.controller.map_ResourceOverlay;
 			}
+
+			//if (SCANcontroller.controller.GlobalResourceOverlay)
+			//{
+			//	if (GUILayout.Button("Resources", SCANskins.SCAN_buttonFixed))
+			//	{
+			//		SCANcontroller.controller.map_ResourceOverlay = !SCANcontroller.controller.map_ResourceOverlay;
+			//		bigmap.resetMap();
+			//	}
+			//}
 
 			stopS();
 

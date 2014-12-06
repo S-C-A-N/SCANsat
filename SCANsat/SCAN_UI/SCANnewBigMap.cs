@@ -29,7 +29,7 @@ namespace SCANsat.SCAN_UI
 		internal SCANdata data;
 		private Vessel v;
 		private double startUT;
-		private bool drawGrid, currentGrid, currentColor, lastColor;
+		private bool drawGrid, currentGrid, currentColor, lastColor, lastResource;
 		private bool drop_down_open, projection_drop_down, mapType_drop_down, resources_drop_down, planetoid_drop_down;
 		private Texture2D overlay_static;
 		private Rect ddRect;
@@ -158,6 +158,12 @@ namespace SCANsat.SCAN_UI
 				currentGrid = SCANcontroller.controller.map_grid;
 				drawGrid = true;
 			}
+
+			if (lastResource != SCANcontroller.controller.map_ResourceOverlay)
+			{
+				lastResource = SCANcontroller.controller.map_ResourceOverlay;
+				bigmap.resetMap();
+			}
 		}
 
 		//Draw version label in upper left corner
@@ -202,14 +208,14 @@ namespace SCANsat.SCAN_UI
 				if (SCANcontroller.controller.GlobalResourceOverlay)
 				{
 					fillS(60);
-					if (GUILayout.Button("Resources", SCANskins.SCAN_buttonFixed, GUILayout.MaxWidth(100)))
+					if (GUILayout.Button("Resources", SCANskins.SCAN_buttonFixed, GUILayout.MaxWidth(90)))
 					{
 						resources_drop_down = !resources_drop_down;
 						drop_down_open = !drop_down_open;
 					}
 				}
 				//fillS();
-				//if (GUILayout.Button("Planetoid", SCANskins.SCAN_buttonFixed, GUILayout.MaxWidth(100)))
+				//if (GUILayout.Button("Planetoid", SCANskins.SCAN_buttonFixed, GUILayout.MaxWidth(90)))
 				//{
 				//	planetoid_drop_down = !planetoid_drop_down;
 				//	drop_down_open = !drop_down_open;
@@ -328,14 +334,27 @@ namespace SCANsat.SCAN_UI
 
 				fillS();
 
-				if (SCANcontroller.controller.GlobalResourceOverlay)
+				SCANcontroller.controller.map_ResourceOverlay = GUILayout.Toggle(SCANcontroller.controller.map_ResourceOverlay, "");
+
+				d = GUILayoutUtility.GetLastRect();
+				d.x += 24;
+				d.y += 2;
+				d.width = 60;
+				d.height = 24;
+
+				if (GUI.Button(d, "Resources", SCANskins.SCAN_buttonBorderless))
 				{
-					if (GUILayout.Button("Resources", SCANskins.SCAN_buttonFixed))
-					{
-						SCANcontroller.controller.map_ResourceOverlay = !SCANcontroller.controller.map_ResourceOverlay;
-						bigmap.resetMap();
-					}
+					SCANcontroller.controller.map_ResourceOverlay = !SCANcontroller.controller.map_ResourceOverlay;
 				}
+				
+				//if (SCANcontroller.controller.GlobalResourceOverlay)
+				//{
+				//	if (GUILayout.Button("Resources", SCANskins.SCAN_buttonFixed))
+				//	{
+				//		SCANcontroller.controller.map_ResourceOverlay = !SCANcontroller.controller.map_ResourceOverlay;
+				//		bigmap.resetMap();
+				//	}
+				//}
 
 			stopS();
 
@@ -428,6 +447,9 @@ namespace SCANsat.SCAN_UI
 			{
 				SCANuiUtil.drawOrbit(TextureRect, bigmap, v, startUT, overlay_static);
 			}
+
+			//Draw the vessel overlays
+			SCANuiUtil.drawMapLabels(TextureRect, v, bigmap, data, v.mainBody);
 		}
 
 		//Draw the altitude legend bar along the bottom
@@ -535,6 +557,7 @@ namespace SCANsat.SCAN_UI
 							SCANcontroller.controller.resourceOverlayType = 1;
 						else
 							SCANcontroller.controller.resourceOverlayType = 0;
+						bigmap.resetMap();
 						drop_down_open = false;
 					}
 					GUI.EndScrollView();
