@@ -441,17 +441,18 @@ namespace SCANsat.SCAN_UI
 			drawLabel(lr, txt, false, true, true);
 		}
 		
-		internal static void drawSliderLabel(Rect r, float min, float max)
+		internal static void drawSliderLabel(Rect r, string min, string max)
 		{
-			Rect sr = new Rect(r.x + 5, r.y + 2, 10, 10);
+			Rect sr = new Rect(r.x, r.y + 7, 10, 20);
+			drawLabel(sr, "|", true, true);
+			sr.x += (r.width - 8);
 			drawLabel(sr, "|", true, false);
-			sr.x += r.width - 10;
-			drawLabel(sr, "|", true, false);
-			sr.x -= r.width + 30;
-			sr.y += 4;
-			drawLabel(sr, min + "m", true, false);
-			sr.x += r.width + 40;
-			drawLabel(sr, max + "m", true, true);
+			sr.width = 80;
+			sr.x -= (r.width + 60);
+			sr.y += 12;
+			drawLabel(sr, min, true, false);
+			sr.x += (r.width + 62);
+			drawLabel(sr, max, true, true);
 		}
 
 		/* FIXME: This uses assumed, shared, static constants with Legend stuff in other SCANsat files */
