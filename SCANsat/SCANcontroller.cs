@@ -587,9 +587,11 @@ namespace SCANsat
 			if (resourceList.Count == 0)
 				globalResourceOverlay = false;
 			else
+			{
 				globalResourceOverlay = true;
-			//if (gridSelection > resourceList.Count - 1)
-			//	gridSelection = 0;
+				if (string.IsNullOrEmpty(resourceSelection))
+					resourceSelection = resourceList.ElementAt(0).Key;
+			}
 		}
 
 		internal void registerSensor(Vessel v, SCANdata.SCANtype sensors, double fov, double min_alt, double max_alt, double best_alt)
