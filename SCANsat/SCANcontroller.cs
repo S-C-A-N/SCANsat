@@ -100,6 +100,8 @@ namespace SCANsat
 		public bool bigMapVisible = false;
 		[KSPField(isPersistant = true)]
 		public bool kscMapVisible = false;
+		[KSPField(isPersistant = true)]
+		public bool toolTips = true;
 
 		/* Needs Fixing: Available resources for overlays; loaded from resource addon configs */
 		//private List<SCANdata.SCANResource> resourcesList = new List<SCANdata.SCANResource>();
