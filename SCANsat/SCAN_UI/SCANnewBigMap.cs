@@ -23,35 +23,38 @@ namespace SCANsat.SCAN_UI
 {
 	class SCANnewBigMap : SCAN_MBW
 	{
-		private static SCANmap bigmap;
+		private static SCANmap bigmap, spotmap;
 		private static CelestialBody b;
 		private static string mapTypeTitle = "";
 		internal SCANdata data;
 		private Vessel v;
 		private double startUT;
-		private bool drawGrid, currentGrid, currentColor, lastColor, lastResource;
+		private float resizeW, resizeH, dragX;
+		private bool drawGrid, currentGrid, currentColor, lastColor, lastResource, resizing;
 		private bool drop_down_open, projection_drop_down, mapType_drop_down, resources_drop_down, planetoid_drop_down;
 		private Texture2D overlay_static;
-		private Rect ddRect;
+		private Rect ddRect, zoomCloseRect;
 		private Rect rc = new Rect(0, 0, 20, 20);
 		private Vector2 scrollP, scrollR;
-		//private Rect pos_spotmap = new Rect(10f, 10f, 10f, 10f);
-		//private Rect pos_spotmap_x = new Rect(10f, 10f, 25f, 25f);
+		private Rect pos_spotmap = new Rect(10f, 10f, 10f, 10f);
+		private Rect pos_spotmap_x = new Rect(10f, 10f, 25f, 25f);
 		internal static Rect defaultRect = new Rect(250, 60, 780, 460);
 
 		protected override void Awake()
 		{
 			WindowCaption = "Map of ";
 			WindowRect = defaultRect;
+			WindowRect_Min = new Rect(0, 0, 600, 300);
 			WindowOptions = new GUILayoutOption[2] { GUILayout.Width(740), GUILayout.Height(420) };
 			WindowStyle = SCANskins.SCAN_window;
 			Visible = false;
 			DragEnabled = true;
 			ClampEnabled = false;
-			ResizeEnabled = true;
-			//ClampToScreenOffset = new RectOffset(-600, -600, -400, -400);
+			ResizeEnabled = false;
+			TooltipMouseOffset = new Vector2d(-10, -25);
 
 			SCAN_SkinsLibrary.SetCurrent("SCAN_Unity");
+			SCAN_SkinsLibrary.SetCurrentTooltip();
 		}
 
 		internal override void Start()
@@ -88,6 +91,7 @@ namespace SCANsat.SCAN_UI
 			}
 			bigmap.setBody(b);
 			bigmap.resource = SCANcontroller.controller.ResourceList[SCANcontroller.controller.resourceSelection];
+			TooltipsEnabled = SCANcontroller.controller.toolTips;
 		}
 
 		protected override void DrawWindowPre(int id)
@@ -98,6 +102,30 @@ namespace SCANsat.SCAN_UI
 				mapTypeTitle = "";
 
 			WindowCaption = string.Format("{0} Map of {1}", mapTypeTitle, b.theName);
+
+			if (IsResizing && !inRepaint())
+			{
+				if (Input.GetMouseButtonUp(0))
+				{
+					IsResizing = false;
+					if (resizeW < WindowRect_Min.width)
+						resizeW = WindowRect_Min.width;
+					if (resizeH < WindowRect_Min.height)
+						resizeH = WindowRect_Min.height;
+					bigmap.setWidth((int)resizeW);
+					overlay_static = null;
+					SCANcontroller.controller.map_width = bigmap.mapwidth;
+					WindowRect_Last = new Rect(0, 0, WindowRect.width, WindowRect.height);
+				}
+				else
+				{
+					float xx = Input.mousePosition.x;
+					resizeW += xx - dragX;
+					dragX = xx;
+				}
+				if (Event.current.isMouse)
+					Event.current.Use();
+			}
 
 			//Disable any errant drop down menus
 			if (!drop_down_open)
@@ -123,11 +151,15 @@ namespace SCANsat.SCAN_UI
 					mapDraw(id);	/* Draw the main map texture */
 				stopE();
 				growE();
-					fillS(120);
-					legendBar(id);	/* Draw the mouseover info and legend bar along the bottom */
+					fillS(160);
+					growS();
+						mouseOver(id);		/* Handle all mouse-over info and zoom-map code */
+						legendBar(id);		/* Draw the mouseover info and legend bar along the bottom */
+					stopS();
 				stopE();
 			stopS();
 
+			zoomMap(id);			/* Draw the zoom map */
 			mapLabels(id);			/* Draw the vessel/anomaly icons on the map */
 			if (drop_down_open)
 				dropDown(id);		/* Draw the drop down menus if any are open */
@@ -138,9 +170,6 @@ namespace SCANsat.SCAN_UI
 			//Close the drop down menu if the window is clicked anywhere else
 			if (drop_down_open && Event.current.type == EventType.mouseDown && !ddRect.Contains(Event.current.mousePosition))
 				drop_down_open = false;
-
-			//if (SCANcontroller.controller.globalOverlay) //Update selected resource
-			//	bigmap.setResource(SCANcontroller.controller.ResourcesList[SCANcontroller.controller.gridSelection].Name);
 
 			if (lastColor != currentColor)
 			{
@@ -165,6 +194,13 @@ namespace SCANsat.SCAN_UI
 				bigmap.resetMap();
 			}
 		}
+
+		//protected override void resizeWindowPost(float width, float height)
+		//{
+		//	bigmap.setWidth((int)width);
+		//	overlay_static = null;
+		//	SCANcontroller.controller.map_width = bigmap.mapwidth;
+		//}
 
 		//Draw version label in upper left corner
 		private void versionLabel(int id)
@@ -229,7 +265,7 @@ namespace SCANsat.SCAN_UI
 		{
 			growS();
 
-				currentColor = GUILayout.Toggle(currentColor, "");
+				currentColor = GUILayout.Toggle(currentColor, textWithTT("", "Toggle Color"));
 
 				Rect d = GUILayoutUtility.GetLastRect();
 				d.x += 44;
@@ -237,14 +273,14 @@ namespace SCANsat.SCAN_UI
 				d.width = 24;
 				d.height = 24;
 
-				if (GUI.Button(d, SCANskins.SCAN_ColorWheelIcon, SCANskins.SCAN_buttonBorderless))
+				if (GUI.Button(d, iconWithTT(SCANskins.SCAN_ColorWheelIcon, "Toggle Color"), SCANskins.SCAN_buttonBorderless))
 				{
 					currentColor = !currentColor;
 				}
 
 				fillS();
 
-				SCANcontroller.controller.map_grid = GUILayout.Toggle(SCANcontroller.controller.map_grid, "");
+				SCANcontroller.controller.map_grid = GUILayout.Toggle(SCANcontroller.controller.map_grid, textWithTT("", "Toggle Grid"));
 
 				d = GUILayoutUtility.GetLastRect();
 				d.x += 34;
@@ -252,14 +288,14 @@ namespace SCANsat.SCAN_UI
 				d.width = 48;
 				d.height = 24;
 
-				if (GUI.Button(d, SCANskins.SCAN_GridIcon, SCANskins.SCAN_buttonBorderless))
+				if (GUI.Button(d, iconWithTT(SCANskins.SCAN_GridIcon, "Toggle Grid"), SCANskins.SCAN_buttonBorderless))
 				{
 					SCANcontroller.controller.map_grid = !SCANcontroller.controller.map_grid;
 				}
 
 				fillS();
 
-				SCANcontroller.controller.map_orbit = GUILayout.Toggle(SCANcontroller.controller.map_orbit, "");
+				SCANcontroller.controller.map_orbit = GUILayout.Toggle(SCANcontroller.controller.map_orbit, textWithTT("", "Toggle Orbit"));
 
 				d = GUILayoutUtility.GetLastRect();
 				d.x += 34;
@@ -267,14 +303,14 @@ namespace SCANsat.SCAN_UI
 				d.width = 48;
 				d.height = 24;
 
-				if (GUI.Button(d, SCANskins.SCAN_OrbitIcon, SCANskins.SCAN_buttonBorderless))
+				if (GUI.Button(d, iconWithTT(SCANskins.SCAN_OrbitIcon, "Toggle Orbit"), SCANskins.SCAN_buttonBorderless))
 				{
 					SCANcontroller.controller.map_orbit = !SCANcontroller.controller.map_orbit;
 				}
 
 				fillS();
 
-				SCANcontroller.controller.map_markers = GUILayout.Toggle(SCANcontroller.controller.map_markers, "");
+				SCANcontroller.controller.map_markers = GUILayout.Toggle(SCANcontroller.controller.map_markers, textWithTT("", "Toggle Anomalies"));
 
 				d = GUILayoutUtility.GetLastRect();
 				d.x += 44;
@@ -282,14 +318,14 @@ namespace SCANsat.SCAN_UI
 				d.width = 24;
 				d.height = 24;
 
-				if (GUI.Button(d, SCANcontroller.controller.anomalyMarker, SCANskins.SCAN_buttonBorderless))
+				if (GUI.Button(d, textWithTT(SCANcontroller.controller.anomalyMarker, "Toggle Anomalies"), SCANskins.SCAN_buttonBorderless))
 				{
 					SCANcontroller.controller.map_markers = !SCANcontroller.controller.map_markers;
 				}
 
 				fillS();
 
-				SCANcontroller.controller.map_flags = GUILayout.Toggle(SCANcontroller.controller.map_flags, "");
+				SCANcontroller.controller.map_flags = GUILayout.Toggle(SCANcontroller.controller.map_flags, textWithTT("", "Toggle Flags"));
 
 				d = GUILayoutUtility.GetLastRect();
 				d.x += 44;
@@ -297,14 +333,14 @@ namespace SCANsat.SCAN_UI
 				d.width = 24;
 				d.height = 24;
 
-				if (GUI.Button(d, SCANskins.SCAN_FlagIcon, SCANskins.SCAN_buttonBorderless))
+				if (GUI.Button(d, iconWithTT(SCANskins.SCAN_FlagIcon, "Toggle Flags"), SCANskins.SCAN_buttonBorderless))
 				{
 					SCANcontroller.controller.map_flags = !SCANcontroller.controller.map_flags;
 				}
 
 				fillS();
 
-				SCANcontroller.controller.map_asteroids = GUILayout.Toggle(SCANcontroller.controller.map_asteroids, "");
+				SCANcontroller.controller.map_asteroids = GUILayout.Toggle(SCANcontroller.controller.map_asteroids, textWithTT("", "Toggle Asteroids"));
 
 				d = GUILayoutUtility.GetLastRect();
 				d.x += 44;
@@ -312,14 +348,14 @@ namespace SCANsat.SCAN_UI
 				d.width = 24;
 				d.height = 24;
 
-				if (GUI.Button(d, SCANskins.SCAN_AsteroidIcon, SCANskins.SCAN_buttonBorderless))
+				if (GUI.Button(d, iconWithTT(SCANskins.SCAN_AsteroidIcon, "Toggle Asteroids"), SCANskins.SCAN_buttonBorderless))
 				{
 					SCANcontroller.controller.map_asteroids = !SCANcontroller.controller.map_asteroids;
 				}
 
 				fillS();
 
-				SCANcontroller.controller.legend = GUILayout.Toggle(SCANcontroller.controller.legend, "");
+				SCANcontroller.controller.legend = GUILayout.Toggle(SCANcontroller.controller.legend, textWithTT("", "Toggle Legend"));
 
 				d = GUILayoutUtility.GetLastRect();
 				d.x += 34;
@@ -327,39 +363,29 @@ namespace SCANsat.SCAN_UI
 				d.width = 48;
 				d.height = 24;
 
-				if (GUI.Button(d, SCANskins.SCAN_LegendIcon, SCANskins.SCAN_buttonBorderless))
+				if (GUI.Button(d, iconWithTT(SCANskins.SCAN_LegendIcon, "Toggle Legend"), SCANskins.SCAN_buttonBorderless))
 				{
 					SCANcontroller.controller.legend = !SCANcontroller.controller.legend;
 				}
 
 				fillS();
 
-				SCANcontroller.controller.map_ResourceOverlay = GUILayout.Toggle(SCANcontroller.controller.map_ResourceOverlay, "");
+				SCANcontroller.controller.map_ResourceOverlay = GUILayout.Toggle(SCANcontroller.controller.map_ResourceOverlay, textWithTT("", "Toggle Resources"));
 
 				d = GUILayoutUtility.GetLastRect();
-				d.x += 24;
+				d.x += 44;
 				d.y += 2;
-				d.width = 60;
+				d.width = 24;
 				d.height = 24;
 
-				if (GUI.Button(d, "Resources", SCANskins.SCAN_buttonBorderless))
+				if (GUI.Button(d, iconWithTT(SCANskins.SCAN_ResourceIcon, "Toggle Resources"), SCANskins.SCAN_buttonBorderless))
 				{
 					SCANcontroller.controller.map_ResourceOverlay = !SCANcontroller.controller.map_ResourceOverlay;
 				}
-				
-				//if (SCANcontroller.controller.GlobalResourceOverlay)
-				//{
-				//	if (GUILayout.Button("Resources", SCANskins.SCAN_buttonFixed))
-				//	{
-				//		SCANcontroller.controller.map_ResourceOverlay = !SCANcontroller.controller.map_ResourceOverlay;
-				//		bigmap.resetMap();
-				//	}
-				//}
-
 			stopS();
 
 			//Make a 2x2 grid for all four windows using icons instead of text; use tooltips
-			Rect s = new Rect(20, WindowRect.height - 80, 80, 20);
+			Rect s = new Rect(5, WindowRect.height - 40, 70, 25);
 
 			//if (GUI.Button(s, "Small Map", SCANskins.SCAN_buttonFixed))
 			//{
@@ -376,7 +402,7 @@ namespace SCANsat.SCAN_UI
 				SCANcontroller.controller.settingsWindow.Visible = !SCANcontroller.controller.settingsWindow.Visible;
 			}
 
-			s.y += 30;
+			s.x += 80;
 			s.height = 38;
 
 			if (GUI.Button(s, "Color\nControl", SCANskins.SCAN_buttonFixed))
@@ -390,7 +416,19 @@ namespace SCANsat.SCAN_UI
 			MapTexture = bigmap.getPartialMap();
 
 			//A blank label used as a template for the actual map texture
-			GUILayout.Label("", GUILayout.Width(MapTexture.width), GUILayout.Height(MapTexture.height));
+			dW = resizeW;
+			if (dW < 700)
+				dW = 700;
+			dH = dW / 2f;
+
+			if (IsResizing)
+			{
+				GUILayout.Label("", GUILayout.Width(dW), GUILayout.Height(dH));
+			}
+			else
+			{
+				GUILayout.Label("", GUILayout.Width(MapTexture.width), GUILayout.Height(MapTexture.height));
+			}
 
 			TextureRect = GUILayoutUtility.GetLastRect();
 			TextureRect.width = bigmap.mapwidth;
@@ -416,7 +454,7 @@ namespace SCANsat.SCAN_UI
 			}
 
 			//Stretches the existing map while re-sizing
-			if (IsDragging)
+			if (IsResizing)
 			{
 				TextureRect.width = dW;
 				TextureRect.height = dH;
@@ -452,15 +490,18 @@ namespace SCANsat.SCAN_UI
 			SCANuiUtil.drawMapLabels(TextureRect, v, bigmap, data, v.mainBody);
 		}
 
-		//Draw the altitude legend bar along the bottom
-		private void legendBar(int id)
+		//Display info for mouse over in the map and handle the zoom map
+		private void mouseOver(int id)
 		{
-			growS();
 			float mx = Event.current.mousePosition.x - TextureRect.x;
 			float my = Event.current.mousePosition.y - TextureRect.y;
-			bool in_map = false;//, in_spotmap = false;
+			bool in_map = false, in_spotmap = false;
 			double mlon = 0, mlat = 0;
+			Rect resizer = new Rect(WindowRect.width - 24, WindowRect.height - 24, 24, 24);
 
+			GUI.Box(resizer, "//", SCAN_SkinsLibrary.CurrentSkin.box);
+
+			//Handles mouse positioning and converting to lat/long coordinates
 			if (mx >= 0 && my >= 0 && mx < MapTexture.width && my < MapTexture.height)
 			{
 				double mlo = (mx * 360f / MapTexture.width) - 180;
@@ -468,25 +509,25 @@ namespace SCANsat.SCAN_UI
 				mlon = bigmap.unprojectLongitude(mlo, mla);
 				mlat = bigmap.unprojectLatitude(mlo, mla);
 
-				//if (spotmap != null)
-				//{
-				//	if (mx >= pos_spotmap.x - maprect.x && my >= pos_spotmap.y - maprect.y && mx <= pos_spotmap.x + pos_spotmap.width - maprect.x && my <= pos_spotmap.y + pos_spotmap.height - maprect.y)
-				//	{
-				//		in_spotmap = true;
-				//		mlon = spotmap.lon_offset + ((mx - pos_spotmap.x + maprect.x) / spotmap.mapscale) - 180;
-				//		mlat = spotmap.lat_offset + ((pos_spotmap.height - (my - pos_spotmap.y + maprect.y)) / spotmap.mapscale) - 90;
-				//		if (mlat > 90)
-				//		{
-				//			mlon = (mlon + 360) % 360 - 180;
-				//			mlat = 180 - mlat;
-				//		}
-				//		else if (mlat < -90)
-				//		{
-				//			mlon = (mlon + 360) % 360 - 180;
-				//			mlat = -180 - mlat;
-				//		}
-				//	}
-				//}
+				if (spotmap != null)
+				{
+					if (mx >= pos_spotmap.x - TextureRect.x && my >= pos_spotmap.y - TextureRect.y && mx <= pos_spotmap.x + pos_spotmap.width - TextureRect.x && my <= pos_spotmap.y + pos_spotmap.height - TextureRect.y)
+					{
+						in_spotmap = true;
+						mlon = spotmap.lon_offset + ((mx - pos_spotmap.x + TextureRect.x) / spotmap.mapscale) - 180;
+						mlat = spotmap.lat_offset + ((pos_spotmap.height - (my - pos_spotmap.y + TextureRect.y)) / spotmap.mapscale) - 90;
+						if (mlat > 90)
+						{
+							mlon = (mlon + 360) % 360 - 180;
+							mlat = 180 - mlat;
+						}
+						else if (mlat < -90)
+						{
+							mlon = (mlon + 360) % 360 - 180;
+							mlat = -180 - mlat;
+						}
+					}
+				}
 
 				if (mlon >= -180 && mlon <= 180 && mlat >= -90 && mlat <= 90)
 				{
@@ -494,10 +535,115 @@ namespace SCANsat.SCAN_UI
 				}
 			}
 
+			//Handles mouse click while inside map; opens zoom map or zooms in further
+			if (Event.current.isMouse && !ddRect.Contains(Event.current.mousePosition) && !zoomCloseRect.Contains(Event.current.mousePosition))
+			{
+				if (Event.current.type == EventType.MouseUp)
+				{
+					if (Event.current.button == 1)
+					{
+						if (in_map || in_spotmap)
+						{
+							if (bigmap.isMapComplete())
+							{
+								if (spotmap == null)
+								{
+									spotmap = new SCANmap();
+									spotmap.setSize(180, 180);
+								}
+								if (in_spotmap)
+								{
+									spotmap.mapscale = spotmap.mapscale * 1.25f;
+								}
+								else
+								{
+									spotmap.mapscale = 10;
+								}
+								spotmap.centerAround(mlon, mlat);
+								spotmap.resetMap(bigmap.mapmode, 1);
+								pos_spotmap.width = 180;
+								pos_spotmap.height = 180;
+								if (!in_spotmap)
+								{
+									pos_spotmap.x = Event.current.mousePosition.x - pos_spotmap.width / 2;
+									pos_spotmap.y = Event.current.mousePosition.y - pos_spotmap.height / 2;
+									if (mx > TextureRect.width / 2)
+										pos_spotmap.x -= pos_spotmap.width;
+									else
+										pos_spotmap.x += pos_spotmap.height;
+									pos_spotmap.x = Math.Max(TextureRect.x, Math.Min(TextureRect.x + TextureRect.width - pos_spotmap.width, pos_spotmap.x));
+									pos_spotmap.y = Math.Max(TextureRect.y, Math.Min(TextureRect.y + TextureRect.height - pos_spotmap.height, pos_spotmap.y));
+								}
+							}
+						}
+					}
+					else if (Event.current.button == 0)
+					{
+						if (spotmap != null)
+						{
+							if (in_spotmap)
+							{
+								if (bigmap.isMapComplete())
+								{
+									//spotmap.mapscale = spotmap.mapscale / 1.25f;
+									//if (spotmap.mapscale < 10)
+									//	spotmap.mapscale = 10;
+									spotmap.centerAround(mlon, mlat);
+									spotmap.resetMap(spotmap.mapmode, 1);
+									Event.current.Use();
+								}
+							}
+
+						}
+					}
+					Event.current.Use();
+				}
+				else if (Event.current.isMouse
+				&& Event.current.type == EventType.MouseDown
+				&& Event.current.button == 0
+				&& resizer.Contains(Event.current.mousePosition))
+				{
+					IsResizing = true;
+					WindowRect_Last = WindowRect;
+					dragX = Input.mousePosition.x;
+					resizeW = TextureRect.width;
+					resizeH = TextureRect.height;
+					Event.current.Use();
+				}
+			}
+
+			//Draw the actual mouse over info label below the map
 			SCANuiUtil.mouseOverInfo(mlon, mlat, bigmap, data, b, in_map);
+		}
+
+		//Draw the altitude legend bar along the bottom
+		private void legendBar(int id)
+		{
 			if (bigmap.mapmode == 0 && SCANcontroller.controller.legend)
 				SCANuiUtil.drawLegend(data);
-			stopS();
+		}
+
+		//Draw the zoom map and its overlays
+		private void zoomMap(int id)
+		{
+			if (spotmap != null)
+			{
+				spotmap.setBody(b);
+
+				if (SCANcontroller.controller.GlobalResourceOverlay)
+					spotmap.resource = SCANcontroller.controller.ResourceList[SCANcontroller.controller.resourceSelection];
+
+				GUI.Box(pos_spotmap, spotmap.getPartialMap());
+				SCANuiUtil.drawOrbit(pos_spotmap, spotmap, v, startUT, overlay_static);
+				SCANuiUtil.drawMapLabels(pos_spotmap, v, spotmap, data, v.mainBody);
+				zoomCloseRect = new Rect(pos_spotmap.x + 180, pos_spotmap.y, 18, 18);
+
+				if (GUI.Button(zoomCloseRect, SCANcontroller.controller.closeBox, SCANskins.SCAN_closeButton))
+				{
+					SCANUtil.SCANlog("Close Zoom Map");
+					spotmap = null;
+				}
+			}
 		}
 
 		//Draw the map overlay labels

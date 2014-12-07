@@ -209,26 +209,35 @@ namespace SCANsat.Platform
 			#region top of gui_build()
 			if (!inRepaint() && IsResizing)
 			{
-
 				if (Input.GetMouseButtonUp(0))
 				{
+					SCANUtil.SCANlog("New Window Rect Height: {0} ; Width: {1}", resizeH, resizeW);
 					if (resizeW < WindowRect_Min.width) resizeW = WindowRect_Min.width;
 					if (resizeH < WindowRect_Min.height) resizeH = WindowRect_Min.height;
-					if (resizeW > WindowRect_Max.width) resizeW = WindowRect_Max.width;
-					if (resizeH > WindowRect_Max.height) resizeH = WindowRect_Max.height;
+					//if (resizeW > WindowRect_Max.width) resizeW = WindowRect_Max.width;
+					//if (resizeH > WindowRect_Max.height) resizeH = WindowRect_Max.height;
 					IsResizing = false;
+					resizeWindowPost(resizeW, resizeW / 2);
 					WindowRect_Last = new Rect(0, 0, WindowRect.width, WindowRect.height);
 				}
 				else
 				{
 					float xx = Input.mousePosition.x;
-					float yy = Input.mousePosition.y;
-					resizeW += xx - dragX;
-					resizeH += yy - dragY;
-					dragX = xx;
-					dragY = yy;
-					WindowRect.width = WindowRect_Last.width + resizeW;
-					WindowRect.height = WindowRect_Last.height - resizeH;
+					//float yy = Input.mousePosition.y;
+					dW = xx - dragX;
+					dH = dW / 2;
+					resizeW += dW;
+					resizeH += dH;
+					//resizeH += yy - dragY;
+					//dragX = xx;
+					//dragY = yy;
+					TextureRect.width += dW;
+					TextureRect.height += dH;
+					WindowRect.width += dW;
+					WindowRect.height += dH;
+					//WindowRect.width = WindowRect_Last.width + dW;
+					//WindowRect.height = WindowRect_Last.height + dH;
+					//SCANUtil.SCANlog("Resizing Window; Add Width: {0}", dW);
 				}
 				if (Event.current.isMouse) Event.current.Use();
 			}
@@ -236,11 +245,11 @@ namespace SCANsat.Platform
 			// ...
 
 			#region middle of gui_build()
-			dW = resizeW;
-			dH = resizeH;
-			if (dW < WindowRect_Min.width) dW = WindowRect_Min.width;
-			if (dH < WindowRect_Min.height) dH = WindowRect_Min.height;
-			dH = dW / 2f; // aspect ratio fixing
+			//dW = resizeW;
+			//dH = resizeH;
+			//if (dW < WindowRect_Min.width) dW = WindowRect_Min.width;
+			//if (dH < WindowRect_Min.height) dH = WindowRect_Min.height;
+			//dH = dW / 2f; // aspect ratio fixing
 
 			//if (IsResizing) GUILayout.Label("", GUILayout.Width (dW), GUILayout.Height (dH));
 			//else			GUILayout.Label("", GUILayout.Width(MapTexture.width), GUILayout.Height(MapTexture.height));
@@ -252,7 +261,7 @@ namespace SCANsat.Platform
 
 			// ...
 
-			//#region later in gui_build()
+			#region later in gui_build()
 			//if (IsResizing)
 			//{
 			//	TextureRect.width = dW;
@@ -263,24 +272,13 @@ namespace SCANsat.Platform
 			//{
 			//	GUI.DrawTexture(TextureRect, MapTexture);
 			//}
-			//#endregion
+			#endregion
 			// ...
 
 			//float mx = Event.current.mousePosition.x - TextureRect.x;
 			//float my = Event.current.mousePosition.y - TextureRect.y;
 
-			// ...
-
-			#region fps widget (extra)
-			//Rect fpswidget = new Rect (maprect.x + maprect.width - 32 , maprect.y + maprect.height + 32 , 32 , 24);
-			//GUI.Label (fpswidget , fps.Tostring ("N1"));
-			#endregion
-
-			// ...
-
 			#region end of gui_build()
-			//Rect resizer = new Rect (maprect.x + maprect.width - 24 , maprect.y + maprect.height + 8 , 24 , 24);
-
 			Rect resizer = new Rect(WindowRect.x + WindowRect.width - 24
 									, WindowRect.y + WindowRect.height - 24
 									, 24, 24);
@@ -295,7 +293,7 @@ namespace SCANsat.Platform
 				IsResizing = true;
 				WindowRect_Last = WindowRect;
 				dragX = Input.mousePosition.x;
-				dragY = Input.mousePosition.y;
+				//dragY = Input.mousePosition.y;
 				resizeW = TextureRect.width;
 				resizeH = TextureRect.height;
 				Event.current.Use();
@@ -303,6 +301,7 @@ namespace SCANsat.Platform
 			#endregion
 		}
 
+		protected virtual void resizeWindowPost(float width, float height) { }
 
 		protected override void Awake() { Log.Debug("New MBWindow Awakened"); }
 		protected virtual void DrawWindowPre(Int32 id) { }
@@ -352,12 +351,8 @@ namespace SCANsat.Platform
 				case true: WindowRect = GUILayout.Window(WindowID, WindowRect, DrawWindowInternal, cc, WindowOptions); break;
 				default: WindowRect = GUILayout.Window(WindowID, WindowRect, DrawWindowInternal, cc, WindowStyle, WindowOptions); break;
 			}
-
 			if (TooltipsEnabled) DrawToolTip();  //Draw the tooltip of its there to be drawn
 			if (ResizeEnabled) resizeWindow();
-
-
-
 		}
 
 		private void DrawWindowInternal(Int32 id)
@@ -368,7 +363,7 @@ namespace SCANsat.Platform
 			DrawWindowPost(id);
 			if (TooltipsEnabled) SetTooltipText();	//Set the Tooltip variable based on whats in this window
 
-			if (ResizeEnabled) { DragRect = new Rect(0, 0, WindowRect.width, WindowRect.height); DragRect.height -= 24; }
+			if (ResizeEnabled) { DragRect = new Rect(0, 0, WindowRect.width - 30, WindowRect.height - 30); }
 			else { DragRect = new Rect(0, 0, 0, 0); }
 
 			if (DragEnabled)
@@ -410,7 +405,6 @@ namespace SCANsat.Platform
 				styleTooltip.wordWrap = (TooltipMaxWidth > 0);
 
 				//clamp it accordingly
-
 				if (ClampEnabled) _TooltipPosition = _TooltipPosition.ClampToScreen(ClampToScreenOffset);
 				GUI.Label(TooltipPosition, contTooltip, styleTooltip);	// Draw the Tooltip
 				GUI.depth = 0;											// On top of everything
