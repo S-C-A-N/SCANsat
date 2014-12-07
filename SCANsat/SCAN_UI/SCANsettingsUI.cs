@@ -45,6 +45,7 @@ namespace SCANsat.SCAN_UI
 			WindowOptions = new GUILayoutOption[2] { GUILayout.Width(360), GUILayout.Height(300) };
 			Visible = false;
 			DragEnabled = true;
+			TooltipMouseOffset = new Vector2d(-10, -25);
 			ClampToScreenOffset = new RectOffset(-280, -280, -600, -600);
 
 			SCAN_SkinsLibrary.SetCurrent("SCAN_Unity");
@@ -59,6 +60,7 @@ namespace SCANsat.SCAN_UI
 
 		internal override void Start()
 		{
+			TooltipsEnabled = SCANcontroller.controller.toolTips;
 		}
 
 		protected override void DrawWindowPre(int id)
@@ -111,7 +113,7 @@ namespace SCANsat.SCAN_UI
 				gui_settings_timewarp(id);				/* time warp resolution settings */
 				gui_settings_numbers(id);				/* sensor/scanning		statistics */
 				gui_settings_data_resets(id);			/* reset data and/or reset resources */
-				gui_settings_window_resets(id);			/* reset windows and positions */
+				gui_settings_window_resets_tooltips(id);/* reset windows and positions and toggle tooltips*/
 				# if DEBUG
 					gui_settings_window_mapFill(id);	/* debug option to fill in maps */
 				#endif
@@ -311,22 +313,34 @@ namespace SCANsat.SCAN_UI
 		}
 
 		//Resets all window positions
-		private void gui_settings_window_resets(int id)
+		private void gui_settings_window_resets_tooltips(int id)
 		{
-			if (GUILayout.Button("Reset window positions", SCANskins.SCAN_buttonFixed))
-			{
-				if (HighLogic.LoadedSceneIsFlight)
+			growE();
+				if (GUILayout.Button("Reset window positions", SCANskins.SCAN_buttonFixed))
 				{
-					SCANuiUtil.resetMainMapPos();
-					SCANuiUtil.resetBigMapPos();
-					SCANuiUtil.resetInstUIPos();
-					SCANuiUtil.resetSettingsUIPos();
+					if (HighLogic.LoadedSceneIsFlight)
+					{
+						SCANuiUtil.resetMainMapPos();
+						SCANuiUtil.resetBigMapPos();
+						SCANuiUtil.resetInstUIPos();
+						SCANuiUtil.resetSettingsUIPos();
+					}
+					else
+					{
+						SCANuiUtil.resetKSCMapPos();
+					}
 				}
-				else
+				fillS(10);
+				if (GUILayout.Button(textWithTT("Tooltips","Toggle Tooltips"), SCANskins.SCAN_buttonFixed))
 				{
-					SCANuiUtil.resetKSCMapPos();
+					SCANcontroller.controller.toolTips = !SCANcontroller.controller.toolTips;
+					TooltipsEnabled = SCANcontroller.controller.toolTips;
+					if (HighLogic.LoadedSceneIsFlight)
+						SCANcontroller.controller.newBigMap.TooltipsEnabled = SCANcontroller.controller.toolTips;
+					if (HighLogic.LoadedScene == GameScenes.SPACECENTER || HighLogic.LoadedScene == GameScenes.TRACKSTATION)
+						SCANcontroller.controller.kscMap.TooltipsEnabled = SCANcontroller.controller.toolTips;
 				}
-			}
+				stopE();
 			fillS(8);
 		}
 

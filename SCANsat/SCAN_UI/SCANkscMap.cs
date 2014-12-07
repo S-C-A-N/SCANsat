@@ -27,7 +27,6 @@ namespace SCANsat.SCAN_UI
 		private static CelestialBody b;
 		private static string mapTypeTitle = "";
 		internal SCANdata data;
-		//private double startUT;
 		private bool drawGrid, currentGrid, currentColor, lastColor, spaceCenterLock, trackingStationLock;
 		private bool drop_down_open, projection_drop_down, mapType_drop_down, resources_drop_down, planetoid_drop_down;
 		private Texture2D overlay_static, map;
@@ -47,9 +46,11 @@ namespace SCANsat.SCAN_UI
 			WindowStyle = SCANskins.SCAN_window;
 			Visible = false;
 			DragEnabled = true;
+			TooltipMouseOffset = new Vector2d(-10, -25);
 			ClampToScreenOffset = new RectOffset(-600, -600, -400, -400);
 
 			SCAN_SkinsLibrary.SetCurrent("SCAN_Unity");
+			SCAN_SkinsLibrary.SetCurrentTooltip();
 
 			InputLockManager.RemoveControlLock(lockID);
 		}
@@ -86,6 +87,7 @@ namespace SCANsat.SCAN_UI
 			}
 			bigmap.setBody(b);
 			bigmap.resource = SCANcontroller.controller.ResourceList[SCANcontroller.controller.resourceSelection];
+			TooltipsEnabled = SCANcontroller.controller.toolTips;
 		}
 
 		internal override void OnDestroy()
@@ -175,9 +177,6 @@ namespace SCANsat.SCAN_UI
 			//Close the drop down menu if the window is clicked anywhere else
 			if (drop_down_open && Event.current.type == EventType.mouseDown && !ddRect.Contains(Event.current.mousePosition))
 				drop_down_open = false;
-
-			//if (SCANcontroller.controller.globalOverlay) //Update selected resource
-			//	bigmap.setResource(SCANcontroller.controller.ResourcesList[SCANcontroller.controller.gridSelection].Name);
 
 			if (lastColor != currentColor)
 			{
@@ -274,7 +273,7 @@ namespace SCANsat.SCAN_UI
 		{
 			growS();
 
-			currentColor = GUILayout.Toggle(currentColor, "");
+			currentColor = GUILayout.Toggle(currentColor, textWithTT("","Toggle Color"));
 
 			Rect d = GUILayoutUtility.GetLastRect();
 			d.x += 44;
@@ -282,14 +281,14 @@ namespace SCANsat.SCAN_UI
 			d.width = 24;
 			d.height = 24;
 
-			if (GUI.Button(d, SCANskins.SCAN_ColorWheelIcon, SCANskins.SCAN_buttonBorderless))
+			if (GUI.Button(d, iconWithTT(SCANskins.SCAN_ColorWheelIcon, "Toggle Color"), SCANskins.SCAN_buttonBorderless))
 			{
 				currentColor = !currentColor;
 			}
 
 			fillS();
 
-			SCANcontroller.controller.map_grid = GUILayout.Toggle(SCANcontroller.controller.map_grid, "");
+			SCANcontroller.controller.map_grid = GUILayout.Toggle(SCANcontroller.controller.map_grid, textWithTT("", "Toggle Grid"));
 
 			d = GUILayoutUtility.GetLastRect();
 			d.x += 34;
@@ -297,14 +296,14 @@ namespace SCANsat.SCAN_UI
 			d.width = 48;
 			d.height = 24;
 
-			if (GUI.Button(d, SCANskins.SCAN_GridIcon, SCANskins.SCAN_buttonBorderless))
+			if (GUI.Button(d, iconWithTT(SCANskins.SCAN_GridIcon, "Toggle Grid"), SCANskins.SCAN_buttonBorderless))
 			{
 				SCANcontroller.controller.map_grid = !SCANcontroller.controller.map_grid;
 			}
 
 			fillS();
 
-			SCANcontroller.controller.map_markers = GUILayout.Toggle(SCANcontroller.controller.map_markers, "");
+			SCANcontroller.controller.map_markers = GUILayout.Toggle(SCANcontroller.controller.map_markers, textWithTT("", "Toggle Anomalies"));
 
 			d = GUILayoutUtility.GetLastRect();
 			d.x += 44;
@@ -312,14 +311,14 @@ namespace SCANsat.SCAN_UI
 			d.width = 24;
 			d.height = 24;
 
-			if (GUI.Button(d, SCANcontroller.controller.anomalyMarker, SCANskins.SCAN_buttonBorderless))
+			if (GUI.Button(d, textWithTT(SCANcontroller.controller.anomalyMarker, "Toggle Anomalies"), SCANskins.SCAN_buttonBorderless))
 			{
 				SCANcontroller.controller.map_markers = !SCANcontroller.controller.map_markers;
 			}
 
 			fillS();
 
-			SCANcontroller.controller.map_flags = GUILayout.Toggle(SCANcontroller.controller.map_flags, "");
+			SCANcontroller.controller.map_flags = GUILayout.Toggle(SCANcontroller.controller.map_flags, textWithTT("", "Toggle Flags"));
 
 			d = GUILayoutUtility.GetLastRect();
 			d.x += 44;
@@ -327,14 +326,14 @@ namespace SCANsat.SCAN_UI
 			d.width = 24;
 			d.height = 24;
 
-			if (GUI.Button(d, SCANskins.SCAN_FlagIcon, SCANskins.SCAN_buttonBorderless))
+			if (GUI.Button(d, iconWithTT(SCANskins.SCAN_FlagIcon, "Toggle Flags"), SCANskins.SCAN_buttonBorderless))
 			{
 				SCANcontroller.controller.map_flags = !SCANcontroller.controller.map_flags;
 			}
 
 			fillS();
 
-			SCANcontroller.controller.map_asteroids = GUILayout.Toggle(SCANcontroller.controller.map_asteroids, "");
+			SCANcontroller.controller.map_asteroids = GUILayout.Toggle(SCANcontroller.controller.map_asteroids, textWithTT("", "Toggle Asteroids"));
 
 			d = GUILayoutUtility.GetLastRect();
 			d.x += 44;
@@ -342,14 +341,14 @@ namespace SCANsat.SCAN_UI
 			d.width = 24;
 			d.height = 24;
 
-			if (GUI.Button(d, SCANskins.SCAN_AsteroidIcon, SCANskins.SCAN_buttonBorderless))
+			if (GUI.Button(d, iconWithTT(SCANskins.SCAN_AsteroidIcon, "Toggle Asteroids"), SCANskins.SCAN_buttonBorderless))
 			{
 				SCANcontroller.controller.map_asteroids = !SCANcontroller.controller.map_asteroids;
 			}
 
 			fillS();
 
-			SCANcontroller.controller.legend = GUILayout.Toggle(SCANcontroller.controller.legend, "");
+			SCANcontroller.controller.legend = GUILayout.Toggle(SCANcontroller.controller.legend, textWithTT("", "Toggle Legend"));
 
 			d = GUILayoutUtility.GetLastRect();
 			d.x += 34;
@@ -357,14 +356,14 @@ namespace SCANsat.SCAN_UI
 			d.width = 48;
 			d.height = 24;
 
-			if (GUI.Button(d, SCANskins.SCAN_LegendIcon, SCANskins.SCAN_buttonBorderless))
+			if (GUI.Button(d, iconWithTT(SCANskins.SCAN_LegendIcon, "Toggle Legend"), SCANskins.SCAN_buttonBorderless))
 			{
 				SCANcontroller.controller.legend = !SCANcontroller.controller.legend;
 			}
 
 			fillS();
 
-			SCANcontroller.controller.map_ResourceOverlay = GUILayout.Toggle(SCANcontroller.controller.map_ResourceOverlay, "");
+			SCANcontroller.controller.map_ResourceOverlay = GUILayout.Toggle(SCANcontroller.controller.map_ResourceOverlay, textWithTT("", "Toggle Resources"));
 
 			d = GUILayoutUtility.GetLastRect();
 			d.x += 24;
@@ -372,19 +371,10 @@ namespace SCANsat.SCAN_UI
 			d.width = 60;
 			d.height = 24;
 
-			if (GUI.Button(d, "Resources", SCANskins.SCAN_buttonBorderless))
+			if (GUI.Button(d, iconWithTT(SCANskins.SCAN_ResourceIcon, "Toggle Resources"), SCANskins.SCAN_buttonBorderless))
 			{
 				SCANcontroller.controller.map_ResourceOverlay = !SCANcontroller.controller.map_ResourceOverlay;
 			}
-
-			//if (SCANcontroller.controller.GlobalResourceOverlay)
-			//{
-			//	if (GUILayout.Button("Resources", SCANskins.SCAN_buttonFixed))
-			//	{
-			//		SCANcontroller.controller.map_ResourceOverlay = !SCANcontroller.controller.map_ResourceOverlay;
-			//		bigmap.resetMap();
-			//	}
-			//}
 
 			stopS();
 
@@ -565,6 +555,7 @@ namespace SCANsat.SCAN_UI
 							SCANcontroller.controller.resourceOverlayType = 1;
 						else
 							SCANcontroller.controller.resourceOverlayType = 0;
+						bigmap.resetMap();
 						drop_down_open = false;
 					}
 					GUI.EndScrollView();

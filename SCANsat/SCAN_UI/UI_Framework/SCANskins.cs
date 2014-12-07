@@ -31,7 +31,6 @@ namespace SCANsat.SCAN_UI
 		internal static GUIStyle SCAN_window;
 		internal static GUIStyle SCAN_tooltip;
 		internal static GUIStyle SCAN_label;
-
 		internal static GUIStyle SCAN_toggle;
 
 		//Button styles
@@ -87,6 +86,7 @@ namespace SCANsat.SCAN_UI
 		internal static Texture2D SCAN_LegendIcon;
 		internal static Texture2D SCAN_ColorWheelIcon;
 		internal static Texture2D SCAN_AsteroidIcon;
+		internal static Texture2D SCAN_ResourceIcon;
 
 		protected override void OnGUI_FirstRun()
 		{
@@ -106,6 +106,7 @@ namespace SCANsat.SCAN_UI
 			SCAN_LegendIcon = GameDatabase.Instance.GetTexture("SCANsat/Icons/SCAN_Legend_Icon", false);
 			SCAN_ColorWheelIcon = GameDatabase.Instance.GetTexture("SCANsat/Icons/SCAN_ColorWheel_Icon", false);
 			SCAN_AsteroidIcon = GameDatabase.Instance.GetTexture("SCANsat/Icons/SCAN_Asteroid_Icon", false);
+			SCAN_ResourceIcon = GameDatabase.Instance.GetTexture("SCANsat/Icons/SCAN_Resource_Icon", false);
 		}
 
 		private static void initializeColors()
@@ -269,8 +270,13 @@ namespace SCANsat.SCAN_UI
 			SCAN_legendTex.name = "SCAN_LegendTex";
 			SCAN_legendTex.alignment = TextAnchor.MiddleCenter;
 
-			SCAN_tooltip = new GUIStyle(SCAN_SkinsLibrary.DefUnitySkin.label);
+			SCAN_tooltip = new GUIStyle(SCAN_SkinsLibrary.DefUnitySkin.box);
 			SCAN_tooltip.name = "SCAN_Tooltip";
+			SCAN_tooltip.normal.background = SCAN_dropDownTex;
+			SCAN_tooltip.fontStyle = FontStyle.Bold;
+			SCAN_tooltip.normal.textColor = palette.white;
+			SCAN_tooltip.alignment = TextAnchor.MiddleCenter;
+			SCAN_tooltip.fontSize = 13;
 
 			SCAN_orbitalLabelOn = new GUIStyle(SCAN_label);
 			SCAN_orbitalLabelOn.name = "SCAN_OrbitalLabelOn";
