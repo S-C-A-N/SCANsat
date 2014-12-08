@@ -296,7 +296,7 @@ namespace SCANsat.SCAN_UI
 		{
 			growS();
 				fillS(4);
-				GUILayout.Label("Terrain Options", SCANskins.SCAN_headlineSmall);
+				GUILayout.Label("Terrain Options: " + data.Body.name, SCANskins.SCAN_headlineSmall);
 
 				growE();
 					fillS(10);
