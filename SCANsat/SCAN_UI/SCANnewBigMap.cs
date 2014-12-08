@@ -44,8 +44,8 @@ namespace SCANsat.SCAN_UI
 		{
 			WindowCaption = "Map of ";
 			WindowRect = defaultRect;
-			WindowRect_Min = new Rect(0, 0, 600, 300);
-			WindowOptions = new GUILayoutOption[2] { GUILayout.Width(740), GUILayout.Height(420) };
+			WindowRect_Min = new Rect(0, 0, 550, 225);
+			WindowOptions = new GUILayoutOption[2] { GUILayout.Width(600), GUILayout.Height(300) };
 			WindowStyle = SCANskins.SCAN_window;
 			Visible = false;
 			DragEnabled = true;
@@ -236,19 +236,20 @@ namespace SCANsat.SCAN_UI
 					mapType_drop_down = !mapType_drop_down;
 					drop_down_open = !drop_down_open;
 				}
-				fillS(60);
-				if (GUILayout.Button("Update Map", SCANskins.SCAN_buttonFixed, GUILayout.MaxWidth(90)))
+				fillS();
+				if (GUILayout.Button(iconWithTT(SCANskins.SCAN_RefreshIcon, "Refresh Map"), SCANskins.SCAN_buttonBorderless, GUILayout.MaxWidth(34), GUILayout.MaxHeight(28)))
 				{
 					bigmap.resetMap();
 				}
+				fillS();
 				if (SCANcontroller.controller.GlobalResourceOverlay)
 				{
-					fillS(60);
 					if (GUILayout.Button("Resources", SCANskins.SCAN_buttonFixed, GUILayout.MaxWidth(90)))
 					{
 						resources_drop_down = !resources_drop_down;
 						drop_down_open = !drop_down_open;
 					}
+					fillS(40);
 				}
 				//fillS();
 				//if (GUILayout.Button("Planetoid", SCANskins.SCAN_buttonFixed, GUILayout.MaxWidth(90)))
@@ -256,7 +257,7 @@ namespace SCANsat.SCAN_UI
 				//	planetoid_drop_down = !planetoid_drop_down;
 				//	drop_down_open = !drop_down_open;
 				//}
-				fillS(20);
+				fillS(110);
 			stopE();
 		}
 
@@ -385,27 +386,28 @@ namespace SCANsat.SCAN_UI
 			stopS();
 
 			//Make a 2x2 grid for all four windows using icons instead of text; use tooltips
-			Rect s = new Rect(5, WindowRect.height - 40, 70, 25);
+			Rect s = new Rect(10, WindowRect.height - 42, 32, 32);
 
-			//if (GUI.Button(s, "Small Map", SCANskins.SCAN_buttonFixed))
-			//{
-			//	SCANcontroller.controller.mainMap.Visible = !SCANcontroller.controller.mainMap.Visible;
-			//}
+			if (GUI.Button(s, iconWithTT(SCANskins.SCAN_SmallMapIcon, "Small Map"), SCANskins.SCAN_windowButton))
+			{
+				SCANcontroller.controller.mainMap.Visible = !SCANcontroller.controller.mainMap.Visible;
+			}
 
-			//if (GUI.Button(s, "Instruments", SCANskins.SCAN_buttonFixed))
+			s.x += 40;
+
+			//if (GUI.Button(s, iconWithTT(SCANskins.SCAN_InstrumentIcon, "Instruments"), SCANskins.SCAN_windowButton))
 			//{
 			//	SCANcontroller.controller.instrumentsWindow.Visible = !SCANcontroller.controller.instrumentsWindow.Visible;
 			//}
 
-			if (GUI.Button(s, "Settings", SCANskins.SCAN_buttonFixed))
+			if (GUI.Button(s, iconWithTT(SCANskins.SCAN_SettingsIcon, "Settings Menu"), SCANskins.SCAN_windowButton))
 			{
 				SCANcontroller.controller.settingsWindow.Visible = !SCANcontroller.controller.settingsWindow.Visible;
 			}
 
-			s.x += 80;
-			s.height = 38;
+			s.x += 40;
 
-			if (GUI.Button(s, "Color\nControl", SCANskins.SCAN_buttonFixed))
+			if (GUI.Button(s, iconWithTT(SCANskins.SCAN_ColorIcon, "Color Control"), SCANskins.SCAN_windowButton))
 			{
 				SCANcontroller.controller.colorManager.Visible = !SCANcontroller.controller.colorManager.Visible;
 			}
@@ -415,12 +417,12 @@ namespace SCANsat.SCAN_UI
 		{
 			MapTexture = bigmap.getPartialMap();
 
-			//A blank label used as a template for the actual map texture
 			dW = resizeW;
-			if (dW < 700)
-				dW = 700;
+			if (dW < WindowRect_Min.width)
+				dW = WindowRect_Min.width;
 			dH = dW / 2f;
 
+			//A blank label used as a template for the actual map texture
 			if (IsResizing)
 			{
 				GUILayout.Label("", GUILayout.Width(dW), GUILayout.Height(dH));
