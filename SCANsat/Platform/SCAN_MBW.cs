@@ -344,7 +344,7 @@ namespace SCANsat.Platform
 			if (ClampEnabled) WindowRect = WindowRect.ClampToScreen(ClampToScreenOffset);
 			if (ResizeEnabled) cc = WindowCaption + " " + WindowRect.WxH();
 			else cc = WindowCaption;
-			if (IsResizing) cc = WindowCaption + " " + WindowRect_Last.WxH() + " -> " + WindowRect.WxH();
+			if (IsResizing) cc = WindowCaption + " " + WindowRect_Last.WxH() + " -> " + WindowRect.WxH() + " Map Width: " + dW;
 
 			switch (WindowStyle == null)
 			{
