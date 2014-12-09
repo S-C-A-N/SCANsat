@@ -242,7 +242,7 @@ namespace SCANsat.SCAN_UI
 				drop_down_open = !drop_down_open;
 			}
 
-			fillS(60);
+			fillS(90);
 
 			if (GUILayout.Button(iconWithTT(SCANskins.SCAN_RefreshIcon, "Refresh Map"), SCANskins.SCAN_buttonBorderless, GUILayout.MaxWidth(34), GUILayout.MaxHeight(28)))
 			{
@@ -251,7 +251,7 @@ namespace SCANsat.SCAN_UI
 
 			if (SCANcontroller.controller.GlobalResourceOverlay)
 			{
-				fillS(60);
+				fillS(100);
 				if (GUILayout.Button("Resources", SCANskins.SCAN_buttonFixed, GUILayout.MaxWidth(90)))
 				{
 					resources_drop_down = !resources_drop_down;
@@ -285,7 +285,7 @@ namespace SCANsat.SCAN_UI
 			d.width = 24;
 			d.height = 24;
 
-			if (GUI.Button(d, iconWithTT(SCANskins.SCAN_ColorWheelIcon, "Toggle Color"), SCANskins.SCAN_buttonBorderless))
+			if (GUI.Button(d, iconWithTT(SCANskins.SCAN_ColorToggleIcon, "Toggle Color"), SCANskins.SCAN_buttonBorderless))
 			{
 				currentColor = !currentColor;
 			}
@@ -384,12 +384,12 @@ namespace SCANsat.SCAN_UI
 			//Open all four windows using icons instead of text; use tooltips
 			Rect s = new Rect(10, WindowRect.height - 42, 32, 32);
 
-			if (GUI.Button(s, iconWithTT(SCANskins.SCAN_SmallMapIcon, "Small Map"), SCANskins.SCAN_windowButton))
-			{
-				SCANcontroller.controller.mainMap.Visible = !SCANcontroller.controller.mainMap.Visible;
-			}
+			//if (GUI.Button(s, iconWithTT(SCANskins.SCAN_SmallMapIcon, "Small Map"), SCANskins.SCAN_windowButton))
+			//{
+			//	SCANcontroller.controller.mainMap.Visible = !SCANcontroller.controller.mainMap.Visible;
+			//}
 
-			s.x += 40;
+			//s.x += 40;
 
 			//if (GUI.Button(s, iconWithTT(SCANskins.SCAN_InstrumentIcon, "Instruments"), SCANskins.SCAN_windowButton))
 			//{
