@@ -23,18 +23,18 @@ namespace SCANsat.SCAN_UI
 {
 	class SCANkscMap : SCAN_MBW
 	{
-		private static SCANmap bigmap;
+		private static SCANmap bigmap, spotmap;
 		private static CelestialBody b;
 		private static string mapTypeTitle = "";
 		internal SCANdata data;
 		private bool drawGrid, currentGrid, currentColor, lastColor, spaceCenterLock, trackingStationLock;
 		private bool drop_down_open, projection_drop_down, mapType_drop_down, resources_drop_down, planetoid_drop_down;
-		private Texture2D overlay_static, map;
-		private Rect ddRect, maprect;
+		private Texture2D overlay_static;
+		private Rect ddRect, zoomCloseRect;
 		private Rect rc = new Rect(0, 0, 20, 20);
 		private Vector2 scrollP, scrollR;
-		//private Rect pos_spotmap = new Rect(10f, 10f, 10f, 10f);
-		//private Rect pos_spotmap_x = new Rect(10f, 10f, 25f, 25f);
+		private Rect pos_spotmap = new Rect(10f, 10f, 10f, 10f);
+		private Rect pos_spotmap_x = new Rect(10f, 10f, 25f, 25f);
 		internal static Rect defaultRect = new Rect(250, 60, 780, 460);
 		private const string lockID = "SCANksc_LOCK";
 
@@ -162,11 +162,15 @@ namespace SCANsat.SCAN_UI
 					mapDraw(id);	/* Draw the main map texture */
 				stopE();
 				growE();
-					fillS(120);
-					legendBar(id);	/* Draw the mouseover info and legend bar along the bottom */
+					fillS(160);
+					growS();
+						mouseOver(id);		/* Handle all mouse-over info and zoom-map code */
+						legendBar(id);		/* Draw the mouseover info and legend bar along the bottom */
+					stopS();
 				stopE();
 			stopS();
 
+			zoomMap(id);			/* Draw the zoom map */
 			mapLabels(id);			/* Draw the vessel/anomaly icons on the map */
 			if (drop_down_open)
 				dropDown(id);		/* Draw the drop down menus if any are open */
@@ -240,7 +244,7 @@ namespace SCANsat.SCAN_UI
 
 			fillS(60);
 
-			if (GUILayout.Button("Update Map", SCANskins.SCAN_buttonFixed, GUILayout.MaxWidth(90)))
+			if (GUILayout.Button(iconWithTT(SCANskins.SCAN_RefreshIcon, "Refresh Map"), SCANskins.SCAN_buttonBorderless, GUILayout.MaxWidth(34), GUILayout.MaxHeight(28)))
 			{
 				bigmap.resetMap();
 			}
@@ -269,11 +273,11 @@ namespace SCANsat.SCAN_UI
 		}
 
 		//Draw the overlay options along the left side of the map texture
-		private void toggleBar (int id)
+		private void toggleBar(int id)
 		{
 			growS();
 
-			currentColor = GUILayout.Toggle(currentColor, textWithTT("","Toggle Color"));
+			currentColor = GUILayout.Toggle(currentColor, textWithTT("", "Toggle Color"));
 
 			Rect d = GUILayoutUtility.GetLastRect();
 			d.x += 44;
@@ -366,40 +370,40 @@ namespace SCANsat.SCAN_UI
 			SCANcontroller.controller.map_ResourceOverlay = GUILayout.Toggle(SCANcontroller.controller.map_ResourceOverlay, textWithTT("", "Toggle Resources"));
 
 			d = GUILayoutUtility.GetLastRect();
-			d.x += 24;
+			d.x += 44;
 			d.y += 2;
-			d.width = 60;
+			d.width = 24;
 			d.height = 24;
 
 			if (GUI.Button(d, iconWithTT(SCANskins.SCAN_ResourceIcon, "Toggle Resources"), SCANskins.SCAN_buttonBorderless))
 			{
 				SCANcontroller.controller.map_ResourceOverlay = !SCANcontroller.controller.map_ResourceOverlay;
 			}
-
 			stopS();
 
-			//Make a 2x2 grid for all four windows using icons instead of text; use tooltips
-			Rect s = new Rect(20, WindowRect.height - 80, 80, 20);
+			//Open all four windows using icons instead of text; use tooltips
+			Rect s = new Rect(10, WindowRect.height - 42, 32, 32);
 
-			//if (GUI.Button(s, "Small Map", SCANskins.SCAN_buttonFixed))
-			//{
-			//	SCANcontroller.controller.mainMap.Visible = !SCANcontroller.controller.mainMap.Visible;
-			//}
+			if (GUI.Button(s, iconWithTT(SCANskins.SCAN_SmallMapIcon, "Small Map"), SCANskins.SCAN_windowButton))
+			{
+				SCANcontroller.controller.mainMap.Visible = !SCANcontroller.controller.mainMap.Visible;
+			}
 
-			//if (GUI.Button(s, "Instruments", SCANskins.SCAN_buttonFixed))
+			s.x += 40;
+
+			//if (GUI.Button(s, iconWithTT(SCANskins.SCAN_InstrumentIcon, "Instruments"), SCANskins.SCAN_windowButton))
 			//{
 			//	SCANcontroller.controller.instrumentsWindow.Visible = !SCANcontroller.controller.instrumentsWindow.Visible;
 			//}
 
-			if (GUI.Button(s, "Settings", SCANskins.SCAN_buttonFixed))
+			if (GUI.Button(s, iconWithTT(SCANskins.SCAN_SettingsIcon, "Settings Menu"), SCANskins.SCAN_windowButton))
 			{
 				SCANcontroller.controller.settingsWindow.Visible = !SCANcontroller.controller.settingsWindow.Visible;
 			}
 
-			s.y += 30;
-			s.height = 38;
+			s.x += 40;
 
-			if (GUI.Button(s, "Color\nControl", SCANskins.SCAN_buttonFixed))
+			if (GUI.Button(s, iconWithTT(SCANskins.SCAN_ColorIcon, "Color Control"), SCANskins.SCAN_windowButton))
 			{
 				SCANcontroller.controller.colorManager.Visible = !SCANcontroller.controller.colorManager.Visible;
 			}
@@ -408,13 +412,13 @@ namespace SCANsat.SCAN_UI
 		//Draw the actual map texture
 		private void mapDraw (int id)
 		{
-			map = bigmap.getPartialMap();
+			MapTexture = bigmap.getPartialMap();
 
-			GUILayout.Label("", GUILayout.Width(map.width), GUILayout.Height(map.height));
+			GUILayout.Label("", GUILayout.Width(MapTexture.width), GUILayout.Height(MapTexture.height));
 
-			maprect = GUILayoutUtility.GetLastRect();
-			maprect.width = bigmap.mapwidth;
-			maprect.height = bigmap.mapheight;
+			TextureRect = GUILayoutUtility.GetLastRect();
+			TextureRect.width = bigmap.mapwidth;
+			TextureRect.height = bigmap.mapheight;
 
 			if (overlay_static == null)
 			{
@@ -427,81 +431,173 @@ namespace SCANsat.SCAN_UI
 				SCANuiUtil.clearTexture(overlay_static);
 				if (SCANcontroller.controller.map_grid)
 				{
-					SCANuiUtil.drawGrid(maprect, bigmap, overlay_static);
+					SCANuiUtil.drawGrid(TextureRect, bigmap, overlay_static);
 				}
 				overlay_static.Apply();
 				drawGrid = false;
 			}
 
-			GUI.DrawTexture(maprect, map);
+			GUI.DrawTexture(TextureRect, MapTexture);
 
 			if (overlay_static != null)
 			{
-				GUI.DrawTexture(maprect, overlay_static, ScaleMode.StretchToFill);
+				GUI.DrawTexture(TextureRect, overlay_static, ScaleMode.StretchToFill);
 			}
 
 			if (bigmap.projection == SCANmap.MapProjection.Polar)
 			{
-				rc.x = maprect.x + maprect.width / 2 - maprect.width / 8;
-				rc.y = maprect.y + maprect.height / 8;
+				rc.x = TextureRect.x + TextureRect.width / 2 - TextureRect.width / 8;
+				rc.y = TextureRect.y + TextureRect.height / 8;
 				SCANuiUtil.drawLabel(rc, "S", false, true, true);
-				rc.x = maprect.x + maprect.width / 2 + maprect.width / 8;
+				rc.x = TextureRect.x + TextureRect.width / 2 + TextureRect.width / 8;
 				SCANuiUtil.drawLabel(rc, "N", false, true, true);
 			}
 		}
 
-		//Draw the altitude legend bar along the bottom
-		private void legendBar (int id)
+		//Display info for mouse over in the map and handle the zoom map
+		private void mouseOver(int id)
 		{
-			growS();
-			float mx = Event.current.mousePosition.x - maprect.x;
-			float my = Event.current.mousePosition.y - maprect.y;
-			bool in_map = false;//, in_spotmap = false;
+			float mx = Event.current.mousePosition.x - TextureRect.x;
+			float my = Event.current.mousePosition.y - TextureRect.y;
+			bool in_map = false, in_spotmap = false;
 			double mlon = 0, mlat = 0;
 
-			if (mx >= 0 && my >= 0 && mx < map.width && my < map.height)
+			//Handles mouse positioning and converting to lat/long coordinates
+			if (mx >= 0 && my >= 0 && mx < MapTexture.width && my < MapTexture.height)
 			{
-				double mlo = (mx * 360f / map.width) - 180;
-				double mla = 90 - (my * 180f / map.height);
+				double mlo = (mx * 360f / MapTexture.width) - 180;
+				double mla = 90 - (my * 180f / MapTexture.height);
 				mlon = bigmap.unprojectLongitude(mlo, mla);
 				mlat = bigmap.unprojectLatitude(mlo, mla);
 
-				//if (spotmap != null)
-				//{
-				//	if (mx >= pos_spotmap.x - maprect.x && my >= pos_spotmap.y - maprect.y && mx <= pos_spotmap.x + pos_spotmap.width - maprect.x && my <= pos_spotmap.y + pos_spotmap.height - maprect.y)
-				//	{
-				//		in_spotmap = true;
-				//		mlon = spotmap.lon_offset + ((mx - pos_spotmap.x + maprect.x) / spotmap.mapscale) - 180;
-				//		mlat = spotmap.lat_offset + ((pos_spotmap.height - (my - pos_spotmap.y + maprect.y)) / spotmap.mapscale) - 90;
-				//		if (mlat > 90)
-				//		{
-				//			mlon = (mlon + 360) % 360 - 180;
-				//			mlat = 180 - mlat;
-				//		}
-				//		else if (mlat < -90)
-				//		{
-				//			mlon = (mlon + 360) % 360 - 180;
-				//			mlat = -180 - mlat;
-				//		}
-				//	}
-				//}
+				if (spotmap != null)
+				{
+					if (mx >= pos_spotmap.x - TextureRect.x && my >= pos_spotmap.y - TextureRect.y && mx <= pos_spotmap.x + pos_spotmap.width - TextureRect.x && my <= pos_spotmap.y + pos_spotmap.height - TextureRect.y)
+					{
+						in_spotmap = true;
+						mlon = spotmap.lon_offset + ((mx - pos_spotmap.x + TextureRect.x) / spotmap.mapscale) - 180;
+						mlat = spotmap.lat_offset + ((pos_spotmap.height - (my - pos_spotmap.y + TextureRect.y)) / spotmap.mapscale) - 90;
+						if (mlat > 90)
+						{
+							mlon = (mlon + 360) % 360 - 180;
+							mlat = 180 - mlat;
+						}
+						else if (mlat < -90)
+						{
+							mlon = (mlon + 360) % 360 - 180;
+							mlat = -180 - mlat;
+						}
+					}
+				}
 
 				if (mlon >= -180 && mlon <= 180 && mlat >= -90 && mlat <= 90)
 				{
 					in_map = true;
 				}
 			}
-			
+
+			//Handles mouse click while inside map; opens zoom map or zooms in further
+			if (Event.current.isMouse && !ddRect.Contains(Event.current.mousePosition) && !zoomCloseRect.Contains(Event.current.mousePosition))
+			{
+				if (Event.current.type == EventType.MouseUp)
+				{
+					if (Event.current.button == 1)
+					{
+						if (in_map || in_spotmap)
+						{
+							if (bigmap.isMapComplete())
+							{
+								if (spotmap == null)
+								{
+									spotmap = new SCANmap();
+									spotmap.setSize(180, 180);
+								}
+								if (in_spotmap)
+								{
+									spotmap.mapscale = spotmap.mapscale * 1.25f;
+								}
+								else
+								{
+									spotmap.mapscale = 10;
+								}
+								spotmap.centerAround(mlon, mlat);
+								spotmap.resetMap(bigmap.mapmode, 1);
+								pos_spotmap.width = 180;
+								pos_spotmap.height = 180;
+								if (!in_spotmap)
+								{
+									pos_spotmap.x = Event.current.mousePosition.x - pos_spotmap.width / 2;
+									pos_spotmap.y = Event.current.mousePosition.y - pos_spotmap.height / 2;
+									if (mx > TextureRect.width / 2)
+										pos_spotmap.x -= pos_spotmap.width;
+									else
+										pos_spotmap.x += pos_spotmap.height;
+									pos_spotmap.x = Math.Max(TextureRect.x, Math.Min(TextureRect.x + TextureRect.width - pos_spotmap.width, pos_spotmap.x));
+									pos_spotmap.y = Math.Max(TextureRect.y, Math.Min(TextureRect.y + TextureRect.height - pos_spotmap.height, pos_spotmap.y));
+								}
+							}
+						}
+					}
+					else if (Event.current.button == 0)
+					{
+						if (spotmap != null)
+						{
+							if (in_spotmap)
+							{
+								if (bigmap.isMapComplete())
+								{
+									//spotmap.mapscale = spotmap.mapscale / 1.25f;
+									//if (spotmap.mapscale < 10)
+									//	spotmap.mapscale = 10;
+									spotmap.centerAround(mlon, mlat);
+									spotmap.resetMap(spotmap.mapmode, 1);
+									Event.current.Use();
+								}
+							}
+
+						}
+					}
+					Event.current.Use();
+				}
+			}
+
+			//Draw the actual mouse over info label below the map
 			SCANuiUtil.mouseOverInfo(mlon, mlat, bigmap, data, b, in_map);
+		}
+
+		//Draw the altitude legend bar along the bottom
+		private void legendBar(int id)
+		{
 			if (bigmap.mapmode == 0 && SCANcontroller.controller.legend)
 				SCANuiUtil.drawLegend(data);
-			stopS();
+		}
+
+		//Draw the zoom map and its overlays
+		private void zoomMap(int id)
+		{
+			if (spotmap != null)
+			{
+				spotmap.setBody(b);
+
+				if (SCANcontroller.controller.GlobalResourceOverlay)
+					spotmap.resource = SCANcontroller.controller.ResourceList[SCANcontroller.controller.resourceSelection];
+
+				GUI.Box(pos_spotmap, spotmap.getPartialMap());
+				SCANuiUtil.drawMapLabels(pos_spotmap, null, spotmap, data, b);
+				zoomCloseRect = new Rect(pos_spotmap.x + 180, pos_spotmap.y, 18, 18);
+
+				if (GUI.Button(zoomCloseRect, SCANcontroller.controller.closeBox, SCANskins.SCAN_closeButton))
+				{
+					SCANUtil.SCANlog("Close Zoom Map");
+					spotmap = null;
+				}
+			}
 		}
 
 		//Draw the map overlay labels
 		private void mapLabels (int id)
 		{
-			SCANuiUtil.drawMapLabels(maprect, null, bigmap, data, b);
+			SCANuiUtil.drawMapLabels(TextureRect, null, bigmap, data, b);
 		}
 
 		//Draw the drop down menus if any have been opened
