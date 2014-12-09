@@ -269,12 +269,12 @@ namespace SCANsat.SCAN_UI
 				currentColor = GUILayout.Toggle(currentColor, textWithTT("", "Toggle Color"));
 
 				Rect d = GUILayoutUtility.GetLastRect();
-				d.x += 44;
+				d.x += 34;
 				d.y += 2;
-				d.width = 24;
+				d.width = 48;
 				d.height = 24;
 
-				if (GUI.Button(d, iconWithTT(SCANskins.SCAN_ColorWheelIcon, "Toggle Color"), SCANskins.SCAN_buttonBorderless))
+				if (GUI.Button(d, iconWithTT(SCANskins.SCAN_ColorToggleIcon, "Toggle Color"), SCANskins.SCAN_buttonBorderless))
 				{
 					currentColor = !currentColor;
 				}
@@ -395,10 +395,12 @@ namespace SCANsat.SCAN_UI
 
 			s.x += 40;
 
-			//if (GUI.Button(s, iconWithTT(SCANskins.SCAN_InstrumentIcon, "Instruments"), SCANskins.SCAN_windowButton))
-			//{
-			//	SCANcontroller.controller.instrumentsWindow.Visible = !SCANcontroller.controller.instrumentsWindow.Visible;
-			//}
+			if (GUI.Button(s, iconWithTT(SCANskins.SCAN_InstrumentIcon, "Instrument Window"), SCANskins.SCAN_windowButton))
+			{
+				SCANcontroller.controller.instrumentsWindow.Visible = !SCANcontroller.controller.instrumentsWindow.Visible;
+			}
+
+			s.x += 40;
 
 			if (GUI.Button(s, iconWithTT(SCANskins.SCAN_SettingsIcon, "Settings Menu"), SCANskins.SCAN_windowButton))
 			{

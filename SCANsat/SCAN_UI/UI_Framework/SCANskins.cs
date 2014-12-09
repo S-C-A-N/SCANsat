@@ -85,7 +85,7 @@ namespace SCANsat.SCAN_UI
 		internal static Texture2D SCAN_OrbitIcon;
 		internal static Texture2D SCAN_FlagIcon;
 		internal static Texture2D SCAN_LegendIcon;
-		internal static Texture2D SCAN_ColorWheelIcon;
+		internal static Texture2D SCAN_ColorToggleIcon;
 		internal static Texture2D SCAN_AsteroidIcon;
 		internal static Texture2D SCAN_ResourceIcon;
 		internal static Texture2D SCAN_RefreshIcon;
@@ -113,13 +113,13 @@ namespace SCANsat.SCAN_UI
 			SCAN_OrbitIcon = GameDatabase.Instance.GetTexture("SCANsat/Icons/SCAN_Orbit_Icon", false);
 			SCAN_FlagIcon = GameDatabase.Instance.GetTexture("SCANsat/Icons/SCAN_Flag_Icon", false);
 			SCAN_LegendIcon = GameDatabase.Instance.GetTexture("SCANsat/Icons/SCAN_Legend_Icon", false);
-			SCAN_ColorWheelIcon = GameDatabase.Instance.GetTexture("SCANsat/Icons/SCAN_ColorWheel_Icon", false);
+			SCAN_ColorToggleIcon = GameDatabase.Instance.GetTexture("SCANsat/Icons/SCAN_ColorToggle_Icon", false);
 			SCAN_AsteroidIcon = GameDatabase.Instance.GetTexture("SCANsat/Icons/SCAN_Asteroid_Icon", false);
 			SCAN_ResourceIcon = GameDatabase.Instance.GetTexture("SCANsat/Icons/SCAN_Resource_Icon", false);
 			SCAN_RefreshIcon = GameDatabase.Instance.GetTexture("SCANsat/Icons/SCAN_Refresh_Icon", false);
 			SCAN_SettingsIcon = GameDatabase.Instance.GetTexture("SCANsat/Icons/SCAN_Settings_Icon", false);
 			SCAN_ColorIcon = GameDatabase.Instance.GetTexture("SCANsat/Icons/SCAN_Color_Icon", false);
-			//SCAN_InstrumentIcon = GameDatabase.Instance.GetTexture("SCANsat/Icons/SCAN_Instrument_Icon", false);
+			SCAN_InstrumentIcon = GameDatabase.Instance.GetTexture("SCANsat/Icons/SCAN_Instrument_Icon", false);
 			SCAN_SmallMapIcon = GameDatabase.Instance.GetTexture("SCANsat/Icons/SCANsat_SmallMap_Icon", false);
 			//SCAN_BigMapIcon = GameDatabase.Instance.GetTexture("SCANsat/Icons/SCANsat_Map_Icon", false);
 		}
