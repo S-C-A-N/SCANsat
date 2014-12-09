@@ -30,7 +30,7 @@ namespace SCANsat.SCAN_UI
 		private Vessel v;
 		private double startUT;
 		private float resizeW, resizeH, dragX;
-		private bool drawGrid, currentGrid, currentColor, lastColor, lastResource, resizing;
+		private bool drawGrid, currentGrid, currentColor, lastColor, lastResource;
 		private bool drop_down_open, projection_drop_down, mapType_drop_down, resources_drop_down, planetoid_drop_down;
 		private Texture2D overlay_static;
 		private Rect ddRect, zoomCloseRect;
