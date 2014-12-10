@@ -309,7 +309,7 @@ namespace SCANsat.SCAN_UI
 
 		internal static void resetBigMapPos()
 		{
-			SCANcontroller.controller.newBigMap.resetWindowPos(SCANbigMap.defaultRect);
+			SCANcontroller.controller.newBigMap.resetWindowPos(SCANnewBigMap.defaultRect);
 		}
 
 		internal static void resetKSCMapPos()
@@ -677,7 +677,7 @@ namespace SCANsat.SCAN_UI
 			if (map.projection == SCANmap.MapProjection.Polar)
 				return;
 
-			if (SCANbigMap.eq_frame <= 0)
+			if (SCANnewBigMap.eq_frame <= 0)
 			{
 				// predict equatorial crossings for the next 100 loops
 				double TAAN = 360f - o.argumentOfPeriapsis;	// true anomaly at ascending node
@@ -687,19 +687,19 @@ namespace SCANsat.SCAN_UI
 				double tAN = (((MAAN - o.meanAnomaly * Mathf.Rad2Deg + 360) % 360) / 360f * o.period + startUT);
 				double tDN = (((MADN - o.meanAnomaly * Mathf.Rad2Deg + 360) % 360) / 360f * o.period + startUT);
 
-				if (SCANbigMap.eq_an_map == null || SCANbigMap.eq_dn_map == null || SCANbigMap.eq_an_map.Length != overlay_static.width)
+				if (SCANnewBigMap.eq_an_map == null || SCANnewBigMap.eq_dn_map == null || SCANnewBigMap.eq_an_map.Length != overlay_static.width)
 				{
-					SCANbigMap.eq_an_map = new int[overlay_static.width];
-					SCANbigMap.eq_dn_map = new int[overlay_static.width];
+					SCANnewBigMap.eq_an_map = new int[overlay_static.width];
+					SCANnewBigMap.eq_dn_map = new int[overlay_static.width];
 				}
-				if (SCANbigMap.eq_map == null || SCANbigMap.eq_map.width != SCANbigMap.eq_an_map.Length)
+				if (SCANnewBigMap.eq_map == null || SCANnewBigMap.eq_map.width != SCANnewBigMap.eq_an_map.Length)
 				{
-					SCANbigMap.eq_map = new Texture2D(SCANbigMap.eq_an_map.Length, eqh, TextureFormat.ARGB32, false);
+					SCANnewBigMap.eq_map = new Texture2D(SCANnewBigMap.eq_an_map.Length, eqh, TextureFormat.ARGB32, false);
 				}
-				for (int i = 0; i < SCANbigMap.eq_an_map.Length; ++i)
+				for (int i = 0; i < SCANnewBigMap.eq_an_map.Length; ++i)
 				{
-					SCANbigMap.eq_an_map[i] = 0;
-					SCANbigMap.eq_dn_map[i] = 0;
+					SCANnewBigMap.eq_an_map[i] = 0;
+					SCANnewBigMap.eq_dn_map[i] = 0;
 				}
 				for (int i = 0; i < 100; ++i)
 				{
@@ -717,31 +717,31 @@ namespace SCANsat.SCAN_UI
 					}
 					double loAN = vessel.mainBody.GetLongitude(pAN) - rotAN;
 					double loDN = vessel.mainBody.GetLongitude(pDN) - rotDN;
-					int lonAN = (int)(((map.projectLongitude(loAN, 0) + 180) % 360) * SCANbigMap.eq_an_map.Length / 360f);
-					int lonDN = (int)(((map.projectLongitude(loDN, 0) + 180) % 360) * SCANbigMap.eq_dn_map.Length / 360f);
-					if (lonAN >= 0 && lonAN < SCANbigMap.eq_an_map.Length)
-						SCANbigMap.eq_an_map[lonAN] += 1;
-					if (lonDN >= 0 && lonDN < SCANbigMap.eq_dn_map.Length)
-						SCANbigMap.eq_dn_map[lonDN] += 1;
+					int lonAN = (int)(((map.projectLongitude(loAN, 0) + 180) % 360) * SCANnewBigMap.eq_an_map.Length / 360f);
+					int lonDN = (int)(((map.projectLongitude(loDN, 0) + 180) % 360) * SCANnewBigMap.eq_dn_map.Length / 360f);
+					if (lonAN >= 0 && lonAN < SCANnewBigMap.eq_an_map.Length)
+						SCANnewBigMap.eq_an_map[lonAN] += 1;
+					if (lonDN >= 0 && lonDN < SCANnewBigMap.eq_dn_map.Length)
+						SCANnewBigMap.eq_dn_map[lonDN] += 1;
 				}
-				Color[] pix = SCANbigMap.eq_map.GetPixels(0, 0, SCANbigMap.eq_an_map.Length, eqh);
+				Color[] pix = SCANnewBigMap.eq_map.GetPixels(0, 0, SCANnewBigMap.eq_an_map.Length, eqh);
 				Color cAN = palette.cb_skyBlue, cDN = palette.cb_orange;
 				for (int y = 0; y < eqh; ++y)
 				{
 					Color lc = palette.clear;
-					for (int x = 0; x < SCANbigMap.eq_an_map.Length; ++x)
+					for (int x = 0; x < SCANnewBigMap.eq_an_map.Length; ++x)
 					{
 						Color c = palette.clear;
 						float scale = 0;
 						if (y < eqh / 2)
 						{
 							c = cDN;
-							scale = SCANbigMap.eq_dn_map[x];
+							scale = SCANnewBigMap.eq_dn_map[x];
 						}
 						else
 						{
 							c = cAN;
-							scale = SCANbigMap.eq_an_map[x];
+							scale = SCANnewBigMap.eq_an_map[x];
 						}
 						if (scale >= 1)
 						{
@@ -752,7 +752,7 @@ namespace SCANsat.SCAN_UI
 							else
 							{
 								if (lc == palette.clear)
-									pix[y * SCANbigMap.eq_an_map.Length + x - 1] = palette.black;
+									pix[y * SCANnewBigMap.eq_an_map.Length + x - 1] = palette.black;
 								scale = Mathf.Clamp(scale - 1, 0, 10) / 10f;
 								c = palette.lerp(c, palette.white, scale);
 							}
@@ -763,26 +763,26 @@ namespace SCANsat.SCAN_UI
 							if (lc != palette.clear && lc != palette.black)
 								c = palette.black;
 						}
-						pix[y * SCANbigMap.eq_an_map.Length + x] = c;
+						pix[y * SCANnewBigMap.eq_an_map.Length + x] = c;
 						lc = c;
 					}
 				}
-				SCANbigMap.eq_map.SetPixels(0, 0, SCANbigMap.eq_an_map.Length, eqh, pix);
-				SCANbigMap.eq_map.Apply();
-				SCANbigMap.eq_frame = 4;
+				SCANnewBigMap.eq_map.SetPixels(0, 0, SCANnewBigMap.eq_an_map.Length, eqh, pix);
+				SCANnewBigMap.eq_map.Apply();
+				SCANnewBigMap.eq_frame = 4;
 			}
 			else
 			{
-				SCANbigMap.eq_frame -= 1;
+				SCANnewBigMap.eq_frame -= 1;
 			}
 
-			if (SCANbigMap.eq_map != null)
+			if (SCANnewBigMap.eq_map != null)
 			{
 				r.x = maprect.x;
-				r.y = maprect.y + maprect.height / 2 + -SCANbigMap.eq_map.height / 2;
-				r.width = SCANbigMap.eq_map.width;
-				r.height = SCANbigMap.eq_map.height;
-				GUI.DrawTexture(r, SCANbigMap.eq_map);
+				r.y = maprect.y + maprect.height / 2 + -SCANnewBigMap.eq_map.height / 2;
+				r.width = SCANnewBigMap.eq_map.width;
+				r.height = SCANnewBigMap.eq_map.height;
+				GUI.DrawTexture(r, SCANnewBigMap.eq_map);
 			}
 		}
 
