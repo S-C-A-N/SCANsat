@@ -89,6 +89,8 @@ namespace SCANsat.SCAN_UI
 		internal static Texture2D SCAN_AsteroidIcon;
 		internal static Texture2D SCAN_ResourceIcon;
 		internal static Texture2D SCAN_RefreshIcon;
+		internal static Texture2D SCAN_ScreenshotIcon;
+		internal static Texture2D SCAN_ResizeIcon;
 
 		//Window Textures
 		internal static Texture2D SCAN_SettingsIcon;
@@ -121,7 +123,9 @@ namespace SCANsat.SCAN_UI
 			SCAN_ColorIcon = GameDatabase.Instance.GetTexture("SCANsat/Icons/SCAN_Color_Icon", false);
 			SCAN_InstrumentIcon = GameDatabase.Instance.GetTexture("SCANsat/Icons/SCAN_Instrument_Icon", false);
 			SCAN_SmallMapIcon = GameDatabase.Instance.GetTexture("SCANsat/Icons/SCANsat_SmallMap_Icon", false);
-			//SCAN_BigMapIcon = GameDatabase.Instance.GetTexture("SCANsat/Icons/SCANsat_Map_Icon", false);
+			SCAN_BigMapIcon = GameDatabase.Instance.GetTexture("SCANsat/Icons/SCANsat_Map_Icon", false);
+			SCAN_ScreenshotIcon = GameDatabase.Instance.GetTexture("SCANsat/Icons/SCAN_Screenshot_Icon", false);
+			SCAN_ResizeIcon = GameDatabase.Instance.GetTexture("SCANsat/Icons/SCAN_Resize_Icon", false);
 		}
 
 		private static void initializeColors()
