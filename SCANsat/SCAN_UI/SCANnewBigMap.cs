@@ -413,6 +413,14 @@ namespace SCANsat.SCAN_UI
 			{
 				SCANcontroller.controller.colorManager.Visible = !SCANcontroller.controller.colorManager.Visible;
 			}
+
+			s.x = WindowRect.width - 66;
+
+			if (GUI.Button(s, iconWithTT(SCANskins.SCAN_ScreenshotIcon, "Export Map"), SCANskins.SCAN_windowButton))
+			{
+				if (bigmap.isMapComplete())
+					bigmap.exportPNG();
+			}
 		}
 
 		private void mapDraw(int id)
@@ -501,9 +509,9 @@ namespace SCANsat.SCAN_UI
 			float my = Event.current.mousePosition.y - TextureRect.y;
 			bool in_map = false, in_spotmap = false;
 			double mlon = 0, mlat = 0;
-			Rect resizer = new Rect(WindowRect.width - 24, WindowRect.height - 24, 24, 24);
+			Rect resizer = new Rect(WindowRect.width - 24, WindowRect.height - 26, 24, 24);
 
-			GUI.Box(resizer, "//", SCAN_SkinsLibrary.CurrentSkin.box);
+			GUI.Label(resizer, SCANskins.SCAN_ResizeIcon);
 
 			//Handles mouse positioning and converting to lat/long coordinates
 			if (mx >= 0 && my >= 0 && mx < MapTexture.width && my < MapTexture.height)
