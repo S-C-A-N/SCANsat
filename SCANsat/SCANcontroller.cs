@@ -124,7 +124,7 @@ namespace SCANsat
 		internal SCAN_MBW mainMap;
 		internal SCAN_MBW settingsWindow;
 		internal SCAN_MBW instrumentsWindow;
-		internal SCAN_MBW bigMap;
+		//internal SCAN_MBW bigMap;
 		internal SCAN_MBW newBigMap;
 		internal SCAN_MBW kscMap;
 		internal SCAN_MBW colorManager;
@@ -345,7 +345,7 @@ namespace SCANsat
 					mainMap = gameObject.AddComponent<SCANmainMap>();
 					settingsWindow = gameObject.AddComponent<SCANsettingsUI>();
 					instrumentsWindow = gameObject.AddComponent<SCANinstrumentUI>();
-					bigMap = gameObject.AddComponent<SCANbigMap>();
+					//bigMap = gameObject.AddComponent<SCANbigMap>();
 					colorManager = gameObject.AddComponent<SCANcolorSelection>();
 					newBigMap = gameObject.AddComponent<SCANnewBigMap>();
 				}
@@ -452,8 +452,8 @@ namespace SCANsat
 				Destroy(settingsWindow);
 			if (instrumentsWindow != null)
 				Destroy(instrumentsWindow);
-			if (bigMap != null)
-				Destroy(bigMap);
+			//if (bigMap != null)
+			//	Destroy(bigMap);
 			if (kscMap != null)
 				Destroy(kscMap);
 			if (newBigMap != null)
@@ -592,6 +592,8 @@ namespace SCANsat
 			{
 				globalResourceOverlay = true;
 				if (string.IsNullOrEmpty(resourceSelection))
+					resourceSelection = resourceList.ElementAt(0).Key;
+				else if (!resourceList.ContainsKey(resourceSelection))
 					resourceSelection = resourceList.ElementAt(0).Key;
 			}
 		}
