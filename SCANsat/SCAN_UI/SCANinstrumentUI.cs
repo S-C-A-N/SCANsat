@@ -25,7 +25,7 @@ namespace SCANsat.SCAN_UI
 {
 	class SCANinstrumentUI: SCAN_MBW
 	{
-		private bool notMappingToday;
+		private bool notMappingToday; //Unused out-of-power bool
 		private SCANremoteView anomalyView;
 		private SCANdata.SCANtype sensors;
 		private SCANdata data;
@@ -86,7 +86,7 @@ namespace SCANsat.SCAN_UI
 
 		protected override void DrawWindow(int id)
 		{
-			versionLabel(id);
+			versionLabel(id);				/* Standard version label and close button */
 			closeBox(id);
 
 			int parts = 0;

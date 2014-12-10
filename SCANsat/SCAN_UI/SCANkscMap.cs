@@ -27,7 +27,7 @@ namespace SCANsat.SCAN_UI
 		private static CelestialBody b;
 		private string mapTypeTitle = "";
 		private SCANdata data;
-		private bool drawGrid, currentGrid, currentColor, lastColor, spaceCenterLock, trackingStationLock;
+		private bool drawGrid, currentGrid, currentColor, lastColor, lastResource, spaceCenterLock, trackingStationLock;
 		private bool drop_down_open, projection_drop_down, mapType_drop_down, resources_drop_down, planetoid_drop_down;
 		private Texture2D overlay_static;
 		private Rect ddRect, zoomCloseRect;
@@ -57,7 +57,6 @@ namespace SCANsat.SCAN_UI
 
 		internal override void Start()
 		{
-			//Initialize the map object
 			Visible = SCANcontroller.controller.kscMapVisible;
 			if (b == null)
 				b = Planetarium.fetch.Home;
@@ -95,6 +94,7 @@ namespace SCANsat.SCAN_UI
 			InputLockManager.RemoveControlLock(lockID);
 		}
 
+		//These properties are used by the color selection window to sync color palettes
 		public SCANdata Data
 		{
 			get { return data; }
@@ -161,7 +161,7 @@ namespace SCANsat.SCAN_UI
 		//The primary GUI method
 		protected override void DrawWindow(int id)
 		{
-			versionLabel(id);
+			versionLabel(id);		/* Standard version label and close button */
 			closeBox(id);
 
 			growS();
@@ -192,6 +192,7 @@ namespace SCANsat.SCAN_UI
 			if (drop_down_open && Event.current.type == EventType.mouseDown && !ddRect.Contains(Event.current.mousePosition))
 				drop_down_open = false;
 
+			//Used to update the black and white/color status
 			if (lastColor != currentColor)
 			{
 				lastColor = currentColor;
@@ -203,10 +204,18 @@ namespace SCANsat.SCAN_UI
 				bigmap.resetMap();
 			}
 
+			//Updates the grid overlay status
 			if (currentGrid != SCANcontroller.controller.map_grid)
 			{
 				currentGrid = SCANcontroller.controller.map_grid;
 				drawGrid = true;
+			}
+
+			//Update selected resource status
+			if (lastResource != SCANcontroller.controller.map_ResourceOverlay)
+			{
+				lastResource = SCANcontroller.controller.map_ResourceOverlay;
+				bigmap.resetMap();
 			}
 		}
 
@@ -268,12 +277,6 @@ namespace SCANsat.SCAN_UI
 				}
 				fillS(40);
 			}
-			else
-			{
-				fillS(190);
-			}
-
-			fillS();
 
 			if (GUILayout.Button("Planetoid", SCANskins.SCAN_buttonFixed, GUILayout.MaxWidth(90)))
 			{

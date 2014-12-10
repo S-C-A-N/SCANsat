@@ -40,6 +40,11 @@ namespace SCANsat.SCAN_UI
 		private Rect pos_spotmap_x = new Rect(10f, 10f, 25f, 25f);
 		internal static Rect defaultRect = new Rect(250, 60, 780, 460);
 
+		//Values used for the orbit overlay - Need to fix this
+		internal static int[] eq_an_map, eq_dn_map;
+		internal static Texture2D eq_map;
+		internal static int eq_frame;
+
 		protected override void Awake()
 		{
 			WindowCaption = "Map of ";
@@ -94,6 +99,7 @@ namespace SCANsat.SCAN_UI
 			TooltipsEnabled = SCANcontroller.controller.toolTips;
 		}
 
+		//Properties used to sync with color selection window
 		public static SCANmap BigMap
 		{
 			get { return bigmap; }
@@ -106,6 +112,7 @@ namespace SCANsat.SCAN_UI
 
 		protected override void DrawWindowPre(int id)
 		{
+			//Append the map type to the window caption
 			if (bigmap != null)
 				mapTypeTitle = SCANmap.mapTypeNames[bigmap.mapmode];
 			else
@@ -113,6 +120,7 @@ namespace SCANsat.SCAN_UI
 
 			WindowCaption = string.Format("{0} Map of {1}", mapTypeTitle, b.theName);
 
+			//Re-sizing code; moved here from SCAN_MBW
 			if (IsResizing && !inRepaint())
 			{
 				if (Input.GetMouseButtonUp(0))
@@ -150,7 +158,7 @@ namespace SCANsat.SCAN_UI
 		//The primary GUI method
 		protected override void DrawWindow(int id)
 		{
-			versionLabel(id);
+			versionLabel(id);		/* Standard version label and close button */
 			closeBox(id);
 
 			growS();
@@ -181,6 +189,7 @@ namespace SCANsat.SCAN_UI
 			if (drop_down_open && Event.current.type == EventType.mouseDown && !ddRect.Contains(Event.current.mousePosition))
 				drop_down_open = false;
 
+			//Update black and white/color statuse
 			if (lastColor != currentColor)
 			{
 				lastColor = currentColor;
@@ -192,12 +201,14 @@ namespace SCANsat.SCAN_UI
 				bigmap.resetMap();
 			}
 
+			//Update grid overlay status
 			if (currentGrid != SCANcontroller.controller.map_grid)
 			{
 				currentGrid = SCANcontroller.controller.map_grid;
 				drawGrid = true;
 			}
 
+			//Update selected resource status
 			if (lastResource != SCANcontroller.controller.map_ResourceOverlay)
 			{
 				lastResource = SCANcontroller.controller.map_ResourceOverlay;
@@ -253,10 +264,6 @@ namespace SCANsat.SCAN_UI
 						drop_down_open = !drop_down_open;
 					}
 					fillS(40);
-				}
-				else
-				{
-					//fillS(130);
 				}
 				if (GUILayout.Button("Planetoid", SCANskins.SCAN_buttonFixed, GUILayout.MaxWidth(90)))
 				{
@@ -435,6 +442,7 @@ namespace SCANsat.SCAN_UI
 		{
 			MapTexture = bigmap.getPartialMap();
 
+			//Set minimum map size during re-sizing
 			dW = resizeW;
 			if (dW < WindowRect_Min.width)
 				dW = WindowRect_Min.width;
@@ -514,8 +522,9 @@ namespace SCANsat.SCAN_UI
 			float my = Event.current.mousePosition.y - TextureRect.y;
 			bool in_map = false, in_spotmap = false;
 			double mlon = 0, mlat = 0;
-			Rect resizer = new Rect(WindowRect.width - 24, WindowRect.height - 26, 24, 24);
 
+			//Draw the re-size label in the corner
+			Rect resizer = new Rect(WindowRect.width - 24, WindowRect.height - 26, 24, 24);
 			GUI.Label(resizer, SCANskins.SCAN_ResizeIcon);
 
 			//Handles mouse positioning and converting to lat/long coordinates
@@ -615,6 +624,7 @@ namespace SCANsat.SCAN_UI
 					}
 					Event.current.Use();
 				}
+				//Handle clicking inside the re-size button
 				else if (Event.current.isMouse
 				&& Event.current.type == EventType.MouseDown
 				&& Event.current.button == 0

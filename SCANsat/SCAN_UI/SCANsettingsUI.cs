@@ -102,12 +102,11 @@ namespace SCANsat.SCAN_UI
 
 		protected override void DrawWindow(int id)
 		{
-			versionLabel(id);
+			versionLabel(id);				/* Standard version label and close button */
 			closeBox(id);
 
 			growS();
 				gui_settings_xmarks(id); 				/* X marker selection */
-				//gui_settings_resources(id);				/* resource details sub-window */
 				gui_settings_toggle_body_scanning(id);	/* background and body scanning toggles */
 				gui_settings_rebuild_kethane(id);		/* rebuild Kethane database with SCANsat info */
 				gui_settings_timewarp(id);				/* time warp resolution settings */
@@ -119,7 +118,7 @@ namespace SCANsat.SCAN_UI
 				#endif
 			stopS();
 
-			warningBox(id);
+			warningBox(id);						/* Warning box for deleting map data */
 		}
 
 		protected override void DrawWindowPost(int id)
@@ -173,49 +172,6 @@ namespace SCANsat.SCAN_UI
 			stopE();
 			fillS(16);
 		}
-
-		//Control resource options - *Will be moved into big map*
-		//private void gui_settings_resources(int id)
-		//{
-		//	GUILayout.Label("Resources Overlay", SCANskins.SCAN_headline);
-		//	if (SCANcontroller.controller.ResourcesList.Count > 0)
-		//	{
-		//		if (SCANcontroller.controller.globalOverlay != GUILayout.Toggle(SCANcontroller.controller.globalOverlay, "Activate Resource Overlay"))
-		//		{ //global toggle for resource overlay
-		//			SCANcontroller.controller.globalOverlay = !SCANcontroller.controller.globalOverlay;
-		//			//if (bigmap != null) bigmap.resetMap();
-		//		}
-		//	}
-
-		//	growE();
-		//	if (GUILayout.Button("Kethane Resources")) //select from two resource types, populates the list below
-		//	{
-		//		SCANcontroller.controller.resourceOverlayType = 1;
-		//		SCANcontroller.controller.Resources(FlightGlobals.currentMainBody);
-		//		if (SCANcontroller.controller.ResourcesList.Count > 0)
-		//			SCANcontroller.controller.globalOverlay = true;
-		//		//if (bigmap != null) bigmap.resetMap();
-		//	}
-
-		//	if (GUILayout.Button("ORSX Resources"))
-		//	{
-		//		SCANcontroller.controller.resourceOverlayType = 0;
-		//		SCANcontroller.controller.Resources(FlightGlobals.currentMainBody);
-		//		if (SCANcontroller.controller.ResourcesList.Count > 0)
-		//			SCANcontroller.controller.globalOverlay = true;
-		//		//if (bigmap != null) bigmap.resetMap();
-		//	}
-		//	stopE();
-		//	if (SCANcontroller.controller.ResourcesList.Count == 0)
-		//	{
-		//		fillS(5);
-		//		GUILayout.Label("No Resources Found", SCANskins.SCAN_headline);
-		//	}
-		//	growE();
-		//	SCANcontroller.controller.gridSelection = GUILayout.SelectionGrid(SCANcontroller.controller.gridSelection, SCANcontroller.controller.ResourcesList.Select(a => a.Name).ToArray(), 4); //select resource to display
-		//	stopE();
-		//	fillS(16);
-		//}
 
 		//Control background scanning options
 		private void gui_settings_toggle_body_scanning(int id)
@@ -277,6 +233,7 @@ namespace SCANsat.SCAN_UI
 		}
 
 		//Display the total number of SCANsat sensors and scanning passes
+		/* Needs to be clarified for users */
 		private void gui_settings_numbers(int id)
 		{
 			string s = 	"Vessels: " + SCANcontroller.controller.ActiveVessels.ToString() +
@@ -286,7 +243,7 @@ namespace SCANsat.SCAN_UI
 			fillS(16);
 		}
 
-		//Reset databases - *Needs confirmation box*
+		//Reset databases
 		private void gui_settings_data_resets(int id)
 		{
 			CelestialBody thisBody = FlightGlobals.currentMainBody;
@@ -312,7 +269,7 @@ namespace SCANsat.SCAN_UI
 			fillS(8);
 		}
 
-		//Resets all window positions
+		//Resets all window positions, tooltip toggle
 		private void gui_settings_window_resets_tooltips(int id)
 		{
 			growE();
