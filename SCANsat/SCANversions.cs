@@ -49,7 +49,8 @@ namespace SCANsat
 			{
 				SCANsatVersion = assemblyList[0].infoVersion;
 				var kAssembly = assemblyList.FirstOrDefault(a => a.name == "Kethane");
-				if (kAssembly != null)
+				var scankAssembly = assemblyList.FirstOrDefault(a => a.name == "SCANsatKethane");
+				if (kAssembly != null && scankAssembly != null)
 				{
 					if (kAssembly.infoVersion == kVersion)
 						kethaneLoaded = true;
