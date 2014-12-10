@@ -324,10 +324,13 @@ namespace SCANsat.SCAN_UI
 						SCANuiUtil.resetBigMapPos();
 						SCANuiUtil.resetInstUIPos();
 						SCANuiUtil.resetSettingsUIPos();
+						SCANuiUtil.resetColorMapPos();
 					}
 					else
 					{
 						SCANuiUtil.resetKSCMapPos();
+						SCANuiUtil.resetColorMapPos();
+						SCANuiUtil.resetSettingsUIPos();
 					}
 				}
 				fillS(10);
