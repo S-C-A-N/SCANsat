@@ -38,6 +38,10 @@ namespace SCANsat.SCAN_UI
 		private const string lockID = "colorLockID";
 		internal static Rect defaultRect = new Rect(100, 400, 650, 330);
 
+		private SCANkscMap kscMapObj;
+		private SCANnewBigMap bigMapObj;
+
+		private static SCANmap bigMap;
 		private SCANdata data;
 
 		protected override void Awake()
@@ -59,6 +63,22 @@ namespace SCANsat.SCAN_UI
 		{
 			paletteSizeInt = palette.CurrentPalettes.size;
 			setSizeSlider(palette.CurrentPalette.kind);
+			if (HighLogic.LoadedScene == GameScenes.SPACECENTER || HighLogic.LoadedScene == GameScenes.TRACKSTATION)
+			{
+				kscMapObj = (SCANkscMap)SCANcontroller.controller.kscMap;
+				if (SCANkscMap.BigMap != null)
+					bigMap = SCANkscMap.BigMap;
+				if (kscMapObj.Data != null)
+					data = kscMapObj.Data;
+			}
+			else if (HighLogic.LoadedSceneIsFlight)
+			{
+				bigMapObj = (SCANnewBigMap)SCANcontroller.controller.newBigMap;
+				if (SCANnewBigMap.BigMap != null)
+					bigMap = SCANnewBigMap.BigMap;
+				if (bigMapObj.Data != null)
+					data = bigMapObj.Data;
+			}
 		}
 
 		internal override void OnDestroy()
@@ -88,12 +108,34 @@ namespace SCANsat.SCAN_UI
 						SCANcontroller.controller.addToBodyData(FlightGlobals.currentMainBody, data);
 					}
 				}
+				if (bigMap == null)
+				{
+					if (SCANnewBigMap.BigMap != null)
+					{
+						bigMap = SCANnewBigMap.BigMap;
+					}
+				}
 			}
 
 			//Lock space center click through - Sync SCANdata
 			else if (HighLogic.LoadedScene == GameScenes.SPACECENTER)
 			{
-				data = ((SCANkscMap)SCANcontroller.controller.kscMap).data;
+				if (data == null)
+				{
+					data = SCANUtil.getData(Planetarium.fetch.Home);
+					if (data == null)
+					{
+						data = new SCANdata(Planetarium.fetch.Home);
+						SCANcontroller.controller.addToBodyData(Planetarium.fetch.Home, data);
+					}
+				}
+				if (bigMap == null)
+				{
+					if (SCANkscMap.BigMap != null)
+					{
+						bigMap = SCANkscMap.BigMap;
+					}
+				}
 				Vector2 mousePos = Input.mousePosition;
 				mousePos.y = Screen.height - mousePos.y;
 				if (WindowRect.Contains(mousePos) && !spaceCenterLock)
@@ -111,7 +153,22 @@ namespace SCANsat.SCAN_UI
 			//Lock tracking scene click through - Sync SCANdata
 			else if (HighLogic.LoadedScene == GameScenes.TRACKSTATION)
 			{
-				data = ((SCANkscMap)SCANcontroller.controller.kscMap).data;
+				if (data == null)
+				{
+					data = SCANUtil.getData(Planetarium.fetch.Home);
+					if (data == null)
+					{
+						data = new SCANdata(Planetarium.fetch.Home);
+						SCANcontroller.controller.addToBodyData(Planetarium.fetch.Home, data);
+					}
+				}
+				if (bigMap == null)
+				{
+					if (SCANkscMap.BigMap != null)
+					{
+						bigMap = SCANkscMap.BigMap;
+					}
+				}
 				Vector2 mousePos = Input.mousePosition;
 				mousePos.y = Screen.height - mousePos.y;
 				if (WindowRect.Contains(mousePos) && !trackingStationLock)
@@ -441,6 +498,8 @@ namespace SCANsat.SCAN_UI
 						data.PaletteReverse = reversePalette;
 						dataPalette = data.ColorPalette;
 						drawCurrentLegend();
+						if (bigMap != null)
+							bigMap.resetMap();
 					}
 					fillS(10);
 					if (GUILayout.Button("Cancel", GUILayout.Width(60)))
@@ -474,20 +533,6 @@ namespace SCANsat.SCAN_UI
 				}
 			}
 		}
-
-		//private float drawInputBox(ref string oldVal, GUIStyle boxStyle, float boxWidth, float labelWidth = 0, string title = "", GUIStyle labelStyle = null)
-		//{
-		//	float newVal = 0;
-		//	float.TryParse(oldVal, out newVal);
-		//	growE();
-		//		if (!string.IsNullOrEmpty(title))
-		//			GUILayout.Label(title, labelStyle, GUILayout.Width(labelWidth));
-		//		oldVal = GUILayout.TextField(oldVal, boxStyle, GUILayout.Width(boxWidth));
-		//	stopE();
-
-		//	float.TryParse(oldVal, out newVal);
-		//	return newVal;
-		//}
 
 		private void drawCurrentLegend()
 		{
