@@ -65,7 +65,7 @@ namespace SCANsat.SCAN_UI
 				{
 					if (SCANcontroller.controller != null)
 					{
-						SCANcontroller.controller.bigMap.Visible = !SCANcontroller.controller.bigMap.Visible;
+						SCANcontroller.controller.newBigMap.Visible = !SCANcontroller.controller.newBigMap.Visible;
 						SCANcontroller.controller.bigMapVisible = !SCANcontroller.controller.bigMapVisible;
 					}
 				};
@@ -119,24 +119,32 @@ namespace SCANsat.SCAN_UI
 			IButton instrument = list.AddOption("Instruments");
 			IButton bigMap = list.AddOption("Big Map");
 			IButton settings = list.AddOption("Settings");
+			IButton color = list.AddOption("Color Options");
 
 			smallMap.OnClick += (e2) =>
 				{
 					SCANcontroller.controller.mainMap.Visible = !SCANcontroller.controller.mainMap.Visible;
 					SCANcontroller.controller.mainMapVisible = !SCANcontroller.controller.mainMapVisible;
 				};
-			instrument.OnClick += (e2) => SCANcontroller.controller.instrumentsWindow.Visible = !SCANcontroller.controller.instrumentsWindow.Visible;
+			instrument.OnClick += (e2) =>
+				{
+					SCANcontroller.controller.instrumentsWindow.Visible = !SCANcontroller.controller.instrumentsWindow.Visible;
+				};
 			bigMap.OnClick += (e2) =>
 				{
-					SCANcontroller.controller.bigMap.Visible = !SCANcontroller.controller.bigMap.Visible;
+					SCANcontroller.controller.newBigMap.Visible = !SCANcontroller.controller.newBigMap.Visible;
 					SCANcontroller.controller.bigMapVisible = !SCANcontroller.controller.bigMapVisible;
 				};
 			settings.OnClick += (e2) =>
-			{
-				if (!SCANcontroller.controller.settingsWindow.Visible)
-					SCANcontroller.controller.Resources(FlightGlobals.currentMainBody);
-				SCANcontroller.controller.settingsWindow.Visible = !SCANcontroller.controller.settingsWindow.Visible;
-			};
+				{
+					if (!SCANcontroller.controller.settingsWindow.Visible)
+						SCANcontroller.controller.Resources(FlightGlobals.currentMainBody);
+					SCANcontroller.controller.settingsWindow.Visible = !SCANcontroller.controller.settingsWindow.Visible;
+				};
+			color.OnClick += (e2) =>
+				{
+					SCANcontroller.controller.colorManager.Visible = !SCANcontroller.controller.colorManager.Visible;
+				};
 			list.OnAnyOptionClicked += () => destroyMenu(menu);
 			menu.Drawable = list;
 		}
