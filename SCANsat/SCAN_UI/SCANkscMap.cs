@@ -25,8 +25,8 @@ namespace SCANsat.SCAN_UI
 	{
 		private static SCANmap bigmap, spotmap;
 		private static CelestialBody b;
-		private static string mapTypeTitle = "";
-		internal SCANdata data;
+		private string mapTypeTitle = "";
+		private SCANdata data;
 		private bool drawGrid, currentGrid, currentColor, lastColor, spaceCenterLock, trackingStationLock;
 		private bool drop_down_open, projection_drop_down, mapType_drop_down, resources_drop_down, planetoid_drop_down;
 		private Texture2D overlay_static;
@@ -93,6 +93,16 @@ namespace SCANsat.SCAN_UI
 		internal override void OnDestroy()
 		{
 			InputLockManager.RemoveControlLock(lockID);
+		}
+
+		public SCANdata Data
+		{
+			get { return data; }
+		}
+
+		public static SCANmap BigMap
+		{
+			get { return bigmap; }
 		}
 
 		protected override void DrawWindowPre(int id)
@@ -242,21 +252,25 @@ namespace SCANsat.SCAN_UI
 				drop_down_open = !drop_down_open;
 			}
 
-			fillS(90);
-
+			fillS();
 			if (GUILayout.Button(iconWithTT(SCANskins.SCAN_RefreshIcon, "Refresh Map"), SCANskins.SCAN_buttonBorderless, GUILayout.MaxWidth(34), GUILayout.MaxHeight(28)))
 			{
 				bigmap.resetMap();
 			}
+			fillS();
 
 			if (SCANcontroller.controller.GlobalResourceOverlay)
 			{
-				fillS(100);
 				if (GUILayout.Button("Resources", SCANskins.SCAN_buttonFixed, GUILayout.MaxWidth(90)))
 				{
 					resources_drop_down = !resources_drop_down;
 					drop_down_open = !drop_down_open;
 				}
+				fillS(40);
+			}
+			else
+			{
+				fillS(190);
 			}
 
 			fillS();
@@ -280,9 +294,9 @@ namespace SCANsat.SCAN_UI
 			currentColor = GUILayout.Toggle(currentColor, textWithTT("", "Toggle Color"));
 
 			Rect d = GUILayoutUtility.GetLastRect();
-			d.x += 44;
+			d.x += 34;
 			d.y += 2;
-			d.width = 24;
+			d.width = 48;
 			d.height = 24;
 
 			if (GUI.Button(d, iconWithTT(SCANskins.SCAN_ColorToggleIcon, "Toggle Color"), SCANskins.SCAN_buttonBorderless))
@@ -365,36 +379,26 @@ namespace SCANsat.SCAN_UI
 				SCANcontroller.controller.legend = !SCANcontroller.controller.legend;
 			}
 
-			fillS();
-
-			SCANcontroller.controller.map_ResourceOverlay = GUILayout.Toggle(SCANcontroller.controller.map_ResourceOverlay, textWithTT("", "Toggle Resources"));
-
-			d = GUILayoutUtility.GetLastRect();
-			d.x += 44;
-			d.y += 2;
-			d.width = 24;
-			d.height = 24;
-
-			if (GUI.Button(d, iconWithTT(SCANskins.SCAN_ResourceIcon, "Toggle Resources"), SCANskins.SCAN_buttonBorderless))
+			if (SCANcontroller.controller.GlobalResourceOverlay)
 			{
-				SCANcontroller.controller.map_ResourceOverlay = !SCANcontroller.controller.map_ResourceOverlay;
+				fillS();
+				SCANcontroller.controller.map_ResourceOverlay = GUILayout.Toggle(SCANcontroller.controller.map_ResourceOverlay, textWithTT("", "Toggle Resources"));
+
+				d = GUILayoutUtility.GetLastRect();
+				d.x += 44;
+				d.y += 2;
+				d.width = 24;
+				d.height = 24;
+
+				if (GUI.Button(d, iconWithTT(SCANskins.SCAN_ResourceIcon, "Toggle Resources"), SCANskins.SCAN_buttonBorderless))
+				{
+					SCANcontroller.controller.map_ResourceOverlay = !SCANcontroller.controller.map_ResourceOverlay;
+				}
 			}
 			stopS();
 
-			//Open all four windows using icons instead of text; use tooltips
+			//Open settings windows using icons instead of text; use tooltips
 			Rect s = new Rect(10, WindowRect.height - 42, 32, 32);
-
-			//if (GUI.Button(s, iconWithTT(SCANskins.SCAN_SmallMapIcon, "Small Map"), SCANskins.SCAN_windowButton))
-			//{
-			//	SCANcontroller.controller.mainMap.Visible = !SCANcontroller.controller.mainMap.Visible;
-			//}
-
-			//s.x += 40;
-
-			//if (GUI.Button(s, iconWithTT(SCANskins.SCAN_InstrumentIcon, "Instruments"), SCANskins.SCAN_windowButton))
-			//{
-			//	SCANcontroller.controller.instrumentsWindow.Visible = !SCANcontroller.controller.instrumentsWindow.Visible;
-			//}
 
 			if (GUI.Button(s, iconWithTT(SCANskins.SCAN_SettingsIcon, "Settings Menu"), SCANskins.SCAN_windowButton))
 			{
@@ -406,6 +410,14 @@ namespace SCANsat.SCAN_UI
 			if (GUI.Button(s, iconWithTT(SCANskins.SCAN_ColorIcon, "Color Control"), SCANskins.SCAN_windowButton))
 			{
 				SCANcontroller.controller.colorManager.Visible = !SCANcontroller.controller.colorManager.Visible;
+			}
+
+			s.x = WindowRect.width - 66;
+
+			if (GUI.Button(s, iconWithTT(SCANskins.SCAN_ScreenshotIcon, "Export Map"), SCANskins.SCAN_windowButton))
+			{
+				if (bigmap.isMapComplete())
+					bigmap.exportPNG();
 			}
 		}
 
@@ -661,7 +673,7 @@ namespace SCANsat.SCAN_UI
 			else if (planetoid_drop_down)
 			{
 				int j = 0;
-				ddRect = new Rect(WindowRect.width - 140, 45, 100, 160);
+				ddRect = new Rect(WindowRect.width - 130, 45, 100, 160);
 				GUI.Box(ddRect, "", SCANskins.SCAN_dropDownBox);
 				for (int i = 0; i < FlightGlobals.Bodies.Count; i++)
 				{
@@ -689,7 +701,6 @@ namespace SCANsat.SCAN_UI
 
 			else
 				drop_down_open = false;
-
 		}
 
 	}
