@@ -38,6 +38,7 @@ namespace SCANsat.SCAN_UI
 		private const string lockID = "colorLockID";
 		internal static Rect defaultRect = new Rect(100, 400, 650, 330);
 
+		//SCAN_MBW objects to sync the color selection fields to the currently displayed map
 		private SCANkscMap kscMapObj;
 		private SCANnewBigMap bigMapObj;
 
@@ -63,6 +64,7 @@ namespace SCANsat.SCAN_UI
 		{
 			paletteSizeInt = palette.CurrentPalettes.size;
 			setSizeSlider(palette.CurrentPalette.kind);
+
 			if (HighLogic.LoadedScene == GameScenes.SPACECENTER || HighLogic.LoadedScene == GameScenes.TRACKSTATION)
 			{
 				kscMapObj = (SCANkscMap)SCANcontroller.controller.kscMap;
@@ -88,6 +90,7 @@ namespace SCANsat.SCAN_UI
 
 		protected override void DrawWindowPre(int id)
 		{
+			//Some clumsy logic is used here to ensure that the color selection fields always remain in sync with the current map in each scene
 			if (HighLogic.LoadedSceneIsFlight)
 			{
 				if (data == null)
@@ -98,6 +101,11 @@ namespace SCANsat.SCAN_UI
 						data = new SCANdata(FlightGlobals.currentMainBody);
 						SCANcontroller.controller.addToBodyData(FlightGlobals.currentMainBody, data);
 					}
+				}
+				if (bigMapObj.Visible && SCANnewBigMap.BigMap != null)
+				{
+					data = bigMapObj.Data;
+					bigMap = SCANnewBigMap.BigMap;
 				}
 				else if (data.Body != FlightGlobals.currentMainBody)
 				{
@@ -121,6 +129,20 @@ namespace SCANsat.SCAN_UI
 			else if (HighLogic.LoadedScene == GameScenes.SPACECENTER)
 			{
 				if (data == null)
+				{
+					data = SCANUtil.getData(Planetarium.fetch.Home);
+					if (data == null)
+					{
+						data = new SCANdata(Planetarium.fetch.Home);
+						SCANcontroller.controller.addToBodyData(Planetarium.fetch.Home, data);
+					}
+				}
+				if (kscMapObj.Visible)
+				{
+					data = kscMapObj.Data;
+					bigMap = SCANkscMap.BigMap;
+				}
+				else if (data.Body != Planetarium.fetch.Home)
 				{
 					data = SCANUtil.getData(Planetarium.fetch.Home);
 					if (data == null)
@@ -162,6 +184,20 @@ namespace SCANsat.SCAN_UI
 						SCANcontroller.controller.addToBodyData(Planetarium.fetch.Home, data);
 					}
 				}
+				if (kscMapObj.Visible)
+				{
+					data = kscMapObj.Data;
+					bigMap = SCANkscMap.BigMap;
+				}
+				else if (data.Body != Planetarium.fetch.Home)
+				{
+					data = SCANUtil.getData(Planetarium.fetch.Home);
+					if (data == null)
+					{
+						data = new SCANdata(Planetarium.fetch.Home);
+						SCANcontroller.controller.addToBodyData(Planetarium.fetch.Home, data);
+					}
+				}
 				if (bigMap == null)
 				{
 					if (SCANkscMap.BigMap != null)
@@ -183,6 +219,7 @@ namespace SCANsat.SCAN_UI
 				}
 			}
 
+			//This updates all of the fields whenever the palette selection is changed; very ugly...
 			if (currentLegend == null || data.ColorPalette != dataPalette)
 			{
 				dataPalette = data.ColorPalette;
@@ -214,23 +251,23 @@ namespace SCANsat.SCAN_UI
 
 		protected override void DrawWindow(int id)
 		{
-			versionLabel(id);
+			versionLabel(id);					/* The standard version number and close button */
 			closeBox(id);
 
 			growS();
 				growE();
-					paletteTextures(id);
-					paletteOptions(id);
+					paletteTextures(id);		/* Draws the palette selection button and preview swatches */
+					paletteOptions(id);			/* All of the terrain and palette options */
 				stopE();
 				fillS(8);
 				growE();
-					palettePreview(id);
+					palettePreview(id);			/* Draws the two preview palette legends */
 					fillS(10);
-					paletteConfirmation(id);
+					paletteConfirmation(id);	/* The buttons for default, apply, and cancel */
 				stopE();
 			stopS();
 
-			paletteSelectionBox(id);
+			paletteSelectionBox(id);			/* Draw the drop down menu for the palette selection box */
 		}
 
 		protected override void DrawWindowPost(int id)
@@ -238,6 +275,7 @@ namespace SCANsat.SCAN_UI
 			if (paletteBox && Event.current.type == EventType.mouseDown && !paletteRect.Contains(Event.current.mousePosition))
 				paletteBox = false;
 
+			//These methods update all of the UI elements whenever any of the options are changed
 			if (reversePalette != oldReverseState)
 			{
 				oldReverseState = reversePalette;
@@ -311,6 +349,7 @@ namespace SCANsat.SCAN_UI
 					GUILayout.Label(palette.getPaletteTypeName, SCANskins.SCAN_whiteReadoutLabel);
 				stopE();
 				growE();
+					// This integer stores the amount of palettes of each type
 					int j = 9;
 					if (palette.CurrentPalettes.paletteType == Palette.Kind.Sequential)
 						j = 12;
@@ -455,6 +494,7 @@ namespace SCANsat.SCAN_UI
 				fillS(6);
 				if (GUILayout.Button("Default Settings", GUILayout.Width(135)))
 				{
+					//Lots of fields to update for switching palettes; again, very clumsy
 					data.MinHeight = data.DefaultMinHeight;
 					data.MaxHeight = data.DefaultMaxHeight;
 					data.ClampHeight = data.DefaultClampHeight;
@@ -534,11 +574,13 @@ namespace SCANsat.SCAN_UI
 			}
 		}
 
+		//Draws the palette swatch for the currently active SCANdata selection
 		private void drawCurrentLegend()
 		{
 			currentLegend = SCANmap.getLegend(0, data);
 		}
 
+		//Draws the palette swatch for the newly adjusted palette
 		private void drawPreviewLegend()
 		{
 			float? clamp = null;
@@ -550,6 +592,7 @@ namespace SCANsat.SCAN_UI
 			previewLegend = SCANmap.getLegend(maxHeightF, minHeightF, clamp, discretePalette, c);
 		}
 
+		//Resets the palettes whenever the size slider is adjusted
 		private void regenPaletteSets()
 		{
 			palette.DivPaletteSet = palette.generatePaletteSet(paletteSizeInt, Palette.Kind.Diverging);
@@ -559,6 +602,7 @@ namespace SCANsat.SCAN_UI
 			palette.CurrentPalettes = palette.setCurrentPalettesType(palette.getPaletteType);
 		}
 
+		//Change the max range on the palette size slider based on palette type
 		private void setSizeSlider(Palette.Kind k)
 		{
 			switch (k)
@@ -595,6 +639,7 @@ namespace SCANsat.SCAN_UI
 			
 		}
 
+		//Dynamically adjust the min and max values on all of the terrain height sliders; avoids impossible values
 		private void setTerrainSliders()
 		{
 			terrainSliderMinMin = data.DefaultMinHeight - 10000f;
