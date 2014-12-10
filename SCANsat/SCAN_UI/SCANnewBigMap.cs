@@ -25,8 +25,8 @@ namespace SCANsat.SCAN_UI
 	{
 		private static SCANmap bigmap, spotmap;
 		private static CelestialBody b;
-		private static string mapTypeTitle = "";
-		internal SCANdata data;
+		private string mapTypeTitle = "";
+		private SCANdata data;
 		private Vessel v;
 		private double startUT;
 		private float resizeW, resizeH, dragX;
@@ -92,6 +92,16 @@ namespace SCANsat.SCAN_UI
 			bigmap.setBody(b);
 			bigmap.resource = SCANcontroller.controller.ResourceList[SCANcontroller.controller.resourceSelection];
 			TooltipsEnabled = SCANcontroller.controller.toolTips;
+		}
+
+		public static SCANmap BigMap
+		{
+			get { return bigmap; }
+		}
+
+		public SCANdata Data
+		{
+			get { return data; }
 		}
 
 		protected override void DrawWindowPre(int id)
@@ -195,13 +205,6 @@ namespace SCANsat.SCAN_UI
 			}
 		}
 
-		//protected override void resizeWindowPost(float width, float height)
-		//{
-		//	bigmap.setWidth((int)width);
-		//	overlay_static = null;
-		//	SCANcontroller.controller.map_width = bigmap.mapwidth;
-		//}
-
 		//Draw version label in upper left corner
 		private void versionLabel(int id)
 		{
@@ -251,13 +254,16 @@ namespace SCANsat.SCAN_UI
 					}
 					fillS(40);
 				}
-				//fillS();
-				//if (GUILayout.Button("Planetoid", SCANskins.SCAN_buttonFixed, GUILayout.MaxWidth(90)))
-				//{
-				//	planetoid_drop_down = !planetoid_drop_down;
-				//	drop_down_open = !drop_down_open;
-				//}
-				fillS(110);
+				else
+				{
+					//fillS(130);
+				}
+				if (GUILayout.Button("Planetoid", SCANskins.SCAN_buttonFixed, GUILayout.MaxWidth(90)))
+				{
+					planetoid_drop_down = !planetoid_drop_down;
+					drop_down_open = !drop_down_open;
+				}
+				fillS(20);
 			stopE();
 		}
 
@@ -369,23 +375,25 @@ namespace SCANsat.SCAN_UI
 					SCANcontroller.controller.legend = !SCANcontroller.controller.legend;
 				}
 
-				fillS();
-
-				SCANcontroller.controller.map_ResourceOverlay = GUILayout.Toggle(SCANcontroller.controller.map_ResourceOverlay, textWithTT("", "Toggle Resources"));
-
-				d = GUILayoutUtility.GetLastRect();
-				d.x += 44;
-				d.y += 2;
-				d.width = 24;
-				d.height = 24;
-
-				if (GUI.Button(d, iconWithTT(SCANskins.SCAN_ResourceIcon, "Toggle Resources"), SCANskins.SCAN_buttonBorderless))
+				if (SCANcontroller.controller.GlobalResourceOverlay)
 				{
-					SCANcontroller.controller.map_ResourceOverlay = !SCANcontroller.controller.map_ResourceOverlay;
+					fillS();
+					SCANcontroller.controller.map_ResourceOverlay = GUILayout.Toggle(SCANcontroller.controller.map_ResourceOverlay, textWithTT("", "Toggle Resources"));
+
+					d = GUILayoutUtility.GetLastRect();
+					d.x += 44;
+					d.y += 2;
+					d.width = 24;
+					d.height = 24;
+
+					if (GUI.Button(d, iconWithTT(SCANskins.SCAN_ResourceIcon, "Toggle Resources"), SCANskins.SCAN_buttonBorderless))
+					{
+						SCANcontroller.controller.map_ResourceOverlay = !SCANcontroller.controller.map_ResourceOverlay;
+					}
 				}
 			stopS();
 
-			//Make a 2x2 grid for all four windows using icons instead of text; use tooltips
+			//Open all four windows using icons instead of text; use tooltips
 			Rect s = new Rect(10, WindowRect.height - 42, 32, 32);
 
 			if (GUI.Button(s, iconWithTT(SCANskins.SCAN_SmallMapIcon, "Small Map"), SCANskins.SCAN_windowButton))
@@ -495,11 +503,8 @@ namespace SCANsat.SCAN_UI
 			//Draw the orbit overlays
 			if (SCANcontroller.controller.map_orbit)
 			{
-				SCANuiUtil.drawOrbit(TextureRect, bigmap, v, startUT, overlay_static);
+				SCANuiUtil.drawOrbit(TextureRect, bigmap, v, startUT, overlay_static, b);
 			}
-
-			//Draw the vessel overlays
-			SCANuiUtil.drawMapLabels(TextureRect, v, bigmap, data, v.mainBody);
 		}
 
 		//Display info for mouse over in the map and handle the zoom map
@@ -646,7 +651,7 @@ namespace SCANsat.SCAN_UI
 					spotmap.resource = SCANcontroller.controller.ResourceList[SCANcontroller.controller.resourceSelection];
 
 				GUI.Box(pos_spotmap, spotmap.getPartialMap());
-				SCANuiUtil.drawOrbit(pos_spotmap, spotmap, v, startUT, overlay_static);
+				SCANuiUtil.drawOrbit(pos_spotmap, spotmap, v, startUT, overlay_static, b);
 				SCANuiUtil.drawMapLabels(pos_spotmap, v, spotmap, data, v.mainBody);
 				zoomCloseRect = new Rect(pos_spotmap.x + 180, pos_spotmap.y, 18, 18);
 
@@ -661,7 +666,7 @@ namespace SCANsat.SCAN_UI
 		//Draw the map overlay labels
 		private void mapLabels(int id)
 		{
-			SCANuiUtil.drawMapLabels(TextureRect, null, bigmap, data, b);
+			SCANuiUtil.drawMapLabels(TextureRect, v, bigmap, data, b);
 		}
 
 		//Draw the drop down menus if any have been opened
@@ -722,37 +727,36 @@ namespace SCANsat.SCAN_UI
 				}
 			}
 
-			//else if (planetoid_drop_down)
-			//{
-			//	int j = 0;
-			//	ddRect = new Rect(WindowRect.width - 140, 45, 100, 160);
-			//	GUI.Box(ddRect, "", SCANskins.SCAN_dropDownBox);
-			//	for (int i = 0; i < FlightGlobals.Bodies.Count; i++)
-			//	{
-			//		scrollP = GUI.BeginScrollView(ddRect, scrollP, new Rect(0, 0, 80, (20 * SCANcontroller.Body_Data.Count) + 1));
-			//		if (SCANcontroller.Body_Data.ContainsKey(FlightGlobals.Bodies[i].name))
-			//		{
-			//			Rect r = new Rect(2, 20 * j, 76, 20);
-			//			if (GUI.Button(r, FlightGlobals.Bodies[i].name, SCANskins.SCAN_dropDownButton))
-			//			{
-			//				CelestialBody newB = FlightGlobals.Bodies[i];
-			//				SCANdata newData = SCANUtil.getData(newB);
-			//				if (newData != null)
-			//				{
-			//					data = newData;
-			//					b = newB;
-			//					bigmap.setBody(b);
-			//				}
-			//				drop_down_open = false;
-			//			}
-			//			j++;
-			//		}
-			//		GUI.EndScrollView();
-			//	}
-			//}
+			else if (planetoid_drop_down)
+			{
+				int j = 0;
+				ddRect = new Rect(WindowRect.width - 130, 45, 100, 160);
+				GUI.Box(ddRect, "", SCANskins.SCAN_dropDownBox);
+				for (int i = 0; i < FlightGlobals.Bodies.Count; i++)
+				{
+					scrollP = GUI.BeginScrollView(ddRect, scrollP, new Rect(0, 0, 80, (20 * SCANcontroller.Body_Data.Count) + 1));
+					if (SCANcontroller.Body_Data.ContainsKey(FlightGlobals.Bodies[i].name))
+					{
+						Rect r = new Rect(2, 20 * j, 76, 20);
+						if (GUI.Button(r, FlightGlobals.Bodies[i].name, SCANskins.SCAN_dropDownButton))
+						{
+							CelestialBody newB = FlightGlobals.Bodies[i];
+							SCANdata newData = SCANUtil.getData(newB);
+							if (newData != null)
+							{
+								data = newData;
+								b = newB;
+								bigmap.setBody(b);
+							}
+							drop_down_open = false;
+						}
+						j++;
+					}
+					GUI.EndScrollView();
+				}
+			}
 			else
 				drop_down_open = false;
-
 		}
 
 	}
