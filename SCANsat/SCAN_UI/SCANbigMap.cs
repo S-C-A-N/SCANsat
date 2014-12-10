@@ -206,7 +206,7 @@ namespace SCANsat.SCAN_UI
 			//Draw the orbit overlays
 			if (SCANcontroller.controller.map_orbit && !notMappingToday)
 			{
-				SCANuiUtil.drawOrbit(maprect, bigmap, v, startUT, overlay_static);
+				SCANuiUtil.drawOrbit(maprect, bigmap, v, startUT, overlay_static, b);
 			}
 
 			growE(GUILayout.ExpandWidth(true));
@@ -617,7 +617,7 @@ namespace SCANsat.SCAN_UI
 				GUI.Box(pos_spotmap, spotmap.getPartialMap());
 				if (!notMappingToday)
 				{
-					SCANuiUtil.drawOrbit(pos_spotmap, spotmap, v, startUT, overlay_static);
+					SCANuiUtil.drawOrbit(pos_spotmap, spotmap, v, startUT, overlay_static, b);
 					SCANuiUtil.drawMapLabels(pos_spotmap, v, spotmap, data, v.mainBody);
 				}
 				Rect sC = new Rect(pos_spotmap.x + 160, pos_spotmap.y, 18, 18);
