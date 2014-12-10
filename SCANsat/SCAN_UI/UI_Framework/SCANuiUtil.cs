@@ -309,12 +309,17 @@ namespace SCANsat.SCAN_UI
 
 		internal static void resetBigMapPos()
 		{
-			SCANcontroller.controller.bigMap.resetWindowPos(SCANbigMap.defaultRect);
+			SCANcontroller.controller.newBigMap.resetWindowPos(SCANbigMap.defaultRect);
 		}
 
 		internal static void resetKSCMapPos()
 		{
 			SCANcontroller.controller.kscMap.resetWindowPos(SCANkscMap.defaultRect);
+		}
+
+		internal static void resetColorMapPos()
+		{
+			SCANcontroller.controller.colorManager.resetWindowPos(SCANcolorSelection.defaultRect);
 		}
 
 		#endregion
@@ -392,7 +397,10 @@ namespace SCANsat.SCAN_UI
 				}
 			}
 			if (vessel != null)
-				drawVesselLabel(maprect, map, 0, vessel);
+			{
+				if (vessel.mainBody == body)
+					drawVesselLabel(maprect, map, 0, vessel);
+			}
 		}
 
 		//Method to draw anomaly labels on the map
@@ -513,8 +521,9 @@ namespace SCANsat.SCAN_UI
 		}
 
 		//Draw the orbit overlay; needs to be replaced with the method used by SCANsatRPM
-		internal static void drawOrbit(Rect maprect, SCANmap map, Vessel vessel, double startUT, Texture2D overlay_static)
+		internal static void drawOrbit(Rect maprect, SCANmap map, Vessel vessel, double startUT, Texture2D overlay_static, CelestialBody body)
 		{
+			if (vessel.mainBody != body) return;
 			int eqh = 16;
 
 			if (vessel.LandedOrSplashed)
