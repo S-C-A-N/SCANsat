@@ -12,6 +12,7 @@
 #endregion
 using System;
 using UnityEngine;
+using SCANsat.Platform.Palettes;
 using palette = SCANsat.SCAN_UI.SCANpalette;
 
 namespace SCANsat
@@ -32,15 +33,17 @@ namespace SCANsat
 
 		public static Texture2D legend;
 		private static float legendMin, legendMax;
+		private static Palette dataPalette;
 		private static int legendScheme;
 		public static Texture2D getLegend(float min, float max, int scheme, SCANdata data)
 		{
-			if (legend != null && legendMin == min && legendMax == max && legendScheme == scheme)
+			if (legend != null && legendMin == min && legendMax == max && legendScheme == scheme && data.ColorPalette == dataPalette)
 				return legend;
 			legend = new Texture2D(256, 1, TextureFormat.RGB24, false);
 			legendMin = min;
 			legendMax = max;
 			legendScheme = scheme;
+			dataPalette = data.ColorPalette;
 			Color[] pix = legend.GetPixels();
 			for (int x = 0; x < 256; ++x)
 			{
