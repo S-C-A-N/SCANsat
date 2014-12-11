@@ -296,7 +296,10 @@ namespace SCANsat.SCAN_UI
 					SCANcontroller.controller.toolTips = !SCANcontroller.controller.toolTips;
 					TooltipsEnabled = SCANcontroller.controller.toolTips;
 					if (HighLogic.LoadedSceneIsFlight)
+					{
 						SCANcontroller.controller.newBigMap.TooltipsEnabled = SCANcontroller.controller.toolTips;
+						SCANcontroller.controller.mainMap.TooltipsEnabled = SCANcontroller.controller.toolTips;
+					}
 					if (HighLogic.LoadedScene == GameScenes.SPACECENTER || HighLogic.LoadedScene == GameScenes.TRACKSTATION)
 						SCANcontroller.controller.kscMap.TooltipsEnabled = SCANcontroller.controller.toolTips;
 				}
