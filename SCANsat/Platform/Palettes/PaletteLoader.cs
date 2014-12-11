@@ -70,8 +70,8 @@ namespace SCANsat.Platform.Palettes
 				palettes.Add(defaultPalette);
 				palettes.Add(FixedColors.FixedColorPalettes.blackForest());
 				palettes.Add(FixedColors.FixedColorPalettes.mars());
-				palettes.Add(FixedColors.FixedColorPalettes.pakistan());
-				palettes.Add(FixedColors.FixedColorPalettes.lithuania());
+				palettes.Add(FixedColors.FixedColorPalettes.departure());
+				palettes.Add(FixedColors.FixedColorPalettes.northRhine());
 				palettes.Add(FixedColors.FixedColorPalettes.wiki2());
 				palettes.Add(FixedColors.FixedColorPalettes.plumbago());
 				palettes.Add(FixedColors.FixedColorPalettes.cw1_013());

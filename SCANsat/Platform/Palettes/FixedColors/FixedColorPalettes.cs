@@ -18,22 +18,24 @@ namespace SCANsat.Platform.Palettes.FixedColors
 			return new Palette(c, "Black Forest", Palette.Kind.Fixed, (Palette.Is)3, (Palette.Is)3, (Palette.Is)3, (Palette.Is)3);
 		}
 
-		/* Wikipedia color scheme licensed under Creative Commons Attribution-Share Alike 3.0 Unported license
-		 * Pakistan Scheme - http://commons.wikimedia.org/wiki/User:Jarke
+		/* A freely available color scheme by Mark J. Fenbers
+		 * http://soliton.vm.bytemark.co.uk/pub/cpt-city/mjf/copying.html
 		 * */
-		public static Palette pakistan()
+		public static Palette departure()
 		{
 			Color32[] c;
-			c = new[] { RGB(218,228,201), RGB(233,234,194), RGB(240,236,209), RGB(242,227,189), RGB(237,207,162), RGB(226,197,150), RGB(202,186,224), RGB(223,214,236), RGB(243,243,255) };
-			return new Palette(c, "Pakistan", Palette.Kind.Fixed, (Palette.Is)3, (Palette.Is)3, (Palette.Is)3, (Palette.Is)3);
+			c = new[] { RGB(68, 34, 0), RGB(102, 51, 0), RGB(160, 108, 60), RGB(218, 166, 120), RGB(238, 212, 188), RGB(255, 255, 255), RGB(200, 255, 200), RGB(100, 255, 100), RGB(0, 255, 0), RGB(0, 192, 0), RGB(0, 128, 0) };
+			return new Palette(c, "Departure", Palette.Kind.Fixed, (Palette.Is)3, (Palette.Is)3, (Palette.Is)3, (Palette.Is)3);
 		}
 
-		//Size *8*
-		public static Palette lithuania()
+		/* Wikipedia color scheme licensed under Creative Commons Attribution-Share Alike 3.0 Unported license
+		 * http://commons.wikimedia.org/wiki/File:North_Rhine-Westphalia_Topography_01.svg
+		 * */
+		public static Palette northRhine()
 		{
 			Color32[] c;
-			c = new[] { RGB(74, 173, 90), RGB(116, 195, 83), RGB(181, 214, 99), RGB(222, 222, 99), RGB(255, 231, 16), RGB(255, 206, 8), RGB(255, 156, 8), RGB(255, 123, 16) };
-			return new Palette(c, "Lithuania", Palette.Kind.Fixed, (Palette.Is)3, (Palette.Is)3, (Palette.Is)3, (Palette.Is)3);
+			c = new[] { RGB(5, 6, 3), RGB(55, 55, 36), RGB(24, 62, 41), RGB(52, 105, 69), RGB(62, 138, 89), RGB(108, 163, 99), RGB(165, 186, 111), RGB(231, 213, 122), RGB(199, 167, 92), RGB(176, 120, 58) };
+			return new Palette(c, "NorthRhine", Palette.Kind.Fixed, (Palette.Is)3, (Palette.Is)3, (Palette.Is)3, (Palette.Is)3);
 		}
 
 		/* Wikipedia color scheme licensed under Creative Commons Attribution-Share Alike 3.0 Unported license
