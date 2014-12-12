@@ -461,8 +461,9 @@ sneaky then they can of course be sneaky.
 [5d]: #top-d-been-there-done-that
 [5e]: #top-e-maptraq-deprecated
 [6]: #top-6-career-mode-research-and-development
-[6a]: #top-6aminimum-scan-for-science
-[6b]: #top-6b-getting-maximum-science
+[6a]: #top-6a-community-tech-tree-support
+[6b]: #top-6a-minimum-scan-for-science
+[6c]: #top-6c-getting-maximum-science
 [7]: #top-7-background-scanning
 [8]: #top-8-time-warp
 [9]: #top-9-note-concerning-data-sources
