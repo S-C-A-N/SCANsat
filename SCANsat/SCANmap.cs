@@ -57,8 +57,6 @@ namespace SCANsat
 
 		public static Texture2D getLegend(int scheme, SCANdata data)
 		{
-			//if (legend != null && legendMin == min && legendMax == max && legendScheme == scheme)
-			//	return legend;
 			Texture2D t = new Texture2D(256, 1, TextureFormat.RGB24, false);
 			Color[] pix = t.GetPixels();
 			for (int x = 0; x < 256; ++x)
