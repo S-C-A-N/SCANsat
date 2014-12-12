@@ -20,6 +20,7 @@ using SCANsat.SCAN_UI;
 using SCANsat.Platform;
 using SCANsat.Platform.Palettes;
 using SCANsat.Platform.Palettes.ColorBrewer;
+using SCANsat.Platform.Palettes.FixedColors;
 using palette = SCANsat.SCAN_UI.SCANpalette;
 
 namespace SCANsat
@@ -76,7 +77,6 @@ namespace SCANsat
 		public int map_y = 50;
 		[KSPField(isPersistant = true)]
 		public string anomalyMarker = "✗";
-		//[KSPField(isPersistant = true)]
 		public string closeBox = "✖";
 		[KSPField(isPersistant = true)]
 		public bool legend = false;
@@ -84,10 +84,6 @@ namespace SCANsat
 		public bool scan_background = true;
 		[KSPField(isPersistant = true)]
 		public int timeWarpResolution = 20;
-		//[KSPField(isPersistant = true)]
-		//public bool globalOverlay = false; //Global resource overlay toggle
-		//[KSPField(isPersistant = true)]
-		//public int gridSelection = 0; //Which resource type is selected in the settings menu
 		[KSPField(isPersistant = true)]
 		public string resourceSelection;
 		[KSPField(isPersistant = true)]
@@ -103,9 +99,7 @@ namespace SCANsat
 		[KSPField(isPersistant = true)]
 		public bool toolTips = true;
 
-		/* Needs Fixing: Available resources for overlays; loaded from resource addon configs */
-		//private List<SCANdata.SCANResource> resourcesList = new List<SCANdata.SCANResource>();
-
+		/* Available resources for overlays; loaded from resource addon configs */
 		private Dictionary<string, SCANdata.SCANResource> resourceList = new Dictionary<string, SCANdata.SCANResource>();
 
 		/* Primary SCANsat vessel dictionary; loaded every time */
@@ -124,7 +118,6 @@ namespace SCANsat
 		internal SCAN_MBW mainMap;
 		internal SCAN_MBW settingsWindow;
 		internal SCAN_MBW instrumentsWindow;
-		//internal SCAN_MBW bigMap;
 		internal SCAN_MBW newBigMap;
 		internal SCAN_MBW kscMap;
 		internal SCAN_MBW colorManager;
@@ -135,13 +128,6 @@ namespace SCANsat
 		private bool globalResourceOverlay = false;
 
 		#region Public Accessors
-		/* Use these to access private members of this class */
-		//public List<SCANdata.SCANResource> ResourcesList
-		//{
-		//	//get { return resourcesList; }
-		//	get { return null; }
-		//}
-
 		public static Dictionary<string, SCANdata> Body_Data
 		{
 			get { return body_data; }
@@ -345,7 +331,6 @@ namespace SCANsat
 					mainMap = gameObject.AddComponent<SCANmainMap>();
 					settingsWindow = gameObject.AddComponent<SCANsettingsUI>();
 					instrumentsWindow = gameObject.AddComponent<SCANinstrumentUI>();
-					//bigMap = gameObject.AddComponent<SCANbigMap>();
 					colorManager = gameObject.AddComponent<SCANcolorSelection>();
 					newBigMap = gameObject.AddComponent<SCANnewBigMap>();
 				}
@@ -452,8 +437,6 @@ namespace SCANsat
 				Destroy(settingsWindow);
 			if (instrumentsWindow != null)
 				Destroy(instrumentsWindow);
-			//if (bigMap != null)
-			//	Destroy(bigMap);
 			if (kscMap != null)
 				Destroy(kscMap);
 			if (newBigMap != null)
@@ -479,11 +462,22 @@ namespace SCANsat
 			{
 				try
 				{
-					//Load the ColorBrewer method by name through reflection
-					var brewer = typeof(BrewerPalettes);
-					var paletteMethod = brewer.GetMethod(data.PaletteName);
-					var colorP = paletteMethod.Invoke(null, new object[] { data.PaletteSize });
-					data.ColorPalette = (Palette)colorP;
+					if (data.PaletteName == "blackForest" || data.PaletteName == "departure" || data.PaletteName == "northRhine" || data.PaletteName == "mars" || data.PaletteName == "wiki2" || data.PaletteName == "plumbago" || data.PaletteName == "cw1_013" || data.PaletteName == "arctic")
+					{
+						//Load the fixed size color palette by name through reflection
+						var fixedPallete = typeof(FixedColorPalettes);
+						var fPaletteMethod = fixedPallete.GetMethod(data.PaletteName);
+						var fColorP = fPaletteMethod.Invoke(null, null);
+						data.ColorPalette = (Palette)fColorP;
+					}
+					else
+					{
+						//Load the ColorBrewer method by name through reflection
+						var brewer = typeof(BrewerPalettes);
+						var bPaletteMethod = brewer.GetMethod(data.PaletteName);
+						var bColorP = bPaletteMethod.Invoke(null, new object[] { data.PaletteSize });
+						data.ColorPalette = (Palette)bColorP;
+					}
 				}
 				catch (Exception e)
 				{
