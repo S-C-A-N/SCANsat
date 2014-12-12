@@ -299,6 +299,8 @@ There are four drop-down menus along the top of the big map. These control, from
 * The resource to overlay on the map
 * The planet to display
 
+The icon in the center of the upper row regenerates the map.
+
 The toggle icons along the left side of the map control the various overlays and the color mode.
 
 The four buttons in the bottom-left open and close the other SCANsat windows.
