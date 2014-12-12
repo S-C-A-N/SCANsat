@@ -15,6 +15,7 @@
 [![][shield:support-karbonite]][karbonite:release]&nbsp;
 [![][shield:support-usi]][usi:release]&nbsp;
 [![][shield:support-epl]][epl:release]&nbsp;
+[![][shield:support-ctt]][ctt:release]&nbsp;
 
 **Table of Contents**
 ------------------------------------------
@@ -136,7 +137,7 @@ S.C.A.N. is proud to collaborate with other KSP mods and modding teams. Followin
 [![Support for Kethane][kethane:logo]][kethane:release] | [![Support for MKS][usi:logo]][usi:release]
 [**OpenResourceSystemX**][orsx:release] | [![Support for ALCOR][alcor:logo]][alcor:release]
 [**RasterPropMonitor**][rpm:release]  | [![Support for Karbonite][karbonite:logo]][karbonite:release]
-[**Blizzy78's Toolbar**][toolbar:release] |  [**KSP: Interstellar**][kspi:release]
+[**Blizzy78's Toolbar**][toolbar:release] |  [Support for Community Tech Tree][ctt:logo][ctt:release]
 [**ModuleManager**][mm:release] | [**Extraplanetary Launchpads**][epl:release]
 
 
@@ -472,6 +473,7 @@ sneaky then they can of course be sneaky.
 [shield:support-usi]:http://img.shields.io/badge/works%20with%20USI-0.21.2-34c566.svg
 [shield:support-karbonite]: http://img.shields.io/badge/works%20with%20Karbonite-0.4.2-ff8c00.svg
 [shield:support-epl]: http://img.shields.io/badge/works%20with%20EPL-4.2.3-ff8c00.svg
+[shield:support-ctt]: http://img.shields.io/badge/works%20with%20CTT-1.1-blue.svg
 
 [shield:gittip-tg-img]: http://img.shields.io/gittip/technogeeky.png
 [shield:gittip-tg]: https://www.gittip.com/technogeeky/
@@ -542,9 +544,13 @@ sneaky then they can of course be sneaky.
 [alcor:release]: http://forum.kerbalspaceprogram.com/threads/54925
 [alcor:logo]: http://i.imgur.com/7eJ3IFC.jpg
 
+[ctt:logo]: http://i.imgur.com/li2tNgE.png
+
 [mm:release]: http://forum.kerbalspaceprogram.com/threads/55219
 
 [epl:release]: http://forum.kerbalspaceprogram.com/threads/59545
+
+[ctt:release]: http://forum.kerbalspaceprogram.com/threads/100385
 
 [kspi:release]: http://forum.kerbalspaceprogram.com/threads/43839
 
