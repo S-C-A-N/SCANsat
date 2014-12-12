@@ -186,7 +186,7 @@ on custom parts, but this is not a requirement.
 
 Without any resource scanning mods installed, **SCANsat** can scan for a few basic types of data. All of these (non-resource) scans are shown as indicators on the Small Map.
 
-![][small-mismatch2]
+![][small-newMap1]
 
 Data Type | Scan Type | Scan Indicator
 :--- | :--- | :---:
@@ -207,7 +207,7 @@ Anomaly | **Been There, Done That(tm)** | **BTDT**
 **SCANsat** will scan planetoids for resources, assuming you have the relevant mods installed. All support for resource scanning is handled through one of two plugins. **ORS** supports many resources, and **Kethane** supports a few. 
 
 Each of the two resource systems can be enabled through the **SCANsat** Settings menu:
-> ![][resource-walkthrough]
+> ![][resource-walkthrough-v2]
 
 Both of the two resource systems will work in IVA, too:
 > ![][resource-iva]
@@ -229,10 +229,10 @@ Once it is installed correctly, you will be able to enable Kethane resources in 
 **ORSX** support is built internal to SCANsat. If you have an **ORSX** DLL loaded anywhere SCANsat will only target the newest version.
 
 With any **ORSX**-using mod installed, you can enable their resources in the Settings menu, and enable their overlay on the Big Map:
-> ![][resource-orsx]
+> ![][resource-orsx-v2]
 
 For instance the **Karbonite** mod's resources can be viewed:
-> ![][resource-orsx-karbonite]
+> ![][resource-orsx-karbonite-v2]
 
 
 ### [:top:][top] 3. Basic Usage
@@ -426,6 +426,7 @@ sneaky then they can of course be sneaky.
 [small-justright]: https://i.imgur.com/Oft4xXP.gif
 [small-mismatch1]: https://i.imgur.com/fNztoUN.gif
 [small-mismatch2]: https://i.imgur.com/aQtTGvV.gif
+[small-newMap1]: http://i.imgur.com/mCnphuZ.gif
 
 [bigmap-scan-10000x]: http://i.imgur.com/VEPL3oN.gif
 [bigmap-scan-100x]: http://i.imgur.com/bcht47p.gif
@@ -437,7 +438,9 @@ sneaky then they can of course be sneaky.
 [resource-orsx-karbonite]: http://i.imgur.com/Sge2OGH.png?1
 [resource-iva]: http://i.imgur.com/iRo4kSA.png
 [resource-walkthrough]: http://i.imgur.com/HJLK1yi.gif
-
+[resource-walkthrough-v2]: http://i.imgur.com/80ximDP.gif
+[resource-orsx-v2]: http://i.imgur.com/ERSFwCX.png
+[resource-orsx-karbonite-v2]: http://i.imgur.com/qVlHzSN.png
 
 [top]: #table-of-contents
 [0]: #top-0-people-and-faqs
