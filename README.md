@@ -3,6 +3,7 @@
 [![][shield:jenkins-rel]][SCANsat:rel-jenkins]&nbsp;
 [![][shield:license-bsd]][SCANsat:rel-license]&nbsp;
 [![][shield:license-mit]][SCANsat:dev-license]&nbsp;
+[![][shield:license-cc-by-sa]][SCANsat:dev-license]&nbsp;
 ![scan your planetoid like the big boys do][bigmap-scan-10000x]
 > ###### **Example SAR scan of Kerbin at 1000x and then 10,000x warp**
 
@@ -470,6 +471,7 @@ sneaky then they can of course be sneaky.
 
 [shield:license-bsd]: http://img.shields.io/:license-bsd-blue.svg
 [shield:license-mit]: http://img.shields.io/:license-mit-a31f34.svg
+[shield:license-cc-by-sa]: http://img.shields.io/badge/license-CC%20BY--SA-green.svg
  
 [shield:jenkins-dev]: http://img.shields.io/jenkins/s/https/ksp.sarbian.com/jenkins/SCANsat-dev.svg
 [shield:jenkins-rel]: http://img.shields.io/jenkins/s/https/ksp.sarbian.com/jenkins/SCANsat-release.svg
