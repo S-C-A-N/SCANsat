@@ -35,6 +35,7 @@
   * [a. FAQ: Finding a Good Altitude][3a]
   * [b. Mismatched Scanners][3b]
 * [4. Big Map][4]
+  * [a. Big Map Options][4a]
 * [5. Parts and Sensors Types][5]
   * [a. RADAR][5a]
   * [b. SAR][5b]
@@ -289,6 +290,21 @@ You can mouse over the big map to see what sensors have data for the location, a
 
 Right-clicking on the big map shows a magnified view around the position where you clicked. Mouse operations work inside this magnified view just like they work outside, meaning the data displayed at the bottom window applies to your position inside the magnified view, and right-clicking inside it will increase magnification. This can be useful to find landing spots which won't kill your kerbals.
 
+#### [:top:][top] 4a. Big Map Options
+
+There are four drop-down menus along the top of the big map. These control, from left to right: The map projection type - Rectangular, KavrayskiyVII:, or Polar
+The map type - Altimetry, Slope, or Biome
+The resource to overlay on the map
+The planet to display
+
+The toggle icons along the left side of the map control the various overlays and the color mode.
+
+The four buttons in the bottom-left open and close the other SCANsat windows.
+
+The camera icon in the lower-right exports a copy of the map.
+
+The re-size icon in the lower-right corner can be dragged to re-size the map.
+
 ### [:top:][top] 5. Parts and Sensor Types
 ------------------------------------------
 
@@ -458,6 +474,7 @@ sneaky then they can of course be sneaky.
 [3a]: #top-3a-faq-finding-a-good-altitude
 [3b]: #top-3b-mismatched-scanners
 [4]: #top-4-big-map
+[4a]: #top-4a-big-map-options
 [5]: #top-5-parts-and-sensor-types
 [5a]: #top-a-the-radar-altimetry-sensor
 [5b]: #top-b-the-sar-altimetry-sensor
