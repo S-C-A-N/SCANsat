@@ -292,10 +292,12 @@ Right-clicking on the big map shows a magnified view around the position where y
 
 #### [:top:][top] 4a. Big Map Options
 
-There are four drop-down menus along the top of the big map. These control, from left to right: The map projection type - Rectangular, KavrayskiyVII:, or Polar
-The map type - Altimetry, Slope, or Biome
-The resource to overlay on the map
-The planet to display
+There are four drop-down menus along the top of the big map. These control, from left to right: 
+
+* The map projection type - Rectangular, KavrayskiyVII:, or Polar
+* The map type - Altimetry, Slope, or Biome
+* The resource to overlay on the map
+* The planet to display
 
 The toggle icons along the left side of the map control the various overlays and the color mode.
 
