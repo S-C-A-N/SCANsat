@@ -280,7 +280,7 @@ Be sure to remember to pack enough batteries, radioisotope generators, and solar
 
 ### [:top:][top] 4. Big Map
 ------------------------------------------
-![A Big Big Map][bigmap-anim]
+![A Big Big Map][bigmap-anim-v2]
 
 A bigger map can be rendered on demand. Rendered maps are automatically
 saved to GameData/SCANsat/PluginData. Note that position indicators for
@@ -431,6 +431,7 @@ sneaky then they can of course be sneaky.
 [bigmap-scan-10000x]: http://i.imgur.com/VEPL3oN.gif
 [bigmap-scan-100x]: http://i.imgur.com/bcht47p.gif
 [bigmap-anim]: http://i.imgur.com/kxyl8xR.gif
+[bigmap-anim-v2]: http://i.imgur.com/lwyVBAN.gif
 
 [resource-kethane]: http://i.imgur.com/naJIsvB.gif
 [resource-kethane2]: http://i.imgur.com/AT2b4G7.jpg?1
