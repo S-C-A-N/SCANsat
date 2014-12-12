@@ -1,6 +1,5 @@
 ### [**SCANsat**][top]: Real Scanning, Real Science, Warp Speed!
 [![][shield:support-ksp]][KSP:developers]&nbsp;
-[![][shield:jenkins-rel]][SCANsat:rel-jenkins]&nbsp;
 [![][shield:license-bsd]][SCANsat:rel-license]&nbsp;
 [![][shield:license-mit]][SCANsat:dev-license]&nbsp;
 [![][shield:license-cc-by-sa]][SCANsat:dev-license]&nbsp;
