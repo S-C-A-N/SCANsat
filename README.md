@@ -16,6 +16,7 @@
 [![][shield:support-usi]][usi:release]&nbsp;
 [![][shield:support-epl]][epl:release]&nbsp;
 [![][shield:support-ctt]][ctt:release]&nbsp;
+[![][shield:support-tm][techmanager:release]&nbsp;
 
 **Table of Contents**
 ------------------------------------------
@@ -322,13 +323,23 @@ The **Multispectral** sensor can be unlocked in **Advanced Exploration**.
 
 The **BTDT** sensor can be unlocked in **Field Science**.
 
+##### [:top:][top] 6a. Community Tech Tree Support
+When the [Community Tech Tree][ctt:release] and [TechManager][techmanager:release] addons are installed SCANsat parts will default to different tech tree nodes.
 
-##### [:top:][top] 6a. Minimum Scan for Science
+The **RADAR Altimetry** sensor can be unlocked in **Orbital Surveys**.
+
+The **SAR Altimetry** sensor can be unlocked in **Specialized Science Tech**.
+
+The **Multispectral** sensor can be unlocked in **Advanced Surveys**.
+
+The **BTDT** sensor can be unlocked in **Field Science**.
+
+##### [:top:][top] 6b. Minimum Scan for Science
 Once you scan at least 30% of a particular map, you can use **Analyze Data** to get delicious science:
 
 ![30% is your minimum][science-min]
 
-##### [:top:][top] 6b. Getting Maximum Science
+##### [:top:][top] 6c. Getting Maximum Science
 Between 30% and 100%, you will get a number of science points proportional to the percentage. Really,
 the upper cutoff is 95% in case you didn't scan the whole map.
 
@@ -474,6 +485,7 @@ sneaky then they can of course be sneaky.
 [shield:support-karbonite]: http://img.shields.io/badge/works%20with%20Karbonite-0.4.2-ff8c00.svg
 [shield:support-epl]: http://img.shields.io/badge/works%20with%20EPL-4.2.3-ff8c00.svg
 [shield:support-ctt]: http://img.shields.io/badge/works%20with%20CTT-1.1-blue.svg
+[shield:support-tm]: http://img.shields.io/badge/works%20with%20TechManager-1.4-lightgrey.svg
 
 [shield:gittip-tg-img]: http://img.shields.io/gittip/technogeeky.png
 [shield:gittip-tg]: https://www.gittip.com/technogeeky/
@@ -551,6 +563,8 @@ sneaky then they can of course be sneaky.
 [epl:release]: http://forum.kerbalspaceprogram.com/threads/59545
 
 [ctt:release]: http://forum.kerbalspaceprogram.com/threads/100385
+
+[techmanager:release]: http://forum.kerbalspaceprogram.com/threads/98293
 
 [kspi:release]: http://forum.kerbalspaceprogram.com/threads/43839
 
