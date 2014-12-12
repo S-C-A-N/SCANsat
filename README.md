@@ -206,7 +206,7 @@ Anomaly | **Been There, Done That(tm)** | **BTDT**
 
 **SCANsat** will scan planetoids for resources, assuming you have the relevant mods installed. All support for resource scanning is handled through one of two plugins. **ORS** supports many resources, and **Kethane** supports a few. 
 
-Each of the two resource systems can be enabled through the **SCANsat** Settings menu:
+Each of the two resource systems can be enabled through the **SCANsat** Big Map:
 > ![][resource-walkthrough-v2]
 
 Both of the two resource systems will work in IVA, too:
@@ -228,7 +228,7 @@ Once it is installed correctly, you will be able to enable Kethane resources in 
 
 **ORSX** support is built internal to SCANsat. If you have an **ORSX** DLL loaded anywhere SCANsat will only target the newest version.
 
-With any **ORSX**-using mod installed, you can enable their resources in the Settings menu, and enable their overlay on the Big Map:
+With any **ORSX**-using mod installed, you can select their resources in the drop down menu from the Big Map or KSC Map, and enable their overlay with the resource icon:
 > ![][resource-orsx-v2]
 
 For instance the **Karbonite** mod's resources can be viewed:
