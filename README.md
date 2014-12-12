@@ -16,7 +16,7 @@
 [![][shield:support-usi]][usi:release]&nbsp;
 [![][shield:support-epl]][epl:release]&nbsp;
 [![][shield:support-ctt]][ctt:release]&nbsp;
-[![][shield:support-tm][techmanager:release]&nbsp;
+[![][shield:support-tm]][techmanager:release]&nbsp;
 
 **Table of Contents**
 ------------------------------------------
