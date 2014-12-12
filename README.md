@@ -137,7 +137,7 @@ S.C.A.N. is proud to collaborate with other KSP mods and modding teams. Followin
 [![Support for Kethane][kethane:logo]][kethane:release] | [![Support for MKS][usi:logo]][usi:release]
 [**OpenResourceSystemX**][orsx:release] | [![Support for ALCOR][alcor:logo]][alcor:release]
 [**RasterPropMonitor**][rpm:release]  | [![Support for Karbonite][karbonite:logo]][karbonite:release]
-[**Blizzy78's Toolbar**][toolbar:release] |  [Support for Community Tech Tree][ctt:logo][ctt:release]
+[**Blizzy78's Toolbar**][toolbar:release] | [![Support for Community Tech Tree][ctt:logo]][ctt:release]
 [**ModuleManager**][mm:release] | [**Extraplanetary Launchpads**][epl:release]
 
 
