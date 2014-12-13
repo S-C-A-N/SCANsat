@@ -45,6 +45,7 @@ namespace SCANsat.SCAN_UI
 			WindowOptions = new GUILayoutOption[2] { GUILayout.Width(360), GUILayout.Height(300) };
 			Visible = false;
 			DragEnabled = true;
+			TooltipMouseOffset = new Vector2d(-10, -25);
 			ClampToScreenOffset = new RectOffset(-280, -280, -600, -600);
 
 			SCAN_SkinsLibrary.SetCurrent("SCAN_Unity");
@@ -59,6 +60,7 @@ namespace SCANsat.SCAN_UI
 
 		internal override void Start()
 		{
+			TooltipsEnabled = SCANcontroller.controller.toolTips;
 		}
 
 		protected override void DrawWindowPre(int id)
@@ -100,24 +102,23 @@ namespace SCANsat.SCAN_UI
 
 		protected override void DrawWindow(int id)
 		{
-			versionLabel(id);
+			versionLabel(id);				/* Standard version label and close button */
 			closeBox(id);
 
 			growS();
 				gui_settings_xmarks(id); 				/* X marker selection */
-				gui_settings_resources(id);				/* resource details sub-window */
 				gui_settings_toggle_body_scanning(id);	/* background and body scanning toggles */
 				gui_settings_rebuild_kethane(id);		/* rebuild Kethane database with SCANsat info */
 				gui_settings_timewarp(id);				/* time warp resolution settings */
 				gui_settings_numbers(id);				/* sensor/scanning		statistics */
 				gui_settings_data_resets(id);			/* reset data and/or reset resources */
-				gui_settings_window_resets(id);			/* reset windows and positions */
+				gui_settings_window_resets_tooltips(id);/* reset windows and positions and toggle tooltips*/
 				# if DEBUG
 					gui_settings_window_mapFill(id);	/* debug option to fill in maps */
 				#endif
 			stopS();
 
-			warningBox(id);
+			warningBox(id);						/* Warning box for deleting map data */
 		}
 
 		protected override void DrawWindowPost(int id)
@@ -172,63 +173,20 @@ namespace SCANsat.SCAN_UI
 			fillS(16);
 		}
 
-		//Control resource options - *Will be moved into big map*
-		private void gui_settings_resources(int id)
-		{
-			GUILayout.Label("Resources Overlay", SCANskins.SCAN_headline);
-			if (SCANcontroller.controller.ResourcesList.Count > 0)
-			{
-				if (SCANcontroller.controller.globalOverlay != GUILayout.Toggle(SCANcontroller.controller.globalOverlay, "Activate Resource Overlay"))
-				{ //global toggle for resource overlay
-					SCANcontroller.controller.globalOverlay = !SCANcontroller.controller.globalOverlay;
-					//if (bigmap != null) bigmap.resetMap();
-				}
-			}
-
-			growE();
-			if (GUILayout.Button("Kethane Resources")) //select from two resource types, populates the list below
-			{
-				SCANcontroller.controller.resourceOverlayType = 1;
-				SCANcontroller.controller.Resources(FlightGlobals.currentMainBody);
-				if (SCANcontroller.controller.ResourcesList.Count > 0)
-					SCANcontroller.controller.globalOverlay = true;
-				//if (bigmap != null) bigmap.resetMap();
-			}
-
-			if (GUILayout.Button("ORSX Resources"))
-			{
-				SCANcontroller.controller.resourceOverlayType = 0;
-				SCANcontroller.controller.Resources(FlightGlobals.currentMainBody);
-				if (SCANcontroller.controller.ResourcesList.Count > 0)
-					SCANcontroller.controller.globalOverlay = true;
-				//if (bigmap != null) bigmap.resetMap();
-			}
-			stopE();
-			if (SCANcontroller.controller.ResourcesList.Count == 0)
-			{
-				fillS(5);
-				GUILayout.Label("No Resources Found", SCANskins.SCAN_headline);
-			}
-			growE();
-			SCANcontroller.controller.gridSelection = GUILayout.SelectionGrid(SCANcontroller.controller.gridSelection, SCANcontroller.controller.ResourcesList.Select(a => a.Name).ToArray(), 4); //select resource to display
-			stopE();
-			fillS(16);
-		}
-
 		//Control background scanning options
 		private void gui_settings_toggle_body_scanning(int id)
 		{
 
 			GUILayout.Label("Background Scanning", SCANskins.SCAN_headline);
 			// scan background
-			SCANcontroller.controller.scan_background = GUILayout.Toggle(SCANcontroller.controller.scan_background, "Scan all active celestials");
+			SCANcontroller.controller.scan_background = GUILayout.Toggle(SCANcontroller.controller.scan_background, "Scan all active celestials", SCANskins.SCAN_settingsToggle);
 			// scanning for individual SoIs
 			growE();
 			int count = 0;
 			foreach (var data in SCANcontroller.Body_Data)
 			{
 				if (count == 0) growS();
-					data.Value.Disabled = !GUILayout.Toggle(!data.Value.Disabled, string.Format("{0} ({1:N1}%)", data.Key, data.Value.getCoveragePercentage(SCANdata.SCANtype.Nothing)));
+					data.Value.Disabled = !GUILayout.Toggle(!data.Value.Disabled, string.Format("{0} ({1:N1}%)", data.Key, data.Value.getCoveragePercentage(SCANdata.SCANtype.Nothing)), SCANskins.SCAN_settingsToggle);
 				switch (count)
 				{
 					case 5: stopS(); count = 0; break;
@@ -243,7 +201,7 @@ namespace SCANsat.SCAN_UI
 		//Update the Kethane database to reset the map grid
 		private void gui_settings_rebuild_kethane(int id)
 		{
-			if (SCANcontroller.controller.resourceOverlayType == 1 && SCANcontroller.controller.globalOverlay)
+			if (SCANcontroller.controller.resourceOverlayType == 1 && SCANcontroller.controller.GlobalResourceOverlay)
 			{ //Rebuild the Kethane database
 				if (GUILayout.Button("Rebuild Kethane Grid Database"))
 					SCANcontroller.controller.KethaneRebuild = !SCANcontroller.controller.KethaneRebuild;
@@ -275,6 +233,7 @@ namespace SCANsat.SCAN_UI
 		}
 
 		//Display the total number of SCANsat sensors and scanning passes
+		/* Needs to be clarified for users */
 		private void gui_settings_numbers(int id)
 		{
 			string s = 	"Vessels: " + SCANcontroller.controller.ActiveVessels.ToString() +
@@ -284,7 +243,7 @@ namespace SCANsat.SCAN_UI
 			fillS(16);
 		}
 
-		//Reset databases - *Needs confirmation box*
+		//Reset databases
 		private void gui_settings_data_resets(int id)
 		{
 			CelestialBody thisBody = FlightGlobals.currentMainBody;
@@ -310,23 +269,41 @@ namespace SCANsat.SCAN_UI
 			fillS(8);
 		}
 
-		//Resets all window positions
-		private void gui_settings_window_resets(int id)
+		//Resets all window positions, tooltip toggle
+		private void gui_settings_window_resets_tooltips(int id)
 		{
-			if (GUILayout.Button("Reset window positions", SCANskins.SCAN_buttonFixed))
-			{
-				if (HighLogic.LoadedSceneIsFlight)
+			growE();
+				if (GUILayout.Button("Reset window positions", SCANskins.SCAN_buttonFixed))
 				{
-					SCANuiUtil.resetMainMapPos();
-					SCANuiUtil.resetBigMapPos();
-					SCANuiUtil.resetInstUIPos();
-					SCANuiUtil.resetSettingsUIPos();
+					if (HighLogic.LoadedSceneIsFlight)
+					{
+						SCANuiUtil.resetMainMapPos();
+						SCANuiUtil.resetBigMapPos();
+						SCANuiUtil.resetInstUIPos();
+						SCANuiUtil.resetSettingsUIPos();
+						SCANuiUtil.resetColorMapPos();
+					}
+					else
+					{
+						SCANuiUtil.resetKSCMapPos();
+						SCANuiUtil.resetColorMapPos();
+						SCANuiUtil.resetSettingsUIPos();
+					}
 				}
-				else
+				fillS(10);
+				if (GUILayout.Button(textWithTT("Tooltips","Toggle Tooltips"), SCANskins.SCAN_buttonFixed))
 				{
-					SCANuiUtil.resetKSCMapPos();
+					SCANcontroller.controller.toolTips = !SCANcontroller.controller.toolTips;
+					TooltipsEnabled = SCANcontroller.controller.toolTips;
+					if (HighLogic.LoadedSceneIsFlight)
+					{
+						SCANcontroller.controller.newBigMap.TooltipsEnabled = SCANcontroller.controller.toolTips;
+						SCANcontroller.controller.mainMap.TooltipsEnabled = SCANcontroller.controller.toolTips;
+					}
+					if (HighLogic.LoadedScene == GameScenes.SPACECENTER || HighLogic.LoadedScene == GameScenes.TRACKSTATION)
+						SCANcontroller.controller.kscMap.TooltipsEnabled = SCANcontroller.controller.toolTips;
 				}
-			}
+				stopE();
 			fillS(8);
 		}
 

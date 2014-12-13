@@ -31,13 +31,13 @@ namespace SCANsat.SCAN_UI
 		internal static GUIStyle SCAN_window;
 		internal static GUIStyle SCAN_tooltip;
 		internal static GUIStyle SCAN_label;
-
 		internal static GUIStyle SCAN_toggle;
 
 		//Button styles
 		internal static GUIStyle SCAN_button;
 		internal static GUIStyle SCAN_buttonActive;
 		internal static GUIStyle SCAN_buttonFixed;
+		internal static GUIStyle SCAN_windowButton;
 		internal static GUIStyle SCAN_texButton;
 		internal static GUIStyle SCAN_buttonBorderless;
 		internal static GUIStyle SCAN_closeButton;
@@ -61,6 +61,9 @@ namespace SCANsat.SCAN_UI
 		//internal static GUIStyle SCAN_texButton;
 		internal static GUIStyle SCAN_legendTex;
 		internal static GUIStyle SCAN_textBox;
+		internal static GUIStyle SCAN_settingsToggle;
+		internal static GUIStyle SCAN_labelSmallLeft;
+		internal static GUIStyle SCAN_labelSmallRight;
 
 		//Styles for map overlay icons
 		internal static GUIStyle SCAN_orbitalLabelOn;
@@ -77,6 +80,25 @@ namespace SCANsat.SCAN_UI
 		internal static Texture2D SCAN_toggleOnHover;
 		internal static Texture2D SCAN_dropDownTex;
 
+		//Map Icon Textures
+		internal static Texture2D SCAN_GridIcon;
+		internal static Texture2D SCAN_OrbitIcon;
+		internal static Texture2D SCAN_FlagIcon;
+		internal static Texture2D SCAN_LegendIcon;
+		internal static Texture2D SCAN_ColorToggleIcon;
+		internal static Texture2D SCAN_AsteroidIcon;
+		internal static Texture2D SCAN_ResourceIcon;
+		internal static Texture2D SCAN_RefreshIcon;
+		internal static Texture2D SCAN_ScreenshotIcon;
+		internal static Texture2D SCAN_ResizeIcon;
+
+		//Window Textures
+		internal static Texture2D SCAN_SettingsIcon;
+		internal static Texture2D SCAN_ColorIcon;
+		internal static Texture2D SCAN_InstrumentIcon;
+		internal static Texture2D SCAN_SmallMapIcon;
+		internal static Texture2D SCAN_BigMapIcon;
+
 		protected override void OnGUI_FirstRun()
 		{
 			initializeTextures();
@@ -89,6 +111,21 @@ namespace SCANsat.SCAN_UI
 			SCAN_toggleOn = GameDatabase.Instance.GetTexture("SCANsat/Icons/SCAN_Toggle", false);
 			SCAN_toggleOnHover = GameDatabase.Instance.GetTexture("SCANsat/Icons/SCAN_Toggle_Hover", false);
 			SCAN_dropDownTex = GameDatabase.Instance.GetTexture("SCANsat/Icons/DropDownTex", false);
+			SCAN_GridIcon = GameDatabase.Instance.GetTexture("SCANsat/Icons/SCAN_Grid_Icon", false);
+			SCAN_OrbitIcon = GameDatabase.Instance.GetTexture("SCANsat/Icons/SCAN_Orbit_Icon", false);
+			SCAN_FlagIcon = GameDatabase.Instance.GetTexture("SCANsat/Icons/SCAN_Flag_Icon", false);
+			SCAN_LegendIcon = GameDatabase.Instance.GetTexture("SCANsat/Icons/SCAN_Legend_Icon", false);
+			SCAN_ColorToggleIcon = GameDatabase.Instance.GetTexture("SCANsat/Icons/SCAN_ColorToggle_Icon", false);
+			SCAN_AsteroidIcon = GameDatabase.Instance.GetTexture("SCANsat/Icons/SCAN_Asteroid_Icon", false);
+			SCAN_ResourceIcon = GameDatabase.Instance.GetTexture("SCANsat/Icons/SCAN_Resource_Icon", false);
+			SCAN_RefreshIcon = GameDatabase.Instance.GetTexture("SCANsat/Icons/SCAN_Refresh_Icon", false);
+			SCAN_SettingsIcon = GameDatabase.Instance.GetTexture("SCANsat/Icons/SCAN_Settings_Icon", false);
+			SCAN_ColorIcon = GameDatabase.Instance.GetTexture("SCANsat/Icons/SCAN_Color_Icon", false);
+			SCAN_InstrumentIcon = GameDatabase.Instance.GetTexture("SCANsat/Icons/SCAN_Instrument_Icon", false);
+			SCAN_SmallMapIcon = GameDatabase.Instance.GetTexture("SCANsat/Icons/SCANsat_SmallMap_Icon", false);
+			SCAN_BigMapIcon = GameDatabase.Instance.GetTexture("SCANsat/Icons/SCANsat_Map_Icon", false);
+			SCAN_ScreenshotIcon = GameDatabase.Instance.GetTexture("SCANsat/Icons/SCAN_Screenshot_Icon", false);
+			SCAN_ResizeIcon = GameDatabase.Instance.GetTexture("SCANsat/Icons/SCAN_Resize_Icon", false);
 		}
 
 		private static void initializeColors()
@@ -96,6 +133,7 @@ namespace SCANsat.SCAN_UI
 			palette.DivPaletteSet = palette.generatePaletteSet(7, Palette.Kind.Diverging);
 			palette.QualPaletteSet = palette.generatePaletteSet(7, Palette.Kind.Qualitative);
 			palette.SeqPaletteSet = palette.generatePaletteSet(7, Palette.Kind.Sequential);
+			palette.FixedPaletteSet = palette.generatePaletteSet(0, Palette.Kind.Fixed);
 			palette.CurrentPalettes = palette.DivPaletteSet;
 			palette.CurrentPalette = PaletteLoader.defaultPalette;
 		}
@@ -129,6 +167,10 @@ namespace SCANsat.SCAN_UI
 			SCAN_buttonFixed.name = "SCAN_ButtonFixed";
 			SCAN_buttonFixed.active.textColor = SCAN_buttonFixed.normal.textColor;
 
+			SCAN_windowButton = new GUIStyle(SCAN_button);
+			SCAN_windowButton.name = "SCAN_WindowButton";
+			SCAN_windowButton.padding = new RectOffset(2, 2, 2, 2);
+
 			SCAN_texButton = new GUIStyle(SCAN_button);
 			SCAN_texButton.name = "SCAN_TexButton";
 			SCAN_texButton.padding = new RectOffset(0, 0, 1, 1);
@@ -140,7 +182,7 @@ namespace SCANsat.SCAN_UI
 			SCAN_buttonBorderless.name = "SCAN_ButtonBorderless";
 			SCAN_buttonBorderless.fontSize = 14;
 			SCAN_buttonBorderless.margin = new RectOffset(2, 2, 2, 2);
-			SCAN_buttonBorderless.padding = new RectOffset(0, 2, 2, 2);
+			SCAN_buttonBorderless.padding = new RectOffset(2, 2, 2, 2);
 			SCAN_buttonBorderless.normal.background = SCAN_SkinsLibrary.DefUnitySkin.label.normal.background;
 
 			SCAN_closeButton = new GUIStyle(SCAN_buttonBorderless);
@@ -217,19 +259,32 @@ namespace SCANsat.SCAN_UI
 			SCAN_headlineSmall.name = "SCAN_HeadlineSmall";
 			SCAN_headlineSmall.fontSize = 30;
 
+			SCAN_labelSmallLeft = new GUIStyle(SCAN_whiteReadoutLabel);
+			SCAN_labelSmallLeft.name = "SCAN_LabelSmallLeft";
+			SCAN_labelSmallLeft.fontSize = 10;
+			SCAN_labelSmallLeft.alignment = TextAnchor.MiddleLeft;
+
+			SCAN_labelSmallRight = new GUIStyle(SCAN_labelSmallLeft);
+			SCAN_labelSmallRight.name = "SCAN_LabelSmallRight";
+			SCAN_labelSmallRight.alignment = TextAnchor.MiddleRight;
+
 			SCAN_buttonWarning = new GUIStyle(SCAN_button);
 			SCAN_buttonWarning.name = "SCAN_ButtonWarning";
 			SCAN_buttonWarning.fontSize = 16;
 			SCAN_buttonWarning.fontStyle = FontStyle.Bold;
 			SCAN_buttonWarning.normal.textColor = palette.cb_vermillion;
 
-			SCAN_toggle = new GUIStyle(SCAN_SkinsLibrary.DefUnitySkin.toggle);
+			SCAN_toggle = new GUIStyle(SCAN_SkinsLibrary.DefKSPSkin.toggle);
 			SCAN_toggle.name = "SCAN_Toggle";
-			SCAN_toggle.onNormal.background = SCAN_toggleOn;
-			SCAN_toggle.onHover.background = SCAN_toggleOnHover;
-			SCAN_toggle.onNormal.background.wrapMode = TextureWrapMode.Clamp;
-			SCAN_toggle.onHover.background.wrapMode = TextureWrapMode.Clamp;
-			SCAN_toggle.border = new RectOffset(15, 0, 1, 1);
+			SCAN_toggle.fixedHeight = 28;
+			SCAN_toggle.fixedWidth = 28;
+
+			SCAN_settingsToggle = new GUIStyle(SCAN_SkinsLibrary.DefUnitySkin.toggle);
+			SCAN_settingsToggle.onNormal.background = SCAN_toggleOn;
+			SCAN_settingsToggle.onHover.background = SCAN_toggleOnHover;
+			SCAN_settingsToggle.onNormal.background.wrapMode = TextureWrapMode.Clamp;
+			SCAN_settingsToggle.onHover.background.wrapMode = TextureWrapMode.Clamp;
+			SCAN_settingsToggle.border = new RectOffset(15, 0, 1, 1);
 
 			SCAN_textBox = new GUIStyle(SCAN_SkinsLibrary.DefUnitySkin.textField);
 			SCAN_textBox.name = "SCAN_TextBox";
@@ -238,8 +293,13 @@ namespace SCANsat.SCAN_UI
 			SCAN_legendTex.name = "SCAN_LegendTex";
 			SCAN_legendTex.alignment = TextAnchor.MiddleCenter;
 
-			SCAN_tooltip = new GUIStyle(SCAN_SkinsLibrary.DefUnitySkin.label);
+			SCAN_tooltip = new GUIStyle(SCAN_SkinsLibrary.DefUnitySkin.box);
 			SCAN_tooltip.name = "SCAN_Tooltip";
+			SCAN_tooltip.normal.background = SCAN_dropDownTex;
+			SCAN_tooltip.fontStyle = FontStyle.Bold;
+			SCAN_tooltip.normal.textColor = palette.white;
+			SCAN_tooltip.alignment = TextAnchor.MiddleCenter;
+			SCAN_tooltip.fontSize = 13;
 
 			SCAN_orbitalLabelOn = new GUIStyle(SCAN_label);
 			SCAN_orbitalLabelOn.name = "SCAN_OrbitalLabelOn";

@@ -25,33 +25,33 @@ namespace SCANsat.SCAN_UI
 {
 	class SCANmainMap: SCAN_MBW
 	{
-		private const string SCANlockID = "SCANmainMapLock";
 		private string infoText;
 		private Vessel v;
 		private SCANdata data;
 		private SCANdata.SCANtype sensors;
-		private bool notMappingToday;
+		private bool notMappingToday; //Unused out-of-power bool
 		private Rect mapRect;
 		private static bool showVesselInfo = true;
-		internal static Rect defaultRect = new Rect(10, 55, 380, 260);
+		internal static Rect defaultRect = new Rect(10, 55, 380, 230);
 
 		protected override void Awake()
 		{
 			WindowCaption = "S.C.A.N. Planetary Mapping";
 			WindowRect = defaultRect;
-			WindowOptions = new GUILayoutOption[2] { GUILayout.Width(380), GUILayout.Height(260) };
+			WindowOptions = new GUILayoutOption[2] { GUILayout.Width(380), GUILayout.Height(230) };
 			WindowStyle = SCANskins.SCAN_window;
 			Visible = false;
 			DragEnabled = true;
+			TooltipMouseOffset = new Vector2d(-10, -25);
 			ClampToScreenOffset = new RectOffset(-300, -300, -200, -200);
 
 			SCAN_SkinsLibrary.SetCurrent("SCAN_Unity");
+			SCAN_SkinsLibrary.SetCurrentTooltip();
 		}
 
 		internal override void Start()
 		{
 			Visible = SCANcontroller.controller.mainMapVisible;
-			//GameEvents.onVesselSOIChanged.Add(soiChanged);
 			v = FlightGlobals.ActiveVessel;
 			data = SCANUtil.getData(v.mainBody);
 			if (data == null)
@@ -59,15 +59,12 @@ namespace SCANsat.SCAN_UI
 				data = new SCANdata(v.mainBody);
 				SCANcontroller.controller.addToBodyData(v.mainBody, data);
 			}
-		}
-
-		internal override void OnDestroy()
-		{
-			//GameEvents.onVesselSOIChanged.Remove(soiChanged);
+			TooltipsEnabled = SCANcontroller.controller.toolTips;
 		}
 
 		protected override void DrawWindowPre(int id)
 		{
+			//Keep the map updated with the current vessel location and status
 			v = FlightGlobals.ActiveVessel;
 			data = SCANUtil.getData(v.mainBody);
 			if (data == null)
@@ -81,12 +78,16 @@ namespace SCANsat.SCAN_UI
 
 		protected override void DrawWindow(int id)
 		{
-			versionLabel(id);
+			versionLabel(id);				/* Standard version label and close button */
 			topMenu(id);
 			growS();
-				topButtons(id);				/* Buttons for other SCANsat windows */
 				mainMap(id);				/* Draws the main map texture */
-				scannerInfo(id);			/* Draws the scanner indicators */
+				fillS(-6);
+				growE();
+					scannerInfo(id);		/* Draws the scanner indicators */
+					windowButtons(id);		/* Draw the buttons for other SCANsat windows */
+				stopE();
+				fillS(-8);
 				vesselInfo(id);				/* Shows info for any SCANsat vessels */
 			stopS();
 		}
@@ -120,31 +121,6 @@ namespace SCANsat.SCAN_UI
 			}
 		}
 
-		//Draw the buttons to control other windows
-		private void topButtons(int id)
-		{
-			fillS(4);
-			growE();
-			if (GUILayout.Button("Big Map", SCANskins.SCAN_buttonFixed))
-			{
-				SCANcontroller.controller.bigMap.Visible = !SCANcontroller.controller.bigMap.Visible;
-				SCANcontroller.controller.bigMapVisible = !SCANcontroller.controller.bigMapVisible;
-			}
-			if (GUILayout.Button("Instruments", SCANskins.SCAN_buttonFixed))
-			{
-				SCANcontroller.controller.instrumentsWindow.Visible = !SCANcontroller.controller.instrumentsWindow.Visible;
-			}
-			if (GUILayout.Button("Settings", SCANskins.SCAN_buttonFixed))
-			{
-				SCANcontroller.controller.settingsWindow.Visible = !SCANcontroller.controller.settingsWindow.Visible;
-			}
-			if (GUILayout.Button("Colors", SCANskins.SCAN_buttonFixed))
-			{
-				SCANcontroller.controller.colorManager.Visible = !SCANcontroller.controller.colorManager.Visible;
-			}
-			stopE();
-		}
-
 		//Draw the map texture
 		private void mainMap(int id)
 		{
@@ -156,13 +132,34 @@ namespace SCANsat.SCAN_UI
 		private void scannerInfo(int id)
 		{
 			bool repainting = Event.current.type == EventType.Repaint;
-			fillS(-6);
 			if (!repainting)
 				infoText = SCANuiUtil.InfoText(v, data, notMappingToday);
 
 			if (infoText != null)
 				SCANuiUtil.readableLabel(infoText, false);
-			fillS(-8);
+		}
+
+		//Draw the SCANsat window buttons with icons
+		private void windowButtons(int id)
+		{
+			//fillS();
+			if (GUILayout.Button(iconWithTT(SCANskins.SCAN_BigMapIcon, "Big Map"), SCANskins.SCAN_windowButton, GUILayout.Height(32), GUILayout.Width(32)))
+			{
+				SCANcontroller.controller.newBigMap.Visible = !SCANcontroller.controller.newBigMap.Visible;
+				SCANcontroller.controller.bigMapVisible = !SCANcontroller.controller.bigMapVisible;
+			}
+			if (GUILayout.Button(iconWithTT(SCANskins.SCAN_InstrumentIcon, "Instrument Window"), SCANskins.SCAN_windowButton, GUILayout.Height(32), GUILayout.Width(32)))
+			{
+				SCANcontroller.controller.instrumentsWindow.Visible = !SCANcontroller.controller.instrumentsWindow.Visible;
+			}
+			if (GUILayout.Button(iconWithTT(SCANskins.SCAN_SettingsIcon, "Settings Menu"), SCANskins.SCAN_windowButton, GUILayout.Height(32), GUILayout.Width(32)))
+			{
+				SCANcontroller.controller.settingsWindow.Visible = !SCANcontroller.controller.settingsWindow.Visible;
+			}
+			if (GUILayout.Button(iconWithTT(SCANskins.SCAN_ColorIcon, "Color Control"), SCANskins.SCAN_windowButton, GUILayout.Height(32), GUILayout.Width(32)))
+			{
+				SCANcontroller.controller.colorManager.Visible = !SCANcontroller.controller.colorManager.Visible;
+			}
 		}
 
 		//Draw the vessel location and alt info
@@ -215,11 +212,6 @@ namespace SCANsat.SCAN_UI
 			}
 			return false;
 		}
-
-		//private void soiChanged(GameEvents.HostedFromToAction<Vessel, CelestialBody> VC)
-		//{
-		//	data = SCANUtil.getData(VC.to);
-		//}
 
 	}
 }

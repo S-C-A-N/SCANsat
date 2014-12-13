@@ -135,6 +135,28 @@ namespace SCANsat
 			}
 		}
 
+		public float DefaultMinHeight
+		{
+			get
+			{
+				if (body.flightGlobalsIndex < 17)
+					return (float)bodyHeightRange[body.flightGlobalsIndex, 0];
+				else
+					return -1000f;
+			}
+		}
+
+		public float DefaultMaxHeight
+		{
+			get
+			{
+				if (body.flightGlobalsIndex < 17)
+					return (float)bodyHeightRange[body.flightGlobalsIndex, 1];
+				else
+					return 8000f;
+			}
+		}
+
 		public float? ClampHeight
 		{
 			get { return clampHeight; }
@@ -144,6 +166,17 @@ namespace SCANsat
 					clampHeight = null;
 				else if (value > minHeight && value < maxHeight)
 					clampHeight = value;
+			}
+		}
+
+		public float? DefaultClampHeight
+		{
+			get
+			{
+				if (body.flightGlobalsIndex < 17)
+					return bodyHeightRange[body.flightGlobalsIndex, 2];
+				else
+					return defaultClampHeight;
 			}
 		}
 
@@ -169,6 +202,28 @@ namespace SCANsat
 		{
 			get { return colorPalette; }
 			internal set { colorPalette = value; }
+		}
+
+		public Palette DefaultColorPalette
+		{
+			get
+			{
+				if (body.flightGlobalsIndex < 17)
+					return paletteDefaults[body.flightGlobalsIndex];
+				else
+					return paletteDefaults[0];
+			}
+		}
+
+		public bool DefaultReversePalette
+		{
+			get
+			{
+				if (body.flightGlobalsIndex < 17)
+					return paletteReverseDefaults[body.flightGlobalsIndex];
+				else
+					return false;
+			}
 		}
 
 		public int PaletteSize
@@ -221,10 +276,18 @@ namespace SCANsat
 		#endregion
 
 		#region Resource classes
+
+		public enum SCANResource_Source
+		{
+			Kethane = 1,
+			ORSX = 2,
+			Regolith = 3,
+		}
+
 		/* DATA: resources */
 		public class SCANResource //The new class to store resource information stored in the respective config nodes
 		{
-			public SCANResource(string n, string Body, Color full, Color empty, bool sc, double scalar, double mult, double threshold, float max, SCANresourceType t)
+			public SCANResource(string n, string Body, Color full, Color empty, bool sc, double scalar, double mult, double threshold, float max, SCANresourceType t, SCANResource_Source s)
 			{
 				name = n;
 				body = Body;
@@ -237,6 +300,7 @@ namespace SCANsat
 				maxValue = max;
 				resourceType = t;
 				type = resourceType.type;
+				source = s;
 			}
 
 			private string name;
@@ -247,6 +311,7 @@ namespace SCANsat
 			internal float maxValue;
 			private SCANtype type;
 			internal SCANresourceType resourceType;
+			private SCANResource_Source source;
 
 			public string Name
 			{
@@ -256,6 +321,11 @@ namespace SCANsat
 			public SCANtype Type
 			{
 				get { return type; }
+			}
+
+			public SCANResource_Source Source
+			{
+				get { return source; }
 			}
 		}
 

@@ -25,22 +25,24 @@ namespace SCANsat.SCAN_UI
 	class SCANcolorSelection: SCAN_MBW
 	{
 		private bool paletteBox, reversePalette, oldReverseState, discretePalette, oldDiscreteState;
-		private bool spaceCenterLock, trackingStationLock, clampHeight, oldClampState;
+		private bool spaceCenterLock, trackingStationLock, clampState, oldClampState;
 		private Rect paletteRect;
 		private Palette dataPalette;
-		private string paletteSize = "6";
 		private int paletteSizeInt, oldPaletteSizeInt = 6;
 		private int paletteIndex;
 		private Texture2D currentLegend, previewLegend;
-		private string minHeightS = "-500";
-		private string maxHeightS = "8000";
-		private string clampHeightS = "0";
-		private float minHeightF = -500;
-		private float maxHeightF = 8000;
+		private float sizeSlider, sizeSliderMin, sizeSliderMax, terrainSliderMinMin, terrainSliderMinMax, terrainSliderMaxMin, terrainSliderMaxMax, clampSliderMin, clampSliderMax;
+		private float minHeightF, oldMinHeightF = -500;
+		private float maxHeightF, oldMaxHeightF = 8000;
 		private float clampHeightF = 0;
 		private const string lockID = "colorLockID";
-		internal static Rect defaultRect = new Rect(100, 400, 600, 300);
+		internal static Rect defaultRect = new Rect(100, 400, 650, 330);
 
+		//SCAN_MBW objects to sync the color selection fields to the currently displayed map
+		private SCANkscMap kscMapObj;
+		private SCANnewBigMap bigMapObj;
+
+		private static SCANmap bigMap;
 		private SCANdata data;
 
 		protected override void Awake()
@@ -48,10 +50,10 @@ namespace SCANsat.SCAN_UI
 			WindowCaption = "S.C.A.N. Color Management";
 			WindowRect = defaultRect;
 			WindowStyle = SCANskins.SCAN_window;
-			WindowOptions = new GUILayoutOption[2] { GUILayout.Width(600), GUILayout.Height(300) };
+			WindowOptions = new GUILayoutOption[2] { GUILayout.Width(650), GUILayout.Height(300) };
 			Visible = false;
 			DragEnabled = true;
-			ClampToScreenOffset = new RectOffset(-400, -400, -250, -250);
+			ClampToScreenOffset = new RectOffset(-450, -450, -250, -250);
 
 			SCAN_SkinsLibrary.SetCurrent("SCAN_Unity");
 
@@ -61,7 +63,24 @@ namespace SCANsat.SCAN_UI
 		internal override void Start()
 		{
 			paletteSizeInt = palette.CurrentPalettes.size;
-			paletteSize = paletteSizeInt.ToString();
+			setSizeSlider(palette.CurrentPalette.kind);
+
+			if (HighLogic.LoadedScene == GameScenes.SPACECENTER || HighLogic.LoadedScene == GameScenes.TRACKSTATION)
+			{
+				kscMapObj = (SCANkscMap)SCANcontroller.controller.kscMap;
+				if (SCANkscMap.BigMap != null)
+					bigMap = SCANkscMap.BigMap;
+				if (kscMapObj.Data != null)
+					data = kscMapObj.Data;
+			}
+			else if (HighLogic.LoadedSceneIsFlight)
+			{
+				bigMapObj = (SCANnewBigMap)SCANcontroller.controller.newBigMap;
+				if (SCANnewBigMap.BigMap != null)
+					bigMap = SCANnewBigMap.BigMap;
+				if (bigMapObj.Data != null)
+					data = bigMapObj.Data;
+			}
 		}
 
 		internal override void OnDestroy()
@@ -71,6 +90,7 @@ namespace SCANsat.SCAN_UI
 
 		protected override void DrawWindowPre(int id)
 		{
+			//Some clumsy logic is used here to ensure that the color selection fields always remain in sync with the current map in each scene
 			if (HighLogic.LoadedSceneIsFlight)
 			{
 				if (data == null)
@@ -82,6 +102,11 @@ namespace SCANsat.SCAN_UI
 						SCANcontroller.controller.addToBodyData(FlightGlobals.currentMainBody, data);
 					}
 				}
+				if (bigMapObj.Visible && SCANnewBigMap.BigMap != null)
+				{
+					data = bigMapObj.Data;
+					bigMap = SCANnewBigMap.BigMap;
+				}
 				else if (data.Body != FlightGlobals.currentMainBody)
 				{
 					data = SCANUtil.getData(FlightGlobals.currentMainBody);
@@ -91,12 +116,48 @@ namespace SCANsat.SCAN_UI
 						SCANcontroller.controller.addToBodyData(FlightGlobals.currentMainBody, data);
 					}
 				}
+				if (bigMap == null)
+				{
+					if (SCANnewBigMap.BigMap != null)
+					{
+						bigMap = SCANnewBigMap.BigMap;
+					}
+				}
 			}
 
 			//Lock space center click through - Sync SCANdata
 			else if (HighLogic.LoadedScene == GameScenes.SPACECENTER)
 			{
-				data = ((SCANkscMap)SCANcontroller.controller.kscMap).data;
+				if (data == null)
+				{
+					data = SCANUtil.getData(Planetarium.fetch.Home);
+					if (data == null)
+					{
+						data = new SCANdata(Planetarium.fetch.Home);
+						SCANcontroller.controller.addToBodyData(Planetarium.fetch.Home, data);
+					}
+				}
+				if (kscMapObj.Visible)
+				{
+					data = kscMapObj.Data;
+					bigMap = SCANkscMap.BigMap;
+				}
+				else if (data.Body != Planetarium.fetch.Home)
+				{
+					data = SCANUtil.getData(Planetarium.fetch.Home);
+					if (data == null)
+					{
+						data = new SCANdata(Planetarium.fetch.Home);
+						SCANcontroller.controller.addToBodyData(Planetarium.fetch.Home, data);
+					}
+				}
+				if (bigMap == null)
+				{
+					if (SCANkscMap.BigMap != null)
+					{
+						bigMap = SCANkscMap.BigMap;
+					}
+				}
 				Vector2 mousePos = Input.mousePosition;
 				mousePos.y = Screen.height - mousePos.y;
 				if (WindowRect.Contains(mousePos) && !spaceCenterLock)
@@ -114,7 +175,36 @@ namespace SCANsat.SCAN_UI
 			//Lock tracking scene click through - Sync SCANdata
 			else if (HighLogic.LoadedScene == GameScenes.TRACKSTATION)
 			{
-				data = ((SCANkscMap)SCANcontroller.controller.kscMap).data;
+				if (data == null)
+				{
+					data = SCANUtil.getData(Planetarium.fetch.Home);
+					if (data == null)
+					{
+						data = new SCANdata(Planetarium.fetch.Home);
+						SCANcontroller.controller.addToBodyData(Planetarium.fetch.Home, data);
+					}
+				}
+				if (kscMapObj.Visible)
+				{
+					data = kscMapObj.Data;
+					bigMap = SCANkscMap.BigMap;
+				}
+				else if (data.Body != Planetarium.fetch.Home)
+				{
+					data = SCANUtil.getData(Planetarium.fetch.Home);
+					if (data == null)
+					{
+						data = new SCANdata(Planetarium.fetch.Home);
+						SCANcontroller.controller.addToBodyData(Planetarium.fetch.Home, data);
+					}
+				}
+				if (bigMap == null)
+				{
+					if (SCANkscMap.BigMap != null)
+					{
+						bigMap = SCANkscMap.BigMap;
+					}
+				}
 				Vector2 mousePos = Input.mousePosition;
 				mousePos.y = Screen.height - mousePos.y;
 				if (WindowRect.Contains(mousePos) && !trackingStationLock)
@@ -129,22 +219,24 @@ namespace SCANsat.SCAN_UI
 				}
 			}
 
+			//This updates all of the fields whenever the palette selection is changed; very ugly...
 			if (currentLegend == null || data.ColorPalette != dataPalette)
 			{
 				dataPalette = data.ColorPalette;
 				minHeightF = data.MinHeight;
-				minHeightS = minHeightF.ToString();
+				oldMinHeightF = minHeightF;
 				maxHeightF = data.MaxHeight;
-				maxHeightS = maxHeightF.ToString();
-				oldPaletteSizeInt= paletteSizeInt = data.PaletteSize;
-				paletteSize = paletteSizeInt.ToString();
+				oldMaxHeightF = maxHeightF;
+				setTerrainSliders();
+				oldPaletteSizeInt = paletteSizeInt = data.PaletteSize;
+				setSizeSlider(dataPalette.kind);
+				sizeSlider = (float)paletteSizeInt;
 				oldReverseState = reversePalette = data.PaletteReverse;
 				oldDiscreteState = discretePalette = data.PaletteDiscrete;
-				oldClampState = clampHeight = data.ClampHeight != null;
-				if (clampHeight)
+				oldClampState = clampState = data.ClampHeight != null;
+				if (clampState)
 				{
 					clampHeightF = (float)data.ClampHeight;
-					clampHeightS = clampHeightF.ToString();
 				}
 				palette.CurrentPalettes = palette.setCurrentPalettesType(dataPalette.kind);
 				palette.CurrentPalette = palette.CurrentPalettes.availablePalettes[0];
@@ -159,23 +251,23 @@ namespace SCANsat.SCAN_UI
 
 		protected override void DrawWindow(int id)
 		{
-			versionLabel(id);
+			versionLabel(id);					/* The standard version number and close button */
 			closeBox(id);
 
 			growS();
 				growE();
-					paletteTextures(id);
-					paletteOptions(id);
+					paletteTextures(id);		/* Draws the palette selection button and preview swatches */
+					paletteOptions(id);			/* All of the terrain and palette options */
 				stopE();
 				fillS(8);
 				growE();
-					palettePreview(id);
-					fillS(20);
-					paletteConfirmation(id);
+					palettePreview(id);			/* Draws the two preview palette legends */
+					fillS(10);
+					paletteConfirmation(id);	/* The buttons for default, apply, and cancel */
 				stopE();
 			stopS();
 
-			paletteSelectionBox(id);
+			paletteSelectionBox(id);			/* Draw the drop down menu for the palette selection box */
 		}
 
 		protected override void DrawWindowPost(int id)
@@ -183,10 +275,18 @@ namespace SCANsat.SCAN_UI
 			if (paletteBox && Event.current.type == EventType.mouseDown && !paletteRect.Contains(Event.current.mousePosition))
 				paletteBox = false;
 
+			//These methods update all of the UI elements whenever any of the options are changed
 			if (reversePalette != oldReverseState)
 			{
 				oldReverseState = reversePalette;
 				drawPreviewLegend();
+			}
+
+			if (oldMinHeightF != minHeightF || oldMaxHeightF != maxHeightF)
+			{
+				oldMinHeightF = minHeightF;
+				oldMaxHeightF = maxHeightF;
+				setTerrainSliders();
 			}
 
 			if (discretePalette != oldDiscreteState)
@@ -195,9 +295,9 @@ namespace SCANsat.SCAN_UI
 				drawPreviewLegend();
 			}
 
-			if (clampHeight != oldClampState)
+			if (clampState != oldClampState)
 			{
-				oldClampState = clampHeight;
+				oldClampState = clampState;
 				drawPreviewLegend();
 			}
 
@@ -206,6 +306,7 @@ namespace SCANsat.SCAN_UI
 				if (paletteSizeInt > 2)
 				{
 					oldPaletteSizeInt = paletteSizeInt;
+					sizeSlider = paletteSizeInt;
 					regenPaletteSets();
 					palette.CurrentPalette = palette.CurrentPalettes.availablePalettes[paletteIndex];
 					drawPreviewLegend();
@@ -238,7 +339,7 @@ namespace SCANsat.SCAN_UI
 		{
 			growS();
 				GUILayout.Label("Palette Selection", SCANskins.SCAN_headline);
-				fillS(8);
+				fillS(12);
 				growE();
 					if (GUILayout.Button("Palette Style:", SCANskins.SCAN_buttonFixed, GUILayout.MaxWidth(120)))
 					{
@@ -248,9 +349,12 @@ namespace SCANsat.SCAN_UI
 					GUILayout.Label(palette.getPaletteTypeName, SCANskins.SCAN_whiteReadoutLabel);
 				stopE();
 				growE();
+					// This integer stores the amount of palettes of each type
 					int j = 9;
 					if (palette.CurrentPalettes.paletteType == Palette.Kind.Sequential)
 						j = 12;
+					else if (palette.CurrentPalettes.paletteType == Palette.Kind.Qualitative)
+						j = 8;
 					else if (palette.CurrentPalettes.paletteType == Palette.Kind.Invertable || palette.CurrentPalettes.paletteType == Palette.Kind.Unknown)
 						j = 0;
 					for (int i = 0; i < j; i++)
@@ -258,7 +362,7 @@ namespace SCANsat.SCAN_UI
 						if (i % 3 == 0)
 						{
 							stopE();
-							fillS(8);
+							fillS(9);
 							growE();
 						}
 						Texture2D t = palette.CurrentPalettes.paletteSwatch[i];
@@ -287,36 +391,77 @@ namespace SCANsat.SCAN_UI
 		private void paletteOptions(int id)
 		{
 			growS();
-				GUILayout.Label("Palette Options", SCANskins.SCAN_headline);
+				fillS(4);
+				GUILayout.Label("Terrain Options: " + data.Body.name, SCANskins.SCAN_headlineSmall);
+
+				growE();
+					fillS(10);
+					GUILayout.Label("Min: " + minHeightF + "m", SCANskins.SCAN_whiteReadoutLabel);
+
+					Rect r = GUILayoutUtility.GetLastRect();
+					r.x += 110;
+					r.width = 130;
+					
+					minHeightF = GUI.HorizontalSlider(r, minHeightF, terrainSliderMinMin, terrainSliderMinMax).Mathf_Round(-2);
+
+					SCANuiUtil.drawSliderLabel(r, terrainSliderMinMin + "m", terrainSliderMinMax + "m");
+				stopE();
 				fillS(8);
-				GUILayout.Label("Terrain Height Range", SCANskins.SCAN_headlineSmall);
+				growE();
+					fillS(10);
+					GUILayout.Label("Max: " + maxHeightF + "m", SCANskins.SCAN_whiteReadoutLabel);
 
+					r = GUILayoutUtility.GetLastRect();
+					r.x += 110;
+					r.width = 130;
+
+					maxHeightF =GUI.HorizontalSlider(r, maxHeightF, terrainSliderMaxMin, terrainSliderMaxMax).Mathf_Round(-2);
+
+					SCANuiUtil.drawSliderLabel(r, terrainSliderMaxMin + "m", terrainSliderMaxMax + "m");
+				stopE();
+				fillS(6);
 				growE();
 					fillS();
-					minHeightF = drawInputBox(ref minHeightS, SCANskins.SCAN_textBox, 40, 40, "Min:", SCANskins.SCAN_whiteReadoutLabel);
-					fillS(10);
-					maxHeightF = drawInputBox(ref maxHeightS, SCANskins.SCAN_textBox, 40, 40, "Max:", SCANskins.SCAN_whiteReadoutLabel);
+					clampState = GUILayout.Toggle(clampState, "Clamp Terrain", SCANskins.SCAN_settingsToggle, GUILayout.Width(100));
 					fillS();
 				stopE();
-
-				growE();
-					fillS();
-					clampHeight = GUILayout.Toggle(clampHeight, "Clamp Terrain", GUILayout.Width(100));
-					if (clampHeight)
+				if (clampState)
 					{
-						fillS(5);
-						clampHeightF = drawInputBox(ref clampHeightS, SCANskins.SCAN_textBox, 40);
-					}
-					fillS();
-				stopE();
+						growE();
+							fillS(10);
+							GUILayout.Label("Clamp: " + clampHeightF + "m", SCANskins.SCAN_whiteReadoutLabel);
 
-				GUILayout.Label("Palette Size", SCANskins.SCAN_headlineSmall);
-				paletteSizeInt = (int)drawInputBox(ref paletteSize, SCANskins.SCAN_textBox, 35, 40, "Size:", SCANskins.SCAN_whiteReadoutLabel);
+							r = GUILayoutUtility.GetLastRect();
+							r.x += 110;
+							r.width = 130;
+
+							clampHeightF = GUI.HorizontalSlider(r, clampHeightF, clampSliderMin, clampSliderMax).Mathf_Round(-1);
+
+							SCANuiUtil.drawSliderLabel(r, clampSliderMin + "m", clampSliderMax +  "m");
+						stopE();
+					}
+				fillS(6);
+				GUILayout.Label("Palette Options", SCANskins.SCAN_headlineSmall);
+				if (palette.CurrentPalettes.paletteType != Palette.Kind.Fixed)
+				{
+					growE();
+						fillS(10);
+						GUILayout.Label("Palette Size: " + paletteSizeInt, SCANskins.SCAN_whiteReadoutLabel);
+
+						r = GUILayoutUtility.GetLastRect();
+						r.x += 110;
+						r.width = 130;
+
+						paletteSizeInt = Mathf.RoundToInt(GUI.HorizontalSlider(r, sizeSlider, sizeSliderMin, sizeSliderMax));
+
+						SCANuiUtil.drawSliderLabel(r, sizeSliderMin + "  ", " " + sizeSliderMax);
+					stopE();
+				}
 
 				growE();
-					reversePalette = GUILayout.Toggle(reversePalette, "Reverse Order");
+					reversePalette = GUILayout.Toggle(reversePalette, "Reverse Order", SCANskins.SCAN_settingsToggle);
 					fillS(10);
-					discretePalette = GUILayout.Toggle(discretePalette, "Discrete Gradient");
+					discretePalette = GUILayout.Toggle(discretePalette, "Discrete Gradient", SCANskins.SCAN_settingsToggle);
 				stopE();
 
 			stopS();
@@ -346,38 +491,66 @@ namespace SCANsat.SCAN_UI
 		private void paletteConfirmation(int id)
 		{
 			growS();
-			fillS(16);
-			if (GUILayout.Button("Apply", GUILayout.Width(80)))
-			{
-				if (minHeightF < maxHeightF)
+				fillS(6);
+				if (GUILayout.Button("Default Settings", GUILayout.Width(135)))
 				{
-					data.MinHeight = minHeightF;
-					data.MaxHeight = maxHeightF;
+					//Lots of fields to update for switching palettes; again, very clumsy
+					data.MinHeight = data.DefaultMinHeight;
+					data.MaxHeight = data.DefaultMaxHeight;
+					data.ClampHeight = data.DefaultClampHeight;
+					minHeightF = data.MinHeight;
+					maxHeightF = data.MaxHeight;
+					clampState = data.ClampHeight != null;
+					if (clampState)
+						clampHeightF = (float)data.ClampHeight;
+					else
+						clampHeightF = 0;
+					dataPalette = palette.CurrentPalette = data.ColorPalette = data.DefaultColorPalette;
+					palette.CurrentPalettes = palette.setCurrentPalettesType(dataPalette.kind);
+					paletteSizeInt = data.PaletteSize = dataPalette.size;
+					reversePalette = data.PaletteReverse = data.DefaultReversePalette;
+					discretePalette = data.PaletteDiscrete = false;
+					setSizeSlider(dataPalette.kind);
+					setTerrainSliders();
+					drawCurrentLegend();
 				}
-				if (clampHeight)
-				{
-					if (clampHeightF > minHeightF && clampHeightF < maxHeightF)
-						data.ClampHeight = (float?)clampHeightF;
-				}
-				else
-					data.ClampHeight = null;
+				fillS(6);
+				growE();
+					if (GUILayout.Button("Apply", GUILayout.Width(60)))
+					{
+						if (minHeightF < maxHeightF)
+						{
+							data.MinHeight = minHeightF;
+							data.MaxHeight = maxHeightF;
+						}
+						if (clampState)
+						{
+							if (clampHeightF > minHeightF && clampHeightF < maxHeightF)
+								data.ClampHeight = (float?)clampHeightF;
+						}
+						else
+							data.ClampHeight = null;
 
-				data.ColorPalette = palette.CurrentPalette;
-				data.PaletteName = palette.CurrentPalette.name;
-				data.PaletteSize = palette.CurrentPalette.size;
-				data.PaletteDiscrete = discretePalette;
-				data.PaletteReverse = reversePalette;
-				drawCurrentLegend();
-			}
-			fillS(8);
-			if (GUILayout.Button("Cancel", GUILayout.Width(80)))
-			{
-				palette.CurrentPalette = data.ColorPalette;
-				InputLockManager.RemoveControlLock(lockID);
-				spaceCenterLock = false;
-				trackingStationLock = false;
-				Visible = false;
-			}
+						data.ColorPalette = palette.CurrentPalette;
+						data.PaletteName = palette.CurrentPalette.name;
+						data.PaletteSize = palette.CurrentPalette.size;
+						data.PaletteDiscrete = discretePalette;
+						data.PaletteReverse = reversePalette;
+						dataPalette = data.ColorPalette;
+						drawCurrentLegend();
+						if (bigMap != null)
+							bigMap.resetMap();
+					}
+					fillS(10);
+					if (GUILayout.Button("Cancel", GUILayout.Width(60)))
+					{
+						palette.CurrentPalette = data.ColorPalette;
+						InputLockManager.RemoveControlLock(lockID);
+						spaceCenterLock = false;
+						trackingStationLock = false;
+						Visible = false;
+					}
+				stopE();
 			stopS();
 		}
 
@@ -386,7 +559,7 @@ namespace SCANsat.SCAN_UI
 		{
 			if (paletteBox)
 			{
-				paletteRect = new Rect(40, 90, 100, 80);
+				paletteRect = new Rect(40, 90, 100, 100);
 				GUI.Box(paletteRect, "", SCANskins.SCAN_dropDownBox);
 				for (int i = 0; i < Palette.kindNames.Length; i++)
 				{
@@ -395,47 +568,90 @@ namespace SCANsat.SCAN_UI
 					{
 						paletteBox = false;
 						palette.CurrentPalettes = palette.setCurrentPalettesType((Palette.Kind)i);
+						setSizeSlider((Palette.Kind)i);
 					}
 				}
 			}
 		}
 
-		private float drawInputBox(ref string oldVal, GUIStyle boxStyle, float boxWidth, float labelWidth = 0, string title = "", GUIStyle labelStyle = null)
-		{
-			float newVal = 0;
-			float.TryParse(oldVal, out newVal);
-			growE();
-				if (!string.IsNullOrEmpty(title))
-					GUILayout.Label(title, labelStyle, GUILayout.Width(labelWidth));
-				oldVal = GUILayout.TextField(oldVal, boxStyle, GUILayout.Width(boxWidth));
-			stopE();
-
-			float.TryParse(oldVal, out newVal);
-			return newVal;
-		}
-
+		//Draws the palette swatch for the currently active SCANdata selection
 		private void drawCurrentLegend()
 		{
 			currentLegend = SCANmap.getLegend(0, data);
 		}
 
+		//Draws the palette swatch for the newly adjusted palette
 		private void drawPreviewLegend()
 		{
 			float? clamp = null;
 			Color32[] c = palette.CurrentPalette.colors;
-			if (clampHeight)
+			if (clampState)
 				clamp = (float?)clampHeightF;
 			if (reversePalette)
 				c = palette.CurrentPalette.colorsReverse;
 			previewLegend = SCANmap.getLegend(maxHeightF, minHeightF, clamp, discretePalette, c);
 		}
 
+		//Resets the palettes whenever the size slider is adjusted
 		private void regenPaletteSets()
 		{
 			palette.DivPaletteSet = palette.generatePaletteSet(paletteSizeInt, Palette.Kind.Diverging);
 			palette.QualPaletteSet = palette.generatePaletteSet(paletteSizeInt, Palette.Kind.Qualitative);
 			palette.SeqPaletteSet = palette.generatePaletteSet(paletteSizeInt, Palette.Kind.Sequential);
+			palette.FixedPaletteSet = palette.generatePaletteSet(0, Palette.Kind.Fixed);
 			palette.CurrentPalettes = palette.setCurrentPalettesType(palette.getPaletteType);
+		}
+
+		//Change the max range on the palette size slider based on palette type
+		private void setSizeSlider(Palette.Kind k)
+		{
+			switch (k)
+			{
+				case Palette.Kind.Diverging:
+					{
+						sizeSliderMin = 3f;
+						sizeSliderMax = 11f;
+						if (paletteSizeInt > sizeSliderMax)
+							paletteSizeInt = (int)sizeSliderMax;
+						break;
+					}
+				case Palette.Kind.Qualitative:
+					{
+						sizeSliderMin = 3f;
+						sizeSliderMax = 12f;
+						if (paletteSizeInt > sizeSliderMax)
+							paletteSizeInt = (int)sizeSliderMax;
+						break;
+					}
+				case Palette.Kind.Sequential:
+					{
+						sizeSliderMin = 3f;
+						sizeSliderMax = 9f;
+						if (paletteSizeInt > sizeSliderMax)
+							paletteSizeInt = (int)sizeSliderMax;
+						break;
+					}
+				case Palette.Kind.Fixed:
+					{
+						break;
+					}
+			}
+			
+		}
+
+		//Dynamically adjust the min and max values on all of the terrain height sliders; avoids impossible values
+		private void setTerrainSliders()
+		{
+			terrainSliderMinMin = data.DefaultMinHeight - 10000f;
+			terrainSliderMaxMax = data.DefaultMaxHeight + 10000f;
+			terrainSliderMinMax = maxHeightF - 100f;
+			terrainSliderMaxMin = minHeightF + 100f;
+			clampSliderMin = minHeightF + 10f;
+			clampSliderMax = maxHeightF - 10f;
+			if (clampHeightF < minHeightF + 10f)
+				clampHeightF = minHeightF + 10f;
+			else if (clampHeightF > maxHeightF - 10f)
+				clampHeightF = maxHeightF - 10f;
 		}
 
 	}

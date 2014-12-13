@@ -1,3 +1,26 @@
+Version 9.3 - 2014-12-13
+------------------------
+
+- In-flight big map has been replaced by a modified version of the KSC map
+
+- Resource overlays are controlled entirely through the big map
+	- Select resources through the drop down menu
+	- Activate overlay with the resource icon toggle on the lower left
+	- All resource controls have been removed from the settings menu
+
+- Support for Community Tech Tree added
+	- SCANsat parts appear in different tech node positions when using CTT and TechManager
+	- Realism Overhaul not affected; will need to create a separate config for this
+	
+- Text boxes have been replaced by icon textures wherever possible
+	- Map overlay options
+	- Other SCANsat window buttons
+	
+- Improvements to the UI of the color selection window
+	- Dynamically updating sliders used to adjust the terrain height options
+	- New fixed size color palettes added
+	- Numerous bug fixes and improvements to syncing color selections to the currently active map
+
 Version 9.2 - 2014-10-26
 ------------------------
 

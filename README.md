@@ -1,8 +1,8 @@
 ### [**SCANsat**][top]: Real Scanning, Real Science, Warp Speed!
 [![][shield:support-ksp]][KSP:developers]&nbsp;
-[![][shield:jenkins-rel]][SCANsat:rel-jenkins]&nbsp;
 [![][shield:license-bsd]][SCANsat:rel-license]&nbsp;
 [![][shield:license-mit]][SCANsat:dev-license]&nbsp;
+[![][shield:license-cc-by-sa]][SCANsat:dev-license]&nbsp;
 ![scan your planetoid like the big boys do][bigmap-scan-10000x]
 > ###### **Example SAR scan of Kerbin at 1000x and then 10,000x warp**
 
@@ -15,6 +15,8 @@
 [![][shield:support-karbonite]][karbonite:release]&nbsp;
 [![][shield:support-usi]][usi:release]&nbsp;
 [![][shield:support-epl]][epl:release]&nbsp;
+[![][shield:support-ctt]][ctt:release]&nbsp;
+[![][shield:support-tm]][techmanager:release]&nbsp;
 
 **Table of Contents**
 ------------------------------------------
@@ -33,6 +35,7 @@
   * [a. FAQ: Finding a Good Altitude][3a]
   * [b. Mismatched Scanners][3b]
 * [4. Big Map][4]
+  * [a. Big Map Options][4a]
 * [5. Parts and Sensors Types][5]
   * [a. RADAR][5a]
   * [b. SAR][5b]
@@ -40,8 +43,9 @@
   * [d. BTDT][5d]
   * [e. MapTraq (deprecated)][5e]
 * [6. (Career Mode) Research and Development][6]
-  * [a. Minimum Scan for Science (30%)][6a]
-  * [b. Getting Maximum Science][6b]
+  * [a. Community Tech Tree Support][6a]
+  * [b. Minimum Scan for Science (30%)][6b]
+  * [c. Getting Maximum Science][6c]
 * [7. Background Scanning][7]
 * [8. Time Warp][8]
 * [9. Note: Data Sources][9]
@@ -136,7 +140,7 @@ S.C.A.N. is proud to collaborate with other KSP mods and modding teams. Followin
 [![Support for Kethane][kethane:logo]][kethane:release] | [![Support for MKS][usi:logo]][usi:release]
 [**OpenResourceSystemX**][orsx:release] | [![Support for ALCOR][alcor:logo]][alcor:release]
 [**RasterPropMonitor**][rpm:release]  | [![Support for Karbonite][karbonite:logo]][karbonite:release]
-[**Blizzy78's Toolbar**][toolbar:release] |  [**KSP: Interstellar**][kspi:release]
+[**Blizzy78's Toolbar**][toolbar:release] | [![Support for Community Tech Tree][ctt:logo]][ctt:release]
 [**ModuleManager**][mm:release] | [**Extraplanetary Launchpads**][epl:release]
 
 
@@ -182,7 +186,7 @@ on custom parts, but this is not a requirement.
 
 Without any resource scanning mods installed, **SCANsat** can scan for a few basic types of data. All of these (non-resource) scans are shown as indicators on the Small Map.
 
-![][small-mismatch2]
+![][small-newMap1]
 
 Data Type | Scan Type | Scan Indicator
 :--- | :--- | :---:
@@ -202,8 +206,8 @@ Anomaly | **Been There, Done That(tm)** | **BTDT**
 
 **SCANsat** will scan planetoids for resources, assuming you have the relevant mods installed. All support for resource scanning is handled through one of two plugins. **ORS** supports many resources, and **Kethane** supports a few. 
 
-Each of the two resource systems can be enabled through the **SCANsat** Settings menu:
-> ![][resource-walkthrough]
+Each of the two resource systems can be enabled through the **SCANsat** Big Map:
+> ![][resource-walkthrough-v2]
 
 Both of the two resource systems will work in IVA, too:
 > ![][resource-iva]
@@ -224,11 +228,11 @@ Once it is installed correctly, you will be able to enable Kethane resources in 
 
 **ORSX** support is built internal to SCANsat. If you have an **ORSX** DLL loaded anywhere SCANsat will only target the newest version.
 
-With any **ORSX**-using mod installed, you can enable their resources in the Settings menu, and enable their overlay on the Big Map:
-> ![][resource-orsx]
+With any **ORSX**-using mod installed, you can select their resources in the drop down menu from the Big Map or KSC Map, and enable their overlay with the resource icon:
+> ![][resource-orsx-v2]
 
 For instance the **Karbonite** mod's resources can be viewed:
-> ![][resource-orsx-karbonite]
+> ![][resource-orsx-karbonite-v2]
 
 
 ### [:top:][top] 3. Basic Usage
@@ -276,7 +280,7 @@ Be sure to remember to pack enough batteries, radioisotope generators, and solar
 
 ### [:top:][top] 4. Big Map
 ------------------------------------------
-![A Big Big Map][bigmap-anim]
+![A Big Big Map][bigmap-anim-v2]
 
 A bigger map can be rendered on demand. Rendered maps are automatically
 saved to GameData/SCANsat/PluginData. Note that position indicators for
@@ -285,6 +289,25 @@ vessels or anomalies are not visible on exported images (but they may be a futur
 You can mouse over the big map to see what sensors have data for the location, as well as terrain elevation, and other details.
 
 Right-clicking on the big map shows a magnified view around the position where you clicked. Mouse operations work inside this magnified view just like they work outside, meaning the data displayed at the bottom window applies to your position inside the magnified view, and right-clicking inside it will increase magnification. This can be useful to find landing spots which won't kill your kerbals.
+
+#### [:top:][top] 4a. Big Map Options
+
+There are four drop-down menus along the top of the big map. These control, from left to right: 
+
+* The map projection type - Rectangular, KavrayskiyVII:, or Polar
+* The map type - Altimetry, Slope, or Biome
+* The resource to overlay on the map
+* The planet to display
+
+The icon in the center of the upper row regenerates the map.
+
+The toggle icons along the left side of the map control the various overlays and the color mode.
+
+The four buttons in the bottom-left open and close the other SCANsat windows.
+
+The camera icon in the lower-right exports a copy of the map.
+
+The re-size icon in the lower-right corner can be dragged to re-size the map.
 
 ### [:top:][top] 5. Parts and Sensor Types
 ------------------------------------------
@@ -321,13 +344,23 @@ The **Multispectral** sensor can be unlocked in **Advanced Exploration**.
 
 The **BTDT** sensor can be unlocked in **Field Science**.
 
+##### [:top:][top] 6a. Community Tech Tree Support
+When the [Community Tech Tree][ctt:release] and [TechManager][techmanager:release] addons are installed SCANsat parts will default to different tech tree nodes.
 
-##### [:top:][top] 6a. Minimum Scan for Science
+The **RADAR Altimetry** sensor can be unlocked in **Orbital Surveys**.
+
+The **SAR Altimetry** sensor can be unlocked in **Specialized Science Tech**.
+
+The **Multispectral** sensor can be unlocked in **Advanced Surveys**.
+
+The **BTDT** sensor can be unlocked in **Field Science**.
+
+##### [:top:][top] 6b. Minimum Scan for Science
 Once you scan at least 30% of a particular map, you can use **Analyze Data** to get delicious science:
 
 ![30% is your minimum][science-min]
 
-##### [:top:][top] 6b. Getting Maximum Science
+##### [:top:][top] 6c. Getting Maximum Science
 Between 30% and 100%, you will get a number of science points proportional to the percentage. Really,
 the upper cutoff is 95% in case you didn't scan the whole map.
 
@@ -412,10 +445,12 @@ sneaky then they can of course be sneaky.
 [small-justright]: https://i.imgur.com/Oft4xXP.gif
 [small-mismatch1]: https://i.imgur.com/fNztoUN.gif
 [small-mismatch2]: https://i.imgur.com/aQtTGvV.gif
+[small-newMap1]: http://i.imgur.com/mCnphuZ.gif
 
 [bigmap-scan-10000x]: http://i.imgur.com/VEPL3oN.gif
 [bigmap-scan-100x]: http://i.imgur.com/bcht47p.gif
 [bigmap-anim]: http://i.imgur.com/kxyl8xR.gif
+[bigmap-anim-v2]: http://i.imgur.com/lwyVBAN.gif
 
 [resource-kethane]: http://i.imgur.com/naJIsvB.gif
 [resource-kethane2]: http://i.imgur.com/AT2b4G7.jpg?1
@@ -423,7 +458,9 @@ sneaky then they can of course be sneaky.
 [resource-orsx-karbonite]: http://i.imgur.com/Sge2OGH.png?1
 [resource-iva]: http://i.imgur.com/iRo4kSA.png
 [resource-walkthrough]: http://i.imgur.com/HJLK1yi.gif
-
+[resource-walkthrough-v2]: http://i.imgur.com/80ximDP.gif
+[resource-orsx-v2]: http://i.imgur.com/ERSFwCX.png
+[resource-orsx-karbonite-v2]: http://i.imgur.com/qVlHzSN.png
 
 [top]: #table-of-contents
 [0]: #top-0-people-and-faqs
@@ -441,6 +478,7 @@ sneaky then they can of course be sneaky.
 [3a]: #top-3a-faq-finding-a-good-altitude
 [3b]: #top-3b-mismatched-scanners
 [4]: #top-4-big-map
+[4a]: #top-4a-big-map-options
 [5]: #top-5-parts-and-sensor-types
 [5a]: #top-a-the-radar-altimetry-sensor
 [5b]: #top-b-the-sar-altimetry-sensor
@@ -448,14 +486,16 @@ sneaky then they can of course be sneaky.
 [5d]: #top-d-been-there-done-that
 [5e]: #top-e-maptraq-deprecated
 [6]: #top-6-career-mode-research-and-development
-[6a]: #top-6aminimum-scan-for-science
-[6b]: #top-6b-getting-maximum-science
+[6a]: #top-6a-community-tech-tree-support
+[6b]: #top-6a-minimum-scan-for-science
+[6c]: #top-6c-getting-maximum-science
 [7]: #top-7-background-scanning
 [8]: #top-8-time-warp
 [9]: #top-9-note-concerning-data-sources
 
 [shield:license-bsd]: http://img.shields.io/:license-bsd-blue.svg
 [shield:license-mit]: http://img.shields.io/:license-mit-a31f34.svg
+[shield:license-cc-by-sa]: http://img.shields.io/badge/license-CC%20BY--SA-green.svg
  
 [shield:jenkins-dev]: http://img.shields.io/jenkins/s/https/ksp.sarbian.com/jenkins/SCANsat-dev.svg
 [shield:jenkins-rel]: http://img.shields.io/jenkins/s/https/ksp.sarbian.com/jenkins/SCANsat-release.svg
@@ -472,6 +512,8 @@ sneaky then they can of course be sneaky.
 [shield:support-usi]:http://img.shields.io/badge/works%20with%20USI-0.21.2-34c566.svg
 [shield:support-karbonite]: http://img.shields.io/badge/works%20with%20Karbonite-0.4.2-ff8c00.svg
 [shield:support-epl]: http://img.shields.io/badge/works%20with%20EPL-4.2.3-ff8c00.svg
+[shield:support-ctt]: http://img.shields.io/badge/works%20with%20CTT-1.1-blue.svg
+[shield:support-tm]: http://img.shields.io/badge/works%20with%20TechManager-1.4-lightgrey.svg
 
 [shield:gittip-tg-img]: http://img.shields.io/gittip/technogeeky.png
 [shield:gittip-tg]: https://www.gittip.com/technogeeky/
@@ -542,9 +584,15 @@ sneaky then they can of course be sneaky.
 [alcor:release]: http://forum.kerbalspaceprogram.com/threads/54925
 [alcor:logo]: http://i.imgur.com/7eJ3IFC.jpg
 
+[ctt:logo]: http://i.imgur.com/li2tNgE.png
+
 [mm:release]: http://forum.kerbalspaceprogram.com/threads/55219
 
 [epl:release]: http://forum.kerbalspaceprogram.com/threads/59545
+
+[ctt:release]: http://forum.kerbalspaceprogram.com/threads/100385
+
+[techmanager:release]: http://forum.kerbalspaceprogram.com/threads/98293
 
 [kspi:release]: http://forum.kerbalspaceprogram.com/threads/43839
 

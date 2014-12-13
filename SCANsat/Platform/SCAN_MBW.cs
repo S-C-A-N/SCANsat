@@ -164,6 +164,9 @@ namespace SCANsat.Platform
 		protected Rect WindowRect_Default;
 		protected Rect WindowRect_Min;
 		protected Rect WindowRect_Max;
+		protected Rect TextureRect;
+		protected Texture2D MapTexture;
+		protected float dW, dH;
 
 		internal void resetWindowPos(Rect r)
 		{
@@ -201,105 +204,104 @@ namespace SCANsat.Platform
 		public static GUIContent iconWithTT(Texture tex, string tooltip) { return new GUIContent(tex, tooltip); }
 
 		/* resizing functionality */
-		public void resizeWindow()
-		{
-			#region top of gui_build()
-			if (!inRepaint() && IsResizing)
-			{
+		//public void resizeWindow()
+		//{
+		//	#region top of gui_build()
+		//	if (!inRepaint() && IsResizing)
+		//	{
+		//		if (Input.GetMouseButtonUp(0))
+		//		{
+		//			SCANUtil.SCANlog("New Window Rect Height: {0} ; Width: {1}", resizeH, resizeW);
+		//			if (resizeW < WindowRect_Min.width) resizeW = WindowRect_Min.width;
+		//			if (resizeH < WindowRect_Min.height) resizeH = WindowRect_Min.height;
+		//			//if (resizeW > WindowRect_Max.width) resizeW = WindowRect_Max.width;
+		//			//if (resizeH > WindowRect_Max.height) resizeH = WindowRect_Max.height;
+		//			IsResizing = false;
+		//			resizeWindowPost(resizeW, resizeW / 2);
+		//			WindowRect_Last = new Rect(0, 0, WindowRect.width, WindowRect.height);
+		//		}
+		//		else
+		//		{
+		//			float xx = Input.mousePosition.x;
+		//			//float yy = Input.mousePosition.y;
+		//			dW = xx - dragX;
+		//			dH = dW / 2;
+		//			resizeW += dW;
+		//			resizeH += dH;
+		//			//resizeH += yy - dragY;
+		//			//dragX = xx;
+		//			//dragY = yy;
+		//			TextureRect.width += dW;
+		//			TextureRect.height += dH;
+		//			WindowRect.width += dW;
+		//			WindowRect.height += dH;
+		//			//WindowRect.width = WindowRect_Last.width + dW;
+		//			//WindowRect.height = WindowRect_Last.height + dH;
+		//			//SCANUtil.SCANlog("Resizing Window; Add Width: {0}", dW);
+		//		}
+		//		if (Event.current.isMouse) Event.current.Use();
+		//	}
+		//	#endregion
+		//	// ...
 
-				if (Input.GetMouseButtonUp(0))
-				{
-					if (resizeW < WindowRect_Min.width) resizeW = WindowRect_Min.width;
-					if (resizeH < WindowRect_Min.height) resizeH = WindowRect_Min.height;
-					if (resizeW > WindowRect_Max.width) resizeW = WindowRect_Max.width;
-					if (resizeH > WindowRect_Max.height) resizeH = WindowRect_Max.height;
-					IsResizing = false;
-					WindowRect_Last = new Rect(0, 0, WindowRect.width, WindowRect.height);
-				}
-				else
-				{
-					float xx = Input.mousePosition.x;
-					float yy = Input.mousePosition.y;
-					resizeW += xx - dragX;
-					resizeH += yy - dragY;
-					dragX = xx;
-					dragY = yy;
-					WindowRect.width = WindowRect_Last.width + resizeW;
-					WindowRect.height = WindowRect_Last.height - resizeH;
-				}
-				if (Event.current.isMouse) Event.current.Use();
-			}
-			#endregion
-			// ...
+		//	#region middle of gui_build()
+		//	//dW = resizeW;
+		//	//dH = resizeH;
+		//	//if (dW < WindowRect_Min.width) dW = WindowRect_Min.width;
+		//	//if (dH < WindowRect_Min.height) dH = WindowRect_Min.height;
+		//	//dH = dW / 2f; // aspect ratio fixing
 
-			#region middle of gui_build()
-			float dW = resizeW;
-			float dH = resizeH;
-			if (dW < WindowRect_Min.width) dW = WindowRect_Min.width;
-			if (dH < WindowRect_Min.height) dH = WindowRect_Min.height;
-			dH = dW / 2f; // aspect ratio fixing
+		//	//if (IsResizing) GUILayout.Label("", GUILayout.Width (dW), GUILayout.Height (dH));
+		//	//else			GUILayout.Label("", GUILayout.Width(MapTexture.width), GUILayout.Height(MapTexture.height));
 
-			//if (IsResizing) GUILayout.Label("", GUILayout.Width (dW), GUILayout.Height (dH));
-			//else 			GUILayout.Label("", map.width, map.height);
+		//	//Rect maprect = GUILayoutUtility.GetLastRect ();
+		//	//maprect.width = bigmap.mapwidth;
+		//	//maprect.height = bigmap.mapheight;
+		//	#endregion
 
-			//Rect maprect = GUILayoutUtility.GetLastRect ();
-			//maprect.width = bigmap.mapwidth;
-			//maprect.height = bigmap.mapheight;
-			#endregion
+		//	// ...
 
-			// ...
+		//	#region later in gui_build()
+		//	//if (IsResizing)
+		//	//{
+		//	//	TextureRect.width = dW;
+		//	//	TextureRect.height = dH;
+		//	//	GUI.DrawTexture(TextureRect, MapTexture, ScaleMode.StretchToFill);
+		//	//}
+		//	//else
+		//	//{
+		//	//	GUI.DrawTexture(TextureRect, MapTexture);
+		//	//}
+		//	#endregion
+		//	// ...
 
-			#region later in gui_build()
-			if (IsResizing)
-			{
-				//maprect.width = dW;
-				//maprect.height = dH;
-				//GUI.DrawTexture (maprect, map, ScaleMode.StretchToFill);
-			}
-			else
-			{
-				//GUI.DrawTexture (maprect, map);
-			}
-			#endregion
-			// ...
+		//	//float mx = Event.current.mousePosition.x - TextureRect.x;
+		//	//float my = Event.current.mousePosition.y - TextureRect.y;
 
-			//float mx = Event.current.mousePosition.x - maprect.x;
-			//float my = Event.current.mousePosition.y - maprect.y;
+		//	#region end of gui_build()
+		//	Rect resizer = new Rect(WindowRect.x + WindowRect.width - 24
+		//							, WindowRect.y + WindowRect.height - 24
+		//							, 24, 24);
 
-			// ...
+		//	GUI.Box(resizer, "//", SCAN_SkinsLibrary.CurrentSkin.box);
 
-			#region fps widget (extra)
-			//Rect fpswidget = new Rect (maprect.x + maprect.width - 32 , maprect.y + maprect.height + 32 , 32 , 24);
-			//GUI.Label (fpswidget , fps.Tostring ("N1"));
-			#endregion
+		//	if (Event.current.isMouse
+		//		&& Event.current.type == EventType.MouseDown
+		//		&& Event.current.button == 0
+		//		&& resizer.Contains(Event.current.mousePosition))
+		//	{
+		//		IsResizing = true;
+		//		WindowRect_Last = WindowRect;
+		//		dragX = Input.mousePosition.x;
+		//		//dragY = Input.mousePosition.y;
+		//		resizeW = TextureRect.width;
+		//		resizeH = TextureRect.height;
+		//		Event.current.Use();
+		//	}
+		//	#endregion
+		//}
 
-			// ...
-
-			#region end of gui_build()
-			//Rect resizer = new Rect (maprect.x + maprect.width - 24 , maprect.y + maprect.height + 8 , 24 , 24);
-
-			Rect resizer = new Rect(WindowRect.x + WindowRect.width - 24
-									, WindowRect.y + WindowRect.height - 24
-									, 24, 24);
-
-			GUI.Box(resizer, "//", SCAN_SkinsLibrary.CurrentSkin.box);
-
-			if (Event.current.isMouse
-				&& Event.current.type == EventType.MouseDown
-				&& Event.current.button == 0
-				&& resizer.Contains(Event.current.mousePosition))
-			{
-				IsResizing = true;
-				WindowRect_Last = WindowRect;
-				dragX = Input.mousePosition.x;
-				dragY = Input.mousePosition.y;
-				//resizeW = bigmap.mapwidth;
-				//resizeH = bigmap.mapheight;
-				Event.current.Use();
-			}
-			#endregion
-		}
-
+		protected virtual void resizeWindowPost(float width, float height) { }
 
 		protected override void Awake() { Log.Debug("New MBWindow Awakened"); }
 		protected virtual void DrawWindowPre(Int32 id) { }
@@ -342,19 +344,15 @@ namespace SCANsat.Platform
 			if (ClampEnabled) WindowRect = WindowRect.ClampToScreen(ClampToScreenOffset);
 			if (ResizeEnabled) cc = WindowCaption + " " + WindowRect.WxH();
 			else cc = WindowCaption;
-			if (IsResizing) cc = WindowCaption + " " + WindowRect_Last.WxH() + " -> " + WindowRect.WxH();
+			if (IsResizing) cc = WindowCaption + " " + WindowRect_Last.WxH() + " -> " + WindowRect.WxH() + " Map Width: " + dW;
 
 			switch (WindowStyle == null)
 			{
 				case true: WindowRect = GUILayout.Window(WindowID, WindowRect, DrawWindowInternal, cc, WindowOptions); break;
 				default: WindowRect = GUILayout.Window(WindowID, WindowRect, DrawWindowInternal, cc, WindowStyle, WindowOptions); break;
 			}
-
 			if (TooltipsEnabled) DrawToolTip();  //Draw the tooltip of its there to be drawn
-			if (ResizeEnabled) resizeWindow();
-
-
-
+			//if (ResizeEnabled) resizeWindow();
 		}
 
 		private void DrawWindowInternal(Int32 id)
@@ -365,7 +363,7 @@ namespace SCANsat.Platform
 			DrawWindowPost(id);
 			if (TooltipsEnabled) SetTooltipText();	//Set the Tooltip variable based on whats in this window
 
-			if (ResizeEnabled) { DragRect = new Rect(0, 0, WindowRect.width, WindowRect.height); DragRect.height -= 24; }
+			if (ResizeEnabled) { DragRect = new Rect(0, 0, WindowRect.width - 30, WindowRect.height - 30); }
 			else { DragRect = new Rect(0, 0, 0, 0); }
 
 			if (DragEnabled)
@@ -407,7 +405,6 @@ namespace SCANsat.Platform
 				styleTooltip.wordWrap = (TooltipMaxWidth > 0);
 
 				//clamp it accordingly
-
 				if (ClampEnabled) _TooltipPosition = _TooltipPosition.ClampToScreen(ClampToScreenOffset);
 				GUI.Label(TooltipPosition, contTooltip, styleTooltip);	// Draw the Tooltip
 				GUI.depth = 0;											// On top of everything

@@ -27,6 +27,7 @@ namespace SCANsat.Platform.Palettes
 			Diverging,
 			Qualitative,
 			Sequential,
+			Fixed,
 			Invertable,
 			Unknown,
 		}
