@@ -271,11 +271,18 @@ namespace SCANsat
 
 		internal static double ORSOverlay(double lon, double lat, int i, string s)
 		{
-			double amount = 0f;
+			double amount = 0d;
 			amount = SCANreflection.ORSXpixelAbundanceValue(i, s, lat, lon);
 			//ORSPlanetaryResourcePixel overlayPixel = ORSPlanetaryResourceMapData.getResourceAvailability(i, s, lat, lon);
 			//if (overlayPixel != null)
 			//	amount = overlayPixel.getAmount();
+			return amount;
+		}
+
+		internal static float RegolithOverlay(double lat, double lon, string name, int body)
+		{
+			float amount = 0f;
+			amount = SCANreflection.RegolithAbundanceValue(lat, lon, name, body, 0, 0);
 			return amount;
 		}
 

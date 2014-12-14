@@ -24,17 +24,34 @@ namespace SCANsat
 		private const string ORSXPixelAbundanceMethod = "getPixelAbundanceValue";
 		private const string ORSXAssemblyName = "ORSX";
 
+		private const string RegolithType = "Regolith.Common.RegolithResourceMap";
+		private const string RegolithAssemblyName = "Regolith";
+		private const string RegolithMethodName = "GetAbundance";
+
 		private static bool ORSXRun = false;
+
+		private static bool RegolithRun = false;
 
 		private delegate double ORSXpixelAbundance(int body, string resourceName, double lat, double lon);
 
+		private delegate float RegolithPosAbundance(double lat, double lon, string resource, int body, int type, double altitude);
+
 		private static ORSXpixelAbundance _ORSXpixelAbundance;
 
+		private static RegolithPosAbundance _RegolithPosAbundance;
+
 		internal static Type _ORSXPlanetType;
+
+		internal static Type _RegolithPlanetType;
 
 		internal static double ORSXpixelAbundanceValue(int body, string resourceName, double lat, double lon)
 		{
 			return _ORSXpixelAbundance(body, resourceName, lat, lon);
+		}
+
+		internal static float RegolithAbundanceValue(double lat, double lon, string resource, int body, int type, double altitude)
+		{
+			return _RegolithPosAbundance(lat, lon, resource, body, type, altitude);
 		}
 
 		internal static bool ORSXReflectionMethod(Assembly ORSXAssembly)
@@ -77,6 +94,51 @@ namespace SCANsat
 			catch (Exception e)
 			{
 				Debug.LogWarning("[SCANsat] Exception While Loading ORSX Reflection Method: " + e);
+			}
+
+			return false;
+		}
+
+		internal static bool RegolithReflectionMethod(Assembly RegolithAssembly)
+		{
+			if (_RegolithPosAbundance != null)
+				return true;
+
+			if (RegolithRun)
+				return false;
+
+			RegolithRun = true;
+
+			try
+			{
+				Type RegolithType = RegolithAssembly.GetExportedTypes()
+					.SingleOrDefault(t => t.FullName == ORSXPlanetDataType);
+
+				if (RegolithType == null)
+				{
+					SCANUtil.SCANlog("Regolith Type Not Found");
+					return false;
+				}
+
+				_RegolithPlanetType = RegolithType;
+
+				MethodInfo RegolithMethod = RegolithType.GetMethod(RegolithMethodName, new Type[] { typeof(double), typeof(double), typeof(string), typeof(int), typeof(int), typeof(double) });
+
+				if (RegolithMethod == null)
+				{
+					SCANUtil.SCANlog("Regolith Method Not Found");
+					return false;
+				}
+
+				_RegolithPosAbundance = (RegolithPosAbundance)Delegate.CreateDelegate(typeof(RegolithPosAbundance), RegolithMethod);
+
+				SCANUtil.SCANlog("Regolith Reflection Method Assigned");
+
+				return true;
+			}
+			catch (Exception e)
+			{
+				Debug.LogWarning("[SCANsat] Exception While Loading Regolith Reflection Method: " + e);
 			}
 
 			return false;

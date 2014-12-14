@@ -23,11 +23,12 @@ namespace SCANsat
 	public class SCANversions : MonoBehaviour
 	{
 		private const string kVersion = "0.9.2";
-		private string[] Assemblies = new string[8] { "SCANsatRPM", "SCANsatKethane", "Kethane", "GeodesicGrid", "RasterPropMonitor", "MechJebRPM", "MechJeb2", "ORSX" };
+		private string[] Assemblies = new string[9] { "SCANsatRPM", "SCANsatKethane", "Kethane", "GeodesicGrid", "RasterPropMonitor", "MechJebRPM", "MechJeb2", "ORSX", "Regolith" };
 
 		internal static string SCANsatVersion = "";
 		public static bool kethaneLoaded = false;
 		internal static bool ORSXFound = false;
+		internal static bool RegolithFound = false;
 
 		private List<AssemblyLog> assemblyList = new List<AssemblyLog>();
 
@@ -59,6 +60,11 @@ namespace SCANsat
 				if (ORSXAssembly != null)
 				{
 					ORSXFound = SCANreflection.ORSXReflectionMethod(ORSXAssembly.assemblyLoaded);
+				}
+				var RegolithAssembly = assemblyList.FirstOrDefault(a => a.name == "Regolith");
+				if (RegolithAssembly != null)
+				{
+					RegolithFound = SCANreflection.RegolithReflectionMethod(RegolithAssembly.assemblyLoaded);
 				}
 
 				debugWriter();
