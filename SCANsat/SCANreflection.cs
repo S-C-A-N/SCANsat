@@ -24,7 +24,7 @@ namespace SCANsat
 		private const string ORSXPixelAbundanceMethod = "getPixelAbundanceValue";
 		private const string ORSXAssemblyName = "ORSX";
 
-		private const string RegolithType = "Regolith.Common.RegolithResourceMap";
+		private const string RegolithTypeName = "Regolith.Common.RegolithResourceMap";
 		private const string RegolithAssemblyName = "Regolith";
 		private const string RegolithMethodName = "GetAbundance";
 
@@ -112,7 +112,7 @@ namespace SCANsat
 			try
 			{
 				Type RegolithType = RegolithAssembly.GetExportedTypes()
-					.SingleOrDefault(t => t.FullName == ORSXPlanetDataType);
+					.SingleOrDefault(t => t.FullName == RegolithTypeName);
 
 				if (RegolithType == null)
 				{
