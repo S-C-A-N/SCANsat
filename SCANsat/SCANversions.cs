@@ -56,11 +56,11 @@ namespace SCANsat
 					if (kAssembly.infoVersion == kVersion)
 						kethaneLoaded = true;
 				}
-				var ORSXAssembly = assemblyList.FirstOrDefault(a => a.name == "ORSX");
-				if (ORSXAssembly != null)
-				{
-					ORSXFound = SCANreflection.ORSXReflectionMethod(ORSXAssembly.assemblyLoaded);
-				}
+				//var ORSXAssembly = assemblyList.FirstOrDefault(a => a.name == "ORSX");
+				//if (ORSXAssembly != null)
+				//{
+				//	ORSXFound = SCANreflection.ORSXReflectionMethod(ORSXAssembly.assemblyLoaded);
+				//}
 				var RegolithAssembly = assemblyList.FirstOrDefault(a => a.name == "Regolith");
 				if (RegolithAssembly != null)
 				{
