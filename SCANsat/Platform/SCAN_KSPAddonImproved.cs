@@ -43,13 +43,12 @@ namespace SCANsat.Platform
 			SpaceCenter = 1 << 2,
 			Credits = 1 << 3,
 			EditorVAB = 1 << 4,
-			EditorSPH = 1 << 5,
-			Flight = 1 << 6,
-			TrackingStation = 1 << 7,
-			PSystemSpawn = 1 << 8,
-			Instantly = 1 << 9,
+			//EditorSPH = 1 << 5,
+			Flight = 1 << 5,
+			TrackingStation = 1 << 6,
+			PSystemSpawn = 1 << 7,
+			Instantly = 1 << 8,
 
-			EditorAny = EditorVAB | EditorSPH,
 			TimeElapses = Flight | TrackingStation | SpaceCenter,
 			RealTime = TimeElapses,
 			EveryScene = ~0
@@ -155,10 +154,6 @@ namespace SCANsat.Platform
 			{
 				case GameScenes.EDITOR:
 					mask = SCAN_KSPAddonImproved.Startup.EditorVAB;
-					break;
-
-				case GameScenes.SPH:
-					mask = SCAN_KSPAddonImproved.Startup.EditorSPH;
 					break;
 
 				case GameScenes.CREDITS:
