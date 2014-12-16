@@ -132,7 +132,7 @@ namespace SCANsat.SCAN_UI
 					info += palette.colored(palette.grey, "HI ");
 				if (SCANUtil.isCovered(lon, lat, data, SCANdata.SCANtype.Biome))
 				{
-					if (body.BiomeMap == null || body.BiomeMap.Map == null)
+					if (body.BiomeMap == null)
 						info += palette.colored(palette.c_ugly, "MULTI ");
 					else
 						info += palette.colored(palette.c_good, "MULTI ");
@@ -154,16 +154,16 @@ namespace SCANsat.SCAN_UI
 
 				if (SCANcontroller.controller.map_ResourceOverlay && SCANcontroller.controller.GlobalResourceOverlay) //Adds selected resource amount to big map legend
 				{
-					if (SCANcontroller.controller.resourceOverlayType == 0 && SCANversions.ORSXFound)
+					if (SCANcontroller.controller.resourceOverlayType == 0 && SCANversions.RegolithFound)
 					{
 						if (SCANUtil.isCovered(lon, lat, data, mapObj.resource.Type))
 						{
-							double amount = SCANUtil.ORSOverlay(lon, lat, mapObj.body.flightGlobalsIndex, mapObj.resource.Name);
+							double amount = SCANUtil.RegolithOverlay(lon, lat, mapObj.resource.Name, mapObj.body.flightGlobalsIndex);
 							string label;
-							if (mapObj.resource.linear) //Make sure that ORS values are handled correctly based on which scale type they use
-								label = (amount * 100).ToString("N1") + " %";
-							else
-								label = (amount * 1000000).ToString("N1") + " ppm";
+							//if (mapObj.resource.linear) //Make sure that ORS values are handled correctly based on which scale type they use
+								label = amount.ToString("P2");
+							//else
+							//	label = (amount * 1000000).ToString("N1") + " ppm";
 							info += palette.colored(mapObj.resource.fullColor, mapObj.resource.Name + ": " + label);
 						}
 					}
