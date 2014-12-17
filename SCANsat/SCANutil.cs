@@ -308,10 +308,14 @@ namespace SCANsat
 				return null;
 			if (resourceType != 0)
 				return null;
-			if (node.HasValue("MinAbundance"))
-				float.TryParse(node.GetValue("MinAbundance"), out min);
-			if (node.HasValue("MaxAbundance"))
-				float.TryParse(node.GetValue("MaxAbundance"), out max);
+			ConfigNode distNode = node.GetNode("Distribution");
+			if (distNode != null)
+			{
+				if (distNode.HasValue("MinAbundance"))
+					float.TryParse(distNode.GetValue("MinAbundance"), out min);
+				if (distNode.HasValue("MaxAbundance"))
+					float.TryParse(distNode.GetValue("MaxAbundance"), out max);
+			}
 			SCANdata.SCANResource SCANres = new SCANdata.SCANResource(name, body, type.colorFull, type.colorEmpty, min, max, type, SCANdata.SCANResource_Source.Regolith);
 			if (SCANres != null)
 				return SCANres;
