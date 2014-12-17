@@ -371,7 +371,7 @@ namespace SCANsat
 			mapsaved = false;
 			if (SCANcontroller.controller.GlobalResourceOverlay)
 			{ //Make sure that a resource is initialized if necessary
-				if (resource == null) resource = SCANcontroller.controller.ResourceList[SCANcontroller.controller.resourceSelection][body.name];
+				if (resource == null && body != null) resource = SCANcontroller.controller.ResourceList[SCANcontroller.controller.resourceSelection][body.name];
 				if (SCANcontroller.controller.resourceOverlayType == 1)
 					SCANcontroller.controller.KethaneReset = !SCANcontroller.controller.KethaneReset;
 			}
@@ -539,29 +539,15 @@ namespace SCANsat
 						{
 							if (SCANUtil.isCovered(lon, lat, data, resource.Type)) //check our new resource coverage map
 							{
-								double amount = SCANUtil.RegolithOverlay(lon, lat, resource.Name, body.flightGlobalsIndex); //grab the resource amount for the current pixel
-								//double scalar = resource.ORS_Multiplier * resource.ORS_Scalar * resource.ORS_Threshold; //low cutoff value
+								double amount = SCANUtil.RegolithOverlay(lat, lon, resource.Name, body.flightGlobalsIndex); //grab the resource amount for the current pixel
 								double scalar = resource.minValue + ((resource.maxValue - resource.minValue) / 4);
-								//if (resource.linear)
-								//{ //linear resources are measured on 0-100% scale
-									amount *= 100;
-									if (amount > scalar)
-									{
-										if (amount > 100) amount = 100;
-										pix[i] = palette.lerp(baseColor, palette.lerp(resource.emptyColor, resource.fullColor, (float)(amount) / (resource.maxValue - resource.minValue)), 0.3f); //vary color by resource amount
-									}
-									else pix[i] = palette.lerp(baseColor, palette.grey, 0.4f);
-								//}
-								//else
-								//{ //log_scale resources are measured in ppm
-								//	amount *= 1000000;
-								//	if (amount > scalar)
-								//	{
-								//		if (amount > 25 * scalar) amount = 25 * scalar; //max cutoff value
-								//		pix[i] = palette.lerp(baseColor, palette.lerp(resource.emptyColor, resource.fullColor, (float)(amount) / (float)(25 * scalar)), 0.8f); //vary color by resource amount
-								//	}
-								//	else pix[i] = palette.lerp(baseColor, palette.grey, 0.4f);
-								//}
+								amount *= 100;
+								if (amount > scalar)
+								{
+									if (amount > 100) amount = 100;
+									pix[i] = palette.lerp(baseColor, palette.lerp(resource.emptyColor, resource.fullColor, (float)(amount) / (resource.maxValue - resource.minValue)), 0.3f); //vary color by resource amount
+								}
+								else pix[i] = palette.lerp(baseColor, palette.grey, 0.4f);
 							}
 							else pix[i] = baseColor;
 						}
@@ -660,29 +646,15 @@ namespace SCANsat
 						{
 							if (SCANUtil.isCovered(lon, lat, data, resource.Type)) //check our new resource coverage map
 							{
-								double amount = SCANUtil.RegolithOverlay(lon, lat, resource.Name, body.flightGlobalsIndex); //grab the resource amount for the current pixel
-								//double scalar = resource.ORS_Multiplier * resource.ORS_Scalar * resource.ORS_Threshold;
+								double amount = SCANUtil.RegolithOverlay(lat, lon, resource.Name, body.flightGlobalsIndex); //grab the resource amount for the current pixel
 								double scalar = resource.minValue + ((resource.maxValue - resource.minValue) / 5);
-								//if (resource.linear)
-								//{
-									amount *= 100;
-									if (amount > scalar)
-									{
-										if (amount > 100) amount = 100; //max cutoff value
-										pix[i] = palette.lerp(baseColor, palette.lerp(resource.emptyColor, resource.fullColor, (float)(amount) / (resource.maxValue - resource.minValue)), 0.3f); //vary color by resource amount
-									}
-									else pix[i] = palette.lerp(baseColor, palette.grey, 0.4f);
-								//}
-								//else
-								//{
-								//	amount *= 1000000;
-								//	if (amount > scalar)
-								//	{
-								//		if (amount > 25 * scalar) amount = 25 * scalar; //max cutoff value
-								//		pix[i] = palette.lerp(baseColor, palette.lerp(resource.emptyColor, resource.fullColor, (float)(amount) / (float)(25 * scalar)), 0.8f); //vary color by resource amount
-								//	}
-								//	else pix[i] = palette.lerp(baseColor, palette.grey, 0.4f);
-								//}
+								amount *= 100;
+								if (amount > scalar)
+								{
+									if (amount > 100) amount = 100; //max cutoff value
+									pix[i] = palette.lerp(baseColor, palette.lerp(resource.emptyColor, resource.fullColor, (float)(amount) / (resource.maxValue - resource.minValue)), 0.3f); //vary color by resource amount
+								}
+								else pix[i] = palette.lerp(baseColor, palette.grey, 0.4f);
 							}
 							else pix[i] = baseColor;
 						}
@@ -784,29 +756,15 @@ namespace SCANsat
 						{
 							if (SCANUtil.isCovered(lon, lat, data, resource.Type)) //check our new resource coverage map
 							{
-								double amount = SCANUtil.RegolithOverlay(lon, lat, resource.Name, body.flightGlobalsIndex); //grab the resource amount for the current pixel
-								//double scalar = resource.ORS_Multiplier * resource.ORS_Scalar * resource.ORS_Threshold;
+								double amount = SCANUtil.RegolithOverlay(lat, lon, resource.Name, body.flightGlobalsIndex); //grab the resource amount for the current pixel
 								double scalar = resource.minValue;// +((resource.maxValue - resource.minValue) / 3);
-								//if (resource.linear)
-								//{
-									amount *= 100;
-									if (amount > scalar)
-									{
-										if (amount > 100) amount = 100; //max cutoff value
-										pix[i] = palette.lerp(baseColor, palette.lerp(resource.emptyColor, resource.fullColor, (float)(amount) / (resource.maxValue - resource.minValue)), 0.3f); //vary color by resource amount
-									}
-									else pix[i] = palette.lerp(baseColor, palette.grey, 0.4f);
-								//}
-								//else
-								//{
-								//	amount *= 1000000;
-								//	if (amount > scalar)
-								//	{
-								//		if (amount > 25 * scalar) amount = 25 * scalar; //max cutoff value
-								//		pix[i] = palette.lerp(baseColor, palette.lerp(resource.emptyColor, resource.fullColor, (float)(amount) / (float)(25 * scalar)), 0.8f); //vary color by resource amount
-								//	}
-								//	else pix[i] = palette.lerp(baseColor, palette.grey, 0.4f);
-								//}
+								amount *= 100;
+								if (amount > scalar)
+								{
+									if (amount > 100) amount = 100; //max cutoff value
+									pix[i] = palette.lerp(baseColor, palette.lerp(resource.emptyColor, resource.fullColor, (float)(amount) / (resource.maxValue - resource.minValue)), 0.3f); //vary color by resource amount
+								}
+								else pix[i] = palette.lerp(baseColor, palette.grey, 0.4f);
 							}
 							else pix[i] = baseColor;
 						}

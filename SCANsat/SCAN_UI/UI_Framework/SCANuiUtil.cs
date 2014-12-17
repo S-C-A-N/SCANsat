@@ -158,7 +158,7 @@ namespace SCANsat.SCAN_UI
 					{
 						if (SCANUtil.isCovered(lon, lat, data, mapObj.resource.Type))
 						{
-							double amount = SCANUtil.RegolithOverlay(lon, lat, mapObj.resource.Name, mapObj.body.flightGlobalsIndex);
+							double amount = SCANUtil.RegolithOverlay(lat, lon, mapObj.resource.Name, mapObj.body.flightGlobalsIndex);
 							string label;
 							//if (mapObj.resource.linear) //Make sure that ORS values are handled correctly based on which scale type they use
 								label = amount.ToString("P2");
