@@ -354,7 +354,7 @@ namespace SCANsat
 			if (body == b)
 				return;
 			body = b;
-			SCANcontroller.controller.Resources(b); //Repopulate resource list when changing SOI
+			//SCANcontroller.controller.Resources(b); //Repopulate resource list when changing SOI
 			if (SCANcontroller.controller.GlobalResourceOverlay)
 				resource = SCANcontroller.controller.ResourceList[SCANcontroller.controller.resourceSelection][b.name];
 			resetMap();
