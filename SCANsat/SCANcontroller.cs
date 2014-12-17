@@ -125,7 +125,7 @@ namespace SCANsat
 		/* Used in case the loading process is interupted somehow */
 		private bool loaded = false;
 
-		private bool globalResourceOverlay = false;
+		private static bool globalResourceOverlay = false;
 
 		#region Public Accessors
 		public static Dictionary<string, SCANdata> Body_Data
@@ -145,7 +145,6 @@ namespace SCANsat
 		public Dictionary<string, Dictionary<string, SCANdata.SCANResource>> ResourceList
 		{
 			get { return resourceList; }
-			internal set { resourceList = value; }
 		}
 		
 		public void addToResourceData (string name, string body, SCANdata.SCANResource res)
@@ -161,7 +160,7 @@ namespace SCANsat
 				if (!resourceList[name].ContainsKey(body))
 					resourceList[name].Add(body, res);
 				else
-					Debug.LogError("[SCANsat] Warning: SCANResource Dictionary Already Contains Key of This Type");
+					Debug.LogError(string.Format("[SCANsat] Warning: SCANResource Dictionary Already Contains Key of This Type: Resource: {0}; Body: {1}", name, body));
 			}
 		}
 
@@ -334,9 +333,17 @@ namespace SCANsat
 			}
 			try
 			{
+				if (resourceList == null)
+					loadResources();
+			}
+			catch (Exception e)
+			{
+				SCANUtil.SCANlog("Something Went Wrong Loading Resource Data: {0}", e);
+				}
+			try
+			{
 				if (HighLogic.LoadedScene == GameScenes.FLIGHT)
 				{
-					Resources(FlightGlobals.currentMainBody);
 					mainMap = gameObject.AddComponent<SCANmainMap>();
 					settingsWindow = gameObject.AddComponent<SCANsettingsUI>();
 					instrumentsWindow = gameObject.AddComponent<SCANinstrumentUI>();
@@ -345,7 +352,6 @@ namespace SCANsat
 				}
 				else if (HighLogic.LoadedScene == GameScenes.SPACECENTER || HighLogic.LoadedScene == GameScenes.TRACKSTATION)
 				{
-					Resources(Planetarium.fetch.Home);
 					kscMap = gameObject.AddComponent<SCANkscMap>();
 					settingsWindow = gameObject.AddComponent<SCANsettingsUI>();
 					colorManager = gameObject.AddComponent<SCANcolorSelection>();
@@ -520,9 +526,9 @@ namespace SCANsat
 			public double lastUT;
 		}
 
-		internal void Resources(CelestialBody b) //Repopulates the master resources list with data from config nodes
+		internal void loadResources() //Repopulates the master resources list with data from config nodes
 		{
-			resourceList.Clear();
+			resourceList = new Dictionary<string, Dictionary<string, SCANdata.SCANResource>>();
 			if (SCANversions.RegolithFound)
 			{
 				foreach (ConfigNode node in GameDatabase.Instance.GetConfigNodes("REGOLITH_GLOBAL_RESOURCE"))
@@ -546,7 +552,15 @@ namespace SCANsat
 									continue;
 								}
 								if (bodyResource.body == body.name)
-									break;
+								{
+									if (bodyResource.Name == resource.Name)
+										break;
+									else
+									{
+										bodyResource = null;
+										continue;
+									}
+								}
 								bodyResource = null;
 							}
 							if (bodyResource == null)
