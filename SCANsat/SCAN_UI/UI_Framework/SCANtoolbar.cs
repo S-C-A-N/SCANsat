@@ -137,8 +137,6 @@ namespace SCANsat.SCAN_UI
 				};
 			settings.OnClick += (e2) =>
 				{
-					if (!SCANcontroller.controller.settingsWindow.Visible)
-						SCANcontroller.controller.Resources(FlightGlobals.currentMainBody);
 					SCANcontroller.controller.settingsWindow.Visible = !SCANcontroller.controller.settingsWindow.Visible;
 				};
 			color.OnClick += (e2) =>
