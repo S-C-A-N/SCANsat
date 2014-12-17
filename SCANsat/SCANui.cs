@@ -1400,7 +1400,7 @@ namespace SCANsat
 						info += "<color=\"grey\">HI</color> ";
 					if (SCANUtil.isCovered(mlon, mlat, data, SCANdata.SCANtype.Biome))
 					{
-						if (vessel.mainBody.BiomeMap == null || vessel.mainBody.BiomeMap.Map == null)
+						if (vessel.mainBody.BiomeMap == null)
 							info += palette.colored (palette.c_ugly , "BIO ");
 						else
 							info += palette.colored (palette.c_good , "BIO ");
