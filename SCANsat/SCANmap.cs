@@ -647,7 +647,7 @@ namespace SCANsat
 							if (SCANUtil.isCovered(lon, lat, data, resource.Type)) //check our new resource coverage map
 							{
 								double amount = SCANUtil.RegolithOverlay(lat, lon, resource.Name, body.flightGlobalsIndex); //grab the resource amount for the current pixel
-								double scalar = resource.minValue + ((resource.maxValue - resource.minValue) / 5);
+								double scalar = resource.minValue + ((resource.maxValue - resource.minValue) / 4);
 								amount *= 100;
 								if (amount > scalar)
 								{
@@ -757,7 +757,7 @@ namespace SCANsat
 							if (SCANUtil.isCovered(lon, lat, data, resource.Type)) //check our new resource coverage map
 							{
 								double amount = SCANUtil.RegolithOverlay(lat, lon, resource.Name, body.flightGlobalsIndex); //grab the resource amount for the current pixel
-								double scalar = resource.minValue;// +((resource.maxValue - resource.minValue) / 3);
+								double scalar = resource.minValue + ((resource.maxValue - resource.minValue) / 4);
 								amount *= 100;
 								if (amount > scalar)
 								{
