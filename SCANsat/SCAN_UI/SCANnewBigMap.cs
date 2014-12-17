@@ -668,7 +668,6 @@ namespace SCANsat.SCAN_UI
 
 				if (GUI.Button(zoomCloseRect, SCANcontroller.controller.closeBox, SCANskins.SCAN_closeButton))
 				{
-					SCANUtil.SCANlog("Close Zoom Map");
 					spotmap = null;
 				}
 			}
