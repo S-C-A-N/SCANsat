@@ -1,6 +1,5 @@
 ### [**SCANsat**][top]: Real Scanning, Real Science, Warp Speed!
 [![][shield:support-ksp]][KSP:developers]&nbsp;
-[![][shield:jenkins-rel]][SCANsat:rel-jenkins]&nbsp;
 [![][shield:license-bsd]][SCANsat:rel-license]&nbsp;
 ![scan your planetoid like the big boys do][bigmap-scan-10000x]
 > ###### **Example SAR scan of Kerbin at 1000x and then 10,000x warp**
@@ -479,7 +478,7 @@ sneaky then they can of course be sneaky.
 [shield:support-ket]: http://img.shields.io/badge/works%20with%20Kethane-v0.9.2-brightgreen.svg
 [shield:support-orsx]: http://img.shields.io/badge/works%20with%20ORSX-v0.1.2-000000.svg
 [shield:support-mm]: http://img.shields.io/badge/works%20with%20MM-v2.5.4-40b7c0.svg
-[shield:support-toolbar]: http://img.shields.io/badge/works%20with%20Blizzy's%20Toolbar-1.7.6-7c69c0.svg
+[shield:support-toolbar]: http://img.shields.io/badge/works%20with%20Blizzy's%20Toolbar-1.7.7-7c69c0.svg
 [shield:support-alcor]: http://img.shields.io/badge/works%20with%20ALCOR-0.9-299bc7.svg
 [shield:support-kspi]: http://img.shields.io/badge/works%20with%20Interstellar-0.13-a62374.svg
 [shield:support-usi]:http://img.shields.io/badge/works%20with%20USI-0.22-34c566.svg
