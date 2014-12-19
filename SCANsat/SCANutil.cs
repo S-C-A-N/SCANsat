@@ -316,6 +316,8 @@ namespace SCANsat
 				if (distNode.HasValue("MaxAbundance"))
 					float.TryParse(distNode.GetValue("MaxAbundance"), out max);
 			}
+			if (min == max)
+				max += 0.001f;
 			SCANdata.SCANResource SCANres = new SCANdata.SCANResource(name, body, type.colorFull, type.colorEmpty, min, max, type, SCANdata.SCANResource_Source.Regolith);
 			if (SCANres != null)
 				return SCANres;
