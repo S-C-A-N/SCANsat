@@ -14,6 +14,8 @@
 [![][shield:support-karbonite]][karbonite:release]&nbsp;
 [![][shield:support-usi]][usi:release]&nbsp;
 [![][shield:support-epl]][epl:release]&nbsp;
+[![][shield:support-ctt]][ctt:release]&nbsp;
+[![][shield:support-tm]][techmanager:release]&nbsp;
 
 **Table of Contents**
 ------------------------------------------
@@ -39,8 +41,9 @@
   * [d. BTDT][5d]
   * [e. MapTraq (deprecated)][5e]
 * [6. (Career Mode) Research and Development][6]
-  * [a. Minimum Scan for Science (30%)][6a]
-  * [b. Getting Maximum Science][6b]
+  * [a. Community Tech Tree Support][6a]
+  * [b. Minimum Scan for Science (30%)][6b]
+  * [c. Getting Maximum Science][6c]
 * [7. Background Scanning][7]
 * [8. Time Warp][8]
 * [9. Note: Data Sources][9]
@@ -135,7 +138,7 @@ S.C.A.N. is proud to collaborate with other KSP mods and modding teams. Followin
 [![Support for Kethane][kethane:logo]][kethane:release] | [![Support for MKS][usi:logo]][usi:release]
 [**OpenResourceSystemX**][orsx:release] | [![Support for ALCOR][alcor:logo]][alcor:release]
 [**RasterPropMonitor**][rpm:release]  | [![Support for Karbonite][karbonite:logo]][karbonite:release]
-[**Blizzy78's Toolbar**][toolbar:release] |  [**KSP: Interstellar**][kspi:release]
+[**Blizzy78's Toolbar**][toolbar:release] |  [![Support for Community Tech Tree][ctt:logo]][ctt:release]
 [**ModuleManager**][mm:release] | [**Extraplanetary Launchpads**][epl:release]
 
 
@@ -320,13 +323,23 @@ The **Multispectral** sensor can be unlocked in **Advanced Exploration**.
 
 The **BTDT** sensor can be unlocked in **Field Science**.
 
+##### [:top:][top] 6a. Community Tech Tree Support
+When the [Community Tech Tree][ctt:release] and [TechManager][techmanager:release] addons are installed SCANsat parts will default to different tech tree nodes.
 
-##### [:top:][top] 6a. Minimum Scan for Science
+The **RADAR Altimetry** sensor can be unlocked in **Orbital Surveys**.
+
+The **SAR Altimetry** sensor can be unlocked in **Specialized Science Tech**.
+
+The **Multispectral** sensor can be unlocked in **Advanced Surveys**.
+
+The **BTDT** sensor can be unlocked in **Field Science**.
+
+##### [:top:][top] 6b. Minimum Scan for Science
 Once you scan at least 30% of a particular map, you can use **Analyze Data** to get delicious science:
 
 ![30% is your minimum][science-min]
 
-##### [:top:][top] 6b. Getting Maximum Science
+##### [:top:][top] 6c. Getting Maximum Science
 Between 30% and 100%, you will get a number of science points proportional to the percentage. Really,
 the upper cutoff is 95% in case you didn't scan the whole map.
 
@@ -447,8 +460,9 @@ sneaky then they can of course be sneaky.
 [5d]: #top-d-been-there-done-that
 [5e]: #top-e-maptraq-deprecated
 [6]: #top-6-career-mode-research-and-development
-[6a]: #top-6aminimum-scan-for-science
-[6b]: #top-6b-getting-maximum-science
+[6a]: #top-6a-community-tech-tree-support
+[6b]: #top-6a-minimum-scan-for-science
+[6c]: #top-6c-getting-maximum-science
 [7]: #top-7-background-scanning
 [8]: #top-8-time-warp
 [9]: #top-9-note-concerning-data-sources
@@ -460,17 +474,19 @@ sneaky then they can of course be sneaky.
 [shield:jenkins-rel]: http://img.shields.io/jenkins/s/https/ksp.sarbian.com/jenkins/SCANsat-release.svg
 [shield:jenkins-ket]: http://img.shields.io/jenkins/s/https/ksp.sarbian.com/jenkins/SCANsat-kethane.svg
 [shield:jenkins-orsx]: http://img.shields.io/jenkins/s/https/ksp.sarbian.com/jenkins/SCANsat-openresourcesystem.svg
-[shield:support-ksp]: http://img.shields.io/badge/for%20KSP-v0.25-bad455.svg
+[shield:support-ksp]: http://img.shields.io/badge/for%20KSP-v0.290-bad455.svg
 [shield:support-rpm]: http://img.shields.io/badge/works%20with%20RPM-v0.18.3-a31f34.svg
 [shield:support-ket]: http://img.shields.io/badge/works%20with%20Kethane-v0.9.2-brightgreen.svg
 [shield:support-orsx]: http://img.shields.io/badge/works%20with%20ORSX-v0.1.2-000000.svg
-[shield:support-mm]: http://img.shields.io/badge/works%20with%20MM-v2.5.1-40b7c0.svg
+[shield:support-mm]: http://img.shields.io/badge/works%20with%20MM-v2.5.4-40b7c0.svg
 [shield:support-toolbar]: http://img.shields.io/badge/works%20with%20Blizzy's%20Toolbar-1.7.6-7c69c0.svg
 [shield:support-alcor]: http://img.shields.io/badge/works%20with%20ALCOR-0.9-299bc7.svg
 [shield:support-kspi]: http://img.shields.io/badge/works%20with%20Interstellar-0.13-a62374.svg
-[shield:support-usi]:http://img.shields.io/badge/works%20with%20USI-0.21.2-34c566.svg
-[shield:support-karbonite]: http://img.shields.io/badge/works%20with%20Karbonite-0.4.2-ff8c00.svg
+[shield:support-usi]:http://img.shields.io/badge/works%20with%20USI-0.22-34c566.svg
+[shield:support-karbonite]: http://img.shields.io/badge/works%20with%20Karbonite-0.5-ff8c00.svg
 [shield:support-epl]: http://img.shields.io/badge/works%20with%20EPL-4.2.3-ff8c00.svg
+[shield:support-ctt]: http://img.shields.io/badge/works%20with%20CTT-1.1-blue.svg
+[shield:support-tm]: http://img.shields.io/badge/works%20with%20TechManager-1.5-lightgrey.svg
 
 [shield:gittip-tg-img]: http://img.shields.io/gittip/technogeeky.png
 [shield:gittip-tg]: https://www.gittip.com/technogeeky/
@@ -541,9 +557,15 @@ sneaky then they can of course be sneaky.
 [alcor:release]: http://forum.kerbalspaceprogram.com/threads/54925
 [alcor:logo]: http://i.imgur.com/7eJ3IFC.jpg
 
+[ctt:logo]: http://i.imgur.com/li2tNgE.png
+
 [mm:release]: http://forum.kerbalspaceprogram.com/threads/55219
 
 [epl:release]: http://forum.kerbalspaceprogram.com/threads/59545
+
+[ctt:release]: http://forum.kerbalspaceprogram.com/threads/100385
+
+[techmanager:release]: http://forum.kerbalspaceprogram.com/threads/98293
 
 [kspi:release]: http://forum.kerbalspaceprogram.com/threads/43839
 
