@@ -231,7 +231,7 @@ namespace SCANsat
 			}
 			else if(!found && (sensor & SCANdata.SCANtype.Biome) != SCANdata.SCANtype.Nothing) {
 				found = true;
-				if (v.mainBody.BiomeMap.Map == null)
+				if (v.mainBody.BiomeMap == null)
 					multiplier = 0.5f;
 				id = "SCANsatBiomeAnomaly";
 				coverage = data.getCoveragePercentage(SCANdata.SCANtype.Biome);
@@ -271,12 +271,58 @@ namespace SCANsat
 
 		internal static double ORSOverlay(double lon, double lat, int i, string s)
 		{
-			double amount = 0f;
+			double amount = 0d;
 			amount = SCANreflection.ORSXpixelAbundanceValue(i, s, lat, lon);
 			//ORSPlanetaryResourcePixel overlayPixel = ORSPlanetaryResourceMapData.getResourceAvailability(i, s, lat, lon);
 			//if (overlayPixel != null)
 			//	amount = overlayPixel.getAmount();
 			return amount;
+		}
+
+		internal static float RegolithOverlay(double lat, double lon, string name, int body)
+		{
+			float amount = 0f;
+			amount = SCANreflection.RegolithAbundanceValue(lat, lon, name, body, 0, 0);
+			return amount;
+		}
+
+		internal static SCANdata.SCANResource RegolithConfigLoad(ConfigNode node)
+		{
+			float min = .001f;
+			float max = 10f;
+			string name = "";
+			string body = "";
+			int resourceType = 0;
+			if (node.HasValue("ResourceName"))
+				name = node.GetValue("ResourceName");
+			else
+				return null;
+			SCANdata.SCANresourceType type = OverlayResourceType(name);
+			if (type == null)
+				return null;
+			if (type.type == SCANdata.SCANtype.Nothing)
+				return null;
+			if (node.HasValue("PlanetName"))
+				body = node.GetValue("PlanetName");
+			if (!int.TryParse(node.GetValue("ResourceType"), out resourceType))
+				return null;
+			if (resourceType != 0)
+				return null;
+			ConfigNode distNode = node.GetNode("Distribution");
+			if (distNode != null)
+			{
+				if (distNode.HasValue("MinAbundance"))
+					float.TryParse(distNode.GetValue("MinAbundance"), out min);
+				if (distNode.HasValue("MaxAbundance"))
+					float.TryParse(distNode.GetValue("MaxAbundance"), out max);
+			}
+			if (min == max)
+				max += 0.001f;
+			SCANdata.SCANResource SCANres = new SCANdata.SCANResource(name, body, type.colorFull, type.colorEmpty, min, max, type, SCANdata.SCANResource_Source.Regolith);
+			if (SCANres != null)
+				return SCANres;
+
+			return null;
 		}
 
 		internal static SCANdata.SCANResource ORSConfigLoad(ConfigNode node)
@@ -320,9 +366,9 @@ namespace SCANsat
 			if (node.HasValue("scaleMultiplier"))
 				double.TryParse(node.GetValue("scaleMultiplier"), out mult);
 
-			SCANdata.SCANResource SCANres = new SCANdata.SCANResource(name, body, type.colorFull, type.colorEmpty, scale, scalar, mult, Threshold, 1f, type, SCANdata.SCANResource_Source.ORSX);
-			if (SCANres != null)
-				return SCANres;
+			//SCANdata.SCANResource SCANres = new SCANdata.SCANResource(name, body, type.colorFull, type.colorEmpty, scale, 1f, type, SCANdata.SCANResource_Source.ORSX);
+			//if (SCANres != null)
+			//	return SCANres;
 
 			return null;
 		}
@@ -359,13 +405,13 @@ namespace SCANsat
 		internal static int getBiomeIndex(CelestialBody body, double lon , double lat)
 		{
 			if (body.BiomeMap == null)		return -1;
-			if (body.BiomeMap.Map == null)	return -1;
+			//if (body.BiomeMap.Map == null)	return -1;
 			double u = fixLon(lon);
 			double v = fixLat(lat);
 
 			if (badDLonLat(u, v))
 				return -1;
-			CBAttributeMap.MapAttribute att = body.BiomeMap.GetAtt (Mathf.Deg2Rad * lat , Mathf.Deg2Rad * lon);
+			CBAttributeMapSO.MapAttribute att = body.BiomeMap.GetAtt (Mathf.Deg2Rad * lat , Mathf.Deg2Rad * lon);
 			for (int i = 0; i < body.BiomeMap.Attributes.Length; ++i) {
 				if (body.BiomeMap.Attributes [i] == att) {
 					return i;
@@ -380,18 +426,18 @@ namespace SCANsat
 			return getBiomeIndex (body, lon , lat) * 1.0f / body.BiomeMap.Attributes.Length;
 		}
 
-		internal static CBAttributeMap.MapAttribute getBiome(CelestialBody body, double lon , double lat)
+		internal static CBAttributeMapSO.MapAttribute getBiome(CelestialBody body, double lon , double lat)
 		{
 			if (body.BiomeMap == null) return null;
-			if (body.BiomeMap.Map == null) return body.BiomeMap.defaultAttribute;
+			//if (body.BiomeMap.Map == null) return body.BiomeMap.defaultAttribute;
 			int i = getBiomeIndex(body, lon , lat);
-			if (i < 0) return body.BiomeMap.defaultAttribute;
-			else return body.BiomeMap.Attributes [i];
+			//if (i < 0) return body.BiomeMap.defaultAttribute;
+			return body.BiomeMap.Attributes [i];
 		}
 
 		internal static string getBiomeName(CelestialBody body, double lon , double lat)
 		{
-			CBAttributeMap.MapAttribute a = getBiome (body, lon , lat);
+			CBAttributeMapSO.MapAttribute a = getBiome (body, lon , lat);
 			if (a == null)
 				return "unknown";
 			return a.name;

@@ -354,9 +354,9 @@ namespace SCANsat
 			if (body == b)
 				return;
 			body = b;
-			SCANcontroller.controller.Resources(b); //Repopulate resource list when changing SOI
+			//SCANcontroller.controller.Resources(b); //Repopulate resource list when changing SOI
 			if (SCANcontroller.controller.GlobalResourceOverlay)
-				resource = SCANcontroller.controller.ResourceList[SCANcontroller.controller.resourceSelection];
+				resource = SCANcontroller.controller.ResourceList[SCANcontroller.controller.resourceSelection][b.name];
 			resetMap();
 		}
 		public bool isMapComplete()
@@ -371,7 +371,7 @@ namespace SCANsat
 			mapsaved = false;
 			if (SCANcontroller.controller.GlobalResourceOverlay)
 			{ //Make sure that a resource is initialized if necessary
-				if (resource == null) resource = SCANcontroller.controller.ResourceList[SCANcontroller.controller.resourceSelection];
+				if (resource == null && body != null) resource = SCANcontroller.controller.ResourceList[SCANcontroller.controller.resourceSelection][body.name];
 				if (SCANcontroller.controller.resourceOverlayType == 1)
 					SCANcontroller.controller.KethaneReset = !SCANcontroller.controller.KethaneReset;
 			}
@@ -535,32 +535,19 @@ namespace SCANsat
 					}
 					if (SCANcontroller.controller.map_ResourceOverlay && SCANcontroller.controller.GlobalResourceOverlay)
 					{
-						if (SCANcontroller.controller.resourceOverlayType == 0 && SCANversions.ORSXFound)
+						if (SCANcontroller.controller.resourceOverlayType == 0 && SCANversions.RegolithFound)
 						{
 							if (SCANUtil.isCovered(lon, lat, data, resource.Type)) //check our new resource coverage map
 							{
-								double amount = SCANUtil.ORSOverlay(lon, lat, body.flightGlobalsIndex, resource.Name); //grab the resource amount for the current pixel
-								double scalar = resource.ORS_Multiplier * resource.ORS_Scalar * resource.ORS_Threshold; //low cutoff value
-								if (resource.linear)
-								{ //linear resources are measured on 0-100% scale
-									amount *= 100;
-									if (amount > scalar)
-									{
-										if (amount > 100) amount = 100;
-										pix[i] = palette.lerp(baseColor, palette.lerp(resource.emptyColor, resource.fullColor, (float)(amount) / 100f), 0.3f); //vary color by resource amount
-									}
-									else pix[i] = palette.lerp(baseColor, palette.grey, 0.4f);
+								double amount = SCANUtil.RegolithOverlay(lat, lon, resource.Name, body.flightGlobalsIndex); //grab the resource amount for the current pixel
+								double scalar = resource.minValue + ((resource.maxValue - resource.minValue) / 5);
+								amount *= 100;
+								if (amount > scalar)
+								{
+									if (amount > 100) amount = 100;
+									pix[i] = palette.lerp(baseColor, palette.lerp(resource.emptyColor, resource.fullColor, (float)(amount) / (resource.maxValue - resource.minValue)), 0.3f); //vary color by resource amount
 								}
-								else
-								{ //log_scale resources are measured in ppm
-									amount *= 1000000;
-									if (amount > scalar)
-									{
-										if (amount > 25 * scalar) amount = 25 * scalar; //max cutoff value
-										pix[i] = palette.lerp(baseColor, palette.lerp(resource.emptyColor, resource.fullColor, (float)(amount) / (float)(25 * scalar)), 0.8f); //vary color by resource amount
-									}
-									else pix[i] = palette.lerp(baseColor, palette.grey, 0.4f);
-								}
+								else pix[i] = palette.lerp(baseColor, palette.grey, 0.4f);
 							}
 							else pix[i] = baseColor;
 						}
@@ -655,32 +642,19 @@ namespace SCANsat
 					}
 					if (SCANcontroller.controller.map_ResourceOverlay && SCANcontroller.controller.GlobalResourceOverlay)
 					{
-						if (SCANcontroller.controller.resourceOverlayType == 0 && SCANversions.ORSXFound)
+						if (SCANcontroller.controller.resourceOverlayType == 0 && SCANversions.RegolithFound)
 						{
 							if (SCANUtil.isCovered(lon, lat, data, resource.Type)) //check our new resource coverage map
 							{
-								double amount = SCANUtil.ORSOverlay(lon, lat, body.flightGlobalsIndex, resource.Name); //grab the resource amount for the current pixel
-								double scalar = resource.ORS_Multiplier * resource.ORS_Scalar * resource.ORS_Threshold;
-								if (resource.linear)
+								double amount = SCANUtil.RegolithOverlay(lat, lon, resource.Name, body.flightGlobalsIndex); //grab the resource amount for the current pixel
+								double scalar = resource.minValue + ((resource.maxValue - resource.minValue) / 5);
+								amount *= 100;
+								if (amount > scalar)
 								{
-									amount *= 100;
-									if (amount > scalar)
-									{
-										if (amount > 100) amount = 100; //max cutoff value
-										pix[i] = palette.lerp(baseColor, palette.lerp(resource.emptyColor, resource.fullColor, (float)(amount) / 100f), 0.3f); //vary color by resource amount
-									}
-									else pix[i] = palette.lerp(baseColor, palette.grey, 0.4f);
+									if (amount > 100) amount = 100; //max cutoff value
+									pix[i] = palette.lerp(baseColor, palette.lerp(resource.emptyColor, resource.fullColor, (float)(amount) / (resource.maxValue - resource.minValue)), 0.3f); //vary color by resource amount
 								}
-								else
-								{
-									amount *= 1000000;
-									if (amount > scalar)
-									{
-										if (amount > 25 * scalar) amount = 25 * scalar; //max cutoff value
-										pix[i] = palette.lerp(baseColor, palette.lerp(resource.emptyColor, resource.fullColor, (float)(amount) / (float)(25 * scalar)), 0.8f); //vary color by resource amount
-									}
-									else pix[i] = palette.lerp(baseColor, palette.grey, 0.4f);
-								}
+								else pix[i] = palette.lerp(baseColor, palette.grey, 0.4f);
 							}
 							else pix[i] = baseColor;
 						}
@@ -705,7 +679,7 @@ namespace SCANsat
 				}
 				else if (mapmode == 2)
 				{
-					if (body.BiomeMap == null || body.BiomeMap.Map == null)
+					if (body.BiomeMap == null)
 					{
 						baseColor = palette.lerp(palette.black, palette.white, UnityEngine.Random.value);
 					}
@@ -778,32 +752,19 @@ namespace SCANsat
 					}
 					if (SCANcontroller.controller.map_ResourceOverlay && SCANcontroller.controller.GlobalResourceOverlay)
 					{
-						if (SCANcontroller.controller.resourceOverlayType == 0 && SCANversions.ORSXFound)
+						if (SCANcontroller.controller.resourceOverlayType == 0 && SCANversions.RegolithFound)
 						{
 							if (SCANUtil.isCovered(lon, lat, data, resource.Type)) //check our new resource coverage map
 							{
-								double amount = SCANUtil.ORSOverlay(lon, lat, body.flightGlobalsIndex, resource.Name); //grab the resource amount for the current pixel
-								double scalar = resource.ORS_Multiplier * resource.ORS_Scalar * resource.ORS_Threshold;
-								if (resource.linear)
+								double amount = SCANUtil.RegolithOverlay(lat, lon, resource.Name, body.flightGlobalsIndex); //grab the resource amount for the current pixel
+								double scalar = resource.minValue + ((resource.maxValue - resource.minValue) / 5);
+								amount *= 100;
+								if (amount > scalar)
 								{
-									amount *= 100;
-									if (amount > scalar)
-									{
-										if (amount > 100) amount = 100; //max cutoff value
-										pix[i] = palette.lerp(baseColor, palette.lerp(resource.emptyColor, resource.fullColor, (float)(amount) / 100f), 0.3f); //vary color by resource amount
-									}
-									else pix[i] = palette.lerp(baseColor, palette.grey, 0.4f);
+									if (amount > 100) amount = 100; //max cutoff value
+									pix[i] = palette.lerp(baseColor, palette.lerp(resource.emptyColor, resource.fullColor, (float)(amount) / (resource.maxValue - resource.minValue)), 0.3f); //vary color by resource amount
 								}
-								else
-								{
-									amount *= 1000000;
-									if (amount > scalar)
-									{
-										if (amount > 25 * scalar) amount = 25 * scalar; //max cutoff value
-										pix[i] = palette.lerp(baseColor, palette.lerp(resource.emptyColor, resource.fullColor, (float)(amount) / (float)(25 * scalar)), 0.8f); //vary color by resource amount
-									}
-									else pix[i] = palette.lerp(baseColor, palette.grey, 0.4f);
-								}
+								else pix[i] = palette.lerp(baseColor, palette.grey, 0.4f);
 							}
 							else pix[i] = baseColor;
 						}

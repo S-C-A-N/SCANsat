@@ -95,7 +95,8 @@ namespace SCANsat.SCAN_UI
 				SCANcontroller.controller.addToBodyData(b, data);
 			}
 			bigmap.setBody(b);
-			bigmap.resource = SCANcontroller.controller.ResourceList[SCANcontroller.controller.resourceSelection];
+			if (SCANcontroller.controller.ResourceList.Count > 0)
+				bigmap.resource = SCANcontroller.controller.ResourceList[SCANcontroller.controller.resourceSelection][b.name];
 			TooltipsEnabled = SCANcontroller.controller.toolTips;
 		}
 
@@ -658,7 +659,7 @@ namespace SCANsat.SCAN_UI
 				spotmap.setBody(b);
 
 				if (SCANcontroller.controller.GlobalResourceOverlay)
-					spotmap.resource = SCANcontroller.controller.ResourceList[SCANcontroller.controller.resourceSelection];
+					spotmap.resource = SCANcontroller.controller.ResourceList[SCANcontroller.controller.resourceSelection][b.name];
 
 				GUI.Box(pos_spotmap, spotmap.getPartialMap());
 				SCANuiUtil.drawOrbit(pos_spotmap, spotmap, v, startUT, overlay_static, b);
@@ -667,7 +668,6 @@ namespace SCANsat.SCAN_UI
 
 				if (GUI.Button(zoomCloseRect, SCANcontroller.controller.closeBox, SCANskins.SCAN_closeButton))
 				{
-					SCANUtil.SCANlog("Close Zoom Map");
 					spotmap = null;
 				}
 			}
@@ -724,14 +724,15 @@ namespace SCANsat.SCAN_UI
 					Rect r = new Rect(2, 20 * i, 96, 20);
 					if (GUI.Button(r, SCANcontroller.controller.ResourceList.ElementAt(i).Key, SCANskins.SCAN_dropDownButton))
 					{
-						bigmap.resource = SCANcontroller.controller.ResourceList.ElementAt(i).Value;
+						bigmap.resource = SCANcontroller.controller.ResourceList.ElementAt(i).Value[b.name];
 						SCANcontroller.controller.resourceSelection = bigmap.resource.Name;
-						if (SCANcontroller.controller.ResourceList.ElementAt(i).Value.Source == SCANdata.SCANResource_Source.Kethane)
+						if (SCANcontroller.controller.ResourceList.ElementAt(i).Value[b.name].Source == SCANdata.SCANResource_Source.Kethane)
 							SCANcontroller.controller.resourceOverlayType = 1;
 						else
 							SCANcontroller.controller.resourceOverlayType = 0;
 						bigmap.resetMap();
 						drop_down_open = false;
+						SCANUtil.SCANlog("Resource {0} Selected; Min Value: {1}; Max Value: {2}", bigmap.resource.Name, bigmap.resource.minValue, bigmap.resource.maxValue);
 					}
 					GUI.EndScrollView();
 				}

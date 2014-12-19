@@ -287,16 +287,17 @@ namespace SCANsat
 		/* DATA: resources */
 		public class SCANResource //The new class to store resource information stored in the respective config nodes
 		{
-			public SCANResource(string n, string Body, Color full, Color empty, bool sc, double scalar, double mult, double threshold, float max, SCANresourceType t, SCANResource_Source s)
+			public SCANResource(string n, string Body, Color full, Color empty, float min, float max, SCANresourceType t, SCANResource_Source s)
 			{
 				name = n;
 				body = Body;
 				fullColor = full;
 				emptyColor = empty;
-				linear = sc;
-				ORS_Scalar = scalar;
-				ORS_Multiplier = mult;
-				ORS_Threshold = threshold;
+				//linear = sc;
+				//ORS_Scalar = scalar;
+				//ORS_Multiplier = mult;
+				//ORS_Threshold = threshold;
+				minValue = min;
 				maxValue = max;
 				resourceType = t;
 				type = resourceType.type;
@@ -305,9 +306,10 @@ namespace SCANsat
 
 			private string name;
 			internal string body;
-			internal double ORS_Scalar, ORS_Multiplier, ORS_Threshold;
+			//internal double ORS_Scalar, ORS_Multiplier, ORS_Threshold;
 			internal Color fullColor, emptyColor;
-			internal bool linear;
+			//internal bool linear;
+			internal float minValue;
 			internal float maxValue;
 			private SCANtype type;
 			internal SCANresourceType resourceType;

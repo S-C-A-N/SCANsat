@@ -100,7 +100,7 @@ namespace SCANsat
 		public bool toolTips = true;
 
 		/* Available resources for overlays; loaded from resource addon configs */
-		private Dictionary<string, SCANdata.SCANResource> resourceList = new Dictionary<string, SCANdata.SCANResource>();
+		private static Dictionary<string, Dictionary<string, SCANdata.SCANResource>> resourceList;
 
 		/* Primary SCANsat vessel dictionary; loaded every time */
 		private Dictionary<Guid, SCANvessel> knownVessels = new Dictionary<Guid, SCANvessel>();
@@ -125,7 +125,7 @@ namespace SCANsat
 		/* Used in case the loading process is interupted somehow */
 		private bool loaded = false;
 
-		private bool globalResourceOverlay = false;
+		private static bool globalResourceOverlay = false;
 
 		#region Public Accessors
 		public static Dictionary<string, SCANdata> Body_Data
@@ -142,18 +142,26 @@ namespace SCANsat
 				Debug.LogError("[SCANsat] Warning: SCANdata Dictionary Already Contains Key of This Type");
 		}
 
-		public Dictionary<string, SCANdata.SCANResource> ResourceList
+		public Dictionary<string, Dictionary<string, SCANdata.SCANResource>> ResourceList
 		{
 			get { return resourceList; }
-			internal set { resourceList = value; }
 		}
 		
-		public void addToResourceData (string name, SCANdata.SCANResource res)
+		public void addToResourceData (string name, string body, SCANdata.SCANResource res)
 		{
 			if (!resourceList.ContainsKey(name))
-				resourceList.Add(name, res);
+			{
+				Dictionary<string, SCANdata.SCANResource> subDict = new Dictionary<string, SCANdata.SCANResource>();
+				subDict.Add(body, res);
+				resourceList.Add(name, subDict);
+			}
 			else
-				Debug.LogError("[SCANsat] Warning: SCANResource Dictionary Already Contains Key of This Type");
+			{
+				if (!resourceList[name].ContainsKey(body))
+					resourceList[name].Add(body, res);
+				else
+					Debug.LogError(string.Format("[SCANsat] Warning: SCANResource Dictionary Already Contains Key of This Type: Resource: {0}; Body: {1}", name, body));
+			}
 		}
 
 		public static Dictionary<string, SCANdata.SCANresourceType> ResourceTypes
@@ -325,9 +333,17 @@ namespace SCANsat
 			}
 			try
 			{
+				if (resourceList == null)
+					loadResources();
+			}
+			catch (Exception e)
+			{
+				SCANUtil.SCANlog("Something Went Wrong Loading Resource Data: {0}", e);
+				}
+			try
+			{
 				if (HighLogic.LoadedScene == GameScenes.FLIGHT)
 				{
-					Resources(FlightGlobals.currentMainBody);
 					mainMap = gameObject.AddComponent<SCANmainMap>();
 					settingsWindow = gameObject.AddComponent<SCANsettingsUI>();
 					instrumentsWindow = gameObject.AddComponent<SCANinstrumentUI>();
@@ -336,7 +352,6 @@ namespace SCANsat
 				}
 				else if (HighLogic.LoadedScene == GameScenes.SPACECENTER || HighLogic.LoadedScene == GameScenes.TRACKSTATION)
 				{
-					Resources(Planetarium.fetch.Home);
 					kscMap = gameObject.AddComponent<SCANkscMap>();
 					settingsWindow = gameObject.AddComponent<SCANsettingsUI>();
 					colorManager = gameObject.AddComponent<SCANcolorSelection>();
@@ -351,7 +366,7 @@ namespace SCANsat
 
 		public override void OnSave(ConfigNode node)
 		{
-			if (HighLogic.LoadedScene != GameScenes.SPH && HighLogic.LoadedScene != GameScenes.EDITOR)
+			if (HighLogic.LoadedScene != GameScenes.EDITOR)
 			{
 				ConfigNode node_vessels = new ConfigNode("Scanners");
 				foreach (Guid id in knownVessels.Keys)
@@ -511,38 +526,52 @@ namespace SCANsat
 			public double lastUT;
 		}
 
-		internal void Resources(CelestialBody b) //Repopulates the master resources list with data from config nodes
+		internal void loadResources() //Repopulates the master resources list with data from config nodes
 		{
-			resourceList.Clear();
-			if (SCANversions.ORSXFound)
+			resourceList = new Dictionary<string, Dictionary<string, SCANdata.SCANResource>>();
+			if (SCANversions.RegolithFound)
 			{
-				foreach (ConfigNode node in GameDatabase.Instance.GetConfigNodes("ORSX_PLANETARY_RESOURCE"))
+				foreach (ConfigNode node in GameDatabase.Instance.GetConfigNodes("REGOLITH_GLOBAL_RESOURCE"))
 				{
 					if (node != null)
 					{
-						bool resourceAdded = false;
 						SCANdata.SCANResource resource = null;
-						if ((resource = SCANUtil.ORSConfigLoad(node)) == null)
+						if ((resource = SCANUtil.RegolithConfigLoad(node)) == null)
 							continue;
-						foreach (SCANdata.SCANResource res in resourceList.Values)
-						{ //Check to see if the resource is already in the list
-							if (resource.Name == res.Name)
+						foreach (CelestialBody body in FlightGlobals.Bodies)
+						{
+							SCANdata.SCANResource bodyResource = null;
+							foreach(ConfigNode bodyNode in GameDatabase.Instance.GetConfigNodes("REGOLITH_PLANETARY_RESOURCE"))
 							{
-								if (resource.body == b.name)
+								bodyResource = SCANUtil.RegolithConfigLoad(bodyNode);
+								if (bodyResource == null)
+									continue;
+								if (string.IsNullOrEmpty(bodyResource.body))
 								{
-									res.linear = resource.linear;
-									res.fullColor = resource.fullColor;
-									res.emptyColor = resource.emptyColor;
-									res.ORS_Multiplier = resource.ORS_Multiplier;
-									res.ORS_Scalar = resource.ORS_Scalar;
-									res.ORS_Threshold = resource.ORS_Threshold;
+									bodyResource = null;
+									continue;
 								}
-								resourceAdded = true;
-								break;
+								if (bodyResource.body == body.name)
+								{
+									if (bodyResource.Name == resource.Name)
+										break;
+									else
+									{
+										bodyResource = null;
+										continue;
+									}
+								}
+								bodyResource = null;
+							}
+							if (bodyResource == null)
+							{
+								addToResourceData(resource.Name, body.name, resource);
+							}
+							else
+							{
+								addToResourceData(bodyResource.Name, bodyResource.body, bodyResource);
 							}
 						}
-						if (!resourceAdded)
-							addToResourceData(resource.Name, resource);
 					}
 				}
 			}
@@ -563,20 +592,30 @@ namespace SCANsat
 						if (subNode != null)
 						{
 							float.TryParse(subNode.GetValue("MaxQuantity"), out max); //Global max quantity
-							foreach (ConfigNode bodySubNode in subNode.GetNodes("Body"))
+							foreach (CelestialBody Body in FlightGlobals.Bodies)
 							{
-								string body = bodySubNode.GetValue("name");
-								if (body == b.name)
+								bool bodySubValue = false;
+								float subMax = 1000000f;
+								foreach (ConfigNode bodySubNode in subNode.GetNodes("Body"))
 								{
-									if (bodySubNode.HasValue("MaxQuantity"))
+									string body = bodySubNode.GetValue("name");
+									if (body == Body.name)
 									{
-										float.TryParse(bodySubNode.GetValue("MaxQuantity"), out max); //Optional body-specific max quantity
+										if (bodySubNode.HasValue("MaxQuantity"))
+										{
+											float.TryParse(bodySubNode.GetValue("MaxQuantity"), out subMax); //Optional body-specific max quantity
+											bodySubValue = true;
+											break;
+										}
 										break;
 									}
 								}
+								if (bodySubValue)
+									max = subMax;
+								SCANdata.SCANResource resource = new SCANdata.SCANResource(name, Body.name, full, empty, 0f, max, type, SCANdata.SCANResource_Source.Kethane);
+								addToResourceData(name, Body.name, resource);
 							}
 						}
-						addToResourceData(name, new SCANdata.SCANResource(name, "", full, empty, true, 1d, 1d, 1d, max, type, SCANdata.SCANResource_Source.Kethane));
 					}
 				}
 			}
