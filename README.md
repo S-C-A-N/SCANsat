@@ -11,7 +11,6 @@
 [![][shield:support-reg]][reg:release]&nbsp;
 [![][shield:support-mm]][mm:release]&nbsp;
 [![][shield:support-toolbar]][toolbar:release]&nbsp;
-[![][shield:support-kspi]][kspi:release]&nbsp;
 [![][shield:support-karbonite]][karbonite:release]&nbsp;
 [![][shield:support-usi]][usi:release]&nbsp;
 [![][shield:support-epl]][epl:release]&nbsp;
@@ -138,7 +137,7 @@ S.C.A.N. is proud to collaborate with other KSP mods and modding teams. Followin
 **Built Using** | **Supported By**
 :---: | :---:
 [![Support for Kethane][kethane:logo]][kethane:release] | [![Support for MKS][usi:logo]][usi:release]
-[**OpenResourceSystemX**][orsx:release] | [![Support for ALCOR][alcor:logo]][alcor:release]
+[**Regolith**][reg:release] | [![Support for ALCOR][alcor:logo]][alcor:release]
 [**RasterPropMonitor**][rpm:release]  | [![Support for Karbonite][karbonite:logo]][karbonite:release]
 [**Blizzy78's Toolbar**][toolbar:release] | [![Support for Community Tech Tree][ctt:logo]][ctt:release]
 [**ModuleManager**][mm:release] | [**Extraplanetary Launchpads**][epl:release]
@@ -158,10 +157,9 @@ S.C.A.N. is proud to collaborate with other KSP mods and modding teams. Followin
   * [x] [![][shield:support-toolbar]][toolbar:release] 
 
 **SCANsat** also supports resource scanning with the following mods:
-  * [x] [![][shield:support-orsx]][ORSX:release]
-  * [x] via (ORSX) <- [![][shield:support-kspi]][kspi:release]
-  * [x] via (ORSX) <- [![][shield:support-usi]][usi:release]
-  * [x] via (ORSX) <- [![][shield:support-karbonite]][karbonite:release]
+  * [x] [![][shield:support-reg]][reg:release]
+  * [x] via (Regolith) <- [![][shield:support-usi]][usi:release]
+  * [x] via (Regolith) <- [![][shield:support-karbonite]][karbonite:release]
   * [x] [![][shield:support-ket]][kethane:release]
   * [x] via (Kethane) <- [![][shield:support-epl]][epl:release]
 
