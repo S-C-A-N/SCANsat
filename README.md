@@ -8,7 +8,7 @@
 
 [![][shield:support-rpm]][RPM:release]&nbsp;
 [![][shield:support-ket]][Kethane:release]&nbsp;
-[![][shield:support-orsx]][ORSX:release]&nbsp;
+[![][shield:support-reg]][reg:release]&nbsp;
 [![][shield:support-mm]][mm:release]&nbsp;
 [![][shield:support-toolbar]][toolbar:release]&nbsp;
 [![][shield:support-kspi]][kspi:release]&nbsp;
@@ -30,7 +30,7 @@
   * [a. Native SCANsat][2a]
   * [b. Resource Scans][2b]
   * [1. Kethane][2b1] [![][shield:support-ket]][kethane:release][![][shield:jenkins-ket]][SCANsat:ket-jenkins]
-  * [2. ORSX][2b2]
+  * [2. Regolith][2b2]
 * [3. Basic Usage][3]
   * [a. FAQ: Finding a Good Altitude][3a]
   * [b. Mismatched Scanners][3b]
@@ -223,12 +223,12 @@ Once it is installed correctly, you will be able to enable Kethane resources in 
 > ![][resource-kethane]
 
 
-##### [:top:][top] 2. ORSX
+##### [:top:][top] 2. Regolith
 [![][shield:jenkins-orsx]][SCANsat:orsx-jenkins]
 
-**ORSX** support is built internal to SCANsat. If you have an **ORSX** DLL loaded anywhere SCANsat will only target the newest version.
+**Regolith** support is built internal to SCANsat. If you have a **Regolith** DLL loaded anywhere SCANsat will only target the newest version.
 
-With any **ORSX**-using mod installed, you can select their resources in the drop down menu from the Big Map or KSC Map, and enable their overlay with the resource icon:
+With any **Regolith**-using mod installed, you can select their resources in the drop down menu from the Big Map or KSC Map, and enable their overlay with the resource icon:
 > ![][resource-orsx-v2]
 
 For instance the **Karbonite** mod's resources can be viewed:
@@ -473,7 +473,7 @@ sneaky then they can of course be sneaky.
 [2a]: #top-a-scansat-scans
 [2b]: #top-d-resource-scans
 [2b1]: #top-1-kethane
-[2b2]: #top-2-orsx
+[2b2]: #top-2-regolith
 [3]: #top-3-basic-usage
 [3a]: #top-3a-faq-finding-a-good-altitude
 [3b]: #top-3b-mismatched-scanners
@@ -501,7 +501,7 @@ sneaky then they can of course be sneaky.
 [shield:jenkins-rel]: http://img.shields.io/jenkins/s/https/ksp.sarbian.com/jenkins/SCANsat-release.svg
 [shield:jenkins-ket]: http://img.shields.io/jenkins/s/https/ksp.sarbian.com/jenkins/SCANsat-kethane.svg
 [shield:jenkins-orsx]: http://img.shields.io/jenkins/s/https/ksp.sarbian.com/jenkins/SCANsat-openresourcesystem.svg
-[shield:support-ksp]: http://img.shields.io/badge/for%20KSP-v0.25-bad455.svg
+[shield:support-ksp]: http://img.shields.io/badge/for%20KSP-v0.90-bad455.svg
 [shield:support-rpm]: http://img.shields.io/badge/works%20with%20RPM-v0.18.3-a31f34.svg
 [shield:support-ket]: http://img.shields.io/badge/works%20with%20Kethane-v0.9.2-brightgreen.svg
 [shield:support-orsx]: http://img.shields.io/badge/works%20with%20ORSX-v0.1.2-000000.svg
@@ -509,11 +509,12 @@ sneaky then they can of course be sneaky.
 [shield:support-toolbar]: http://img.shields.io/badge/works%20with%20Blizzy's%20Toolbar-1.7.7-7c69c0.svg
 [shield:support-alcor]: http://img.shields.io/badge/works%20with%20ALCOR-0.9-299bc7.svg
 [shield:support-kspi]: http://img.shields.io/badge/works%20with%20Interstellar-0.13-a62374.svg
-[shield:support-usi]:http://img.shields.io/badge/works%20with%20USI-0.21.2-34c566.svg
-[shield:support-karbonite]: http://img.shields.io/badge/works%20with%20Karbonite-0.4.2-ff8c00.svg
+[shield:support-usi]:http://img.shields.io/badge/works%20with%20USI-0.22-34c566.svg
+[shield:support-karbonite]: http://img.shields.io/badge/works%20with%20Karbonite-0.5-ff8c00.svg
 [shield:support-epl]: http://img.shields.io/badge/works%20with%20EPL-4.2.3-ff8c00.svg
 [shield:support-ctt]: http://img.shields.io/badge/works%20with%20CTT-1.1-blue.svg
-[shield:support-tm]: http://img.shields.io/badge/works%20with%20TechManager-1.4-lightgrey.svg
+[shield:support-tm]: http://img.shields.io/badge/works%20with%20TechManager-1.5-lightgrey.svg
+[shield:support-reg]: https://img.shields.io/badge/works%20with%20Regolith-1.1-000000.svg
 
 [shield:gittip-tg-img]: http://img.shields.io/gittip/technogeeky.png
 [shield:gittip-tg]: https://www.gittip.com/technogeeky/
@@ -601,3 +602,5 @@ sneaky then they can of course be sneaky.
 [toolbar:release]: http://forum.kerbalspaceprogram.com/threads/60863
 
 [rpm:release]: http://forum.kerbalspaceprogram.com/threads/57603
+
+[reg:release]: http://forum.kerbalspaceprogram.com/threads/100162
