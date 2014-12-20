@@ -15,8 +15,8 @@ using System.Runtime.CompilerServices;
 // The form "{Major}.{Minor}.*" will automatically update the build and revision,
 // and "{Major}.{Minor}.{Build}.*" will update just the revision.
 [assembly: AssemblyVersion ("1.0.8.0")]
-[assembly: AssemblyFileVersion ("1.0.8.0")]
-[assembly: AssemblyInformationalVersion ("v8")]
+[assembly: AssemblyFileVersion ("1.0.8.1")]
+[assembly: AssemblyInformationalVersion ("v8.1")]
 
 [assembly: KSPAssembly ("SCANsat", 0, 8)]
 

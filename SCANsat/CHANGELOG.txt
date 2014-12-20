@@ -1,3 +1,17 @@
+Version 8.1 - 2014-12-19
+---------------------
+
+- Updated for KSP 0.90
+
+- Fixes for biome related issues due to 0.90 changes
+
+- Fixes for orbit renderer in early career mode; no orbit overlay on 1st tier tracking station
+
+- All parts use .mbm textures
+
+- Community Tech Tree support added
+	- All parts rebalanced for cost and tech tree position
+
 Version 8 - 2014-10-8
 ---------------------
 

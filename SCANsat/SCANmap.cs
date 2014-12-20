@@ -578,7 +578,7 @@ namespace SCANsat
                     }
                     else pix[i] = baseColor;
 				} else if (mapmode == 2) {
-					if (body.BiomeMap == null || body.BiomeMap.Map == null) {
+					if (body.BiomeMap == null) {
 						baseColor = palette.lerp (palette.black , palette.white , UnityEngine.Random.value);
 					}
 					/* // this just basically stretches the actual biome map to fit... it looks horrible
