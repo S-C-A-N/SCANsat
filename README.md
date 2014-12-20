@@ -473,7 +473,7 @@ sneaky then they can of course be sneaky.
 [shield:jenkins-rel]: http://img.shields.io/jenkins/s/https/ksp.sarbian.com/jenkins/SCANsat-release.svg
 [shield:jenkins-ket]: http://img.shields.io/jenkins/s/https/ksp.sarbian.com/jenkins/SCANsat-kethane.svg
 [shield:jenkins-orsx]: http://img.shields.io/jenkins/s/https/ksp.sarbian.com/jenkins/SCANsat-openresourcesystem.svg
-[shield:support-ksp]: http://img.shields.io/badge/for%20KSP-v0.290-bad455.svg
+[shield:support-ksp]: http://img.shields.io/badge/for%20KSP-v0.90-bad455.svg
 [shield:support-rpm]: http://img.shields.io/badge/works%20with%20RPM-v0.18.3-a31f34.svg
 [shield:support-ket]: http://img.shields.io/badge/works%20with%20Kethane-v0.9.2-brightgreen.svg
 [shield:support-orsx]: http://img.shields.io/badge/works%20with%20ORSX-v0.1.2-000000.svg
