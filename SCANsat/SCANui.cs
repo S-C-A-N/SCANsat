@@ -843,6 +843,7 @@ namespace SCANsat
 
 		/* UI: drawing methods */
 		private static void drawOrbit ( Rect maprect , SCANmap map , Vessel vessel ) {
+
 			if (vessel.LandedOrSplashed)
 				return;
 			bool lite = maprect.width < 400;
@@ -913,7 +914,6 @@ namespace SCANsat
 				}
 				drawOrbitIcon ((int)r.x , (int)r.y , OrbitIcon.Planet , col , 8 , false);
 			}
-
 			// show apoapsis and periapsis
 			if (o.ApA > 0 && mapPosAtT (maprect , map , ref r , vessel , o , o.timeToAp)) {
 				drawOrbitIcon ((int)r.x , (int)r.y , OrbitIcon.Ap , palette.cb_skyBlue , 32 , true);
@@ -934,36 +934,47 @@ namespace SCANsat
 				return;
 
 			// show first maneuver node
-			if (vessel.patchedConicSolver.maneuverNodes.Count > 0) {
-				ManeuverNode n = vessel.patchedConicSolver.maneuverNodes [0];
-				if (n.patch == vessel.orbit && n.nextPatch != null && n.nextPatch.activePatch && n.UT > startUT - o.period && mapPosAtT (maprect , map , ref r , vessel , o , n.UT - startUT)) {
-					col = palette.cb_reddishPurple;
-					if (SCANcontroller.controller.colours != 1)
-						col = palette.xkcd_PurplyPink;
-					drawOrbitIcon ((int)r.x , (int)r.y , OrbitIcon.ManeuverNode , col , 32 , true);
-					Orbit nuo = n.nextPatch;
-					for (int i=0; i<steps; ++i) {
-						double T = n.UT - startUT + i * nuo.period / steps;
-						if (T + startUT > nuo.EndUT)
-							break;
-						if (mapPosAtT (maprect , map , ref r , vessel , nuo , T)) {
-							drawOrbitIcon ((int)r.x , (int)r.y , OrbitIcon.Planet , col , 8 , false);
+			if (vessel.patchedConicSolver != null)
+			{
+				if (vessel.patchedConicSolver.maneuverNodes.Count > 0)
+				{
+					ManeuverNode n = vessel.patchedConicSolver.maneuverNodes[0];
+					if (n.patch == vessel.orbit && n.nextPatch != null && n.nextPatch.activePatch && n.UT > startUT - o.period && mapPosAtT(maprect, map, ref r, vessel, o, n.UT - startUT))
+					{
+						col = palette.cb_reddishPurple;
+						if (SCANcontroller.controller.colours != 1)
+							col = palette.xkcd_PurplyPink;
+						drawOrbitIcon((int)r.x, (int)r.y, OrbitIcon.ManeuverNode, col, 32, true);
+						Orbit nuo = n.nextPatch;
+						for (int i = 0; i < steps; ++i)
+						{
+							double T = n.UT - startUT + i * nuo.period / steps;
+							if (T + startUT > nuo.EndUT)
+								break;
+							if (mapPosAtT(maprect, map, ref r, vessel, nuo, T))
+							{
+								drawOrbitIcon((int)r.x, (int)r.y, OrbitIcon.Planet, col, 8, false);
+							}
 						}
-					}
-					if (nuo.patchEndTransition == Orbit.PatchTransitionType.ESCAPE) {
-						drawOrbitIcon ((int)r.x , (int)r.y , OrbitIcon.Exit , col , 32 , true);
-					} else if (nuo.patchEndTransition == Orbit.PatchTransitionType.ENCOUNTER) {
-						drawOrbitIcon ((int)r.x , (int)r.y , OrbitIcon.Encounter , col , 32 , true);
-					}
-					if (nuo.timeToAp > 0 && n.UT + nuo.timeToAp < nuo.EndUT && mapPosAtT (maprect , map , ref r , vessel , nuo , n.UT - startUT + nuo.timeToAp)) {
-						drawOrbitIcon ((int)r.x , (int)r.y , OrbitIcon.Ap , col , 32 , true);
-					}
-					if (nuo.timeToPe > 0 && n.UT + nuo.timeToPe < nuo.EndUT && mapPosAtT (maprect , map , ref r , vessel , nuo , n.UT - startUT + nuo.timeToPe)) {
-						drawOrbitIcon ((int)r.x , (int)r.y , OrbitIcon.Pe , col , 32 , true);
+						if (nuo.patchEndTransition == Orbit.PatchTransitionType.ESCAPE)
+						{
+							drawOrbitIcon((int)r.x, (int)r.y, OrbitIcon.Exit, col, 32, true);
+						}
+						else if (nuo.patchEndTransition == Orbit.PatchTransitionType.ENCOUNTER)
+						{
+							drawOrbitIcon((int)r.x, (int)r.y, OrbitIcon.Encounter, col, 32, true);
+						}
+						if (nuo.timeToAp > 0 && n.UT + nuo.timeToAp < nuo.EndUT && mapPosAtT(maprect, map, ref r, vessel, nuo, n.UT - startUT + nuo.timeToAp))
+						{
+							drawOrbitIcon((int)r.x, (int)r.y, OrbitIcon.Ap, col, 32, true);
+						}
+						if (nuo.timeToPe > 0 && n.UT + nuo.timeToPe < nuo.EndUT && mapPosAtT(maprect, map, ref r, vessel, nuo, n.UT - startUT + nuo.timeToPe))
+						{
+							drawOrbitIcon((int)r.x, (int)r.y, OrbitIcon.Pe, col, 32, true);
+						}
 					}
 				}
 			}
-
 			if (o.PeA < 0)
 				return;
 			if (overlay_static == null)
