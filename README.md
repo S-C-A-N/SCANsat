@@ -503,11 +503,11 @@ sneaky then they can of course be sneaky.
 [shield:support-rpm]: http://img.shields.io/badge/works%20with%20RPM-v0.18.3-a31f34.svg
 [shield:support-ket]: http://img.shields.io/badge/works%20with%20Kethane-v0.9.2-brightgreen.svg
 [shield:support-orsx]: http://img.shields.io/badge/works%20with%20ORSX-v0.1.2-000000.svg
-[shield:support-mm]: http://img.shields.io/badge/works%20with%20MM-v2.5.1-40b7c0.svg
-[shield:support-toolbar]: http://img.shields.io/badge/works%20with%20Blizzy's%20Toolbar-1.7.7-7c69c0.svg
+[shield:support-mm]: http://img.shields.io/badge/works%20with%20MM-v2.5.5-40b7c0.svg
+[shield:support-toolbar]: http://img.shields.io/badge/works%20with%20Blizzy's%20Toolbar-1.7.8-7c69c0.svg
 [shield:support-alcor]: http://img.shields.io/badge/works%20with%20ALCOR-0.9-299bc7.svg
 [shield:support-kspi]: http://img.shields.io/badge/works%20with%20Interstellar-0.13-a62374.svg
-[shield:support-usi]:http://img.shields.io/badge/works%20with%20USI-0.22-34c566.svg
+[shield:support-usi]:http://img.shields.io/badge/works%20with%20USI-0.22.1-34c566.svg
 [shield:support-karbonite]: http://img.shields.io/badge/works%20with%20Karbonite-0.5-ff8c00.svg
 [shield:support-epl]: http://img.shields.io/badge/works%20with%20EPL-4.2.3-ff8c00.svg
 [shield:support-ctt]: http://img.shields.io/badge/works%20with%20CTT-1.1-blue.svg
