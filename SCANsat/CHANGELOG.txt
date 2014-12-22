@@ -1,4 +1,9 @@
-Version 9.4 - 2014-12-16
+Version 9.4.1 - 2014-12-22
+------------------------
+
+- Fix for orbit overlays on the first tier tracking station
+
+Version 9.4 - 2014-12-19
 ------------------------
 
 - Updated for KSP 0.90
