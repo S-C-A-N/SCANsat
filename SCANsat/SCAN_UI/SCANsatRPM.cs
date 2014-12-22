@@ -241,10 +241,14 @@ namespace SCANsat.SCAN_UI
 						DrawOrbitIcon(vessel, MapIcons.OtherIcon.DN, iconColorANDNValue, vessel.orbit.TimeOfDescendingNode(targetVessel.orbit, start));
 				}
 				// And the maneuver node and post-maneuver orbit: 
-				ManeuverNode node = vessel.patchedConicSolver.maneuverNodes.Count > 0 ? vessel.patchedConicSolver.maneuverNodes[0] : null;
-				if (node != null) {
-					DrawOrbit(vessel, node.nextPatch, node.UT, iconColorNodeValue);
-					DrawOrbitIcon(vessel, MapIcons.OtherIcon.NODE, iconColorNodeValue, node.UT);
+				if (vessel.patchedConicSolver != null)
+				{
+					ManeuverNode node = vessel.patchedConicSolver.maneuverNodes.Count > 0 ? vessel.patchedConicSolver.maneuverNodes[0] : null;
+					if (node != null)
+					{
+						DrawOrbit(vessel, node.nextPatch, node.UT, iconColorNodeValue);
+						DrawOrbitIcon(vessel, MapIcons.OtherIcon.NODE, iconColorNodeValue, node.UT);
+					}
 				}
 			}
 			// Own icon goes above that

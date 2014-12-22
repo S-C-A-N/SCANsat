@@ -631,41 +631,44 @@ namespace SCANsat.SCAN_UI
 				return;
 
 			// show first maneuver node
-			if (vessel.patchedConicSolver.maneuverNodes.Count > 0)
+			if (vessel.patchedConicSolver != null)
 			{
-				ManeuverNode n = vessel.patchedConicSolver.maneuverNodes[0];
-				if (n.patch == vessel.orbit && n.nextPatch != null && n.nextPatch.activePatch && n.UT > startUT - o.period && mapPosAtT(maprect, map, ref r, vessel, o, n.UT - startUT, startUT))
+				if (vessel.patchedConicSolver.maneuverNodes.Count > 0)
 				{
-					col = palette.cb_reddishPurple;
-					if (SCANcontroller.controller.colours != 1)
-						col = palette.xkcd_PurplyPink;
-					SCANicon.drawOrbitIcon((int)r.x, (int)r.y, SCANicon.OrbitIcon.ManeuverNode, col, 32, true);
-					Orbit nuo = n.nextPatch;
-					for (int i = 0; i < steps; ++i)
+					ManeuverNode n = vessel.patchedConicSolver.maneuverNodes[0];
+					if (n.patch == vessel.orbit && n.nextPatch != null && n.nextPatch.activePatch && n.UT > startUT - o.period && mapPosAtT(maprect, map, ref r, vessel, o, n.UT - startUT, startUT))
 					{
-						double T = n.UT - startUT + i * nuo.period / steps;
-						if (T + startUT > nuo.EndUT)
-							break;
-						if (mapPosAtT(maprect, map, ref r, vessel, nuo, T, startUT))
+						col = palette.cb_reddishPurple;
+						if (SCANcontroller.controller.colours != 1)
+							col = palette.xkcd_PurplyPink;
+						SCANicon.drawOrbitIcon((int)r.x, (int)r.y, SCANicon.OrbitIcon.ManeuverNode, col, 32, true);
+						Orbit nuo = n.nextPatch;
+						for (int i = 0; i < steps; ++i)
 						{
-							SCANicon.drawOrbitIcon((int)r.x, (int)r.y, SCANicon.OrbitIcon.Planet, col, 8, false);
+							double T = n.UT - startUT + i * nuo.period / steps;
+							if (T + startUT > nuo.EndUT)
+								break;
+							if (mapPosAtT(maprect, map, ref r, vessel, nuo, T, startUT))
+							{
+								SCANicon.drawOrbitIcon((int)r.x, (int)r.y, SCANicon.OrbitIcon.Planet, col, 8, false);
+							}
 						}
-					}
-					if (nuo.patchEndTransition == Orbit.PatchTransitionType.ESCAPE)
-					{
-						SCANicon.drawOrbitIcon((int)r.x, (int)r.y, SCANicon.OrbitIcon.Exit, col, 32, true);
-					}
-					else if (nuo.patchEndTransition == Orbit.PatchTransitionType.ENCOUNTER)
-					{
-						SCANicon.drawOrbitIcon((int)r.x, (int)r.y, SCANicon.OrbitIcon.Encounter, col, 32, true);
-					}
-					if (nuo.timeToAp > 0 && n.UT + nuo.timeToAp < nuo.EndUT && mapPosAtT(maprect, map, ref r, vessel, nuo, n.UT - startUT + nuo.timeToAp, startUT))
-					{
-						SCANicon.drawOrbitIcon((int)r.x, (int)r.y, SCANicon.OrbitIcon.Ap, col, 32, true);
-					}
-					if (nuo.timeToPe > 0 && n.UT + nuo.timeToPe < nuo.EndUT && mapPosAtT(maprect, map, ref r, vessel, nuo, n.UT - startUT + nuo.timeToPe, startUT))
-					{
-						SCANicon.drawOrbitIcon((int)r.x, (int)r.y, SCANicon.OrbitIcon.Pe, col, 32, true);
+						if (nuo.patchEndTransition == Orbit.PatchTransitionType.ESCAPE)
+						{
+							SCANicon.drawOrbitIcon((int)r.x, (int)r.y, SCANicon.OrbitIcon.Exit, col, 32, true);
+						}
+						else if (nuo.patchEndTransition == Orbit.PatchTransitionType.ENCOUNTER)
+						{
+							SCANicon.drawOrbitIcon((int)r.x, (int)r.y, SCANicon.OrbitIcon.Encounter, col, 32, true);
+						}
+						if (nuo.timeToAp > 0 && n.UT + nuo.timeToAp < nuo.EndUT && mapPosAtT(maprect, map, ref r, vessel, nuo, n.UT - startUT + nuo.timeToAp, startUT))
+						{
+							SCANicon.drawOrbitIcon((int)r.x, (int)r.y, SCANicon.OrbitIcon.Ap, col, 32, true);
+						}
+						if (nuo.timeToPe > 0 && n.UT + nuo.timeToPe < nuo.EndUT && mapPosAtT(maprect, map, ref r, vessel, nuo, n.UT - startUT + nuo.timeToPe, startUT))
+						{
+							SCANicon.drawOrbitIcon((int)r.x, (int)r.y, SCANicon.OrbitIcon.Pe, col, 32, true);
+						}
 					}
 				}
 			}

@@ -223,7 +223,7 @@ namespace SCANsat.SCAN_UI
 		//Draw version label in upper left corner
 		private void versionLabel(int id)
 		{
-			Rect r = new Rect(6, 0, 40, 18);
+			Rect r = new Rect(6, 0, 50, 18);
 			GUI.Label(r, SCANversions.SCANsatVersion, SCANskins.SCAN_whiteReadoutLabel);
 		}
 
