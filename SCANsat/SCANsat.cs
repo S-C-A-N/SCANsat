@@ -12,6 +12,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using SCANsat.SCAN_Toolbar;
 using SCANsat.SCAN_UI;
 using UnityEngine;
 using palette = SCANsat.SCAN_UI.SCANpalette;
