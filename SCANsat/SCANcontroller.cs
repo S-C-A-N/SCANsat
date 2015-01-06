@@ -21,6 +21,7 @@ using SCANsat.Platform;
 using SCANsat.Platform.Palettes;
 using SCANsat.Platform.Palettes.ColorBrewer;
 using SCANsat.Platform.Palettes.FixedColors;
+using SCANsat.SCAN_Toolbar;
 using palette = SCANsat.SCAN_UI.SCANpalette;
 
 namespace SCANsat
@@ -98,6 +99,8 @@ namespace SCANsat
 		public bool kscMapVisible = false;
 		[KSPField(isPersistant = true)]
 		public bool toolTips = true;
+		[KSPField(isPersistant = true)]
+		public bool useStockAppLauncher = true;
 
 		/* Available resources for overlays; loaded from resource addon configs */
 		private static Dictionary<string, Dictionary<string, SCANdata.SCANResource>> resourceList;
@@ -121,6 +124,9 @@ namespace SCANsat
 		internal SCAN_MBW newBigMap;
 		internal SCAN_MBW kscMap;
 		internal SCAN_MBW colorManager;
+
+		/* App launcher object */
+		internal SCANappLauncher appLauncher;
 
 		/* Used in case the loading process is interupted somehow */
 		private bool loaded = false;
@@ -425,7 +431,8 @@ namespace SCANsat
 				if (!body_data.ContainsKey(Planetarium.fetch.Home.name))
 					body_data.Add(Planetarium.fetch.Home.name, new SCANdata(Planetarium.fetch.Home));
 			}
-			
+			if (useStockAppLauncher)
+				appLauncher = gameObject.AddComponent<SCANappLauncher>();
 		}
 
 		private void Update()
@@ -456,6 +463,8 @@ namespace SCANsat
 				Destroy(kscMap);
 			if (newBigMap != null)
 				Destroy(newBigMap);
+			if (appLauncher != null)
+				Destroy(appLauncher);
 		}
 
 		private void SOIChange(GameEvents.HostedFromToAction<Vessel, CelestialBody> VC)
