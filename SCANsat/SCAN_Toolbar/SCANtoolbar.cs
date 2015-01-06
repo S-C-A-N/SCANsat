@@ -16,7 +16,7 @@ using System.IO;
 using UnityEngine;
 using SCANsat.Platform;
 
-namespace SCANsat.SCAN_UI
+namespace SCANsat.SCAN_Toolbar
 {
 	[SCAN_KSPAddonImproved(SCAN_KSPAddonImproved.Startup.TimeElapses, false)]
 	class SCANtoolbar : MonoBehaviour

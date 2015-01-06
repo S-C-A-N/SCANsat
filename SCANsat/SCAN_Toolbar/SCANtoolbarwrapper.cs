@@ -33,7 +33,7 @@ using System.Text;
 using UnityEngine;
 
 
-namespace SCANsat.SCAN_UI {
+namespace SCANsat.SCAN_Toolbar {
 
 
 
