@@ -119,17 +119,30 @@ namespace SCANsat
 		public MapProjection projection = MapProjection.Rectangular;
 
 		/* MAP: Big Map height map caching */
-		protected float[, ,] big_heightmap;
+		protected float[,] big_heightmap;
 		protected CelestialBody big_heightmap_body;
 		internal mapType mType;
 
 
-		public void heightMapArray(float height, int line, int i, mapType type)
+		//public void heightMapArray(float height, int line, int i, mapType type)
+		//{
+		//	if (type == 0)
+		//	{
+		//		big_heightmap[i, line, SCANcontroller.controller.projection] = height;
+		//	}
+		//}
+
+		private float terrainHeightToArray(double lon, double lat, int lo, int la, CelestialBody b, mapType type)
 		{
+			float alt = 0f;
+			alt = (float)SCANUtil.getElevation(b, lon, lat);
 			if (type == 0)
 			{
-				big_heightmap[i, line, SCANcontroller.controller.projection] = height;
+				if (alt == 0f)
+					alt = -0.001f;
+				big_heightmap[lo, la] = alt;
 			}
+			return alt;
 		}
 
 
@@ -313,7 +326,7 @@ namespace SCANsat
 			mapscale = mapwidth / 360f;
 			mapheight = (int)(w / 2);
 			/* big map caching */
-			big_heightmap = new float[mapwidth, mapheight, 3];
+			big_heightmap = new float[mapwidth, mapheight];
 			big_heightmap_body = body;
 			map = null;
 			resetMap();
@@ -346,7 +359,7 @@ namespace SCANsat
 		protected bool mapsaved; // all refs are below
 		protected double[] mapline; // all refs are below
 		internal CelestialBody body; // all refs are below
-		public SCANdata.SCANResource resource;
+		internal SCANresource resource;
 
 		/* MAP: nearly trivial functions */
 		public void setBody(CelestialBody b)
@@ -422,6 +435,8 @@ namespace SCANsat
 			if (data == null)
 				return new Texture2D(1, 1);
 			Color[] pix;
+			float rectVal;
+			float projVal;
 
 			/* init cache if necessary */
 			if (body != big_heightmap_body)
@@ -434,10 +449,7 @@ namespace SCANsat
 							{ //Save memory by not unnecessarily making a new cache
 								for (int y = 0; y < mapwidth / 2; y++)
 								{
-									for (int z = 0; z < 3; z++)
-									{
-										big_heightmap[x, y, z] = 0f;
-									}
+									big_heightmap[x, y] = 0f;
 								}
 							}
 							big_heightmap_body = body;
@@ -481,6 +493,31 @@ namespace SCANsat
 				int scheme = SCANcontroller.controller.colours;
 				double lat = (mapstep * 1.0f / mapscale) - 90f + lat_offset;
 				double lon = (i * 1.0f / mapscale) - 180f + lon_offset;
+
+				/* Introduce altimetry check here; Use unprojected lat/long coordinates
+				 * All cached altimetry data stored in a single 2D array in rectangular format
+				 * Pull altimetry data from cache after unprojection
+				 * 
+				 * All altimetry checks will be handled here; subsequent code is for color only
+				 */
+
+				rectVal = 0f;
+				projVal = 0f;
+				if (body.pqsController != null)
+				{
+					rectVal = big_heightmap[i, mapstep];
+					if (rectVal == 0f)
+					{
+						if (SCANUtil.isCovered(lon, lat, data, SCANtype.Altimetry))
+						{
+							if (mType == 0)
+								rectVal = big_heightmap[i, mapstep];
+							if (rectVal == 0)
+								rectVal = terrainHeightToArray(lon, lat, i, mapstep, body, mType);
+						}
+					}
+				}
+
 				double la = lat, lo = lon;
 				lat = unprojectLatitude(lo, la);
 				lon = unprojectLongitude(lo, la);
@@ -496,43 +533,19 @@ namespace SCANsat
 					{
 						baseColor = palette.lerp(palette.black, palette.white, UnityEngine.Random.value);
 					}
-					else if (SCANUtil.isCovered(lon, lat, data, SCANdata.SCANtype.Altimetry))
+					else if (SCANUtil.isCovered(lon, lat, data, SCANtype.AltimetryHiRes))
 					{
-						float val = 0f;
-						if (mType == 0)
-							val = big_heightmap[i, mapstep, SCANcontroller.controller.projection];
-						if (val == 0)
-						{
-							if (SCANUtil.isCovered(lon, lat, data, SCANdata.SCANtype.AltimetryHiRes))
-							{
-								// high resolution gets a coloured pixel for the actual position
-								val = (float)SCANUtil.getElevation(body, lon, lat);
-								baseColor = palette.heightToColor(val, scheme, data); //use temporary color to store pixel value
-								if (val == 0f) val = -0.001f;
-								heightMapArray(val, mapstep, i, mType);
-							}
-							else
-							{
-								// basic altimetry gets forced greyscale with lower resolution
-								val = (float)SCANUtil.getElevation(body, ((int)(lon * 5)) / 5, ((int)(lat * 5)) / 5);
-								baseColor = palette.heightToColor(val, 1, data);
-								if (val == 0f) val = -0.001f;
-								heightMapArray(val, mapstep, i, mType);
-							}
-						}
-						else if (val != 0)
-						{
-							if (SCANUtil.isCovered(lon, lat, data, SCANdata.SCANtype.AltimetryHiRes))
-							{
-								baseColor = palette.heightToColor(val, scheme, data);
-							}
-							else
-							{
-								baseColor = palette.heightToColor(val, 1, data);
-							}
-						}
-						mapline[i] = val;
+						projVal = big_heightmap[(int)lon, (int)lat];
+						baseColor = palette.heightToColor(projVal, scheme, data);
 					}
+					else if (SCANUtil.isCovered(lon, lat, data, SCANtype.AltimetryLoRes))
+					{
+						// basic altimetry gets forced greyscale with lower resolution
+						projVal = big_heightmap[((int)(lon * 5)) / 5, ((int)(lat * 5) / 5)];
+						baseColor = palette.heightToColor(projVal, 1, data);
+					}
+					mapline[i] = projVal;
+
 					if (SCANcontroller.controller.map_ResourceOverlay && SCANcontroller.controller.GlobalResourceOverlay)
 					{
 						if (SCANcontroller.controller.resourceOverlayType == 0 && SCANversions.RegolithFound)
@@ -540,12 +553,12 @@ namespace SCANsat
 							if (SCANUtil.isCovered(lon, lat, data, resource.Type)) //check our new resource coverage map
 							{
 								double amount = SCANUtil.RegolithOverlay(lat, lon, resource.Name, body.flightGlobalsIndex); //grab the resource amount for the current pixel
-								double scalar = resource.minValue + ((resource.maxValue - resource.minValue) / 5);
+								double scalar = resource.MinValue + ((resource.MaxValue - resource.MinValue) / 5);
 								amount *= 100;
 								if (amount > scalar)
 								{
 									if (amount > 100) amount = 100;
-									pix[i] = palette.lerp(baseColor, palette.lerp(resource.emptyColor, resource.fullColor, (float)(amount) / (resource.maxValue - resource.minValue)), 0.3f); //vary color by resource amount
+									pix[i] = palette.lerp(baseColor, palette.lerp(resource.EmptyColor, resource.FullColor, (float)(amount) / (resource.MaxValue - resource.MinValue)), 0.3f); //vary color by resource amount
 								}
 								else pix[i] = palette.lerp(baseColor, palette.grey, 0.4f);
 							}
@@ -561,7 +574,7 @@ namespace SCANsat
 								if (amount <= 0) pix[i] = palette.lerp(baseColor, palette.grey, 0.4f);
 								else
 								{
-									pix[i] = palette.lerp(baseColor, palette.lerp(resource.emptyColor, resource.fullColor, amount / resource.maxValue), 0.8f);
+									pix[i] = palette.lerp(baseColor, palette.lerp(resource.EmptyColor, resource.FullColor, amount / resource.MaxValue), 0.8f);
 								}
 							}
 							else pix[i] = baseColor;
@@ -587,25 +600,15 @@ namespace SCANsat
 					{
 						baseColor = palette.lerp(palette.black, palette.white, UnityEngine.Random.value);
 					}
-					else if (SCANUtil.isCovered(lon, lat, data, SCANdata.SCANtype.Altimetry))
+					else if (SCANUtil.isCovered(lon, lat, data, SCANtype.Altimetry))
 					{
-						float val = 0f;
-						if (mType == 0)
-							val = big_heightmap[i, mapstep, SCANcontroller.controller.projection];
-						if (val == 0)
+						if (SCANUtil.isCovered(lon, lat, data, SCANtype.AltimetryHiRes))
 						{
-							if (SCANUtil.isCovered(lon, lat, data, SCANdata.SCANtype.AltimetryHiRes))
-							{
-								val = (float)SCANUtil.getElevation(body, lon, lat);
-								if (val == 0f) val = -0.001f;
-								heightMapArray(val, mapstep, i, mType);
-							}
-							else
-							{
-								val = (float)SCANUtil.getElevation(body, ((int)(lon * 5)) / 5, ((int)(lat * 5)) / 5);
-								if (val == 0f) val = -0.001f;
-								heightMapArray(val, mapstep, i, mType);
-							}
+							projVal = rectVal;
+						}
+						else
+						{
+							projVal = big_heightmap[((int)(lon * 5) / 5), ((int)(lat * 5) / 5)];
 						}
 						if (mapstep == 0)
 						{
@@ -621,7 +624,7 @@ namespace SCANsat
 								v1 = Math.Max(v1, mapline[i - 1]);
 							if (i < mapline.Length - 1)
 								v1 = Math.Max(v1, mapline[i + 1]);
-							float v = Mathf.Clamp((float)Math.Abs(val - v1) / 1000f, 0, 2f);
+							float v = Mathf.Clamp((float)Math.Abs(projVal - v1) / 1000f, 0, 2f);
 							if (SCANcontroller.controller.colours == 1)
 							{
 								baseColor = palette.lerp(palette.black, palette.white, v / 2f);
@@ -638,7 +641,7 @@ namespace SCANsat
 								}
 							}
 						}
-						mapline[i] = val;
+						mapline[i] = projVal;
 					}
 					if (SCANcontroller.controller.map_ResourceOverlay && SCANcontroller.controller.GlobalResourceOverlay)
 					{
@@ -647,12 +650,12 @@ namespace SCANsat
 							if (SCANUtil.isCovered(lon, lat, data, resource.Type)) //check our new resource coverage map
 							{
 								double amount = SCANUtil.RegolithOverlay(lat, lon, resource.Name, body.flightGlobalsIndex); //grab the resource amount for the current pixel
-								double scalar = resource.minValue + ((resource.maxValue - resource.minValue) / 5);
+								double scalar = resource.MinValue + ((resource.MaxValue - resource.MinValue) / 5);
 								amount *= 100;
 								if (amount > scalar)
 								{
 									if (amount > 100) amount = 100; //max cutoff value
-									pix[i] = palette.lerp(baseColor, palette.lerp(resource.emptyColor, resource.fullColor, (float)(amount) / (resource.maxValue - resource.minValue)), 0.3f); //vary color by resource amount
+									pix[i] = palette.lerp(baseColor, palette.lerp(resource.EmptyColor, resource.FullColor, (float)(amount) / (resource.MaxValue - resource.MinValue)), 0.3f); //vary color by resource amount
 								}
 								else pix[i] = palette.lerp(baseColor, palette.grey, 0.4f);
 							}
@@ -668,7 +671,7 @@ namespace SCANsat
 								if (amount <= 0) pix[i] = palette.lerp(baseColor, palette.grey, 0.4f);
 								else
 								{
-									pix[i] = palette.lerp(baseColor, palette.lerp(resource.emptyColor, resource.fullColor, amount / resource.maxValue), 0.8f);
+									pix[i] = palette.lerp(baseColor, palette.lerp(resource.EmptyColor, resource.FullColor, amount / resource.MaxValue), 0.8f);
 								}
 							}
 							else pix[i] = baseColor;
@@ -690,7 +693,7 @@ namespace SCANsat
 				u /= 360f; v /= 180f;
 				pix[i] = body.BiomeMap.Map.GetPixelBilinear(u, v);
 				*/
-					else if (SCANUtil.isCovered(lon, lat, data, SCANdata.SCANtype.Biome))
+					else if (SCANUtil.isCovered(lon, lat, data, SCANtype.Biome))
 					{
 						double bio = SCANUtil.getBiomeIndexFraction(body, lon, lat);
 						Color biome = palette.grey;
@@ -712,27 +715,17 @@ namespace SCANsat
 							{
 								baseColor = palette.lerp(palette.black, palette.white, UnityEngine.Random.value);
 							}
-							else if (SCANUtil.isCovered(lon, lat, data, SCANdata.SCANtype.Altimetry))
+							else if (SCANUtil.isCovered(lon, lat, data, SCANtype.Altimetry))
 							{
-								float val = 0f;
-								if (mType == 0)
-									val = big_heightmap[i, mapstep, SCANcontroller.controller.projection];
-								if (val == 0)
+								if (SCANUtil.isCovered(lon, lat, data, SCANtype.AltimetryHiRes))
 								{
-									if (SCANUtil.isCovered(lon, lat, data, SCANdata.SCANtype.AltimetryHiRes))
-									{
-										val = (float)SCANUtil.getElevation(body, lon, lat);
-										if (val == 0f) val = -0.001f;
-										heightMapArray(val, mapstep, i, mType);
-									}
-									else
-									{
-										val = (float)SCANUtil.getElevation(body, ((int)(lon * 5)) / 5, ((int)(lat * 5)) / 5);
-										if (val == 0f) val = -0.001f;
-										heightMapArray(val, mapstep, i, mType);
-									}
+									projVal = rectVal;
 								}
-								elevation = palette.lerp(palette.black, palette.white, Mathf.Clamp(val + 1500f, 0, 9000) / 9000f);
+								else
+								{
+									projVal = big_heightmap[((int)(lon * 5) / 5), ((int)(lat * 5) / 5)];
+								}
+								elevation = palette.lerp(palette.black, palette.white, Mathf.Clamp(projVal + 1500f, 0, 9000) / 9000f);
 							}
 							Color bio1 = palette.xkcd_CamoGreen;
 							Color bio2 = palette.xkcd_Marigold;
@@ -757,12 +750,12 @@ namespace SCANsat
 							if (SCANUtil.isCovered(lon, lat, data, resource.Type)) //check our new resource coverage map
 							{
 								double amount = SCANUtil.RegolithOverlay(lat, lon, resource.Name, body.flightGlobalsIndex); //grab the resource amount for the current pixel
-								double scalar = resource.minValue + ((resource.maxValue - resource.minValue) / 5);
+								double scalar = resource.MinValue + ((resource.MaxValue - resource.MinValue) / 5);
 								amount *= 100;
 								if (amount > scalar)
 								{
 									if (amount > 100) amount = 100; //max cutoff value
-									pix[i] = palette.lerp(baseColor, palette.lerp(resource.emptyColor, resource.fullColor, (float)(amount) / (resource.maxValue - resource.minValue)), 0.3f); //vary color by resource amount
+									pix[i] = palette.lerp(baseColor, palette.lerp(resource.EmptyColor, resource.FullColor, (float)(amount) / (resource.MaxValue - resource.MinValue)), 0.3f); //vary color by resource amount
 								}
 								else pix[i] = palette.lerp(baseColor, palette.grey, 0.4f);
 							}
@@ -778,7 +771,7 @@ namespace SCANsat
 								if (amount <= 0) pix[i] = palette.lerp(baseColor, palette.grey, 0.4f);
 								else
 								{
-									pix[i] = palette.lerp(baseColor, palette.lerp(resource.emptyColor, resource.fullColor, amount / resource.maxValue), 0.8f);
+									pix[i] = palette.lerp(baseColor, palette.lerp(resource.EmptyColor, resource.FullColor, amount / resource.MaxValue), 0.8f);
 								}
 							}
 							else pix[i] = baseColor;
