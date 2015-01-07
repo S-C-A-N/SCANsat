@@ -87,7 +87,7 @@ namespace SCANsat
 			{
 				SCANdata data = getData(Body);
 				if (data != null)
-					return data.getCoveragePercentage((SCANdata.SCANtype)SCANtype);
+					return getCoveragePercentage(data, (SCANtype)SCANtype);
 				else
 					return 0;
 			}
@@ -95,7 +95,7 @@ namespace SCANsat
 				return 0;
 		}
 
-		internal static bool isCovered(double lon, double lat, SCANdata data, SCANdata.SCANtype type)
+		internal static bool isCovered(double lon, double lat, SCANdata data, SCANtype type)
 		{
 			int ilon = icLON(lon);
 			int ilat = icLAT(lat);
@@ -103,33 +103,32 @@ namespace SCANsat
 			return (data.Coverage[ilon, ilat] & (Int32)type) != 0;
 		}
 
-		internal static bool isCovered(int lon, int lat, SCANdata data, SCANdata.SCANtype type)
+		internal static bool isCovered(int lon, int lat, SCANdata data, SCANtype type)
 		{
 			if (badLonLat(lon, lat)) return false;
 			return (data.Coverage[lon, lat] & (Int32)type) != 0;
 		}
 
-		internal static bool isCoveredByAll (int lon, int lat, SCANdata data, SCANdata.SCANtype type)
+		internal static bool isCoveredByAll (int lon, int lat, SCANdata data, SCANtype type)
 		{
 			if (badLonLat(lon,lat)) return false;
 			return (data.Coverage[lon, lat] & (Int32)type) == (Int32)type;
 		}
 
-		internal static void registerPass ( double lon, double lat, SCANdata data, SCANdata.SCANtype type ) {
+		internal static void registerPass ( double lon, double lat, SCANdata data, SCANtype type ) {
 			int ilon = SCANUtil.icLON(lon);
 			int ilat = SCANUtil.icLAT(lat);
 			if (SCANUtil.badLonLat(ilon, ilat)) return;
 			data.Coverage[ilon, ilat] |= (Int32)type;
 		}
 
-		internal static double getCoveragePercentage(CelestialBody body, SCANdata.SCANtype type )
+		internal static double getCoveragePercentage(SCANdata data, SCANtype type )
 		{
-			SCANdata data = getData(body);
 			if (data == null)
 				return 0;
 			double cov = 0d;
-			if (type == SCANdata.SCANtype.Nothing)
-				type = SCANdata.SCANtype.AltimetryLoRes | SCANdata.SCANtype.AltimetryHiRes | SCANdata.SCANtype.Biome | SCANdata.SCANtype.Anomaly;          
+			if (type == SCANtype.Nothing)
+				type = SCANtype.AltimetryLoRes | SCANtype.AltimetryHiRes | SCANtype.Biome | SCANtype.Anomaly;          
 			cov = data.getCoverage (type);
 			if (cov <= 0)
 				cov = 100;
@@ -202,7 +201,7 @@ namespace SCANsat
 			return ret;
 		}
 
-		internal static ScienceData getAvailableScience(Vessel v, SCANdata.SCANtype sensor, bool notZero)
+		internal static ScienceData getAvailableScience(Vessel v, SCANtype sensor, bool notZero)
 		{
 			SCANdata data = getData(v.mainBody);
 			if (data == null)
@@ -215,26 +214,26 @@ namespace SCANsat
 			double coverage = 0f;
 			float multiplier = 1f;
 
-			if(!found && (sensor & SCANdata.SCANtype.AltimetryLoRes) != SCANdata.SCANtype.Nothing) {
+			if(!found && (sensor & SCANtype.AltimetryLoRes) != SCANtype.Nothing) {
 				found = true;
 				if (v.mainBody.pqsController == null)
 					multiplier = 0.5f;
 				id = "SCANsatAltimetryLoRes";
-				coverage = data.getCoveragePercentage(SCANdata.SCANtype.AltimetryLoRes);
+				coverage = getCoveragePercentage(data, SCANtype.AltimetryLoRes);
 			}
-			else if(!found && (sensor & SCANdata.SCANtype.AltimetryHiRes) != SCANdata.SCANtype.Nothing) {
+			else if(!found && (sensor & SCANtype.AltimetryHiRes) != SCANtype.Nothing) {
 				found = true;
 				if (v.mainBody.pqsController == null)
 					multiplier = 0.5f;
 				id = "SCANsatAltimetryHiRes";
-				coverage = data.getCoveragePercentage(SCANdata.SCANtype.AltimetryHiRes);
+				coverage = getCoveragePercentage(data, SCANtype.AltimetryHiRes);
 			}
-			else if(!found && (sensor & SCANdata.SCANtype.Biome) != SCANdata.SCANtype.Nothing) {
+			else if(!found && (sensor & SCANtype.Biome) != SCANtype.Nothing) {
 				found = true;
 				if (v.mainBody.BiomeMap == null)
 					multiplier = 0.5f;
 				id = "SCANsatBiomeAnomaly";
-				coverage = data.getCoveragePercentage(SCANdata.SCANtype.Biome);
+				coverage = getCoveragePercentage(data, SCANtype.Biome);
 			}
 			if(!found) return null;
 			se = ResearchAndDevelopment.GetExperiment(id);
@@ -269,16 +268,6 @@ namespace SCANsat
 			return sd;
 		}
 
-		internal static double ORSOverlay(double lon, double lat, int i, string s)
-		{
-			double amount = 0d;
-			amount = SCANreflection.ORSXpixelAbundanceValue(i, s, lat, lon);
-			//ORSPlanetaryResourcePixel overlayPixel = ORSPlanetaryResourceMapData.getResourceAvailability(i, s, lat, lon);
-			//if (overlayPixel != null)
-			//	amount = overlayPixel.getAmount();
-			return amount;
-		}
-
 		internal static float RegolithOverlay(double lat, double lon, string name, int body)
 		{
 			float amount = 0f;
@@ -286,7 +275,7 @@ namespace SCANsat
 			return amount;
 		}
 
-		internal static SCANdata.SCANResource RegolithConfigLoad(ConfigNode node)
+		internal static SCANresource RegolithConfigLoad(ConfigNode node)
 		{
 			float min = .001f;
 			float max = 10f;
@@ -297,10 +286,10 @@ namespace SCANsat
 				name = node.GetValue("ResourceName");
 			else
 				return null;
-			SCANdata.SCANresourceType type = OverlayResourceType(name);
+			SCANresourceType type = OverlayResourceType(name);
 			if (type == null)
 				return null;
-			if (type.type == SCANdata.SCANtype.Nothing)
+			if (type.Type == SCANtype.Nothing)
 				return null;
 			if (node.HasValue("PlanetName"))
 				body = node.GetValue("PlanetName");
@@ -318,64 +307,16 @@ namespace SCANsat
 			}
 			if (min == max)
 				max += 0.001f;
-			SCANdata.SCANResource SCANres = new SCANdata.SCANResource(name, body, type.colorFull, type.colorEmpty, min, max, type, SCANdata.SCANResource_Source.Regolith);
+			SCANresource SCANres = new SCANresource(name, body, type.ColorFull, type.ColorEmpty, min, max, type, SCANresource_Source.Regolith);
 			if (SCANres != null)
 				return SCANres;
 
 			return null;
 		}
 
-		internal static SCANdata.SCANResource ORSConfigLoad(ConfigNode node)
-		{
-			double scalar = 1d;
-			double Threshold = 1d;
-			double mult = 1d;
-			string name = "";
-			string body = "";
-			bool scale = false;
-			if (node.HasValue("name"))
-				name = node.GetValue("name");
-			else
-				return null;
-			SCANdata.SCANresourceType type = OverlayResourceType(name);
-			if (type == null)
-				return null;
-			if (type.type == SCANdata.SCANtype.Nothing)
-				return null;
-			if (node.HasValue("celestialBodyName"))
-				body = node.GetValue("celestialBodyName");
-			else
-				return null;
-			if (node.HasValue("resourceScale"))
-			{
-				if (node.GetValue("resourceScale") == "LINEAR_SCALE")
-					scale = true;
-				else if (node.GetValue("resourceScale") == "LOG_SCALE")
-					scale = false;
-			}
-			if (node.HasValue("displayThreshold"))
-				double.TryParse(node.GetValue("displayThreshold"), out Threshold);
-			if (scale)
-				Threshold *= 10;
-			else
-			{
-				Threshold *= 10000;
-				if (node.HasValue("scaleFactor"))
-					double.TryParse(node.GetValue("scaleFactor"), out scalar);
-			}
-			if (node.HasValue("scaleMultiplier"))
-				double.TryParse(node.GetValue("scaleMultiplier"), out mult);
-
-			//SCANdata.SCANResource SCANres = new SCANdata.SCANResource(name, body, type.colorFull, type.colorEmpty, scale, 1f, type, SCANdata.SCANResource_Source.ORSX);
-			//if (SCANres != null)
-			//	return SCANres;
-
-			return null;
-		}
-
 		internal static void loadSCANtypes()
 		{
-			SCANcontroller.ResourceTypes = new Dictionary<string, SCANdata.SCANresourceType>();
+			SCANcontroller.ResourceTypes = new Dictionary<string, SCANresourceType>();
 			foreach (ConfigNode node in GameDatabase.Instance.GetConfigNodes("SCANSAT_SENSOR"))
 			{
 				string name = "";
@@ -392,20 +333,19 @@ namespace SCANsat
 				if (node.HasValue("ColorEmpty"))
 					colorEmpty = node.GetValue("ColorEmpty");
 				if (!SCANcontroller.ResourceTypes.ContainsKey(name) && !string.IsNullOrEmpty(name))
-					SCANcontroller.ResourceTypes.Add(name, new SCANdata.SCANresourceType(name, i, colorFull, colorEmpty));
+					SCANcontroller.ResourceTypes.Add(name, new SCANresourceType(name, i, colorFull, colorEmpty));
 			}
 		}
 
-		internal static SCANdata.SCANresourceType OverlayResourceType(string s)
+		internal static SCANresourceType OverlayResourceType(string s)
 		{
-			var resourceType = SCANcontroller.ResourceTypes.FirstOrDefault(r => r.Value.name == s).Value;
+			var resourceType = SCANcontroller.ResourceTypes.FirstOrDefault(r => r.Value.Name == s).Value;
 			return resourceType;
 		}
 
 		internal static int getBiomeIndex(CelestialBody body, double lon , double lat)
 		{
 			if (body.BiomeMap == null)		return -1;
-			//if (body.BiomeMap.Map == null)	return -1;
 			double u = fixLon(lon);
 			double v = fixLat(lat);
 
@@ -429,9 +369,7 @@ namespace SCANsat
 		internal static CBAttributeMapSO.MapAttribute getBiome(CelestialBody body, double lon , double lat)
 		{
 			if (body.BiomeMap == null) return null;
-			//if (body.BiomeMap.Map == null) return body.BiomeMap.defaultAttribute;
 			int i = getBiomeIndex(body, lon , lat);
-			//if (i < 0) return body.BiomeMap.defaultAttribute;
 			return body.BiomeMap.Attributes [i];
 		}
 
