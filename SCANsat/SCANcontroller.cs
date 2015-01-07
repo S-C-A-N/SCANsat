@@ -103,7 +103,7 @@ namespace SCANsat
 		public bool useStockAppLauncher = true;
 
 		/* Available resources for overlays; loaded from resource addon configs */
-		private static Dictionary<string, Dictionary<string, SCANdata.SCANResource>> resourceList;
+		private static Dictionary<string, Dictionary<string, SCANresource>> resourceList;
 
 		/* Primary SCANsat vessel dictionary; loaded every time */
 		private Dictionary<Guid, SCANvessel> knownVessels = new Dictionary<Guid, SCANvessel>();
@@ -112,7 +112,7 @@ namespace SCANsat
 		private static Dictionary<string, SCANdata> body_data = new Dictionary<string,SCANdata>();
 
 		/* Resource types loaded from configs; only needs to be loaded once */
-		private static Dictionary<string, SCANdata.SCANresourceType> resourceTypes;
+		private static Dictionary<string, SCANresourceType> resourceTypes;
 
 		/* Kethane integration */
 		private bool kethaneRebuild, kethaneReset, kethaneBusy = false;
@@ -131,9 +131,11 @@ namespace SCANsat
 		/* Used in case the loading process is interupted somehow */
 		private bool loaded = false;
 
+		/* Governs resource overlay availability */
 		private static bool globalResourceOverlay = false;
 
 		#region Public Accessors
+
 		public static Dictionary<string, SCANdata> Body_Data
 		{
 			get { return body_data; }
@@ -148,16 +150,16 @@ namespace SCANsat
 				Debug.LogError("[SCANsat] Warning: SCANdata Dictionary Already Contains Key of This Type");
 		}
 
-		public Dictionary<string, Dictionary<string, SCANdata.SCANResource>> ResourceList
+		public Dictionary<string, Dictionary<string, SCANresource>> ResourceList
 		{
 			get { return resourceList; }
 		}
 		
-		public void addToResourceData (string name, string body, SCANdata.SCANResource res)
+		public void addToResourceData (string name, string body, SCANresource res)
 		{
 			if (!resourceList.ContainsKey(name))
 			{
-				Dictionary<string, SCANdata.SCANResource> subDict = new Dictionary<string, SCANdata.SCANResource>();
+				Dictionary<string, SCANresource> subDict = new Dictionary<string, SCANresource>();
 				subDict.Add(body, res);
 				resourceList.Add(name, subDict);
 			}
@@ -170,7 +172,7 @@ namespace SCANsat
 			}
 		}
 
-		public static Dictionary<string, SCANdata.SCANresourceType> ResourceTypes
+		public static Dictionary<string, SCANresourceType> ResourceTypes
 		{
 			get { return resourceTypes; }
 			internal set { resourceTypes = value; }
@@ -253,7 +255,7 @@ namespace SCANsat
 							max_alt = maxScanAlt;
 						if (!double.TryParse(node_sensor.GetValue("best_alt"), out best_alt))
 							best_alt = bestScanAlt;
-						registerSensor(id, (SCANdata.SCANtype)sensor, fov, min_alt, max_alt, best_alt);
+						registerSensor(id, (SCANtype)sensor, fov, min_alt, max_alt, best_alt);
 					}
 				}
 			}
@@ -515,7 +517,7 @@ namespace SCANsat
 
 		public class SCANsensor
 		{
-			public SCANdata.SCANtype sensor;
+			public SCANtype sensor;
 			public double fov;
 			public double min_alt, max_alt, best_alt;
 
@@ -527,7 +529,7 @@ namespace SCANsat
 		{
 			public Guid id;
 			public Vessel vessel;
-			public Dictionary<SCANdata.SCANtype, SCANsensor> sensors = new Dictionary<SCANdata.SCANtype, SCANsensor>();
+			public Dictionary<SCANtype, SCANsensor> sensors = new Dictionary<SCANtype, SCANsensor>();
 
 			public CelestialBody body;
 			public double latitude, longitude;
@@ -537,30 +539,30 @@ namespace SCANsat
 
 		internal void loadResources() //Repopulates the master resources list with data from config nodes
 		{
-			resourceList = new Dictionary<string, Dictionary<string, SCANdata.SCANResource>>();
+			resourceList = new Dictionary<string, Dictionary<string, SCANresource>>();
 			if (SCANversions.RegolithFound)
 			{
 				foreach (ConfigNode node in GameDatabase.Instance.GetConfigNodes("REGOLITH_GLOBAL_RESOURCE"))
 				{
 					if (node != null)
 					{
-						SCANdata.SCANResource resource = null;
+						SCANresource resource = null;
 						if ((resource = SCANUtil.RegolithConfigLoad(node)) == null)
 							continue;
 						foreach (CelestialBody body in FlightGlobals.Bodies)
 						{
-							SCANdata.SCANResource bodyResource = null;
+							SCANresource bodyResource = null;
 							foreach(ConfigNode bodyNode in GameDatabase.Instance.GetConfigNodes("REGOLITH_PLANETARY_RESOURCE"))
 							{
 								bodyResource = SCANUtil.RegolithConfigLoad(bodyNode);
 								if (bodyResource == null)
 									continue;
-								if (string.IsNullOrEmpty(bodyResource.body))
+								if (string.IsNullOrEmpty(bodyResource.Body))
 								{
 									bodyResource = null;
 									continue;
 								}
-								if (bodyResource.body == body.name)
+								if (bodyResource.Body == body.name)
 								{
 									if (bodyResource.Name == resource.Name)
 										break;
@@ -578,7 +580,7 @@ namespace SCANsat
 							}
 							else
 							{
-								addToResourceData(bodyResource.Name, bodyResource.body, bodyResource);
+								addToResourceData(bodyResource.Name, bodyResource.Body, bodyResource);
 							}
 						}
 					}
@@ -591,11 +593,11 @@ namespace SCANsat
 					if (node != null)
 					{
 						string name = node.GetValue("Resource");
-						SCANdata.SCANresourceType type = null;
+						SCANresourceType type = null;
 						if ((type = SCANUtil.OverlayResourceType(name)) == null)
 							continue;
-						Color full = type.colorFull;
-						Color empty = type.colorFull;
+						Color full = type.ColorFull;
+						Color empty = type.ColorFull;
 						float max = 1000000f;
 						ConfigNode subNode = node.GetNode("Generator");
 						if (subNode != null)
@@ -621,7 +623,7 @@ namespace SCANsat
 								}
 								if (bodySubValue)
 									max = subMax;
-								SCANdata.SCANResource resource = new SCANdata.SCANResource(name, Body.name, full, empty, 0f, max, type, SCANdata.SCANResource_Source.Kethane);
+								SCANresource resource = new SCANresource(name, Body.name, full, empty, 0f, max, type, SCANresource_Source.Kethane);
 								addToResourceData(name, Body.name, resource);
 							}
 						}
@@ -640,7 +642,7 @@ namespace SCANsat
 			}
 		}
 
-		internal void registerSensor(Vessel v, SCANdata.SCANtype sensors, double fov, double min_alt, double max_alt, double best_alt)
+		internal void registerSensor(Vessel v, SCANtype sensors, double fov, double min_alt, double max_alt, double best_alt)
 		{
 			registerSensor(v.id, sensors, fov, min_alt, max_alt, best_alt);
 			knownVessels[v.id].vessel = v;
@@ -648,7 +650,7 @@ namespace SCANsat
 			knownVessels[v.id].longitude = SCANUtil.fixLonShift(v.longitude);
 		}
 
-		private void registerSensor(Guid id, SCANdata.SCANtype sensors, double fov, double min_alt, double max_alt, double best_alt)
+		private void registerSensor(Guid id, SCANtype sensors, double fov, double min_alt, double max_alt, double best_alt)
 		{
 			if (id == null)
 				return;
@@ -661,10 +663,10 @@ namespace SCANsat
 				knownVessels.Remove(id);
 				return;
 			}
-			foreach (SCANdata.SCANtype sensor in Enum.GetValues(typeof(SCANdata.SCANtype)))
+			foreach (SCANtype sensor in Enum.GetValues(typeof(SCANtype)))
 			{
 				if (SCANUtil.countBits((int)sensor) != 1) continue;
-				if ((sensor & sensors) == SCANdata.SCANtype.Nothing) continue;
+				if ((sensor & sensors) == SCANtype.Nothing) continue;
 				double this_fov = fov, this_min_alt = min_alt, this_max_alt = max_alt, this_best_alt = best_alt;
 				if (this_max_alt <= 0)
 				{
@@ -672,8 +674,8 @@ namespace SCANsat
 					this_max_alt = 500000;
 					this_best_alt = 200000;
 					this_fov = 5;
-					if ((sensor & SCANdata.SCANtype.AltimetryHiRes) != SCANdata.SCANtype.Nothing) this_fov = 3;
-					if ((sensor & SCANdata.SCANtype.AnomalyDetail) != SCANdata.SCANtype.Nothing)
+					if ((sensor & SCANtype.AltimetryHiRes) != SCANtype.Nothing) this_fov = 3;
+					if ((sensor & SCANtype.AnomalyDetail) != SCANtype.Nothing)
 					{
 						this_min_alt = 0;
 						this_max_alt = 2000;
@@ -691,26 +693,26 @@ namespace SCANsat
 			}
 		}
 
-		internal void unregisterSensor(Vessel v, SCANdata.SCANtype sensors)
+		internal void unregisterSensor(Vessel v, SCANtype sensors)
 		{
 			if (!knownVessels.ContainsKey(v.id)) return;
 			SCANvessel sv = knownVessels[v.id];
 			sv.id = v.id;
 			sv.vessel = v;
-			foreach (SCANdata.SCANtype sensor in Enum.GetValues(typeof(SCANdata.SCANtype)))
+			foreach (SCANtype sensor in Enum.GetValues(typeof(SCANtype)))
 			{
-				if ((sensors & sensor) == SCANdata.SCANtype.Nothing) continue;
+				if ((sensors & sensor) == SCANtype.Nothing) continue;
 				if (!sv.sensors.ContainsKey(sensor)) continue;
 				sv.sensors.Remove(sensor);
 			}
 		}
 
-		internal bool isVesselKnown(Guid id, SCANdata.SCANtype sensor)
+		internal bool isVesselKnown(Guid id, SCANtype sensor)
 		{
 			if (!knownVessels.ContainsKey(id)) return false;
-			SCANdata.SCANtype all = SCANdata.SCANtype.Nothing;
-			foreach (SCANdata.SCANtype s in knownVessels[id].sensors.Keys) all |= s;
-			return (all & sensor) != SCANdata.SCANtype.Nothing;
+			SCANtype all = SCANtype.Nothing;
+			foreach (SCANtype s in knownVessels[id].sensors.Keys) all |= s;
+			return (all & sensor) != SCANtype.Nothing;
 		}
 
 		private bool isVesselKnown(Guid id)
@@ -725,18 +727,18 @@ namespace SCANsat
 			return isVesselKnown(v.id);
 		}
 
-		internal SCANsensor getSensorStatus(Vessel v, SCANdata.SCANtype sensor)
+		internal SCANsensor getSensorStatus(Vessel v, SCANtype sensor)
 		{
 			if (!knownVessels.ContainsKey(v.id)) return null;
 			if (!knownVessels[v.id].sensors.ContainsKey(sensor)) return null;
 			return knownVessels[v.id].sensors[sensor];
 		}
 
-		internal SCANdata.SCANtype activeSensorsOnVessel(Guid id)
+		internal SCANtype activeSensorsOnVessel(Guid id)
 		{
-			if (!knownVessels.ContainsKey(id)) return SCANdata.SCANtype.Nothing;
-			SCANdata.SCANtype sensors = SCANdata.SCANtype.Nothing;
-			foreach (SCANdata.SCANtype s in knownVessels[id].sensors.Keys) sensors |= s;
+			if (!knownVessels.ContainsKey(id)) return SCANtype.Nothing;
+			SCANtype sensors = SCANtype.Nothing;
+			foreach (SCANtype s in knownVessels[id].sensors.Keys) sensors |= s;
 			return sensors;
 		}
 
