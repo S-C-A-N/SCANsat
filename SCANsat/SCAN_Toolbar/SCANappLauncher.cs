@@ -37,7 +37,10 @@ namespace SCANsat.SCAN_Toolbar
 			while (!ApplicationLauncher.Ready)
 				yield return null;
 
-			SCANappLauncherButton = ApplicationLauncher.Instance.AddModApplication(toggleOn, toggleOff, null, null, null, null, (ApplicationLauncher.AppScenes)63, SCANskins.SCAN_SmallMapIcon);
+			if (HighLogic.LoadedScene == GameScenes.FLIGHT)
+				SCANappLauncherButton = ApplicationLauncher.Instance.AddModApplication(toggleFlightOn, toggleFlightOff, null, null, null, null, ApplicationLauncher.AppScenes.FLIGHT | ApplicationLauncher.AppScenes.MAPVIEW, SCANskins.SCAN_SmallMapIcon);
+			else if (HighLogic.LoadedScene == GameScenes.SPACECENTER || HighLogic.LoadedScene == GameScenes.TRACKSTATION)
+				SCANappLauncherButton = ApplicationLauncher.Instance.AddModApplication(toggleKSCOn, toggleKSCOff, null, null, null, null, ApplicationLauncher.AppScenes.SPACECENTER | ApplicationLauncher.AppScenes.TRACKSTATION, SCANskins.SCAN_BigMapIcon);
 
 			GameEvents.onGUIApplicationLauncherUnreadifying.Add(removeButton);
 		}
@@ -49,7 +52,7 @@ namespace SCANsat.SCAN_Toolbar
 			SCANUtil.SCANlog("App Launcher Button Removed");
 		}
 
-		private void toggleOn()
+		private void toggleFlightOn()
 		{
 			if (SCANcontroller.controller != null)
 			{
@@ -58,12 +61,30 @@ namespace SCANsat.SCAN_Toolbar
 			}
 		}
 
-		private void toggleOff()
+		private void toggleFlightOff()
 		{
 			if (SCANcontroller.controller != null)
 			{
 				SCANcontroller.controller.mainMap.Visible = false;
 				SCANcontroller.controller.mainMapVisible = false;
+			}
+		}
+
+		private void toggleKSCOn()
+		{
+			if (SCANcontroller.controller != null)
+			{
+				SCANcontroller.controller.kscMap.Visible = true;
+				SCANcontroller.controller.kscMapVisible = true;
+			}
+		}
+
+		private void toggleKSCOff()
+		{
+			if (SCANcontroller.controller != null)
+			{
+				SCANcontroller.controller.kscMap.Visible = false;
+				SCANcontroller.controller.kscMapVisible = false;
 			}
 		}
 	}
