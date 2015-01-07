@@ -61,6 +61,9 @@
     <Compile Include="Platform\Palettes\Palettes.cs" />
     <Compile Include="Platform\Palettes\Swatches.cs" />
     <Compile Include="Platform\SCAN_CLZF2.cs" />
+    <Compile Include="SCAN_Toolbar\SCANappLauncher.cs" />
+    <Compile Include="SCAN_Toolbar\SCANtoolbar.cs" />
+    <Compile Include="SCAN_Toolbar\SCANtoolbarwrapper.cs" />
     <Compile Include="SCAN_UI\SCANcolorSelection.cs" />
     <Compile Include="SCAN_UI\SCANnewBigMap.cs" />
     <Compile Include="SCAN_UI\UI_Framework\SCANremoteView.cs" />
@@ -158,8 +161,6 @@
     <Compile Include="SCANsat.cs" />
     <Compile Include="SCAN_UI\SCANsatRPM.cs" />
     <Compile Include="SCAN_UI\SCANsettingsUI.cs" />
-    <Compile Include="SCAN_UI\UI_Framework\SCANtoolbar.cs" />
-    <Compile Include="SCAN_UI\UI_Framework\SCANtoolbarwrapper.cs" />
     <Compile Include="SCANui.cs" />
     <Compile Include="SCANutil.cs" />
     <Compile Include="SCANversions.cs" />
