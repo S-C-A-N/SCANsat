@@ -243,131 +243,6 @@ namespace SCANsat
 		}
 		#endregion
 
-		#region SCANtype enum
-		/* DATA: known types of data */
-		public enum SCANtype : int
-		{
-			Nothing = 0, 		    // no data (MapTraq)
-			AltimetryLoRes = 1 << 0,  // low resolution altimetry (limited zoom)
-			AltimetryHiRes = 1 << 1,  // high resolution altimetry (unlimited zoom)
-			Altimetry = (1 << 2) - 1, 	        // both (setting) or either (testing) altimetry
-			SCANsat_1 = 1 << 2,		// Unused, reserved for future SCANsat scanner
-			Biome = 1 << 3,		    // biome data
-			Anomaly = 1 << 4,		    // anomalies (position of anomaly)
-			AnomalyDetail = 1 << 5,	// anomaly detail (name of anomaly, etc.)
-			Kethane = 1 << 6,         // Kethane - K-type - Kethane
-			Ore = 1 << 7,             // Ore - ORS & K-type - EPL & MKS
-			Kethane_3 = 1 << 8,       // Reserved - K-type
-			Kethane_4 = 1 << 9,       // Reserved - K-type
-			Uranium = 1 << 10,        // Uranium - ORS - KSPI
-			Thorium = 1 << 11,        // Thorium - ORS - KSPI
-			Alumina = 1 << 12,        // Alumina - ORS - KSPI
-			Water = 1 << 13,          // Water - ORS - KSPI
-			Aquifer = 1 << 14,        // Aquifer - ORS & K-type - MKS
-			Minerals = 1 << 15,       // Minerals - ORS & K-type - MKS
-			Substrate = 1 << 16,      // Substrate - ORS & K-type - MKS
-			KEEZO = 1 << 17,          // KEEZO - ORS - Kass Effect
-			Karbonite = 1 << 18,    // Karbonite - ORS
-			ORS_10 = 1 << 19,         // Reserved - ORS
-
-			Everything_SCAN = (1 << 6) - 1,	// All default SCANsat scanners
-			Everything = Int32.MaxValue      // All scanner types
-		}
-		#endregion
-
-		#region Resource classes
-
-		public enum SCANResource_Source
-		{
-			Kethane = 1,
-			ORSX = 2,
-			Regolith = 3,
-		}
-
-		/* DATA: resources */
-		public class SCANResource //The new class to store resource information stored in the respective config nodes
-		{
-			public SCANResource(string n, string Body, Color full, Color empty, float min, float max, SCANresourceType t, SCANResource_Source s)
-			{
-				name = n;
-				body = Body;
-				fullColor = full;
-				emptyColor = empty;
-				//linear = sc;
-				//ORS_Scalar = scalar;
-				//ORS_Multiplier = mult;
-				//ORS_Threshold = threshold;
-				minValue = min;
-				maxValue = max;
-				resourceType = t;
-				type = resourceType.type;
-				source = s;
-			}
-
-			private string name;
-			internal string body;
-			//internal double ORS_Scalar, ORS_Multiplier, ORS_Threshold;
-			internal Color fullColor, emptyColor;
-			//internal bool linear;
-			internal float minValue;
-			internal float maxValue;
-			private SCANtype type;
-			internal SCANresourceType resourceType;
-			private SCANResource_Source source;
-
-			public string Name
-			{
-				get { return name; }
-			}
-
-			public SCANtype Type
-			{
-				get { return type; }
-			}
-
-			public SCANResource_Source Source
-			{
-				get { return source; }
-			}
-		}
-
-		public class SCANresourceType
-		{
-			internal string name;
-			internal SCANtype type;
-			internal Color colorFull, colorEmpty;
-
-			public SCANresourceType(string s, int i, string Full, string Empty)
-			{
-				name = s;
-				type = (SCANtype)i;
-				if ((type & SCANtype.Everything_SCAN) != SCANtype.Nothing)
-				{
-					Debug.LogWarning("[SCANsat] Attempt To Override Default SCANsat Sensors; Resetting Resource Scanner Type To 0");
-					type = SCANtype.Nothing;
-				}
-				try
-				{
-					colorFull = ConfigNode.ParseColor(Full);
-				}
-				catch (Exception e)
-				{
-					SCANUtil.SCANlog("Color Format Incorrect; Reverting To Default Full Resource Color: {0}", e);
-					colorFull = palette.cb_reddishPurple;
-				}
-				try
-				{
-					colorEmpty = ConfigNode.ParseColor(Empty);
-				}
-				catch (Exception e)
-				{
-					SCANUtil.SCANlog("Color Format Incorrect; Reverting To Default Empty Resource Color: {0}", e);
-					colorEmpty = palette.magenta;
-				}
-			}
-		}
-		#endregion
-
 		#region Anomalies
 		/* DATA: anomalies and such */
 		internal class SCANanomaly
@@ -416,7 +291,7 @@ namespace SCANsat
 
 		#region Scanning coverage
 		/* DATA: coverage */
-		internal int[] coverage_count = new int[32];
+		private int[] coverage_count = new int[32];
 		internal void updateCoverage()
 		{
 			for (int i = 0; i < 32; ++i)
@@ -476,20 +351,8 @@ namespace SCANsat
 			if ((type & SCANtype.ORS_10) != SCANtype.Nothing)
 				uncov += coverage_count[19];
 			return uncov;
-
 		}
-		internal double getCoveragePercentage(SCANtype type)
-		{
-			double cov = 0d;
-			if (type == SCANtype.Nothing)
-				type = SCANtype.AltimetryLoRes | SCANtype.AltimetryHiRes | SCANtype.Biome | SCANtype.Anomaly;
-			cov = getCoverage(type);
-			if (cov <= 0)
-				cov = 100;
-			else
-				cov = Math.Min(99.9d, 100 - cov * 100d / (360d * 180d * SCANUtil.countBits((int)type)));
-			return cov;
-		}
+		
 		#endregion
 
 		#region Map Texture
@@ -620,6 +483,143 @@ namespace SCANsat
 
 		#region Unused code
 
+		#region SCANtype enum
+		///* DATA: known types of data */
+		//public enum SCANtype : int
+		//{
+		//	Nothing = 0, 		    // no data (MapTraq)
+		//	AltimetryLoRes = 1 << 0,  // low resolution altimetry (limited zoom)
+		//	AltimetryHiRes = 1 << 1,  // high resolution altimetry (unlimited zoom)
+		//	Altimetry = (1 << 2) - 1, 	        // both (setting) or either (testing) altimetry
+		//	SCANsat_1 = 1 << 2,		// Unused, reserved for future SCANsat scanner
+		//	Biome = 1 << 3,		    // biome data
+		//	Anomaly = 1 << 4,		    // anomalies (position of anomaly)
+		//	AnomalyDetail = 1 << 5,	// anomaly detail (name of anomaly, etc.)
+		//	Kethane = 1 << 6,         // Kethane - K-type - Kethane
+		//	Ore = 1 << 7,             // Ore - ORS & K-type - EPL & MKS
+		//	Kethane_3 = 1 << 8,       // Reserved - K-type
+		//	Kethane_4 = 1 << 9,       // Reserved - K-type
+		//	Uranium = 1 << 10,        // Uranium - ORS - KSPI
+		//	Thorium = 1 << 11,        // Thorium - ORS - KSPI
+		//	Alumina = 1 << 12,        // Alumina - ORS - KSPI
+		//	Water = 1 << 13,          // Water - ORS - KSPI
+		//	Aquifer = 1 << 14,        // Aquifer - ORS & K-type - MKS
+		//	Minerals = 1 << 15,       // Minerals - ORS & K-type - MKS
+		//	Substrate = 1 << 16,      // Substrate - ORS & K-type - MKS
+		//	KEEZO = 1 << 17,          // KEEZO - ORS - Kass Effect
+		//	Karbonite = 1 << 18,    // Karbonite - ORS
+		//	ORS_10 = 1 << 19,         // Reserved - ORS
+
+		//	Everything_SCAN = (1 << 6) - 1,	// All default SCANsat scanners
+		//	Everything = Int32.MaxValue      // All scanner types
+		//}
+		#endregion
+
+		#region Resource classes
+
+		//public enum SCANResource_Source
+		//{
+		//	Kethane = 1,
+		//	ORSX = 2,
+		//	Regolith = 3,
+		//}
+
+		///* DATA: resources */
+		//public class SCANResource //The new class to store resource information stored in the respective config nodes
+		//{
+		//	public SCANResource(string n, string Body, Color full, Color empty, float min, float max, SCANresourceType t, SCANResource_Source s)
+		//	{
+		//		name = n;
+		//		body = Body;
+		//		fullColor = full;
+		//		emptyColor = empty;
+		//		//linear = sc;
+		//		//ORS_Scalar = scalar;
+		//		//ORS_Multiplier = mult;
+		//		//ORS_Threshold = threshold;
+		//		minValue = min;
+		//		maxValue = max;
+		//		resourceType = t;
+		//		type = resourceType.type;
+		//		source = s;
+		//	}
+
+		//	private string name;
+		//	internal string body;
+		//	//internal double ORS_Scalar, ORS_Multiplier, ORS_Threshold;
+		//	internal Color fullColor, emptyColor;
+		//	//internal bool linear;
+		//	internal float minValue;
+		//	internal float maxValue;
+		//	private SCANtype type;
+		//	internal SCANresourceType resourceType;
+		//	private SCANResource_Source source;
+
+		//	public string Name
+		//	{
+		//		get { return name; }
+		//	}
+
+		//	public SCANtype Type
+		//	{
+		//		get { return type; }
+		//	}
+
+		//	public SCANResource_Source Source
+		//	{
+		//		get { return source; }
+		//	}
+		//}
+
+		//public class SCANresourceType
+		//{
+		//	internal string name;
+		//	internal SCANtype type;
+		//	internal Color colorFull, colorEmpty;
+
+		//	public SCANresourceType(string s, int i, string Full, string Empty)
+		//	{
+		//		name = s;
+		//		type = (SCANtype)i;
+		//		if ((type & SCANtype.Everything_SCAN) != SCANtype.Nothing)
+		//		{
+		//			Debug.LogWarning("[SCANsat] Attempt To Override Default SCANsat Sensors; Resetting Resource Scanner Type To 0");
+		//			type = SCANtype.Nothing;
+		//		}
+		//		try
+		//		{
+		//			colorFull = ConfigNode.ParseColor(Full);
+		//		}
+		//		catch (Exception e)
+		//		{
+		//			SCANUtil.SCANlog("Color Format Incorrect; Reverting To Default Full Resource Color: {0}", e);
+		//			colorFull = palette.cb_reddishPurple;
+		//		}
+		//		try
+		//		{
+		//			colorEmpty = ConfigNode.ParseColor(Empty);
+		//		}
+		//		catch (Exception e)
+		//		{
+		//			SCANUtil.SCANlog("Color Format Incorrect; Reverting To Default Empty Resource Color: {0}", e);
+		//			colorEmpty = palette.magenta;
+		//		}
+		//	}
+		//}
+		#endregion
+
+//internal double getCoveragePercentage(SCANtype type)
+		//{
+		//	double cov = 0d;
+		//	if (type == SCANtype.Nothing)
+		//		type = SCANtype.AltimetryLoRes | SCANtype.AltimetryHiRes | SCANtype.Biome | SCANtype.Anomaly;
+		//	cov = getCoverage(type);
+		//	if (cov <= 0)
+		//		cov = 100;
+		//	else
+		//		cov = Math.Min(99.9d, 100 - cov * 100d / (360d * 180d * SCANUtil.countBits((int)type)));
+		//	return cov;
+		//}
 		/* MAP: anonymous functions (in place of preprocessor macros */
 		// icLON and icLAT: [i]nteger casted, [c]lamped, longitude and latitude
 		//internal Func<double,int> icLON = (lon) => ((int)(lon + 360 + 180)) % 360;
