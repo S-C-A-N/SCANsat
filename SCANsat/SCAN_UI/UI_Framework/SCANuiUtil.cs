@@ -112,7 +112,7 @@ namespace SCANsat.SCAN_UI
 
 			if (b)
 			{
-				if (SCANUtil.isCovered(lon, lat, data, SCANdata.SCANtype.AltimetryLoRes))
+				if (SCANUtil.isCovered(lon, lat, data, SCANtype.AltimetryLoRes))
 				{
 					if (body.pqsController == null)
 						info += palette.colored(palette.c_ugly, "LO ");
@@ -121,7 +121,7 @@ namespace SCANsat.SCAN_UI
 				}
 				else
 					info += palette.colored(palette.grey, "LO ");
-				if (SCANUtil.isCovered(lon, lat, data, SCANdata.SCANtype.AltimetryHiRes))
+				if (SCANUtil.isCovered(lon, lat, data, SCANtype.AltimetryHiRes))
 				{
 					if (body.pqsController == null)
 						info += palette.colored(palette.c_ugly, "HI ");
@@ -130,7 +130,7 @@ namespace SCANsat.SCAN_UI
 				}
 				else
 					info += palette.colored(palette.grey, "HI ");
-				if (SCANUtil.isCovered(lon, lat, data, SCANdata.SCANtype.Biome))
+				if (SCANUtil.isCovered(lon, lat, data, SCANtype.Biome))
 				{
 					if (body.BiomeMap == null)
 						info += palette.colored(palette.c_ugly, "MULTI ");
@@ -139,15 +139,15 @@ namespace SCANsat.SCAN_UI
 				}
 				else
 					info += palette.colored(palette.grey, "MULTI ");
-				if (SCANUtil.isCovered(lon, lat, data, SCANdata.SCANtype.AltimetryHiRes))
+				if (SCANUtil.isCovered(lon, lat, data, SCANtype.AltimetryHiRes))
 				{
 					info += SCANUtil.getElevation(body, lon, lat).ToString("N2") + "m ";
 				}
-				else if (SCANUtil.isCovered(lon, lat, data, SCANdata.SCANtype.AltimetryLoRes))
+				else if (SCANUtil.isCovered(lon, lat, data, SCANtype.AltimetryLoRes))
 				{
 					info += (((int)SCANUtil.getElevation(body, lon, lat) / 500) * 500).ToString() + "m ";
 				}
-				if (SCANUtil.isCovered(lon, lat, data, SCANdata.SCANtype.Biome))
+				if (SCANUtil.isCovered(lon, lat, data, SCANtype.Biome))
 				{
 					info += SCANUtil.getBiomeName(body, lon, lat) + " ";
 				}
@@ -164,7 +164,7 @@ namespace SCANsat.SCAN_UI
 								label = amount.ToString("P2");
 							//else
 							//	label = (amount * 1000000).ToString("N1") + " ppm";
-							info += palette.colored(mapObj.resource.fullColor, mapObj.resource.Name + ": " + label);
+							info += palette.colored(mapObj.resource.FullColor, mapObj.resource.Name + ": " + label);
 						}
 					}
 					else if (SCANcontroller.controller.resourceOverlayType == 1)
@@ -173,7 +173,7 @@ namespace SCANsat.SCAN_UI
 						{
 							double amount = data.KethaneValueMap[SCANUtil.icLON(lon), SCANUtil.icLAT(lat)];
 							if (amount < 0) amount = 0d;
-							info += palette.colored(mapObj.resource.fullColor, mapObj.resource.Name + ": " + amount.ToString("N1"));
+							info += palette.colored(mapObj.resource.FullColor, mapObj.resource.Name + ": " + amount.ToString("N1"));
 						}
 					}
 				}
@@ -199,7 +199,7 @@ namespace SCANsat.SCAN_UI
 			SCANcontroller.SCANsensor s;
 
 			//Check here for each sensor; if active, in range, and at the ideal altitude
-			s = SCANcontroller.controller.getSensorStatus(v, SCANdata.SCANtype.AltimetryLoRes);
+			s = SCANcontroller.controller.getSensorStatus(v, SCANtype.AltimetryLoRes);
 			if (s == null)
 				infotext += palette.colored(palette.grey, "LO");
 			else if (!s.inRange)
@@ -209,7 +209,7 @@ namespace SCANsat.SCAN_UI
 			else
 				infotext += palette.colored(palette.c_good, "LO");
 
-			s = SCANcontroller.controller.getSensorStatus(v, SCANdata.SCANtype.AltimetryHiRes);
+			s = SCANcontroller.controller.getSensorStatus(v, SCANtype.AltimetryHiRes);
 			if (s == null)
 				infotext += palette.colored(palette.grey, " HI");
 			else if (!s.inRange)
@@ -219,7 +219,7 @@ namespace SCANsat.SCAN_UI
 			else
 				infotext += palette.colored(palette.c_good, " HI");
 
-			s = SCANcontroller.controller.getSensorStatus(v, SCANdata.SCANtype.Biome);
+			s = SCANcontroller.controller.getSensorStatus(v, SCANtype.Biome);
 			if (s == null)
 				infotext += palette.colored(palette.grey, " MULTI");
 			else if (!s.inRange)
@@ -229,7 +229,7 @@ namespace SCANsat.SCAN_UI
 			else
 				infotext += palette.colored(palette.c_good, " MULTI");
 
-			s = SCANcontroller.controller.getSensorStatus(v, SCANdata.SCANtype.AnomalyDetail);
+			s = SCANcontroller.controller.getSensorStatus(v, SCANtype.AnomalyDetail);
 			if (s == null)
 				infotext += palette.colored(palette.grey, " BTDT");
 			else if (!s.inRange)
@@ -240,10 +240,10 @@ namespace SCANsat.SCAN_UI
 				infotext += palette.colored(palette.c_good, " BTDT");
 
 			//Get coverage percentage for all active scanners on the vessel
-			SCANdata.SCANtype active = SCANcontroller.controller.activeSensorsOnVessel(v.id);
-			if (active != SCANdata.SCANtype.Nothing)
+			SCANtype active = SCANcontroller.controller.activeSensorsOnVessel(v.id);
+			if (active != SCANtype.Nothing)
 			{
-				double cov = data.getCoveragePercentage(active);
+				double cov = SCANUtil.getCoveragePercentage(data, active);
 				infotext += string.Format(" {0:N1}%", cov);
 				if (b)
 				{

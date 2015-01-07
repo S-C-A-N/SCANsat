@@ -28,7 +28,7 @@ namespace SCANsat.SCAN_UI
 		private string infoText;
 		private Vessel v;
 		private SCANdata data;
-		private SCANdata.SCANtype sensors;
+		private SCANtype sensors;
 		private bool notMappingToday; //Unused out-of-power bool
 		private Rect mapRect;
 		private static bool showVesselInfo = true;

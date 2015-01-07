@@ -27,7 +27,7 @@ namespace SCANsat.SCAN_UI
 	{
 		private bool notMappingToday; //Unused out-of-power bool
 		private SCANremoteView anomalyView;
-		private SCANdata.SCANtype sensors;
+		private SCANtype sensors;
 		private SCANdata data;
 		internal static Rect defaultRect = new Rect(30, 600, 260, 60);
 
@@ -69,17 +69,17 @@ namespace SCANsat.SCAN_UI
 			if (true)
 			{
 				//Check if region below the vessel is scanned
-				if (SCANUtil.isCovered(FlightGlobals.ActiveVessel.longitude, FlightGlobals.ActiveVessel.latitude, data, SCANdata.SCANtype.AltimetryLoRes))
+				if (SCANUtil.isCovered(FlightGlobals.ActiveVessel.longitude, FlightGlobals.ActiveVessel.latitude, data, SCANtype.AltimetryLoRes))
 				{
-					sensors |= SCANdata.SCANtype.Altimetry;
+					sensors |= SCANtype.Altimetry;
 				}
-				else if (SCANUtil.isCovered(FlightGlobals.ActiveVessel.longitude, FlightGlobals.ActiveVessel.latitude, data, SCANdata.SCANtype.AltimetryHiRes))
+				else if (SCANUtil.isCovered(FlightGlobals.ActiveVessel.longitude, FlightGlobals.ActiveVessel.latitude, data, SCANtype.AltimetryHiRes))
 				{
-					sensors |= SCANdata.SCANtype.Altimetry;
+					sensors |= SCANtype.Altimetry;
 				}
-				if (SCANUtil.isCovered(FlightGlobals.ActiveVessel.longitude, FlightGlobals.ActiveVessel.latitude, data, SCANdata.SCANtype.Biome))
+				if (SCANUtil.isCovered(FlightGlobals.ActiveVessel.longitude, FlightGlobals.ActiveVessel.latitude, data, SCANtype.Biome))
 				{
-					sensors |= SCANdata.SCANtype.Biome;
+					sensors |= SCANtype.Biome;
 				}
 			}
 		}
@@ -128,7 +128,7 @@ namespace SCANsat.SCAN_UI
 		//Display current biome info
 		private bool biomeInfo(int id)
 		{
-			if ((sensors & SCANdata.SCANtype.Biome) != SCANdata.SCANtype.Nothing)
+			if ((sensors & SCANtype.Biome) != SCANtype.Nothing)
 			{
 				GUILayout.Label(string.Format("Biome:  {0}", SCANUtil.getBiomeName(FlightGlobals.ActiveVessel.mainBody, FlightGlobals.ActiveVessel.longitude, FlightGlobals.ActiveVessel.latitude)), SCANskins.SCAN_insColorLabel);
 				fillS(-10);
@@ -140,7 +140,7 @@ namespace SCANsat.SCAN_UI
 		//Display the current vessel altitude *Needs to be fixed to display accurate alt*
 		private bool altInfo(int id)
 		{
-			if ((sensors & SCANdata.SCANtype.Altimetry) != SCANdata.SCANtype.Nothing)
+			if ((sensors & SCANtype.Altimetry) != SCANtype.Nothing)
 			{
 				double h = FlightGlobals.ActiveVessel.heightFromTerrain;
 				if (h < 0)
@@ -155,7 +155,7 @@ namespace SCANsat.SCAN_UI
 		//Display info on the nearest anomaly *Need to separate the BTDT display*
 		private bool anomalyInfo(int id)
 		{
-			if ((sensors & SCANdata.SCANtype.AnomalyDetail) != SCANdata.SCANtype.Nothing)
+			if ((sensors & SCANtype.AnomalyDetail) != SCANtype.Nothing)
 			{
 				SCANdata.SCANanomaly nearest = null;
 				double nearest_dist = -1;

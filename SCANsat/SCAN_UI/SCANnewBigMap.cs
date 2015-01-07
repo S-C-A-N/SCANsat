@@ -726,13 +726,13 @@ namespace SCANsat.SCAN_UI
 					{
 						bigmap.resource = SCANcontroller.controller.ResourceList.ElementAt(i).Value[b.name];
 						SCANcontroller.controller.resourceSelection = bigmap.resource.Name;
-						if (SCANcontroller.controller.ResourceList.ElementAt(i).Value[b.name].Source == SCANdata.SCANResource_Source.Kethane)
+						if (SCANcontroller.controller.ResourceList.ElementAt(i).Value[b.name].Source == SCANresource_Source.Kethane)
 							SCANcontroller.controller.resourceOverlayType = 1;
 						else
 							SCANcontroller.controller.resourceOverlayType = 0;
 						bigmap.resetMap();
 						drop_down_open = false;
-						SCANUtil.SCANlog("Resource {0} Selected; Min Value: {1}; Max Value: {2}", bigmap.resource.Name, bigmap.resource.minValue, bigmap.resource.maxValue);
+						SCANUtil.SCANlog("Resource {0} Selected; Min Value: {1}; Max Value: {2}", bigmap.resource.Name, bigmap.resource.MinValue, bigmap.resource.MaxValue);
 					}
 					GUI.EndScrollView();
 				}

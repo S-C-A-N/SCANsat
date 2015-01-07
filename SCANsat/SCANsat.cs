@@ -53,7 +53,7 @@ namespace SCANsat
 			}
 			if (scanName != null)
 			{ // Use bitwise operators to check if the part has valid science collection scanners
-				if ((sensorType & (Int32)SCANdata.SCANtype.AltimetryLoRes) == 0 && (sensorType & (Int32)SCANdata.SCANtype.AltimetryHiRes) == 0 && (sensorType & (Int32)SCANdata.SCANtype.Biome) == 0)
+				if ((sensorType & (Int32)SCANtype.AltimetryLoRes) == 0 && (sensorType & (Int32)SCANtype.AltimetryHiRes) == 0 && (sensorType & (Int32)SCANtype.Biome) == 0)
 				{
 					Events["startScan"].guiName = "Start " + scanName;
 					Events["stopScan"].guiName = "Stop " + scanName;
@@ -117,7 +117,7 @@ namespace SCANsat
 					}
 					else
 					{
-						if (sensorType == 0 || SCANcontroller.controller.isVesselKnown(vessel.id, (SCANdata.SCANtype)sensorType))
+						if (sensorType == 0 || SCANcontroller.controller.isVesselKnown(vessel.id, (SCANtype)sensorType))
 						{
 							if (TimeWarp.CurrentRate < 1500)
 							{
@@ -396,14 +396,14 @@ namespace SCANsat
 		{
 			scanning = true;
 			if (sensorType > 0 && SCANcontroller.controller != null)
-				SCANcontroller.controller.registerSensor(vessel, (SCANdata.SCANtype)sensorType, fov, min_alt, max_alt, best_alt);
+				SCANcontroller.controller.registerSensor(vessel, (SCANtype)sensorType, fov, min_alt, max_alt, best_alt);
 		}
 
 		public void unregisterScanner()
 		{
 			scanning = false;
 			if (sensorType > 0 && SCANcontroller.controller != null)
-				SCANcontroller.controller.unregisterSensor(vessel, (SCANdata.SCANtype)sensorType);
+				SCANcontroller.controller.unregisterSensor(vessel, (SCANtype)sensorType);
 		}
 
 		private string scanAlt()
@@ -427,7 +427,7 @@ namespace SCANsat
 			if (expDialog != null)
 				DestroyImmediate(expDialog);
 			storedData.Clear();
-			ScienceData sd = SCANUtil.getAvailableScience(vessel, (SCANdata.SCANtype)sensorType, notZero);
+			ScienceData sd = SCANUtil.getAvailableScience(vessel, (SCANtype)sensorType, notZero);
 			if (sd == null)
 				return;
 			storedData.Add(sd);

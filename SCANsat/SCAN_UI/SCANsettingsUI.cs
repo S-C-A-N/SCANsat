@@ -211,7 +211,7 @@ namespace SCANsat.SCAN_UI
 			foreach (var data in SCANcontroller.Body_Data)
 			{
 				if (count == 0) growS();
-					data.Value.Disabled = !GUILayout.Toggle(!data.Value.Disabled, string.Format("{0} ({1:N1}%)", data.Key, data.Value.getCoveragePercentage(SCANdata.SCANtype.Nothing)), SCANskins.SCAN_settingsToggle);
+					data.Value.Disabled = !GUILayout.Toggle(!data.Value.Disabled, string.Format("{0} ({1:N1}%)", data.Key, SCANUtil.getCoveragePercentage(data.Value, SCANtype.Nothing)), SCANskins.SCAN_settingsToggle);
 				switch (count)
 				{
 					case 5: stopS(); count = 0; break;
