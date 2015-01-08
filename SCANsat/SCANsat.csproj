@@ -61,6 +61,8 @@
     <Compile Include="Platform\Palettes\Palettes.cs" />
     <Compile Include="Platform\Palettes\Swatches.cs" />
     <Compile Include="Platform\SCAN_CLZF2.cs" />
+    <Compile Include="SCANresource.cs" />
+    <Compile Include="SCANtype.cs" />
     <Compile Include="SCAN_Toolbar\SCANappLauncher.cs" />
     <Compile Include="SCAN_Toolbar\SCANtoolbar.cs" />
     <Compile Include="SCAN_Toolbar\SCANtoolbarwrapper.cs" />
