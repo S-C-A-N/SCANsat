@@ -1,8 +1,8 @@
 ﻿using System;
-using palette = SCANsat.SCAN_UI.SCANpalette;
+using palette = SCANsat.SCAN_UI.UI_Framework.SCANpalette;
 using UnityEngine;
 
-namespace SCANsat
+namespace SCANsat.SCAN_Data
 {
 	public enum SCANresource_Source
 	{
