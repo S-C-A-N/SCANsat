@@ -17,11 +17,11 @@ using System.Collections.Generic;
 using System.Linq;
 using SCANsat.Platform;
 using SCANsat.Platform.Palettes;
-using palette = SCANsat.SCAN_UI.SCANpalette;
+using palette = SCANsat.SCAN_UI.UI_Framework.SCANpalette;
 using UnityEngine;
 
 
-namespace SCANsat.SCAN_UI
+namespace SCANsat.SCAN_UI.UI_Framework
 {
 	[KSPAddon(KSPAddon.Startup.MainMenu, true)]
 	class SCANskins: SCAN_MBE

@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using SCANsat.Platform;
 using SCANsat.SCAN_UI;
+using SCANsat.SCAN_UI.UI_Framework;
 
 namespace SCANsat.SCAN_Toolbar
 {

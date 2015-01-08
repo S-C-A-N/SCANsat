@@ -12,10 +12,12 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using SCANsat.SCAN_Data;
 using SCANsat.SCAN_Toolbar;
 using SCANsat.SCAN_UI;
+
 using UnityEngine;
-using palette = SCANsat.SCAN_UI.SCANpalette;
+using palette = SCANsat.SCAN_UI.UI_Framework.SCANpalette;
 
 namespace SCANsat
 {

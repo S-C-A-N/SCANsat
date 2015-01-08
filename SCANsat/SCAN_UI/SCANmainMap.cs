@@ -17,9 +17,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 using SCANsat.Platform;
-using SCANsat;
+using SCANsat.SCAN_Data;
+using SCANsat.SCAN_UI.UI_Framework;
 using UnityEngine;
-using palette = SCANsat.SCAN_UI.SCANpalette;
+using palette = SCANsat.SCAN_UI.UI_Framework.SCANpalette;
 
 namespace SCANsat.SCAN_UI
 {

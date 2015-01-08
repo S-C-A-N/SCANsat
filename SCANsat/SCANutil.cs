@@ -20,7 +20,8 @@ using System.Linq;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
 using SCANsat.Platform;
-using palette = SCANsat.SCAN_UI.SCANpalette;
+using SCANsat.SCAN_Data;
+using palette = SCANsat.SCAN_UI.UI_Framework.SCANpalette;
 
 namespace SCANsat
 {

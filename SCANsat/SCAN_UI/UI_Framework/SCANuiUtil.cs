@@ -17,10 +17,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 using SCANsat.Platform;
-using palette = SCANsat.SCAN_UI.SCANpalette;
+using SCANsat.SCAN_Data;
+using SCANsat.SCAN_Map;
+using palette = SCANsat.SCAN_UI.UI_Framework.SCANpalette;
 using UnityEngine;
 
-namespace SCANsat.SCAN_UI
+namespace SCANsat.SCAN_UI.UI_Framework
 {
 	static class SCANuiUtil
 	{
@@ -464,12 +466,12 @@ namespace SCANsat.SCAN_UI
 		}
 
 		/* FIXME: This uses assumed, shared, static constants with Legend stuff in other SCANsat files */
-		internal static void drawLegend(SCANdata data)
+		internal static void drawLegend(SCANdata data, SCANmapLegend legend)
 		{
 			GUILayout.Label("", GUILayout.ExpandWidth(true));
 			Rect r = GUILayoutUtility.GetLastRect();
 			r.width -= 64;
-			GUI.DrawTexture(r, SCANmap.getLegend(data.MinHeight, data.MaxHeight, SCANcontroller.controller.colours, data));
+			GUI.DrawTexture(r, legend.Legend); //SCANmapLegend.getLegend(data.MinHeight, data.MaxHeight, SCANcontroller.controller.colours, data));
 			float minLabel = data.MinHeight;
 			float maxLabel = data.MaxHeight;
 			if (data.MinHeight % 1000 != 0)
@@ -677,7 +679,7 @@ namespace SCANsat.SCAN_UI
 				return;
 			if (overlay_static == null)
 				return;
-			if (map.projection == SCANmap.MapProjection.Polar)
+			if (map.projection == MapProjection.Polar)
 				return;
 
 			if (SCANnewBigMap.eq_frame <= 0)

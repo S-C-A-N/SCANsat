@@ -19,6 +19,8 @@ using System;
 using System.Linq;
 using System.Collections.Generic;
 using System.Globalization;
+using SCANsat.SCAN_Map;
+using SCANsat.SCAN_Data;
 
 namespace SCANsat.SCAN_UI
 {
@@ -569,7 +571,7 @@ namespace SCANsat.SCAN_UI
 		private void RedrawMap()
 		{
 			map = new SCANmap();
-			map.setProjection(SCANmap.MapProjection.Rectangular);
+			map.setProjection(MapProjection.Rectangular);
 			orbitingBody = vessel.mainBody;
 			map.setBody(vessel.mainBody);
 			map.setSize(screenWidth, screenHeight);
@@ -580,7 +582,7 @@ namespace SCANsat.SCAN_UI
 			if (zoomLevel == 0)
 				mapCenterLat = 0;
 			map.centerAround(mapCenterLong, mapCenterLat);
-			map.resetMap(mapMode,1);
+			map.resetMap((mapType)mapMode, false);
 
 			// Compute and store the map scale factors in mapSizeScale.  We
 			// use these values for every segment when drawing trails, so it
