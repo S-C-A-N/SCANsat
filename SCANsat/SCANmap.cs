@@ -13,6 +13,7 @@
 using System;
 using UnityEngine;
 using SCANsat.Platform.Palettes;
+using SCANsat.Platform.Logging;
 using palette = SCANsat.SCAN_UI.SCANpalette;
 
 namespace SCANsat
@@ -26,7 +27,6 @@ namespace SCANsat
 
 		internal SCANmap()
 		{
-
 		}
 
 		/* MAP: legends */
@@ -132,15 +132,16 @@ namespace SCANsat
 		//	}
 		//}
 
-		private float terrainHeightToArray(double lon, double lat, int lo, int la, CelestialBody b, mapType type)
+		private float terrainHeightToArray(double lon, double lat, int ilon, int ilat, mapType type)
 		{
 			float alt = 0f;
-			alt = (float)SCANUtil.getElevation(b, lon, lat);
+			alt = (float)SCANUtil.getElevation(body, lon, lat);
 			if (type == 0)
 			{
+				ConsoleLogger.Debug("Writing To Height Cache");
 				if (alt == 0f)
 					alt = -0.001f;
-				big_heightmap[lo, la] = alt;
+				big_heightmap[ilon, ilat] = alt;
 			}
 			return alt;
 		}
@@ -310,6 +311,7 @@ namespace SCANsat
 					map = null;
 			}
 		}
+
 		public void setWidth(int w)
 		{
 			if (w == 0)
@@ -331,22 +333,41 @@ namespace SCANsat
 			map = null;
 			resetMap();
 		}
+
 		public void centerAround(double lon, double lat)
 		{
 			lon_offset = 180 + lon - (mapwidth / mapscale) / 2;
 			lat_offset = 90 + lat - (mapheight / mapscale) / 2;
 		}
+
 		public double scaleLatitude(double lat)
 		{
 			lat -= lat_offset;
 			lat *= 180f / (mapheight / mapscale);
 			return lat;
 		}
+
 		public double scaleLongitude(double lon)
 		{
 			lon -= lon_offset;
 			lon *= 360f / (mapwidth / mapscale);
 			return lon;
+		}
+
+		private int unScaleLatitude(double lat)
+		{
+			lat -= lat_offset;
+			lat += 90;
+			lat *= mapscale;
+			return (int)lat;
+		}
+
+		private int unScaleLongitude(double lon)
+		{
+			lon -= lon_offset;
+			lon += 180;
+			lon *= mapscale;
+			return (int)lon;
 		}
 
 		/* MAP: shared state */
@@ -355,9 +376,9 @@ namespace SCANsat
 
 
 		/* MAP: internal state */
-		protected int mapstep; // all refs are below
-		protected bool mapsaved; // all refs are below
-		protected double[] mapline; // all refs are below
+		private int mapstep; // all refs are below
+		private bool mapsaved; // all refs are below
+		private double[] mapline; // all refs are below
 		internal CelestialBody body; // all refs are below
 		internal SCANresource resource;
 
@@ -372,12 +393,14 @@ namespace SCANsat
 				resource = SCANcontroller.controller.ResourceList[SCANcontroller.controller.resourceSelection][b.name];
 			resetMap();
 		}
+
 		public bool isMapComplete()
 		{
 			if (map == null)
 				return false;
 			return mapstep >= map.height;
 		}
+
 		public void resetMap()
 		{
 			mapstep = 0;
@@ -389,12 +412,14 @@ namespace SCANsat
 					SCANcontroller.controller.KethaneReset = !SCANcontroller.controller.KethaneReset;
 			}
 		}
+
 		public void resetMap(int mode, int maptype)
 		{
 			mapmode = mode;
 			mType = (mapType)maptype;
 			resetMap();
 		}
+
 		//public void setResource(string s)
 		//{ //Used when a different resource is selected
 		//	if (resource == null) resource = SCANcontroller.controller.ResourceList[SCANcontroller.controller.resourceSelection];
@@ -416,7 +441,8 @@ namespace SCANsat
 				case 2: mode = "biome"; break;
 				default: mode = "unknown"; break;
 			}
-
+			if (SCANcontroller.controller.map_ResourceOverlay && SCANcontroller.controller.GlobalResourceOverlay && !string.IsNullOrEmpty(SCANcontroller.controller.resourceSelection))
+				mode += "-" + SCANcontroller.controller.resourceSelection;
 			if (SCANcontroller.controller.colours == 1)
 				mode += "-grey";
 			string filename = body.name + "_" + mode + "_" + map.width.ToString() + "x" + map.height.ToString();
@@ -435,8 +461,6 @@ namespace SCANsat
 			if (data == null)
 				return new Texture2D(1, 1);
 			Color[] pix;
-			float rectVal;
-			float projVal;
 
 			/* init cache if necessary */
 			if (body != big_heightmap_body)
@@ -446,11 +470,9 @@ namespace SCANsat
 					case 0:
 						{
 							for (int x = 0; x < mapwidth; x++)
-							{ //Save memory by not unnecessarily making a new cache
+							{
 								for (int y = 0; y < mapwidth / 2; y++)
-								{
 									big_heightmap[x, y] = 0f;
-								}
 							}
 							big_heightmap_body = body;
 							break;
@@ -489,10 +511,16 @@ namespace SCANsat
 			pix = map.GetPixels(0, mapstep, map.width, 1);
 			for (int i = 0; i < map.width; i++)
 			{
-				Color baseColor = palette.grey; //default pixel color 
+				Color baseColor = palette.grey; //default pixel color
+				pix[i] = baseColor;
 				int scheme = SCANcontroller.controller.colours;
+				float rectVal = 0f;
+				float projVal = 0f;
 				double lat = (mapstep * 1.0f / mapscale) - 90f + lat_offset;
 				double lon = (i * 1.0f / mapscale) - 180f + lon_offset;
+				double la = lat, lo = lon;
+				lat = unprojectLatitude(lo, la);
+				lon = unprojectLongitude(lo, la);
 
 				/* Introduce altimetry check here; Use unprojected lat/long coordinates
 				 * All cached altimetry data stored in a single 2D array in rectangular format
@@ -501,27 +529,30 @@ namespace SCANsat
 				 * All altimetry checks will be handled here; subsequent code is for color only
 				 */
 
-				rectVal = 0f;
-				projVal = 0f;
 				if (body.pqsController != null)
 				{
 					rectVal = big_heightmap[i, mapstep];
 					if (rectVal == 0f)
 					{
-						if (SCANUtil.isCovered(lon, lat, data, SCANtype.Altimetry))
+						ConsoleLogger.Debug("Checking For Altimetry Coverage");
+						if (SCANUtil.isCovered(lo, la, data, SCANtype.Altimetry))
 						{
 							if (mType == 0)
 								rectVal = big_heightmap[i, mapstep];
-							if (rectVal == 0)
-								rectVal = terrainHeightToArray(lon, lat, i, mapstep, body, mType);
+							if (rectVal == 0f)
+								rectVal = terrainHeightToArray(lo, la, i, mapstep, mType);
+						}
+
+						ConsoleLogger.Debug("Checking For Projection Special Case");
+						if (projection != MapProjection.Rectangular)
+						{
+							if (rectVal == 0f)
+								rectVal = terrainHeightToArray(lon, lat, unScaleLongitude(lon), unScaleLatitude(lat), mType);
 						}
 					}
+					ConsoleLogger.Debug("Height Map Check Complete For Long: {0} ; Lat: {1}", i, mapstep);
 				}
 
-				double la = lat, lo = lon;
-				lat = unprojectLatitude(lo, la);
-				lon = unprojectLongitude(lo, la);
-				pix[i] = baseColor;
 				if (double.IsNaN(lat) || double.IsNaN(lon) || lat < -90 || lat > 90 || lon < -180 || lon > 180)
 				{
 					pix[i] = palette.clear;
@@ -535,13 +566,13 @@ namespace SCANsat
 					}
 					else if (SCANUtil.isCovered(lon, lat, data, SCANtype.AltimetryHiRes))
 					{
-						projVal = big_heightmap[(int)lon, (int)lat];
+						projVal = big_heightmap[i , mapstep];
 						baseColor = palette.heightToColor(projVal, scheme, data);
 					}
 					else if (SCANUtil.isCovered(lon, lat, data, SCANtype.AltimetryLoRes))
 					{
 						// basic altimetry gets forced greyscale with lower resolution
-						projVal = big_heightmap[((int)(lon * 5)) / 5, ((int)(lat * 5) / 5)];
+						projVal = big_heightmap[unScaleLongitude((lon * 5) / 5), unScaleLatitude((lat * 5) / 5)];
 						baseColor = palette.heightToColor(projVal, 1, data);
 					}
 					mapline[i] = projVal;
@@ -604,11 +635,11 @@ namespace SCANsat
 					{
 						if (SCANUtil.isCovered(lon, lat, data, SCANtype.AltimetryHiRes))
 						{
-							projVal = rectVal;
+							projVal = big_heightmap[unScaleLongitude(lon), unScaleLatitude(lat)];
 						}
 						else
 						{
-							projVal = big_heightmap[((int)(lon * 5) / 5), ((int)(lat * 5) / 5)];
+							projVal = big_heightmap[unScaleLongitude((lon * 5) / 5), unScaleLatitude((lat * 5) / 5)];
 						}
 						if (mapstep == 0)
 						{
@@ -719,11 +750,11 @@ namespace SCANsat
 							{
 								if (SCANUtil.isCovered(lon, lat, data, SCANtype.AltimetryHiRes))
 								{
-									projVal = rectVal;
+									projVal = big_heightmap[unScaleLongitude(lon), unScaleLatitude(lat)];
 								}
 								else
 								{
-									projVal = big_heightmap[((int)(lon * 5) / 5), ((int)(lat * 5) / 5)];
+									projVal = big_heightmap[unScaleLongitude((lon * 5) / 5), unScaleLatitude((lat * 5) / 5)];
 								}
 								elevation = palette.lerp(palette.black, palette.white, Mathf.Clamp(projVal + 1500f, 0, 9000) / 9000f);
 							}
