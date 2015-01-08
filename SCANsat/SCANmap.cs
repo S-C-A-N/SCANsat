@@ -119,8 +119,8 @@ namespace SCANsat
 		public MapProjection projection = MapProjection.Rectangular;
 
 		/* MAP: Big Map height map caching */
-		protected float[,] big_heightmap;
-		protected CelestialBody big_heightmap_body;
+		private float[,] big_heightmap;
+		private CelestialBody big_heightmap_body;
 		internal mapType mType;
 
 
@@ -132,13 +132,12 @@ namespace SCANsat
 		//	}
 		//}
 
-		private float terrainHeightToArray(double lon, double lat, int ilon, int ilat, mapType type)
+		private float terrainHeightToArray(double lon, double lat, int ilon, int ilat)
 		{
 			float alt = 0f;
 			alt = (float)SCANUtil.getElevation(body, lon, lat);
-			if (type == 0)
+			if (mType == 0)
 			{
-				ConsoleLogger.Debug("Writing To Height Cache");
 				if (alt == 0f)
 					alt = -0.001f;
 				big_heightmap[ilon, ilat] = alt;
@@ -534,23 +533,17 @@ namespace SCANsat
 					rectVal = big_heightmap[i, mapstep];
 					if (rectVal == 0f)
 					{
-						ConsoleLogger.Debug("Checking For Altimetry Coverage");
 						if (SCANUtil.isCovered(lo, la, data, SCANtype.Altimetry))
 						{
-							if (mType == 0)
-								rectVal = big_heightmap[i, mapstep];
-							if (rectVal == 0f)
-								rectVal = terrainHeightToArray(lo, la, i, mapstep, mType);
+							rectVal = terrainHeightToArray(lo, la, i, mapstep);
 						}
 
-						ConsoleLogger.Debug("Checking For Projection Special Case");
 						if (projection != MapProjection.Rectangular)
 						{
 							if (rectVal == 0f)
-								rectVal = terrainHeightToArray(lon, lat, unScaleLongitude(lon), unScaleLatitude(lat), mType);
+								rectVal = terrainHeightToArray(lon, lat, unScaleLongitude(lon), unScaleLatitude(lat));
 						}
 					}
-					ConsoleLogger.Debug("Height Map Check Complete For Long: {0} ; Lat: {1}", i, mapstep);
 				}
 
 				if (double.IsNaN(lat) || double.IsNaN(lon) || lat < -90 || lat > 90 || lon < -180 || lon > 180)
@@ -566,7 +559,7 @@ namespace SCANsat
 					}
 					else if (SCANUtil.isCovered(lon, lat, data, SCANtype.AltimetryHiRes))
 					{
-						projVal = big_heightmap[i , mapstep];
+						projVal = big_heightmap[unScaleLongitude(lon), unScaleLatitude(lat)];
 						baseColor = palette.heightToColor(projVal, scheme, data);
 					}
 					else if (SCANUtil.isCovered(lon, lat, data, SCANtype.AltimetryLoRes))
