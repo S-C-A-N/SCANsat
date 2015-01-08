@@ -16,11 +16,13 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using SCANsat.SCAN_Toolbar;
+using SCANsat.SCAN_Data;
+using SCANsat.SCAN_UI.UI_Framework;
 using SCANsat.Platform;
 using SCANsat.Platform.Palettes;
 using UnityEngine;
 
-using palette = SCANsat.SCAN_UI.SCANpalette;
+using palette = SCANsat.SCAN_UI.UI_Framework.SCANpalette;
 
 namespace SCANsat.SCAN_UI
 {
@@ -362,7 +364,7 @@ namespace SCANsat.SCAN_UI
 			if (warningBoxOne)
 			{
 				CelestialBody thisBody = FlightGlobals.currentMainBody;
-				warningRect = new Rect(WindowRect.width - (WindowRect.width / 2)- 150, WindowRect.height - 190, 300, 90);
+				warningRect = new Rect(WindowRect.width - (WindowRect.width / 2)- 150, WindowRect.height - 160, 300, 90);
 				GUI.Box(warningRect, "", SCANskins.SCAN_dropDownBox);
 				Rect r = new Rect(warningRect.x + 10, warningRect.y + 5, 280, 40);
 				GUI.Label(r, "Erase all data for " + thisBody.theName + "?", SCANskins.SCAN_headlineSmall);
@@ -380,7 +382,7 @@ namespace SCANsat.SCAN_UI
 			}
 			else if (warningBoxAll)
 			{
-				warningRect = new Rect(WindowRect.width - (WindowRect.width / 2) - 120, WindowRect.height - 190, 240, 90);
+				warningRect = new Rect(WindowRect.width - (WindowRect.width / 2) - 120, WindowRect.height - 160, 240, 90);
 				GUI.Box(warningRect, "", SCANskins.SCAN_dropDownBox);
 				Rect r = new Rect(warningRect.x + 10, warningRect.y + 5, 220, 40);
 				GUI.Label(r, "Erase <b>all</b> data ?", SCANskins.SCAN_headlineSmall);
