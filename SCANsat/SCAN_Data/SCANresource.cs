@@ -66,11 +66,21 @@ namespace SCANsat.SCAN_Data
 		public float MinValue
 		{
 			get { return minValue; }
+			internal set
+			{
+				if (value >= 0)
+					minValue = value;
+			}
 		}
 		
 		public float MaxValue
 		{
 			get { return maxValue; }
+			internal set
+			{
+				if (value >= 0)
+					maxValue = value;
+			}
 		}
 
 		public SCANresource_Source Source
