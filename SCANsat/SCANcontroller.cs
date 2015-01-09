@@ -52,9 +52,9 @@ namespace SCANsat
 			}
 		}
 
-		public static int minScanAlt = 5000;
-		public static int maxScanAlt = 500000;
-		public static int bestScanAlt = 250000;
+		private static int minScanAlt = 5000;
+		private static int maxScanAlt = 500000;
+		private static int bestScanAlt = 250000;
 		[KSPField(isPersistant = true)]
 		public int colours = 0;
 		[KSPField(isPersistant = true)]
@@ -103,7 +103,7 @@ namespace SCANsat
 		[KSPField(isPersistant = true)]
 		public bool useStockAppLauncher = true;
 
-		/* Available resources for overlays; loaded from resource addon configs */
+		/* Available resources for overlays; loaded from resource addon configs; only loaded once */
 		private static Dictionary<string, Dictionary<string, SCANresource>> resourceList;
 
 		/* Primary SCANsat vessel dictionary; loaded every time */
@@ -168,6 +168,13 @@ namespace SCANsat
 			{
 				if (!resourceList[name].ContainsKey(body))
 					resourceList[name].Add(body, res);
+				else if (res.Source == SCANresource_Source.Regolith)
+				{
+					if (res.MinValue > resourceList[name][body].MinValue && res.MinValue < res.MaxValue)
+						resourceList[name][body].MinValue = res.MinValue;
+					if (res.MaxValue > resourceList[name][body].MaxValue && res.MaxValue > res.MinValue)
+						resourceList[name][body].MaxValue = res.MaxValue;
+				}
 				else
 					Debug.LogError(string.Format("[SCANsat] Warning: SCANResource Dictionary Already Contains Key of This Type: Resource: {0}; Body: {1}", name, body));
 			}
@@ -348,7 +355,7 @@ namespace SCANsat
 			catch (Exception e)
 			{
 				SCANUtil.SCANlog("Something Went Wrong Loading Resource Data: {0}", e);
-				}
+			}
 			try
 			{
 				if (HighLogic.LoadedScene == GameScenes.FLIGHT)
@@ -443,13 +450,6 @@ namespace SCANsat
 			if (scan_background && loaded)
 			{
 				scanFromAllVessels();
-#if DEBUG
-				//if (HighLogic.LoadedScene == GameScenes.FLIGHT)
-				//{
-				//	SCANui.gui_ping(false);
-				//	SCANui.gui_ping_maptraq();
-				//}
-#endif
 			}
 		}
 
