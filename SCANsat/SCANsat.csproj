@@ -61,8 +61,13 @@
     <Compile Include="Platform\Palettes\Palettes.cs" />
     <Compile Include="Platform\Palettes\Swatches.cs" />
     <Compile Include="Platform\SCAN_CLZF2.cs" />
-    <Compile Include="SCANresource.cs" />
-    <Compile Include="SCANtype.cs" />
+    <Compile Include="SCAN_Data\SCANdata.cs" />
+    <Compile Include="SCAN_Data\SCANresource.cs" />
+    <Compile Include="SCAN_Data\SCANtype.cs" />
+    <Compile Include="SCAN_Map\SCANmap.cs" />
+    <Compile Include="SCAN_Map\SCANmapLegend.cs" />
+    <Compile Include="SCAN_Map\SCANmapProjection.cs" />
+    <Compile Include="SCAN_Map\SCANmapType.cs" />
     <Compile Include="SCAN_Toolbar\SCANappLauncher.cs" />
     <Compile Include="SCAN_Toolbar\SCANtoolbar.cs" />
     <Compile Include="SCAN_Toolbar\SCANtoolbarwrapper.cs" />
@@ -70,7 +75,6 @@
     <Compile Include="SCAN_UI\SCANnewBigMap.cs" />
     <Compile Include="SCAN_UI\UI_Framework\SCANremoteView.cs" />
     <Compile Include="SCANcontroller.cs" />
-    <Compile Include="SCANdata.cs" />
     <Compile Include="Platform\Extensions\Colors\UnityEngine.Color32_.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -156,7 +160,6 @@
     <Compile Include="Platform\SCAN_SkinsLibrary.cs" />
     <Compile Include="SCAN_UI\SCANkscMap.cs" />
     <Compile Include="SCAN_UI\SCANmainMap.cs" />
-    <Compile Include="SCANmap.cs" />
     <Compile Include="SCAN_UI\UI_Framework\SCANpalette.cs" />
     <Compile Include="SCANquickload.cs" />
     <Compile Include="SCANreflection.cs" />
