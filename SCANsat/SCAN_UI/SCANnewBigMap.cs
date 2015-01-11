@@ -515,7 +515,12 @@ namespace SCANsat.SCAN_UI
 			//Draw the orbit overlays
 			if (SCANcontroller.controller.map_orbit)
 			{
+				//Graphics.Blit(bigmap.map, screen);
+				GL.PushMatrix();
+				//GL.LoadPixelMatrix(TextureRect.x, TextureRect.width, TextureRect.height, TextureRect.y);
+				SCANuiUtil.newOrbitLine(TextureRect, bigmap, v, v.orbit, startUT, b, 200);
 				SCANuiUtil.drawOrbit(TextureRect, bigmap, v, startUT, overlay_static, b);
+				GL.PopMatrix();
 			}
 		}
 
@@ -652,6 +657,8 @@ namespace SCANsat.SCAN_UI
 		{
 			if (bigmap.mType == mapType.Altimetry && SCANcontroller.controller.legend)
 			{
+				if (bigmap.mapLegend == null)
+					bigmap.mapLegend = new SCANmapLegend();
 				bigmap.mapLegend.Legend = bigmap.mapLegend.getLegend(data.MinHeight, data.MaxHeight, SCANcontroller.controller.colours, data);
 				SCANuiUtil.drawLegend(data, bigmap.mapLegend);
 			}
