@@ -842,5 +842,116 @@ namespace SCANsat.SCAN_UI.UI_Framework
 
 		#endregion
 
+		#region newOrbitOverlay
+
+		private static Color32 lineColor = new Color(1f, 1f, 1f, 0.6f);
+		private static Material lineMat = JUtil.DrawLineMaterial();
+
+		internal static void newOrbitLine(Rect mapRect, SCANmap map, Vessel v, Orbit o, double startUT, CelestialBody b, int steps)
+		{
+			if (steps == 0)
+				return;
+			double dTstep = Math.Floor(o.period / steps);
+			var points = new List<Vector2d>();
+			for (double time = startUT; time < (startUT + o.period); time += dTstep)
+			{
+				bool collide;
+				Vector2d coord;
+				if (mapPosAtT(v, o, startUT, time, out coord, out collide))
+					points.Add(coord);
+				if (collide)
+					break;
+			}
+			//SCANUtil.SCANdebugLog("Orbit Line With {0} Points", points.Count);
+			drawTrail(mapRect, map, points, Vector2d.zero);
+		}
+
+		private static void drawTrail(Rect mapRect, SCANmap map, IList<Vector2d> points, Vector2d end, bool hasEnd = false)
+		{
+			if (points.Count < 2)
+				return;
+			GL.Begin(GL.LINES);
+			lineMat.SetPass(0);
+			GL.Color(lineColor);
+			float xStart, yStart;
+			float mapWidth = map.mapwidth;
+			float mapHeight = map.mapheight;
+			xStart = (float)SCANUtil.fixLon(map.projectLongitude(points[0].x, points[0].y));
+			yStart = (float)SCANUtil.fixLat(map.projectLatitude(points[0].x, points[0].y));
+			xStart = (float)map.scaleLongitude(xStart);
+			yStart = (float)map.scaleLatitude(yStart);
+			if (xStart < 0 || yStart < 0 || yStart > 180 || xStart > 360)
+				return;
+			//SCANUtil.SCANdebugLog("Start Point Checks Out");
+			xStart = xStart * mapWidth / 360f;
+			yStart = map.mapheight - yStart * map.mapheight / 180f;
+			for (int i = 1; i < points.Count; i++)
+			{
+				float xEnd = (float)SCANUtil.fixLon(map.projectLongitude(points[i].x, points[i].y));
+				float yEnd = (float)SCANUtil.fixLat(map.projectLatitude(points[i].x, points[i].y));
+				xEnd = (float)map.scaleLongitude(xEnd);
+				yEnd = (float)map.scaleLatitude(yEnd);
+				//SCANUtil.SCANdebugLog("Checking Orbit End Point...");
+				if (xEnd < 0 || yEnd < 0 || yEnd > 180 || xEnd > 360)
+					return;
+				xEnd = xEnd* mapWidth / 360f;
+				yEnd = mapHeight - yEnd * mapHeight / 180f;
+
+				//SCANUtil.SCANdebugLog("Draw Line {0}", i);
+				drawLine(xStart, yStart, xEnd, yEnd, mapRect, mapWidth);
+
+				xStart = xEnd;
+				yStart = yEnd; ;
+			}
+			GL.End();
+		}
+
+		private static void drawLine(float xStart, float yStart, float xEnd, float yEnd, Rect mapRect, float width)
+		{
+			var start = new Vector2(xStart, yStart);
+			var end = new Vector2(xEnd, yEnd);
+
+			if (!mapRect.Contains(start) && !mapRect.Contains(end))
+				return;
+
+			float leftX = Math.Min(start.x, end.x);
+			float rightX = Math.Max(start.x, end.x);
+
+			if (leftX + width * 0.5f < rightX)
+			{
+				if (start.x < end.x)
+					end.x -= width;
+				else
+					start.x -= width;
+			}
+
+			GL.Vertex(start);
+			GL.Vertex(end);
+		}
+
+		private static bool mapPosAtT(Vessel v, Orbit o, double start, double dT, out Vector2d Coord, out bool Collide)
+		{
+			Coord = Vector2d.zero;
+			Collide = false;
+			double UT = start + dT;
+			if (double.IsNaN(UT))
+				return false;
+			if (double.IsNaN(o.getObtAtUT(UT)))
+				return false;
+			double rotOffset = 0;
+			if (v.mainBody.rotates)
+				rotOffset = (360 * ((dT - start) / v.mainBody.rotationPeriod)) % 360;
+			Vector3d pos = o.getPositionAtUT(dT);
+			if (o.Radius(dT) < v.mainBody.Radius + v.mainBody.getElevation(pos))
+			{
+				Collide = true;
+				return false;
+			}
+			Coord = new Vector2d(v.mainBody.GetLongitude(pos) - rotOffset, v.mainBody.GetLatitude(pos));
+			return true;
+		}
+
+		#endregion
+
 	}
 }
