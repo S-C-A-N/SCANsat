@@ -96,23 +96,23 @@ namespace SCANsat
 				return 0;
 		}
 
-        /// <summary>
-        /// Given the name of the SCANtype, returns the int value.
-        /// </summary>
-        /// <param name="SCANname">The name of the SCANtype.</param>
-        /// <returns>The int value that can be used in other public methods.</returns>
-        public static int GetSCANtype(string SCANname)
-        {
-            try
-            {
-                return (int)Enum.Parse(typeof(SCANtype), SCANname);
-            }
-            catch (ArgumentException e)
-            {
-                throw new ArgumentException("An invalid SCANtype name was provided.  Valid values are: " +
-                    string.Join(", ", ((IEnumerable<SCANtype>)Enum.GetValues(typeof(SCANtype))).Select<SCANtype, string>(x => x.ToString()).ToArray()));
-            }
-        }
+		/// <summary>
+		/// Given the name of the SCANtype, returns the int value.
+		/// </summary>
+		/// <param name="SCANname">The name of the SCANtype.</param>
+		/// <returns>The int value that can be used in other public methods.</returns>
+		public static int GetSCANtype(string SCANname)
+		{
+			try
+			{
+				return (int)Enum.Parse(typeof(SCANtype), SCANname);
+			}
+			catch (ArgumentException e)
+			{
+				throw new ArgumentException("An invalid SCANtype name was provided.  Valid values are: " +
+					string.Join(", ", ((IEnumerable<SCANtype>)Enum.GetValues(typeof(SCANtype))).Select<SCANtype, string>(x => x.ToString()).ToArray()));
+			}
+		}
 
 		internal static bool isCovered(double lon, double lat, SCANdata data, SCANtype type)
 		{
@@ -412,6 +412,12 @@ namespace SCANsat
 			log = string.Format(log, stringObjects);
 			string finalLog = string.Format("[SCANsat] {0}", log);
 			Debug.Log(finalLog);
+		}
+
+		[System.Diagnostics.Conditional("DEBUG")]
+		internal static void SCANdebugLog(string log, params object[] stringObjects)
+		{
+			SCANlog(log, stringObjects);
 		}
 
 		//Take the Int32[] coverage and convert it to a single dimension byte array
