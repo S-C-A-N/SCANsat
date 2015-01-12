@@ -1,6 +1,6 @@
 {
      "NAME":"SCANsat",
-	 "URL":"https://github.com/S-C-A-N/SCANsat/blob/dev/SCANassets/SCANsat.version",
+	 "URL":"https://raw.githubusercontent.com/S-C-A-N/SCANsat/dev/SCANassets/SCANsat.version",
      "DOWNLOAD":"https://github.com/S-C-A-N/SCANsat/releases",
      "GITHUB":{
          "USERNAME":"S-C-A-N",
@@ -11,7 +11,7 @@
          "MAJOR":1,
          "MINOR":0,
          "PATCH":9,
-         "BUILD":41
+         "BUILD":5
      },
      "KSP_VERSION":{
          "MAJOR":0,
