@@ -23,10 +23,10 @@ namespace SCANsat
 {
 	public class SCANsat : PartModule, IScienceDataContainer
 	{
-		protected bool powerIsProblem;
-		protected Animation anim = null;
-		protected List<ScienceData> storedData = new List<ScienceData>();
-		protected ExperimentsResultDialog expDialog = null;
+		private bool powerIsProblem;
+		private Animation anim = null;
+		private List<ScienceData> storedData = new List<ScienceData>();
+		private ExperimentsResultDialog expDialog = null;
 
 		/* SAT: KSP entry points */
 		public override void OnStart(StartState state)
@@ -323,7 +323,7 @@ namespace SCANsat
 		}
 
 		/* SCAN: trivial function to do animation */
-		public void animate(float speed, float time)
+		private void animate(float speed, float time)
 		{
 			if (anim != null && anim[animationName] != null)
 			{
@@ -378,7 +378,7 @@ namespace SCANsat
 		}
 
 		/* SCAN: add static (a warning that we're low on electric charge) */
-		public void addStatic()
+		private void addStatic()
 		{
 			SCANdata data = SCANUtil.getData(vessel.mainBody);
 			if (data == null)
@@ -394,14 +394,14 @@ namespace SCANsat
 		}
 
 		/* SCAN: register scanners without going through animation */
-		public void registerScanner()
+		private void registerScanner()
 		{
 			scanning = true;
 			if (sensorType > 0 && SCANcontroller.controller != null)
 				SCANcontroller.controller.registerSensor(vessel, (SCANtype)sensorType, fov, min_alt, max_alt, best_alt);
 		}
 
-		public void unregisterScanner()
+		private void unregisterScanner()
 		{
 			scanning = false;
 			if (sensorType > 0 && SCANcontroller.controller != null)
@@ -424,15 +424,85 @@ namespace SCANsat
 
 		/* SCAN: SCIENCE! make, store, transmit, keep
 		 * 	discard, review, count DATA */
-		public void makeScienceData(bool notZero)
+		private void makeScienceData(bool notZero)
 		{
 			if (expDialog != null)
 				DestroyImmediate(expDialog);
 			storedData.Clear();
-			ScienceData sd = SCANUtil.getAvailableScience(vessel, (SCANtype)sensorType, notZero);
+			ScienceData sd = getAvailableScience((SCANtype)sensorType, notZero);
 			if (sd == null)
 				return;
 			storedData.Add(sd);
+		}
+
+		private ScienceData getAvailableScience(SCANtype sensor, bool notZero)
+		{
+			SCANdata data = SCANUtil.getData(vessel.mainBody);
+			if (data == null)
+				return null;
+			ScienceData sd = null;
+			ScienceExperiment se = null;
+			ScienceSubject su = null;
+			bool found = false;
+			string id = null;
+			double coverage = 0f;
+			float multiplier = 1f;
+
+			if (!found && (sensor & SCANtype.AltimetryLoRes) != SCANtype.Nothing)
+			{
+				found = true;
+				if (vessel.mainBody.pqsController == null)
+					multiplier = 0.5f;
+				id = "SCANsatAltimetryLoRes";
+				coverage = SCANUtil.getCoveragePercentage(data, SCANtype.AltimetryLoRes);
+			}
+			else if (!found && (sensor & SCANtype.AltimetryHiRes) != SCANtype.Nothing)
+			{
+				found = true;
+				if (vessel.mainBody.pqsController == null)
+					multiplier = 0.5f;
+				id = "SCANsatAltimetryHiRes";
+				coverage = SCANUtil.getCoveragePercentage(data, SCANtype.AltimetryHiRes);
+			}
+			else if (!found && (sensor & SCANtype.Biome) != SCANtype.Nothing)
+			{
+				found = true;
+				if (vessel.mainBody.BiomeMap == null)
+					multiplier = 0.5f;
+				id = "SCANsatBiomeAnomaly";
+				coverage = SCANUtil.getCoveragePercentage(data, SCANtype.Biome);
+			}
+			if (!found) return null;
+			se = ResearchAndDevelopment.GetExperiment(id);
+			if (se == null) return null;
+
+			su = ResearchAndDevelopment.GetExperimentSubject(se, ExperimentSituations.InSpaceHigh, vessel.mainBody, "surface");
+			if (su == null) return null;
+
+			su.scienceCap *= multiplier;
+
+			SCANUtil.SCANlog("Coverage: {0}, Science cap: {1}, Subject value: {2}, Scientific value: {3}, Science: {4}", new object[5] { coverage.ToString("F1"), su.scienceCap.ToString("F1"), su.subjectValue.ToString("F2"), su.scientificValue.ToString("F2"), su.science.ToString("F2") });
+
+			su.scientificValue = 1;
+
+			float science = (float)coverage;
+			if (science > 95) science = 100;
+			if (science < 30) science = 0;
+			science = science / 100f;
+			science = Mathf.Max(0, (science * su.scienceCap) - su.science);
+
+			SCANUtil.SCANlog("Remaining science: {0}, Base value: {1}", new object[2] { science.ToString("F1"), se.baseValue.ToString("F1") });
+
+			science /= Mathf.Max(0.1f, su.scientificValue); //look 10 lines up; this is always 1...
+			science /= su.subjectValue;
+
+			SCANUtil.SCANlog("Resulting science value: {0}", new object[1] { science.ToString("F2") });
+
+			if (notZero && science <= 0) science = 0.00001f;
+
+			sd = new ScienceData(science * su.dataScale, 1f, 0f, su.id, se.experimentTitle + " of " + vessel.mainBody.theName);
+			su.title = sd.title;
+			return sd;
 		}
 
 		public ScienceData[] GetData()
@@ -440,12 +510,12 @@ namespace SCANsat
 			return storedData.ToArray();
 		}
 
-		public void KeepData(ScienceData data)
+		private void KeepData(ScienceData data)
 		{
 			expDialog = null;
 		}
 
-		public void TransmitData(ScienceData data)
+		private void TransmitData(ScienceData data)
 		{
 			expDialog = null;
 			List<IScienceDataTransmitter> tranList = vessel.FindPartModulesImplementing<IScienceDataTransmitter>();
