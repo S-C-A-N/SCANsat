@@ -124,6 +124,41 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			GUI.color = old;
 		}
 
+		internal static void drawOrbitIconGL(int x, int y, OrbitIcon icon, Color c, Color shadow, Material iconMat, int size = 32 /*px*/, bool outline = false)
+		{
+			// PX [0..n]
+			// ORIGIN: NorthWest
+			pos_icon.x = x - (size / 2);
+			pos_icon.y = y - (size / 2);
+			pos_icon.width = size;
+			pos_icon.height = size;
+
+			// UV [0..1]
+			// Origin: SouthWest
+			grid_pos.width = 0.2f;
+			grid_pos.height = 0.2f;
+			grid_pos.x = 0.2f * ((int)icon % 5);
+			grid_pos.y = 0.2f * (4 - (int)icon / 5);
+
+			if (outline)
+			{
+				iconMat.color = shadow;
+				pos_icon.x -= 1;
+				Graphics.DrawTexture(pos_icon, MapView.OrbitIconsMap, grid_pos, 0, 0, 0, 0, iconMat);
+				pos_icon.x += 2;
+				Graphics.DrawTexture(pos_icon, MapView.OrbitIconsMap, grid_pos, 0, 0, 0, 0, iconMat);
+				pos_icon.x -= 1;
+				pos_icon.y -= 1;
+				Graphics.DrawTexture(pos_icon, MapView.OrbitIconsMap, grid_pos, 0, 0, 0, 0, iconMat);
+				pos_icon.y += 2;
+				Graphics.DrawTexture(pos_icon, MapView.OrbitIconsMap, grid_pos, 0, 0, 0, 0, iconMat);
+				pos_icon.y -= 1;
+			}
+
+			iconMat.color = c;
+			Graphics.DrawTexture(pos_icon, MapView.OrbitIconsMap, grid_pos, 0, 0, 0, 0, iconMat);
+		}
+
 		public static void drawIcon(Color c, int size = 32 /*px*/, bool outline = false)
 		{
 			var old = GUI.color;
