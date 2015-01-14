@@ -1,4 +1,17 @@
-﻿using System;
+﻿#region license
+/*
+ * [Scientific Committee on Advanced Navigation]
+ * 			S.C.A.N. Satellite
+ * 
+ * SCANmapLegend - Object to store data on map legend textures
+ *
+ * Copyright (c)2013 damny;
+ * Copyright (c)2014 technogeeky <technogeeky@gmail.com>;
+ * Copyright (c)2014 (Your Name Here) <your email here>; see LICENSE.txt for licensing details.
+*/
+#endregion
+
+using System;
 using SCANsat.SCAN_Platform.Palettes;
 using SCANsat.SCAN_Data;
 using palette = SCANsat.SCAN_UI.UI_Framework.SCANpalette;

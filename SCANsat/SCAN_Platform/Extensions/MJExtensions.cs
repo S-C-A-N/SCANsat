@@ -1,9 +1,14 @@
-﻿using System;
+﻿#region license
+/*
+ * This extension is from MechJeb; Used with permission from r4m0n: https://github.com/MuMech/MechJeb2/blob/master/MechJeb2/OrbitExtensions.cs
+*/
+#endregion
+
+using System;
 using System.Collections.Generic;
 
 namespace SCANsat
 {
-	// This extension is from MechJeb; Used with permission from r4m0n: https://github.com/MuMech/MechJeb2/blob/master/MechJeb2/OrbitExtensions.cs
 
 	public static class OrbitExtensions
 	{

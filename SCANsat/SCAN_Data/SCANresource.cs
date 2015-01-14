@@ -1,4 +1,17 @@
-﻿using System;
+﻿#region license
+/*
+ * [Scientific Committee on Advanced Navigation]
+ * 			S.C.A.N. Satellite
+ * 
+ * SCANresource - Stores info on resources pulled from their respective addons and SCANsat configs
+ *
+ * Copyright (c)2013 damny;
+ * Copyright (c)2014 technogeeky <technogeeky@gmail.com>;
+ * Copyright (c)2014 (Your Name Here) <your email here>; see LICENSE.txt for licensing details.
+*/
+#endregion
+
+using System;
 using palette = SCANsat.SCAN_UI.UI_Framework.SCANpalette;
 using UnityEngine;
 
