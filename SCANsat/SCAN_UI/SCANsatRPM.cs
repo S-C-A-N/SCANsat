@@ -21,6 +21,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using SCANsat.SCAN_Map;
 using SCANsat.SCAN_Data;
+using SCANsat.SCAN_UI.UI_Framework;
 
 namespace SCANsat.SCAN_UI
 {
@@ -198,8 +199,7 @@ namespace SCANsat.SCAN_UI
 			// Anomalies go above trails
 			foreach (SCANdata.SCANanomaly anomaly in localAnomalies) {
 				if (anomaly.known)
-					DrawIcon(anomaly.longitude, anomaly.latitude,
-						anomaly.detail ? (VesselType)int.MaxValue : VesselType.Unknown,
+					DrawIcon(anomaly.longitude, anomaly.latitude, SCANicon.orbitIconForVesselType(anomaly.detail ? (VesselType)int.MaxValue : VesselType.Unknown),
 						anomaly.detail ? iconColorVisitedAnomalyValue : iconColorUnvisitedAnomalyValue);
 			}
 			// Target orbit and targets go above anomalies
@@ -223,10 +223,10 @@ namespace SCANsat.SCAN_UI
 						}
 					}
 				}
-				DrawIcon(targetVessel.longitude, targetVessel.latitude, targetVessel.vesselType, iconColorTargetValue);
+				DrawIcon(targetVessel.longitude, targetVessel.latitude, SCANicon.orbitIconForVesselType(targetVessel.vesselType), iconColorTargetValue);
 				if (showLines) {
-					DrawOrbitIcon(targetVessel, MapIcons.OtherIcon.AP, iconColorTargetValue);
-					DrawOrbitIcon(targetVessel, MapIcons.OtherIcon.PE, iconColorTargetValue);
+					DrawOrbitIcon(targetVessel, SCANicon.OrbitIcon.Ap, iconColorTargetValue);
+					DrawOrbitIcon(targetVessel, SCANicon.OrbitIcon.Pe, iconColorTargetValue);
 				}
 
 
@@ -234,13 +234,13 @@ namespace SCANsat.SCAN_UI
 			// Own orbit goes above that.
 			if (showLines && JUtil.OrbitMakesSense(vessel)) {
 				DrawOrbit(vessel, vessel.orbit, start, iconColorSelfValue);
-				DrawOrbitIcon(vessel, MapIcons.OtherIcon.AP, iconColorAPValue);
-				DrawOrbitIcon(vessel, MapIcons.OtherIcon.PE, iconColorPEValue);
+				DrawOrbitIcon(vessel, SCANicon.OrbitIcon.Ap, iconColorAPValue);
+				DrawOrbitIcon(vessel, SCANicon.OrbitIcon.Pe, iconColorPEValue);
 				if (targetVessel != null && JUtil.OrbitMakesSense(targetVessel)) {
 					if (vessel.orbit.AscendingNodeExists(targetVessel.orbit))
-						DrawOrbitIcon(vessel, MapIcons.OtherIcon.AN, iconColorANDNValue, vessel.orbit.TimeOfAscendingNode(targetVessel.orbit, start));
+						DrawOrbitIcon(vessel, SCANicon.OrbitIcon.AN, iconColorANDNValue, vessel.orbit.TimeOfAscendingNode(targetVessel.orbit, start));
 					if (vessel.orbit.DescendingNodeExists(targetVessel.orbit))
-						DrawOrbitIcon(vessel, MapIcons.OtherIcon.DN, iconColorANDNValue, vessel.orbit.TimeOfDescendingNode(targetVessel.orbit, start));
+						DrawOrbitIcon(vessel, SCANicon.OrbitIcon.DN, iconColorANDNValue, vessel.orbit.TimeOfDescendingNode(targetVessel.orbit, start));
 				}
 				// And the maneuver node and post-maneuver orbit: 
 				if (vessel.patchedConicSolver != null)
@@ -249,12 +249,12 @@ namespace SCANsat.SCAN_UI
 					if (node != null)
 					{
 						DrawOrbit(vessel, node.nextPatch, node.UT, iconColorNodeValue);
-						DrawOrbitIcon(vessel, MapIcons.OtherIcon.NODE, iconColorNodeValue, node.UT);
+						DrawOrbitIcon(vessel, SCANicon.OrbitIcon.ManeuverNode, iconColorNodeValue, node.UT);
 					}
 				}
 			}
 			// Own icon goes above that
-			DrawIcon(vessel.longitude, vessel.latitude, vessel.vesselType, iconColorSelfValue);
+			DrawIcon(vessel.longitude, vessel.latitude, SCANicon.orbitIconForVesselType(vessel.vesselType), iconColorSelfValue);
 			// And scale goes above everything.
 			DrawScale();
 
@@ -263,20 +263,23 @@ namespace SCANsat.SCAN_UI
 			return true;
 		}
 
-		private void DrawOrbitIcon(Vessel thatVessel, MapIcons.OtherIcon iconType, Color iconColor, double givenPoint = 0)
+		private void DrawOrbitIcon(Vessel thatVessel, SCANicon.OrbitIcon iconType, Color iconColor, double givenPoint = 0)
 		{
 			double timePoint = start;
 			switch (iconType) {
-				case MapIcons.OtherIcon.AP:
+				case SCANicon.OrbitIcon.Ap:
 					timePoint += thatVessel.orbit.timeToAp;
 					break;
-				case MapIcons.OtherIcon.PE:
+				case SCANicon.OrbitIcon.Pe:
 					timePoint += thatVessel.orbit.timeToPe;
 					break;
-				case MapIcons.OtherIcon.AN:
-				case MapIcons.OtherIcon.DN:
-				case MapIcons.OtherIcon.NODE:
+				case SCANicon.OrbitIcon.AN:
+				case SCANicon.OrbitIcon.DN:
+				case SCANicon.OrbitIcon.ManeuverNode:
 					timePoint = givenPoint;
+					break;
+				default:
+					iconType = SCANicon.orbitIconForVesselType(thatVessel.vesselType);
 					break;
 			}
 
@@ -284,7 +287,7 @@ namespace SCANsat.SCAN_UI
 				bool collision;
 				Vector2d coord;
 				if (GetPositionAtT(thatVessel, thatVessel.orbit, start, timePoint, out coord, out collision) && !collision) {
-					DrawIcon(coord.x, coord.y, thatVessel.vesselType, iconColor, iconType);
+					DrawIcon(coord.x, coord.y, iconType, iconColor);
 				}
 			}
 		}
@@ -422,7 +425,7 @@ namespace SCANsat.SCAN_UI
 			Graphics.DrawTexture(scaleBarRect, scaleLabelTexture, new Rect(0f, scaleID * scaleLabelSpan, 1f, scaleLabelSpan), 0, 0, 0, 0, scaleTint);
 		}
 
-		private void DrawIcon(double longitude, double latitude, VesselType vt, Color iconColor, MapIcons.OtherIcon icon = MapIcons.OtherIcon.None)
+		private void DrawIcon(double longitude, double latitude, SCANicon.OrbitIcon icon, Color iconColor)
 		{
 			var position = new Rect((float)(longitudeToPixels(longitude, latitude) - iconPixelSize / 2),
 				               (float)(latitudeToPixels(longitude, latitude) - iconPixelSize / 2),
@@ -432,11 +435,13 @@ namespace SCANsat.SCAN_UI
 			shadow.x += iconShadowShift.x;
 			shadow.y += iconShadowShift.y;
 
-			iconMaterial.color = iconColorShadowValue;
-			Graphics.DrawTexture(shadow, MapView.OrbitIconsMap, MapIcons.VesselTypeIcon(vt, icon), 0, 0, 0, 0, iconMaterial);
+			SCANicon.drawOrbitIconGL((int)position.x, (int)position.y, icon, iconColor, iconColorShadowValue, iconMaterial, 16, true);
 
-			iconMaterial.color = iconColor;
-			Graphics.DrawTexture(position, MapView.OrbitIconsMap, MapIcons.VesselTypeIcon(vt, icon), 0, 0, 0, 0, iconMaterial);
+			//iconMaterial.color = iconColorShadowValue;
+			//Graphics.DrawTexture(shadow, MapView.OrbitIconsMap, MapIcons.VesselTypeIcon(vt, icon), 0, 0, 0, 0, iconMaterial);
+
+			//iconMaterial.color = iconColor;
+			//Graphics.DrawTexture(position, MapView.OrbitIconsMap, MapIcons.VesselTypeIcon(vt, icon), 0, 0, 0, 0, iconMaterial);
 		}
 
 		private double longitudeToPixels(double longitude, double latitude)
