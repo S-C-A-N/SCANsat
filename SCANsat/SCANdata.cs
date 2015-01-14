@@ -370,7 +370,7 @@ namespace SCANsat
 
 		#region Anomalies
 		/* DATA: anomalies and such */
-		internal class SCANanomaly
+		public class SCANanomaly
 		{
 			internal SCANanomaly(string s, double lon, double lat, PQSMod m)
 			{
@@ -387,11 +387,17 @@ namespace SCANsat
 			internal double longitude;
 			internal double latitude;
 			internal PQSMod mod;
+
+			public string Name { get { return name; } }
+			public double Longitude { get { return longitude; } }
+			public double Latitude { get { return latitude; } }
+			public bool Known { get { return known; } }
+			public bool Detail { get { return detail; } }
 		}
 
 		private SCANanomaly[] anomalies;
 
-		internal SCANanomaly[] Anomalies
+		public SCANanomaly[] Anomalies
 		{
 			get
 			{
