@@ -18,10 +18,10 @@ using System.Collections.Generic;
 using UnityEngine;
 using SCANsat.SCAN_UI;
 using SCANsat.SCAN_Data;
-using SCANsat.Platform;
-using SCANsat.Platform.Palettes;
-using SCANsat.Platform.Palettes.ColorBrewer;
-using SCANsat.Platform.Palettes.FixedColors;
+using SCANsat.SCAN_Platform;
+using SCANsat.SCAN_Platform.Palettes;
+using SCANsat.SCAN_Platform.Palettes.ColorBrewer;
+using SCANsat.SCAN_Platform.Palettes.FixedColors;
 using SCANsat.SCAN_Toolbar;
 using palette = SCANsat.SCAN_UI.UI_Framework.SCANpalette;
 

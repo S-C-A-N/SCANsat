@@ -2,7 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using SCANsat.Platform;
+using SCANsat.SCAN_Platform;
 using SCANsat.SCAN_UI;
 using SCANsat.SCAN_UI.UI_Framework;
 
@@ -27,13 +27,13 @@ namespace SCANsat.SCAN_Toolbar
 
 		private void setupToolbar()
 		{
-			SCANUtil.SCANlog("Starting App Launcher Manager");
+			SCANUtil.SCANdebugLog("Starting App Launcher Manager");
 			StartCoroutine(addButton());
 		}
 
 		IEnumerator addButton()
 		{
-			SCANUtil.SCANlog("Waiting For Application Launcher...");
+			SCANUtil.SCANdebugLog("Waiting For Application Launcher...");
 
 			while (!ApplicationLauncher.Ready)
 				yield return null;
@@ -50,7 +50,7 @@ namespace SCANsat.SCAN_Toolbar
 		{
 			ApplicationLauncher.Instance.RemoveModApplication(SCANappLauncherButton);
 			SCANappLauncherButton = null;
-			SCANUtil.SCANlog("App Launcher Button Removed");
+			SCANUtil.SCANdebugLog("App Launcher Button Removed");
 		}
 
 		private void toggleFlightOn()

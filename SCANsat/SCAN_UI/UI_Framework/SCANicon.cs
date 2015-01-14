@@ -18,7 +18,7 @@ using System.Reflection;
 using UnityEngine;
 
 using palette = SCANsat.SCAN_UI.UI_Framework.SCANpalette;
-using Log = SCANsat.Platform.Logging.ConsoleLogger;
+using Log = SCANsat.SCAN_Platform.Logging.ConsoleLogger;
 
 namespace SCANsat.SCAN_UI.UI_Framework
 {

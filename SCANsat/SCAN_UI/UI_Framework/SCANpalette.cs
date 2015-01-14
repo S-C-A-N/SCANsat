@@ -14,8 +14,8 @@ using System;
 //using System.Text.RegularExpressions;
 using UnityEngine;
 using SCANsat.SCAN_Data;
-using SCANsat.Platform.Palettes;
-using SCANsat.Platform.Palettes.ColorBrewer;
+using SCANsat.SCAN_Platform.Palettes;
+using SCANsat.SCAN_Platform.Palettes.ColorBrewer;
 
 namespace SCANsat.SCAN_UI.UI_Framework
 {

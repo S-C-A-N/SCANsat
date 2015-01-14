@@ -16,9 +16,9 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
-using SCANsat.Platform;
-using SCANsat.Platform.Palettes;
-using SCANsat.Platform.Palettes.ColorBrewer;
+using SCANsat.SCAN_Platform;
+using SCANsat.SCAN_Platform.Palettes;
+using SCANsat.SCAN_Platform.Palettes.ColorBrewer;
 using palette = SCANsat.SCAN_UI.UI_Framework.SCANpalette;
 
 namespace SCANsat.SCAN_Data

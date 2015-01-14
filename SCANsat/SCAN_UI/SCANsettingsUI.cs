@@ -18,8 +18,8 @@ using System.Linq;
 using SCANsat.SCAN_Toolbar;
 using SCANsat.SCAN_Data;
 using SCANsat.SCAN_UI.UI_Framework;
-using SCANsat.Platform;
-using SCANsat.Platform.Palettes;
+using SCANsat.SCAN_Platform;
+using SCANsat.SCAN_Platform.Palettes;
 using UnityEngine;
 
 using palette = SCANsat.SCAN_UI.UI_Framework.SCANpalette;

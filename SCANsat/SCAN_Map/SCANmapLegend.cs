@@ -1,5 +1,5 @@
 ﻿using System;
-using SCANsat.Platform.Palettes;
+using SCANsat.SCAN_Platform.Palettes;
 using SCANsat.SCAN_Data;
 using palette = SCANsat.SCAN_UI.UI_Framework.SCANpalette;
 

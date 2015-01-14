@@ -17,7 +17,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
-using SCANsat.Platform;
+using SCANsat.SCAN_Platform;
 using SCANsat.SCAN_Data;
 using palette = SCANsat.SCAN_UI.UI_Framework.SCANpalette;
 
