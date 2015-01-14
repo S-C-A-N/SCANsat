@@ -105,7 +105,7 @@ namespace SCANsat.SCAN_UI
 		private CelestialBody orbitingBody;
 		private Vessel targetVessel;
 		private double redrawDeviation;
-		private SCANdata.SCANanomaly[] localAnomalies;
+		private SCANanomaly[] localAnomalies;
 		private Material iconMaterial;
 		private SCANsat sat;
 		internal RPMPersistence persist;
@@ -197,10 +197,10 @@ namespace SCANsat.SCAN_UI
 				DrawTrail(trail, trailColorValue, new Vector2d(vessel.longitude, vessel.latitude), true);
 		
 			// Anomalies go above trails
-			foreach (SCANdata.SCANanomaly anomaly in localAnomalies) {
-				if (anomaly.known)
-					DrawIcon(anomaly.longitude, anomaly.latitude, SCANicon.orbitIconForVesselType(anomaly.detail ? (VesselType)int.MaxValue : VesselType.Unknown),
-						anomaly.detail ? iconColorVisitedAnomalyValue : iconColorUnvisitedAnomalyValue);
+			foreach (SCANanomaly anomaly in localAnomalies) {
+				if (anomaly.Known)
+					DrawIcon(anomaly.Longitude, anomaly.Latitude, SCANicon.orbitIconForVesselType(anomaly.Detail ? (VesselType)int.MaxValue : VesselType.Unknown),
+						anomaly.Detail ? iconColorVisitedAnomalyValue : iconColorUnvisitedAnomalyValue);
 			}
 			// Target orbit and targets go above anomalies
 			if (targetVessel != null && targetVessel.mainBody == orbitingBody) {

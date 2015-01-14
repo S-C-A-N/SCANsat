@@ -159,13 +159,13 @@ namespace SCANsat.SCAN_UI
 		{
 			if ((sensors & SCANtype.AnomalyDetail) != SCANtype.Nothing)
 			{
-				SCANdata.SCANanomaly nearest = null;
+				SCANanomaly nearest = null;
 				double nearest_dist = -1;
-				foreach (SCANdata.SCANanomaly a in data.Anomalies)
+				foreach (SCANanomaly a in data.Anomalies)
 				{
-					if (!a.known)
+					if (!a.Known)
 						continue;
-					double d = (a.mod.transform.position - FlightGlobals.ActiveVessel.transform.position).magnitude;
+					double d = (a.Mod.transform.position - FlightGlobals.ActiveVessel.transform.position).magnitude;
 					if (d < nearest_dist || nearest_dist < 0)
 					{
 						if (d < 50000)
@@ -178,8 +178,8 @@ namespace SCANsat.SCAN_UI
 				if (nearest != null)
 				{
 					string txt = "Anomaly";
-					if (nearest.detail)
-						txt = nearest.name;
+					if (nearest.Detail)
+						txt = nearest.Name;
 					txt += ":  " + SCANuiUtil.distanceString(nearest_dist, 5000);
 					GUILayout.Label(txt, SCANskins.SCAN_insColorLabel);
 
@@ -187,15 +187,15 @@ namespace SCANsat.SCAN_UI
 						anomalyView = new SCANremoteView();
 					if (anomalyView != null)
 					{
-						if (nearest.mod != null)
+						if (nearest.Mod != null)
 						{
-							if (anomalyView.lookat != nearest.mod.gameObject)
-								anomalyView.setup(320, 240, nearest.mod.gameObject);
+							if (anomalyView.lookat != nearest.Mod.gameObject)
+								anomalyView.setup(320, 240, nearest.Mod.gameObject);
 							Texture t = anomalyView.getTexture();
 							if (t != null)
 							{
 								GUILayout.Label(anomalyView.getTexture());
-								anomalyView.drawOverlay(GUILayoutUtility.GetLastRect(), SCANskins.SCAN_anomalyOverlay, nearest.detail);
+								anomalyView.drawOverlay(GUILayoutUtility.GetLastRect(), SCANskins.SCAN_anomalyOverlay, nearest.Detail);
 							}
 						}
 					}

@@ -393,7 +393,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			//This section handles anomaly labels
 			if (SCANcontroller.controller.map_markers)
 			{
-				foreach (SCANdata.SCANanomaly anomaly in data.Anomalies)
+				foreach (SCANanomaly anomaly in data.Anomalies)
 				{
 					drawAnomalyLabel(maprect, map, anomaly);
 				}
@@ -406,16 +406,16 @@ namespace SCANsat.SCAN_UI.UI_Framework
 		}
 
 		//Method to draw anomaly labels on the map
-		internal static void drawAnomalyLabel(Rect maprect, SCANmap map, SCANdata.SCANanomaly anomaly)
+		internal static void drawAnomalyLabel(Rect maprect, SCANmap map, SCANanomaly anomaly)
 		{
-			if (!anomaly.known)
+			if (!anomaly.Known)
 				return;
-			double lon = (anomaly.longitude + 360 + 180) % 360;
-			double lat = (anomaly.latitude + 180 + 90) % 180;
+			double lon = (anomaly.Longitude + 360 + 180) % 360;
+			double lat = (anomaly.Latitude + 180 + 90) % 180;
 			if (map != null)
 			{
-				lat = (map.projectLatitude(anomaly.longitude, anomaly.latitude) + 90) % 180;
-				lon = (map.projectLongitude(anomaly.longitude, anomaly.latitude) + 180) % 360;
+				lat = (map.projectLatitude(anomaly.Longitude, anomaly.Latitude) + 90) % 180;
+				lon = (map.projectLongitude(anomaly.Longitude, anomaly.Latitude) + 180) % 360;
 				lat = map.scaleLatitude(lat);
 				lon = map.scaleLongitude(lon);
 				if (lat < 0 || lon < 0 || lat > 180 || lon > 360)
@@ -423,8 +423,8 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			}
 			lon = lon * maprect.width / 360f;
 			lat = maprect.height - lat * maprect.height / 180f;
-			string txt = SCANcontroller.controller.anomalyMarker + " " + anomaly.name;
-			if (!anomaly.detail)
+			string txt = SCANcontroller.controller.anomalyMarker + " " + anomaly.Name;
+			if (!anomaly.Detail)
 				txt = SCANcontroller.controller.anomalyMarker + " Anomaly";
 			Rect r = new Rect(maprect.x + (float)lon, maprect.y + (float)lat, 250f, 25f);
 			drawLabel(r, txt, true, true, true);
