@@ -15,8 +15,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using SCANsat.Platform;
-using SCANsat.Platform.Palettes;
+using SCANsat.SCAN_Platform;
+using SCANsat.SCAN_Platform.Palettes;
 using palette = SCANsat.SCAN_UI.UI_Framework.SCANpalette;
 using UnityEngine;
 
@@ -213,6 +213,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			SCAN_whiteReadoutLabel = new GUIStyle(SCAN_readoutLabel);
 			SCAN_whiteReadoutLabel.name = "SCAN_WhiteLabel";
 			SCAN_whiteReadoutLabel.normal.textColor = palette.white;
+			SCAN_whiteReadoutLabel.wordWrap = false;
 
 			SCAN_activeReadoutLabel = new GUIStyle(SCAN_readoutLabel);
 			SCAN_activeReadoutLabel.name = "SCAN_ActiveLabel";
