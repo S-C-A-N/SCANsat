@@ -293,11 +293,11 @@ namespace SCANsat
 							string mapdata = node_body.GetValue("Map");
 							if (dataRebuild)
 							{ //On the first load deserialize the "Map" value to both coverage arrays
-								SCANUtil.integerDeserialize(mapdata, true, data);
+								data.integerDeserialize(mapdata, true);
 							}
 							else
 							{
-								SCANUtil.integerDeserialize(mapdata, false, data);
+								data.integerDeserialize(mapdata, false);
 							}
 						}
 						catch (Exception e)
@@ -420,7 +420,7 @@ namespace SCANsat
 						node_body.AddValue("PaletteSize", body_scan.PaletteSize);
 						node_body.AddValue("PaletteReverse", body_scan.PaletteReverse);
 						node_body.AddValue("PaletteDiscrete", body_scan.PaletteDiscrete);
-						node_body.AddValue("Map", SCANUtil.integerSerialize(body_scan));
+						node_body.AddValue("Map", body_scan.integerSerialize());
 						node_progress.AddNode(node_body);
 					}
 					node.AddNode(node_progress);
