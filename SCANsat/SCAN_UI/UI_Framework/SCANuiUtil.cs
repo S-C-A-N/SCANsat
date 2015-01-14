@@ -16,7 +16,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
-using SCANsat.Platform;
+using SCANsat.SCAN_Platform;
 using SCANsat.SCAN_Data;
 using SCANsat.SCAN_Map;
 using palette = SCANsat.SCAN_UI.UI_Framework.SCANpalette;
@@ -158,24 +158,24 @@ namespace SCANsat.SCAN_UI.UI_Framework
 				{
 					if (SCANcontroller.controller.resourceOverlayType == 0 && SCANversions.RegolithFound)
 					{
-						if (SCANUtil.isCovered(lon, lat, data, mapObj.resource.Type))
+						if (SCANUtil.isCovered(lon, lat, data, mapObj.Resource.Type))
 						{
-							double amount = SCANUtil.RegolithOverlay(lat, lon, mapObj.resource.Name, mapObj.body.flightGlobalsIndex);
+							double amount = SCANUtil.RegolithOverlay(lat, lon, mapObj.Resource.Name, mapObj.Body.flightGlobalsIndex);
 							string label;
 							//if (mapObj.resource.linear) //Make sure that ORS values are handled correctly based on which scale type they use
 								label = amount.ToString("P2");
 							//else
 							//	label = (amount * 1000000).ToString("N1") + " ppm";
-							info += palette.colored(mapObj.resource.FullColor, mapObj.resource.Name + ": " + label);
+							info += palette.colored(mapObj.Resource.FullColor, mapObj.Resource.Name + ": " + label);
 						}
 					}
 					else if (SCANcontroller.controller.resourceOverlayType == 1)
 					{
-						if (SCANUtil.isCovered(lon, lat, data, mapObj.resource.Type))
+						if (SCANUtil.isCovered(lon, lat, data, mapObj.Resource.Type))
 						{
 							double amount = data.KethaneValueMap[SCANUtil.icLON(lon), SCANUtil.icLAT(lat)];
 							if (amount < 0) amount = 0d;
-							info += palette.colored(mapObj.resource.FullColor, mapObj.resource.Name + ": " + amount.ToString("N1"));
+							info += palette.colored(mapObj.Resource.FullColor, mapObj.Resource.Name + ": " + amount.ToString("N1"));
 						}
 					}
 				}
@@ -437,7 +437,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 				return;
 			float scale = r.width * 1f / (max - min);
 			float x = r.x + scale * (val - min);
-			Rect lr = new Rect(x, r.y + r.height / 4, r.width - x, r.height);
+			Rect lr = new Rect(x, r.y + r.height / 4, 15, r.height);
 			drawLabel(lr, "|", false, true, true);
 			string txt = val.ToString("N0");
 			GUIContent c = new GUIContent(txt);
@@ -448,6 +448,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 				lr.x = r.x;
 			if (lr.x + dim.x > r.x + r.width)
 				lr.x = r.x + r.width - dim.x;
+			lr.width = dim.x;
 			drawLabel(lr, txt, false, true, true);
 		}
 		
@@ -504,8 +505,8 @@ namespace SCANsat.SCAN_UI.UI_Framework
 				{
 					if (lat % 30 == 0 || lon % 30 == 0)
 					{
-						x = (int)(map.mapscale * ((map.projectLongitude(lon, lat) + 180) % 360));
-						y = (int)(map.mapscale * ((map.projectLatitude(lon, lat) + 90) % 180));
+						x = (int)(map.MapScale * ((map.projectLongitude(lon, lat) + 180) % 360));
+						y = (int)(map.MapScale * ((map.projectLatitude(lon, lat) + 90) % 180));
 						drawDot(x, y, palette.white, overlay_static);
 					}
 				}
@@ -679,7 +680,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 				return;
 			if (overlay_static == null)
 				return;
-			if (map.projection == MapProjection.Polar)
+			if (map.Projection == MapProjection.Polar)
 				return;
 
 			if (SCANnewBigMap.eq_frame <= 0)
@@ -874,8 +875,8 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			lineMat.SetPass(0);
 			GL.Color(lineColor);
 			float xStart, yStart;
-			float mapWidth = map.mapwidth;
-			float mapHeight = map.mapheight;
+			float mapWidth = map.MapWidth;
+			float mapHeight = map.MapHeight;
 			xStart = (float)SCANUtil.fixLon(map.projectLongitude(points[0].x, points[0].y));
 			yStart = (float)SCANUtil.fixLat(map.projectLatitude(points[0].x, points[0].y));
 			xStart = (float)map.scaleLongitude(xStart);
@@ -884,7 +885,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 				return;
 			//SCANUtil.SCANdebugLog("Start Point Checks Out");
 			xStart = xStart * mapWidth / 360f;
-			yStart = map.mapheight - yStart * map.mapheight / 180f;
+			yStart = map.MapHeight - yStart * map.MapHeight / 180f;
 			for (int i = 1; i < points.Count; i++)
 			{
 				float xEnd = (float)SCANUtil.fixLon(map.projectLongitude(points[i].x, points[i].y));
