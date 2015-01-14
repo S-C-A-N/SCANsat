@@ -248,28 +248,9 @@ namespace SCANsat.SCAN_Data
 
 		#region Anomalies
 		/* DATA: anomalies and such */
-		internal class SCANanomaly
-		{
-			internal SCANanomaly(string s, double lon, double lat, PQSMod m)
-			{
-				name = s;
-				longitude = lon;
-				latitude = lat;
-				known = false;
-				mod = m;
-			}
-
-			internal bool known;
-			internal bool detail;
-			internal string name;
-			internal double longitude;
-			internal double latitude;
-			internal PQSMod mod;
-		}
-
 		private SCANanomaly[] anomalies;
 
-		internal SCANanomaly[] Anomalies
+		public SCANanomaly[] Anomalies
 		{
 			get
 			{
@@ -284,12 +265,13 @@ namespace SCANsat.SCAN_Data
 				}
 				for (int i = 0; i < anomalies.Length; ++i)
 				{
-					anomalies[i].known = SCANUtil.isCovered(anomalies[i].longitude, anomalies[i].latitude, this, SCANtype.Anomaly);
-					anomalies[i].detail = SCANUtil.isCovered(anomalies[i].longitude, anomalies[i].latitude, this, SCANtype.AnomalyDetail);
+					anomalies[i].Known = SCANUtil.isCovered(anomalies[i].Longitude, anomalies[i].Latitude, this, SCANtype.Anomaly);
+					anomalies[i].Detail = SCANUtil.isCovered(anomalies[i].Longitude, anomalies[i].Latitude, this, SCANtype.AnomalyDetail);
 				}
 				return anomalies;
 			}
 		}
+
 		#endregion
 
 		#region Scanning coverage
