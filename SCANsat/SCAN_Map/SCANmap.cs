@@ -13,8 +13,8 @@
 
 using System;
 using UnityEngine;
-using SCANsat.Platform.Palettes;
-using SCANsat.Platform.Logging;
+using SCANsat.SCAN_Platform.Palettes;
+using SCANsat.SCAN_Platform.Logging;
 using SCANsat.SCAN_Data;
 using palette = SCANsat.SCAN_UI.UI_Framework.SCANpalette;
 
@@ -32,6 +32,68 @@ namespace SCANsat.SCAN_Map
 		{
 		}
 
+		#region Public Accessors
+
+		public double MapScale
+		{
+			get { return mapscale; }
+			internal set { mapscale = value; }
+		}
+
+		public double Lon_Offset
+		{
+			get { return lon_offset; }
+		}
+
+		public double Lat_Offset
+		{
+			get { return lat_offset; }
+		}
+
+		public int MapWidth
+		{
+			get { return mapwidth; }
+		}
+
+		public int MapHeight
+		{
+			get { return mapheight; }
+		}
+
+		public mapType MType
+		{
+			get { return mType; }
+		}
+
+		public Texture2D Map
+		{
+			get { return map; }
+		}
+
+		public CelestialBody Body
+		{
+			get { return body; }
+		}
+
+		public SCANresource Resource
+		{
+			get { return resource; }
+			internal set { resource = value; }
+		}
+
+		public SCANmapLegend MapLegend
+		{
+			get { return mapLegend; }
+			internal set { mapLegend = value; }
+		}
+
+		public MapProjection Projection
+		{
+			get { return projection; }
+		}
+
+		#endregion
+
 		/* MAP: Big Map height map caching */
 		private float[,] big_heightmap;
 		private CelestialBody big_heightmap_body;
@@ -47,7 +109,7 @@ namespace SCANsat.SCAN_Map
 		}
 
 		/* MAP: Projection methods for converting planet coordinates to the rectangular texture */
-		internal MapProjection projection = MapProjection.Rectangular;
+		private MapProjection projection = MapProjection.Rectangular;
 
 		internal void setProjection(MapProjection p)
 		{
@@ -197,8 +259,9 @@ namespace SCANsat.SCAN_Map
 		}
 
 		/* MAP: scaling, centering (setting origin), translating, etc */
-		internal double mapscale, lon_offset, lat_offset;
-		internal int mapwidth, mapheight;
+		private double mapscale, lon_offset, lat_offset;
+		private int mapwidth, mapheight;
+
 		internal void setSize(int w, int h)
 		{
 			if (w == 0)
@@ -285,15 +348,12 @@ namespace SCANsat.SCAN_Map
 			return ilon;
 		}
 
-		/* MAP: shared state */
-		//public int mapmode = 0; // lots of EXTERNAL refs!
-		internal mapType mType;
-		internal Texture2D map; // refs above: 214,215,216,232, below, and JSISCANsatRPM.
-		internal CelestialBody body; // all refs are below
-		internal SCANresource resource;
-		internal SCANmapLegend mapLegend;
-
 		/* MAP: internal state */
+		private mapType mType;
+		private Texture2D map; // refs above: 214,215,216,232, below, and JSISCANsatRPM.
+		private CelestialBody body; // all refs are below
+		private SCANresource resource;
+		private SCANmapLegend mapLegend;
 		private int mapstep; // all refs are below
 		private bool mapsaved; // all refs are below
 		private double[] mapline; // all refs are below
@@ -370,21 +430,16 @@ namespace SCANsat.SCAN_Map
 			Color[] pix;
 
 			/* init cache if necessary */
-			if (body != big_heightmap_body)
+			if (cache)
 			{
-				switch (mType)
+				if (body != big_heightmap_body)
 				{
-					case 0:
-						{
-							for (int x = 0; x < mapwidth; x++)
-							{
-								for (int y = 0; y < mapwidth / 2; y++)
-									big_heightmap[x, y] = 0f;
-							}
-							big_heightmap_body = body;
-							break;
-						}
-					default: break;
+					for (int x = 0; x < mapwidth; x++)
+					{
+						for (int y = 0; y < mapwidth / 2; y++)
+							big_heightmap[x, y] = 0f;
+					}
+					big_heightmap_body = body;
 				}
 			}
 
