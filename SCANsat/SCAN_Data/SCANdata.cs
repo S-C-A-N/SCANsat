@@ -14,6 +14,9 @@ using System;
 using System.Linq;
 using System.Collections.Generic;
 using UnityEngine;
+using System.IO;
+using System.Runtime.Serialization.Formatters.Binary;
+using SCANsat.Platform;
 using SCANsat.Platform.Palettes;
 using SCANsat.Platform.Palettes.ColorBrewer;
 using palette = SCANsat.SCAN_UI.UI_Framework.SCANpalette;
@@ -480,6 +483,100 @@ namespace SCANsat.SCAN_Data
 			map_small.Apply();
 		}
 		#endregion
+
+		#region Data Serialize/Deserialize
+
+		//Take the Int32[] coverage and convert it to a single dimension byte array
+		private byte[] ConvertToByte(Int32[,] iArray)
+		{
+			byte[] bArray = new byte[360 * 180 * 4];
+			int k = 0;
+			for (int i = 0; i < 360; i++)
+			{
+				for (int j = 0; j < 180; j++)
+				{
+					byte[] bytes = BitConverter.GetBytes(iArray[i, j]);
+					for (int m = 0; m < bytes.Length; m++)
+					{
+						bArray[k++] = bytes[m];
+					}
+				}
+			}
+			return bArray;
+		}
+
+		//Convert byte array from persistent file to usable Int32[]
+		private Int32[,] ConvertToInt(byte[] bArray)
+		{
+			Int32[,] iArray = new Int32[360, 180];
+			int k = 0;
+			for (int i = 0; i < 360; i++)
+			{
+				for (int j = 0; j < 180; j++)
+				{
+					iArray[i, j] = BitConverter.ToInt32(bArray, k);
+					k += 4;
+				}
+			}
+			return iArray;
+		}
+
+		//One time conversion of single byte[,] to Int32 to recover old scanning data
+		private Int32[,] RecoverToInt(byte[,] bArray)
+		{
+			Int32[,] iArray = new Int32[360, 180];
+			for (int i = 0; i < 360; i++)
+			{
+				for (int j = 0; j < 180; j++)
+				{
+					iArray[i, j] = (Int32)bArray[i, j];
+				}
+			}
+			return iArray;
+		}
+
+		/* DATA: serialization and compression */
+		internal string integerSerialize()
+		{
+			byte[] bytes = ConvertToByte(Coverage);
+			MemoryStream mem = new MemoryStream();
+			BinaryFormatter binf = new BinaryFormatter();
+			binf.Serialize(mem, bytes);
+			string blob = Convert.ToBase64String(SCAN_CLZF2.Compress(mem.ToArray()));
+			return blob.Replace("/", "-").Replace("=", "_");
+		}
+
+		internal void integerDeserialize(string blob, bool b)
+		{
+			try
+			{
+				blob = blob.Replace("-", "/").Replace("_", "=");
+				byte[] bytes = Convert.FromBase64String(blob);
+				bytes = SCAN_CLZF2.Decompress(bytes);
+				MemoryStream mem = new MemoryStream(bytes, false);
+				BinaryFormatter binf = new BinaryFormatter();
+				if (b)
+				{
+					byte[,] bRecover = new byte[360, 180];
+					bRecover = (byte[,])binf.Deserialize(mem);
+					Coverage = RecoverToInt(bRecover);
+				}
+				else
+				{
+					byte[] bArray = (byte[])binf.Deserialize(mem);
+					Coverage = ConvertToInt(bArray);
+				}
+			}
+			catch (Exception e)
+			{
+				Coverage = new Int32[360, 180];
+				HeightMap = new float[360, 180];
+				throw e;
+			}
+			resetImages();
+		}
+
+#endregion
 
 		#region Unused code
 
