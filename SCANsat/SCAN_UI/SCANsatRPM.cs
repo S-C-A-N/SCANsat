@@ -180,7 +180,7 @@ namespace SCANsat.SCAN_UI
 
 			start = Planetarium.GetUniversalTime();
 
-			Graphics.Blit(map.map, screen);
+			Graphics.Blit(map.Map, screen);
 			GL.PushMatrix();
 			GL.LoadPixelMatrix(0, screenWidth, screenHeight, 0);
 
@@ -462,7 +462,7 @@ namespace SCANsat.SCAN_UI
 			// put the baseline latitude in the range [0,180] instead of
 			// [-90, +90].
 			double projLat = map.projectLatitude(longitude, latitude);
-			double translatedLat = 90.0 + projLat - map.lat_offset;
+			double translatedLat = 90.0 + projLat - map.Lat_Offset;
 			double scaledLat = translatedLat * mapSizeScale.y;
 			double pix = scaledLat * screenHeight / 180.0;
 
@@ -472,7 +472,7 @@ namespace SCANsat.SCAN_UI
 
 		private double rescaleLongitude(double lon)
 		{
-			return Clamp(lon - map.lon_offset, 360d) * mapSizeScale.x;
+			return Clamp(lon - map.Lon_Offset, 360d) * mapSizeScale.x;
 		}
 
 		private static double Clamp(double value, double clamp)
@@ -580,7 +580,7 @@ namespace SCANsat.SCAN_UI
 			orbitingBody = vessel.mainBody;
 			map.setBody(vessel.mainBody);
 			map.setSize(screenWidth, screenHeight);
-			map.mapscale *= (zoomLevel * zoomLevel + zoomModifier);
+			map.MapScale *= (zoomLevel * zoomLevel + zoomModifier);
 			mapCenterLong = vessel.longitude;
 			mapCenterLat = vessel.latitude;
 			// That's really just sweeping the problem under the carpet instead of fixing it, but meh.
@@ -592,7 +592,7 @@ namespace SCANsat.SCAN_UI
 			// Compute and store the map scale factors in mapSizeScale.  We
 			// use these values for every segment when drawing trails, so it
 			// makes sense to compute it only when it changes.
-			mapSizeScale = new Vector2d(360.0 * map.mapscale / map.mapwidth, 180.0 * map.mapscale / map.mapheight);
+			mapSizeScale = new Vector2d(360.0 * map.MapScale / map.MapWidth, 180.0 * map.MapScale / map.MapHeight);
 			redrawDeviation = redrawEdge * 180 / (zoomLevel * zoomLevel + zoomModifier);
 			try {
 				SCANdata data = SCANUtil.getData(vessel.mainBody);

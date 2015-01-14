@@ -15,7 +15,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using SCANsat.Platform;
+using SCANsat.SCAN_Platform;
 using SCANsat;
 using SCANsat.SCAN_UI.UI_Framework;
 using SCANsat.SCAN_Data;
@@ -99,7 +99,7 @@ namespace SCANsat.SCAN_UI
 			}
 			bigmap.setBody(b);
 			if (SCANcontroller.controller.ResourceList.Count > 0)
-				bigmap.resource = SCANcontroller.controller.ResourceList[SCANcontroller.controller.resourceSelection][b.name];
+				bigmap.Resource = SCANcontroller.controller.ResourceList[SCANcontroller.controller.resourceSelection][b.name];
 			TooltipsEnabled = SCANcontroller.controller.toolTips;
 		}
 
@@ -118,7 +118,7 @@ namespace SCANsat.SCAN_UI
 		{
 			//Append the map type to the window caption
 			if (bigmap != null)
-				mapTypeTitle = SCANmapType.mapTypeNames[(int)bigmap.mType];
+				mapTypeTitle = SCANmapType.mapTypeNames[(int)bigmap.MType];
 			else
 				mapTypeTitle = "";
 
@@ -136,7 +136,7 @@ namespace SCANsat.SCAN_UI
 						resizeH = WindowRect_Min.height;
 					bigmap.setWidth((int)resizeW);
 					overlay_static = null;
-					SCANcontroller.controller.map_width = bigmap.mapwidth;
+					SCANcontroller.controller.map_width = bigmap.MapWidth;
 					WindowRect_Last = new Rect(0, 0, WindowRect.width, WindowRect.height);
 				}
 				else
@@ -463,13 +463,13 @@ namespace SCANsat.SCAN_UI
 			}
 
 			TextureRect = GUILayoutUtility.GetLastRect();
-			TextureRect.width = bigmap.mapwidth;
-			TextureRect.height = bigmap.mapheight;
+			TextureRect.width = bigmap.MapWidth;
+			TextureRect.height = bigmap.MapHeight;
 
 			//The background texture for the map
 			if (overlay_static == null)
 			{
-				overlay_static = new Texture2D((int)bigmap.mapwidth, (int)bigmap.mapheight, TextureFormat.ARGB32, false);
+				overlay_static = new Texture2D((int)bigmap.MapWidth, (int)bigmap.MapHeight, TextureFormat.ARGB32, false);
 				drawGrid = true;
 			}
 
@@ -503,7 +503,7 @@ namespace SCANsat.SCAN_UI
 			}
 
 			//Add the North/South labels to the polar projection
-			if (bigmap.projection == MapProjection.Polar)
+			if (bigmap.Projection == MapProjection.Polar)
 			{
 				rc.x = TextureRect.x + TextureRect.width / 2 - TextureRect.width / 8;
 				rc.y = TextureRect.y + TextureRect.height / 8;
@@ -549,8 +549,8 @@ namespace SCANsat.SCAN_UI
 					if (mx >= pos_spotmap.x - TextureRect.x && my >= pos_spotmap.y - TextureRect.y && mx <= pos_spotmap.x + pos_spotmap.width - TextureRect.x && my <= pos_spotmap.y + pos_spotmap.height - TextureRect.y)
 					{
 						in_spotmap = true;
-						mlon = spotmap.lon_offset + ((mx - pos_spotmap.x + TextureRect.x) / spotmap.mapscale) - 180;
-						mlat = spotmap.lat_offset + ((pos_spotmap.height - (my - pos_spotmap.y + TextureRect.y)) / spotmap.mapscale) - 90;
+						mlon = spotmap.Lon_Offset + ((mx - pos_spotmap.x + TextureRect.x) / spotmap.MapScale) - 180;
+						mlat = spotmap.Lat_Offset + ((pos_spotmap.height - (my - pos_spotmap.y + TextureRect.y)) / spotmap.MapScale) - 90;
 						if (mlat > 90)
 						{
 							mlon = (mlon + 360) % 360 - 180;
@@ -588,14 +588,14 @@ namespace SCANsat.SCAN_UI
 								}
 								if (in_spotmap)
 								{
-									spotmap.mapscale = spotmap.mapscale * 1.25f;
+									spotmap.MapScale = spotmap.MapScale * 1.25f;
 								}
 								else
 								{
-									spotmap.mapscale = 10;
+									spotmap.MapScale = 10;
 								}
 								spotmap.centerAround(mlon, mlat);
-								spotmap.resetMap(bigmap.mType, false);
+								spotmap.resetMap(bigmap.MType, false);
 								pos_spotmap.width = 180;
 								pos_spotmap.height = 180;
 								if (!in_spotmap)
@@ -624,7 +624,7 @@ namespace SCANsat.SCAN_UI
 									//if (spotmap.mapscale < 10)
 									//	spotmap.mapscale = 10;
 									spotmap.centerAround(mlon, mlat);
-									spotmap.resetMap(spotmap.mType, false);
+									spotmap.resetMap(spotmap.MType, false);
 									Event.current.Use();
 								}
 							}
@@ -655,12 +655,12 @@ namespace SCANsat.SCAN_UI
 		//Draw the altitude legend bar along the bottom
 		private void legendBar(int id)
 		{
-			if (bigmap.mType == mapType.Altimetry && SCANcontroller.controller.legend)
+			if (bigmap.MType == mapType.Altimetry && SCANcontroller.controller.legend)
 			{
-				if (bigmap.mapLegend == null)
-					bigmap.mapLegend = new SCANmapLegend();
-				bigmap.mapLegend.Legend = bigmap.mapLegend.getLegend(data.MinHeight, data.MaxHeight, SCANcontroller.controller.colours, data);
-				SCANuiUtil.drawLegend(data, bigmap.mapLegend);
+				if (bigmap.MapLegend == null)
+					bigmap.MapLegend = new SCANmapLegend();
+				bigmap.MapLegend.Legend = bigmap.MapLegend.getLegend(data.MinHeight, data.MaxHeight, SCANcontroller.controller.colours, data);
+				SCANuiUtil.drawLegend(data, bigmap.MapLegend);
 			}
 		}
 
@@ -672,7 +672,7 @@ namespace SCANsat.SCAN_UI
 				spotmap.setBody(b);
 
 				if (SCANcontroller.controller.GlobalResourceOverlay)
-					spotmap.resource = SCANcontroller.controller.ResourceList[SCANcontroller.controller.resourceSelection][b.name];
+					spotmap.Resource = SCANcontroller.controller.ResourceList[SCANcontroller.controller.resourceSelection][b.name];
 
 				GUI.Box(pos_spotmap, spotmap.getPartialMap());
 				SCANuiUtil.drawOrbit(pos_spotmap, spotmap, v, startUT, overlay_static, b);
@@ -737,15 +737,15 @@ namespace SCANsat.SCAN_UI
 					Rect r = new Rect(2, 20 * i, 96, 20);
 					if (GUI.Button(r, SCANcontroller.controller.ResourceList.ElementAt(i).Key, SCANskins.SCAN_dropDownButton))
 					{
-						bigmap.resource = SCANcontroller.controller.ResourceList.ElementAt(i).Value[b.name];
-						SCANcontroller.controller.resourceSelection = bigmap.resource.Name;
+						bigmap.Resource = SCANcontroller.controller.ResourceList.ElementAt(i).Value[b.name];
+						SCANcontroller.controller.resourceSelection = bigmap.Resource.Name;
 						if (SCANcontroller.controller.ResourceList.ElementAt(i).Value[b.name].Source == SCANresource_Source.Kethane)
 							SCANcontroller.controller.resourceOverlayType = 1;
 						else
 							SCANcontroller.controller.resourceOverlayType = 0;
 						bigmap.resetMap();
 						drop_down_open = false;
-						SCANUtil.SCANlog("Resource {0} Selected; Min Value: {1}; Max Value: {2}", bigmap.resource.Name, bigmap.resource.MinValue, bigmap.resource.MaxValue);
+						SCANUtil.SCANdebugLog("Resource {0} Selected; Min Value: {1}; Max Value: {2}", bigmap.Resource.Name, bigmap.Resource.MinValue, bigmap.Resource.MaxValue);
 					}
 					GUI.EndScrollView();
 				}
