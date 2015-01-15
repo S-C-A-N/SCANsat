@@ -535,7 +535,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			Orbit o = vessel.orbit;
 			startUT = Planetarium.GetUniversalTime();
 			double UT = startUT;
-			int steps = 100; // increase for neater lines, decrease for better speed indication
+			int steps = 80; // increase for neater lines, decrease for better speed indication
 			bool ath = false;
 			if (vessel.mainBody.atmosphere)
 			{
@@ -853,8 +853,9 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			if (steps == 0)
 				return;
 			double dTstep = Math.Floor(o.period / steps);
+			startUT = Planetarium.GetUniversalTime();
 			var points = new List<Vector2d>();
-			for (double time = startUT; time < (startUT + o.period); time += dTstep)
+			for (double time = (startUT - o.period); time < (startUT + o.period); time += dTstep)
 			{
 				bool collide;
 				Vector2d coord;
@@ -884,8 +885,8 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			if (xStart < 0 || yStart < 0 || yStart > 180 || xStart > 360)
 				return;
 			//SCANUtil.SCANdebugLog("Start Point Checks Out");
-			xStart = xStart * mapWidth / 360f;
-			yStart = map.MapHeight - yStart * map.MapHeight / 180f;
+			xStart = (xStart * mapWidth / 360f) + mapRect.x;
+			yStart = (map.MapHeight - yStart * map.MapHeight / 180f) + mapRect.y;
 			for (int i = 1; i < points.Count; i++)
 			{
 				float xEnd = (float)SCANUtil.fixLon(map.projectLongitude(points[i].x, points[i].y));
@@ -893,16 +894,16 @@ namespace SCANsat.SCAN_UI.UI_Framework
 				xEnd = (float)map.scaleLongitude(xEnd);
 				yEnd = (float)map.scaleLatitude(yEnd);
 				//SCANUtil.SCANdebugLog("Checking Orbit End Point...");
-				if (xEnd < 0 || yEnd < 0 || yEnd > 180 || xEnd > 360)
-					return;
-				xEnd = xEnd* mapWidth / 360f;
-				yEnd = mapHeight - yEnd * mapHeight / 180f;
+				if (xEnd < 0 || yEnd < 1|| yEnd > 179|| xEnd > 360)
+					continue;
+				xEnd = (xEnd* mapWidth / 360f) + mapRect.x;
+				yEnd = (mapHeight - yEnd * mapHeight / 180f) + mapRect.y;
 
 				//SCANUtil.SCANdebugLog("Draw Line {0}", i);
 				drawLine(xStart, yStart, xEnd, yEnd, mapRect, mapWidth);
 
 				xStart = xEnd;
-				yStart = yEnd; ;
+				yStart = yEnd;
 			}
 			GL.End();
 		}

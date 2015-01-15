@@ -515,10 +515,8 @@ namespace SCANsat.SCAN_UI
 			//Draw the orbit overlays
 			if (SCANcontroller.controller.map_orbit)
 			{
-				//Graphics.Blit(bigmap.map, screen);
 				GL.PushMatrix();
-				//GL.LoadPixelMatrix(TextureRect.x, TextureRect.width, TextureRect.height, TextureRect.y);
-				SCANuiUtil.newOrbitLine(TextureRect, bigmap, v, v.orbit, startUT, b, 200);
+				//SCANuiUtil.newOrbitLine(TextureRect, bigmap, v, v.orbit, startUT, b, 100);
 				SCANuiUtil.drawOrbit(TextureRect, bigmap, v, startUT, overlay_static, b);
 				GL.PopMatrix();
 			}
