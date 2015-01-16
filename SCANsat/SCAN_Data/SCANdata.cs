@@ -276,7 +276,7 @@ namespace SCANsat.SCAN_Data
 
 		#region Scanning coverage
 		/* DATA: coverage */
-		private int[] coverage_count = new int[32];
+		private int[] coverage_count = Enumerable.Repeat(360 * 180, 32).ToArray();
 		internal void updateCoverage()
 		{
 			for (int i = 0; i < 32; ++i)
