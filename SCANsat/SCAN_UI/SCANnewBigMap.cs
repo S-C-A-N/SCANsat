@@ -476,13 +476,12 @@ namespace SCANsat.SCAN_UI
 			//Generate the grid texture
 			if (drawGrid)
 			{
-				SCANuiUtil.drawGridLine(TextureRect, bigmap);
-				SCANuiUtil.clearTexture(overlay_static);
-				if (SCANcontroller.controller.map_grid)
-				{
-					SCANuiUtil.drawGrid(TextureRect, bigmap, overlay_static);
-				}
-				overlay_static.Apply();
+				//SCANuiUtil.clearTexture(overlay_static);
+				//if (SCANcontroller.controller.map_grid)
+				//{
+				//	SCANuiUtil.drawGrid(TextureRect, bigmap, overlay_static);
+				//}
+				//overlay_static.Apply();
 				drawGrid = false;
 			}
 
@@ -498,10 +497,10 @@ namespace SCANsat.SCAN_UI
 				GUI.DrawTexture(TextureRect, MapTexture);
 			}
 
-			if (overlay_static != null)
-			{
-				GUI.DrawTexture(TextureRect, overlay_static, ScaleMode.StretchToFill);
-			}
+			//if (overlay_static != null)
+			//{
+			//	GUI.DrawTexture(TextureRect, overlay_static, ScaleMode.StretchToFill);
+			//}
 
 			//Add the North/South labels to the polar projection
 			if (bigmap.Projection == MapProjection.Polar)
@@ -513,13 +512,20 @@ namespace SCANsat.SCAN_UI
 				SCANuiUtil.drawLabel(rc, "N", false, true, true);
 			}
 
+			if (SCANcontroller.controller.map_grid)
+			{
+				GL.PushMatrix();
+				SCANuiUtil.drawGridLine(TextureRect, bigmap);
+				GL.PopMatrix();
+			}
+
 			//Draw the orbit overlays
 			if (SCANcontroller.controller.map_orbit)
 			{
-				GL.PushMatrix();
+				//GL.PushMatrix();
 				//SCANuiUtil.newOrbitLine(TextureRect, bigmap, v, v.orbit, startUT, b, 100);
 				SCANuiUtil.drawOrbit(TextureRect, bigmap, v, startUT, overlay_static, b);
-				GL.PopMatrix();
+				//GL.PopMatrix();
 			}
 		}
 
