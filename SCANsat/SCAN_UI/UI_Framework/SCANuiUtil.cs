@@ -523,7 +523,121 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			tex.SetPixel(x, y + 1, palette.black);
 		}
 
-		//Draw the orbit overlay; needs to be replaced with the method used by SCANsatRPM
+		internal static void drawGridLine(Rect maprect, SCANmap map)
+		{
+			var lineMaps = new Dictionary<int, List<Vector2d>>();
+			switch (map.Projection)
+			{
+				case MapProjection.Rectangular:
+					{
+						int i = 0;
+						for (double lon = -150; lon <= 150; lon += 30)
+						{
+							List<Vector2d> points = new List<Vector2d>();
+							points.Add(new Vector2d(lon, 90));
+							points.Add(new Vector2d(lon, -90));
+							lineMaps.Add(i, points);
+							i++;
+						}
+						for (double lat = -60; lat <= 60; lat += 30)
+						{
+							List<Vector2d> points = new List<Vector2d>();
+							points.Add(new Vector2d(-180, lat));
+							points.Add(new Vector2d(180, lat));
+							lineMaps.Add(i, points);
+							i++;
+						}
+							break;
+					}
+				case MapProjection.KavrayskiyVII:
+					{
+						int i = 0;
+						for (double lon = -150; lon <= 150; lon += 30)
+						{
+							List<Vector2d> points = new List<Vector2d>();
+							for (double lat = -90; lat <= 90; lat += 2)
+							{
+								points.Add(new Vector2d((SCANUtil.fixLon(map.projectLongitude(lon, lat))), (SCANUtil.fixLat(map.projectLongitude(lon, lat)))));
+							}
+							lineMaps.Add(i, points);
+							i++;
+						}
+						for (double lat = -60; lat <= 60; lat += 30)
+						{
+							List<Vector2d> points = new List<Vector2d>();
+							for (double lon = -180; lon <= 180; lon += 2)
+							{
+								points.Add(new Vector2d((SCANUtil.fixLon(map.projectLongitude(lon, lat))), (SCANUtil.fixLat(map.projectLongitude(lon, lat)))));
+							}
+							lineMaps.Add(i, points);
+							i++;
+						}
+						break;
+					}
+				case MapProjection.Polar:
+					{
+						int i = 0;
+						for (double lon = -180; lon <= 190; lon += 30)
+						{
+							List<Vector2d> points = new List<Vector2d>();
+							for (double lat = -88; lat <= 88; lat += 2)
+							{
+								points.Add(new Vector2d((SCANUtil.fixLon(map.projectLongitude(lon, lat))), (SCANUtil.fixLat(map.projectLongitude(lon, lat)))));
+							}
+							lineMaps.Add(i, points);
+							i++;
+						}
+						for (double lat = -60; lat <= 60; lat += 30)
+						{
+							if (lat != 0)
+							{
+								List<Vector2d> points = new List<Vector2d>();
+								for (double lon = -180; lon <= 180; lon += 2)
+								{
+									points.Add(new Vector2d((SCANUtil.fixLon(map.projectLongitude(lon, lat))), (SCANUtil.fixLat(map.projectLongitude(lon, lat)))));
+								}
+								lineMaps.Add(i, points);
+								i++;
+							}
+						}
+						break;
+					}
+			}
+			foreach (List<Vector2d> points in lineMaps.Values)
+				drawGridLines(maprect, map, points);
+		}
+
+		private static void drawGridLines(Rect mapRect, SCANmap map, IList<Vector2d> points)
+		{
+			if (points.Count < 2)
+				return;
+			GL.Begin(GL.LINES);
+			lineMat.SetPass(0);
+			GL.Color(lineColor);
+			float xStart, yStart;
+			xStart = (float)points[0].x;
+			yStart = (float)points[0].y;
+			if (xStart < 0 || yStart < 0 || yStart > map.MapHeight|| xStart > map.MapWidth)
+				return;
+			xStart += mapRect.x;
+			yStart += mapRect.y;
+			for (int i = 1; i < points.Count; i++)
+			{
+				float xEnd = (float)points[i].x;
+				float yEnd = (float)points[i].y;
+				if (xEnd < 0 || yEnd < 1 || yEnd > map.MapHeight || xEnd > map.MapWidth)
+					continue;
+				xEnd += mapRect.x;
+				yEnd += mapRect.y;
+
+				drawLine(xStart, yStart, xEnd, yEnd, mapRect, map.MapWidth);
+
+				xStart = xEnd;
+				yStart = yEnd;
+			}
+		}
+
+		//Draw the orbit overlay
 		internal static void drawOrbit(Rect maprect, SCANmap map, Vessel vessel, double startUT, Texture2D overlay_static, CelestialBody body)
 		{
 			if (vessel.mainBody != body) return;

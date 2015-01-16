@@ -476,6 +476,7 @@ namespace SCANsat.SCAN_UI
 			//Generate the grid texture
 			if (drawGrid)
 			{
+				SCANuiUtil.drawGridLine(TextureRect, bigmap);
 				SCANuiUtil.clearTexture(overlay_static);
 				if (SCANcontroller.controller.map_grid)
 				{
