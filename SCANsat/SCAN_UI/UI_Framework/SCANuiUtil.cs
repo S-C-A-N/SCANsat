@@ -534,16 +534,16 @@ namespace SCANsat.SCAN_UI.UI_Framework
 						for (double lon = -150; lon <= 150; lon += 30)
 						{
 							List<Vector2d> points = new List<Vector2d>();
-							points.Add(new Vector2d(lon, 90));
-							points.Add(new Vector2d(lon, -90));
+							points.Add(new Vector2d(map.MapScale * SCANUtil.fixLon(lon), map.MapScale * SCANUtil.fixLat(90)));
+							points.Add(new Vector2d(map.MapScale * SCANUtil.fixLon(lon), map.MapScale * SCANUtil.fixLat(-90)));
 							lineMaps.Add(i, points);
 							i++;
 						}
 						for (double lat = -60; lat <= 60; lat += 30)
 						{
 							List<Vector2d> points = new List<Vector2d>();
-							points.Add(new Vector2d(-180, lat));
-							points.Add(new Vector2d(180, lat));
+							points.Add(new Vector2d(map.MapScale * SCANUtil.fixLon(-180), map.MapScale * SCANUtil.fixLat(lat)));
+							points.Add(new Vector2d(map.MapScale * SCANUtil.fixLon(180), map.MapScale * SCANUtil.fixLat(lat)));
 							lineMaps.Add(i, points);
 							i++;
 						}
@@ -557,7 +557,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 							List<Vector2d> points = new List<Vector2d>();
 							for (double lat = -90; lat <= 90; lat += 2)
 							{
-								points.Add(new Vector2d((SCANUtil.fixLon(map.projectLongitude(lon, lat))), (SCANUtil.fixLat(map.projectLongitude(lon, lat)))));
+								points.Add(new Vector2d(map.MapScale * (SCANUtil.fixLon(map.projectLongitude(lon, lat))), map.MapScale * (SCANUtil.fixLat(map.projectLongitude(lon, lat)))));
 							}
 							lineMaps.Add(i, points);
 							i++;
@@ -567,7 +567,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 							List<Vector2d> points = new List<Vector2d>();
 							for (double lon = -180; lon <= 180; lon += 2)
 							{
-								points.Add(new Vector2d((SCANUtil.fixLon(map.projectLongitude(lon, lat))), (SCANUtil.fixLat(map.projectLongitude(lon, lat)))));
+								points.Add(new Vector2d(map.MapScale * (SCANUtil.fixLon(map.projectLongitude(lon, lat))), map.MapScale * (SCANUtil.fixLat(map.projectLongitude(lon, lat)))));
 							}
 							lineMaps.Add(i, points);
 							i++;
@@ -582,7 +582,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 							List<Vector2d> points = new List<Vector2d>();
 							for (double lat = -88; lat <= 88; lat += 2)
 							{
-								points.Add(new Vector2d((SCANUtil.fixLon(map.projectLongitude(lon, lat))), (SCANUtil.fixLat(map.projectLongitude(lon, lat)))));
+								points.Add(new Vector2d(map.MapScale * (SCANUtil.fixLon(map.projectLongitude(lon, lat))), map.MapScale * (SCANUtil.fixLat(map.projectLongitude(lon, lat)))));
 							}
 							lineMaps.Add(i, points);
 							i++;
@@ -594,7 +594,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 								List<Vector2d> points = new List<Vector2d>();
 								for (double lon = -180; lon <= 180; lon += 2)
 								{
-									points.Add(new Vector2d((SCANUtil.fixLon(map.projectLongitude(lon, lat))), (SCANUtil.fixLat(map.projectLongitude(lon, lat)))));
+									points.Add(new Vector2d(map.MapScale * (SCANUtil.fixLon(map.projectLongitude(lon, lat))), map.MapScale * (SCANUtil.fixLat(map.projectLongitude(lon, lat)))));
 								}
 								lineMaps.Add(i, points);
 								i++;
@@ -625,7 +625,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			{
 				float xEnd = (float)points[i].x;
 				float yEnd = (float)points[i].y;
-				if (xEnd < 0 || yEnd < 1 || yEnd > map.MapHeight || xEnd > map.MapWidth)
+				if (xEnd < 0 || yEnd < 0 || yEnd > map.MapHeight || xEnd > map.MapWidth)
 					continue;
 				xEnd += mapRect.x;
 				yEnd += mapRect.y;
@@ -635,6 +635,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 				xStart = xEnd;
 				yStart = yEnd;
 			}
+			GL.End();
 		}
 
 		//Draw the orbit overlay
@@ -1030,16 +1031,16 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			if (!mapRect.Contains(start) && !mapRect.Contains(end))
 				return;
 
-			float leftX = Math.Min(start.x, end.x);
-			float rightX = Math.Max(start.x, end.x);
+			//float leftX = Math.Min(start.x, end.x);
+			//float rightX = Math.Max(start.x, end.x);
 
-			if (leftX + width * 0.5f < rightX)
-			{
-				if (start.x < end.x)
-					end.x -= width;
-				else
-					start.x -= width;
-			}
+			//if (leftX + width * 0.5f < rightX)
+			//{
+			//	if (start.x < end.x)
+			//		end.x -= width;
+			//	else
+			//		start.x -= width;
+			//}
 
 			GL.Vertex(start);
 			GL.Vertex(end);
