@@ -31,11 +31,11 @@ namespace SCANsat.SCAN_UI
 		private string mapTypeTitle = "";
 		private SCANdata data;
 		private Vessel v;
-		private double startUT;
 		private float resizeW, resizeH, dragX;
 		private bool drawGrid, currentGrid, currentColor, lastColor, lastResource;
 		private bool drop_down_open, projection_drop_down, mapType_drop_down, resources_drop_down, planetoid_drop_down;
-		private Texture2D overlay_static;
+		//private Texture2D overlay_static;
+		private List<List<Vector2d>> gridLines = new List<List<Vector2d>>();
 		private Rect ddRect, zoomCloseRect;
 		private Rect rc = new Rect(0, 0, 20, 20);
 		private Vector2 scrollP, scrollR;
@@ -135,7 +135,8 @@ namespace SCANsat.SCAN_UI
 					if (resizeH < WindowRect_Min.height)
 						resizeH = WindowRect_Min.height;
 					bigmap.setWidth((int)resizeW);
-					overlay_static = null;
+					//overlay_static = null;
+					drawGrid = true;
 					SCANcontroller.controller.map_width = bigmap.MapWidth;
 					WindowRect_Last = new Rect(0, 0, WindowRect.width, WindowRect.height);
 				}
@@ -466,22 +467,11 @@ namespace SCANsat.SCAN_UI
 			TextureRect.width = bigmap.MapWidth;
 			TextureRect.height = bigmap.MapHeight;
 
-			//The background texture for the map
-			if (overlay_static == null)
-			{
-				overlay_static = new Texture2D((int)bigmap.MapWidth, (int)bigmap.MapHeight, TextureFormat.ARGB32, false);
-				drawGrid = true;
-			}
-
-			//Generate the grid texture
+			//Generate the grid lines
 			if (drawGrid)
 			{
-				//SCANuiUtil.clearTexture(overlay_static);
-				//if (SCANcontroller.controller.map_grid)
-				//{
-				//	SCANuiUtil.drawGrid(TextureRect, bigmap, overlay_static);
-				//}
-				//overlay_static.Apply();
+				gridLines = new List<List<Vector2d>>();
+				gridLines = SCANuiUtil.drawGridLine(TextureRect, bigmap);
 				drawGrid = false;
 			}
 
@@ -497,11 +487,6 @@ namespace SCANsat.SCAN_UI
 				GUI.DrawTexture(TextureRect, MapTexture);
 			}
 
-			//if (overlay_static != null)
-			//{
-			//	GUI.DrawTexture(TextureRect, overlay_static, ScaleMode.StretchToFill);
-			//}
-
 			//Add the North/South labels to the polar projection
 			if (bigmap.Projection == MapProjection.Polar)
 			{
@@ -514,18 +499,21 @@ namespace SCANsat.SCAN_UI
 
 			if (SCANcontroller.controller.map_grid && !IsResizing)
 			{
-				GL.PushMatrix();
-				SCANuiUtil.drawGridLine(TextureRect, bigmap);
-				GL.PopMatrix();
+				if (gridLines.Count > 0)
+				{
+					GL.PushMatrix();
+					foreach (List<Vector2d> points in gridLines)
+					{
+						SCANuiUtil.drawGridLines(points, bigmap.MapWidth, TextureRect.x, TextureRect.y);
+					}
+					GL.PopMatrix();
+				}
 			}
 
 			//Draw the orbit overlays
 			if (SCANcontroller.controller.map_orbit)
 			{
-				//GL.PushMatrix();
-				//SCANuiUtil.newOrbitLine(TextureRect, bigmap, v, v.orbit, startUT, b, 100);
-				SCANuiUtil.drawOrbit(TextureRect, bigmap, v, startUT, overlay_static, b);
-				//GL.PopMatrix();
+				SCANuiUtil.drawOrbit(TextureRect, bigmap, v, b);
 			}
 		}
 
@@ -680,7 +668,7 @@ namespace SCANsat.SCAN_UI
 					spotmap.Resource = SCANcontroller.controller.ResourceList[SCANcontroller.controller.resourceSelection][b.name];
 
 				GUI.Box(pos_spotmap, spotmap.getPartialMap());
-				SCANuiUtil.drawOrbit(pos_spotmap, spotmap, v, startUT, overlay_static, b);
+				SCANuiUtil.drawOrbit(pos_spotmap, spotmap, v, b);
 				SCANuiUtil.drawMapLabels(pos_spotmap, v, spotmap, data, v.mainBody);
 				zoomCloseRect = new Rect(pos_spotmap.x + 180, pos_spotmap.y, 18, 18);
 

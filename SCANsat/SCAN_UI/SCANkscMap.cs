@@ -32,7 +32,8 @@ namespace SCANsat.SCAN_UI
 		private SCANdata data;
 		private bool drawGrid, currentGrid, currentColor, lastColor, lastResource, spaceCenterLock, trackingStationLock;
 		private bool drop_down_open, projection_drop_down, mapType_drop_down, resources_drop_down, planetoid_drop_down;
-		private Texture2D overlay_static;
+		//private Texture2D overlay_static;
+		private List<List<Vector2d>> gridLines = new List<List<Vector2d>>();
 		private Rect ddRect, zoomCloseRect;
 		private Rect rc = new Rect(0, 0, 20, 20);
 		private Vector2 scrollP, scrollR;
@@ -439,29 +440,14 @@ namespace SCANsat.SCAN_UI
 			TextureRect.width = bigmap.MapWidth;
 			TextureRect.height = bigmap.MapHeight;
 
-			if (overlay_static == null)
-			{
-				overlay_static = new Texture2D((int)bigmap.MapWidth, (int)bigmap.MapHeight, TextureFormat.ARGB32, false);
-				drawGrid = true;
-			}
-
 			if (drawGrid)
 			{
-				SCANuiUtil.clearTexture(overlay_static);
-				if (SCANcontroller.controller.map_grid)
-				{
-					SCANuiUtil.drawGrid(TextureRect, bigmap, overlay_static);
-				}
-				overlay_static.Apply();
+				gridLines = new List<List<Vector2d>>();
+				gridLines = SCANuiUtil.drawGridLine(TextureRect, bigmap);
 				drawGrid = false;
 			}
 
 			GUI.DrawTexture(TextureRect, MapTexture);
-
-			if (overlay_static != null)
-			{
-				GUI.DrawTexture(TextureRect, overlay_static, ScaleMode.StretchToFill);
-			}
 
 			if (bigmap.Projection == MapProjection.Polar)
 			{
@@ -470,6 +456,19 @@ namespace SCANsat.SCAN_UI
 				SCANuiUtil.drawLabel(rc, "S", false, true, true);
 				rc.x = TextureRect.x + TextureRect.width / 2 + TextureRect.width / 8;
 				SCANuiUtil.drawLabel(rc, "N", false, true, true);
+			}
+
+			if (SCANcontroller.controller.map_grid)
+			{
+				if (gridLines.Count > 0)
+				{
+					GL.PushMatrix();
+					foreach (List<Vector2d> points in gridLines)
+					{
+						SCANuiUtil.drawGridLines(points, bigmap.MapWidth, TextureRect.x, TextureRect.y);
+					}
+					GL.PopMatrix();
+				}
 			}
 		}
 
