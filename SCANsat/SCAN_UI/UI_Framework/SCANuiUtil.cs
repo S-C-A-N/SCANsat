@@ -523,7 +523,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			tex.SetPixel(x, y + 1, palette.black);
 		}
 
-		internal static void drawGridLine(Rect maprect, SCANmap map)
+		internal static void drawGridLine(Rect maprect, SCANmap map, double scale)
 		{
 			var lineMaps = new Dictionary<int, List<Vector2d>>();
 			switch (map.Projection)
@@ -534,16 +534,16 @@ namespace SCANsat.SCAN_UI.UI_Framework
 						for (double lon = -150; lon <= 150; lon += 30)
 						{
 							List<Vector2d> points = new List<Vector2d>();
-							points.Add(new Vector2d(map.MapScale * SCANUtil.fixLon(lon), map.MapScale * SCANUtil.fixLat(90)));
-							points.Add(new Vector2d(map.MapScale * SCANUtil.fixLon(lon), map.MapScale * SCANUtil.fixLat(-90)));
+							points.Add(new Vector2d(scale * (lon + 180), 0));
+							points.Add(new Vector2d(scale * (lon + 180), scale * 180));
 							lineMaps.Add(i, points);
 							i++;
 						}
 						for (double lat = -60; lat <= 60; lat += 30)
 						{
 							List<Vector2d> points = new List<Vector2d>();
-							points.Add(new Vector2d(map.MapScale * SCANUtil.fixLon(-180), map.MapScale * SCANUtil.fixLat(lat)));
-							points.Add(new Vector2d(map.MapScale * SCANUtil.fixLon(180), map.MapScale * SCANUtil.fixLat(lat)));
+							points.Add(new Vector2d(0, scale * (lat + 90)));
+							points.Add(new Vector2d(scale * 360, scale * (lat + 90)));
 							lineMaps.Add(i, points);
 							i++;
 						}
@@ -555,19 +555,19 @@ namespace SCANsat.SCAN_UI.UI_Framework
 						for (double lon = -150; lon <= 150; lon += 30)
 						{
 							List<Vector2d> points = new List<Vector2d>();
-							for (double lat = -90; lat <= 90; lat += 2)
+							for (double lat = -90; lat <= 89; lat += 2)
 							{
-								points.Add(new Vector2d(map.MapScale * (SCANUtil.fixLon(map.projectLongitude(lon, lat))), map.MapScale * (SCANUtil.fixLat(map.projectLongitude(lon, lat)))));
+								points.Add(new Vector2d(scale * (map.projectLongitude(lon, lat) + 180), scale * (map.projectLatitude(lon, lat) + 90)));
 							}
 							lineMaps.Add(i, points);
 							i++;
 						}
-						for (double lat = -60; lat <= 60; lat += 30)
+						for (double lat = -90; lat <= 90; lat += 30)
 						{
 							List<Vector2d> points = new List<Vector2d>();
-							for (double lon = -180; lon <= 180; lon += 2)
+							for (double lon = -180; lon <= 178; lon += 2)
 							{
-								points.Add(new Vector2d(map.MapScale * (SCANUtil.fixLon(map.projectLongitude(lon, lat))), map.MapScale * (SCANUtil.fixLat(map.projectLongitude(lon, lat)))));
+								points.Add(new Vector2d(scale * (map.projectLongitude(lon, lat) + 180), scale * (map.projectLatitude(lon, lat) + 90)));
 							}
 							lineMaps.Add(i, points);
 							i++;
@@ -577,34 +577,46 @@ namespace SCANsat.SCAN_UI.UI_Framework
 				case MapProjection.Polar:
 					{
 						int i = 0;
-						for (double lon = -180; lon <= 190; lon += 30)
+						for (double lon = -180; lon <= 150; lon += 30)
 						{
-							List<Vector2d> points = new List<Vector2d>();
-							for (double lat = -88; lat <= 88; lat += 2)
+							List<Vector2d> pointsS = new List<Vector2d>();
+							for (double lat = -88; lat <= -2; lat += 2)
 							{
-								points.Add(new Vector2d(map.MapScale * (SCANUtil.fixLon(map.projectLongitude(lon, lat))), map.MapScale * (SCANUtil.fixLat(map.projectLongitude(lon, lat)))));
+								pointsS.Add(new Vector2d(scale * (map.projectLongitude(lon, lat) + 180), scale * (map.projectLatitude(lon, lat) + 90)));
 							}
-							lineMaps.Add(i, points);
+							lineMaps.Add(i, pointsS);
+							i++;
+							List<Vector2d> pointsN = new List<Vector2d>();
+							for (double lat = 2; lat <= 88; lat += 2)
+							{
+								pointsN.Add(new Vector2d(scale * (map.projectLongitude(lon, lat) + 180), scale * (map.projectLatitude(lon, lat) + 90)));
+							}
+							lineMaps.Add(i, pointsN);
 							i++;
 						}
-						for (double lat = -60; lat <= 60; lat += 30)
+						for (double lat = -85; lat <= 85; lat += 5)
 						{
 							if (lat != 0)
 							{
-								List<Vector2d> points = new List<Vector2d>();
-								for (double lon = -180; lon <= 180; lon += 2)
+								if (lat % 30 == 0 || lat == -85 || lat == 85)
 								{
-									points.Add(new Vector2d(map.MapScale * (SCANUtil.fixLon(map.projectLongitude(lon, lat))), map.MapScale * (SCANUtil.fixLat(map.projectLongitude(lon, lat)))));
+									List<Vector2d> points = new List<Vector2d>();
+									for (double lon = -180; lon <= 180; lon += 2)
+									{
+										points.Add(new Vector2d(scale * (map.projectLongitude(lon, lat) + 180), scale * (map.projectLatitude(lon, lat) + 90)));
+									}
+									lineMaps.Add(i, points);
+									i++;
 								}
-								lineMaps.Add(i, points);
-								i++;
 							}
 						}
 						break;
 					}
 			}
 			foreach (List<Vector2d> points in lineMaps.Values)
+			{
 				drawGridLines(maprect, map, points);
+			}
 		}
 
 		private static void drawGridLines(Rect mapRect, SCANmap map, IList<Vector2d> points)
@@ -616,15 +628,16 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			GL.Color(lineColor);
 			float xStart, yStart;
 			xStart = (float)points[0].x;
-			yStart = (float)points[0].y;
+			yStart = map.MapHeight - (float)points[0].y;
 			if (xStart < 0 || yStart < 0 || yStart > map.MapHeight|| xStart > map.MapWidth)
 				return;
 			xStart += mapRect.x;
 			yStart += mapRect.y;
 			for (int i = 1; i < points.Count; i++)
 			{
+
 				float xEnd = (float)points[i].x;
-				float yEnd = (float)points[i].y;
+				float yEnd = map.MapHeight - (float)points[i].y;
 				if (xEnd < 0 || yEnd < 0 || yEnd > map.MapHeight || xEnd > map.MapWidth)
 					continue;
 				xEnd += mapRect.x;
