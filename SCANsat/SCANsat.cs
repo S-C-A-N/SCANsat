@@ -262,7 +262,10 @@ namespace SCANsat
 		public void startScan()
 		{
 			if (!ToolbarManager.ToolbarAvailable && SCANcontroller.controller != null)
-				SCANcontroller.controller.mainMap.Visible = true;
+			{
+				if (!SCANcontroller.controller.useStockAppLauncher)
+					SCANcontroller.controller.mainMap.Visible = true;
+			}
 #if DEBUG
 			//SCANui.minimode = (SCANui.minimode > 0 ? 2 : -SCANui.minimode);
 #endif
