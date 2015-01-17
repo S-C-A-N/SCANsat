@@ -496,62 +496,63 @@ namespace SCANsat.SCAN_UI.UI_Framework
 		#region Overlays
 
 		//Setup the lat/long grid
-		internal static void drawGrid(Rect maprect, SCANmap map, Texture2D overlay_static)
-		{
-			int x, y;
-			for (double lat = -90; lat < 90; lat += 2)
-			{
-				for (double lon = -180; lon < 180; lon += 2)
-				{
-					if (lat % 30 == 0 || lon % 30 == 0)
-					{
-						x = (int)(map.MapScale * ((map.projectLongitude(lon, lat) + 180) % 360));
-						y = (int)(map.MapScale * ((map.projectLatitude(lon, lat) + 90) % 180));
-						drawDot(x, y, palette.white, overlay_static);
-					}
-				}
-			}
-		}
+		//internal static void drawGrid(Rect maprect, SCANmap map, Texture2D overlay_static)
+		//{
+		//	int x, y;
+		//	for (double lat = -90; lat < 90; lat += 2)
+		//	{
+		//		for (double lon = -180; lon < 180; lon += 2)
+		//		{
+		//			if (lat % 30 == 0 || lon % 30 == 0)
+		//			{
+		//				x = (int)(map.MapScale * ((map.projectLongitude(lon, lat) + 180) % 360));
+		//				y = (int)(map.MapScale * ((map.projectLatitude(lon, lat) + 90) % 180));
+		//				drawDot(x, y, palette.white, overlay_static);
+		//			}
+		//		}
+		//	}
+		//}
 
 		//Draw the actual dot textures for the grid
-		private static void drawDot(int x, int y, Color c, Texture2D tex)
-		{
-			tex.SetPixel(x, y, c);
-			tex.SetPixel(x - 1, y, palette.black);
-			tex.SetPixel(x + 1, y, palette.black);
-			tex.SetPixel(x, y - 1, palette.black);
-			tex.SetPixel(x, y + 1, palette.black);
-		}
+		//private static void drawDot(int x, int y, Color c, Texture2D tex)
+		//{
+		//	tex.SetPixel(x, y, c);
+		//	tex.SetPixel(x - 1, y, palette.black);
+		//	tex.SetPixel(x + 1, y, palette.black);
+		//	tex.SetPixel(x, y - 1, palette.black);
+		//	tex.SetPixel(x, y + 1, palette.black);
+		//}
 
-		internal static void drawGridLine(Rect maprect, SCANmap map)
+		private static Color32 lineColor = new Color(1f, 1f, 1f, 0.95f);
+		private static Material lineMat = JUtil.DrawLineMaterial();
+
+		internal static List<List<Vector2d>> drawGridLine(Rect maprect, SCANmap map)
 		{
-			var lineMaps = new Dictionary<int, List<Vector2d>>();
+			var lineList = new List<List<Vector2d>>();
 			switch (map.Projection)
 			{
 				case MapProjection.Rectangular:
 					{
-						int i = 0;
 						for (double lon = -150; lon <= 150; lon += 30)
 						{
 							List<Vector2d> points = new List<Vector2d>();
 							points.Add(new Vector2d(map.MapScale * (lon + 180), 0));
 							points.Add(new Vector2d(map.MapScale * (lon + 180), map.MapScale * 180));
-							lineMaps.Add(i, points);
-							i++;
+
+							lineList.Add(points);
 						}
 						for (double lat = -60; lat <= 60; lat += 30)
 						{
 							List<Vector2d> points = new List<Vector2d>();
 							points.Add(new Vector2d(0, map.MapScale * (lat + 90)));
 							points.Add(new Vector2d(map.MapScale * 360, map.MapScale * (lat + 90)));
-							lineMaps.Add(i, points);
-							i++;
+
+							lineList.Add(points);
 						}
 							break;
 					}
 				case MapProjection.KavrayskiyVII:
 					{
-						int i = 0;
 						for (double lon = -150; lon <= 150; lon += 30)
 						{
 							List<Vector2d> points = new List<Vector2d>();
@@ -559,34 +560,33 @@ namespace SCANsat.SCAN_UI.UI_Framework
 							{
 								points.Add(new Vector2d(map.MapScale * (map.projectLongitude(lon, lat) + 180), map.MapScale * (map.projectLatitude(lon, lat) + 90)));
 							}
-							lineMaps.Add(i, points);
-							i++;
+							lineList.Add(points);
 						}
 						for (double lat = -60; lat <= 60; lat += 30)
 						{
 							List<Vector2d> points = new List<Vector2d>();
 							points.Add(new Vector2d(map.MapScale * (map.projectLongitude(-179, lat) + 180), map.MapScale * (lat + 90)));
 							points.Add(new Vector2d(map.MapScale * (map.projectLongitude(179, lat) + 180), map.MapScale * (lat + 90)));
-							lineMaps.Add(i, points);
-							i++;
+
+							lineList.Add(points);
 						}
 						break;
 					}
 				case MapProjection.Polar:
 					{
-						int i = 0;
 						for (double lon = -180; lon <= 150; lon += 30)
 						{
 							List<Vector2d> pointsS = new List<Vector2d>();
 							pointsS.Add(new Vector2d(map.MapScale * (map.projectLongitude(lon, -88) + 180), map.MapScale * (map.projectLatitude(lon, -88) + 90)));
 							pointsS.Add(new Vector2d(map.MapScale * (map.projectLongitude(lon, -2) + 180), map.MapScale * (map.projectLatitude(lon, -2) + 90)));
-							lineMaps.Add(i, pointsS);
-							i++;
+
+							lineList.Add(pointsS);
+
 							List<Vector2d> pointsN = new List<Vector2d>();
 							pointsN.Add(new Vector2d(map.MapScale * (map.projectLongitude(lon, 2) + 180), map.MapScale * (map.projectLatitude (lon, 2) + 90)));
 							pointsN.Add(new Vector2d(map.MapScale * (map.projectLongitude(lon, 88) + 180), map.MapScale * (map.projectLatitude(lon, 88) + 90)));
-							lineMaps.Add(i, pointsN);
-							i++;
+
+							lineList.Add(pointsN);
 						}
 						for (double lat = -88; lat <= 88; lat += 2)
 						{
@@ -599,21 +599,18 @@ namespace SCANsat.SCAN_UI.UI_Framework
 									{
 										points.Add(new Vector2d(map.MapScale * (map.projectLongitude(lon, lat) + 180), map.MapScale * (map.projectLatitude(lon, lat) + 90)));
 									}
-									lineMaps.Add(i, points);
-									i++;
+									lineList.Add(points);
 								}
 							}
 						}
 						break;
 					}
 			}
-			foreach (List<Vector2d> points in lineMaps.Values)
-			{
-				drawGridLines(maprect, map, points);
-			}
+
+			return lineList;
 		}
 
-		private static void drawGridLines(Rect mapRect, SCANmap map, IList<Vector2d> points)
+		internal static void drawGridLines(IList<Vector2d> points, float mapWidth, float left, float top)
 		{
 			if (points.Count < 2)
 				return;
@@ -622,22 +619,22 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			GL.Color(lineColor);
 			float xStart, yStart;
 			xStart = (float)points[0].x;
-			yStart = map.MapHeight - (float)points[0].y;
-			if (xStart < 0 || yStart < 0 || yStart > map.MapHeight|| xStart > map.MapWidth)
+			yStart = (mapWidth / 2) - (float)points[0].y;
+			if (xStart < 0 || yStart < 0 || yStart > (mapWidth / 2) || xStart > mapWidth)
 				return;
-			xStart += mapRect.x;
-			yStart += mapRect.y;
+			xStart += left;
+			yStart += top;
 			for (int i = 1; i < points.Count; i++)
 			{
 
 				float xEnd = (float)points[i].x;
-				float yEnd = map.MapHeight - (float)points[i].y;
-				if (xEnd < 0 || yEnd < 0 || yEnd > map.MapHeight || xEnd > map.MapWidth)
+				float yEnd = (mapWidth / 2) - (float)points[i].y;
+				if (xEnd < 0 || yEnd < 0 || yEnd > (mapWidth / 2) || xEnd > mapWidth)
 					continue;
-				xEnd += mapRect.x;
-				yEnd += mapRect.y;
+				xEnd += left;
+				yEnd += top;
 
-				drawLine(xStart, yStart, xEnd, yEnd, mapRect, map.MapWidth);
+				drawLine(xStart, yStart, xEnd, yEnd, mapWidth);
 
 				xStart = xEnd;
 				yStart = yEnd;
@@ -645,8 +642,17 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			GL.End();
 		}
 
+		private static void drawLine(float xStart, float yStart, float xEnd, float yEnd, float width)
+		{
+			var start = new Vector2(xStart, yStart);
+			var end = new Vector2(xEnd, yEnd);
+
+			GL.Vertex(start);
+			GL.Vertex(end);
+		}
+
 		//Draw the orbit overlay
-		internal static void drawOrbit(Rect maprect, SCANmap map, Vessel vessel, double startUT, Texture2D overlay_static, CelestialBody body)
+		internal static void drawOrbit(Rect maprect, SCANmap map, Vessel vessel, CelestialBody body)
 		{
 			if (vessel.mainBody != body) return;
 			int eqh = 16;
@@ -655,7 +661,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 				return;
 			bool lite = maprect.width < 400;
 			Orbit o = vessel.orbit;
-			startUT = Planetarium.GetUniversalTime();
+			double startUT = Planetarium.GetUniversalTime();
 			double UT = startUT;
 			int steps = 80; // increase for neater lines, decrease for better speed indication
 			bool ath = false;
@@ -800,8 +806,6 @@ namespace SCANsat.SCAN_UI.UI_Framework
 
 			if (o.PeA < 0)
 				return;
-			if (overlay_static == null)
-				return;
 			if (map.Projection == MapProjection.Polar)
 				return;
 
@@ -815,10 +819,10 @@ namespace SCANsat.SCAN_UI.UI_Framework
 				double tAN = (((MAAN - o.meanAnomaly * Mathf.Rad2Deg + 360) % 360) / 360f * o.period + startUT);
 				double tDN = (((MADN - o.meanAnomaly * Mathf.Rad2Deg + 360) % 360) / 360f * o.period + startUT);
 
-				if (SCANnewBigMap.eq_an_map == null || SCANnewBigMap.eq_dn_map == null || SCANnewBigMap.eq_an_map.Length != overlay_static.width)
+				if (SCANnewBigMap.eq_an_map == null || SCANnewBigMap.eq_dn_map == null || SCANnewBigMap.eq_an_map.Length != maprect.width)
 				{
-					SCANnewBigMap.eq_an_map = new int[overlay_static.width];
-					SCANnewBigMap.eq_dn_map = new int[overlay_static.width];
+					SCANnewBigMap.eq_an_map = new int[(int)maprect.width];
+					SCANnewBigMap.eq_dn_map = new int[(int)maprect.width];
 				}
 				if (SCANnewBigMap.eq_map == null || SCANnewBigMap.eq_map.width != SCANnewBigMap.eq_an_map.Length)
 				{
@@ -967,113 +971,112 @@ namespace SCANsat.SCAN_UI.UI_Framework
 
 		#region newOrbitOverlay
 
-		private static Color32 lineColor = new Color(1f, 1f, 1f, 0.6f);
-		private static Material lineMat = JUtil.DrawLineMaterial();
 
-		internal static void newOrbitLine(Rect mapRect, SCANmap map, Vessel v, Orbit o, double startUT, CelestialBody b, int steps)
-		{
-			if (steps == 0)
-				return;
-			double dTstep = Math.Floor(o.period / steps);
-			startUT = Planetarium.GetUniversalTime();
-			var points = new List<Vector2d>();
-			for (double time = (startUT - o.period); time < (startUT + o.period); time += dTstep)
-			{
-				bool collide;
-				Vector2d coord;
-				if (mapPosAtT(v, o, startUT, time, out coord, out collide))
-					points.Add(coord);
-				if (collide)
-					break;
-			}
-			//SCANUtil.SCANdebugLog("Orbit Line With {0} Points", points.Count);
-			drawTrail(mapRect, map, points, Vector2d.zero);
-		}
 
-		private static void drawTrail(Rect mapRect, SCANmap map, IList<Vector2d> points, Vector2d end, bool hasEnd = false)
-		{
-			if (points.Count < 2)
-				return;
-			GL.Begin(GL.LINES);
-			lineMat.SetPass(0);
-			GL.Color(lineColor);
-			float xStart, yStart;
-			float mapWidth = map.MapWidth;
-			float mapHeight = map.MapHeight;
-			xStart = (float)SCANUtil.fixLon(map.projectLongitude(points[0].x, points[0].y));
-			yStart = (float)SCANUtil.fixLat(map.projectLatitude(points[0].x, points[0].y));
-			xStart = (float)map.scaleLongitude(xStart);
-			yStart = (float)map.scaleLatitude(yStart);
-			if (xStart < 0 || yStart < 0 || yStart > 180 || xStart > 360)
-				return;
-			//SCANUtil.SCANdebugLog("Start Point Checks Out");
-			xStart = (xStart * mapWidth / 360f) + mapRect.x;
-			yStart = (map.MapHeight - yStart * map.MapHeight / 180f) + mapRect.y;
-			for (int i = 1; i < points.Count; i++)
-			{
-				float xEnd = (float)SCANUtil.fixLon(map.projectLongitude(points[i].x, points[i].y));
-				float yEnd = (float)SCANUtil.fixLat(map.projectLatitude(points[i].x, points[i].y));
-				xEnd = (float)map.scaleLongitude(xEnd);
-				yEnd = (float)map.scaleLatitude(yEnd);
-				//SCANUtil.SCANdebugLog("Checking Orbit End Point...");
-				if (xEnd < 0 || yEnd < 1|| yEnd > 179|| xEnd > 360)
-					continue;
-				xEnd = (xEnd* mapWidth / 360f) + mapRect.x;
-				yEnd = (mapHeight - yEnd * mapHeight / 180f) + mapRect.y;
+		//internal static void newOrbitLine(Rect mapRect, SCANmap map, Vessel v, Orbit o, double startUT, CelestialBody b, int steps)
+		//{
+		//	if (steps == 0)
+		//		return;
+		//	double dTstep = Math.Floor(o.period / steps);
+		//	startUT = Planetarium.GetUniversalTime();
+		//	var points = new List<Vector2d>();
+		//	for (double time = (startUT - o.period); time < (startUT + o.period); time += dTstep)
+		//	{
+		//		bool collide;
+		//		Vector2d coord;
+		//		if (mapPosAtT(v, o, startUT, time, out coord, out collide))
+		//			points.Add(coord);
+		//		if (collide)
+		//			break;
+		//	}
+		//	//SCANUtil.SCANdebugLog("Orbit Line With {0} Points", points.Count);
+		//	drawTrail(mapRect, map, points, Vector2d.zero);
+		//}
 
-				//SCANUtil.SCANdebugLog("Draw Line {0}", i);
-				drawLine(xStart, yStart, xEnd, yEnd, mapRect, mapWidth);
+		//private static void drawTrail(Rect mapRect, SCANmap map, IList<Vector2d> points, Vector2d end, bool hasEnd = false)
+		//{
+		//	if (points.Count < 2)
+		//		return;
+		//	GL.Begin(GL.LINES);
+		//	lineMat.SetPass(0);
+		//	GL.Color(lineColor);
+		//	float xStart, yStart;
+		//	float mapWidth = map.MapWidth;
+		//	float mapHeight = map.MapHeight;
+		//	xStart = (float)SCANUtil.fixLon(map.projectLongitude(points[0].x, points[0].y));
+		//	yStart = (float)SCANUtil.fixLat(map.projectLatitude(points[0].x, points[0].y));
+		//	xStart = (float)map.scaleLongitude(xStart);
+		//	yStart = (float)map.scaleLatitude(yStart);
+		//	if (xStart < 0 || yStart < 0 || yStart > 180 || xStart > 360)
+		//		return;
+		//	//SCANUtil.SCANdebugLog("Start Point Checks Out");
+		//	xStart = (xStart * mapWidth / 360f) + mapRect.x;
+		//	yStart = (map.MapHeight - yStart * map.MapHeight / 180f) + mapRect.y;
+		//	for (int i = 1; i < points.Count; i++)
+		//	{
+		//		float xEnd = (float)SCANUtil.fixLon(map.projectLongitude(points[i].x, points[i].y));
+		//		float yEnd = (float)SCANUtil.fixLat(map.projectLatitude(points[i].x, points[i].y));
+		//		xEnd = (float)map.scaleLongitude(xEnd);
+		//		yEnd = (float)map.scaleLatitude(yEnd);
+		//		//SCANUtil.SCANdebugLog("Checking Orbit End Point...");
+		//		if (xEnd < 0 || yEnd < 1|| yEnd > 179|| xEnd > 360)
+		//			continue;
+		//		xEnd = (xEnd* mapWidth / 360f) + mapRect.x;
+		//		yEnd = (mapHeight - yEnd * mapHeight / 180f) + mapRect.y;
 
-				xStart = xEnd;
-				yStart = yEnd;
-			}
-			GL.End();
-		}
+		//		//SCANUtil.SCANdebugLog("Draw Line {0}", i);
+		//		drawLine(xStart, yStart, xEnd, yEnd, mapRect, mapWidth);
 
-		private static void drawLine(float xStart, float yStart, float xEnd, float yEnd, Rect mapRect, float width)
-		{
-			var start = new Vector2(xStart, yStart);
-			var end = new Vector2(xEnd, yEnd);
+		//		xStart = xEnd;
+		//		yStart = yEnd;
+		//	}
+		//	GL.End();
+		//}
 
-			if (!mapRect.Contains(start) && !mapRect.Contains(end))
-				return;
+		//private static void drawLine(float xStart, float yStart, float xEnd, float yEnd, Rect mapRect, float width)
+		//{
+		//	var start = new Vector2(xStart, yStart);
+		//	var end = new Vector2(xEnd, yEnd);
 
-			//float leftX = Math.Min(start.x, end.x);
-			//float rightX = Math.Max(start.x, end.x);
+		//	if (!mapRect.Contains(start) && !mapRect.Contains(end))
+		//		return;
 
-			//if (leftX + width * 0.5f < rightX)
-			//{
-			//	if (start.x < end.x)
-			//		end.x -= width;
-			//	else
-			//		start.x -= width;
-			//}
+		//	//float leftX = Math.Min(start.x, end.x);
+		//	//float rightX = Math.Max(start.x, end.x);
 
-			GL.Vertex(start);
-			GL.Vertex(end);
-		}
+		//	//if (leftX + width * 0.5f < rightX)
+		//	//{
+		//	//	if (start.x < end.x)
+		//	//		end.x -= width;
+		//	//	else
+		//	//		start.x -= width;
+		//	//}
 
-		private static bool mapPosAtT(Vessel v, Orbit o, double start, double dT, out Vector2d Coord, out bool Collide)
-		{
-			Coord = Vector2d.zero;
-			Collide = false;
-			double UT = start + dT;
-			if (double.IsNaN(UT))
-				return false;
-			if (double.IsNaN(o.getObtAtUT(UT)))
-				return false;
-			double rotOffset = 0;
-			if (v.mainBody.rotates)
-				rotOffset = (360 * ((dT - start) / v.mainBody.rotationPeriod)) % 360;
-			Vector3d pos = o.getPositionAtUT(dT);
-			if (o.Radius(dT) < v.mainBody.Radius + v.mainBody.getElevation(pos))
-			{
-				Collide = true;
-				return false;
-			}
-			Coord = new Vector2d(v.mainBody.GetLongitude(pos) - rotOffset, v.mainBody.GetLatitude(pos));
-			return true;
-		}
+		//	GL.Vertex(start);
+		//	GL.Vertex(end);
+		//}
+
+		//private static bool mapPosAtT(Vessel v, Orbit o, double start, double dT, out Vector2d Coord, out bool Collide)
+		//{
+		//	Coord = Vector2d.zero;
+		//	Collide = false;
+		//	double UT = start + dT;
+		//	if (double.IsNaN(UT))
+		//		return false;
+		//	if (double.IsNaN(o.getObtAtUT(UT)))
+		//		return false;
+		//	double rotOffset = 0;
+		//	if (v.mainBody.rotates)
+		//		rotOffset = (360 * ((dT - start) / v.mainBody.rotationPeriod)) % 360;
+		//	Vector3d pos = o.getPositionAtUT(dT);
+		//	if (o.Radius(dT) < v.mainBody.Radius + v.mainBody.getElevation(pos))
+		//	{
+		//		Collide = true;
+		//		return false;
+		//	}
+		//	Coord = new Vector2d(v.mainBody.GetLongitude(pos) - rotOffset, v.mainBody.GetLatitude(pos));
+		//	return true;
+		//}
 
 		#endregion
 
