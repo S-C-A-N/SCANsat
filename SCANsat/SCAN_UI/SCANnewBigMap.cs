@@ -446,6 +446,8 @@ namespace SCANsat.SCAN_UI
 		{
 			MapTexture = bigmap.getPartialMap();
 
+			double scale = bigmap.MapScale;
+
 			//Set minimum map size during re-sizing
 			dW = resizeW;
 			if (dW < WindowRect_Min.width)
@@ -456,6 +458,7 @@ namespace SCANsat.SCAN_UI
 			if (IsResizing)
 			{
 				GUILayout.Label("", GUILayout.Width(dW), GUILayout.Height(dH));
+				scale = dW / 360;
 			}
 			else
 			{
@@ -515,7 +518,7 @@ namespace SCANsat.SCAN_UI
 			if (SCANcontroller.controller.map_grid)
 			{
 				GL.PushMatrix();
-				SCANuiUtil.drawGridLine(TextureRect, bigmap);
+				SCANuiUtil.drawGridLine(TextureRect, bigmap, scale);
 				GL.PopMatrix();
 			}
 
