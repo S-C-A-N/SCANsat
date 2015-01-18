@@ -634,7 +634,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 				xEnd += left;
 				yEnd += top;
 
-				drawLine(xStart, yStart, xEnd, yEnd, mapWidth);
+				drawLine(xStart, yStart, xEnd, yEnd);
 
 				xStart = xEnd;
 				yStart = yEnd;
@@ -642,7 +642,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			GL.End();
 		}
 
-		private static void drawLine(float xStart, float yStart, float xEnd, float yEnd, float width)
+		private static void drawLine(float xStart, float yStart, float xEnd, float yEnd)
 		{
 			var start = new Vector2(xStart, yStart);
 			var end = new Vector2(xEnd, yEnd);
