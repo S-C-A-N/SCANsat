@@ -130,7 +130,7 @@ namespace SCANsat.SCAN_UI
 		//Display current biome info
 		private bool biomeInfo(int id)
 		{
-			if ((sensors & SCANtype.Biome) != SCANtype.Nothing)
+			if ((sensors & SCANtype.Biome) != SCANtype.Nothing && FlightGlobals.ActiveVessel.mainBody.BiomeMap != null)
 			{
 				GUILayout.Label(string.Format("Biome:  {0}", SCANUtil.getBiomeName(FlightGlobals.ActiveVessel.mainBody, FlightGlobals.ActiveVessel.longitude, FlightGlobals.ActiveVessel.latitude)), SCANskins.SCAN_insColorLabel);
 				fillS(-10);
