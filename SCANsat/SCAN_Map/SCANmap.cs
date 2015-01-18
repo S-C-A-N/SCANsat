@@ -12,6 +12,7 @@
 #endregion
 
 using System;
+using System.IO;
 using UnityEngine;
 using SCANsat.SCAN_Platform.Palettes;
 using SCANsat.SCAN_Platform.Logging;
@@ -355,7 +356,6 @@ namespace SCANsat.SCAN_Map
 		private SCANresource resource;
 		private SCANmapLegend mapLegend;
 		private int mapstep; // all refs are below
-		private bool mapsaved; // all refs are below
 		private double[] mapline; // all refs are below
 
 		/* MAP: nearly trivial functions */
@@ -380,7 +380,6 @@ namespace SCANsat.SCAN_Map
 		public void resetMap()
 		{
 			mapstep = 0;
-			mapsaved = false;
 			if (SCANcontroller.controller.GlobalResourceOverlay)
 			{ //Make sure that a resource is initialized if necessary
 				if (resource == null && body != null) resource = SCANcontroller.controller.ResourceList[SCANcontroller.controller.resourceSelection][body.name];
@@ -399,26 +398,28 @@ namespace SCANsat.SCAN_Map
 		/* MAP: export: PNG file */
 		internal void exportPNG()
 		{
-			string mode;
+			string path = Path.Combine(new DirectoryInfo(KSPUtil.ApplicationRootPath).FullName, "GameData/SCANsat/PluginData/").Replace("\\", "/");
+			string mode = "";
 
 			switch (mType)
 			{
 				case mapType.Altimetry: mode = "elevation"; break;
 				case mapType.Slope: mode = "slope"; break;
 				case mapType.Biome: mode = "biome"; break;
-				default: mode = "unknown"; break;
 			}
 			if (SCANcontroller.controller.map_ResourceOverlay && SCANcontroller.controller.GlobalResourceOverlay && !string.IsNullOrEmpty(SCANcontroller.controller.resourceSelection))
 				mode += "-" + SCANcontroller.controller.resourceSelection;
 			if (SCANcontroller.controller.colours == 1)
 				mode += "-grey";
-			string filename = body.name + "_" + mode + "_" + map.width.ToString() + "x" + map.height.ToString();
+			string filename = string.Format("{0}_{1}_{2}x{3}", body.name, mode, map.width, map.height);
 			if (projection != MapProjection.Rectangular)
 				filename += "_" + projection.ToString();
 			filename += ".png";
-			KSP.IO.File.WriteAllBytes<SCANdata>(map.EncodeToPNG(), filename, null);
-			mapsaved = true;
-			ScreenMessages.PostScreenMessage("Map saved: " + filename, 5, ScreenMessageStyle.UPPER_CENTER);
+
+			string fullPath = Path.Combine(path, filename);
+			System.IO.File.WriteAllBytes(fullPath, map.EncodeToPNG());
+
+			ScreenMessages.PostScreenMessage("Map saved: GameData/SCANsat/PluginData/" + filename, 8, ScreenMessageStyle.UPPER_CENTER);
 		}
 
 		/* MAP: build: map to Texture2D */
