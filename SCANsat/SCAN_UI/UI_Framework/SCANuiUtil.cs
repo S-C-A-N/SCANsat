@@ -162,10 +162,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 						{
 							double amount = SCANUtil.RegolithOverlay(lat, lon, mapObj.Resource.Name, mapObj.Body.flightGlobalsIndex);
 							string label;
-							//if (mapObj.resource.linear) //Make sure that ORS values are handled correctly based on which scale type they use
 								label = amount.ToString("P2");
-							//else
-							//	label = (amount * 1000000).ToString("N1") + " ppm";
 							info += palette.colored(mapObj.Resource.FullColor, mapObj.Resource.Name + ": " + label);
 						}
 					}
