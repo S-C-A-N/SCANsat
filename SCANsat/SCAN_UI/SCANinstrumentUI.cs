@@ -157,7 +157,8 @@ namespace SCANsat.SCAN_UI
 				if (v.mainBody.pqsController != null)
 				{
 					pqs = v.PQSAltitude();
-					h -= pqs;
+					if (pqs > 0 || !v.mainBody.ocean)
+						h -= pqs;
 				}
 				if (h < 0)
 					h = v.altitude;
