@@ -50,9 +50,9 @@ namespace SCANsat.SCAN_Toolbar
 				yield return null;
 
 			if (HighLogic.LoadedScene == GameScenes.FLIGHT)
-				SCANappLauncherButton = ApplicationLauncher.Instance.AddModApplication(toggleFlightOn, toggleFlightOff, null, null, null, null, ApplicationLauncher.AppScenes.FLIGHT | ApplicationLauncher.AppScenes.MAPVIEW, SCANskins.SCAN_SmallMapIcon);
+				SCANappLauncherButton = ApplicationLauncher.Instance.AddModApplication(toggleFlightOn, toggleFlightOff, null, null, null, null, ApplicationLauncher.AppScenes.FLIGHT | ApplicationLauncher.AppScenes.MAPVIEW, SCANskins.SCAN_SmallMapAppIcon);
 			else if (HighLogic.LoadedScene == GameScenes.SPACECENTER || HighLogic.LoadedScene == GameScenes.TRACKSTATION)
-				SCANappLauncherButton = ApplicationLauncher.Instance.AddModApplication(toggleKSCOn, toggleKSCOff, null, null, null, null, ApplicationLauncher.AppScenes.SPACECENTER | ApplicationLauncher.AppScenes.TRACKSTATION, SCANskins.SCAN_BigMapIcon);
+				SCANappLauncherButton = ApplicationLauncher.Instance.AddModApplication(toggleKSCOn, toggleKSCOff, null, null, null, null, ApplicationLauncher.AppScenes.SPACECENTER | ApplicationLauncher.AppScenes.TRACKSTATION, SCANskins.SCAN_BigMapAppIcon);
 
 			GameEvents.onGUIApplicationLauncherUnreadifying.Add(removeButton);
 		}

@@ -99,6 +99,10 @@ namespace SCANsat.SCAN_UI.UI_Framework
 		internal static Texture2D SCAN_SmallMapIcon;
 		internal static Texture2D SCAN_BigMapIcon;
 
+		//App Launcher Textures
+		internal static Texture2D SCAN_SmallMapAppIcon;
+		internal static Texture2D SCAN_BigMapAppIcon;
+
 		protected override void OnGUI_FirstRun()
 		{
 			initializeTextures();
@@ -126,6 +130,8 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			SCAN_BigMapIcon = GameDatabase.Instance.GetTexture("SCANsat/Icons/SCANsat_Map_Icon", false);
 			SCAN_ScreenshotIcon = GameDatabase.Instance.GetTexture("SCANsat/Icons/SCAN_Screenshot_Icon", false);
 			SCAN_ResizeIcon = GameDatabase.Instance.GetTexture("SCANsat/Icons/SCAN_Resize_Icon", false);
+			SCAN_SmallMapAppIcon = GameDatabase.Instance.GetTexture("SCANsat/Icons/SCANsat_AppLauncherSmall_Icon", false);
+			SCAN_BigMapAppIcon = GameDatabase.Instance.GetTexture("SCANsat/Icons/SCANsat_AppLauncherLarge_Icon", false);
 		}
 
 		private static void initializeColors()
