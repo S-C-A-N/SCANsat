@@ -520,12 +520,16 @@ namespace SCANsat.SCAN_UI.UI_Framework
 		//	tex.SetPixel(x, y + 1, palette.black);
 		//}
 
-		private static Color32 lineColor = new Color(1f, 1f, 1f, 0.95f);
+		internal static Color32 lineColor = new Color(1f, 1f, 1f, 1f);
+		internal static Color32 blackLineColor = new Color(0f, 0f, 0f, 0.9f);
 		private static Material lineMat = JUtil.DrawLineMaterial();
 
-		internal static List<List<Vector2d>> drawGridLine(Rect maprect, SCANmap map)
+		internal static Dictionary<int, List<List<Vector2d>>> drawGridLine(Rect maprect, SCANmap map)
 		{
-			var lineList = new List<List<Vector2d>>();
+			var lineDict = new Dictionary<int, List<List<Vector2d>>>();
+			var whiteLineList = new List<List<Vector2d>>();
+			var blackLineList = new List<List<Vector2d>>();
+
 			switch (map.Projection)
 			{
 				case MapProjection.Rectangular:
@@ -533,18 +537,26 @@ namespace SCANsat.SCAN_UI.UI_Framework
 						for (double lon = -150; lon <= 150; lon += 30)
 						{
 							List<Vector2d> points = new List<Vector2d>();
-							points.Add(new Vector2d(map.MapScale * (lon + 180), 0));
-							points.Add(new Vector2d(map.MapScale * (lon + 180), map.MapScale * 180));
+							List<Vector2d> pointsBlack = new List<Vector2d>();
+							points.Add(new Vector2d((int)(map.MapScale * (lon + 180)), 0));
+							points.Add(new Vector2d((int)(map.MapScale * (lon + 180)), (int)(map.MapScale * 180)));
+							pointsBlack.Add(new Vector2d(points[0].x + 1, points[0].y));
+							pointsBlack.Add(new Vector2d(points[1].x + 1, points[1].y));
 
-							lineList.Add(points);
+							whiteLineList.Add(points);
+							blackLineList.Add(pointsBlack);
 						}
 						for (double lat = -60; lat <= 60; lat += 30)
 						{
 							List<Vector2d> points = new List<Vector2d>();
-							points.Add(new Vector2d(0, map.MapScale * (lat + 90)));
-							points.Add(new Vector2d(map.MapScale * 360, map.MapScale * (lat + 90)));
+							List<Vector2d> pointsBlack = new List<Vector2d>();
+							points.Add(new Vector2d(0, (int)(map.MapScale * (lat + 90))));
+							points.Add(new Vector2d((int)(map.MapScale * 360), (int)(map.MapScale * (lat + 90))));
+							pointsBlack.Add(new Vector2d(points[0].x, points[0].y - 1));
+							pointsBlack.Add(new Vector2d(points[1].x, points[1].y - 1));
 
-							lineList.Add(points);
+							whiteLineList.Add(points);
+							blackLineList.Add(pointsBlack);
 						}
 							break;
 					}
@@ -553,19 +565,29 @@ namespace SCANsat.SCAN_UI.UI_Framework
 						for (double lon = -150; lon <= 150; lon += 30)
 						{
 							List<Vector2d> points = new List<Vector2d>();
+							List<Vector2d> pointsBlack = new List<Vector2d>();
+							int i = 0;
 							for (double lat = -88; lat <= 88; lat += 4)
 							{
-								points.Add(new Vector2d(map.MapScale * (map.projectLongitude(lon, lat) + 180), map.MapScale * (map.projectLatitude(lon, lat) + 90)));
+								points.Add(new Vector2d((int)(map.MapScale * (map.projectLongitude(lon, lat) + 180)), (int)(map.MapScale * (map.projectLatitude(lon, lat) + 90))));
+								pointsBlack.Add(new Vector2d(points[i].x + 1, points[i].y));
+								i++;
 							}
-							lineList.Add(points);
+
+							whiteLineList.Add(points);
+							blackLineList.Add(pointsBlack);
 						}
 						for (double lat = -60; lat <= 60; lat += 30)
 						{
 							List<Vector2d> points = new List<Vector2d>();
-							points.Add(new Vector2d(map.MapScale * (map.projectLongitude(-179, lat) + 180), map.MapScale * (lat + 90)));
-							points.Add(new Vector2d(map.MapScale * (map.projectLongitude(179, lat) + 180), map.MapScale * (lat + 90)));
+							List<Vector2d> pointsBlack = new List<Vector2d>();
+							points.Add(new Vector2d((int)(map.MapScale * (map.projectLongitude(-179, lat) + 180)), (int)(map.MapScale * (lat + 90))));
+							points.Add(new Vector2d((int)(map.MapScale * (map.projectLongitude(179, lat) + 180)), (int)(map.MapScale * (lat + 90))));
+							pointsBlack.Add(new Vector2d(points[0].x, points[0].y - 1));
+							pointsBlack.Add(new Vector2d(points[1].x, points[1].y - 1));
 
-							lineList.Add(points);
+							whiteLineList.Add(points);
+							blackLineList.Add(pointsBlack);
 						}
 						break;
 					}
@@ -574,16 +596,16 @@ namespace SCANsat.SCAN_UI.UI_Framework
 						for (double lon = -180; lon <= 150; lon += 30)
 						{
 							List<Vector2d> pointsS = new List<Vector2d>();
-							pointsS.Add(new Vector2d(map.MapScale * (map.projectLongitude(lon, -88) + 180), map.MapScale * (map.projectLatitude(lon, -88) + 90)));
-							pointsS.Add(new Vector2d(map.MapScale * (map.projectLongitude(lon, -2) + 180), map.MapScale * (map.projectLatitude(lon, -2) + 90)));
+							pointsS.Add(new Vector2d((int)(map.MapScale * (map.projectLongitude(lon, -88) + 180)), (int)(map.MapScale * (map.projectLatitude(lon, -88) + 90))));
+							pointsS.Add(new Vector2d((int)(map.MapScale * (map.projectLongitude(lon, -2) + 180)), (int)(map.MapScale * (map.projectLatitude(lon, -2) + 90))));
 
-							lineList.Add(pointsS);
+							whiteLineList.Add(pointsS);
 
 							List<Vector2d> pointsN = new List<Vector2d>();
-							pointsN.Add(new Vector2d(map.MapScale * (map.projectLongitude(lon, 2) + 180), map.MapScale * (map.projectLatitude (lon, 2) + 90)));
-							pointsN.Add(new Vector2d(map.MapScale * (map.projectLongitude(lon, 88) + 180), map.MapScale * (map.projectLatitude(lon, 88) + 90)));
+							pointsN.Add(new Vector2d((int)(map.MapScale * (map.projectLongitude(lon, 2) + 180)), (int)(map.MapScale * (map.projectLatitude (lon, 2) + 90))));
+							pointsN.Add(new Vector2d((int)(map.MapScale * (map.projectLongitude(lon, 88) + 180)), (int)(map.MapScale * (map.projectLatitude(lon, 88) + 90))));
 
-							lineList.Add(pointsN);
+							whiteLineList.Add(pointsN);
 						}
 						for (double lat = -88; lat <= 88; lat += 2)
 						{
@@ -594,9 +616,9 @@ namespace SCANsat.SCAN_UI.UI_Framework
 									List<Vector2d> points = new List<Vector2d>();
 									for (double lon = -180; lon <= 180; lon += 4)
 									{
-										points.Add(new Vector2d(map.MapScale * (map.projectLongitude(lon, lat) + 180), map.MapScale * (map.projectLatitude(lon, lat) + 90)));
+										points.Add(new Vector2d((int)(map.MapScale * (map.projectLongitude(lon, lat) + 180)), (int)(map.MapScale * (map.projectLatitude(lon, lat) + 90))));
 									}
-									lineList.Add(points);
+									whiteLineList.Add(points);
 								}
 							}
 						}
@@ -604,16 +626,19 @@ namespace SCANsat.SCAN_UI.UI_Framework
 					}
 			}
 
-			return lineList;
+			lineDict.Add(0, blackLineList);
+			lineDict.Add(1, whiteLineList);
+
+			return lineDict;
 		}
 
-		internal static void drawGridLines(IList<Vector2d> points, float mapWidth, float left, float top)
+		internal static void drawGridLines(IList<Vector2d> points, float mapWidth, float left, float top, Color c)
 		{
 			if (points.Count < 2)
 				return;
 			GL.Begin(GL.LINES);
 			lineMat.SetPass(0);
-			GL.Color(lineColor);
+			GL.Color(c);
 			float xStart, yStart;
 			xStart = (float)points[0].x;
 			yStart = (mapWidth / 2) - (float)points[0].y;
