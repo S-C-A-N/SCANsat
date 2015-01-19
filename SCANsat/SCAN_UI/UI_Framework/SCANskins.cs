@@ -231,15 +231,13 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			SCAN_insColorLabel = new GUIStyle(SCAN_label);
 			SCAN_insColorLabel.name = "SCAN_InsColorLabel";
 			SCAN_insColorLabel.alignment = TextAnchor.MiddleCenter;
-			SCAN_insColorLabel.font = dotty;
-			SCAN_insColorLabel.fontSize = 36;
+			SCAN_insColorLabel.fontSize = 20;
 
 			SCAN_insWhiteLabel = new GUIStyle(SCAN_whiteReadoutLabel);
 			SCAN_insWhiteLabel.name = "SCAN_InsWhiteLabel";
 			SCAN_insWhiteLabel.alignment = TextAnchor.MiddleCenter;
 			SCAN_insWhiteLabel.fontStyle = FontStyle.Normal;
-			SCAN_insWhiteLabel.font = dotty;
-			SCAN_insWhiteLabel.fontSize = 36;
+			SCAN_insWhiteLabel.fontSize = 20;
 
 			SCAN_anomalyOverlay = new GUIStyle(SCAN_SkinsLibrary.DefUnitySkin.label);
 			SCAN_anomalyOverlay.name = "SCAN_AnomalyOverlay";
