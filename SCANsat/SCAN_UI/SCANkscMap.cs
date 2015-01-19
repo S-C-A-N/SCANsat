@@ -33,7 +33,7 @@ namespace SCANsat.SCAN_UI
 		private bool drawGrid, currentGrid, currentColor, lastColor, lastResource, spaceCenterLock, trackingStationLock;
 		private bool drop_down_open, projection_drop_down, mapType_drop_down, resources_drop_down, planetoid_drop_down;
 		//private Texture2D overlay_static;
-		private List<List<Vector2d>> gridLines = new List<List<Vector2d>>();
+		private Dictionary<int, List<List<Vector2d>>> gridLines = new Dictionary<int, List<List<Vector2d>>>();
 		private Rect ddRect, zoomCloseRect;
 		private Rect rc = new Rect(0, 0, 20, 20);
 		private Vector2 scrollP, scrollR;
@@ -442,7 +442,7 @@ namespace SCANsat.SCAN_UI
 
 			if (drawGrid)
 			{
-				gridLines = new List<List<Vector2d>>();
+				gridLines = new Dictionary<int, List<List<Vector2d>>>();
 				gridLines = SCANuiUtil.drawGridLine(TextureRect, bigmap);
 				drawGrid = false;
 			}
@@ -463,9 +463,9 @@ namespace SCANsat.SCAN_UI
 				if (gridLines.Count > 0)
 				{
 					GL.PushMatrix();
-					foreach (List<Vector2d> points in gridLines)
+					foreach (List<Vector2d> points in gridLines[0])
 					{
-						SCANuiUtil.drawGridLines(points, bigmap.MapWidth, TextureRect.x, TextureRect.y);
+						//SCANuiUtil.drawGridLines(points, bigmap.MapWidth, TextureRect.x, TextureRect.y);
 					}
 					GL.PopMatrix();
 				}
