@@ -50,11 +50,48 @@ namespace SCANsat.SCAN_Toolbar
 				yield return null;
 
 			if (HighLogic.LoadedScene == GameScenes.FLIGHT)
+			{
 				SCANappLauncherButton = ApplicationLauncher.Instance.AddModApplication(toggleFlightOn, toggleFlightOff, null, null, null, null, ApplicationLauncher.AppScenes.FLIGHT | ApplicationLauncher.AppScenes.MAPVIEW, SCANskins.SCAN_SmallMapAppIcon);
+				if (SCANcontroller.controller.mainMapVisible)
+					setAppLauncherToTrue();
+			}
 			else if (HighLogic.LoadedScene == GameScenes.SPACECENTER || HighLogic.LoadedScene == GameScenes.TRACKSTATION)
+			{
 				SCANappLauncherButton = ApplicationLauncher.Instance.AddModApplication(toggleKSCOn, toggleKSCOff, null, null, null, null, ApplicationLauncher.AppScenes.SPACECENTER | ApplicationLauncher.AppScenes.TRACKSTATION, SCANskins.SCAN_BigMapAppIcon);
+				if (SCANcontroller.controller.kscMapVisible)
+					setAppLauncherToTrue();
+			}
 
 			GameEvents.onGUIApplicationLauncherUnreadifying.Add(removeButton);
+		}
+
+		private void setAppLauncherToTrue()
+		{
+			float timeLimit = 5f;
+			DateTime timer = DateTime.Now;
+			bool appTrue = false;
+
+			while (!appTrue)
+			{
+				if (SCANappLauncherButton.State != RUIToggleButton.ButtonState.TRUE)
+				{
+					if (timer.AddSeconds(timeLimit) < DateTime.Now)
+					{
+						appTrue = true;
+						SCANUtil.SCANlog("Applauncher Button failed to be set to active state after {0:F0} seconds...", timeLimit);
+					}
+					else
+					{
+						SCANappLauncherButton.SetTrue(true);
+						SCANUtil.SCANdebugLog("Set Applauncher Button to true");
+					}
+				}
+				else
+				{
+					appTrue = true;
+					SCANUtil.SCANdebugLog("App Launcher Already Set To True");
+				}
+			}
 		}
 
 		private void removeButton(GameScenes scene)
