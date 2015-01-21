@@ -323,30 +323,29 @@ namespace SCANsat.SCAN_Map
 			return lon;
 		}
 
-		private int unScaleLatitude(double lat)
+		private double unScaleLatitude(double lat)
 		{
 			lat -= lat_offset;
 			lat += 90;
 			lat *= mapscale;
-			int ilat = Mathf.RoundToInt((float)lat);
-			if (ilat < 0)
-				ilat = 0;
-			if (ilat >= mapheight)
-				ilat = mapheight - 1;
-			return ilat;
+			return lat;
 		}
 
-		private int unScaleLongitude(double lon)
+		private double unScaleLongitude(double lon)
 		{
 			lon -= lon_offset;
 			lon += 180;
 			lon *= mapscale;
-			int ilon = Mathf.RoundToInt((float)lon);
-			if (ilon < 0)
-				ilon = 0;
-			if (ilon >= mapwidth)
-				ilon = mapwidth - 1;
-			return ilon;
+			return lon;
+		}
+
+		private double fixUnscale(double value, int size)
+		{
+			if (value < 0)
+				value = 0;
+			else if (value >= size - 0.5)
+				value = size - 1;
+			return value;
 		}
 
 		/* MAP: internal state */
@@ -837,7 +836,9 @@ namespace SCANsat.SCAN_Map
 			{
 				if (cache)
 				{
-					elevation = big_heightmap[unScaleLongitude(Lon), unScaleLatitude(Lat)];
+					double lon = fixUnscale(unScaleLongitude(Lon), mapwidth);
+					double lat = fixUnscale(unScaleLatitude(Lat), mapheight);
+					elevation = big_heightmap[(int)lon, (int)lat];
 					if (elevation== 0f)
 						elevation = (float)SCANUtil.getElevation(body, Lon, Lat);
 				}
@@ -848,7 +849,9 @@ namespace SCANsat.SCAN_Map
 			{
 				if (cache)
 				{
-					elevation = big_heightmap[(unScaleLongitude(Lon) * 5) / 5, (unScaleLatitude(Lat) * 5) / 5];
+					double lon = fixUnscale(unScaleLongitude(Lon), mapwidth);
+					double lat = fixUnscale(unScaleLatitude(Lat), mapheight);
+					elevation = big_heightmap[((int)(lon * 5)) / 5, ((int)(lat * 5)) / 5];
 					if (elevation == 0f)
 						elevation = (float)SCANUtil.getElevation(body, ((int)(Lon * 5)) / 5, ((int)(Lat * 5)) / 5);
 				}
