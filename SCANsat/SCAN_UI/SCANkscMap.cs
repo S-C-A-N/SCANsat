@@ -465,7 +465,11 @@ namespace SCANsat.SCAN_UI
 					GL.PushMatrix();
 					foreach (List<Vector2d> points in gridLines[0])
 					{
-						//SCANuiUtil.drawGridLines(points, bigmap.MapWidth, TextureRect.x, TextureRect.y);
+						SCANuiUtil.drawGridLines(points, bigmap.MapWidth, TextureRect.x, TextureRect.y, SCANuiUtil.blackLineColor);
+					}
+					foreach (List<Vector2d> points in gridLines[1])
+					{
+						SCANuiUtil.drawGridLines(points, bigmap.MapWidth, TextureRect.x, TextureRect.y, SCANuiUtil.lineColor);
 					}
 					GL.PopMatrix();
 				}
