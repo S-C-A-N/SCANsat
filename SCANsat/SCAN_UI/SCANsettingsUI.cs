@@ -364,7 +364,7 @@ namespace SCANsat.SCAN_UI
 			if (warningBoxOne)
 			{
 				CelestialBody thisBody = FlightGlobals.currentMainBody;
-				warningRect = new Rect(WindowRect.width - (WindowRect.width / 2)- 150, WindowRect.height - 160, 300, 90);
+				warningRect = new Rect(WindowRect.width - (WindowRect.width / 2)- 150, WindowRect.height - 125, 300, 90);
 				GUI.Box(warningRect, "", SCANskins.SCAN_dropDownBox);
 				Rect r = new Rect(warningRect.x + 10, warningRect.y + 5, 280, 40);
 				GUI.Label(r, "Erase all data for " + thisBody.theName + "?", SCANskins.SCAN_headlineSmall);
