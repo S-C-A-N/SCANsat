@@ -413,7 +413,7 @@ from ocean to solid terrain more pronounced.
 All stock KSP planets have default color palette and terrain height values appropriate for the planet's terrain. Standard default values are used
 for any addon planets.
 
-### [:top:][top] 8. Instruments Window
+### [:top:][top] 8. Instrument Window
 ------------------------------------------
 
 The instruments window provides a readout of several types of data based on current scanning coverage.
