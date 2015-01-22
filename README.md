@@ -112,7 +112,7 @@ For licensing information, please see the [included LICENSE.txt][SCANsat:rel-lic
   * [Career Mode] Does SCANsat give us science points?
     * **Yes!** For each type of map, if you scan at least 30% of the surface, you can yse Data for partial science points; up until the maximum value at 95% map coverage.
   * [Career Mode] Is it integrated into the tech tree?
-    * **Yes!** This link tells you which nodes unlock which parts in the tech tree.
+    * **Yes!** [**This link**][6a] tells you which nodes unlock which parts in the tech tree.
   * [Contracts] Does SCANsat offer contracts to complete?
     * **Yes/No.** Contracts are currently only supported through [**third-party addons**][6d].
   * Can you add <some feature or change> to SCANsat?
