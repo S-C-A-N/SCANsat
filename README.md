@@ -92,6 +92,8 @@ As of August 2014, the vast majority of code is damny's and DMagic's; and techno
 
 In addition to the authors, the following people have contributed:
   + (Models, Graphics, Textures) [Milkshakefiend][Milkshakefiend]
+  
+  + (Science results text) [Olympic1][Olympic1]
 
 #### Licenses
 
@@ -426,6 +428,7 @@ sneaky then they can of course be sneaky.
 [DMagic]: http://forum.kerbalspaceprogram.com/members/59127-DMagic
 [damny]: http://forum.kerbalspaceprogram.com/members/80692-damny
 [Milkshakefiend]: http://forum.kerbalspaceprogram.com/members/72507-Milkshakefiend
+[Olympic1]: http://forum.kerbalspaceprogram.com/members/81815
 
 [KSP:developers]: https://kerbalspaceprogram.com/index.php
 [KSP:reddit]: http://www.reddit.com/r/KerbalSpaceProgram
