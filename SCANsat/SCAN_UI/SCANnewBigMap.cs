@@ -740,7 +740,8 @@ namespace SCANsat.SCAN_UI
 							SCANcontroller.controller.resourceOverlayType = 1;
 						else
 							SCANcontroller.controller.resourceOverlayType = 0;
-						bigmap.resetMap();
+						if (SCANcontroller.controller.map_ResourceOverlay)
+							bigmap.resetMap();
 						drop_down_open = false;
 						SCANUtil.SCANdebugLog("Resource {0} Selected; Min Value: {1}; Max Value: {2}", bigmap.Resource.Name, bigmap.Resource.MinValue, bigmap.Resource.MaxValue);
 					}

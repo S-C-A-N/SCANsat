@@ -678,7 +678,8 @@ namespace SCANsat.SCAN_UI
 							SCANcontroller.controller.resourceOverlayType = 1;
 						else
 							SCANcontroller.controller.resourceOverlayType = 0;
-						bigmap.resetMap();
+						if (SCANcontroller.controller.map_ResourceOverlay)
+							bigmap.resetMap();
 						drop_down_open = false;
 					}
 					GUI.EndScrollView();
