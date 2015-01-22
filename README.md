@@ -28,8 +28,8 @@
 * [2. Types of Scans][2]
   * [a. Native SCANsat][2a]
   * [b. Resource Scans][2b]
-  * [1. Kethane][2b1] [![][shield:support-ket]][kethane:release][![][shield:jenkins-ket]][SCANsat:ket-jenkins]
-  * [2. Regolith][2b2]
+  * [1. Regolith][2b1]
+  * [2. Kethane][2b2] [![][shield:support-ket]][kethane:release][![][shield:jenkins-ket]][SCANsat:ket-jenkins]
 * [3. Basic Usage][3]
   * [a. FAQ: Finding a Good Altitude][3a]
   * [b. Mismatched Scanners][3b]
@@ -45,6 +45,7 @@
   * [a. Community Tech Tree Support][6a]
   * [b. Minimum Scan for Science (30%)][6b]
   * [c. Getting Maximum Science][6c]
+  * [d. Contracts][6d]
 * [7. Background Scanning][7]
 * [8. Time Warp][8]
 * [9. Note: Data Sources][9]
@@ -148,7 +149,7 @@ S.C.A.N. is proud to collaborate with other KSP mods and modding teams. Followin
   * [x] [**v8.0**][SCANsat:rel-thread] SCANsat Release **version: v8.0**
   * [x] [**v9.0**][SCANsat:dev-thread] SCANsat Dev **version: v9.0**
 
- **MM**, **RPM**, and **Toolbar** are all **soft** dependencies. This means your experience with SCANsat will be enhanced if you are using these mods, but they are not necessary.
+ **MM**, **RPM**, **Toolbar**, and **Resource Addons** are all **soft** dependencies. This means your experience with SCANsat will be enhanced if you are using these mods, but they are not necessary.
 
 **SCANsat** is built against the following mods:
   * [x] [![][shield:support-mm]][mm:release]
@@ -190,27 +191,37 @@ Data Type | Scan Type | Scan Indicator
 :--- | :--- | :---:
 Altimetry | **RADAR** | **LO**
 Altimetry | **SAR** | **HI**
-Biome | **Biome** | **BIO**
-Anomaly | **Anomaly** | **ANOM**
+Biome | **Biome** | **MULTI**
+Anomaly | **Anomaly** | **MULTI**
 Anomaly | **Been There, Done That(tm)** | **BTDT**
 
 * The **Slope** map is generated from either **HI** or **LO** data.
-* The **Biome** scan only works for bodies that have biomes. For vanilla KSP, this means Kerbin, Mun, and Minmus.
-* **Anomalies** are things the builds of KSC, hidden easter eggs, lowest or highest altitudes, etc...
-* The *ANOM** data scans for anomalies from orbit, while
+* The **Biome** scan only works for bodies that have biomes. For vanilla KSP, this means all planets except the sun and Jool.
+* **Anomalies** are things the builds of KSC, hidden easter eggs, etc...
+* The *Anomaly** data scans for anomalies from orbit, while
 * **BTDT** shows a camera view of an anomaly once you are near it
+* The **Biome** and **Anomaly** scans are combined into the multi-spectral scanner; indicated by **MULTI**
 
 #### [:top:][top] b. Resource Scans
 
-**SCANsat** will scan planetoids for resources, assuming you have the relevant mods installed. All support for resource scanning is handled through one of two plugins. **ORS** supports many resources, and **Kethane** supports a few. 
+**SCANsat** will scan planetoids for resources, assuming you have the relevant mods installed. All support for resource scanning is handled through one of two plugins. **Regolith** supports many resources, and **Kethane** supports a few. 
+
+Resource scans are initiated in the same way as any other scan. In this case they must use custom scanner parts included with the resource addon.
+> ![][resource-scanner]
 
 Each of the two resource systems can be enabled through the **SCANsat** Big Map:
 > ![][resource-walkthrough-v2]
 
-Both of the two resource systems will work in IVA, too:
-> ![][resource-iva]
+##### [:top:][top] 1. Regolith
+[![][shield:jenkins-orsx]][SCANsat:orsx-jenkins]
 
-##### [:top:][top] 1. Kethane
+**Regolith** support is built internal to SCANsat. If you have a **Regolith** DLL loaded anywhere SCANsat will only target the newest version.
+
+With any **Regolith**-using mod installed, you can select their resources in the drop down menu from the Big Map or KSC Map, and enable their overlay with the resource icon.
+For instance the **Karbonite** mod's resources can be viewed:
+> ![][resource-orsx-karbonite-v2]
+
+##### [:top:][top] 2. Kethane
 [![][shield:jenkins-ket]][SCANsat:ket-jenkins]
 
 **Kethane** support is built using an included extra DLL file. 
@@ -220,18 +231,8 @@ This file will only be loaded if you have a Kethane installed in its usual locat
 Once it is installed correctly, you will be able to enable Kethane resources in the settings menu:
 > ![][resource-kethane]
 
-
-##### [:top:][top] 2. Regolith
-[![][shield:jenkins-orsx]][SCANsat:orsx-jenkins]
-
-**Regolith** support is built internal to SCANsat. If you have a **Regolith** DLL loaded anywhere SCANsat will only target the newest version.
-
-With any **Regolith**-using mod installed, you can select their resources in the drop down menu from the Big Map or KSC Map, and enable their overlay with the resource icon:
-> ![][resource-orsx-v2]
-
-For instance the **Karbonite** mod's resources can be viewed:
-> ![][resource-orsx-karbonite-v2]
-
+Both of the two resource systems will work in IVA, too:
+> ![][resource-iva]
 
 ### [:top:][top] 3. Basic Usage
 ------------------------------------------
@@ -247,15 +248,15 @@ Watch the data indicators on the small map to determine how well your scanners a
 
 ###### too high
 Solid ORANGE means you're too high (and therefore no data is being recorded):
-![][small-toohigh]
+![][small-toohigh-v10]
 
 ###### too low
 Flashing ORANGE/GREEN means you're too low (and therefore you have a FOV penalty):
-![][small-toolow]
+![][small-toolow-v10]
 
 ###### just right
 Solid GREEN means you're in an ideal orbit. Notice the larger swath width on the right:
-![][small-justright]
+![][small-justright-v10]
 
 #### [:top:][top] 3b. Mismatched Scanners
 
@@ -270,6 +271,8 @@ SAR (HI) has thin swaths due to low alt. | Multi and RADAR have similar ideal sw
 ![][small-scan-color] | ![][small-scan-bw]
 
 The mapping interface consists of a small-ish map of the planet, as far as it has been scanned in your current game. It scans and updates quickly and shows positions of the active vessel, as well as other scanning vessels in orbit around the same planet. Orbital information is also provided. For a slower but more detailed view, see the **[big map][4]**.
+
+Note that the indicators flash blue when the gray-scale color option is selected on the big map.
 
 Be sure to remember to pack enough batteries, radioisotope generators, and solar panels. If you forget, you'll run out of electricity, you'll stop recording data, and you'll see useless static:
 
@@ -303,7 +306,7 @@ The toggle icons along the left side of the map control the various overlays and
 
 The four buttons in the bottom-left open and close the other SCANsat windows.
 
-The camera icon in the lower-right exports a copy of the map.
+The camera icon in the lower-right exports a copy of the map. Map images are exported to: Kerbal Space Program/GameData/SCANsat/PluginData
 
 The re-size icon in the lower-right corner can be dragged to re-size the map.
 
@@ -363,6 +366,13 @@ Between 30% and 100%, you will get a number of science points proportional to th
 the upper cutoff is 95% in case you didn't scan the whole map.
 
 ![Scan 95% to get all science][science-max]
+
+##### [:top:][top] 6d. Contract Support
+Career mode contracts are supported through third party addons.
+
+* [Contract Configurator Forum Thread][cconfig:release]
+* [SCANsat Contract Pack][ccfgSCANsat:release]
+
 
 ### [:top:][top] 7. Background Scanning
 ------------------------------------------
@@ -444,6 +454,9 @@ sneaky then they can of course be sneaky.
 [small-mismatch1]: https://i.imgur.com/fNztoUN.gif
 [small-mismatch2]: https://i.imgur.com/aQtTGvV.gif
 [small-newMap1]: http://i.imgur.com/mCnphuZ.gif
+[small-toolow-v10]: http://i.imgur.com/USsvSSs.gif
+[small-toohigh-v10]: http://i.imgur.com/i7rGDIj.gif
+[small-justright-v10]: http://i.imgur.com/y7mHvEF.gif
 
 [bigmap-scan-10000x]: http://i.imgur.com/VEPL3oN.gif
 [bigmap-scan-100x]: http://i.imgur.com/bcht47p.gif
@@ -459,6 +472,7 @@ sneaky then they can of course be sneaky.
 [resource-walkthrough-v2]: http://i.imgur.com/80ximDP.gif
 [resource-orsx-v2]: http://i.imgur.com/ERSFwCX.png
 [resource-orsx-karbonite-v2]: http://i.imgur.com/qVlHzSN.png
+[resource-scanner]: http://i.imgur.com/7Q7a7aD.gif
 
 [top]: #table-of-contents
 [0]: #top-0-people-and-faqs
@@ -470,8 +484,8 @@ sneaky then they can of course be sneaky.
 [2]: #top-2-types-of-scans
 [2a]: #top-a-scansat-scans
 [2b]: #top-d-resource-scans
-[2b1]: #top-1-kethane
-[2b2]: #top-2-regolith
+[2b1]: #top-2-regolith
+[2b2]: #top-1-kethane
 [3]: #top-3-basic-usage
 [3a]: #top-3a-faq-finding-a-good-altitude
 [3b]: #top-3b-mismatched-scanners
@@ -487,6 +501,7 @@ sneaky then they can of course be sneaky.
 [6a]: #top-6a-community-tech-tree-support
 [6b]: #top-6a-minimum-scan-for-science
 [6c]: #top-6c-getting-maximum-science
+[6d]: #top-6d-contracts
 [7]: #top-7-background-scanning
 [8]: #top-8-time-warp
 [9]: #top-9-note-concerning-data-sources
@@ -602,3 +617,7 @@ sneaky then they can of course be sneaky.
 [rpm:release]: http://forum.kerbalspaceprogram.com/threads/57603
 
 [reg:release]: http://forum.kerbalspaceprogram.com/threads/100162
+
+[cconfig:release]: http://forum.kerbalspaceprogram.com/threads/101604
+
+[ccfgSCANsat:release]: http://forum.kerbalspaceprogram.com/threads/108097
