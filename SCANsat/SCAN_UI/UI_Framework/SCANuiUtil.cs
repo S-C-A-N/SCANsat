@@ -614,11 +614,17 @@ namespace SCANsat.SCAN_UI.UI_Framework
 								if (lat % 30 == 0 || lat == -88 || lat == 88)
 								{
 									List<Vector2d> points = new List<Vector2d>();
+									List<Vector2d> pointsBlack = new List<Vector2d>();
 									for (double lon = -180; lon <= 180; lon += 4)
 									{
 										points.Add(new Vector2d((int)(map.MapScale * (map.projectLongitude(lon, lat) + 180)), (int)(map.MapScale * (map.projectLatitude(lon, lat) + 90))));
+										int offset = 0;
+										if (lat < 0) offset = 1;
+										else offset = -1;
+										pointsBlack.Add(new Vector2d((int)(map.MapScale * (map.projectLongitude(lon, lat + offset) + 180)), (int)(map.MapScale * (map.projectLatitude(lon, lat + offset) + 90))));
 									}
 									whiteLineList.Add(points);
+									blackLineList.Add(pointsBlack);
 								}
 							}
 						}
