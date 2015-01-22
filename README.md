@@ -20,6 +20,7 @@
 
 **Table of Contents**
 ------------------------------------------
+
 * [0. People and FAQs][0]
   * [a. FAQs][0a]
 * [1. Installation and Interoperability][1]
@@ -48,9 +49,11 @@
   * [c. Getting Maximum Science][6c]
   * [d. Contracts][6d]
 * [7. Color Management][7]
-* [8. Background Scanning][8]
-* [9. Time Warp][9]
-* [10. Note: Data Sources][10]
+* [8. Instrument Window][8]
+* [9. Background Scanning][9]
+* [10. Time Warp][10]
+* [11. Settings Menu][11]
+* [12. Note: Data Sources][12]
 
 **WARNING**:
 
@@ -62,9 +65,10 @@ Disclaimer aside, this add-on is widely used and it **usually** works just fine.
 
 ### [:top:][top] 0. People, Facts, and FAQs
 ------------------------------------------
+
 #### Maintainers 
 The current maintainer is:
-  + [technogeeky][technogeeky] \<<technogeeky@gmail.com>\>
+  + [DMagic][DMagic] \<<david.grandy@gmail.com>\>
 
 Maintainers are the people who you should complain to if there is something wrong.
 
@@ -171,6 +175,7 @@ S.C.A.N. is proud to collaborate with other KSP mods and modding teams. Followin
 
 ### [:top:][top] 2. Types of Scans 
 ------------------------------------------
+
 SCANsat supports several different kinds of scans (as opposed to
 scanning modules or parts).
 
@@ -288,6 +293,7 @@ Be sure to remember to pack enough batteries, radioisotope generators, and solar
 
 ### [:top:][top] 4. Big Map
 ------------------------------------------
+
 ![A Big Big Map][bigmap-anim-v2]
 
 A bigger map can be rendered on demand. Rendered maps are automatically
@@ -383,6 +389,8 @@ Career mode contracts are supported through third party addons.
 ### [:top:][top] 7. Color Management
 ------------------------------------------
 
+![][color-window]
+
 SCANsat provides multiple options for map color configurations and terrain level changes.
 
 The color management window can be accessed from the big or small map with the color palette icon, or from the toolbar menu.
@@ -390,7 +398,6 @@ The color management window can be accessed from the big or small map with the c
 On the left are the various color palettes available; there are four different styles that can be selected from the drop down menu. 
 Palettes can be customized by changing the number of colors in the palette, reversing the order, or making the palette use discrete
 color transitions, rather than the smooth gradient used by default.
-![][color-window]
 
 Changes to the color palette are reflected after selecting **Apply**, the big and small maps will automatically refresh using the newly selected color palette.
 Note that only the altimetry map is affected by color palette selection.
@@ -406,8 +413,18 @@ from ocean to solid terrain more pronounced.
 All stock KSP planets have default color palette and terrain height values appropriate for the planet's terrain. Standard default values are used
 for any addon planets.
 
+### [:top:][top] 8. Instruments Window
+------------------------------------------
 
-### [:top:][top] 8. Background Scanning
+The instruments window provides a readout of several types of data based on current scanning coverage.
+
+* **Biome** Shows the biome that the current vessel is in or over
+* **Altitude** Shows the vessel's current altitude above the terrain
+* **Slope** Shows a highly localized slope based on a 3X3 grid centered 5m around the vessel
+* **Anomaly** Shows the nearest anomaly and its distance from the vessel
+* **BTDT Anomaly** Shows detailed information and a crude image about the nearest anomaly
+
+### [:top:][top] 9. Background Scanning
 ------------------------------------------
 
 ![Note the background scanning (non-active vessels are scanning)][small-scan]
@@ -416,8 +433,9 @@ Unlike some other KSP scanning systems, SCANsat allows scanning with multiple
 vessels.  All online scanners scan at the same time during any scene where time progresses; no active SCANsat
 parts are necessary. 
 
-### [:top:][top] 9. Time Warp
+### [:top:][top] 10. Time Warp
 ------------------------------------------
+
 SCANsat does not interpolate satellite paths during time warp; nevertheless, due to the relatively large field of view
 of each sensor, it's still possible to acquire data faster by time warping. The maximum recommended time warp speed
 is currently **10,000x**. Scanning at this warp factor should allow identical scanning performance 
@@ -432,8 +450,20 @@ It starts at **1000x** and then speeds up to **10,000x**:
 
 Notice that the only gaps in coverage are those at the poles (ie, the selected inclination was not high enough to capture the poles).
 
-### [:top:][top] 10. Note Concerning Data Sources
+### [:top:][top] 11. Settings Menu
 ------------------------------------------
+
+The settings menu has a various general options
+* The marker used for anomalies can be specified
+* Background scanning can be controlled for each planet
+* Background scanning resolution can be lowered for better performance (watch for short pauses when several scanners are active at very high timewarp; reducing the scanning resolution can help with this)
+* Toggles control the availability of the stock app launcher button and the tooltips for various icons on other windows
+* If the windows are ever dragged off screen there is an option to reset all windows to their default positions
+* Data can be deleted for any or all planets; a confirmation box will appear when these options are selected
+
+### [:top:][top] 12. Note Concerning Data Sources
+------------------------------------------
+
 All data this mod shows you is pulled from your game as you play. This
 includes:
   * terrain elevation
@@ -542,9 +572,11 @@ sneaky then they can of course be sneaky.
 [6c]: #top-6c-getting-maximum-science
 [6d]: #top-6d-contract-support
 [7]: #top-7-color-management
-[8]: #top-8-background-scanning
-[9]: #top-9-time-warp
-[10]: #top-10-note-concerning-data-sources
+[8]: #top-8-instrument-window
+[9]: #top-9-background-scanning
+[10]: #top-10-time-warp
+[11]: #top-11-settings-menu
+[12]: #top-12-note-concerning-data-sources
 
 [shield:license-bsd]: http://img.shields.io/:license-bsd-blue.svg
 [shield:license-mit]: http://img.shields.io/:license-mit-a31f34.svg
