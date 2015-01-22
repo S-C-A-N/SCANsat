@@ -210,6 +210,9 @@ Anomaly | **Been There, Done That(tm)** | **BTDT**
 Resource scans are initiated in the same way as any other scan. In this case they must use custom scanner parts included with the resource addon.
 > ![][resource-scanner]
 
+Resource scanning proceeds the same way as standard SCANsat scanning instruments do. The grey scale color option generally works best when viewing resource overlays.
+> ![][resource-bigmap]
+
 Each of the two resource systems can be enabled through the **SCANsat** Big Map:
 > ![][resource-walkthrough-v2]
 
@@ -474,6 +477,7 @@ sneaky then they can of course be sneaky.
 [resource-orsx-v2]: http://i.imgur.com/ERSFwCX.png
 [resource-orsx-karbonite-v2]: http://i.imgur.com/qVlHzSN.png
 [resource-scanner]: http://i.imgur.com/7Q7a7aD.gif
+[resource-bigmap]: http://i.imgur.com/aFu2U3F.gif
 
 [top]: #table-of-contents
 [0]: #top-0-people-and-faqs
