@@ -333,8 +333,10 @@ namespace SCANsat.SCAN_Data
 				uncov += coverage_count[17];
 			if ((type & SCANtype.Karbonite) != SCANtype.Nothing)
 				uncov += coverage_count[18];
-			if ((type & SCANtype.ORS_10) != SCANtype.Nothing)
+			if ((type & SCANtype.Regolith_10) != SCANtype.Nothing)
 				uncov += coverage_count[19];
+			if ((type & SCANtype.Regolith_11) != SCANtype.Nothing)
+				uncov += coverage_count[20];
 			return uncov;
 		}
 		
