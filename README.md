@@ -392,15 +392,19 @@ Palettes can be customized by changing the number of colors in the palette, reve
 color transitions, rather than the smooth gradient used by default.
 ![][color-window]
 
-Changes to the color palette are reflected after selecting **Apply**, the big map will automatically refresh using the newly selected color palette.
+Changes to the color palette are reflected after selecting **Apply**, the big and small maps will automatically refresh using the newly selected color palette.
 Note that only the altimetry map is affected by color palette selection.
 ![][color-palette-switch]
 
-There are several terrain height options available as well. The **Min** and **Max** height sliders can be used to set the lower and upper cut off values for the terrain height-to-color algorithm. The **Clamp** option can be used to set a cutoff below which only the first two colors in the selected
+There are several terrain height options available as well.
+* The **Min** and **Max** height sliders can be used to set the lower and upper cutoff values for the terrain height-to-color algorithm.
+* The **Clamp** option can be used to set a cutoff below which only the first two colors in the selected
 palette will be used for the terrain height-to-color algorithm. This is especially useful on planets where there is an ocean, as it makes the transition
 from ocean to solid terrain more pronounced.
 ![][color-clamp-terrain]
 
+All stock KSP planets have default color palette and terrain height values appropriate for the planet's terrain. Standard default values are used
+for any addon planets.
 
 
 ### [:top:][top] 8. Background Scanning
