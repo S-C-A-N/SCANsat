@@ -186,11 +186,21 @@ namespace SCANsat
 		/// <returns>SCANdata instance for the given Celestial Body; null if none exists</returns>
 		public static SCANdata getData(CelestialBody body)
 		{
-			if (!SCANcontroller.Body_Data.ContainsKey(body.name))
+			return getData(body.name);
+		}
+
+		/// <summary>
+		/// For a given Celestial Body name this returns the SCANdata instance if it exists in the SCANcontroller master dictionary; return is null if the SCANdata does not exist for that body (ie it has never been visited while SCANsat has been active)
+		/// </summary>
+		/// <param name="BodyName">Name of celestial body (do not use TheName string)</param>
+		/// <returns>SCANdata instance for the given Celestial Body; null if none exists</returns>
+		public static SCANdata getData(string BodyName)
+		{
+			if (!SCANcontroller.Body_Data.ContainsKey(BodyName))
 			{
 				return null;
 			}
-			SCANdata data = SCANcontroller.Body_Data[body.name];
+			SCANdata data = SCANcontroller.Body_Data[BodyName];
 			return data;
 		}
 
