@@ -52,14 +52,14 @@ namespace SCANsat.SCAN_Toolbar
 			if (HighLogic.LoadedScene == GameScenes.FLIGHT)
 			{
 				SCANappLauncherButton = ApplicationLauncher.Instance.AddModApplication(toggleFlightOn, toggleFlightOff, null, null, null, null, ApplicationLauncher.AppScenes.FLIGHT | ApplicationLauncher.AppScenes.MAPVIEW, SCANskins.SCAN_SmallMapAppIcon);
-				if (SCANcontroller.controller.mainMapVisible)
-					setAppLauncherToTrue();
+				//if (SCANcontroller.controller.mainMapVisible)
+				//	setAppLauncherToTrue();
 			}
 			else if (HighLogic.LoadedScene == GameScenes.SPACECENTER || HighLogic.LoadedScene == GameScenes.TRACKSTATION)
 			{
 				SCANappLauncherButton = ApplicationLauncher.Instance.AddModApplication(toggleKSCOn, toggleKSCOff, null, null, null, null, ApplicationLauncher.AppScenes.SPACECENTER | ApplicationLauncher.AppScenes.TRACKSTATION, SCANskins.SCAN_BigMapAppIcon);
-				if (SCANcontroller.controller.kscMapVisible)
-					setAppLauncherToTrue();
+				//if (SCANcontroller.controller.kscMapVisible)
+				//	setAppLauncherToTrue();
 			}
 
 			GameEvents.onGUIApplicationLauncherUnreadifying.Add(removeButton);
@@ -105,8 +105,8 @@ namespace SCANsat.SCAN_Toolbar
 		{
 			if (SCANcontroller.controller != null)
 			{
-				SCANcontroller.controller.mainMap.Visible = true;
-				SCANcontroller.controller.mainMapVisible = true;
+				SCANcontroller.controller.mainMap.Visible = !SCANcontroller.controller.mainMap.Visible;
+				SCANcontroller.controller.mainMapVisible = !SCANcontroller.controller.mainMapVisible;
 			}
 		}
 
@@ -114,8 +114,8 @@ namespace SCANsat.SCAN_Toolbar
 		{
 			if (SCANcontroller.controller != null)
 			{
-				SCANcontroller.controller.mainMap.Visible = false;
-				SCANcontroller.controller.mainMapVisible = false;
+				SCANcontroller.controller.mainMap.Visible = !SCANcontroller.controller.mainMap.Visible;
+				SCANcontroller.controller.mainMapVisible = !SCANcontroller.controller.mainMapVisible;
 			}
 		}
 
@@ -123,8 +123,8 @@ namespace SCANsat.SCAN_Toolbar
 		{
 			if (SCANcontroller.controller != null)
 			{
-				SCANcontroller.controller.kscMap.Visible = true;
-				SCANcontroller.controller.kscMapVisible = true;
+				SCANcontroller.controller.kscMap.Visible = !SCANcontroller.controller.kscMap.Visible;
+				SCANcontroller.controller.kscMapVisible = !SCANcontroller.controller.kscMapVisible;
 			}
 		}
 
@@ -132,8 +132,8 @@ namespace SCANsat.SCAN_Toolbar
 		{
 			if (SCANcontroller.controller != null)
 			{
-				SCANcontroller.controller.kscMap.Visible = false;
-				SCANcontroller.controller.kscMapVisible = false;
+				SCANcontroller.controller.kscMap.Visible = !SCANcontroller.controller.kscMap.Visible;
+				SCANcontroller.controller.kscMapVisible = !SCANcontroller.controller.kscMapVisible;
 			}
 		}
 	}
