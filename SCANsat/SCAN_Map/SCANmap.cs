@@ -838,7 +838,7 @@ namespace SCANsat.SCAN_Map
 				{
 					double lon = fixUnscale(unScaleLongitude(Lon), mapwidth);
 					double lat = fixUnscale(unScaleLatitude(Lat), mapheight);
-					elevation = big_heightmap[(int)lon, (int)lat];
+					elevation = big_heightmap[Mathf.RoundToInt((float)lon), Mathf.RoundToInt((float)lat)];
 					if (elevation== 0f)
 						elevation = (float)SCANUtil.getElevation(body, Lon, Lat);
 				}
