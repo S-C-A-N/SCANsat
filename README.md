@@ -16,6 +16,7 @@
 [![][shield:support-epl]][epl:release]&nbsp;
 [![][shield:support-ctt]][ctt:release]&nbsp;
 [![][shield:support-tm]][techmanager:release]&nbsp;
+[![][shield:support-ccfg]][cconfig:release]&nbsp;
 
 **Table of Contents**
 ------------------------------------------
@@ -113,7 +114,7 @@ For licensing information, please see the [included LICENSE.txt][SCANsat:rel-lic
   * [Career Mode] Is it integrated into the tech tree?
     * **Yes!** This link tells you which nodes unlock which parts in the tech tree.
   * [Contracts] Does SCANsat offer contracts to complete?
-    * **No.** This is a planned feature.
+    * **Yes/No.** Contracts are currently only supported through [**third-party addons**][6d].
   * Can you add <some feature or change> to SCANsat?
     * **Probably!** First, check the issues page to see if it's already been requested. If not, add a new issue. Even better, attempt to add the feature yourself and submit a pull request. We'll catch the bugs for you!
 
@@ -178,7 +179,7 @@ scanning modules or parts).
   * **Resource**: Scan for chemical or mineral resource on the surface.
 
 Other parts and add-ons are free to include one or more of these kinds of scans. In general,
-we would request that similar (same order of magitude) scanning paramters and limitations are used
+we would request that similar (same order of magnitude) scanning parameters and limitations are used
 on custom parts, but this is not a requirement.
 
 #### [:top:][top] a. SCANsat Scans
@@ -198,7 +199,7 @@ Anomaly | **Been There, Done That(tm)** | **BTDT**
 * The **Slope** map is generated from either **HI** or **LO** data.
 * The **Biome** scan only works for bodies that have biomes. For vanilla KSP, this means all planets except the sun and Jool.
 * **Anomalies** are things the builds of KSC, hidden easter eggs, etc...
-* The *Anomaly** data scans for anomalies from orbit, while
+* The **Anomaly** data scans for anomalies from orbit, while
 * **BTDT** shows a camera view of an anomaly once you are near it
 * The **Biome** and **Anomaly** scans are combined into the multi-spectral scanner; indicated by **MULTI**
 
@@ -243,7 +244,7 @@ You can start scanning by selecting a SCANsat part's context menu, enabling the 
 
 #### [:top:][top] 3a. FAQ: Finding a Good Altitude
 
-Watch the data indicators on the small map to determine how well your scanners are performing.
+Watch the data indicators on the small map to determine how well your scanners are performing. The right-click context menus also contain indicators for the proper scanning altitude.
 
 
 ###### too high
@@ -306,7 +307,7 @@ The toggle icons along the left side of the map control the various overlays and
 
 The four buttons in the bottom-left open and close the other SCANsat windows.
 
-The camera icon in the lower-right exports a copy of the map. Map images are exported to: Kerbal Space Program/GameData/SCANsat/PluginData
+The camera icon in the lower-right exports a copy of the map.
 
 The re-size icon in the lower-right corner can be dragged to re-size the map.
 
@@ -484,8 +485,8 @@ sneaky then they can of course be sneaky.
 [2]: #top-2-types-of-scans
 [2a]: #top-a-scansat-scans
 [2b]: #top-d-resource-scans
-[2b1]: #top-2-regolith
-[2b2]: #top-1-kethane
+[2b1]: #top-1-regolith
+[2b2]: #top-2-kethane
 [3]: #top-3-basic-usage
 [3a]: #top-3a-faq-finding-a-good-altitude
 [3b]: #top-3b-mismatched-scanners
@@ -501,7 +502,7 @@ sneaky then they can of course be sneaky.
 [6a]: #top-6a-community-tech-tree-support
 [6b]: #top-6a-minimum-scan-for-science
 [6c]: #top-6c-getting-maximum-science
-[6d]: #top-6d-contracts
+[6d]: #top-6d-contract-support
 [7]: #top-7-background-scanning
 [8]: #top-8-time-warp
 [9]: #top-9-note-concerning-data-sources
@@ -518,16 +519,17 @@ sneaky then they can of course be sneaky.
 [shield:support-rpm]: http://img.shields.io/badge/works%20with%20RPM-v0.18.3-a31f34.svg
 [shield:support-ket]: http://img.shields.io/badge/works%20with%20Kethane-v0.9.2-brightgreen.svg
 [shield:support-orsx]: http://img.shields.io/badge/works%20with%20ORSX-v0.1.2-000000.svg
-[shield:support-mm]: http://img.shields.io/badge/works%20with%20MM-v2.5.5-40b7c0.svg
+[shield:support-mm]: http://img.shields.io/badge/works%20with%20MM-v2.5.9-40b7c0.svg
 [shield:support-toolbar]: http://img.shields.io/badge/works%20with%20Blizzy's%20Toolbar-1.7.8-7c69c0.svg
 [shield:support-alcor]: http://img.shields.io/badge/works%20with%20ALCOR-0.9-299bc7.svg
 [shield:support-kspi]: http://img.shields.io/badge/works%20with%20Interstellar-0.13-a62374.svg
-[shield:support-usi]:http://img.shields.io/badge/works%20with%20USI-0.22.1-34c566.svg
-[shield:support-karbonite]: http://img.shields.io/badge/works%20with%20Karbonite-0.5-ff8c00.svg
+[shield:support-usi]:http://img.shields.io/badge/works%20with%20USI-0.22.3-34c566.svg
+[shield:support-karbonite]: http://img.shields.io/badge/works%20with%20Karbonite-0.5.1-ff8c00.svg
 [shield:support-epl]: http://img.shields.io/badge/works%20with%20EPL-4.2.3-ff8c00.svg
 [shield:support-ctt]: http://img.shields.io/badge/works%20with%20CTT-1.1-blue.svg
 [shield:support-tm]: http://img.shields.io/badge/works%20with%20TechManager-1.5-lightgrey.svg
 [shield:support-reg]: https://img.shields.io/badge/works%20with%20Regolith-1.1-000000.svg
+[shield:support-ccfg]: https://img.shields.io/badge/works%20with%20Contract%20Configurator-6.0-yellowgreen.svg
 
 [shield:gittip-tg-img]: http://img.shields.io/gittip/technogeeky.png
 [shield:gittip-tg]: https://www.gittip.com/technogeeky/
