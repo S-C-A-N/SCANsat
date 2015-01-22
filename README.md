@@ -47,9 +47,10 @@
   * [b. Minimum Scan for Science (30%)][6b]
   * [c. Getting Maximum Science][6c]
   * [d. Contracts][6d]
-* [7. Background Scanning][7]
-* [8. Time Warp][8]
-* [9. Note: Data Sources][9]
+* [7. Color Management][7]
+* [8. Background Scanning][8]
+* [9. Time Warp][9]
+* [10. Note: Data Sources][10]
 
 **WARNING**:
 
@@ -379,8 +380,30 @@ Career mode contracts are supported through third party addons.
 * [Contract Configurator Forum Thread][cconfig:release]
 * [SCANsat Contract Pack][ccfgSCANsat:release]
 
+### [:top:][top] 7. Color Management
+------------------------------------------
 
-### [:top:][top] 7. Background Scanning
+SCANsat provides multiple options for map color configurations and terrain level changes.
+
+The color management window can be accessed from the big or small map with the color palette icon, or from the toolbar menu.
+
+On the left are the various color palettes available; there are four different styles that can be selected from the drop down menu. 
+Palettes can be customized by changing the number of colors in the palette, reversing the order, or making the palette use discrete
+color transitions, rather than the smooth gradient used by default.
+![][color-window]
+
+Changes to the color palette are reflected after selecting **Apply**, the big map will automatically refresh using the newly selected color palette.
+Note that only the altimetry map is affected by color palette selection.
+![][color-palette-switch]
+
+There are several terrain height options available as well. The **Min** and **Max** height sliders can be used to set the lower and upper cut off values for the terrain height-to-color algorithm. The **Clamp** option can be used to set a cutoff below which only the first two colors in the selected
+palette will be used for the terrain height-to-color algorithm. This is especially useful on planets where there is an ocean, as it makes the transition
+from ocean to solid terrain more pronounced.
+![][color-clamp-terrain]
+
+
+
+### [:top:][top] 8. Background Scanning
 ------------------------------------------
 
 ![Note the background scanning (non-active vessels are scanning)][small-scan]
@@ -389,7 +412,7 @@ Unlike some other KSP scanning systems, SCANsat allows scanning with multiple
 vessels.  All online scanners scan at the same time during any scene where time progresses; no active SCANsat
 parts are necessary. 
 
-### [:top:][top] 8. Time Warp
+### [:top:][top] 9. Time Warp
 ------------------------------------------
 SCANsat does not interpolate satellite paths during time warp; nevertheless, due to the relatively large field of view
 of each sensor, it's still possible to acquire data faster by time warping. The maximum recommended time warp speed
@@ -405,7 +428,7 @@ It starts at **1000x** and then speeds up to **10,000x**:
 
 Notice that the only gaps in coverage are those at the poles (ie, the selected inclination was not high enough to capture the poles).
 
-### [:top:][top] 9. Note Concerning Data Sources
+### [:top:][top] 10. Note Concerning Data Sources
 ------------------------------------------
 All data this mod shows you is pulled from your game as you play. This
 includes:
@@ -482,6 +505,10 @@ sneaky then they can of course be sneaky.
 [resource-scanner]: http://i.imgur.com/7Q7a7aD.gif
 [resource-bigmap]: http://i.imgur.com/aFu2U3F.gif
 
+[color-window]: http://i.imgur.com/XM2ynyZ.png
+[color-palette-switch]: http://i.imgur.com/0XdMGSy.gif
+[color-clamp-terrain]: http://i.imgur.com/8dgFLGj.gif
+
 [top]: #table-of-contents
 [0]: #top-0-people-and-faqs
 [0a]: #top-b-faqs
@@ -510,9 +537,10 @@ sneaky then they can of course be sneaky.
 [6b]: #top-6a-minimum-scan-for-science
 [6c]: #top-6c-getting-maximum-science
 [6d]: #top-6d-contract-support
-[7]: #top-7-background-scanning
-[8]: #top-8-time-warp
-[9]: #top-9-note-concerning-data-sources
+[7]: #top-7-color-management
+[8]: #top-8-background-scanning
+[9]: #top-9-time-warp
+[10]: #top-10-note-concerning-data-sources
 
 [shield:license-bsd]: http://img.shields.io/:license-bsd-blue.svg
 [shield:license-mit]: http://img.shields.io/:license-mit-a31f34.svg
