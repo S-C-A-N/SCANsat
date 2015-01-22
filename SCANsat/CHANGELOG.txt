@@ -1,3 +1,32 @@
+Version 9.5 - 2015-1-23
+------------------------
+
+- Significant internal code changes; any addons with hard-depencies on SCANsat will likely need updating
+	- Public read-only properties added for most fields
+
+- Stock app launcher support added
+	- A single toolbar button opens/closes the small map
+	- Can be disabled through the settings menu
+	- When Blizzy's toolbar and the stock toolbar are disabled the small map can be opened by starting a scan with any SCANsat instrument
+	
+- Improvements to big map terrain data caching
+	- Reduces memory used by the big map by 40%
+	- A single cache used for each map projection type
+	
+- Big map grid texture replaced by line rendering method
+	- Further reduces big map memory usage
+	
+- Localized slope indicator added to the instrument window
+	- Slope calculated based on a 3X3 grid centered 5m around the vessel's location
+	- Altitude indicator displays the correct height above the terrain while under timewarp
+	
+- Exported maps saved to GameData/SCANsat/PluginData folder
+
+- New science results text added
+	- Thanks Olympic1
+
+- Uranium resource type changed to Uraninite
+
 Version 9.4.1 - 2014-12-22
 ------------------------
 
