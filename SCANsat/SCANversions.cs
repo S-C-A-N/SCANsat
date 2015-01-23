@@ -23,7 +23,7 @@ namespace SCANsat
 	public class SCANversions : MonoBehaviour
 	{
 		private const string kVersion = "0.9.2";
-		private string[] Assemblies = new string[9] { "SCANsatRPM", "SCANsatKethane", "Kethane", "GeodesicGrid", "RasterPropMonitor", "MechJebRPM", "MechJeb2", "ORSX", "Regolith" };
+		private string[] Assemblies = new string[11] { "SCANsatRPM", "SCANsatKethane", "Kethane", "GeodesicGrid", "RasterPropMonitor", "MechJebRPM", "MechJeb2", "ORSX", "Regolith", "ContractConfigurator", "CC_SCANsat" };
 
 		internal static string SCANsatVersion = "";
 		public static bool kethaneLoaded = false;
