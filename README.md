@@ -539,7 +539,7 @@ sneaky then they can of course be sneaky.
 [resource-orsx-karbonite]: http://i.imgur.com/Sge2OGH.png?1
 [resource-iva]: http://i.imgur.com/iRo4kSA.png
 [resource-walkthrough]: http://i.imgur.com/HJLK1yi.gif
-[resource-walkthrough-v2]: http://i.imgur.com/80ximDP.gif
+[resource-walkthrough-v2]: http://i.imgur.com/80ximDP.gif?1
 [resource-orsx-v2]: http://i.imgur.com/ERSFwCX.png
 [resource-orsx-karbonite-v2]: http://i.imgur.com/qVlHzSN.png
 [resource-scanner]: http://i.imgur.com/7Q7a7aD.gif
