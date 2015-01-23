@@ -12,6 +12,7 @@ Version 9.5 - 2015-1-23
 - Improvements to big map terrain data caching
 	- Reduces memory used by the big map by 40%
 	- A single cache used for each map projection type
+	- Improves big map generation speed when switching projection types
 	
 - Big map grid texture replaced by line rendering method
 	- Further reduces big map memory usage
