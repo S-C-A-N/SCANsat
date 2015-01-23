@@ -106,7 +106,7 @@ For licensing information, please see the [included LICENSE.txt][SCANsat:rel-lic
 
 [Source Code][SCANsat:rel-source] is available, as some licenses may require.
 
-### [:top:][top] a. FAQs
+### [:top:][top] 0a. FAQs
 
   * What does SCANsat do?
     * It allows you to scan planetary bodies for terrain, biome, and resource information and generate various kinds of maps.
@@ -130,16 +130,16 @@ For licensing information, please see the [included LICENSE.txt][SCANsat:rel-lic
 ### [:top:][top] 1. Installation and Interoperability 
 ------------------------------------------
 
-#### [:top:][top] a. Installation 
+#### [:top:][top] 1a. Installation 
 
   1. Download the latest [SCANsat package][SCANsat:rel-dist-github] from the releases section of this GitHub Repo
   2. Extract the included package and put the SCANsat folder in your KSP installation's GameData folder.
 
-#### [:top:][top] b. GameData Layout 
+#### [:top:][top] 1b. GameData Layout 
 
 ![][SCANsat:gamedata]
 
-#### [:top:][top] c. Other Add-Ons 
+#### [:top:][top] 1c. Other Add-Ons 
 
 S.C.A.N. is proud to collaborate with other KSP mods and modding teams. Following is a table of all of the mods, add-ons, or software that we interoperate with.
 
@@ -190,7 +190,7 @@ Other parts and add-ons are free to include one or more of these kinds of scans.
 we would request that similar (same order of magnitude) scanning parameters and limitations are used
 on custom parts, but this is not a requirement.
 
-#### [:top:][top] a. SCANsat Scans
+#### [:top:][top] 2a. SCANsat Scans
 
 Without any resource scanning mods installed, **SCANsat** can scan for a few basic types of data. All of these (non-resource) scans are shown as indicators on the Small Map.
 
@@ -211,7 +211,7 @@ Anomaly | **Been There, Done That(tm)** | **BTDT**
 * **BTDT** shows a camera view of an anomaly once you are near it
 * The **Biome** and **Anomaly** scans are combined into the multi-spectral scanner; indicated by **MULTI**
 
-#### [:top:][top] b. Resource Scans
+#### [:top:][top] 2b. Resource Scans
 
 **SCANsat** will scan planetoids for resources, assuming you have the relevant mods installed. All support for resource scanning is handled through one of two plugins. **Regolith** supports many resources, and **Kethane** supports a few. 
 
@@ -224,7 +224,7 @@ Resource scanning proceeds the same way as standard SCANsat scanning instruments
 Each of the two resource systems can be enabled through the **SCANsat** Big Map:
 > ![][resource-walkthrough-v2]
 
-##### [:top:][top] c. Regolith
+##### [:top:][top] 2c. Regolith
 [![][shield:jenkins-orsx]][SCANsat:orsx-jenkins]
 
 **Regolith** support is built internal to SCANsat. If you have a **Regolith** DLL loaded anywhere SCANsat will only target the newest version.
@@ -233,7 +233,7 @@ With any **Regolith**-using mod installed, you can select their resources in the
 For instance the **Karbonite** mod's resources can be viewed:
 > ![][resource-orsx-karbonite-v2]
 
-##### [:top:][top] d. Kethane
+##### [:top:][top] 2d. Kethane
 [![][shield:jenkins-ket]][SCANsat:ket-jenkins]
 
 **Kethane** support is built using an included extra DLL file. 
@@ -334,15 +334,15 @@ The re-size icon in the lower-right corner can be dragged to re-size the map.
 | [Been There Done That®][5d] | **Anomaly** | 1 | 0 m | 0 m | 2 km
 | [MapTraq® (deprecated)][5e] | **None** | N/A | N/A | N/A | N/A 
 
-#### [:top:][top] a. The RADAR Altimetry Sensor
+#### [:top:][top] 5a. The RADAR Altimetry Sensor
 ![RADAR][vab-radar]
-#### [:top:][top] b. The SAR Altimetry Sensor
+#### [:top:][top] 5b. The SAR Altimetry Sensor
 ![SAR][vab-sar]
-#### [:top:][top] c. The Multispectral Sensor
+#### [:top:][top] 5c. The Multispectral Sensor
 ![Multi][vab-multi]
-#### [:top:][top] d. Been There Done That
+#### [:top:][top] 5d. Been There Done That
 ![BTDT][vab-btdt]
-#### [:top:][top] e. MapTraq (deprecated)
+#### [:top:][top] 5e. MapTraq (deprecated)
 ![MapTraq][vab-maptraq]
  
 
@@ -424,7 +424,7 @@ The instruments window provides a readout of several types of data based on curr
 * **Altitude** Shows the vessel's current altitude above the terrain
 * **Slope** Shows a highly localized slope based on a 3X3 grid centered 5m around the vessel
 * **Anomaly** Shows the nearest anomaly and its distance from the vessel
-* **BTDT Anomaly** Shows detailed information and a crude image about the nearest anomaly
+* **BTDT Anomaly** Shows detailed information and a crude image about the nearest anomaly; scroll the mouse wheel when positioned over the anomaly window to switch between different structures if more than one is found
 
 ![][instruments-btdt]
 
@@ -556,30 +556,30 @@ sneaky then they can of course be sneaky.
 
 [top]: #table-of-contents
 [0]: #top-0-people-facts-and-faqs
-[0a]: #top-a-faqs
+[0a]: #top-0a-faqs
 [1]: #top-1-installation-and-interoperability
-[1a]: #top-a-installation
-[1b]: #top-b-gamedata-layout
-[1c]: #top-c-other-add-ons
+[1a]: #top-1a-installation
+[1b]: #top-1b-gamedata-layout
+[1c]: #top-1c-other-add-ons
 [2]: #top-2-types-of-scans
-[2a]: #top-a-scansat-scans
-[2b]: #top-b-resource-scans
-[2c]: #top-c-regolith
-[2d]: #top-d-kethane
+[2a]: #top-2a-scansat-scans
+[2b]: #top-2b-resource-scans
+[2c]: #top-2c-regolith
+[2d]: #top-2d-kethane
 [3]: #top-3-basic-usage
 [3a]: #top-3a-faq-finding-a-good-altitude
 [3b]: #top-3b-mismatched-scanners
 [4]: #top-4-big-map
 [4a]: #top-4a-big-map-options
 [5]: #top-5-parts-and-sensor-types
-[5a]: #top-a-the-radar-altimetry-sensor
-[5b]: #top-b-the-sar-altimetry-sensor
-[5c]: #top-c-the-multispectral-sensor
-[5d]: #top-d-been-there-done-that
-[5e]: #top-e-maptraq-deprecated
+[5a]: #top-5a-the-radar-altimetry-sensor
+[5b]: #top-5b-the-sar-altimetry-sensor
+[5c]: #top-5c-the-multispectral-sensor
+[5d]: #top-5d-been-there-done-that
+[5e]: #top-5e-maptraq-deprecated
 [6]: #top-6-career-mode-research-and-development
 [6a]: #top-6a-community-tech-tree-support
-[6b]: #top-6a-minimum-scan-for-science
+[6b]: #top-6b-minimum-scan-for-science
 [6c]: #top-6c-getting-maximum-science
 [6d]: #top-6d-contract-support
 [7]: #top-7-color-management
