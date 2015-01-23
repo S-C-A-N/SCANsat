@@ -30,8 +30,8 @@
 * [2. Types of Scans][2]
   * [a. Native SCANsat][2a]
   * [b. Resource Scans][2b]
-  * [1. Regolith][2b1]
-  * [2. Kethane][2b2] [![][shield:support-ket]][kethane:release][![][shield:jenkins-ket]][SCANsat:ket-jenkins]
+  * [c. Regolith][2c]
+  * [d. Kethane][2d] [![][shield:support-ket]][kethane:release][![][shield:jenkins-ket]][SCANsat:ket-jenkins]
 * [3. Basic Usage][3]
   * [a. FAQ: Finding a Good Altitude][3a]
   * [b. Mismatched Scanners][3b]
@@ -544,7 +544,7 @@ sneaky then they can of course be sneaky.
 [color-clamp-terrain]: http://i.imgur.com/8dgFLGj.gif
 
 [top]: #table-of-contents
-[0]: #top-0-people,-facts,-and-faqs
+[0]: #top-0-people-facts-and-faqs
 [0a]: #top-a-faqs
 [1]: #top-1-installation-and-interoperability
 [1a]: #top-a-installation
@@ -553,8 +553,8 @@ sneaky then they can of course be sneaky.
 [2]: #top-2-types-of-scans
 [2a]: #top-a-scansat-scans
 [2b]: #top-b-resource-scans
-[2b1]: #top-b1-regolith
-[2b2]: #top-b2-kethane
+[2c]: #top-c-regolith
+[2d]: #top-d-kethane
 [3]: #top-3-basic-usage
 [3a]: #top-3a-faq-finding-a-good-altitude
 [3b]: #top-3b-mismatched-scanners
