@@ -51,47 +51,14 @@ namespace SCANsat.SCAN_Toolbar
 
 			if (HighLogic.LoadedScene == GameScenes.FLIGHT)
 			{
-				SCANappLauncherButton = ApplicationLauncher.Instance.AddModApplication(toggleFlightOn, toggleFlightOff, null, null, null, null, ApplicationLauncher.AppScenes.FLIGHT | ApplicationLauncher.AppScenes.MAPVIEW, SCANskins.SCAN_SmallMapAppIcon);
-				//if (SCANcontroller.controller.mainMapVisible)
-				//	setAppLauncherToTrue();
+				SCANappLauncherButton = ApplicationLauncher.Instance.AddModApplication(toggleFlight, toggleFlight, null, null, null, null, ApplicationLauncher.AppScenes.FLIGHT | ApplicationLauncher.AppScenes.MAPVIEW, SCANskins.SCAN_SmallMapAppIcon);
 			}
 			else if (HighLogic.LoadedScene == GameScenes.SPACECENTER || HighLogic.LoadedScene == GameScenes.TRACKSTATION)
 			{
-				SCANappLauncherButton = ApplicationLauncher.Instance.AddModApplication(toggleKSCOn, toggleKSCOff, null, null, null, null, ApplicationLauncher.AppScenes.SPACECENTER | ApplicationLauncher.AppScenes.TRACKSTATION, SCANskins.SCAN_BigMapAppIcon);
-				//if (SCANcontroller.controller.kscMapVisible)
-				//	setAppLauncherToTrue();
+				SCANappLauncherButton = ApplicationLauncher.Instance.AddModApplication(toggleKSC, toggleKSC, null, null, null, null, ApplicationLauncher.AppScenes.SPACECENTER | ApplicationLauncher.AppScenes.TRACKSTATION, SCANskins.SCAN_BigMapAppIcon);
 			}
 
 			GameEvents.onGUIApplicationLauncherUnreadifying.Add(removeButton);
-		}
-
-		private void setAppLauncherToTrue()
-		{
-			float timeLimit = 5f;
-			DateTime timer = DateTime.Now;
-			bool appTrue = false;
-
-			while (!appTrue)
-			{
-				if (SCANappLauncherButton.State != RUIToggleButton.ButtonState.TRUE)
-				{
-					if (timer.AddSeconds(timeLimit) < DateTime.Now)
-					{
-						appTrue = true;
-						SCANUtil.SCANlog("Applauncher Button failed to be set to active state after {0:F0} seconds...", timeLimit);
-					}
-					else
-					{
-						SCANappLauncherButton.SetTrue(true);
-						SCANUtil.SCANdebugLog("Set Applauncher Button to true");
-					}
-				}
-				else
-				{
-					appTrue = true;
-					SCANUtil.SCANdebugLog("App Launcher Already Set To True");
-				}
-			}
 		}
 
 		private void removeButton(GameScenes scene)
@@ -101,7 +68,7 @@ namespace SCANsat.SCAN_Toolbar
 			SCANUtil.SCANdebugLog("App Launcher Button Removed");
 		}
 
-		private void toggleFlightOn()
+		private void toggleFlight()
 		{
 			if (SCANcontroller.controller != null)
 			{
@@ -110,25 +77,7 @@ namespace SCANsat.SCAN_Toolbar
 			}
 		}
 
-		private void toggleFlightOff()
-		{
-			if (SCANcontroller.controller != null)
-			{
-				SCANcontroller.controller.mainMap.Visible = !SCANcontroller.controller.mainMap.Visible;
-				SCANcontroller.controller.mainMapVisible = !SCANcontroller.controller.mainMapVisible;
-			}
-		}
-
-		private void toggleKSCOn()
-		{
-			if (SCANcontroller.controller != null)
-			{
-				SCANcontroller.controller.kscMap.Visible = !SCANcontroller.controller.kscMap.Visible;
-				SCANcontroller.controller.kscMapVisible = !SCANcontroller.controller.kscMapVisible;
-			}
-		}
-
-		private void toggleKSCOff()
+		private void toggleKSC()
 		{
 			if (SCANcontroller.controller != null)
 			{
