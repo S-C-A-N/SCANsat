@@ -224,7 +224,7 @@ Resource scanning proceeds the same way as standard SCANsat scanning instruments
 Each of the two resource systems can be enabled through the **SCANsat** Big Map:
 > ![][resource-walkthrough-v2]
 
-##### [:top:][top] 1. Regolith
+##### [:top:][top] c. Regolith
 [![][shield:jenkins-orsx]][SCANsat:orsx-jenkins]
 
 **Regolith** support is built internal to SCANsat. If you have a **Regolith** DLL loaded anywhere SCANsat will only target the newest version.
@@ -233,7 +233,7 @@ With any **Regolith**-using mod installed, you can select their resources in the
 For instance the **Karbonite** mod's resources can be viewed:
 > ![][resource-orsx-karbonite-v2]
 
-##### [:top:][top] 2. Kethane
+##### [:top:][top] d. Kethane
 [![][shield:jenkins-ket]][SCANsat:ket-jenkins]
 
 **Kethane** support is built using an included extra DLL file. 
