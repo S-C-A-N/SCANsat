@@ -596,16 +596,49 @@ namespace SCANsat.SCAN_UI.UI_Framework
 						for (double lon = -180; lon <= 150; lon += 30)
 						{
 							List<Vector2d> pointsS = new List<Vector2d>();
+							List<Vector2d> pointsBlackS = new List<Vector2d>();
 							pointsS.Add(new Vector2d((int)(map.MapScale * (map.projectLongitude(lon, -88) + 180)), (int)(map.MapScale * (map.projectLatitude(lon, -88) + 90))));
 							pointsS.Add(new Vector2d((int)(map.MapScale * (map.projectLongitude(lon, -2) + 180)), (int)(map.MapScale * (map.projectLatitude(lon, -2) + 90))));
 
 							whiteLineList.Add(pointsS);
 
 							List<Vector2d> pointsN = new List<Vector2d>();
+							List<Vector2d> pointsBlackN = new List<Vector2d>();
 							pointsN.Add(new Vector2d((int)(map.MapScale * (map.projectLongitude(lon, 2) + 180)), (int)(map.MapScale * (map.projectLatitude (lon, 2) + 90))));
 							pointsN.Add(new Vector2d((int)(map.MapScale * (map.projectLongitude(lon, 88) + 180)), (int)(map.MapScale * (map.projectLatitude(lon, 88) + 90))));
 
 							whiteLineList.Add(pointsN);
+
+							if (lon == -180 || lon == 0)
+							{
+								pointsBlackS.Add(new Vector2d(pointsS[0].x + 1, pointsS[0].y));
+								pointsBlackS.Add(new Vector2d(pointsS[1].x + 1, pointsS[1].y));
+								pointsBlackN.Add(new Vector2d(pointsN[0].x + 1, pointsN[0].y));
+								pointsBlackN.Add(new Vector2d(pointsN[1].x + 1, pointsN[1].y));
+							}
+							else if (lon == -90 || lon == 90)
+							{
+								pointsBlackS.Add(new Vector2d(pointsS[0].x, pointsS[0].y - 1));
+								pointsBlackS.Add(new Vector2d(pointsS[1].x, pointsS[1].y - 1));
+								pointsBlackN.Add(new Vector2d(pointsN[0].x, pointsN[0].y - 1));
+								pointsBlackN.Add(new Vector2d(pointsN[1].x, pointsN[1].y - 1));
+							}
+							else if (lon == -60 || lon == -30 || lon == 120 || lon == 150)
+							{
+								pointsBlackS.Add(new Vector2d(pointsS[0].x - 1, pointsS[0].y - 1));
+								pointsBlackS.Add(new Vector2d(pointsS[1].x - 1, pointsS[1].y - 1));
+								pointsBlackN.Add(new Vector2d(pointsN[0].x + 1, pointsN[0].y - 1));
+								pointsBlackN.Add(new Vector2d(pointsN[1].x + 1, pointsN[1].y - 1));
+							}
+							else
+							{
+								pointsBlackS.Add(new Vector2d(pointsS[0].x + 1, pointsS[0].y - 1));
+								pointsBlackS.Add(new Vector2d(pointsS[1].x + 1, pointsS[1].y - 1));
+								pointsBlackN.Add(new Vector2d(pointsN[0].x - 1, pointsN[0].y - 1));
+								pointsBlackN.Add(new Vector2d(pointsN[1].x - 1, pointsN[1].y - 1));
+							}
+							blackLineList.Add(pointsBlackS);
+							blackLineList.Add(pointsBlackN);
 						}
 						for (double lat = -88; lat <= 88; lat += 2)
 						{
@@ -618,10 +651,13 @@ namespace SCANsat.SCAN_UI.UI_Framework
 									for (double lon = -180; lon <= 180; lon += 4)
 									{
 										points.Add(new Vector2d((int)(map.MapScale * (map.projectLongitude(lon, lat) + 180)), (int)(map.MapScale * (map.projectLatitude(lon, lat) + 90))));
-										int offset = 0;
-										if (lat < 0) offset = 1;
-										else offset = -1;
-										pointsBlack.Add(new Vector2d((int)(map.MapScale * (map.projectLongitude(lon, lat + offset) + 180)), (int)(map.MapScale * (map.projectLatitude(lon, lat + offset) + 90))));
+										float offset = 0;
+										if (lat == 30) offset = -0.8f;
+										else if (lat == -30) offset = 0.8f;
+										else if (lat == 60) offset = -0.3f;
+										else if (lat == -60) offset = 0.3f;
+										if (lat != -88 && lat != 88)
+											pointsBlack.Add(new Vector2d((int)(map.MapScale * (map.projectLongitude(lon, lat + offset) + 180)), (int)(map.MapScale * (map.projectLatitude(lon, lat + offset) + 90))));
 									}
 									whiteLineList.Add(points);
 									blackLineList.Add(pointsBlack);
