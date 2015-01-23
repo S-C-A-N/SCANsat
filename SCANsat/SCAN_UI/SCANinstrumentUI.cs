@@ -15,11 +15,13 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using SCANsat.Platform;
+using SCANsat.SCAN_Platform;
 using SCANsat;
+using SCANsat.SCAN_UI.UI_Framework;
+using SCANsat.SCAN_Data;
 using UnityEngine;
 
-using palette = SCANsat.SCAN_UI.SCANpalette;
+using palette = SCANsat.SCAN_UI.UI_Framework.SCANpalette;
 
 namespace SCANsat.SCAN_UI
 {
@@ -27,8 +29,13 @@ namespace SCANsat.SCAN_UI
 	{
 		private bool notMappingToday; //Unused out-of-power bool
 		private SCANremoteView anomalyView;
-		private SCANdata.SCANtype sensors;
+		private SCANtype sensors;
 		private SCANdata data;
+		private Vessel v;
+		private double degreeOffset;
+		private float lastUpdate = 0f;
+		private float updateInterval = 0.2f;
+		private double slopeAVG;
 		internal static Rect defaultRect = new Rect(30, 600, 260, 60);
 
 		protected override void Awake()
@@ -53,6 +60,7 @@ namespace SCANsat.SCAN_UI
 				data = new SCANdata(FlightGlobals.currentMainBody);
 				SCANcontroller.controller.addToBodyData(FlightGlobals.currentMainBody, data);
 			}
+			planetConstants(FlightGlobals.currentMainBody);
 		}
 
 		internal override void OnDestroy()
@@ -62,24 +70,26 @@ namespace SCANsat.SCAN_UI
 
 		protected override void DrawWindowPre(int id)
 		{
+			v = FlightGlobals.ActiveVessel;
+
 			//Grab the active scanners on this vessel
-			sensors = SCANcontroller.controller.activeSensorsOnVessel(FlightGlobals.ActiveVessel.id);
+			sensors = SCANcontroller.controller.activeSensorsOnVessel(v.id);
 
 			//if (maptraq_frame >= Time.frameCount - 5) //Still not sure what this actually does
 			if (true)
 			{
 				//Check if region below the vessel is scanned
-				if (SCANUtil.isCovered(FlightGlobals.ActiveVessel.longitude, FlightGlobals.ActiveVessel.latitude, data, SCANdata.SCANtype.AltimetryLoRes))
+				if (SCANUtil.isCovered(v.longitude, v.latitude, data, SCANtype.AltimetryLoRes))
 				{
-					sensors |= SCANdata.SCANtype.Altimetry;
+					sensors |= SCANtype.Altimetry;
 				}
-				else if (SCANUtil.isCovered(FlightGlobals.ActiveVessel.longitude, FlightGlobals.ActiveVessel.latitude, data, SCANdata.SCANtype.AltimetryHiRes))
+				else if (SCANUtil.isCovered(v.longitude, v.latitude, data, SCANtype.AltimetryHiRes))
 				{
-					sensors |= SCANdata.SCANtype.Altimetry;
+					sensors |= SCANtype.Altimetry;
 				}
-				if (SCANUtil.isCovered(FlightGlobals.ActiveVessel.longitude, FlightGlobals.ActiveVessel.latitude, data, SCANdata.SCANtype.Biome))
+				if (SCANUtil.isCovered(v.longitude, v.latitude, data, SCANtype.Biome))
 				{
-					sensors |= SCANdata.SCANtype.Biome;
+					sensors |= SCANtype.Biome;
 				}
 			}
 		}
@@ -96,7 +106,7 @@ namespace SCANsat.SCAN_UI
 			else
 			{
 				if (biomeInfo(id)) ++parts;			/* show current biome info */
-				if (altInfo(id)) ++parts;			/* show current altitude *FixMe - inaccurate* */
+				if (altInfo(id)) ++parts;			/* show current altitude and slope */
 				if (anomalyInfo(id)) ++parts;		/* show nearest anomaly detail - including BTDT view */
 				if (parts <= 0) noData(id);			/* nothing to show */
 			}
@@ -128,25 +138,85 @@ namespace SCANsat.SCAN_UI
 		//Display current biome info
 		private bool biomeInfo(int id)
 		{
-			if ((sensors & SCANdata.SCANtype.Biome) != SCANdata.SCANtype.Nothing)
+			if ((sensors & SCANtype.Biome) != SCANtype.Nothing && v.mainBody.BiomeMap != null)
 			{
-				GUILayout.Label(string.Format("Biome:  {0}", SCANUtil.getBiomeName(FlightGlobals.ActiveVessel.mainBody, FlightGlobals.ActiveVessel.longitude, FlightGlobals.ActiveVessel.latitude)), SCANskins.SCAN_insColorLabel);
+				GUILayout.Label(string.Format("Biome:  {0}", SCANUtil.getBiomeName(v.mainBody, v.longitude, v.latitude)), SCANskins.SCAN_insColorLabel);
 				fillS(-10);
 				return true;
 			}
 			return false;
 		}
 
-		//Display the current vessel altitude *Needs to be fixed to display accurate alt*
+		//Display the current vessel altitude
 		private bool altInfo(int id)
 		{
-			if ((sensors & SCANdata.SCANtype.Altimetry) != SCANdata.SCANtype.Nothing)
+			if ((sensors & SCANtype.Altimetry) != SCANtype.Nothing)
 			{
-				double h = FlightGlobals.ActiveVessel.heightFromTerrain;
+				double h = v.altitude;
+				double pqs = 0;
+				if (v.mainBody.pqsController != null)
+				{
+					pqs = v.PQSAltitude();
+					if (pqs > 0 || !v.mainBody.ocean)
+						h -= pqs;
+				}
 				if (h < 0)
-					h = FlightGlobals.ActiveVessel.altitude;
+					h = v.altitude;
+
 				GUILayout.Label(string.Format("Altitude:  {0}", SCANuiUtil.distanceString(h, 100000)), SCANskins.SCAN_insColorLabel);
 				fillS(-10);
+
+				//Calculate slope less frequently; the rapidly changing value makes it difficult to read otherwise
+				if (v.mainBody.pqsController != null)
+				{
+					float deltaTime = 1f;
+					if (Time.deltaTime != 0)
+						deltaTime = TimeWarp.deltaTime / Time.deltaTime;
+					if (deltaTime > 5)
+						deltaTime = 5;
+					if (((Time.time * deltaTime) - lastUpdate) > updateInterval)
+					{
+						lastUpdate = Time.time;
+
+						/* Slope is calculated using a nine point grid centered 5m around the vessel location
+						 * The rise between the vessel location's elevation and each point on the grid is calculated, converted to slope in degrees, and averaged;
+						 * Note: Averageing is not the most accurate method
+						 */
+
+						double lon = v.longitude;
+						double lat = v.latitude;
+						double latOffset = degreeOffset * Math.Cos(Mathf.Deg2Rad * lat);
+						double[] e = new double[9];
+						double[] s = new double[8];
+						e[0] = pqs;
+						e[1] = SCANUtil.getElevation(v.mainBody, lon + latOffset, lat);
+						e[2] = SCANUtil.getElevation(v.mainBody, lon - latOffset, lat);
+						e[3] = SCANUtil.getElevation(v.mainBody, lon, lat + latOffset);
+						e[4] = SCANUtil.getElevation(v.mainBody, lon, lat - latOffset);
+						e[5] = SCANUtil.getElevation(v.mainBody, lon + latOffset, lat + latOffset);
+						e[6] = SCANUtil.getElevation(v.mainBody, lon + latOffset, lat - latOffset);
+						e[7] = SCANUtil.getElevation(v.mainBody, lon - latOffset, lat + latOffset);
+						e[8] = SCANUtil.getElevation(v.mainBody, lon - latOffset, lat - latOffset);
+
+						for (int i = 1; i <= 4; i++)
+						{
+							s[i - 1] = Math.Atan((Math.Abs(e[i] - e[0])) / 5) * Mathf.Rad2Deg;
+						}
+						for (int i = 5; i <= 8; i++)
+						{
+							s[i - 1] = Math.Atan((Math.Abs(e[i] - e[0])) / 7.071) * Mathf.Rad2Deg;
+						}
+
+							//SCANUtil.SCANdebugLog("Elevations: {0:F3};{1:F3};{2:F3};{3:F3};{4:F3} ; Long: {5:F6};{6:F6};{7:F6};{8:F6};{9:F6} ; Lat: {10:F6};{11:F6};{12:F6};{13:F6};{14:F6} ; Slope: {15:F1};{16:F1};{17:F1};{18:F1}", e[0], e[1], e[2], e[3], e[4], lon, lon + latOffset, lon - latOffset, lon, lon, lat, lat, lat, lat + latOffset, lat - latOffset, s[0], s[1], s[2], s[3]);
+
+						slopeAVG = s.Sum() / 8;
+
+					}
+
+					GUILayout.Label(string.Format("Slope: {0:F2}°", slopeAVG), SCANskins.SCAN_insColorLabel);
+					fillS(-10);
+				}
+
 				return true;
 			}
 			return false;
@@ -155,15 +225,15 @@ namespace SCANsat.SCAN_UI
 		//Display info on the nearest anomaly *Need to separate the BTDT display*
 		private bool anomalyInfo(int id)
 		{
-			if ((sensors & SCANdata.SCANtype.AnomalyDetail) != SCANdata.SCANtype.Nothing)
+			if ((sensors & SCANtype.AnomalyDetail) != SCANtype.Nothing)
 			{
-				SCANdata.SCANanomaly nearest = null;
+				SCANanomaly nearest = null;
 				double nearest_dist = -1;
-				foreach (SCANdata.SCANanomaly a in data.Anomalies)
+				foreach (SCANanomaly a in data.Anomalies)
 				{
-					if (!a.known)
+					if (!a.Known)
 						continue;
-					double d = (a.mod.transform.position - FlightGlobals.ActiveVessel.transform.position).magnitude;
+					double d = (a.Mod.transform.position - v.transform.position).magnitude;
 					if (d < nearest_dist || nearest_dist < 0)
 					{
 						if (d < 50000)
@@ -176,8 +246,8 @@ namespace SCANsat.SCAN_UI
 				if (nearest != null)
 				{
 					string txt = "Anomaly";
-					if (nearest.detail)
-						txt = nearest.name;
+					if (nearest.Detail)
+						txt = nearest.Name;
 					txt += ":  " + SCANuiUtil.distanceString(nearest_dist, 5000);
 					GUILayout.Label(txt, SCANskins.SCAN_insColorLabel);
 
@@ -185,15 +255,15 @@ namespace SCANsat.SCAN_UI
 						anomalyView = new SCANremoteView();
 					if (anomalyView != null)
 					{
-						if (nearest.mod != null)
+						if (nearest.Mod != null)
 						{
-							if (anomalyView.lookat != nearest.mod.gameObject)
-								anomalyView.setup(320, 240, nearest.mod.gameObject);
+							if (anomalyView.lookat != nearest.Mod.gameObject)
+								anomalyView.setup(320, 240, nearest.Mod.gameObject);
 							Texture t = anomalyView.getTexture();
 							if (t != null)
 							{
 								GUILayout.Label(anomalyView.getTexture());
-								anomalyView.drawOverlay(GUILayoutUtility.GetLastRect(), SCANskins.SCAN_anomalyOverlay, nearest.detail);
+								anomalyView.drawOverlay(GUILayoutUtility.GetLastRect(), SCANskins.SCAN_anomalyOverlay, nearest.Detail);
 							}
 						}
 					}
@@ -204,6 +274,13 @@ namespace SCANsat.SCAN_UI
 			return false;
 		}
 
+		private void planetConstants (CelestialBody b)
+		{
+			double circum = b.Radius * 2 * Math.PI;
+			double eqDistancePerDegree = circum / 360;
+			degreeOffset = 5 / eqDistancePerDegree;
+		}
+
 		private void soiChange (GameEvents.HostedFromToAction<Vessel, CelestialBody> VC)
 		{
 			data = SCANUtil.getData(VC.to);
@@ -212,6 +289,7 @@ namespace SCANsat.SCAN_UI
 				data = new SCANdata(VC.to);
 				SCANcontroller.controller.addToBodyData(VC.to, data);
 			}
+			planetConstants(VC.to);
 		}
 
 	}

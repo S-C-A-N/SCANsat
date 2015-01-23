@@ -11,10 +11,10 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
-using palette = SCANsat.SCAN_UI.SCANpalette;
+using palette = SCANsat.SCAN_UI.UI_Framework.SCANpalette;
 
 
-namespace SCANsat.SCAN_UI
+namespace SCANsat.SCAN_UI.UI_Framework
 {
 	public class SCANremoteView {
 

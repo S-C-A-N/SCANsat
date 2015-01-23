@@ -40,6 +40,18 @@ Milkshakefiend has given permission that these models and textures may be
 distributed with SCANsat, including derived works, as long as credit is given.
 
 
+LICENSING INFORMATION FOR SCIENCE TEXT
+---------------------------------------------
+
+Science results text were created by Olympic1:
+https://github.com/S-C-A-N/SCANsat/pull/110#issuecomment-71082065
+
+All Rights Reserved - Olympic1 / Arne Peirs
+
+Olympic1 has given permission that these results texts may be distributed 
+with SCANsant, including derived works, as long as credit is given.
+
+
 LICENSING INFORMATION FOR LOGO
 ---------------------------------------------
 

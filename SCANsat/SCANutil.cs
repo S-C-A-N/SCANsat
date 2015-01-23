@@ -17,10 +17,9 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
-using System.IO;
-using System.Runtime.Serialization.Formatters.Binary;
-using SCANsat.Platform;
-using palette = SCANsat.SCAN_UI.SCANpalette;
+using SCANsat.SCAN_Platform;
+using SCANsat.SCAN_Data;
+using palette = SCANsat.SCAN_UI.UI_Framework.SCANpalette;
 
 namespace SCANsat
 {
@@ -87,7 +86,7 @@ namespace SCANsat
 			{
 				SCANdata data = getData(Body);
 				if (data != null)
-					return data.getCoveragePercentage((SCANdata.SCANtype)SCANtype);
+					return getCoveragePercentage(data, (SCANtype)SCANtype);
 				else
 					return 0;
 			}
@@ -95,7 +94,25 @@ namespace SCANsat
 				return 0;
 		}
 
-		internal static bool isCovered(double lon, double lat, SCANdata data, SCANdata.SCANtype type)
+		/// <summary>
+		/// Given the name of the SCANtype, returns the int value.
+		/// </summary>
+		/// <param name="SCANname">The name of the SCANtype.</param>
+		/// <returns>The int value that can be used in other public methods.</returns>
+		public static int GetSCANtype(string SCANname)
+		{
+			try
+			{
+				return (int)Enum.Parse(typeof(SCANtype), SCANname);
+			}
+			catch (ArgumentException e)
+			{
+				throw new ArgumentException("An invalid SCANtype name was provided.  Valid values are: " +
+					string.Join(", ", ((IEnumerable<SCANtype>)Enum.GetValues(typeof(SCANtype))).Select<SCANtype, string>(x => x.ToString()).ToArray()));
+			}
+		}
+
+		internal static bool isCovered(double lon, double lat, SCANdata data, SCANtype type)
 		{
 			int ilon = icLON(lon);
 			int ilat = icLAT(lat);
@@ -103,33 +120,32 @@ namespace SCANsat
 			return (data.Coverage[ilon, ilat] & (Int32)type) != 0;
 		}
 
-		internal static bool isCovered(int lon, int lat, SCANdata data, SCANdata.SCANtype type)
+		internal static bool isCovered(int lon, int lat, SCANdata data, SCANtype type)
 		{
 			if (badLonLat(lon, lat)) return false;
 			return (data.Coverage[lon, lat] & (Int32)type) != 0;
 		}
 
-		internal static bool isCoveredByAll (int lon, int lat, SCANdata data, SCANdata.SCANtype type)
+		internal static bool isCoveredByAll (int lon, int lat, SCANdata data, SCANtype type)
 		{
 			if (badLonLat(lon,lat)) return false;
 			return (data.Coverage[lon, lat] & (Int32)type) == (Int32)type;
 		}
 
-		internal static void registerPass ( double lon, double lat, SCANdata data, SCANdata.SCANtype type ) {
+		internal static void registerPass ( double lon, double lat, SCANdata data, SCANtype type ) {
 			int ilon = SCANUtil.icLON(lon);
 			int ilat = SCANUtil.icLAT(lat);
 			if (SCANUtil.badLonLat(ilon, ilat)) return;
 			data.Coverage[ilon, ilat] |= (Int32)type;
 		}
 
-		internal static double getCoveragePercentage(CelestialBody body, SCANdata.SCANtype type )
+		internal static double getCoveragePercentage(SCANdata data, SCANtype type )
 		{
-			SCANdata data = getData(body);
 			if (data == null)
 				return 0;
 			double cov = 0d;
-			if (type == SCANdata.SCANtype.Nothing)
-				type = SCANdata.SCANtype.AltimetryLoRes | SCANdata.SCANtype.AltimetryHiRes | SCANdata.SCANtype.Biome | SCANdata.SCANtype.Anomaly;          
+			if (type == SCANtype.Nothing)
+				type = SCANtype.AltimetryLoRes | SCANtype.AltimetryHiRes | SCANtype.Biome | SCANtype.Anomaly;          
 			cov = data.getCoverage (type);
 			if (cov <= 0)
 				cov = 100;
@@ -163,13 +179,28 @@ namespace SCANsat
 			return (lon + 360 + 180) % 360;
 		}
 
+		/// <summary>
+		/// For a given Celestial Body this returns the SCANdata instance if it exists in the SCANcontroller master dictionary; return is null if the SCANdata does not exist for that body (ie it has never been visited while SCANsat has been active)
+		/// </summary>
+		/// <param name="body">Celestial Body object</param>
+		/// <returns>SCANdata instance for the given Celestial Body; null if none exists</returns>
 		public static SCANdata getData(CelestialBody body)
 		{
-			if (!SCANcontroller.Body_Data.ContainsKey(body.name))
+			return getData(body.name);
+		}
+
+		/// <summary>
+		/// For a given Celestial Body name this returns the SCANdata instance if it exists in the SCANcontroller master dictionary; return is null if the SCANdata does not exist for that body (ie it has never been visited while SCANsat has been active)
+		/// </summary>
+		/// <param name="BodyName">Name of celestial body (do not use TheName string)</param>
+		/// <returns>SCANdata instance for the given Celestial Body; null if none exists</returns>
+		public static SCANdata getData(string BodyName)
+		{
+			if (!SCANcontroller.Body_Data.ContainsKey(BodyName))
 			{
 				return null;
 			}
-			SCANdata data = SCANcontroller.Body_Data[body.name];
+			SCANdata data = SCANcontroller.Body_Data[BodyName];
 			return data;
 		}
 
@@ -202,83 +233,6 @@ namespace SCANsat
 			return ret;
 		}
 
-		internal static ScienceData getAvailableScience(Vessel v, SCANdata.SCANtype sensor, bool notZero)
-		{
-			SCANdata data = getData(v.mainBody);
-			if (data == null)
-				return null;
-			ScienceData sd = null;
-			ScienceExperiment se = null;
-			ScienceSubject su = null;
-			bool found = false;
-			string id = null;
-			double coverage = 0f;
-			float multiplier = 1f;
-
-			if(!found && (sensor & SCANdata.SCANtype.AltimetryLoRes) != SCANdata.SCANtype.Nothing) {
-				found = true;
-				if (v.mainBody.pqsController == null)
-					multiplier = 0.5f;
-				id = "SCANsatAltimetryLoRes";
-				coverage = data.getCoveragePercentage(SCANdata.SCANtype.AltimetryLoRes);
-			}
-			else if(!found && (sensor & SCANdata.SCANtype.AltimetryHiRes) != SCANdata.SCANtype.Nothing) {
-				found = true;
-				if (v.mainBody.pqsController == null)
-					multiplier = 0.5f;
-				id = "SCANsatAltimetryHiRes";
-				coverage = data.getCoveragePercentage(SCANdata.SCANtype.AltimetryHiRes);
-			}
-			else if(!found && (sensor & SCANdata.SCANtype.Biome) != SCANdata.SCANtype.Nothing) {
-				found = true;
-				if (v.mainBody.BiomeMap == null)
-					multiplier = 0.5f;
-				id = "SCANsatBiomeAnomaly";
-				coverage = data.getCoveragePercentage(SCANdata.SCANtype.Biome);
-			}
-			if(!found) return null;
-			se = ResearchAndDevelopment.GetExperiment(id);
-			if(se == null) return null;
-
-			su = ResearchAndDevelopment.GetExperimentSubject(se, ExperimentSituations.InSpaceHigh, v.mainBody, "surface");
-			if(su == null) return null;
-
-			su.scienceCap *= multiplier;
-
-			SCANlog("Coverage: {0}, Science cap: {1}, Subject value: {2}, Scientific value: {3}, Science: {4}", new object[5] {coverage.ToString("F1"), su.scienceCap.ToString("F1"), su.subjectValue.ToString("F2"), su.scientificValue.ToString("F2"), su.science.ToString("F2")});
-
-			su.scientificValue = 1;
-
-			float science = (float)coverage;
-			if(science > 95) science = 100;
-			if(science < 30) science = 0;
-			science = science / 100f;
-			science = Mathf.Max(0, (science * su.scienceCap) - su.science);
-
-			SCANlog("Remaining science: {0}, Base value: {1}", new object[2] {science.ToString("F1"), se.baseValue.ToString("F1")});
-
-			science /= Mathf.Max(0.1f, su.scientificValue); //look 10 lines up; this is always 1...
-			science /= su.subjectValue;
-
-			SCANlog("Resulting science value: {0}", new object[1] {science.ToString("F2")});
-
-			if(notZero && science <= 0) science = 0.00001f;
-
-			sd = new ScienceData(science * su.dataScale, 1f, 0f, su.id, se.experimentTitle + " of " + v.mainBody.theName);
-			su.title = sd.title;
-			return sd;
-		}
-
-		internal static double ORSOverlay(double lon, double lat, int i, string s)
-		{
-			double amount = 0d;
-			amount = SCANreflection.ORSXpixelAbundanceValue(i, s, lat, lon);
-			//ORSPlanetaryResourcePixel overlayPixel = ORSPlanetaryResourceMapData.getResourceAvailability(i, s, lat, lon);
-			//if (overlayPixel != null)
-			//	amount = overlayPixel.getAmount();
-			return amount;
-		}
-
 		internal static float RegolithOverlay(double lat, double lon, string name, int body)
 		{
 			float amount = 0f;
@@ -286,7 +240,7 @@ namespace SCANsat
 			return amount;
 		}
 
-		internal static SCANdata.SCANResource RegolithConfigLoad(ConfigNode node)
+		internal static SCANresource RegolithConfigLoad(ConfigNode node)
 		{
 			float min = .001f;
 			float max = 10f;
@@ -297,10 +251,10 @@ namespace SCANsat
 				name = node.GetValue("ResourceName");
 			else
 				return null;
-			SCANdata.SCANresourceType type = OverlayResourceType(name);
+			SCANresourceType type = OverlayResourceType(name);
 			if (type == null)
 				return null;
-			if (type.type == SCANdata.SCANtype.Nothing)
+			if (type.Type == SCANtype.Nothing)
 				return null;
 			if (node.HasValue("PlanetName"))
 				body = node.GetValue("PlanetName");
@@ -318,64 +272,16 @@ namespace SCANsat
 			}
 			if (min == max)
 				max += 0.001f;
-			SCANdata.SCANResource SCANres = new SCANdata.SCANResource(name, body, type.colorFull, type.colorEmpty, min, max, type, SCANdata.SCANResource_Source.Regolith);
+			SCANresource SCANres = new SCANresource(name, body, type.ColorFull, type.ColorEmpty, min, max, type, SCANresource_Source.Regolith);
 			if (SCANres != null)
 				return SCANres;
 
 			return null;
 		}
 
-		internal static SCANdata.SCANResource ORSConfigLoad(ConfigNode node)
-		{
-			double scalar = 1d;
-			double Threshold = 1d;
-			double mult = 1d;
-			string name = "";
-			string body = "";
-			bool scale = false;
-			if (node.HasValue("name"))
-				name = node.GetValue("name");
-			else
-				return null;
-			SCANdata.SCANresourceType type = OverlayResourceType(name);
-			if (type == null)
-				return null;
-			if (type.type == SCANdata.SCANtype.Nothing)
-				return null;
-			if (node.HasValue("celestialBodyName"))
-				body = node.GetValue("celestialBodyName");
-			else
-				return null;
-			if (node.HasValue("resourceScale"))
-			{
-				if (node.GetValue("resourceScale") == "LINEAR_SCALE")
-					scale = true;
-				else if (node.GetValue("resourceScale") == "LOG_SCALE")
-					scale = false;
-			}
-			if (node.HasValue("displayThreshold"))
-				double.TryParse(node.GetValue("displayThreshold"), out Threshold);
-			if (scale)
-				Threshold *= 10;
-			else
-			{
-				Threshold *= 10000;
-				if (node.HasValue("scaleFactor"))
-					double.TryParse(node.GetValue("scaleFactor"), out scalar);
-			}
-			if (node.HasValue("scaleMultiplier"))
-				double.TryParse(node.GetValue("scaleMultiplier"), out mult);
-
-			//SCANdata.SCANResource SCANres = new SCANdata.SCANResource(name, body, type.colorFull, type.colorEmpty, scale, 1f, type, SCANdata.SCANResource_Source.ORSX);
-			//if (SCANres != null)
-			//	return SCANres;
-
-			return null;
-		}
-
 		internal static void loadSCANtypes()
 		{
-			SCANcontroller.ResourceTypes = new Dictionary<string, SCANdata.SCANresourceType>();
+			SCANcontroller.ResourceTypes = new Dictionary<string, SCANresourceType>();
 			foreach (ConfigNode node in GameDatabase.Instance.GetConfigNodes("SCANSAT_SENSOR"))
 			{
 				string name = "";
@@ -392,20 +298,19 @@ namespace SCANsat
 				if (node.HasValue("ColorEmpty"))
 					colorEmpty = node.GetValue("ColorEmpty");
 				if (!SCANcontroller.ResourceTypes.ContainsKey(name) && !string.IsNullOrEmpty(name))
-					SCANcontroller.ResourceTypes.Add(name, new SCANdata.SCANresourceType(name, i, colorFull, colorEmpty));
+					SCANcontroller.ResourceTypes.Add(name, new SCANresourceType(name, i, colorFull, colorEmpty));
 			}
 		}
 
-		internal static SCANdata.SCANresourceType OverlayResourceType(string s)
+		internal static SCANresourceType OverlayResourceType(string s)
 		{
-			var resourceType = SCANcontroller.ResourceTypes.FirstOrDefault(r => r.Value.name == s).Value;
+			var resourceType = SCANcontroller.ResourceTypes.FirstOrDefault(r => r.Value.Name == s).Value;
 			return resourceType;
 		}
 
 		internal static int getBiomeIndex(CelestialBody body, double lon , double lat)
 		{
 			if (body.BiomeMap == null)		return -1;
-			//if (body.BiomeMap.Map == null)	return -1;
 			double u = fixLon(lon);
 			double v = fixLat(lat);
 
@@ -429,9 +334,7 @@ namespace SCANsat
 		internal static CBAttributeMapSO.MapAttribute getBiome(CelestialBody body, double lon , double lat)
 		{
 			if (body.BiomeMap == null) return null;
-			//if (body.BiomeMap.Map == null) return body.BiomeMap.defaultAttribute;
 			int i = getBiomeIndex(body, lon , lat);
-			//if (i < 0) return body.BiomeMap.defaultAttribute;
 			return body.BiomeMap.Attributes [i];
 		}
 
@@ -457,397 +360,144 @@ namespace SCANsat
 			Debug.Log(finalLog);
 		}
 
-		//Take the Int32[] coverage and convert it to a single dimension byte array
-		private static byte[] ConvertToByte(Int32[,] iArray)
+		[System.Diagnostics.Conditional("DEBUG")]
+		internal static void SCANdebugLog(string log, params object[] stringObjects)
 		{
-			byte[] bArray = new byte[360 * 180 * 4];
-			int k = 0;
-			for (int i = 0; i < 360; i++) {
-				for (int j = 0; j < 180; j++) {
-					byte[] bytes = BitConverter.GetBytes(iArray[i, j]);
-					for (int m = 0; m < bytes.Length; m++) {
-						bArray[k++] = bytes[m];
-					}
-				}
-			}
-			return bArray;
-		}
-
-		//Convert byte array from persistent file to usable Int32[]
-		private static Int32[,] ConvertToInt(byte[] bArray)
-		{
-			Int32[,] iArray = new Int32[360, 180];
-			int k = 0;
-			for (int i = 0; i < 360; i++) {
-				for (int j = 0; j < 180; j++) {
-					iArray[i, j] = BitConverter.ToInt32(bArray, k);
-					k += 4;
-				}
-			}
-			return iArray;
-		}
-
-		//One time conversion of single byte[,] to Int32 to recover old scanning data
-		private static Int32[,] RecoverToInt(byte[,] bArray)
-		{
-			Int32[,] iArray = new Int32[360, 180];
-			for (int i = 0; i < 360; i++) {
-				for (int j = 0; j < 180; j++) {
-					iArray[i, j] = (Int32)bArray[i, j];
-				}
-			}
-			return iArray;
-		}
-
-		/* DATA: serialization and compression */
-		internal static string integerSerialize(SCANdata data)
-		{
-			byte[] bytes = ConvertToByte(data.Coverage);
-			MemoryStream mem = new MemoryStream();
-			BinaryFormatter binf = new BinaryFormatter();
-			binf.Serialize(mem, bytes);
-			string blob = Convert.ToBase64String(SCAN_CLZF2.Compress(mem.ToArray()));
-			return blob.Replace("/", "-").Replace("=", "_");
-		}
-
-		internal static void integerDeserialize(string blob, bool b, SCANdata data)
-		{
-			try {
-				blob = blob.Replace("-", "/").Replace("_", "=");
-				byte[] bytes = Convert.FromBase64String(blob);
-				bytes = SCAN_CLZF2.Decompress(bytes);
-				MemoryStream mem = new MemoryStream(bytes, false);
-				BinaryFormatter binf = new BinaryFormatter();
-				if (b) {
-					byte[,] bRecover = new byte[360, 180];
-					bRecover = (byte[,])binf.Deserialize(mem);
-					data.Coverage = RecoverToInt(bRecover);
-				}
-				else {
-					byte[] bArray = (byte[])binf.Deserialize(mem);
-					data.Coverage = ConvertToInt(bArray);
-				}
-			}
-			catch (Exception e) {
-				data.Coverage = new Int32[360, 180];
-				data.HeightMap = new float[360, 180];
-				throw e;
-			}
-			data.resetImages();
+			SCANlog(log, stringObjects);
 		}
 
 	}
-
-	#region MechJeb Extensions
-
-	// This extension is from MechJeb; Used with permission from r4m0n: https://github.com/MuMech/MechJeb2/blob/master/MechJeb2/OrbitExtensions.cs
-
-		public static class OrbitExtensions
-		{
-				//Returns whether a has an ascending node with b. This can be false
-				//if a is hyperbolic and the would-be ascending node is within the opening
-				//angle of the hyperbola.
-				public static bool AscendingNodeExists(this Orbit a, Orbit b)
-				{
-						return Math.Abs(JUtil.ClampDegrees180(a.AscendingNodeTrueAnomaly(b))) <= a.MaximumTrueAnomaly();
-				}
-				//Gives the true anomaly (in a's orbit) at which a crosses its ascending node
-				//with b's orbit.
-				//The returned value is always between 0 and 360.
-				public static double AscendingNodeTrueAnomaly(this Orbit a, Orbit b)
-				{
-						Vector3d vectorToAN = Vector3d.Cross (a.SwappedOrbitNormal (), b.SwappedOrbitNormal ());
-						return a.TrueAnomalyFromVector(vectorToAN);
-
-				}
-				//For hyperbolic orbits, the true anomaly only takes on values in the range
-				// -M < true anomaly < +M for some M. This function computes M.
-				public static double MaximumTrueAnomaly(this Orbit o)
-				{
-						if (o.eccentricity < 1)
-								return 180;
-						return 180 / Math.PI * Math.Acos(-1 / o.eccentricity);
-				}
-				//normalized vector perpendicular to the orbital plane
-				//convention: as you look down along the orbit normal, the satellite revolves counterclockwise
-				public static Vector3d SwappedOrbitNormal(this Orbit o)
-				{
-						return -(o.GetOrbitNormal().xzy).normalized;
-				}
-
-				//Returns whether a has a descending node with b. This can be false
-				//if a is hyperbolic and the would-be descending node is within the opening
-				//angle of the hyperbola.
-				public static bool DescendingNodeExists(this Orbit a, Orbit b)
-				{
-						return Math.Abs(JUtil.ClampDegrees180(a.DescendingNodeTrueAnomaly(b))) <= a.MaximumTrueAnomaly();
-				}
-				//Gives the true anomaly (in a's orbit) at which a crosses its descending node
-				//with b's orbit.
-				//The returned value is always between 0 and 360.
-				public static double DescendingNodeTrueAnomaly(this Orbit a, Orbit b)
-				{
-						return JUtil.ClampDegrees360(a.AscendingNodeTrueAnomaly(b) + 180);
-				}
-				//Returns the next time at which a will cross its ascending node with b.
-				//For elliptical orbits this is a time between UT and UT + a.period.
-				//For hyperbolic orbits this can be any time, including a time in the past if
-				//the ascending node is in the past.
-				//NOTE: this function will throw an ArgumentException if a is a hyperbolic orbit and the "ascending node"
-				//occurs at a true anomaly that a does not actually ever attain
-				public static double TimeOfAscendingNode(this Orbit a, Orbit b, double UT)
-				{
-						return a.TimeOfTrueAnomaly(a.AscendingNodeTrueAnomaly(b), UT);
-				}
-				//Returns the next time at which a will cross its descending node with b.
-				//For elliptical orbits this is a time between UT and UT + a.period.
-				//For hyperbolic orbits this can be any time, including a time in the past if
-				//the descending node is in the past.
-				//NOTE: this function will throw an ArgumentException if a is a hyperbolic orbit and the "descending node"
-				//occurs at a true anomaly that a does not actually ever attain
-				public static double TimeOfDescendingNode(this Orbit a, Orbit b, double UT)
-				{
-						return a.TimeOfTrueAnomaly(a.DescendingNodeTrueAnomaly(b), UT);
-				}
-				//NOTE: this function can throw an ArgumentException, if o is a hyperbolic orbit with an eccentricity
-				//large enough that it never attains the given true anomaly
-				public static double TimeOfTrueAnomaly(this Orbit o, double trueAnomaly, double UT)
-				{
-						return o.UTAtMeanAnomaly(o.GetMeanAnomalyAtEccentricAnomaly(o.GetEccentricAnomalyAtTrueAnomaly(trueAnomaly)), UT);
-				}
-				//The next time at which the orbiting object will reach the given mean anomaly.
-				//For elliptical orbits, this will be a time between UT and UT + o.period
-				//For hyperbolic orbits, this can be any time, including a time in the past, if
-				//the given mean anomaly occurred in the past
-				public static double UTAtMeanAnomaly(this Orbit o, double meanAnomaly, double UT)
-				{
-						double currentMeanAnomaly = o.MeanAnomalyAtUT(UT);
-						double meanDifference = meanAnomaly - currentMeanAnomaly;
-						if (o.eccentricity < 1)
-								meanDifference = JUtil.ClampRadiansTwoPi(meanDifference);
-						return UT + meanDifference / o.MeanMotion();
-				}
-				//Converts an eccentric anomaly into a mean anomaly.
-				//For an elliptical orbit, the returned value is between 0 and 2pi
-				//For a hyperbolic orbit, the returned value is any number
-				public static double GetMeanAnomalyAtEccentricAnomaly(this Orbit o, double E)
-				{
-						double e = o.eccentricity;
-						if (e < 1) { //elliptical orbits
-								return JUtil.ClampRadiansTwoPi(E - (e * Math.Sin(E)));
-						} //hyperbolic orbits
-						return (e * Math.Sinh(E)) - E;
-				}
-				//Originally by Zool, revised by The_Duck
-				//Converts a true anomaly into an eccentric anomaly.
-				//For elliptical orbits this returns a value between 0 and 2pi
-				//For hyperbolic orbits the returned value can be any number.
-				//NOTE: For a hyperbolic orbit, if a true anomaly is requested that does not exist (a true anomaly
-				//past the true anomaly of the asymptote) then an ArgumentException is thrown
-				public static double GetEccentricAnomalyAtTrueAnomaly(this Orbit o, double trueAnomaly)
-				{
-						double e = o.eccentricity;
-						trueAnomaly = JUtil.ClampDegrees360(trueAnomaly);
-						trueAnomaly = trueAnomaly * (Math.PI / 180);
-
-						if (e < 1) { //elliptical orbits
-								double cosE = (e + Math.Cos(trueAnomaly)) / (1 + e * Math.Cos(trueAnomaly));
-								double sinE = Math.Sqrt(1 - (cosE * cosE));
-								if (trueAnomaly > Math.PI)
-										sinE *= -1;
-
-								return JUtil.ClampRadiansTwoPi(Math.Atan2(sinE, cosE));
-						} else {  //hyperbolic orbits
-								double coshE = (e + Math.Cos(trueAnomaly)) / (1 + e * Math.Cos(trueAnomaly));
-								if (coshE < 1)
-										throw new ArgumentException("OrbitExtensions.GetEccentricAnomalyAtTrueAnomaly: True anomaly of " + trueAnomaly + " radians is not attained by orbit with eccentricity " + o.eccentricity);
-
-								double E = JUtil.Acosh(coshE);
-								if (trueAnomaly > Math.PI)
-										E *= -1;
-
-								return E;
-						}
-				}
-				//The mean anomaly of the orbit.
-				//For elliptical orbits, the value return is always between 0 and 2pi
-				//For hyperbolic orbits, the value can be any number.
-				public static double MeanAnomalyAtUT(this Orbit o, double UT)
-				{
-						double ret = o.meanAnomalyAtEpoch + o.MeanMotion() * (UT - o.epoch);
-						if (o.eccentricity < 1)
-								ret = JUtil.ClampRadiansTwoPi(ret);
-						return ret;
-				}
-				//mean motion is rate of increase of the mean anomaly
-				public static double MeanMotion(this Orbit o)
-				{
-						return Math.Sqrt(o.referenceBody.gravParameter / Math.Abs(Math.Pow(o.semiMajorAxis, 3)));
-				}
-				//Converts a direction, specified by a Vector3d, into a true anomaly.
-				//The vector is projected into the orbital plane and then the true anomaly is
-				//computed as the angle this vector makes with the vector pointing to the periapsis.
-				//The returned value is always between 0 and 360.
-				public static double TrueAnomalyFromVector(this Orbit o, Vector3d vec)
-				{
-						Vector3d projected = Vector3d.Exclude(o.SwappedOrbitNormal(), vec);
-						Vector3d vectorToPe = o.eccVec.xzy;
-						double angleFromPe = Math.Abs(Vector3d.Angle(vectorToPe, projected));
-
-						//If the vector points to the infalling part of the orbit then we need to do 360 minus the
-						//angle from Pe to get the true anomaly. Test this by taking the the cross product of the
-						//orbit normal and vector to the periapsis. This gives a vector that points to center of the 
-						//outgoing side of the orbit. If vectorToAN is more than 90 degrees from this vector, it occurs
-						//during the infalling part of the orbit.
-						if (Math.Abs(Vector3d.Angle(projected, Vector3d.Cross(o.SwappedOrbitNormal(), vectorToPe))) < 90) {
-								return angleFromPe;
-						}
-						return 360 - angleFromPe;
-				}
-				//distance from the center of the planet
-				public static double Radius(this Orbit o, double UT)
-				{
-						return o.SwappedRelativePositionAtUT(UT).magnitude;
-				}
-				//position relative to the primary
-				public static Vector3d SwappedRelativePositionAtUT(this Orbit o, double UT)
-				{
-						return o.getRelativePositionAtUT(UT).xzy;
-				}
-		}
-
-	#endregion
 
 		#region fix Duplicated Code
 
 		// Mihara: Notice that quite a bit of it, at least conceptually, duplicates code that SCANsat already contains elsewhere,
 		// and in general needs trimming.
 
-		public static class MapIcons
-		{
-				public enum OtherIcon
-				{
-						None,
-						PE,
-						AP,
-						AN,
-						DN,
-						NODE,
-						SHIPATINTERCEPT,
-						TGTATINTERCEPT,
-						ENTERSOI,
-						EXITSOI,
-						PLANET,
-				}
+		//public static class MapIcons
+		//{
+		//		public enum OtherIcon
+		//		{
+		//				None,
+		//				PE,
+		//				AP,
+		//				AN,
+		//				DN,
+		//				NODE,
+		//				SHIPATINTERCEPT,
+		//				TGTATINTERCEPT,
+		//				ENTERSOI,
+		//				EXITSOI,
+		//				PLANET,
+		//		}
 
-				public static Rect VesselTypeIcon(VesselType type, OtherIcon icon)
-				{
-						int x = 0;
-						int y = 0;
-						const float symbolSpan = 0.2f;
-						if (icon != OtherIcon.None) {
-								switch (icon) {
-								case OtherIcon.AP:
-										x = 1;
-										y = 4;
-										break;
-								case OtherIcon.PE:
-										x = 0;
-										y = 4;
-										break;
-								case OtherIcon.AN:
-										x = 2;
-										y = 4;
-										break;
-								case OtherIcon.DN:
-										x = 3;
-										y = 4;
-										break;
-								case OtherIcon.NODE:
-										x = 2;
-										y = 1;
-										break;
-								case OtherIcon.SHIPATINTERCEPT:
-										x = 0;
-										y = 1;
-										break;
-								case OtherIcon.TGTATINTERCEPT:
-										x = 1;
-										y = 1;
-										break;
-								case OtherIcon.ENTERSOI:
-										x = 0;
-										y = 2;
-										break;
-								case OtherIcon.EXITSOI:
-										x = 1;
-										y = 2;
-										break;
-								case OtherIcon.PLANET:
-										// Not sure if it is (2,3) or (3,2) - both are round
-										x = 2;
-										y = 3;
-										break;
-								}
-						} else {
-								switch (type) {
-								case VesselType.Base:
-										x = 2;
-										y = 0;
-										break;
-								case VesselType.Debris:
-										x = 1;
-										y = 3;
-										break;
-								case VesselType.EVA:
-										x = 2;
-										y = 2;
-										break;
-								case VesselType.Flag:
-										x = 4;
-										y = 0;
-										break;
-								case VesselType.Lander:
-										x = 3;
-										y = 0;
-										break;
-								case VesselType.Probe:
-										x = 1;
-										y = 0;
-										break;
-								case VesselType.Rover:
-										x = 0;
-										y = 0;
-										break;
-								case VesselType.Ship:
-										x = 0;
-										y = 3;
-										break;
-								case VesselType.Station:
-										x = 3;
-										y = 1;
-										break;
-								case VesselType.Unknown:
-										x = 3;
-										y = 3;
-										break;
-								case VesselType.SpaceObject:
-										x = 4;
-										y = 1;
-										break;
-								default:
-										x = 3;
-										y = 2;
-										break;
-								}
-						}
-						var result = new Rect();
-						result.x = symbolSpan * x;
-						result.y = symbolSpan * y;
-						result.height = result.width = symbolSpan;
-						return result;
-				}
-		}
+		//		public static Rect VesselTypeIcon(VesselType type, OtherIcon icon)
+		//		{
+		//				int x = 0;
+		//				int y = 0;
+		//				const float symbolSpan = 0.2f;
+		//				if (icon != OtherIcon.None) {
+		//						switch (icon) {
+		//						case OtherIcon.AP:
+		//								x = 1;
+		//								y = 4;
+		//								break;
+		//						case OtherIcon.PE:
+		//								x = 0;
+		//								y = 4;
+		//								break;
+		//						case OtherIcon.AN:
+		//								x = 2;
+		//								y = 4;
+		//								break;
+		//						case OtherIcon.DN:
+		//								x = 3;
+		//								y = 4;
+		//								break;
+		//						case OtherIcon.NODE:
+		//								x = 2;
+		//								y = 1;
+		//								break;
+		//						case OtherIcon.SHIPATINTERCEPT:
+		//								x = 0;
+		//								y = 1;
+		//								break;
+		//						case OtherIcon.TGTATINTERCEPT:
+		//								x = 1;
+		//								y = 1;
+		//								break;
+		//						case OtherIcon.ENTERSOI:
+		//								x = 0;
+		//								y = 2;
+		//								break;
+		//						case OtherIcon.EXITSOI:
+		//								x = 1;
+		//								y = 2;
+		//								break;
+		//						case OtherIcon.PLANET:
+		//								// Not sure if it is (2,3) or (3,2) - both are round
+		//								x = 2;
+		//								y = 3;
+		//								break;
+		//						}
+		//				} else {
+		//						switch (type) {
+		//						case VesselType.Base:
+		//								x = 2;
+		//								y = 0;
+		//								break;
+		//						case VesselType.Debris:
+		//								x = 1;
+		//								y = 3;
+		//								break;
+		//						case VesselType.EVA:
+		//								x = 2;
+		//								y = 2;
+		//								break;
+		//						case VesselType.Flag:
+		//								x = 4;
+		//								y = 0;
+		//								break;
+		//						case VesselType.Lander:
+		//								x = 3;
+		//								y = 0;
+		//								break;
+		//						case VesselType.Probe:
+		//								x = 1;
+		//								y = 0;
+		//								break;
+		//						case VesselType.Rover:
+		//								x = 0;
+		//								y = 0;
+		//								break;
+		//						case VesselType.Ship:
+		//								x = 0;
+		//								y = 3;
+		//								break;
+		//						case VesselType.Station:
+		//								x = 3;
+		//								y = 1;
+		//								break;
+		//						case VesselType.Unknown:
+		//								x = 3;
+		//								y = 3;
+		//								break;
+		//						case VesselType.SpaceObject:
+		//								x = 4;
+		//								y = 1;
+		//								break;
+		//						default:
+		//								x = 3;
+		//								y = 2;
+		//								break;
+		//						}
+		//				}
+		//				var result = new Rect();
+		//				result.x = symbolSpan * x;
+		//				result.y = symbolSpan * y;
+		//				result.height = result.width = symbolSpan;
+		//				return result;
+		//		}
+		//}
 
 		#endregion
 

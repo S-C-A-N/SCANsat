@@ -15,13 +15,13 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using SCANsat.Platform;
-using SCANsat.Platform.Palettes;
-using palette = SCANsat.SCAN_UI.SCANpalette;
+using SCANsat.SCAN_Platform;
+using SCANsat.SCAN_Platform.Palettes;
+using palette = SCANsat.SCAN_UI.UI_Framework.SCANpalette;
 using UnityEngine;
 
 
-namespace SCANsat.SCAN_UI
+namespace SCANsat.SCAN_UI.UI_Framework
 {
 	[KSPAddon(KSPAddon.Startup.MainMenu, true)]
 	class SCANskins: SCAN_MBE
@@ -99,6 +99,10 @@ namespace SCANsat.SCAN_UI
 		internal static Texture2D SCAN_SmallMapIcon;
 		internal static Texture2D SCAN_BigMapIcon;
 
+		//App Launcher Textures
+		internal static Texture2D SCAN_SmallMapAppIcon;
+		internal static Texture2D SCAN_BigMapAppIcon;
+
 		protected override void OnGUI_FirstRun()
 		{
 			initializeTextures();
@@ -126,6 +130,8 @@ namespace SCANsat.SCAN_UI
 			SCAN_BigMapIcon = GameDatabase.Instance.GetTexture("SCANsat/Icons/SCANsat_Map_Icon", false);
 			SCAN_ScreenshotIcon = GameDatabase.Instance.GetTexture("SCANsat/Icons/SCAN_Screenshot_Icon", false);
 			SCAN_ResizeIcon = GameDatabase.Instance.GetTexture("SCANsat/Icons/SCAN_Resize_Icon", false);
+			SCAN_SmallMapAppIcon = GameDatabase.Instance.GetTexture("SCANsat/Icons/SCANsat_AppLauncherSmall_Icon", false);
+			SCAN_BigMapAppIcon = GameDatabase.Instance.GetTexture("SCANsat/Icons/SCANsat_AppLauncherLarge_Icon", false);
 		}
 
 		private static void initializeColors()
@@ -213,6 +219,7 @@ namespace SCANsat.SCAN_UI
 			SCAN_whiteReadoutLabel = new GUIStyle(SCAN_readoutLabel);
 			SCAN_whiteReadoutLabel.name = "SCAN_WhiteLabel";
 			SCAN_whiteReadoutLabel.normal.textColor = palette.white;
+			SCAN_whiteReadoutLabel.wordWrap = false;
 
 			SCAN_activeReadoutLabel = new GUIStyle(SCAN_readoutLabel);
 			SCAN_activeReadoutLabel.name = "SCAN_ActiveLabel";
@@ -230,15 +237,13 @@ namespace SCANsat.SCAN_UI
 			SCAN_insColorLabel = new GUIStyle(SCAN_label);
 			SCAN_insColorLabel.name = "SCAN_InsColorLabel";
 			SCAN_insColorLabel.alignment = TextAnchor.MiddleCenter;
-			SCAN_insColorLabel.font = dotty;
-			SCAN_insColorLabel.fontSize = 36;
+			SCAN_insColorLabel.fontSize = 20;
 
 			SCAN_insWhiteLabel = new GUIStyle(SCAN_whiteReadoutLabel);
 			SCAN_insWhiteLabel.name = "SCAN_InsWhiteLabel";
 			SCAN_insWhiteLabel.alignment = TextAnchor.MiddleCenter;
 			SCAN_insWhiteLabel.fontStyle = FontStyle.Normal;
-			SCAN_insWhiteLabel.font = dotty;
-			SCAN_insWhiteLabel.fontSize = 36;
+			SCAN_insWhiteLabel.fontSize = 20;
 
 			SCAN_anomalyOverlay = new GUIStyle(SCAN_SkinsLibrary.DefUnitySkin.label);
 			SCAN_anomalyOverlay.name = "SCAN_AnomalyOverlay";

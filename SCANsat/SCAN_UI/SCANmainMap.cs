@@ -16,10 +16,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
-using SCANsat.Platform;
-using SCANsat;
+using SCANsat.SCAN_Platform;
+using SCANsat.SCAN_Data;
+using SCANsat.SCAN_UI.UI_Framework;
 using UnityEngine;
-using palette = SCANsat.SCAN_UI.SCANpalette;
+using palette = SCANsat.SCAN_UI.UI_Framework.SCANpalette;
 
 namespace SCANsat.SCAN_UI
 {
@@ -28,7 +29,7 @@ namespace SCANsat.SCAN_UI
 		private string infoText;
 		private Vessel v;
 		private SCANdata data;
-		private SCANdata.SCANtype sensors;
+		private SCANtype sensors;
 		private bool notMappingToday; //Unused out-of-power bool
 		private Rect mapRect;
 		private static bool showVesselInfo = true;

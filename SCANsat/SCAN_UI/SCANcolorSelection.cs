@@ -15,9 +15,12 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using SCANsat.Platform;
-using SCANsat.Platform.Palettes;
-using palette = SCANsat.SCAN_UI.SCANpalette;
+using SCANsat.SCAN_Data;
+using SCANsat.SCAN_Map;
+using SCANsat.SCAN_UI.UI_Framework;
+using SCANsat.SCAN_Platform;
+using SCANsat.SCAN_Platform.Palettes;
+using palette = SCANsat.SCAN_UI.UI_Framework.SCANpalette;
 using UnityEngine;
 
 namespace SCANsat.SCAN_UI
@@ -30,7 +33,7 @@ namespace SCANsat.SCAN_UI
 		private Palette dataPalette;
 		private int paletteSizeInt, oldPaletteSizeInt = 6;
 		private int paletteIndex;
-		private Texture2D currentLegend, previewLegend;
+		private SCANmapLegend currentLegend, previewLegend;
 		private float sizeSlider, sizeSliderMin, sizeSliderMax, terrainSliderMinMin, terrainSliderMinMax, terrainSliderMaxMin, terrainSliderMaxMax, clampSliderMin, clampSliderMax;
 		private float minHeightF, oldMinHeightF = -500;
 		private float maxHeightF, oldMaxHeightF = 8000;
@@ -475,7 +478,7 @@ namespace SCANsat.SCAN_UI
 				fillS(8);
 				GUILayout.Label("", SCANskins.SCAN_legendTex, GUILayout.Width(180), GUILayout.Height(25));
 				Rect r = GUILayoutUtility.GetLastRect();
-				GUI.DrawTexture(r, currentLegend);
+				GUI.DrawTexture(r, currentLegend.Legend);
 			stopS();
 			fillS(8);
 			growS();
@@ -483,7 +486,7 @@ namespace SCANsat.SCAN_UI
 				fillS(8);
 				GUILayout.Label("", SCANskins.SCAN_legendTex, GUILayout.Width(180), GUILayout.Height(25));
 				r = GUILayoutUtility.GetLastRect();
-				GUI.DrawTexture(r, previewLegend);
+				GUI.DrawTexture(r, previewLegend.Legend);
 			stopS();
 		}
 
@@ -577,7 +580,9 @@ namespace SCANsat.SCAN_UI
 		//Draws the palette swatch for the currently active SCANdata selection
 		private void drawCurrentLegend()
 		{
-			currentLegend = SCANmap.getLegend(0, data);
+			currentLegend = new SCANmapLegend();
+			currentLegend.Legend = currentLegend.getLegend(0, data);
+			//currentLegend = SCANmapLegend.getLegend(0, data);
 		}
 
 		//Draws the palette swatch for the newly adjusted palette
@@ -589,7 +594,9 @@ namespace SCANsat.SCAN_UI
 				clamp = (float?)clampHeightF;
 			if (reversePalette)
 				c = palette.CurrentPalette.colorsReverse;
-			previewLegend = SCANmap.getLegend(maxHeightF, minHeightF, clamp, discretePalette, c);
+			previewLegend = new SCANmapLegend();
+			previewLegend.Legend = previewLegend.getLegend(maxHeightF, minHeightF, clamp, discretePalette, c);
+			//previewLegend = SCANmapLegend.getLegend(maxHeightF, minHeightF, clamp, discretePalette, c);
 		}
 
 		//Resets the palettes whenever the size slider is adjusted
