@@ -21,7 +21,7 @@
 **Table of Contents**
 ------------------------------------------
 
-* [0. People and FAQs][0]
+* [0. People, Facts, and FAQs][0]
   * [a. FAQs][0a]
 * [1. Installation and Interoperability][1]
   * [a. Installation][1a]
@@ -544,17 +544,17 @@ sneaky then they can of course be sneaky.
 [color-clamp-terrain]: http://i.imgur.com/8dgFLGj.gif
 
 [top]: #table-of-contents
-[0]: #top-0-people-and-faqs
-[0a]: #top-b-faqs
+[0]: #top-0-people,-facts,-and-faqs
+[0a]: #top-a-faqs
 [1]: #top-1-installation-and-interoperability
 [1a]: #top-a-installation
 [1b]: #top-b-gamedata-layout
 [1c]: #top-c-other-add-ons
 [2]: #top-2-types-of-scans
 [2a]: #top-a-scansat-scans
-[2b]: #top-d-resource-scans
-[2b1]: #top-1-regolith
-[2b2]: #top-2-kethane
+[2b]: #top-b-resource-scans
+[2b1]: #top-b1-regolith
+[2b2]: #top-b2-kethane
 [3]: #top-3-basic-usage
 [3a]: #top-3a-faq-finding-a-good-altitude
 [3b]: #top-3b-mismatched-scanners
