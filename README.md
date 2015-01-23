@@ -416,6 +416,8 @@ for any addon planets.
 ### [:top:][top] 8. Instrument Window
 ------------------------------------------
 
+![][instruments-small]
+
 The instruments window provides a readout of several types of data based on current scanning coverage.
 
 * **Biome** Shows the biome that the current vessel is in or over
@@ -423,6 +425,8 @@ The instruments window provides a readout of several types of data based on curr
 * **Slope** Shows a highly localized slope based on a 3X3 grid centered 5m around the vessel
 * **Anomaly** Shows the nearest anomaly and its distance from the vessel
 * **BTDT Anomaly** Shows detailed information and a crude image about the nearest anomaly
+
+![][instruments-btdt]
 
 ### [:top:][top] 9. Background Scanning
 ------------------------------------------
@@ -452,6 +456,8 @@ Notice that the only gaps in coverage are those at the poles (ie, the selected i
 
 ### [:top:][top] 11. Settings Menu
 ------------------------------------------
+
+![][settings-window]
 
 The settings menu has a various general options
 * The marker used for anomalies can be specified
@@ -542,6 +548,11 @@ sneaky then they can of course be sneaky.
 [color-window]: http://i.imgur.com/XM2ynyZ.png
 [color-palette-switch]: http://i.imgur.com/0XdMGSy.gif
 [color-clamp-terrain]: http://i.imgur.com/8dgFLGj.gif
+
+[instruments-small]: http://i.imgur.com/DwkwCI5.gif
+[instruments-btdt]: http://i.imgur.com/tybbDap.gif
+
+[settings-window]: http://i.imgur.com/ogQbeso.png
 
 [top]: #table-of-contents
 [0]: #top-0-people-facts-and-faqs
