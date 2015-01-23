@@ -1,16 +1,102 @@
-Version 8.1 - 2014-12-19
----------------------
+Version 9.5 - 2015-1-23
+------------------------
+
+- Significant internal code changes; any addons with hard-depencies on SCANsat will likely need updating
+	- Public read-only properties added for most fields
+
+- Stock app launcher support added
+	- A single toolbar button opens/closes the small map
+	- Can be disabled through the settings menu
+	- When Blizzy's toolbar and the stock toolbar are disabled the small map can be opened by starting a scan with any SCANsat instrument
+	
+- Improvements to big map terrain data caching
+	- Reduces memory used by the big map by 40%
+	- A single cache used for each map projection type
+	- Improves big map generation speed when switching projection types
+	
+- Big map grid texture replaced by line rendering method
+	- Further reduces big map memory usage
+	
+- Localized slope indicator added to the instrument window
+	- Slope calculated based on a 3X3 grid centered 5m around the vessel's location
+	- Altitude indicator displays the correct height above the terrain while under timewarp
+	
+- Exported maps saved to GameData/SCANsat/PluginData folder
+
+- New science results text added
+	- Thanks Olympic1
+
+- Uranium resource type changed to Uraninite
+
+Version 9.4.1 - 2014-12-22
+------------------------
+
+- Fix for orbit overlays on the first tier tracking station
+
+Version 9.4 - 2014-12-19
+------------------------
 
 - Updated for KSP 0.90
 
 - Fixes for biome related issues due to 0.90 changes
 
-- Fixes for orbit renderer in early career mode; no orbit overlay on 1st tier tracking station
+- Regolith resource overlay support added
+	- ORSX overlay support dropped
 
-- All parts use .mbm textures
+Version 9.3 - 2014-12-13
+------------------------
 
-- Community Tech Tree support added
-	- All parts rebalanced for cost and tech tree position
+- In-flight big map has been replaced by a modified version of the KSC map
+
+- Resource overlays are controlled entirely through the big map
+	- Select resources through the drop down menu
+	- Activate overlay with the resource icon toggle on the lower left
+	- All resource controls have been removed from the settings menu
+
+- Support for Community Tech Tree added
+	- SCANsat parts appear in different tech node positions when using CTT and TechManager
+	- Realism Overhaul not affected; will need to create a separate config for this
+	
+- Text boxes have been replaced by icon textures wherever possible
+	- Map overlay options
+	- Other SCANsat window buttons
+	
+- Improvements to the UI of the color selection window
+	- Dynamically updating sliders used to adjust the terrain height options
+	- New fixed size color palettes added
+	- Numerous bug fixes and improvements to syncing color selections to the currently active map
+
+Version 9.2 - 2014-10-26
+------------------------
+
+- Color selection and management window added
+	- Select from a variety of color palettes
+	- Manage map options for each individual planet
+	- Default colore palett, height range, and other options added for each planet
+	
+- Settings and Color Management window buttons added to KSC Map window
+
+- Numerous checks added to prevent errors caused by Scenario Module or SCANdata loading problems
+	- Several changes made to saving and loading process - Make backups
+	- Less log spam on scenario module failure
+	
+- Internal changes to SCANdata and SCANcontroller classes
+	- End user result should be similar; bugs may exist
+	- Data only loaded on first visit to a planet, rather than all at once; does not affect existing saves
+	- All explicit external interfaces should be unaffected
+
+Version 9 - 2014-10-14
+------------------------
+
+- Total UI replacement
+	- All UI elements have been overhauled
+	- Each window is its own Object
+	- UI support moved to Technogeeky's modification of TriggerAu's KSP Platform
+- KSP Map added
+	- A map similar to the standard big map
+	- Available in Space center and tracking station scenes
+- All textures replaced with .mbm format files
+
 
 Version 8 - 2014-10-8
 ---------------------

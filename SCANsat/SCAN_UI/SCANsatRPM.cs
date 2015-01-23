@@ -242,17 +242,6 @@ namespace SCANsat.SCAN_UI
 					if (vessel.orbit.DescendingNodeExists(targetVessel.orbit))
 						DrawOrbitIcon(vessel, SCANicon.OrbitIcon.DN, iconColorANDNValue, vessel.orbit.TimeOfDescendingNode(targetVessel.orbit, start));
 				}
-<<<<<<< HEAD:SCANsat/SCANsatRPM.cs
-				// And the maneuver node and post-maneuver orbit:
-				if (vessel.patchedConicSolver != null)
-				{
-					ManeuverNode node = vessel.patchedConicSolver.maneuverNodes.Count > 0 ? vessel.patchedConicSolver.maneuverNodes[0] : null;
-					if (node != null)
-					{
-						DrawOrbit(vessel, node.nextPatch, node.UT, iconColorNodeValue);
-						DrawOrbitIcon(vessel, MapIcons.OtherIcon.NODE, iconColorNodeValue, node.UT);
-					}
-=======
 				// And the maneuver node and post-maneuver orbit: 
 				if (vessel.patchedConicSolver != null)
 				{
@@ -262,7 +251,6 @@ namespace SCANsat.SCAN_UI
 						DrawOrbit(vessel, node.nextPatch, node.UT, iconColorNodeValue);
 						DrawOrbitIcon(vessel, SCANicon.OrbitIcon.ManeuverNode, iconColorNodeValue, node.UT);
 					}
->>>>>>> dev:SCANsat/SCAN_UI/SCANsatRPM.cs
 				}
 			}
 			// Own icon goes above that
