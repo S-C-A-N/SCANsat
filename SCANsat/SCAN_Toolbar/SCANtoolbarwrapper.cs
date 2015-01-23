@@ -1,3 +1,4 @@
+#region license
 /*
 Copyright (c) 2013-2014, Maik Schreiber
 All rights reserved.
@@ -23,7 +24,8 @@ CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
-﻿using System;
+#endregion
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -31,7 +33,7 @@ using System.Text;
 using UnityEngine;
 
 
-namespace SCANsat {
+namespace SCANsat.SCAN_Toolbar {
 
 
 
