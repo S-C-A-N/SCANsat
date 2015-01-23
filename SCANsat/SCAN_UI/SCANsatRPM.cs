@@ -427,8 +427,8 @@ namespace SCANsat.SCAN_UI
 
 		private void DrawIcon(double longitude, double latitude, SCANicon.OrbitIcon icon, Color iconColor)
 		{
-			var position = new Rect((float)(longitudeToPixels(longitude, latitude) - iconPixelSize / 2),
-				               (float)(latitudeToPixels(longitude, latitude) - iconPixelSize / 2),
+			var position = new Rect((float)(longitudeToPixels(longitude, latitude)),
+				               (float)(latitudeToPixels(longitude, latitude)),
 				               iconPixelSize, iconPixelSize);
 
 			Rect shadow = position;
