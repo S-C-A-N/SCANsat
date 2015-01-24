@@ -80,17 +80,17 @@ namespace SCANsat.SCAN_Platform.Palettes
 	public class Swatch { 
 		public string Name { get; set; }
 		public Color Color { get; set; }
-		public _color _col;
+		//public _color _col;
 
-		[StructLayout(LayoutKind.Explicit)]
-		public struct _color {
-			[FieldOffset(0)] public Color				AsRGBAf;
-			[FieldOffset(0)] public Color32			AsRGBAb;
-			[FieldOffset(0)] public ColorModels.HSVA	AsHSVA;
-			[FieldOffset(0)] public ColorModels.HSBA	AsHSBA;
-			[FieldOffset(0)] public ColorModels.HSLA  AsHSLA;
-			[FieldOffset(0)] public ColorModels.CMYK	AsCMYK;
-		}
+		//[StructLayout(LayoutKind.Explicit)]
+		//public struct _color {
+		//	[FieldOffset(0)] public Color				AsRGBAf;
+		//	[FieldOffset(0)] public Color32			AsRGBAb;
+		//	[FieldOffset(0)] public ColorModels.HSVA	AsHSVA;
+		//	[FieldOffset(0)] public ColorModels.HSBA	AsHSBA;
+		//	[FieldOffset(0)] public ColorModels.HSLA  AsHSLA;
+		//	[FieldOffset(0)] public ColorModels.CMYK	AsCMYK;
+		//}
 		internal Texture2D tex = new Texture2D(1,1);
 
 		public Swatch(string name) : this(name, new Color()) {}
