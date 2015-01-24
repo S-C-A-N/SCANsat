@@ -122,7 +122,7 @@ namespace SCANsat
 		internal SCAN_MBW mainMap;
 		internal SCAN_MBW settingsWindow;
 		internal SCAN_MBW instrumentsWindow;
-		internal SCAN_MBW newBigMap;
+		internal SCAN_MBW BigMap;
 		internal SCAN_MBW kscMap;
 		internal SCAN_MBW colorManager;
 
@@ -364,7 +364,7 @@ namespace SCANsat
 					settingsWindow = gameObject.AddComponent<SCANsettingsUI>();
 					instrumentsWindow = gameObject.AddComponent<SCANinstrumentUI>();
 					colorManager = gameObject.AddComponent<SCANcolorSelection>();
-					newBigMap = gameObject.AddComponent<SCANnewBigMap>();
+					BigMap = gameObject.AddComponent<SCANBigMap>();
 				}
 				else if (HighLogic.LoadedScene == GameScenes.SPACECENTER || HighLogic.LoadedScene == GameScenes.TRACKSTATION)
 				{
@@ -464,8 +464,8 @@ namespace SCANsat
 				Destroy(instrumentsWindow);
 			if (kscMap != null)
 				Destroy(kscMap);
-			if (newBigMap != null)
-				Destroy(newBigMap);
+			if (BigMap != null)
+				Destroy(BigMap);
 			if (appLauncher != null)
 				Destroy(appLauncher);
 		}
@@ -926,115 +926,6 @@ namespace SCANsat
 			res = scanQueue.Dequeue();
 			goto loop;
 		}
-
-
-		#region Unused code
-
-		//public static int countBits(int i) {
-		//    int count;
-		//    for(count=0; i!=0; ++count) i &= (i - 1);
-		//    return count;
-		//}
-
-		//**** Most commented code moved to SCANUtil****
-		//public ScienceData getAvailableScience(Vessel v, SCANdata.SCANtype sensor, bool notZero) {
-		//    SCANdata data = getData(v.mainBody);
-		//    ScienceData sd = null;
-		//    ScienceExperiment se = null;
-		//    ScienceSubject su = null;
-		//    bool found = false;
-		//    string id = null;
-		//    double coverage = 0f;
-
-		//    if(v.mainBody.pqsController != null) {
-		//        if(!found && (sensor & SCANdata.SCANtype.AltimetryLoRes) != SCANdata.SCANtype.Nothing) {
-		//            found = true;
-		//            id = "SCANsatAltimetryLoRes";
-		//            coverage = data.getCoveragePercentage(SCANdata.SCANtype.AltimetryLoRes);
-		//        }
-		//        if(!found && (sensor & SCANdata.SCANtype.AltimetryHiRes) != SCANdata.SCANtype.Nothing) {
-		//            found = true;
-		//            id = "SCANsatAltimetryHiRes";
-		//            coverage = data.getCoveragePercentage(SCANdata.SCANtype.AltimetryHiRes);
-		//        }
-		//    }
-		//    if(v.mainBody.BiomeMap != null) {
-		//        if(!found && (sensor & SCANdata.SCANtype.Biome) != SCANdata.SCANtype.Nothing) {
-		//            found = true;
-		//            id = "SCANsatBiomeAnomaly";
-		//            coverage = data.getCoveragePercentage(SCANdata.SCANtype.Biome); //This should only really check biomes, and it screws up with the changes made to getCoveragePercentage
-		//        }
-		//    }
-
-		//    if(!found) return null;
-
-		//    se = ResearchAndDevelopment.GetExperiment(id);
-		//    if(se == null) return null;
-
-		//    su = ResearchAndDevelopment.GetExperimentSubject(se, ExperimentSituations.InSpaceHigh, v.mainBody, "surface");
-		//    if(su == null) return null;
-
-		//    print("[SCANsat] coverage " + coverage.ToString("F1") + ", science cap " + su.scienceCap.ToString("F1") + ", subject value " + su.subjectValue.ToString("F2") + ", science value " + su.scientificValue.ToString("F2") + ", science " + su.science.ToString("F2"));
-		//    su.scientificValue = 1;
-
-		//    float science = (float)coverage;
-		//    if(science > 95) science = 100;
-		//    if(science < 30) science = 0;
-		//    science = science / 100f;
-		//    science = Mathf.Max(0, (science * su.scienceCap) - su.science);
-
-		//    print("[SCANsat] remaining science: " + science.ToString("F1") + ", base = " + (se.baseValue).ToString("F1"));
-
-		//    science /= Mathf.Max(0.1f, su.scientificValue);
-		//    science /= su.subjectValue;
-
-		//    print("[SCANsat] result = " + science.ToString("F2"));
-
-		//    if(notZero && science <= 0) science = 0.00001f;
-
-		//    sd = new ScienceData(science * su.dataScale, 1f, 0f, su.id, se.experimentTitle + " of " + v.mainBody.theName);
-		//    su.title = sd.title;
-		//    return sd;
-		//}
-
-		//public SCANdata getData(string name) {
-		//    if(!SCANUtil.body_data.ContainsKey(name)) {
-		//        SCANUtil.body_data[name] = new SCANdata();
-		//        SCANUtil.body_data[name].resetImages();
-		//    }
-		//    return SCANUtil.body_data[name];
-		//}
-
-		//public SCANdata getData(CelestialBody body) {
-		//    SCANdata data = getData(body.bodyName);
-		//    data.body = body;
-		//    return data;
-		//}
-
-		//public void registerPass(CelestialBody body, float lon, float lat, SCANdata.SCANtype type) {
-		//    getData(body).registerPass(lon, lat, type);
-		//}
-
-		//public double fixLatitude(double lat) {
-		//    return (lat + 90 + 180) % 180 - 90;
-		//}
-
-		//public double fixLongitude(double lon) {
-		//    return (lon + 180 + 360) % 360 - 180;
-		//}
-
-		//****Unused****//
-		//protected static HashSet<string> disabledBodies = new HashSet<string>();
-		//public static bool bodyIsDisabled(string name) {
-		//    return disabledBodies.Contains(name);
-		//}
-
-		//public static void setBodyDisabled(string name, bool disabled) {
-		//    if(disabled) disabledBodies.Add(name);
-		//    else disabledBodies.Remove(name);
-		//}
-
-		#endregion
 
 	}
 }
