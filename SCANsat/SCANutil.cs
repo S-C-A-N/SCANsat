@@ -26,6 +26,9 @@ namespace SCANsat
 
 	public static class SCANUtil
 	{
+
+		#region Public API Methods
+
 		/// <summary>
 		/// Determines scanning coverage for a given area with a given scanner type
 		/// </summary>
@@ -112,6 +115,35 @@ namespace SCANsat
 			}
 		}
 
+		/// <summary>
+		/// For a given Celestial Body this returns the SCANdata instance if it exists in the SCANcontroller master dictionary; return is null if the SCANdata does not exist for that body (ie it has never been visited while SCANsat has been active)
+		/// </summary>
+		/// <param name="body">Celestial Body object</param>
+		/// <returns>SCANdata instance for the given Celestial Body; null if none exists</returns>
+		public static SCANdata getData(CelestialBody body)
+		{
+			return getData(body.name);
+		}
+
+		/// <summary>
+		/// For a given Celestial Body name this returns the SCANdata instance if it exists in the SCANcontroller master dictionary; return is null if the SCANdata does not exist for that body (ie it has never been visited while SCANsat has been active)
+		/// </summary>
+		/// <param name="BodyName">Name of celestial body (do not use TheName string)</param>
+		/// <returns>SCANdata instance for the given Celestial Body; null if none exists</returns>
+		public static SCANdata getData(string BodyName)
+		{
+			if (!SCANcontroller.Body_Data.ContainsKey(BodyName))
+			{
+				return null;
+			}
+			SCANdata data = SCANcontroller.Body_Data[BodyName];
+			return data;
+		}
+
+		#endregion
+
+		#region Internal Utilities
+
 		internal static bool isCovered(double lon, double lat, SCANdata data, SCANtype type)
 		{
 			int ilon = icLON(lon);
@@ -177,31 +209,6 @@ namespace SCANsat
 		internal static double fixLon(double lon)
 		{
 			return (lon + 360 + 180) % 360;
-		}
-
-		/// <summary>
-		/// For a given Celestial Body this returns the SCANdata instance if it exists in the SCANcontroller master dictionary; return is null if the SCANdata does not exist for that body (ie it has never been visited while SCANsat has been active)
-		/// </summary>
-		/// <param name="body">Celestial Body object</param>
-		/// <returns>SCANdata instance for the given Celestial Body; null if none exists</returns>
-		public static SCANdata getData(CelestialBody body)
-		{
-			return getData(body.name);
-		}
-
-		/// <summary>
-		/// For a given Celestial Body name this returns the SCANdata instance if it exists in the SCANcontroller master dictionary; return is null if the SCANdata does not exist for that body (ie it has never been visited while SCANsat has been active)
-		/// </summary>
-		/// <param name="BodyName">Name of celestial body (do not use TheName string)</param>
-		/// <returns>SCANdata instance for the given Celestial Body; null if none exists</returns>
-		public static SCANdata getData(string BodyName)
-		{
-			if (!SCANcontroller.Body_Data.ContainsKey(BodyName))
-			{
-				return null;
-			}
-			SCANdata data = SCANcontroller.Body_Data[BodyName];
-			return data;
 		}
 
 		internal static double getElevation(CelestialBody body, double lon, double lat)
@@ -366,140 +373,9 @@ namespace SCANsat
 			SCANlog(log, stringObjects);
 		}
 
-	}
-
-		#region fix Duplicated Code
-
-		// Mihara: Notice that quite a bit of it, at least conceptually, duplicates code that SCANsat already contains elsewhere,
-		// and in general needs trimming.
-
-		//public static class MapIcons
-		//{
-		//		public enum OtherIcon
-		//		{
-		//				None,
-		//				PE,
-		//				AP,
-		//				AN,
-		//				DN,
-		//				NODE,
-		//				SHIPATINTERCEPT,
-		//				TGTATINTERCEPT,
-		//				ENTERSOI,
-		//				EXITSOI,
-		//				PLANET,
-		//		}
-
-		//		public static Rect VesselTypeIcon(VesselType type, OtherIcon icon)
-		//		{
-		//				int x = 0;
-		//				int y = 0;
-		//				const float symbolSpan = 0.2f;
-		//				if (icon != OtherIcon.None) {
-		//						switch (icon) {
-		//						case OtherIcon.AP:
-		//								x = 1;
-		//								y = 4;
-		//								break;
-		//						case OtherIcon.PE:
-		//								x = 0;
-		//								y = 4;
-		//								break;
-		//						case OtherIcon.AN:
-		//								x = 2;
-		//								y = 4;
-		//								break;
-		//						case OtherIcon.DN:
-		//								x = 3;
-		//								y = 4;
-		//								break;
-		//						case OtherIcon.NODE:
-		//								x = 2;
-		//								y = 1;
-		//								break;
-		//						case OtherIcon.SHIPATINTERCEPT:
-		//								x = 0;
-		//								y = 1;
-		//								break;
-		//						case OtherIcon.TGTATINTERCEPT:
-		//								x = 1;
-		//								y = 1;
-		//								break;
-		//						case OtherIcon.ENTERSOI:
-		//								x = 0;
-		//								y = 2;
-		//								break;
-		//						case OtherIcon.EXITSOI:
-		//								x = 1;
-		//								y = 2;
-		//								break;
-		//						case OtherIcon.PLANET:
-		//								// Not sure if it is (2,3) or (3,2) - both are round
-		//								x = 2;
-		//								y = 3;
-		//								break;
-		//						}
-		//				} else {
-		//						switch (type) {
-		//						case VesselType.Base:
-		//								x = 2;
-		//								y = 0;
-		//								break;
-		//						case VesselType.Debris:
-		//								x = 1;
-		//								y = 3;
-		//								break;
-		//						case VesselType.EVA:
-		//								x = 2;
-		//								y = 2;
-		//								break;
-		//						case VesselType.Flag:
-		//								x = 4;
-		//								y = 0;
-		//								break;
-		//						case VesselType.Lander:
-		//								x = 3;
-		//								y = 0;
-		//								break;
-		//						case VesselType.Probe:
-		//								x = 1;
-		//								y = 0;
-		//								break;
-		//						case VesselType.Rover:
-		//								x = 0;
-		//								y = 0;
-		//								break;
-		//						case VesselType.Ship:
-		//								x = 0;
-		//								y = 3;
-		//								break;
-		//						case VesselType.Station:
-		//								x = 3;
-		//								y = 1;
-		//								break;
-		//						case VesselType.Unknown:
-		//								x = 3;
-		//								y = 3;
-		//								break;
-		//						case VesselType.SpaceObject:
-		//								x = 4;
-		//								y = 1;
-		//								break;
-		//						default:
-		//								x = 3;
-		//								y = 2;
-		//								break;
-		//						}
-		//				}
-		//				var result = new Rect();
-		//				result.x = symbolSpan * x;
-		//				result.y = symbolSpan * y;
-		//				result.height = result.width = symbolSpan;
-		//				return result;
-		//		}
-		//}
-
 		#endregion
+
+	}
 
 		#region JUtil
 
