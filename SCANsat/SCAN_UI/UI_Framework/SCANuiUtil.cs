@@ -308,7 +308,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 
 		internal static void resetBigMapPos()
 		{
-			SCANcontroller.controller.newBigMap.resetWindowPos(SCANnewBigMap.defaultRect);
+			SCANcontroller.controller.BigMap.resetWindowPos(SCANBigMap.defaultRect);
 		}
 
 		internal static void resetKSCMapPos()
@@ -491,34 +491,6 @@ namespace SCANsat.SCAN_UI.UI_Framework
 		#endregion
 
 		#region Overlays
-
-		//Setup the lat/long grid
-		//internal static void drawGrid(Rect maprect, SCANmap map, Texture2D overlay_static)
-		//{
-		//	int x, y;
-		//	for (double lat = -90; lat < 90; lat += 2)
-		//	{
-		//		for (double lon = -180; lon < 180; lon += 2)
-		//		{
-		//			if (lat % 30 == 0 || lon % 30 == 0)
-		//			{
-		//				x = (int)(map.MapScale * ((map.projectLongitude(lon, lat) + 180) % 360));
-		//				y = (int)(map.MapScale * ((map.projectLatitude(lon, lat) + 90) % 180));
-		//				drawDot(x, y, palette.white, overlay_static);
-		//			}
-		//		}
-		//	}
-		//}
-
-		//Draw the actual dot textures for the grid
-		//private static void drawDot(int x, int y, Color c, Texture2D tex)
-		//{
-		//	tex.SetPixel(x, y, c);
-		//	tex.SetPixel(x - 1, y, palette.black);
-		//	tex.SetPixel(x + 1, y, palette.black);
-		//	tex.SetPixel(x, y - 1, palette.black);
-		//	tex.SetPixel(x, y + 1, palette.black);
-		//}
 
 		internal static Color32 lineColor = new Color(1f, 1f, 1f, 1f);
 		internal static Color32 blackLineColor = new Color(0f, 0f, 0f, 0.9f);
@@ -873,7 +845,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			if (map.Projection == MapProjection.Polar)
 				return;
 
-			if (SCANnewBigMap.eq_frame <= 0)
+			if (SCANBigMap.eq_frame <= 0)
 			{
 				// predict equatorial crossings for the next 100 loops
 				double TAAN = 360f - o.argumentOfPeriapsis;	// true anomaly at ascending node
@@ -883,19 +855,19 @@ namespace SCANsat.SCAN_UI.UI_Framework
 				double tAN = (((MAAN - o.meanAnomaly * Mathf.Rad2Deg + 360) % 360) / 360f * o.period + startUT);
 				double tDN = (((MADN - o.meanAnomaly * Mathf.Rad2Deg + 360) % 360) / 360f * o.period + startUT);
 
-				if (SCANnewBigMap.eq_an_map == null || SCANnewBigMap.eq_dn_map == null || SCANnewBigMap.eq_an_map.Length != maprect.width)
+				if (SCANBigMap.eq_an_map == null || SCANBigMap.eq_dn_map == null || SCANBigMap.eq_an_map.Length != maprect.width)
 				{
-					SCANnewBigMap.eq_an_map = new int[(int)maprect.width];
-					SCANnewBigMap.eq_dn_map = new int[(int)maprect.width];
+					SCANBigMap.eq_an_map = new int[(int)maprect.width];
+					SCANBigMap.eq_dn_map = new int[(int)maprect.width];
 				}
-				if (SCANnewBigMap.eq_map == null || SCANnewBigMap.eq_map.width != SCANnewBigMap.eq_an_map.Length)
+				if (SCANBigMap.eq_map == null || SCANBigMap.eq_map.width != SCANBigMap.eq_an_map.Length)
 				{
-					SCANnewBigMap.eq_map = new Texture2D(SCANnewBigMap.eq_an_map.Length, eqh, TextureFormat.ARGB32, false);
+					SCANBigMap.eq_map = new Texture2D(SCANBigMap.eq_an_map.Length, eqh, TextureFormat.ARGB32, false);
 				}
-				for (int i = 0; i < SCANnewBigMap.eq_an_map.Length; ++i)
+				for (int i = 0; i < SCANBigMap.eq_an_map.Length; ++i)
 				{
-					SCANnewBigMap.eq_an_map[i] = 0;
-					SCANnewBigMap.eq_dn_map[i] = 0;
+					SCANBigMap.eq_an_map[i] = 0;
+					SCANBigMap.eq_dn_map[i] = 0;
 				}
 				for (int i = 0; i < 100; ++i)
 				{
@@ -913,31 +885,31 @@ namespace SCANsat.SCAN_UI.UI_Framework
 					}
 					double loAN = vessel.mainBody.GetLongitude(pAN) - rotAN;
 					double loDN = vessel.mainBody.GetLongitude(pDN) - rotDN;
-					int lonAN = (int)(((map.projectLongitude(loAN, 0) + 180) % 360) * SCANnewBigMap.eq_an_map.Length / 360f);
-					int lonDN = (int)(((map.projectLongitude(loDN, 0) + 180) % 360) * SCANnewBigMap.eq_dn_map.Length / 360f);
-					if (lonAN >= 0 && lonAN < SCANnewBigMap.eq_an_map.Length)
-						SCANnewBigMap.eq_an_map[lonAN] += 1;
-					if (lonDN >= 0 && lonDN < SCANnewBigMap.eq_dn_map.Length)
-						SCANnewBigMap.eq_dn_map[lonDN] += 1;
+					int lonAN = (int)(((map.projectLongitude(loAN, 0) + 180) % 360) * SCANBigMap.eq_an_map.Length / 360f);
+					int lonDN = (int)(((map.projectLongitude(loDN, 0) + 180) % 360) * SCANBigMap.eq_dn_map.Length / 360f);
+					if (lonAN >= 0 && lonAN < SCANBigMap.eq_an_map.Length)
+						SCANBigMap.eq_an_map[lonAN] += 1;
+					if (lonDN >= 0 && lonDN < SCANBigMap.eq_dn_map.Length)
+						SCANBigMap.eq_dn_map[lonDN] += 1;
 				}
-				Color[] pix = SCANnewBigMap.eq_map.GetPixels(0, 0, SCANnewBigMap.eq_an_map.Length, eqh);
+				Color[] pix = SCANBigMap.eq_map.GetPixels(0, 0, SCANBigMap.eq_an_map.Length, eqh);
 				Color cAN = palette.cb_skyBlue, cDN = palette.cb_orange;
 				for (int y = 0; y < eqh; ++y)
 				{
 					Color lc = palette.clear;
-					for (int x = 0; x < SCANnewBigMap.eq_an_map.Length; ++x)
+					for (int x = 0; x < SCANBigMap.eq_an_map.Length; ++x)
 					{
 						Color c = palette.clear;
 						float scale = 0;
 						if (y < eqh / 2)
 						{
 							c = cDN;
-							scale = SCANnewBigMap.eq_dn_map[x];
+							scale = SCANBigMap.eq_dn_map[x];
 						}
 						else
 						{
 							c = cAN;
-							scale = SCANnewBigMap.eq_an_map[x];
+							scale = SCANBigMap.eq_an_map[x];
 						}
 						if (scale >= 1)
 						{
@@ -948,7 +920,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 							else
 							{
 								if (lc == palette.clear)
-									pix[y * SCANnewBigMap.eq_an_map.Length + x - 1] = palette.black;
+									pix[y * SCANBigMap.eq_an_map.Length + x - 1] = palette.black;
 								scale = Mathf.Clamp(scale - 1, 0, 10) / 10f;
 								c = palette.lerp(c, palette.white, scale);
 							}
@@ -959,26 +931,26 @@ namespace SCANsat.SCAN_UI.UI_Framework
 							if (lc != palette.clear && lc != palette.black)
 								c = palette.black;
 						}
-						pix[y * SCANnewBigMap.eq_an_map.Length + x] = c;
+						pix[y * SCANBigMap.eq_an_map.Length + x] = c;
 						lc = c;
 					}
 				}
-				SCANnewBigMap.eq_map.SetPixels(0, 0, SCANnewBigMap.eq_an_map.Length, eqh, pix);
-				SCANnewBigMap.eq_map.Apply();
-				SCANnewBigMap.eq_frame = 4;
+				SCANBigMap.eq_map.SetPixels(0, 0, SCANBigMap.eq_an_map.Length, eqh, pix);
+				SCANBigMap.eq_map.Apply();
+				SCANBigMap.eq_frame = 4;
 			}
 			else
 			{
-				SCANnewBigMap.eq_frame -= 1;
+				SCANBigMap.eq_frame -= 1;
 			}
 
-			if (SCANnewBigMap.eq_map != null)
+			if (SCANBigMap.eq_map != null)
 			{
 				r.x = maprect.x;
-				r.y = maprect.y + maprect.height / 2 + -SCANnewBigMap.eq_map.height / 2;
-				r.width = SCANnewBigMap.eq_map.width;
-				r.height = SCANnewBigMap.eq_map.height;
-				GUI.DrawTexture(r, SCANnewBigMap.eq_map);
+				r.y = maprect.y + maprect.height / 2 + -SCANBigMap.eq_map.height / 2;
+				r.width = SCANBigMap.eq_map.width;
+				r.height = SCANBigMap.eq_map.height;
+				GUI.DrawTexture(r, SCANBigMap.eq_map);
 			}
 		}
 
@@ -1030,117 +1002,6 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			// the mean anomaly isn't really an angle, but I'm a simple person
 			return MA * Mathf.Rad2Deg;
 		}
-
-		#endregion
-
-		#region newOrbitOverlay
-
-
-
-		//internal static void newOrbitLine(Rect mapRect, SCANmap map, Vessel v, Orbit o, double startUT, CelestialBody b, int steps)
-		//{
-		//	if (steps == 0)
-		//		return;
-		//	double dTstep = Math.Floor(o.period / steps);
-		//	startUT = Planetarium.GetUniversalTime();
-		//	var points = new List<Vector2d>();
-		//	for (double time = (startUT - o.period); time < (startUT + o.period); time += dTstep)
-		//	{
-		//		bool collide;
-		//		Vector2d coord;
-		//		if (mapPosAtT(v, o, startUT, time, out coord, out collide))
-		//			points.Add(coord);
-		//		if (collide)
-		//			break;
-		//	}
-		//	//SCANUtil.SCANdebugLog("Orbit Line With {0} Points", points.Count);
-		//	drawTrail(mapRect, map, points, Vector2d.zero);
-		//}
-
-		//private static void drawTrail(Rect mapRect, SCANmap map, IList<Vector2d> points, Vector2d end, bool hasEnd = false)
-		//{
-		//	if (points.Count < 2)
-		//		return;
-		//	GL.Begin(GL.LINES);
-		//	lineMat.SetPass(0);
-		//	GL.Color(lineColor);
-		//	float xStart, yStart;
-		//	float mapWidth = map.MapWidth;
-		//	float mapHeight = map.MapHeight;
-		//	xStart = (float)SCANUtil.fixLon(map.projectLongitude(points[0].x, points[0].y));
-		//	yStart = (float)SCANUtil.fixLat(map.projectLatitude(points[0].x, points[0].y));
-		//	xStart = (float)map.scaleLongitude(xStart);
-		//	yStart = (float)map.scaleLatitude(yStart);
-		//	if (xStart < 0 || yStart < 0 || yStart > 180 || xStart > 360)
-		//		return;
-		//	//SCANUtil.SCANdebugLog("Start Point Checks Out");
-		//	xStart = (xStart * mapWidth / 360f) + mapRect.x;
-		//	yStart = (map.MapHeight - yStart * map.MapHeight / 180f) + mapRect.y;
-		//	for (int i = 1; i < points.Count; i++)
-		//	{
-		//		float xEnd = (float)SCANUtil.fixLon(map.projectLongitude(points[i].x, points[i].y));
-		//		float yEnd = (float)SCANUtil.fixLat(map.projectLatitude(points[i].x, points[i].y));
-		//		xEnd = (float)map.scaleLongitude(xEnd);
-		//		yEnd = (float)map.scaleLatitude(yEnd);
-		//		//SCANUtil.SCANdebugLog("Checking Orbit End Point...");
-		//		if (xEnd < 0 || yEnd < 1|| yEnd > 179|| xEnd > 360)
-		//			continue;
-		//		xEnd = (xEnd* mapWidth / 360f) + mapRect.x;
-		//		yEnd = (mapHeight - yEnd * mapHeight / 180f) + mapRect.y;
-
-		//		//SCANUtil.SCANdebugLog("Draw Line {0}", i);
-		//		drawLine(xStart, yStart, xEnd, yEnd, mapRect, mapWidth);
-
-		//		xStart = xEnd;
-		//		yStart = yEnd;
-		//	}
-		//	GL.End();
-		//}
-
-		//private static void drawLine(float xStart, float yStart, float xEnd, float yEnd, Rect mapRect, float width)
-		//{
-		//	var start = new Vector2(xStart, yStart);
-		//	var end = new Vector2(xEnd, yEnd);
-
-		//	if (!mapRect.Contains(start) && !mapRect.Contains(end))
-		//		return;
-
-		//	//float leftX = Math.Min(start.x, end.x);
-		//	//float rightX = Math.Max(start.x, end.x);
-
-		//	//if (leftX + width * 0.5f < rightX)
-		//	//{
-		//	//	if (start.x < end.x)
-		//	//		end.x -= width;
-		//	//	else
-		//	//		start.x -= width;
-		//	//}
-
-		//	GL.Vertex(start);
-		//	GL.Vertex(end);
-		//}
-
-		//private static bool mapPosAtT(Vessel v, Orbit o, double start, double dT, out Vector2d Coord, out bool Collide)
-		//{
-		//	Coord = Vector2d.zero;
-		//	Collide = false;
-		//	double UT = start + dT;
-		//	if (double.IsNaN(UT))
-		//		return false;
-		//	if (double.IsNaN(o.getObtAtUT(UT)))
-		//		return false;
-		//	double rotOffset = 0;
-		//	if (v.mainBody.rotates)
-		//		rotOffset = (360 * ((dT - start) / v.mainBody.rotationPeriod)) % 360;
-		//	Vector3d pos = o.getPositionAtUT(dT);
-		//	if (o.Radius(dT) < v.mainBody.Radius + v.mainBody.getElevation(pos))
-		//	{
-		//		Collide = true;
-		//		return false;
-		//	}
-		//	Coord = new Vector2d(v.mainBody.GetLongitude(pos) - rotOffset, v.mainBody.GetLatitude(pos));
-		//	return true;
-		//}
 
 		#endregion
 
