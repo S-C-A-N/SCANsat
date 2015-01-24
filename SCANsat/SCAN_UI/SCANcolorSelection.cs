@@ -43,7 +43,7 @@ namespace SCANsat.SCAN_UI
 
 		//SCAN_MBW objects to sync the color selection fields to the currently displayed map
 		private SCANkscMap kscMapObj;
-		private SCANnewBigMap bigMapObj;
+		private SCANBigMap bigMapObj;
 
 		private static SCANmap bigMap;
 		private SCANdata data;
@@ -78,9 +78,9 @@ namespace SCANsat.SCAN_UI
 			}
 			else if (HighLogic.LoadedSceneIsFlight)
 			{
-				bigMapObj = (SCANnewBigMap)SCANcontroller.controller.newBigMap;
-				if (SCANnewBigMap.BigMap != null)
-					bigMap = SCANnewBigMap.BigMap;
+				bigMapObj = (SCANBigMap)SCANcontroller.controller.BigMap;
+				if (SCANBigMap.BigMap != null)
+					bigMap = SCANBigMap.BigMap;
 				if (bigMapObj.Data != null)
 					data = bigMapObj.Data;
 			}
@@ -105,10 +105,10 @@ namespace SCANsat.SCAN_UI
 						SCANcontroller.controller.addToBodyData(FlightGlobals.currentMainBody, data);
 					}
 				}
-				if (bigMapObj.Visible && SCANnewBigMap.BigMap != null)
+				if (bigMapObj.Visible && SCANBigMap.BigMap != null)
 				{
 					data = bigMapObj.Data;
-					bigMap = SCANnewBigMap.BigMap;
+					bigMap = SCANBigMap.BigMap;
 				}
 				else if (data.Body != FlightGlobals.currentMainBody)
 				{
@@ -121,9 +121,9 @@ namespace SCANsat.SCAN_UI
 				}
 				if (bigMap == null)
 				{
-					if (SCANnewBigMap.BigMap != null)
+					if (SCANBigMap.BigMap != null)
 					{
-						bigMap = SCANnewBigMap.BigMap;
+						bigMap = SCANBigMap.BigMap;
 					}
 				}
 			}

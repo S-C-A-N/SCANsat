@@ -140,7 +140,7 @@ namespace SCANsat.SCAN_UI
 				TooltipsEnabled = SCANcontroller.controller.toolTips;
 				if (HighLogic.LoadedSceneIsFlight)
 				{
-					SCANcontroller.controller.newBigMap.TooltipsEnabled = SCANcontroller.controller.toolTips;
+					SCANcontroller.controller.BigMap.TooltipsEnabled = SCANcontroller.controller.toolTips;
 					SCANcontroller.controller.mainMap.TooltipsEnabled = SCANcontroller.controller.toolTips;
 				}
 				if (HighLogic.LoadedScene == GameScenes.SPACECENTER || HighLogic.LoadedScene == GameScenes.TRACKSTATION)

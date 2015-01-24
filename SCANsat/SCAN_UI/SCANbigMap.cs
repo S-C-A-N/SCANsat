@@ -1,745 +1,785 @@
-﻿//#region license
-///* 
-// *  [Scientific Committee on Advanced Navigation]
-// * 			S.C.A.N. Satellite
-// *
-// * SCANsat - Big map window object
-// * 
-// * This is all essentially place-holder code to be replaced by a version
-// * of the SCANkscMap
-// * 
-// * Copyright (c)2013 damny;
-// * Copyright (c)2014 David Grandy <david.grandy@gmail.com>;
-// * Copyright (c)2014 technogeeky <technogeeky@gmail.com>;
-// * Copyright (c)2014 (Your Name Here) <your email here>; see LICENSE.txt for licensing details.
-// *
-// */
-//#endregion
-//using System;
-//using System.Collections.Generic;
-//using System.Linq;
-//using SCANsat.Platform;
-//using SCANsat;
-//using UnityEngine;
+﻿#region license
+/* 
+ *  [Scientific Committee on Advanced Navigation]
+ * 			S.C.A.N. Satellite
+ *
+ * SCANsat - New Big map window object
+ * 
+ * Copyright (c)2013 damny;
+ * Copyright (c)2014 David Grandy <david.grandy@gmail.com>;
+ * Copyright (c)2014 technogeeky <technogeeky@gmail.com>;
+ * Copyright (c)2014 (Your Name Here) <your email here>; see LICENSE.txt for licensing details.
+ *
+ */
+#endregion
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using SCANsat.SCAN_Platform;
+using SCANsat;
+using SCANsat.SCAN_UI.UI_Framework;
+using SCANsat.SCAN_Data;
+using SCANsat.SCAN_Map;
+using UnityEngine;
 
-//using palette = SCANsat.SCAN_UI.SCANpalette;
+namespace SCANsat.SCAN_UI
+{
+	class SCANBigMap : SCAN_MBW
+	{
+		private static SCANmap bigmap, spotmap;
+		private static CelestialBody b;
+		private string mapTypeTitle = "";
+		private SCANdata data;
+		private Vessel v;
+		private float resizeW, resizeH, dragX;
+		private bool drawGrid, currentGrid, currentColor, lastColor, lastResource;
+		private bool drop_down_open, projection_drop_down, mapType_drop_down, resources_drop_down, planetoid_drop_down;
+		//private Texture2D overlay_static;
+		private Dictionary<int, List<List<Vector2d>>> gridLines = new Dictionary<int, List<List<Vector2d>>>();
+		private Rect ddRect, zoomCloseRect;
+		private Rect rc = new Rect(0, 0, 20, 20);
+		private Vector2 scrollP, scrollR;
+		private Rect pos_spotmap = new Rect(10f, 10f, 10f, 10f);
+		private Rect pos_spotmap_x = new Rect(10f, 10f, 25f, 25f);
+		internal static Rect defaultRect = new Rect(250, 60, 780, 460);
 
-//namespace SCANsat.SCAN_UI
-//{
-//	class SCANbigMap : SCAN_MBW
-//	{
-//		private static SCANmap bigmap;
-//		private SCANmap spotmap;
-//		private Vessel v;
-//		private CelestialBody b;
-//		private SCANdata data;
-//		private double startUT;
-//		private bool bigmap_dragging, overlay_static_dirty, notMappingToday;
-//		private float bigmap_drag_w, bigmap_drag_x;
-//		private Texture2D overlay_static;
-//		private Rect rc = new Rect(0, 0, 20, 20);
-//		private Rect pos_spotmap = new Rect(10f, 10f, 10f, 10f);
-//		internal static Rect defaultRect = new Rect(350, 55, 380, 180);
-//		internal static int[] eq_an_map, eq_dn_map;
-//		internal static Texture2D eq_map;
-//		internal static int eq_frame;
+		//Values used for the orbit overlay - Need to fix this
+		internal static int[] eq_an_map, eq_dn_map;
+		internal static Texture2D eq_map;
+		internal static int eq_frame;
 
-//		protected override void Awake()
-//		{
-//			WindowCaption = "Map of ";
-//			WindowRect = defaultRect;
-//			WindowOptions = new GUILayoutOption[2] { GUILayout.Width(360), GUILayout.Height(180) };
-//			WindowStyle = SCANskins.SCAN_window;
-//			Visible = false;
-//			DragEnabled = true;
-//			ClampEnabled = false;
+		protected override void Awake()
+		{
+			WindowCaption = "Map of ";
+			WindowRect = defaultRect;
+			WindowRect_Min = new Rect(0, 0, 550, 225);
+			WindowOptions = new GUILayoutOption[2] { GUILayout.Width(600), GUILayout.Height(300) };
+			WindowStyle = SCANskins.SCAN_window;
+			Visible = false;
+			DragEnabled = true;
+			ClampEnabled = false;
+			ResizeEnabled = false;
+			TooltipMouseOffset = new Vector2d(-10, -25);
 
-//			SCAN_SkinsLibrary.SetCurrent("SCAN_Unity");
-//		}
+			SCAN_SkinsLibrary.SetCurrent("SCAN_Unity");
+			SCAN_SkinsLibrary.SetCurrentTooltip();
+		}
 
-//		internal override void Start()
-//		{
-//			Visible = SCANcontroller.controller.bigMapVisible;
-//			//GameEvents.onVesselSOIChanged.Add(soiChanged);
-//			if (bigmap == null)
-//			{
-//				bigmap = new SCANmap();
-//				bigmap.setProjection((SCANmap.MapProjection)SCANcontroller.controller.projection);
-//				bigmap.setWidth(SCANcontroller.controller.map_width);
-//				WindowRect.x = SCANcontroller.controller.map_x;
-//				WindowRect.y = SCANcontroller.controller.map_y;
-//			}
-//			else
-//			{
-//				WindowRect.x = SCANcontroller.controller.map_x;
-//				WindowRect.y = SCANcontroller.controller.map_y;
-//			}
-//			b = FlightGlobals.currentMainBody;
-//			data = SCANUtil.getData(b);
-//			if (data == null)
-//			{
-//				data = new SCANdata(b);
-//				SCANcontroller.controller.addToBodyData(b, data);
-//			}
-//			WindowCaption = string.Format("Map of {0}", b.theName);
-//			bigmap.setBody(b);
-//		}
+		internal override void Start()
+		{
+			//Initialize the map object
+			Visible = SCANcontroller.controller.bigMapVisible;
+			if (v == null)
+				v = FlightGlobals.ActiveVessel;
+			if (b == null)
+				b = v.mainBody;
+			if (bigmap == null)
+			{
+				bigmap = new SCANmap(b, true);
+				bigmap.setProjection((MapProjection)SCANcontroller.controller.projection);
+				bigmap.setWidth(SCANcontroller.controller.map_width);
+				WindowRect.x = SCANcontroller.controller.map_x;
+				WindowRect.y = SCANcontroller.controller.map_y;
+			}
+			else
+			{
+				SCANcontroller.controller.map_x = (int)WindowRect.x;
+				SCANcontroller.controller.map_y = (int)WindowRect.y;
+			}
+			if (SCANcontroller.controller.resourceOverlayType == 1)
+				SCANcontroller.controller.map_ResourceOverlay = false;
+			currentColor = SCANcontroller.controller.colours == 0;
+			lastColor = currentColor;
+			WindowCaption = string.Format("Map of {0}", b.theName);
+			data = SCANUtil.getData(b);
+			if (data == null)
+			{
+				data = new SCANdata(b);
+				SCANcontroller.controller.addToBodyData(b, data);
+			}
+			bigmap.setBody(b);
+			if (SCANcontroller.controller.ResourceList.Count > 0)
+				bigmap.Resource = SCANcontroller.controller.ResourceList[SCANcontroller.controller.resourceSelection][b.name];
+			TooltipsEnabled = SCANcontroller.controller.toolTips;
+		}
 
-//		internal override void OnDestroy()
-//		{
-//			//GameEvents.onVesselSOIChanged.Remove(soiChanged);
-//		}
+		//Properties used to sync with color selection window
+		public static SCANmap BigMap
+		{
+			get { return bigmap; }
+		}
 
-//		protected override void DrawWindowPre(int id)
-//		{
-//			bool repainting = Event.current.type == EventType.Repaint;
+		public SCANdata Data
+		{
+			get { return data; }
+		}
 
-//			// Handle dragging independently of mouse events: MouseDrag doesn't work
-//			// so well if the resizer widget can't follow the mouse because the map
-//			// aspect ratio is constrained.
-//			if (bigmap_dragging && !repainting)
-//			{
-//				if (Input.GetMouseButtonUp(0))
-//				{
-//					bigmap_dragging = false;
-//					if (bigmap_drag_w < 450)
-//						bigmap_drag_w = 450;
-//					bigmap.setWidth((int)bigmap_drag_w);
-//					overlay_static = null;
-//					SCANcontroller.controller.map_width = bigmap.mapwidth;
-//				}
-//				else
-//				{
-//					float xx = Input.mousePosition.x;
-//					bigmap_drag_w += xx - bigmap_drag_x;
-//					bigmap_drag_x = xx;
-//				}
-//				if (Event.current.isMouse)
-//					Event.current.Use();
-//			}
+		protected override void DrawWindowPre(int id)
+		{
+			//Append the map type to the window caption
+			if (bigmap != null)
+				mapTypeTitle = SCANmapType.mapTypeNames[(int)bigmap.MType];
+			else
+				mapTypeTitle = "";
 
-//			v = FlightGlobals.ActiveVessel;
-//			if (b != v.mainBody)
-//			{
-//				b = v.mainBody;
-//				data = SCANUtil.getData(b);
-//				if (data == null)
-//				{
-//					data = new SCANdata(b);
-//					SCANcontroller.controller.addToBodyData(b, data);
-//				}
-//				bigmap.setBody(b);
-//			}
-//		}
+			WindowCaption = string.Format("{0} Map of {1}", mapTypeTitle, b.theName);
 
-//		protected override void DrawWindow(int id)
-//		{
-//			versionLabel(id);
+			//Re-sizing code; moved here from SCAN_MBW
+			if (IsResizing && !inRepaint())
+			{
+				if (Input.GetMouseButtonUp(0))
+				{
+					IsResizing = false;
+					if (resizeW < WindowRect_Min.width)
+						resizeW = WindowRect_Min.width;
+					if (resizeH < WindowRect_Min.height)
+						resizeH = WindowRect_Min.height;
+					bigmap.setWidth((int)resizeW);
+					//overlay_static = null;
+					drawGrid = true;
+					SCANcontroller.controller.map_width = bigmap.MapWidth;
+					WindowRect_Last = new Rect(0, 0, WindowRect.width, WindowRect.height);
+				}
+				else
+				{
+					float xx = Input.mousePosition.x;
+					resizeW += xx - dragX;
+					dragX = xx;
+				}
+				if (Event.current.isMouse)
+					Event.current.Use();
+			}
 
-//			growS();
+			//Disable any errant drop down menus
+			if (!drop_down_open)
+			{
+				projection_drop_down = false;
+				mapType_drop_down = false;
+				resources_drop_down = false;
+				planetoid_drop_down = false;
+			}
+		}
 
-//			Texture2D map = bigmap.getPartialMap(); // this is the expensive call
+		//The primary GUI method
+		protected override void DrawWindow(int id)
+		{
+			versionLabel(id);		/* Standard version label and close button */
+			closeBox(id);
 
-//			//Makes sure the window re-sizes correctly
-//			float dw = bigmap_drag_w;
-//			if (dw < 450) dw = 450;	// changed to prevent resizer from overlapping with buttons
-//			float dh = dw / 2f;
-//			if (bigmap_dragging)
-//			{
-//				GUILayout.Label("", GUILayout.Width(dw), GUILayout.Height(dh));
-//			}
-//			else
-//			{
-//				GUILayout.Label("", GUILayout.Width(map.width), GUILayout.Height(map.height));
-//			}
+			growS();
+				topMenu(id);		/* Top row of buttons - used to control the map types */
+				growE();
+					toggleBar(id);	/* Toggle options along left side - control overlay options - *Replace buttons with		textures*    */
+					fillS(60);
+					mapDraw(id);	/* Draw the main map texture */
+				stopE();
+				growE();
+					fillS(160);
+					growS();
+						mouseOver(id);		/* Handle all mouse-over info and zoom-map code */
+						legendBar(id);		/* Draw the mouseover info and legend bar along the bottom */
+					stopS();
+				stopE();
+			stopS();
 
-//			Rect maprect = GUILayoutUtility.GetLastRect();
-//			maprect.width = bigmap.mapwidth;
-//			maprect.height = bigmap.mapheight;
+			zoomMap(id);			/* Draw the zoom map */
+			mapLabels(id);			/* Draw the vessel/anomaly icons on the map */
+			if (drop_down_open)
+				dropDown(id);		/* Draw the drop down menus if any are open */
+		}
 
-//			//The background texture for the map
-//			if (overlay_static == null)
-//			{
-//				overlay_static = new Texture2D((int)bigmap.mapwidth, (int)bigmap.mapheight, TextureFormat.ARGB32, false);
-//				overlay_static_dirty = true;
-//			}
+		protected override void DrawWindowPost(int id)
+		{
+			//Close the drop down menu if the window is clicked anywhere else
+			if (drop_down_open && Event.current.type == EventType.mouseDown && !ddRect.Contains(Event.current.mousePosition))
+				drop_down_open = false;
 
-//			//Generate the grid texture
-//			if (overlay_static_dirty)
-//			{
-//				SCANuiUtil.clearTexture(overlay_static);
-//				if (SCANcontroller.controller.map_grid)
-//				{
-//					SCANuiUtil.drawGrid(maprect, bigmap, overlay_static);
-//				}
-//				overlay_static.Apply();
-//				overlay_static_dirty = false;
-//			}
+			//Update black and white/color statuse
+			if (lastColor != currentColor)
+			{
+				lastColor = currentColor;
+				if (SCANcontroller.controller.colours == 0)
+					SCANcontroller.controller.colours = 1;
+				else
+					SCANcontroller.controller.colours = 0;
+				data.resetImages();
+				bigmap.resetMap();
+			}
 
-//			//Stretches the existing map while re-sizing
-//			if (bigmap_dragging)
-//			{
-//				maprect.width = dw;
-//				maprect.height = dh;
-//				GUI.DrawTexture(maprect, map, ScaleMode.StretchToFill);
-//			}
-//			else
-//			{
-//				GUI.DrawTexture(maprect, map); // this is the drawing of the map
-//			}
+			//Update grid overlay status
+			if (currentGrid != SCANcontroller.controller.map_grid)
+			{
+				currentGrid = SCANcontroller.controller.map_grid;
+				drawGrid = true;
+			}
 
-//			if (overlay_static != null)
-//			{
-//				GUI.DrawTexture(maprect, overlay_static, ScaleMode.StretchToFill);
-//			}
+			//Update selected resource status
+			if (lastResource != SCANcontroller.controller.map_ResourceOverlay)
+			{
+				lastResource = SCANcontroller.controller.map_ResourceOverlay;
+				bigmap.resetMap();
+			}
+		}
 
-//			//Add the North/South labels to the polar projection
-//			if (bigmap.projection == SCANmap.MapProjection.Polar)
-//			{
-//				rc.x = maprect.x + maprect.width / 2 - maprect.width / 8;
-//				rc.y = maprect.y + maprect.height / 8;
-//				SCANuiUtil.drawLabel(rc, "S", false, true, true);
-//				rc.x = maprect.x + maprect.width / 2 + maprect.width / 8;
-//				SCANuiUtil.drawLabel(rc, "N", false, true, true);
-//			}
+		//Draw version label in upper left corner
+		private void versionLabel(int id)
+		{
+			Rect r = new Rect(6, 0, 50, 18);
+			GUI.Label(r, SCANversions.SCANsatVersion, SCANskins.SCAN_whiteReadoutLabel);
+		}
 
-//			//Draw the orbit overlays
-//			if (SCANcontroller.controller.map_orbit && !notMappingToday)
-//			{
-//				SCANuiUtil.drawOrbit(maprect, bigmap, v, startUT, overlay_static, b);
-//			}
+		//Draw the close button in upper right corner
+		private void closeBox(int id)
+		{
+			Rect r = new Rect(WindowRect.width - 20, 0, 18, 18);
+			if (GUI.Button(r, SCANcontroller.controller.closeBox, SCANskins.SCAN_closeButton))
+			{
+				Visible = false;
+				SCANcontroller.controller.bigMapVisible = Visible;
+			}
+		}
 
-//			growE(GUILayout.ExpandWidth(true));
-//			growE(GUILayout.Width(300));
+		//Draw the drop down buttons along the top of the map - Used to control map types
+		private void topMenu(int id)
+		{
+			growE();
+				fillS(100);
+				if (GUILayout.Button("Projection", SCANskins.SCAN_buttonFixed, GUILayout.MaxWidth(100)))
+				{
+					projection_drop_down = !projection_drop_down;
+					drop_down_open = !drop_down_open;
+				}
+				fillS(40);
+				if (GUILayout.Button("Map Type", SCANskins.SCAN_buttonFixed, GUILayout.MaxWidth(90)))
+				{
+					mapType_drop_down = !mapType_drop_down;
+					drop_down_open = !drop_down_open;
+				}
+				fillS();
+				if (GUILayout.Button(iconWithTT(SCANskins.SCAN_RefreshIcon, "Refresh Map"), SCANskins.SCAN_buttonBorderless, GUILayout.MaxWidth(34), GUILayout.MaxHeight(28)))
+				{
+					bigmap.resetMap();
+				}
+				fillS();
+				if (SCANcontroller.controller.GlobalResourceOverlay)
+				{
+					if (GUILayout.Button("Resources", SCANskins.SCAN_buttonFixed, GUILayout.MaxWidth(90)))
+					{
+						resources_drop_down = !resources_drop_down;
+						drop_down_open = !drop_down_open;
+					}
+					fillS(40);
+				}
+				if (GUILayout.Button("Planetoid", SCANskins.SCAN_buttonFixed, GUILayout.MaxWidth(90)))
+				{
+					planetoid_drop_down = !planetoid_drop_down;
+					drop_down_open = !drop_down_open;
+				}
+				fillS(20);
+			stopE();
+		}
 
-//			#region buttons: close / export png
-//			growS();
-//			if (GUILayout.Button("Close", SCANskins.SCAN_buttonFixed))
-//			{
-//				Visible = false;
-//				SCANcontroller.controller.bigMapVisible = Visible;
-//			}
+		//Draw the overlay options along the left side of the map texture
+		private void toggleBar(int id)
+		{
+			growS();
 
-//			if (GUILayout.Button("Colors", SCANskins.SCAN_buttonFixed))
-//			{
-//				SCANcontroller.controller.colorManager.Visible = !SCANcontroller.controller.colorManager.Visible;
-//			}
+				currentColor = GUILayout.Toggle(currentColor, textWithTT("", "Toggle Color"));
 
-//			if (GUILayout.Button("Export PNG", SCANskins.SCAN_buttonFixed))
-//			{
-//				if (bigmap.isMapComplete())
-//				{
-//					bigmap.exportPNG();
-//				}
-//			}
-//			#endregion
+				Rect d = GUILayoutUtility.GetLastRect();
+				d.x += 34;
+				d.y += 2;
+				d.width = 48;
+				d.height = 24;
 
-//			stopS();
-//			growS();
+				if (GUI.Button(d, iconWithTT(SCANskins.SCAN_ColorToggleIcon, "Toggle Color"), SCANskins.SCAN_buttonBorderless))
+				{
+					currentColor = !currentColor;
+				}
 
-//			#region buttons: grey / color / legend
-//			if (SCANcontroller.controller.colours == 1)
-//			{
-//				if (GUILayout.Button("Grey", SCANskins.SCAN_buttonActive))
-//				{
-//					SCANcontroller.controller.colours = 1;
-//				}
+				fillS();
 
-//				if (GUILayout.Button("Colour"))
-//				{
-//					SCANcontroller.controller.colours = 0;
-//					data.resetImages();
-//					bigmap.resetMap();
-//				}
-//			}
-//			else
-//			{
-//				if (GUILayout.Button("Grey"))
-//				{
-//					SCANcontroller.controller.colours = 1;
-//					data.resetImages();
-//					bigmap.resetMap();
-//				}
+				SCANcontroller.controller.map_grid = GUILayout.Toggle(SCANcontroller.controller.map_grid, textWithTT("", "Toggle Grid"));
 
-//				if (GUILayout.Button("Colour", SCANskins.SCAN_buttonActive))
-//				{
-//					SCANcontroller.controller.colours = 0;
-//				}
-//			}
+				d = GUILayoutUtility.GetLastRect();
+				d.x += 34;
+				d.y += 2;
+				d.width = 48;
+				d.height = 24;
 
-//			if (SCANcontroller.controller.legend)
-//			{
-//				if (GUILayout.Button("Legend", SCANskins.SCAN_buttonActive))
-//					SCANcontroller.controller.legend = !SCANcontroller.controller.legend;
-//			}
-//			else
-//			{
-//				if (GUILayout.Button("Legend"))
-//					SCANcontroller.controller.legend = !SCANcontroller.controller.legend;
-//			}
+				if (GUI.Button(d, iconWithTT(SCANskins.SCAN_GridIcon, "Toggle Grid"), SCANskins.SCAN_buttonBorderless))
+				{
+					SCANcontroller.controller.map_grid = !SCANcontroller.controller.map_grid;
+				}
 
-//			#endregion
-//			stopS();
-//			growS();
-//			#region buttons: altimetry / slope / biome
-//			if (bigmap.mapmode == 0)
-//			{
-//				if (GUILayout.Button("Altimetry", SCANskins.SCAN_buttonActive))
-//				{
-//					bigmap.resetMap(0, 0);
-//				}
-//				if (GUILayout.Button("Slope"))
-//				{
-//					bigmap.resetMap(1, 0);
-//				}
-//				if (GUILayout.Button("Biome"))
-//				{
-//					bigmap.resetMap(2, 0);
-//				}
-//			}
-//			else if (bigmap.mapmode == 1)
-//			{
-//				if (GUILayout.Button("Altimetry"))
-//				{
-//					bigmap.resetMap(0, 0);
-//				}
-//				if (GUILayout.Button("Slope", SCANskins.SCAN_buttonActive))
-//				{
-//					bigmap.resetMap(1, 0);
-//				}
-//				if (GUILayout.Button("Biome"))
-//				{
-//					bigmap.resetMap(2, 0);
-//				}
-//			}
-//			else if (bigmap.mapmode == 2)
-//			{
-//				if (GUILayout.Button("Altimetry"))
-//				{
-//					bigmap.resetMap(0, 0);
-//				}
-//				if (GUILayout.Button("Slope"))
-//				{
-//					bigmap.resetMap(1, 0);
-//				}
-//				if (GUILayout.Button("Biome", SCANskins.SCAN_buttonActive))
-//				{
-//					bigmap.resetMap(2, 0);
-//				}
-//			}
-//			#endregion
-//			stopS();
-//			growS();
-//			growE();
-//			#region buttons: anomaly markers / flags / orbit / asteroids
-//			if (SCANcontroller.controller.map_markers)
-//			{
-//				if (GUILayout.Button("Markers", SCANskins.SCAN_buttonActive))
-//					SCANcontroller.controller.map_markers = !SCANcontroller.controller.map_markers;
-//			}
-//			else
-//			{
-//				if (GUILayout.Button("Markers"))
-//					SCANcontroller.controller.map_markers = !SCANcontroller.controller.map_markers;
-//			}
+				fillS();
 
-//			if (SCANcontroller.controller.map_flags)
-//			{
-//				if (GUILayout.Button("Flags", SCANskins.SCAN_buttonActive))
-//					SCANcontroller.controller.map_flags = !SCANcontroller.controller.map_flags;
-//			}
-//			else
-//			{
-//				if (GUILayout.Button("Flags"))
-//					SCANcontroller.controller.map_flags = !SCANcontroller.controller.map_flags;
-//			}
+				SCANcontroller.controller.map_orbit = GUILayout.Toggle(SCANcontroller.controller.map_orbit, textWithTT("", "Toggle Orbit"));
 
-//			stopE();
-//			growE();
+				d = GUILayoutUtility.GetLastRect();
+				d.x += 34;
+				d.y += 2;
+				d.width = 48;
+				d.height = 24;
 
-//			if (SCANcontroller.controller.map_orbit)
-//			{
-//				if (GUILayout.Button("Orbit", SCANskins.SCAN_buttonActive))
-//					SCANcontroller.controller.map_orbit = !SCANcontroller.controller.map_orbit;
-//			}
-//			else
-//			{
-//				if (GUILayout.Button("Orbit"))
-//					SCANcontroller.controller.map_orbit = !SCANcontroller.controller.map_orbit;
-//			}
+				if (GUI.Button(d, iconWithTT(SCANskins.SCAN_OrbitIcon, "Toggle Orbit"), SCANskins.SCAN_buttonBorderless))
+				{
+					SCANcontroller.controller.map_orbit = !SCANcontroller.controller.map_orbit;
+				}
 
-//			if (SCANcontroller.controller.map_asteroids)
-//			{
-//				if (GUILayout.Button("Asteroids", SCANskins.SCAN_buttonActive))
-//					SCANcontroller.controller.map_asteroids = !SCANcontroller.controller.map_asteroids;
-//			}
-//			else
-//			{
-//				if (GUILayout.Button("Asteroids"))
-//					SCANcontroller.controller.map_asteroids = !SCANcontroller.controller.map_asteroids;
-//			}
+				fillS();
 
-//			#endregion
-//			stopE();
-//			growE();
-//			#region buttons: grid / [resources]
+				SCANcontroller.controller.map_markers = GUILayout.Toggle(SCANcontroller.controller.map_markers, textWithTT("", "Toggle Anomalies"));
 
-//			if (SCANcontroller.controller.map_grid)
-//			{
-//				if (GUILayout.Button("Grid", SCANskins.SCAN_buttonActive))
-//				{
-//					SCANcontroller.controller.map_grid = !SCANcontroller.controller.map_grid;
-//					overlay_static_dirty = true;
-//				}
-//			}
-//			else
-//			{
-//				if (GUILayout.Button("Grid"))
-//				{
-//					SCANcontroller.controller.map_grid = !SCANcontroller.controller.map_grid;
-//					overlay_static_dirty = true;
-//				}
-//			}
+				d = GUILayoutUtility.GetLastRect();
+				d.x += 44;
+				d.y += 2;
+				d.width = 24;
+				d.height = 24;
 
-//			if (SCANcontroller.controller.GlobalResourceOverlay) //Button to turn on/off resource overlay
-//			{
-//				if (!SCANcontroller.controller.KethaneBusy || SCANcontroller.controller.resourceOverlayType == 0)
-//				{
-//					if (SCANcontroller.controller.map_ResourceOverlay)
-//					{
-//						if (GUILayout.Button(SCANcontroller.controller.resourceSelection, SCANskins.SCAN_buttonActive))
-//						{
-//							SCANcontroller.controller.map_ResourceOverlay = !SCANcontroller.controller.map_ResourceOverlay;
-//							bigmap.resetMap();
-//						}
-//					}
-//					else
-//					{
-//						if (GUILayout.Button(SCANcontroller.controller.resourceSelection))
-//						{
-//							SCANcontroller.controller.map_ResourceOverlay = !SCANcontroller.controller.map_ResourceOverlay;
-//							bigmap.resetMap();
-//						}
-//					}
-//				}
-//				else
-//				{ //Disable overlay while kethane database is rebuilding
-//					GUILayout.Button("Rebuilding...");
-//				}
-//			}
+				if (GUI.Button(d, textWithTT(SCANcontroller.controller.anomalyMarker, "Toggle Anomalies"), SCANskins.SCAN_buttonBorderless))
+				{
+					SCANcontroller.controller.map_markers = !SCANcontroller.controller.map_markers;
+				}
 
-//			#endregion
+				fillS();
 
-//			stopE();
-//			stopS();
-//			growS();
+				SCANcontroller.controller.map_flags = GUILayout.Toggle(SCANcontroller.controller.map_flags, textWithTT("", "Toggle Flags"));
 
-//			#region buttons: projections
-//			for (int i = 0; i < SCANmap.projectionNames.Length; ++i)
-//			{
-//				if (bigmap.projection.ToString() == SCANmap.projectionNames[i])
-//				{
-//					if (GUILayout.Button(SCANmap.projectionNames[i], SCANskins.SCAN_buttonActive))
-//					{
-//						bigmap.setProjection((SCANmap.MapProjection)i);
-//						SCANcontroller.controller.projection = i;
-//						overlay_static_dirty = true;
-//					}
-//				}
-//				else
-//				{
-//					if (GUILayout.Button(SCANmap.projectionNames[i]))
-//					{
-//						bigmap.setProjection((SCANmap.MapProjection)i);
-//						SCANcontroller.controller.projection = i;
-//						overlay_static_dirty = true;
-//					}
-//				}
-//			}
-//			#endregion
+				d = GUILayoutUtility.GetLastRect();
+				d.x += 44;
+				d.y += 2;
+				d.width = 24;
+				d.height = 24;
 
-//			stopS();
-//			stopE();
+				if (GUI.Button(d, iconWithTT(SCANskins.SCAN_FlagIcon, "Toggle Flags"), SCANskins.SCAN_buttonBorderless))
+				{
+					SCANcontroller.controller.map_flags = !SCANcontroller.controller.map_flags;
+				}
 
-//			//string scanInfo = "";
-//			//string posInfo = "";
-//			//string resourceInfo = "";
-//			float mx = Event.current.mousePosition.x - maprect.x;
-//			float my = Event.current.mousePosition.y - maprect.y;
-//			bool in_map = false, in_spotmap = false;
-//			double mlon = 0, mlat = 0;
+				fillS();
 
-//			if (mx >= 0 && my >= 0 && mx < map.width && my < map.height && !bigmap_dragging)
-//			{
-//				double mlo = (mx * 360f / map.width) - 180;
-//				double mla = 90 - (my * 180f / map.height);
-//				mlon = bigmap.unprojectLongitude(mlo, mla);
-//				mlat = bigmap.unprojectLatitude(mlo, mla);
+				SCANcontroller.controller.map_asteroids = GUILayout.Toggle(SCANcontroller.controller.map_asteroids, textWithTT("", "Toggle Asteroids"));
 
-//				if (spotmap != null)
-//				{
-//					if (mx >= pos_spotmap.x - maprect.x && my >= pos_spotmap.y - maprect.y && mx <= pos_spotmap.x + pos_spotmap.width - maprect.x && my <= pos_spotmap.y + pos_spotmap.height - maprect.y)
-//					{
-//						in_spotmap = true;
-//						mlon = spotmap.lon_offset + ((mx - pos_spotmap.x + maprect.x) / spotmap.mapscale) - 180;
-//						mlat = spotmap.lat_offset + ((pos_spotmap.height - (my - pos_spotmap.y + maprect.y)) / spotmap.mapscale) - 90;
-//						if (mlat > 90)
-//						{
-//							mlon = (mlon + 360) % 360 - 180;
-//							mlat = 180 - mlat;
-//						}
-//						else if (mlat < -90)
-//						{
-//							mlon = (mlon + 360) % 360 - 180;
-//							mlat = -180 - mlat;
-//						}
-//					}
-//				}
+				d = GUILayoutUtility.GetLastRect();
+				d.x += 44;
+				d.y += 2;
+				d.width = 24;
+				d.height = 24;
 
-//				if (mlon >= -180 && mlon <= 180 && mlat >= -90 && mlat <= 90)
-//				{
-//					in_map = true;
-//				}
-//			}
+				if (GUI.Button(d, iconWithTT(SCANskins.SCAN_AsteroidIcon, "Toggle Asteroids"), SCANskins.SCAN_buttonBorderless))
+				{
+					SCANcontroller.controller.map_asteroids = !SCANcontroller.controller.map_asteroids;
+				}
 
-//			#region if (mouse inside bigmap)
-//			//	if (mlon >= -180 && mlon <= 180 && mlat >= -90 && mlat <= 90)
-//			//	{
-//			//		in_map = true;
-//			//		if (SCANUtil.isCovered(mlon, mlat, data, SCANdata.SCANtype.AltimetryLoRes))
-//			//		{
-//			//			if (v.mainBody.pqsController == null)
-//			//				scanInfo += palette.colored(palette.c_ugly, "LO ");
-//			//			else
-//			//				scanInfo += palette.colored(palette.c_good, "LO ");
-//			//		}
-//			//		else
-//			//			scanInfo += "<color=\"grey\">LO</color> ";
-//			//		if (SCANUtil.isCovered(mlon, mlat, data, SCANdata.SCANtype.AltimetryHiRes))
-//			//		{
-//			//			if (v.mainBody.pqsController == null)
-//			//				scanInfo += palette.colored(palette.c_ugly, "HI ");
-//			//			else
-//			//				scanInfo += palette.colored(palette.c_good, "HI ");
-//			//		}
-//			//		else
-//			//			scanInfo += "<color=\"grey\">HI</color> ";
-//			//		if (SCANUtil.isCovered(mlon, mlat, data, SCANdata.SCANtype.Biome))
-//			//		{
-//			//			if (v.mainBody.BiomeMap == null || v.mainBody.BiomeMap.Map == null)
-//			//				scanInfo += palette.colored(palette.c_ugly, "MULTI ");
-//			//			else
-//			//				scanInfo += palette.colored(palette.c_good, "MULTI ");
-//			//		}
-//			//		else
-//			//			scanInfo += "<color=\"grey\">MULTI</color> ";
-//			//		if (SCANUtil.isCovered(mlon, mlat, data, SCANdata.SCANtype.AltimetryHiRes))
-//			//		{
-//			//			scanInfo += SCANUtil.getElevation(v.mainBody, mlon, mlat).ToString("N2") + "m ";
-//			//		}
-//			//		else if (SCANUtil.isCovered(mlon, mlat, data, SCANdata.SCANtype.AltimetryLoRes))
-//			//		{
-//			//			scanInfo += (((int)SCANUtil.getElevation(v.mainBody, mlon, mlat) / 500) * 500).ToString() + "m ";
-//			//		}
-//			//		if (SCANUtil.isCovered(mlon, mlat, data, SCANdata.SCANtype.Biome))
-//			//		{
-//			//			scanInfo += SCANUtil.getBiomeName(v.mainBody, mlon, mlat) + " ";
-//			//		}
-//			//		posInfo += SCANuiUtil.toDMS(mlat, mlon) + " (lat: " + mlat.ToString("F2") + " lon: " + mlon.ToString("F2") + ") ";
-//			//		if (in_spotmap)
-//			//			posInfo += " " + spotmap.mapscale.ToString("F1") + "x";
-//			//		if (SCANcontroller.controller.map_ResourceOverlay && SCANcontroller.controller.globalOverlay) //Adds selected resource amount to big map legend
-//			//		{
-//			//			if (SCANcontroller.controller.resourceOverlayType == 0 && SCANreflection.ORSXFound)
-//			//			{
-//			//				if (SCANUtil.isCovered(mlon, mlat, data, bigmap.resource.type))
-//			//				{
-//			//					double amount = SCANUtil.ORSOverlay(mlon, mlat, bigmap.body.flightGlobalsIndex, bigmap.resource.name);
-//			//					string label;
-//			//					if (bigmap.resource.linear) //Make sure that ORS values are handled correctly based on which scale type they use
-//			//						label = (amount * 100).ToString("N1") + " %";
-//			//					else
-//			//						label = (amount * 1000000).ToString("N1") + " ppm";
-//			//					resourceInfo += palette.colored(bigmap.resource.fullColor, bigmap.resource.name + ": " + label);
-//			//				}
-//			//			}
-//			//			else if (SCANcontroller.controller.resourceOverlayType == 1)
-//			//			{
-//			//				if (SCANUtil.isCovered(mlon, mlat, data, bigmap.resource.type))
-//			//				{
-//			//					double amount = data.kethaneValueMap[SCANUtil.icLON(mlon), SCANUtil.icLAT(mlat)];
-//			//					if (amount < 0) amount = 0d;
-//			//					resourceInfo += palette.colored(bigmap.resource.fullColor, bigmap.resource.name + ": " + amount.ToString("N1"));
-//			//				}
-//			//			}
-//			//		}
-//			//	}
-//			//	//else
-//			//	//{
-//			//	//	info += " " + mlat.ToString("F") + " " + mlon.ToString("F"); // uncomment for debugging projections
-//			//	//}
-//			//}
-//			#endregion
+				fillS();
 
-//			bool repainting = Event.current.type == EventType.Repaint;
+				SCANcontroller.controller.legend = GUILayout.Toggle(SCANcontroller.controller.legend, textWithTT("", "Toggle Legend"));
 
-//			#region bigmap mouseover info and legend
+				d = GUILayoutUtility.GetLastRect();
+				d.x += 34;
+				d.y += 2;
+				d.width = 48;
+				d.height = 24;
 
-//			if (maprect.width < 720)
-//			{
-//				stopE();
-//				SCANuiUtil.mouseOverInfo(mlon, mlat, bigmap, data, v.mainBody, in_map);
-//				if (bigmap.mapmode == 0 && SCANcontroller.controller.legend)
-//					SCANuiUtil.drawLegend(data);
-//			}
-//			else
-//			{
-//				growS();
-//				SCANuiUtil.mouseOverInfo(mlon, mlat, bigmap, data, v.mainBody, in_map);
-//				if (bigmap.mapmode == 0 && SCANcontroller.controller.legend)
-//					SCANuiUtil.drawLegend(data);
-//				stopS();
-//				stopE();
-//			}
-//			#endregion
+				if (GUI.Button(d, iconWithTT(SCANskins.SCAN_LegendIcon, "Toggle Legend"), SCANskins.SCAN_buttonBorderless))
+				{
+					SCANcontroller.controller.legend = !SCANcontroller.controller.legend;
+				}
 
-//			if (!notMappingToday)
-//				SCANuiUtil.drawMapLabels(maprect, v, bigmap, data, v.mainBody);
+				if (SCANcontroller.controller.GlobalResourceOverlay)
+				{
+					fillS();
+					SCANcontroller.controller.map_ResourceOverlay = GUILayout.Toggle(SCANcontroller.controller.map_ResourceOverlay, textWithTT("", "Toggle Resources"));
 
-//			#region zoom map
-//			if (spotmap != null)
-//			{
-//				spotmap.setBody(v.mainBody);
+					d = GUILayoutUtility.GetLastRect();
+					d.x += 44;
+					d.y += 2;
+					d.width = 24;
+					d.height = 24;
 
-//				//if (SCANcontroller.controller.globalOverlay) //make sure resources show up in zoom map
-//				//	spotmap.setResource(SCANcontroller.controller.ResourcesList[SCANcontroller.controller.gridSelection].Name);
+					if (GUI.Button(d, iconWithTT(SCANskins.SCAN_ResourceIcon, "Toggle Resources"), SCANskins.SCAN_buttonBorderless))
+					{
+						SCANcontroller.controller.map_ResourceOverlay = !SCANcontroller.controller.map_ResourceOverlay;
+					}
+				}
+			stopS();
 
-//				GUI.Box(pos_spotmap, spotmap.getPartialMap());
-//				if (!notMappingToday)
-//				{
-//					SCANuiUtil.drawOrbit(pos_spotmap, spotmap, v, startUT, overlay_static, b);
-//					SCANuiUtil.drawMapLabels(pos_spotmap, v, spotmap, data, v.mainBody);
-//				}
-//				Rect sC = new Rect(pos_spotmap.x + 160, pos_spotmap.y, 18, 18);
-//				if (GUI.Button(sC, palette.colored(palette.cb_vermillion, SCANcontroller.controller.closeBox)))
-//				{
-//					spotmap = null;
-//				}
-//			}
-//			#endregion
-//			#region big map resizing
-//			Rect resizer = new Rect(maprect.x + maprect.width - 24, maprect.y + maprect.height + 8, 24, 24);
-//			GUI.Box(resizer, "//");
-//			if (Event.current.isMouse)
-//			{
-//				if (Event.current.type == EventType.MouseUp)
-//				{
-//					if (bigmap_dragging)
-//					{
-//					}
-//					else if (Event.current.button == 1)
-//					{
-//						if (in_map || in_spotmap)
-//						{
-//							if (bigmap.isMapComplete())
-//							{
-//								if (spotmap == null)
-//								{
-//									spotmap = new SCANmap();
-//									spotmap.setSize(180, 180);
-//								}
-//								if (in_spotmap)
-//								{
-//									spotmap.mapscale = spotmap.mapscale * 1.25f;
-//								}
-//								else
-//								{
-//									spotmap.mapscale = 10;
-//								}
-//								spotmap.centerAround(mlon, mlat);
-//								spotmap.resetMap(bigmap.mapmode, 1);
-//								pos_spotmap.width = 180;
-//								pos_spotmap.height = 180;
-//								if (!in_spotmap)
-//								{
-//									pos_spotmap.x = Event.current.mousePosition.x - pos_spotmap.width / 2;
-//									pos_spotmap.y = Event.current.mousePosition.y - pos_spotmap.height / 2;
-//									if (mx > maprect.width / 2)
-//										pos_spotmap.x -= pos_spotmap.width;
-//									else
-//										pos_spotmap.x += pos_spotmap.height;
-//									pos_spotmap.x = Math.Max(maprect.x, Math.Min(maprect.x + maprect.width - pos_spotmap.width, pos_spotmap.x));
-//									pos_spotmap.y = Math.Max(maprect.y, Math.Min(maprect.y + maprect.height - pos_spotmap.height, pos_spotmap.y));
-//								}
-//							}
-//						}
-//					}
-//					else if (Event.current.button == 0)
-//					{
-//						if (spotmap != null && in_spotmap)
-//						{
-//							if (bigmap.isMapComplete())
-//							{
-//								spotmap.mapscale = spotmap.mapscale / 1.25f;
-//								if (spotmap.mapscale < 10)
-//									spotmap.mapscale = 10;
-//								spotmap.resetMap(spotmap.mapmode, 1);
-//								Event.current.Use();
-//							}
-//						}
-//					}
-//					Event.current.Use();
-//				}
-//				else if (Event.current.type == EventType.MouseDown)
-//				{
-//					if (Event.current.button == 0)
-//					{
-//						if (resizer.Contains(Event.current.mousePosition))
-//						{
-//							bigmap_dragging = true;
-//							bigmap_drag_x = Input.mousePosition.x;
-//							bigmap_drag_w = bigmap.mapwidth;
-//							Event.current.Use();
-//						}
-//					}
-//				}
-//			}
-//			#endregion
+			//Open all four windows using icons instead of text; use tooltips
+			Rect s = new Rect(10, WindowRect.height - 42, 32, 32);
 
-//			stopS();
+			if (GUI.Button(s, iconWithTT(SCANskins.SCAN_SmallMapIcon, "Small Map"), SCANskins.SCAN_windowButton))
+			{
+				SCANcontroller.controller.mainMap.Visible = !SCANcontroller.controller.mainMap.Visible;
+			}
 
-//		}
+			s.x += 40;
 
-//		protected override void DrawWindowPost(int id)
-//		{
-//			string titleText = "";
-//			if (bigmap_dragging)
-//				titleText = string.Format(" [{0}x{1}]", bigmap_drag_w, (bigmap_drag_w / 2));
-//			if (!bigmap.isMapComplete())
-//				titleText += " [rendering]";
+			if (GUI.Button(s, iconWithTT(SCANskins.SCAN_InstrumentIcon, "Instrument Window"), SCANskins.SCAN_windowButton))
+			{
+				SCANcontroller.controller.instrumentsWindow.Visible = !SCANcontroller.controller.instrumentsWindow.Visible;
+			}
 
-//			WindowCaption = string.Format("Map of {0}{1}", b.theName, titleText);
+			s.x += 40;
 
-//			//if (SCANcontroller.controller.globalOverlay) //Update selected resource
-//			//	bigmap.setResource(SCANcontroller.controller.ResourceList[SCANcontroller.controller.gridSelection].Name);
+			if (GUI.Button(s, iconWithTT(SCANskins.SCAN_SettingsIcon, "Settings Menu"), SCANskins.SCAN_windowButton))
+			{
+				SCANcontroller.controller.settingsWindow.Visible = !SCANcontroller.controller.settingsWindow.Visible;
+			}
 
-//			SCANcontroller.controller.map_x = (int)WindowRect.x;
-//			SCANcontroller.controller.map_y = (int)WindowRect.y;
-//		}
+			s.x += 40;
 
-//		//Print the version number
-//		private void versionLabel(int id)
-//		{
-//			Rect vR = new Rect(6, 0, 40, 18);
-//			GUI.Label(vR, SCANversions.SCANsatVersion, SCANskins.SCAN_whiteReadoutLabel);
-//		}
+			if (GUI.Button(s, iconWithTT(SCANskins.SCAN_ColorIcon, "Color Control"), SCANskins.SCAN_windowButton))
+			{
+				SCANcontroller.controller.colorManager.Visible = !SCANcontroller.controller.colorManager.Visible;
+			}
 
-//		//private void soiChanged(GameEvents.HostedFromToAction<Vessel, CelestialBody> VC)
-//		//{
-//		//	b = VC.to;
-//		//	bigmap.setBody(b);
-//		//	WindowCaption = string.Format("Map of {0}", b.theName);
-//		//}
+			s.x = WindowRect.width - 66;
 
-//	}
-//}
+			if (GUI.Button(s, iconWithTT(SCANskins.SCAN_ScreenshotIcon, "Export Map"), SCANskins.SCAN_windowButton))
+			{
+				if (bigmap.isMapComplete())
+					bigmap.exportPNG();
+			}
+		}
+
+		private void mapDraw(int id)
+		{
+			MapTexture = bigmap.getPartialMap();
+
+			//Set minimum map size during re-sizing
+			dW = resizeW;
+			if (dW < WindowRect_Min.width)
+				dW = WindowRect_Min.width;
+			dH = dW / 2f;
+
+			//A blank label used as a template for the actual map texture
+			if (IsResizing)
+			{
+				GUILayout.Label("", GUILayout.Width(dW), GUILayout.Height(dH));
+			}
+			else
+			{
+				GUILayout.Label("", GUILayout.Width(MapTexture.width), GUILayout.Height(MapTexture.height));
+			}
+
+			TextureRect = GUILayoutUtility.GetLastRect();
+			TextureRect.width = bigmap.MapWidth;
+			TextureRect.height = bigmap.MapHeight;
+
+			//Generate the grid lines
+			if (drawGrid)
+			{
+				gridLines = new Dictionary<int, List<List<Vector2d>>>();
+				gridLines = SCANuiUtil.drawGridLine(TextureRect, bigmap);
+				drawGrid = false;
+			}
+
+			//Stretches the existing map while re-sizing
+			if (IsResizing)
+			{
+				TextureRect.width = dW;
+				TextureRect.height = dH;
+				GUI.DrawTexture(TextureRect, MapTexture, ScaleMode.StretchToFill);
+			}
+			else
+			{
+				GUI.DrawTexture(TextureRect, MapTexture);
+			}
+
+			//Add the North/South labels to the polar projection
+			if (bigmap.Projection == MapProjection.Polar)
+			{
+				rc.x = TextureRect.x + TextureRect.width / 2 - TextureRect.width / 8;
+				rc.y = TextureRect.y + TextureRect.height / 8;
+				SCANuiUtil.drawLabel(rc, "S", false, true, true);
+				rc.x = TextureRect.x + TextureRect.width / 2 + TextureRect.width / 8;
+				SCANuiUtil.drawLabel(rc, "N", false, true, true);
+			}
+
+			if (SCANcontroller.controller.map_grid && !IsResizing)
+			{
+				if (gridLines.Count > 0)
+				{
+					GL.PushMatrix();
+					foreach (List<Vector2d> points in gridLines[0])
+					{
+						SCANuiUtil.drawGridLines(points, bigmap.MapWidth, TextureRect.x, TextureRect.y, SCANuiUtil.blackLineColor);
+					}
+					foreach (List<Vector2d> points in gridLines[1])
+					{
+						SCANuiUtil.drawGridLines(points, bigmap.MapWidth, TextureRect.x, TextureRect.y, SCANuiUtil.lineColor);
+					}
+					GL.PopMatrix();
+				}
+			}
+
+			//Draw the orbit overlays
+			if (SCANcontroller.controller.map_orbit)
+			{
+				SCANuiUtil.drawOrbit(TextureRect, bigmap, v, b);
+			}
+		}
+
+		//Display info for mouse over in the map and handle the zoom map
+		private void mouseOver(int id)
+		{
+			float mx = Event.current.mousePosition.x - TextureRect.x;
+			float my = Event.current.mousePosition.y - TextureRect.y;
+			bool in_map = false, in_spotmap = false;
+			double mlon = 0, mlat = 0;
+
+			//Draw the re-size label in the corner
+			Rect resizer = new Rect(WindowRect.width - 24, WindowRect.height - 26, 24, 24);
+			GUI.Label(resizer, SCANskins.SCAN_ResizeIcon);
+
+			//Handles mouse positioning and converting to lat/long coordinates
+			if (mx >= 0 && my >= 0 && mx < MapTexture.width && my < MapTexture.height)
+			{
+				double mlo = (mx * 360f / MapTexture.width) - 180;
+				double mla = 90 - (my * 180f / MapTexture.height);
+				mlon = bigmap.unprojectLongitude(mlo, mla);
+				mlat = bigmap.unprojectLatitude(mlo, mla);
+
+				if (spotmap != null)
+				{
+					if (mx >= pos_spotmap.x - TextureRect.x && my >= pos_spotmap.y - TextureRect.y && mx <= pos_spotmap.x + pos_spotmap.width - TextureRect.x && my <= pos_spotmap.y + pos_spotmap.height - TextureRect.y)
+					{
+						in_spotmap = true;
+						mlon = spotmap.Lon_Offset + ((mx - pos_spotmap.x + TextureRect.x) / spotmap.MapScale) - 180;
+						mlat = spotmap.Lat_Offset + ((pos_spotmap.height - (my - pos_spotmap.y + TextureRect.y)) / spotmap.MapScale) - 90;
+						if (mlat > 90)
+						{
+							mlon = (mlon + 360) % 360 - 180;
+							mlat = 180 - mlat;
+						}
+						else if (mlat < -90)
+						{
+							mlon = (mlon + 360) % 360 - 180;
+							mlat = -180 - mlat;
+						}
+					}
+				}
+
+				if (mlon >= -180 && mlon <= 180 && mlat >= -90 && mlat <= 90)
+				{
+					in_map = true;
+				}
+			}
+
+			//Handles mouse click while inside map; opens zoom map or zooms in further
+			if (Event.current.isMouse && !ddRect.Contains(Event.current.mousePosition) && !zoomCloseRect.Contains(Event.current.mousePosition))
+			{
+				if (Event.current.type == EventType.MouseUp)
+				{
+					if (Event.current.button == 1)
+					{
+						if (in_map || in_spotmap)
+						{
+							if (bigmap.isMapComplete())
+							{
+								if (spotmap == null)
+								{
+									spotmap = new SCANmap();
+									spotmap.setSize(180, 180);
+								}
+								if (in_spotmap)
+								{
+									spotmap.MapScale = spotmap.MapScale * 1.25f;
+								}
+								else
+								{
+									spotmap.MapScale = 10;
+								}
+								spotmap.centerAround(mlon, mlat);
+								spotmap.resetMap(bigmap.MType, false);
+								pos_spotmap.width = 180;
+								pos_spotmap.height = 180;
+								if (!in_spotmap)
+								{
+									pos_spotmap.x = Event.current.mousePosition.x - pos_spotmap.width / 2;
+									pos_spotmap.y = Event.current.mousePosition.y - pos_spotmap.height / 2;
+									if (mx > TextureRect.width / 2)
+										pos_spotmap.x -= pos_spotmap.width;
+									else
+										pos_spotmap.x += pos_spotmap.height;
+									pos_spotmap.x = Math.Max(TextureRect.x, Math.Min(TextureRect.x + TextureRect.width - pos_spotmap.width, pos_spotmap.x));
+									pos_spotmap.y = Math.Max(TextureRect.y, Math.Min(TextureRect.y + TextureRect.height - pos_spotmap.height, pos_spotmap.y));
+								}
+							}
+						}
+					}
+					else if (Event.current.button == 0)
+					{
+						if (spotmap != null)
+						{
+							if (in_spotmap)
+							{
+								if (bigmap.isMapComplete())
+								{
+									//spotmap.mapscale = spotmap.mapscale / 1.25f;
+									//if (spotmap.mapscale < 10)
+									//	spotmap.mapscale = 10;
+									spotmap.centerAround(mlon, mlat);
+									spotmap.resetMap(spotmap.MType, false);
+									Event.current.Use();
+								}
+							}
+
+						}
+					}
+					Event.current.Use();
+				}
+				//Handle clicking inside the re-size button
+				else if (Event.current.isMouse
+				&& Event.current.type == EventType.MouseDown
+				&& Event.current.button == 0
+				&& resizer.Contains(Event.current.mousePosition))
+				{
+					IsResizing = true;
+					WindowRect_Last = WindowRect;
+					dragX = Input.mousePosition.x;
+					resizeW = TextureRect.width;
+					resizeH = TextureRect.height;
+					Event.current.Use();
+				}
+			}
+
+			//Draw the actual mouse over info label below the map
+			SCANuiUtil.mouseOverInfo(mlon, mlat, bigmap, data, b, in_map);
+		}
+
+		//Draw the altitude legend bar along the bottom
+		private void legendBar(int id)
+		{
+			if (bigmap.MType == mapType.Altimetry && SCANcontroller.controller.legend)
+			{
+				if (bigmap.MapLegend == null)
+					bigmap.MapLegend = new SCANmapLegend();
+				bigmap.MapLegend.Legend = bigmap.MapLegend.getLegend(data.MinHeight, data.MaxHeight, SCANcontroller.controller.colours, data);
+				SCANuiUtil.drawLegend(data, bigmap.MapLegend);
+			}
+		}
+
+		//Draw the zoom map and its overlays
+		private void zoomMap(int id)
+		{
+			if (spotmap != null)
+			{
+				spotmap.setBody(b);
+
+				if (SCANcontroller.controller.GlobalResourceOverlay)
+					spotmap.Resource = SCANcontroller.controller.ResourceList[SCANcontroller.controller.resourceSelection][b.name];
+
+				GUI.Box(pos_spotmap, spotmap.getPartialMap());
+				SCANuiUtil.drawOrbit(pos_spotmap, spotmap, v, b);
+				SCANuiUtil.drawMapLabels(pos_spotmap, v, spotmap, data, v.mainBody);
+				zoomCloseRect = new Rect(pos_spotmap.x + 180, pos_spotmap.y, 18, 18);
+
+				if (GUI.Button(zoomCloseRect, SCANcontroller.controller.closeBox, SCANskins.SCAN_closeButton))
+				{
+					spotmap = null;
+				}
+			}
+		}
+
+		//Draw the map overlay labels
+		private void mapLabels(int id)
+		{
+			SCANuiUtil.drawMapLabels(TextureRect, v, bigmap, data, b);
+		}
+
+		//Draw the drop down menus if any have been opened
+		private void dropDown(int id)
+		{
+			if (projection_drop_down)
+			{
+				ddRect = new Rect(110, 45, 100, 70);
+				GUI.Box(ddRect, "", SCANskins.SCAN_dropDownBox);
+				for (int i = 0; i < SCANmapProjection.projectionNames.Length; ++i)
+				{
+					Rect r = new Rect(ddRect.x + 2, ddRect.y + (24 * i), ddRect.width - 4, 20);
+					if (GUI.Button(r, SCANmapProjection.projectionNames[i], SCANskins.SCAN_dropDownButton))
+					{
+						bigmap.setProjection((MapProjection)i);
+						SCANcontroller.controller.projection = i;
+						drawGrid = true;
+						drop_down_open = false;
+					}
+				}
+			}
+
+			else if (mapType_drop_down)
+			{
+				ddRect = new Rect(270, 45, 70, 70);
+				GUI.Box(ddRect, "", SCANskins.SCAN_dropDownBox);
+				for (int i = 0; i < SCANmapType.mapTypeNames.Length; i++)
+				{
+					Rect r = new Rect(ddRect.x + 2, ddRect.y + (24 * i), ddRect.width - 4, 20);
+					if (GUI.Button(r, SCANmapType.mapTypeNames[i], SCANskins.SCAN_dropDownButton))
+					{
+						bigmap.resetMap((mapType)i, true);
+						drop_down_open = false;
+					}
+				}
+			}
+
+			else if (resources_drop_down)
+			{
+				ddRect = new Rect(WindowRect.width - 290, 45, 120, 160);
+				GUI.Box(ddRect, "", SCANskins.SCAN_dropDownBox);
+				for (int i = 0; i < SCANcontroller.controller.ResourceList.Count; i++)
+				{
+					scrollR = GUI.BeginScrollView(ddRect, scrollR, new Rect(0, 0, 100, 20 * SCANcontroller.controller.ResourceList.Count));
+					Rect r = new Rect(2, 20 * i, 96, 20);
+					if (GUI.Button(r, SCANcontroller.controller.ResourceList.ElementAt(i).Key, SCANskins.SCAN_dropDownButton))
+					{
+						bigmap.Resource = SCANcontroller.controller.ResourceList.ElementAt(i).Value[b.name];
+						SCANcontroller.controller.resourceSelection = bigmap.Resource.Name;
+						if (SCANcontroller.controller.ResourceList.ElementAt(i).Value[b.name].Source == SCANresource_Source.Kethane)
+							SCANcontroller.controller.resourceOverlayType = 1;
+						else
+							SCANcontroller.controller.resourceOverlayType = 0;
+						if (SCANcontroller.controller.map_ResourceOverlay)
+							bigmap.resetMap();
+						drop_down_open = false;
+						SCANUtil.SCANdebugLog("Resource {0} Selected; Min Value: {1}; Max Value: {2}", bigmap.Resource.Name, bigmap.Resource.MinValue, bigmap.Resource.MaxValue);
+					}
+					GUI.EndScrollView();
+				}
+			}
+
+			else if (planetoid_drop_down)
+			{
+				int j = 0;
+				ddRect = new Rect(WindowRect.width - 130, 45, 100, 160);
+				GUI.Box(ddRect, "", SCANskins.SCAN_dropDownBox);
+				for (int i = 0; i < FlightGlobals.Bodies.Count; i++)
+				{
+					scrollP = GUI.BeginScrollView(ddRect, scrollP, new Rect(0, 0, 80, (20 * SCANcontroller.Body_Data.Count) + 1));
+					if (SCANcontroller.Body_Data.ContainsKey(FlightGlobals.Bodies[i].name))
+					{
+						Rect r = new Rect(2, 20 * j, 76, 20);
+						if (GUI.Button(r, FlightGlobals.Bodies[i].name, SCANskins.SCAN_dropDownButton))
+						{
+							CelestialBody newB = FlightGlobals.Bodies[i];
+							SCANdata newData = SCANUtil.getData(newB);
+							if (newData != null)
+							{
+								data = newData;
+								b = newB;
+								bigmap.setBody(b);
+							}
+							drop_down_open = false;
+						}
+						j++;
+					}
+					GUI.EndScrollView();
+				}
+			}
+			else
+				drop_down_open = false;
+		}
+
+	}
+}

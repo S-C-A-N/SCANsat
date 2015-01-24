@@ -146,7 +146,7 @@ namespace SCANsat.SCAN_UI
 			//fillS();
 			if (GUILayout.Button(iconWithTT(SCANskins.SCAN_BigMapIcon, "Big Map"), SCANskins.SCAN_windowButton, GUILayout.Height(32), GUILayout.Width(32)))
 			{
-				SCANcontroller.controller.newBigMap.Visible = !SCANcontroller.controller.newBigMap.Visible;
+				SCANcontroller.controller.BigMap.Visible = !SCANcontroller.controller.BigMap.Visible;
 				SCANcontroller.controller.bigMapVisible = !SCANcontroller.controller.bigMapVisible;
 			}
 			if (GUILayout.Button(iconWithTT(SCANskins.SCAN_InstrumentIcon, "Instrument Window"), SCANskins.SCAN_windowButton, GUILayout.Height(32), GUILayout.Width(32)))
