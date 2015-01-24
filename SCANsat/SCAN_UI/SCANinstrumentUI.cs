@@ -198,6 +198,11 @@ namespace SCANsat.SCAN_UI
 						e[7] = SCANUtil.getElevation(v.mainBody, lon - latOffset, lat + latOffset);
 						e[8] = SCANUtil.getElevation(v.mainBody, lon - latOffset, lat - latOffset);
 
+						/* Calculate rise for each point on the grid
+						 * The distance is 5m for adjacent points and 7.071m for the points on the corners
+						 * Rise is converted to slope; i.e. a 5m elevation change over a 5m distance is a rise of 1
+						 * Converted to slope using the inverse tangent this gives a slope of 45°
+						 * */
 						for (int i = 1; i <= 4; i++)
 						{
 							s[i - 1] = Math.Atan((Math.Abs(e[i] - e[0])) / 5) * Mathf.Rad2Deg;
@@ -206,8 +211,6 @@ namespace SCANsat.SCAN_UI
 						{
 							s[i - 1] = Math.Atan((Math.Abs(e[i] - e[0])) / 7.071) * Mathf.Rad2Deg;
 						}
-
-							//SCANUtil.SCANdebugLog("Elevations: {0:F3};{1:F3};{2:F3};{3:F3};{4:F3} ; Long: {5:F6};{6:F6};{7:F6};{8:F6};{9:F6} ; Lat: {10:F6};{11:F6};{12:F6};{13:F6};{14:F6} ; Slope: {15:F1};{16:F1};{17:F1};{18:F1}", e[0], e[1], e[2], e[3], e[4], lon, lon + latOffset, lon - latOffset, lon, lon, lat, lat, lat, lat + latOffset, lat - latOffset, s[0], s[1], s[2], s[3]);
 
 						slopeAVG = s.Sum() / 8;
 
