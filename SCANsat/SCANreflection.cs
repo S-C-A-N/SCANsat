@@ -31,8 +31,6 @@ namespace SCANsat
 
 		private static RegolithPosAbundance _RegolithPosAbundance;
 
-		internal static Type _RegolithPlanetType;
-
 		internal static float RegolithAbundanceValue(double lat, double lon, string resource, int body, int type, double altitude)
 		{
 			return _RegolithPosAbundance(lat, lon, resource, body, type, altitude);
@@ -58,8 +56,6 @@ namespace SCANsat
 					SCANUtil.SCANlog("Regolith Type Not Found");
 					return false;
 				}
-
-				_RegolithPlanetType = RegolithType;
 
 				MethodInfo RegolithMethod = RegolithType.GetMethod(RegolithMethodName, new Type[] { typeof(double), typeof(double), typeof(string), typeof(int), typeof(int), typeof(double) });
 
