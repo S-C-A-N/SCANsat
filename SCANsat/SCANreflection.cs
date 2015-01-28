@@ -27,13 +27,13 @@ namespace SCANsat
 
 		private static bool RegolithRun = false;
 
-		private delegate float RegolithPosAbundance(double lat, double lon, string resource, int body, int type, double altitude);
+		private delegate float RegolithPosAbundance(double lat, double lon, string resource, int body, int type, int altitude, bool biomes);
 
 		private static RegolithPosAbundance _RegolithPosAbundance;
 
-		internal static float RegolithAbundanceValue(double lat, double lon, string resource, int body, int type, double altitude)
+		internal static float RegolithAbundanceValue(double lat, double lon, string resource, int body, int type, int altitude, bool biomes)
 		{
-			return _RegolithPosAbundance(lat, lon, resource, body, type, altitude);
+			return _RegolithPosAbundance(lat, lon, resource, body, type, altitude, biomes);
 		}
 
 		internal static bool RegolithReflectionMethod(Assembly RegolithAssembly)
@@ -57,7 +57,7 @@ namespace SCANsat
 					return false;
 				}
 
-				MethodInfo RegolithMethod = RegolithType.GetMethod(RegolithMethodName, new Type[] { typeof(double), typeof(double), typeof(string), typeof(int), typeof(int), typeof(double) });
+				MethodInfo RegolithMethod = RegolithType.GetMethod(RegolithMethodName, new Type[] { typeof(double), typeof(double), typeof(string), typeof(int), typeof(int), typeof(int), typeof(bool) });
 
 				if (RegolithMethod == null)
 				{

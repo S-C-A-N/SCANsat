@@ -243,7 +243,7 @@ namespace SCANsat
 		internal static float RegolithOverlay(double lat, double lon, string name, int body)
 		{
 			float amount = 0f;
-			amount = SCANreflection.RegolithAbundanceValue(lat, lon, name, body, 0, 0);
+			amount = SCANreflection.RegolithAbundanceValue(lat, lon, name, body, 0, 0, SCANcontroller.controller.regolithBiomeLock);
 			return amount;
 		}
 
