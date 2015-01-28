@@ -165,7 +165,7 @@ namespace SCANsat.SCAN_UI
 				mousePos.y = Screen.height - mousePos.y;
 				if (WindowRect.Contains(mousePos) && !spaceCenterLock)
 				{
-					InputLockManager.SetControlLock(ControlTypes.CAMERACONTROLS | ControlTypes.KSC_FACILITIES | ControlTypes.KSC_UI, lockID);
+					InputLockManager.SetControlLock(ControlTypes.CAMERACONTROLS | ControlTypes.KSC_ALL, lockID);
 					spaceCenterLock = true;
 				}
 				else if (!WindowRect.Contains(mousePos) && spaceCenterLock)
@@ -212,7 +212,7 @@ namespace SCANsat.SCAN_UI
 				mousePos.y = Screen.height - mousePos.y;
 				if (WindowRect.Contains(mousePos) && !trackingStationLock)
 				{
-					InputLockManager.SetControlLock(ControlTypes.CAMERACONTROLS | ControlTypes.TRACKINGSTATION_ALL, lockID);
+					InputLockManager.SetControlLock(ControlTypes.TRACKINGSTATION_UI, lockID);
 					trackingStationLock = true;
 				}
 				else if (!WindowRect.Contains(mousePos) && trackingStationLock)
