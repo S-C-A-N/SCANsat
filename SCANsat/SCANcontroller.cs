@@ -102,6 +102,8 @@ namespace SCANsat
 		public bool toolTips = true;
 		[KSPField(isPersistant = true)]
 		public bool useStockAppLauncher = true;
+		[KSPField(isPersistant = true)]
+		public bool regolithBiomeLock = false;
 
 		/* Available resources for overlays; loaded from resource addon configs; only loaded once */
 		private static Dictionary<string, Dictionary<string, SCANresource>> resourceList;

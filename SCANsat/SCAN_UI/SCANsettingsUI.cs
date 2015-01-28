@@ -306,8 +306,13 @@ namespace SCANsat.SCAN_UI
 			GUILayout.Label("Settings", SCANskins.SCAN_headline);
 			growE();
 				SCANcontroller.controller.useStockAppLauncher = GUILayout.Toggle(SCANcontroller.controller.useStockAppLauncher, "Use Stock Toolbar", SCANskins.SCAN_settingsToggle);
-				fillS(10);
+				fillS(5);
 				SCANcontroller.controller.toolTips = GUILayout.Toggle(SCANcontroller.controller.toolTips, "Tooltips", SCANskins.SCAN_settingsToggle);
+				if (SCANcontroller.controller.GlobalResourceOverlay && SCANversions.RegolithFound)
+				{
+					fillS(5);
+					SCANcontroller.controller.regolithBiomeLock = GUILayout.Toggle(SCANcontroller.controller.regolithBiomeLock, "Regolith Biome Lock", SCANskins.SCAN_settingsToggle);
+				}
 			stopE();
 			fillS(8);
 			if (GUILayout.Button("Reset window positions", SCANskins.SCAN_buttonFixed))
