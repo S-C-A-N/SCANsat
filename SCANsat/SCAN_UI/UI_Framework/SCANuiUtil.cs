@@ -162,6 +162,9 @@ namespace SCANsat.SCAN_UI.UI_Framework
 						{
 							double amount = SCANUtil.RegolithOverlay(lat, lon, mapObj.Resource.Name, mapObj.Body.flightGlobalsIndex);
 							string label;
+							if (amount < 0)
+								label = "Unknown";
+							else
 								label = amount.ToString("P2");
 							info += palette.colored(mapObj.Resource.FullColor, mapObj.Resource.Name + ": " + label);
 						}
