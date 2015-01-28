@@ -315,7 +315,7 @@ namespace SCANsat.SCAN_Data
 				uncov += coverage_count[8];
 			if ((type & SCANtype.Kethane_4) != SCANtype.Nothing)
 				uncov += coverage_count[9];
-			if ((type & SCANtype.Uranium) != SCANtype.Nothing)
+			if ((type & SCANtype.Uraninite) != SCANtype.Nothing)
 				uncov += coverage_count[10];
 			if ((type & SCANtype.Thorium) != SCANtype.Nothing)
 				uncov += coverage_count[11];
