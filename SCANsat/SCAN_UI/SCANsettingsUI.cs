@@ -77,7 +77,7 @@ namespace SCANsat.SCAN_UI
 				mousePos.y = Screen.height - mousePos.y;
 				if (WindowRect.Contains(mousePos) && !spaceCenterLock)
 				{
-					InputLockManager.SetControlLock(ControlTypes.CAMERACONTROLS | ControlTypes.KSC_FACILITIES | ControlTypes.KSC_UI, lockID);
+					InputLockManager.SetControlLock(ControlTypes.CAMERACONTROLS | ControlTypes.KSC_ALL, lockID);
 					spaceCenterLock = true;
 				}
 				else if (!WindowRect.Contains(mousePos) && spaceCenterLock)
@@ -94,7 +94,7 @@ namespace SCANsat.SCAN_UI
 				mousePos.y = Screen.height - mousePos.y;
 				if (WindowRect.Contains(mousePos) && !trackingStationLock)
 				{
-					InputLockManager.SetControlLock(ControlTypes.CAMERACONTROLS | ControlTypes.TRACKINGSTATION_ALL, lockID);
+					InputLockManager.SetControlLock(ControlTypes.TRACKINGSTATION_UI, lockID);
 					trackingStationLock = true;
 				}
 				else if (!WindowRect.Contains(mousePos) && trackingStationLock)
@@ -273,7 +273,11 @@ namespace SCANsat.SCAN_UI
 		//Reset databases
 		private void gui_settings_data_resets(int id)
 		{
-			CelestialBody thisBody = FlightGlobals.currentMainBody;
+			CelestialBody thisBody = null;
+			if (HighLogic.LoadedSceneIsFlight)
+				thisBody = FlightGlobals.currentMainBody;
+			else
+				thisBody = Planetarium.fetch.Home;
 			GUILayout.Label("Data Management", SCANskins.SCAN_headline);
 			growE();
 			if (warningBoxOne || warningBoxAll)
