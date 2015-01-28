@@ -229,6 +229,9 @@ Each of the two resource systems can be enabled through the **SCANsat** Big Map:
 
 **Regolith** support is built internal to SCANsat. If you have a **Regolith** DLL loaded anywhere SCANsat will only target the newest version.
 
+Check for the **Regolith Biome Lock** toggle in the SCANsat settings menu to enable or disable biome-based restrictions on resource scanning accuracy.
+> ![][resource-biome-lock]
+
 With any **Regolith**-using mod installed, you can select their resources in the drop down menu from the Big Map or KSC Map, and enable their overlay with the resource icon.
 For instance the **Karbonite** mod's resources can be viewed:
 > ![][resource-orsx-karbonite-v2]
@@ -457,15 +460,19 @@ Notice that the only gaps in coverage are those at the poles (ie, the selected i
 ### [:top:][top] 11. Settings Menu
 ------------------------------------------
 
-![][settings-window]
+![][settings-window-v10]
 
 The settings menu has a various general options
-* The marker used for anomalies can be specified
-* Background scanning can be controlled for each planet
-* Background scanning resolution can be lowered for better performance (watch for short pauses when several scanners are active at very high timewarp; reducing the scanning resolution can help with this)
-* Toggles control the availability of the stock app launcher button and the tooltips for various icons on other windows
-* If the windows are ever dragged off screen there is an option to reset all windows to their default positions
-* Data can be deleted for any or all planets; a confirmation box will appear when these options are selected
+* The marker used for **Anomalies** can be specified
+* **Background scanning** can be controlled for each planet
+* **Background scanning** resolution can be lowered for better performance (watch for short pauses when several scanners are active at very high timewarp; reducing the scanning resolution can help with this)
+* Toggles control the availability of the **Stock App Launcher** button, the **Tooltips** for various icons on other windows, and the **Regolith Biome Lock** if available
+* If the windows are ever dragged off screen there is an option to **Reset All Windows** to their default positions
+* **Scanning Data** can be deleted for any or all planets; a confirmation box will appear when these options are selected
+* The numbers under the **Time Warp Resolution** indicate the following
+    * **Vessels:** The number of vessels with any active SCANsat sensors present
+	* **Sensors:** The total number of SCANsat sensors on all vessels; note that all combination sensors are separated into their invidual components, i.e. the Multi-Spectral scanner consists of two sensors, Biomes and Anomalies.
+	* **Passes:** The number of scanning passes recorded per second, this number can easily be in the tens of thousands at high time warp with multiple vessels and sensors active.
 
 ### [:top:][top] 12. Note Concerning Data Sources
 ------------------------------------------
@@ -544,6 +551,7 @@ sneaky then they can of course be sneaky.
 [resource-orsx-karbonite-v2]: http://i.imgur.com/qVlHzSN.png
 [resource-scanner]: http://i.imgur.com/7Q7a7aD.gif
 [resource-bigmap]: http://i.imgur.com/aFu2U3F.gif
+[resource-biome-lock]: http://i.imgur.com/yJJEyjx.png
 
 [color-window]: http://i.imgur.com/XM2ynyZ.png
 [color-palette-switch]: http://i.imgur.com/0XdMGSy.gif
@@ -553,6 +561,7 @@ sneaky then they can of course be sneaky.
 [instruments-btdt]: http://i.imgur.com/tybbDap.gif
 
 [settings-window]: http://i.imgur.com/ogQbeso.png
+[settings-window-v10]: http://i.imgur.com/kArtbSx.png
 
 [top]: #table-of-contents
 [0]: #top-0-people-facts-and-faqs
