@@ -2,59 +2,59 @@ Version 10 - 2015-1-28
 ---------------------
 
 User Interface:
-	- Complete replacement of SCANsat user interface
+- Complete replacement of SCANsat user interface
+
+- Stock App Launcher Button included
+	- Toggles the SCANsat small map, which can be used to open all other windows
+	- Toggles the KSC map in the Space Center or Tracking Station scenes
+	- Can be toggled on/off in the settings menu
+	- Does not replace Blizzy78's Toolbar buttons
+
+- New SCANsat Big Map
+	- Text buttons replaced with drop down menus and icon toggles
+	- Maps for different planets can be selected at any time
+	- Replaced longitude/latitude texture grid overlay with simple line drawing overlay
 	
-	- Stock App Launcher Button included
-		- Toggles the SCANsat small map, which can be used to open all other windows
-		- Toggles the KSC map in the Space Center or Tracking Station scenes
-		- Can be toggled on/off in the settings menu
-		- Does not replace Blizzy78's Toolbar buttons
+- New KSC and Tracking Station window
+	- Fixed size version of the big map
 	
-	- New SCANsat Big Map
-		- Text buttons replaced with drop down menus and icon toggles
-		- Maps for different planets can be selected at any time
-		- Replaced longitude/latitude texture grid overlay with simple line drawing overlay
-		
-	- New KSC and Tracking Station window
-		- Fixed size version of the big map
-		
-	- Improvements to big map elevation data caching
-		- Reduced memory usage
-		- Faster map rendering when switching projection types
-		
-	- New Color Management window
-		- Used to change color palettes for elevation maps
-		- Used to set various terrain settings
-		- All settings are saved for each planet
-		
-	- Improved SCAN instruments window
-		- Altitude above terrain is shown correctly while in time warp
-		- Localized slope is indicated based on a 3X3 grid centered 5m around the vessel
+- Improvements to big map elevation data caching
+	- Reduced memory usage
+	- Faster map rendering when switching projection types
+	
+- New Color Management window
+	- Used to change color palettes for elevation maps
+	- Used to set various terrain settings
+	- All settings are saved for each planet
+	
+- Improved SCAN instruments window
+	- Altitude above terrain is shown correctly while in time warp
+	- Localized slope is indicated based on a 3X3 grid centered 5m around the vessel
 		
 Resources:
-	- Updated to support Regolith 1.4
+- Updated to support Regolith 1.4
+
+- SCANsatKethane not functional
+
+- Resource overlay and selection is controlled entirely through the big map
+	- Resource selection is handled through a drop down menu found along the top of the map
+	- Resource overlays are toggled by the resource icon on the lower left of the map
 	
-	- SCANsatKethane not functional
-	
-	- Resource overlay and selection is controlled entirely through the big map
-		- Resource selection is handled through a drop down menu found along the top of the map
-		- Resource overlays are toggled by the resource icon on the lower left of the map
-		
-	- Regolith Biome lock settings can be toggled in the SCANsat settings window
-	
-	- ORSX support removed
+- Regolith Biome lock settings can be toggled in the SCANsat settings window
+
+- ORSX support removed
 	
 Code Base:
-	- Significant internal code changes and rearrangement
-	
-	- Anything not relying entirely on the public API methods in SCANUtil will likely break
+- Significant internal code changes and rearrangement
+
+- Anything not relying entirely on the public API methods in SCANUtil will likely break
 	
 Miscellaneous and Bug Fixes:
-	- Maps exported to GameData/SCANsat/PluginData folder; the location where they should have been	
-	- Science results text added courtesy of Olympic1
-	- Uranium resource name changed to Uraninite to support the Community Resource Pack
-	- SETI Rebalance project compatibility added for Community Tech Tree
-	- Prevent scanning coverage from temporarily reporting 100%, which disrupted some SCANsat contracts
+- Maps exported to GameData/SCANsat/PluginData folder; the location where they should have been	
+- Science results text added courtesy of Olympic1
+- Uranium resource name changed to Uraninite to support the Community Resource Pack
+- SETI Rebalance project compatibility added for Community Tech Tree
+- Prevent scanning coverage from temporarily reporting 100%, which disrupted some SCANsat contracts
 
 
 Version 8.1 - 2014-12-19
