@@ -614,12 +614,12 @@ sneaky then they can of course be sneaky.
 [shield:support-toolbar]: http://img.shields.io/badge/works%20with%20Blizzy's%20Toolbar-1.7.8-7c69c0.svg
 [shield:support-alcor]: http://img.shields.io/badge/works%20with%20ALCOR-0.9-299bc7.svg
 [shield:support-kspi]: http://img.shields.io/badge/works%20with%20Interstellar-0.13-a62374.svg
-[shield:support-usi]:http://img.shields.io/badge/works%20with%20USI-0.22.3-34c566.svg
-[shield:support-karbonite]: http://img.shields.io/badge/works%20with%20Karbonite-0.5.1-ff8c00.svg
+[shield:support-usi]:http://img.shields.io/badge/works%20with%20USI-0.22.4-34c566.svg
+[shield:support-karbonite]: http://img.shields.io/badge/works%20with%20Karbonite-0.5.4-ff8c00.svg
 [shield:support-epl]: http://img.shields.io/badge/works%20with%20EPL-4.2.3-ff8c00.svg
 [shield:support-ctt]: http://img.shields.io/badge/works%20with%20CTT-1.1-blue.svg
 [shield:support-tm]: http://img.shields.io/badge/works%20with%20TechManager-1.5-lightgrey.svg
-[shield:support-reg]: https://img.shields.io/badge/works%20with%20Regolith-1.1-000000.svg
+[shield:support-reg]: https://img.shields.io/badge/works%20with%20Regolith-1.4-000000.svg
 [shield:support-ccfg]: https://img.shields.io/badge/works%20with%20Contract%20Configurator-6.0-yellowgreen.svg
 
 [shield:gittip-tg-img]: http://img.shields.io/gittip/technogeeky.png
