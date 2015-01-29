@@ -1,10 +1,29 @@
+#region license
+/* 
+ * [Scientific Committee on Advanced Navigation]
+ * 			S.C.A.N. Satellite
+ *
+ * SCANsat - RPM - A class to handle RasterPropMonitor integration; IVA maps
+ * 
+ * Based on Mihara's original SCANsatRPM code:
+ * https://github.com/Mihara/RasterPropMonitor
+ * 
+ * Copyright (c)2013 damny;
+ * Copyright (c)2014 David Grandy <david.grandy@gmail.com>;
+ * Copyright (c)2014 technogeeky <technogeeky@gmail.com>;
+ * Copyright (c)2014 (Your Name Here) <your email here>; see LICENSE.txt for licensing details.
+ */
+#endregion
 using UnityEngine;
 using System;
 using System.Linq;
 using System.Collections.Generic;
 using System.Globalization;
+using SCANsat.SCAN_Map;
+using SCANsat.SCAN_Data;
+using SCANsat.SCAN_UI.UI_Framework;
 
-namespace SCANsat
+namespace SCANsat.SCAN_UI
 {
 	public class JSISCANsatRPM: InternalModule
 	{
@@ -86,7 +105,7 @@ namespace SCANsat
 		private CelestialBody orbitingBody;
 		private Vessel targetVessel;
 		private double redrawDeviation;
-		private SCANdata.SCANanomaly[] localAnomalies;
+		private SCANanomaly[] localAnomalies;
 		private Material iconMaterial;
 		private SCANsat sat;
 		internal RPMPersistence persist;
@@ -161,7 +180,7 @@ namespace SCANsat
 
 			start = Planetarium.GetUniversalTime();
 
-			Graphics.Blit(map.map, screen);
+			Graphics.Blit(map.Map, screen);
 			GL.PushMatrix();
 			GL.LoadPixelMatrix(0, screenWidth, screenHeight, 0);
 
@@ -178,11 +197,10 @@ namespace SCANsat
 				DrawTrail(trail, trailColorValue, new Vector2d(vessel.longitude, vessel.latitude), true);
 		
 			// Anomalies go above trails
-			foreach (SCANdata.SCANanomaly anomaly in localAnomalies) {
-				if (anomaly.known)
-					DrawIcon(anomaly.longitude, anomaly.latitude,
-						anomaly.detail ? (VesselType)int.MaxValue : VesselType.Unknown,
-						anomaly.detail ? iconColorVisitedAnomalyValue : iconColorUnvisitedAnomalyValue);
+			foreach (SCANanomaly anomaly in localAnomalies) {
+				if (anomaly.Known)
+					DrawIcon(anomaly.Longitude, anomaly.Latitude, SCANicon.orbitIconForVesselType(anomaly.Detail ? (VesselType)int.MaxValue : VesselType.Unknown),
+						anomaly.Detail ? iconColorVisitedAnomalyValue : iconColorUnvisitedAnomalyValue);
 			}
 			// Target orbit and targets go above anomalies
 			if (targetVessel != null && targetVessel.mainBody == orbitingBody) {
@@ -205,10 +223,10 @@ namespace SCANsat
 						}
 					}
 				}
-				DrawIcon(targetVessel.longitude, targetVessel.latitude, targetVessel.vesselType, iconColorTargetValue);
+				DrawIcon(targetVessel.longitude, targetVessel.latitude, SCANicon.orbitIconForVesselType(targetVessel.vesselType), iconColorTargetValue);
 				if (showLines) {
-					DrawOrbitIcon(targetVessel, MapIcons.OtherIcon.AP, iconColorTargetValue);
-					DrawOrbitIcon(targetVessel, MapIcons.OtherIcon.PE, iconColorTargetValue);
+					DrawOrbitIcon(targetVessel, SCANicon.OrbitIcon.Ap, iconColorTargetValue);
+					DrawOrbitIcon(targetVessel, SCANicon.OrbitIcon.Pe, iconColorTargetValue);
 				}
 
 
@@ -216,27 +234,27 @@ namespace SCANsat
 			// Own orbit goes above that.
 			if (showLines && JUtil.OrbitMakesSense(vessel)) {
 				DrawOrbit(vessel, vessel.orbit, start, iconColorSelfValue);
-				DrawOrbitIcon(vessel, MapIcons.OtherIcon.AP, iconColorAPValue);
-				DrawOrbitIcon(vessel, MapIcons.OtherIcon.PE, iconColorPEValue);
+				DrawOrbitIcon(vessel, SCANicon.OrbitIcon.Ap, iconColorAPValue);
+				DrawOrbitIcon(vessel, SCANicon.OrbitIcon.Pe, iconColorPEValue);
 				if (targetVessel != null && JUtil.OrbitMakesSense(targetVessel)) {
 					if (vessel.orbit.AscendingNodeExists(targetVessel.orbit))
-						DrawOrbitIcon(vessel, MapIcons.OtherIcon.AN, iconColorANDNValue, vessel.orbit.TimeOfAscendingNode(targetVessel.orbit, start));
+						DrawOrbitIcon(vessel, SCANicon.OrbitIcon.AN, iconColorANDNValue, vessel.orbit.TimeOfAscendingNode(targetVessel.orbit, start));
 					if (vessel.orbit.DescendingNodeExists(targetVessel.orbit))
-						DrawOrbitIcon(vessel, MapIcons.OtherIcon.DN, iconColorANDNValue, vessel.orbit.TimeOfDescendingNode(targetVessel.orbit, start));
+						DrawOrbitIcon(vessel, SCANicon.OrbitIcon.DN, iconColorANDNValue, vessel.orbit.TimeOfDescendingNode(targetVessel.orbit, start));
 				}
-				// And the maneuver node and post-maneuver orbit:
+				// And the maneuver node and post-maneuver orbit: 
 				if (vessel.patchedConicSolver != null)
 				{
 					ManeuverNode node = vessel.patchedConicSolver.maneuverNodes.Count > 0 ? vessel.patchedConicSolver.maneuverNodes[0] : null;
 					if (node != null)
 					{
 						DrawOrbit(vessel, node.nextPatch, node.UT, iconColorNodeValue);
-						DrawOrbitIcon(vessel, MapIcons.OtherIcon.NODE, iconColorNodeValue, node.UT);
+						DrawOrbitIcon(vessel, SCANicon.OrbitIcon.ManeuverNode, iconColorNodeValue, node.UT);
 					}
 				}
 			}
 			// Own icon goes above that
-			DrawIcon(vessel.longitude, vessel.latitude, vessel.vesselType, iconColorSelfValue);
+			DrawIcon(vessel.longitude, vessel.latitude, SCANicon.orbitIconForVesselType(vessel.vesselType), iconColorSelfValue);
 			// And scale goes above everything.
 			DrawScale();
 
@@ -245,20 +263,23 @@ namespace SCANsat
 			return true;
 		}
 
-		private void DrawOrbitIcon(Vessel thatVessel, MapIcons.OtherIcon iconType, Color iconColor, double givenPoint = 0)
+		private void DrawOrbitIcon(Vessel thatVessel, SCANicon.OrbitIcon iconType, Color iconColor, double givenPoint = 0)
 		{
 			double timePoint = start;
 			switch (iconType) {
-				case MapIcons.OtherIcon.AP:
+				case SCANicon.OrbitIcon.Ap:
 					timePoint += thatVessel.orbit.timeToAp;
 					break;
-				case MapIcons.OtherIcon.PE:
+				case SCANicon.OrbitIcon.Pe:
 					timePoint += thatVessel.orbit.timeToPe;
 					break;
-				case MapIcons.OtherIcon.AN:
-				case MapIcons.OtherIcon.DN:
-				case MapIcons.OtherIcon.NODE:
+				case SCANicon.OrbitIcon.AN:
+				case SCANicon.OrbitIcon.DN:
+				case SCANicon.OrbitIcon.ManeuverNode:
 					timePoint = givenPoint;
+					break;
+				default:
+					iconType = SCANicon.orbitIconForVesselType(thatVessel.vesselType);
 					break;
 			}
 
@@ -266,7 +287,7 @@ namespace SCANsat
 				bool collision;
 				Vector2d coord;
 				if (GetPositionAtT(thatVessel, thatVessel.orbit, start, timePoint, out coord, out collision) && !collision) {
-					DrawIcon(coord.x, coord.y, thatVessel.vesselType, iconColor, iconType);
+					DrawIcon(coord.x, coord.y, iconType, iconColor);
 				}
 			}
 		}
@@ -404,21 +425,23 @@ namespace SCANsat
 			Graphics.DrawTexture(scaleBarRect, scaleLabelTexture, new Rect(0f, scaleID * scaleLabelSpan, 1f, scaleLabelSpan), 0, 0, 0, 0, scaleTint);
 		}
 
-		private void DrawIcon(double longitude, double latitude, VesselType vt, Color iconColor, MapIcons.OtherIcon icon = MapIcons.OtherIcon.None)
+		private void DrawIcon(double longitude, double latitude, SCANicon.OrbitIcon icon, Color iconColor)
 		{
-			var position = new Rect((float)(longitudeToPixels(longitude, latitude) - iconPixelSize / 2),
-				               (float)(latitudeToPixels(longitude, latitude) - iconPixelSize / 2),
+			var position = new Rect((float)(longitudeToPixels(longitude, latitude)),
+				               (float)(latitudeToPixels(longitude, latitude)),
 				               iconPixelSize, iconPixelSize);
 
 			Rect shadow = position;
 			shadow.x += iconShadowShift.x;
 			shadow.y += iconShadowShift.y;
 
-			iconMaterial.color = iconColorShadowValue;
-			Graphics.DrawTexture(shadow, MapView.OrbitIconsMap, MapIcons.VesselTypeIcon(vt, icon), 0, 0, 0, 0, iconMaterial);
+			SCANicon.drawOrbitIconGL((int)position.x, (int)position.y, icon, iconColor, iconColorShadowValue, iconMaterial, 16, true);
 
-			iconMaterial.color = iconColor;
-			Graphics.DrawTexture(position, MapView.OrbitIconsMap, MapIcons.VesselTypeIcon(vt, icon), 0, 0, 0, 0, iconMaterial);
+			//iconMaterial.color = iconColorShadowValue;
+			//Graphics.DrawTexture(shadow, MapView.OrbitIconsMap, MapIcons.VesselTypeIcon(vt, icon), 0, 0, 0, 0, iconMaterial);
+
+			//iconMaterial.color = iconColor;
+			//Graphics.DrawTexture(position, MapView.OrbitIconsMap, MapIcons.VesselTypeIcon(vt, icon), 0, 0, 0, 0, iconMaterial);
 		}
 
 		private double longitudeToPixels(double longitude, double latitude)
@@ -439,7 +462,7 @@ namespace SCANsat
 			// put the baseline latitude in the range [0,180] instead of
 			// [-90, +90].
 			double projLat = map.projectLatitude(longitude, latitude);
-			double translatedLat = 90.0 + projLat - map.lat_offset;
+			double translatedLat = 90.0 + projLat - map.Lat_Offset;
 			double scaledLat = translatedLat * mapSizeScale.y;
 			double pix = scaledLat * screenHeight / 180.0;
 
@@ -449,7 +472,7 @@ namespace SCANsat
 
 		private double rescaleLongitude(double lon)
 		{
-			return Clamp(lon - map.lon_offset, 360d) * mapSizeScale.x;
+			return Clamp(lon - map.Lon_Offset, 360d) * mapSizeScale.x;
 		}
 
 		private static double Clamp(double value, double clamp)
@@ -553,26 +576,28 @@ namespace SCANsat
 		private void RedrawMap()
 		{
 			map = new SCANmap();
-			map.setProjection(SCANmap.MapProjection.Rectangular);
+			map.setProjection(MapProjection.Rectangular);
 			orbitingBody = vessel.mainBody;
 			map.setBody(vessel.mainBody);
 			map.setSize(screenWidth, screenHeight);
-			map.mapscale *= (zoomLevel * zoomLevel + zoomModifier);
+			map.MapScale *= (zoomLevel * zoomLevel + zoomModifier);
 			mapCenterLong = vessel.longitude;
 			mapCenterLat = vessel.latitude;
 			// That's really just sweeping the problem under the carpet instead of fixing it, but meh.
 			if (zoomLevel == 0)
 				mapCenterLat = 0;
 			map.centerAround(mapCenterLong, mapCenterLat);
-			map.resetMap(mapMode,1);
+			map.resetMap((mapType)mapMode, false);
 
 			// Compute and store the map scale factors in mapSizeScale.  We
 			// use these values for every segment when drawing trails, so it
 			// makes sense to compute it only when it changes.
-			mapSizeScale = new Vector2d(360.0 * map.mapscale / map.mapwidth, 180.0 * map.mapscale / map.mapheight);
+			mapSizeScale = new Vector2d(360.0 * map.MapScale / map.MapWidth, 180.0 * map.MapScale / map.MapHeight);
 			redrawDeviation = redrawEdge * 180 / (zoomLevel * zoomLevel + zoomModifier);
 			try {
-				localAnomalies = SCANUtil.getData(vessel.mainBody).getAnomalies();
+				SCANdata data = SCANUtil.getData(vessel.mainBody);
+				if (data != null)
+					localAnomalies = data.Anomalies;
 			} catch {
 				Debug.Log("JSISCANsatRPM: Could not get a list of anomalies, what happened?");
 			}
