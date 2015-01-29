@@ -1,4 +1,4 @@
-Version 10 - 2015-1-28
+Version 10 - 2015-1-29
 ---------------------
 
 User Interface:
@@ -55,6 +55,7 @@ Miscellaneous and Bug Fixes:
 - SETI Rebalance project compatibility added for Community Tech Tree
 - Prevent scanning coverage from temporarily reporting 100%, which disrupted some SCANsat contracts
 - From v9; Fixed automatic camera movement while the KSC map was active in the tracking station
+- From v9; Fix potential error with stock toolbar when changing scenes
 
 
 Version 8.1 - 2014-12-19
