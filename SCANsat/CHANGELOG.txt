@@ -16,7 +16,7 @@ User Interface:
 	- Replaced longitude/latitude texture grid overlay with simple line drawing overlay
 	
 - New KSC and Tracking Station window
-	- Fixed size version of the big map
+	- Fixed-size version of the big map
 	
 - Improvements to big map elevation data caching
 	- Reduced memory usage
@@ -32,15 +32,14 @@ User Interface:
 	- Localized slope is indicated based on a 3X3 grid centered 5m around the vessel
 		
 Resources:
-- Updated to support Regolith 1.4
-
-- SCANsatKethane not functional
-
 - Resource overlay and selection is controlled entirely through the big map
 	- Resource selection is handled through a drop down menu found along the top of the map
 	- Resource overlays are toggled by the resource icon on the lower left of the map
 	
-- Regolith Biome lock settings can be toggled in the SCANsat settings window
+- Updated to support Regolith 1.4
+	- Regolith Biome lock settings can be toggled in the SCANsat settings window
+
+- SCANsatKethane not functional
 
 - ORSX support removed
 	
@@ -55,6 +54,7 @@ Miscellaneous and Bug Fixes:
 - Uranium resource name changed to Uraninite to support the Community Resource Pack
 - SETI Rebalance project compatibility added for Community Tech Tree
 - Prevent scanning coverage from temporarily reporting 100%, which disrupted some SCANsat contracts
+- From v9; Fixed automatic camera movement while the KSC map was active in the tracking station
 
 
 Version 8.1 - 2014-12-19
