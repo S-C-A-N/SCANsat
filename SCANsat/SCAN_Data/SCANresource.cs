@@ -33,7 +33,6 @@ namespace SCANsat.SCAN_Data
 			emptyColor = empty;
 			minValue = min;
 			maxValue = max;
-			cutOffValue = minValue + ((maxValue - minValue) / 5);
 			resourceType = t;
 			type = resourceType.Type;
 			source = s;
@@ -42,7 +41,7 @@ namespace SCANsat.SCAN_Data
 		private string name;
 		private string body;
 		private Color fullColor, emptyColor;
-		private float minValue, maxValue, cutOffValue;
+		private float minValue, maxValue;
 		private SCANtype type;
 		private SCANresourceType resourceType;
 		private SCANresource_Source source;
@@ -95,11 +94,6 @@ namespace SCANsat.SCAN_Data
 				if (value >= 0)
 					maxValue = value;
 			}
-		}
-
-		public float CutOffValue
-		{
-			get { return cutOffValue; }
 		}
 
 		public SCANresource_Source Source

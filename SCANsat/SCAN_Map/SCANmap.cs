@@ -713,7 +713,7 @@ namespace SCANsat.SCAN_Map
 				{
 					amount = SCANUtil.RegolithOverlay(Lat, Lon, resource.Name, body.flightGlobalsIndex); //grab the resource amount for the current pixel
 					amount *= 100;
-					if (amount > resource.CutOffValue)
+					if (amount >= resource.MinValue)
 					{
 						if (amount > 100)
 							amount = 100;
@@ -747,7 +747,7 @@ namespace SCANsat.SCAN_Map
 			else if (amount == 0)
 				return palette.lerp(BaseColor, palette.grey, 0.4f);
 			else if (SCANcontroller.controller.resourceOverlayType == 0 && SCANversions.RegolithFound)
-				return palette.lerp(BaseColor, palette.lerp(resource.EmptyColor, resource.FullColor, (float)amount / (resource.MaxValue - resource.CutOffValue)), 0.3f);
+				return palette.lerp(BaseColor, palette.lerp(resource.EmptyColor, resource.FullColor, (float)amount / (resource.MaxValue - resource.MinValue)), 0.3f);
 			else if (SCANcontroller.controller.resourceOverlayType == 1 && SCANversions.kethaneLoaded)
 				return palette.lerp(BaseColor, palette.lerp(resource.EmptyColor, resource.FullColor, (float)amount / resource.MaxValue), 0.8f);
 
