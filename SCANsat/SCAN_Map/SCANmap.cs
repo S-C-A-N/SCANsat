@@ -715,8 +715,8 @@ namespace SCANsat.SCAN_Map
 					amount *= 100;
 					if (amount >= resource.MinValue)
 					{
-						if (amount > 100)
-							amount = 100;
+						if (amount > resource.MaxValue)
+							amount = resource.MaxValue;
 					}
 					else
 						amount = 0;
