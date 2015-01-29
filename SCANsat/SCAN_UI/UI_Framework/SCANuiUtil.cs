@@ -165,7 +165,11 @@ namespace SCANsat.SCAN_UI.UI_Framework
 							if (amount < 0)
 								label = "Unknown";
 							else
+							{
+								if (amount > 1)
+									amount = 1;
 								label = amount.ToString("P2");
+							}
 							info += palette.colored(mapObj.Resource.FullColor, mapObj.Resource.Name + ": " + label);
 						}
 					}
