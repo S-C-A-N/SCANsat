@@ -63,9 +63,12 @@ namespace SCANsat.SCAN_Toolbar
 
 		private void removeButton(GameScenes scene)
 		{
-			ApplicationLauncher.Instance.RemoveModApplication(SCANappLauncherButton);
-			SCANappLauncherButton = null;
-			SCANUtil.SCANdebugLog("App Launcher Button Removed");
+			if (SCANappLauncherButton != null)
+			{
+				ApplicationLauncher.Instance.RemoveModApplication(SCANappLauncherButton);
+				SCANappLauncherButton = null;
+				SCANUtil.SCANdebugLog("App Launcher Button Removed");
+			}
 		}
 
 		private void toggleFlight()
