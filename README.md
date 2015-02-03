@@ -98,7 +98,7 @@ As of August 2014, the vast majority of code is damny's and DMagic's; and techno
 In addition to the authors, the following people have contributed:
   + (Models, Graphics, Textures) [Milkshakefiend][Milkshakefiend]
   
-  + (Science results text) [Olympic1][Olympic1]
+  + (Science results text) [madsailor][madsailor]
 
 #### Licenses
 
@@ -229,7 +229,7 @@ Each of the two resource systems can be enabled through the **SCANsat** Big Map:
 
 **Regolith** support is built internal to SCANsat. If you have a **Regolith** DLL loaded anywhere SCANsat will only target the newest version.
 
-Check for the **Regolith Biome Lock** toggle in the SCANsat settings menu to enable or disable biome-based restrictions on resource scanning accuracy.
+Check for the **Regolith Biome Lock** toggle in the SCANsat settings menu to enable or disable biome-based restrictions on resource scanning accuracy. With the biome lock active resource scanning will be of only limited accuracy until you have explored the surface of the planet and/or the specific biomes.
 > ![][resource-biome-lock]
 
 With any **Regolith**-using mod installed, you can select their resources in the drop down menu from the Big Map or KSC Map, and enable their overlay with the resource icon.
@@ -499,6 +499,7 @@ sneaky then they can of course be sneaky.
 [damny]: http://forum.kerbalspaceprogram.com/members/80692-damny
 [Milkshakefiend]: http://forum.kerbalspaceprogram.com/members/72507-Milkshakefiend
 [Olympic1]: http://forum.kerbalspaceprogram.com/members/81815
+[madsailor]: http://forum.kerbalspaceprogram.com/members/123944
 
 [KSP:developers]: https://kerbalspaceprogram.com/index.php
 [KSP:reddit]: http://www.reddit.com/r/KerbalSpaceProgram
@@ -614,12 +615,12 @@ sneaky then they can of course be sneaky.
 [shield:support-toolbar]: http://img.shields.io/badge/works%20with%20Blizzy's%20Toolbar-1.7.8-7c69c0.svg
 [shield:support-alcor]: http://img.shields.io/badge/works%20with%20ALCOR-0.9-299bc7.svg
 [shield:support-kspi]: http://img.shields.io/badge/works%20with%20Interstellar-0.13-a62374.svg
-[shield:support-usi]:http://img.shields.io/badge/works%20with%20USI-0.22.4-34c566.svg
-[shield:support-karbonite]: http://img.shields.io/badge/works%20with%20Karbonite-0.5.4-ff8c00.svg
+[shield:support-usi]:http://img.shields.io/badge/works%20with%20USI-0.22.6-34c566.svg
+[shield:support-karbonite]: http://img.shields.io/badge/works%20with%20Karbonite-0.5.5-ff8c00.svg
 [shield:support-epl]: http://img.shields.io/badge/works%20with%20EPL-4.2.3-ff8c00.svg
 [shield:support-ctt]: http://img.shields.io/badge/works%20with%20CTT-1.1-blue.svg
 [shield:support-tm]: http://img.shields.io/badge/works%20with%20TechManager-1.5-lightgrey.svg
-[shield:support-reg]: https://img.shields.io/badge/works%20with%20Regolith-1.4-000000.svg
+[shield:support-reg]: https://img.shields.io/badge/works%20with%20Regolith-1.5-000000.svg
 [shield:support-ccfg]: https://img.shields.io/badge/works%20with%20Contract%20Configurator-6.0-yellowgreen.svg
 
 [shield:gittip-tg-img]: http://img.shields.io/gittip/technogeeky.png
