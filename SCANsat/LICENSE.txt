@@ -43,13 +43,11 @@ distributed with SCANsat, including derived works, as long as credit is given.
 LICENSING INFORMATION FOR SCIENCE TEXT
 ---------------------------------------------
 
-Science results text were created by Olympic1:
-https://github.com/S-C-A-N/SCANsat/pull/110#issuecomment-71082065
+Science results text were created by madsailor, originally for Crowd Sourced Science:
+https://github.com/DuoDex/CrowdSourcedScience/commit/d7824034dd2f3a8367323c16dbb9f85499fb98a8
 
-All Rights Reserved - Olympic1 / Arne Peirs
-
-Olympic1 has given permission that these results texts may be distributed 
-with SCANsant, including derived works, as long as credit is given.
+The text is released under the CC0 license: 
+http://creativecommons.org/publicdomain/zero/1.0/legalcode
 
 
 LICENSING INFORMATION FOR LOGO
