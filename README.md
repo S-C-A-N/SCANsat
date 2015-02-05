@@ -1,5 +1,6 @@
 ### [**SCANsat**][top]: Real Scanning, Real Science, Warp Speed!
 [![][shield:support-ksp]][KSP:developers]&nbsp;
+[![][shield:ckan]][CKAN:org]&nbsp;
 [![][shield:license-bsd]][SCANsat:rel-license]&nbsp;
 [![][shield:license-mit]][SCANsat:dev-license]&nbsp;
 [![][shield:license-cc-by-sa]][SCANsat:dev-license]&nbsp;
@@ -622,10 +623,13 @@ sneaky then they can of course be sneaky.
 [shield:support-tm]: http://img.shields.io/badge/works%20with%20TechManager-1.5-lightgrey.svg
 [shield:support-reg]: https://img.shields.io/badge/works%20with%20Regolith-1.5-000000.svg
 [shield:support-ccfg]: https://img.shields.io/badge/works%20with%20Contract%20Configurator-6.0-yellowgreen.svg
+[shield:ckan]: https://img.shields.io/badge/CKAN-Indexed-brightgreen.svg
 
 [shield:gittip-tg-img]: http://img.shields.io/gittip/technogeeky.png
 [shield:gittip-tg]: https://www.gittip.com/technogeeky/
 [shield:github-issues]: http://img.shields.io/github/issues/technogeeky/SCANsat.svg
+
+[CKAN:org]: http://ksp-ckan.org/
 
 [SCANsat:organization]: https://github.com/S-C-A-N
 [SCANsat:logo]: http://i.imgur.com/GArPFFB.png
