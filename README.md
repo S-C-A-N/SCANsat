@@ -24,7 +24,7 @@
 
 * [0. People, Facts, and FAQs][0]
   * [a. FAQs][0a]
-  * [b. Video][0b]
+  * [b. Video Overview][0b]
 * [1. Installation and Interoperability][1]
   * [a. Installation][1a]
   * [b. GameData Layout][1b]
@@ -127,11 +127,11 @@ For licensing information, please see the [included LICENSE.txt][SCANsat:rel-lic
   * Can you add <some feature or change> to SCANsat?
     * **Probably!** First, check the issues page to see if it's already been requested. If not, add a new issue. Even better, attempt to add the feature yourself and submit a pull request. We'll catch the bugs for you!
 
-### [:top:][top] 0b. Video
+### [:top:][top] 0b. Video Overview
 
-SCANsat overview and review by: [TinyPirate][tinypirate]
+##### SCANsat overview and review by: [TinyPirate][tinypirate]
    * Watch this quick video on the features and functions of SCANsat
-![][tinypirate-video]
+[![][tinypirate-video-screen]][tinypirate-video]
 
 
 
@@ -573,12 +573,13 @@ sneaky then they can of course be sneaky.
 [settings-window]: http://i.imgur.com/ogQbeso.png
 [settings-window-v10]: http://i.imgur.com/kArtbSx.png
 
+[tinypirate-video-screen]: https://www.youtube.com/watch?v=UY7eBuReSYU/0.jpg
 [tinypirate-video]: https://www.youtube.com/watch?v=UY7eBuReSYU
 
 [top]: #table-of-contents
 [0]: #top-0-people-facts-and-faqs
 [0a]: #top-0a-faqs
-[0b]: #top-0b-video
+[0b]: #top-0b-video-overview
 [1]: #top-1-installation-and-interoperability
 [1a]: #top-1a-installation
 [1b]: #top-1b-gamedata-layout
