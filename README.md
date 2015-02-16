@@ -24,6 +24,7 @@
 
 * [0. People, Facts, and FAQs][0]
   * [a. FAQs][0a]
+  * [b. Video][0b]
 * [1. Installation and Interoperability][1]
   * [a. Installation][1a]
   * [b. GameData Layout][1b]
@@ -125,6 +126,12 @@ For licensing information, please see the [included LICENSE.txt][SCANsat:rel-lic
     * **Yes/No.** Contracts are currently only supported through [**third-party addons**][6d].
   * Can you add <some feature or change> to SCANsat?
     * **Probably!** First, check the issues page to see if it's already been requested. If not, add a new issue. Even better, attempt to add the feature yourself and submit a pull request. We'll catch the bugs for you!
+
+### [:top:][top] 0b. Video
+
+SCANsat overview and review by: [TinyPirate][tinypirate]
+   * Watch this quick video on the features and functions of SCANsat
+![][tinypirate-video]
 
 
 
@@ -495,12 +502,13 @@ sneaky then they can of course be sneaky.
 
 
 
-[technogeeky]: http://forum.kerbalspaceprogram.com/members/110153-technogeeky
-[DMagic]: http://forum.kerbalspaceprogram.com/members/59127-DMagic
-[damny]: http://forum.kerbalspaceprogram.com/members/80692-damny
-[Milkshakefiend]: http://forum.kerbalspaceprogram.com/members/72507-Milkshakefiend
+[technogeeky]: http://forum.kerbalspaceprogram.com/members/110153
+[DMagic]: http://forum.kerbalspaceprogram.com/members/59127
+[damny]: http://forum.kerbalspaceprogram.com/members/80692
+[Milkshakefiend]: http://forum.kerbalspaceprogram.com/members/72507
 [Olympic1]: http://forum.kerbalspaceprogram.com/members/81815
 [madsailor]: http://forum.kerbalspaceprogram.com/members/123944
+[tinypirate]: http://forum.kerbalspaceprogram.com/members/79868
 
 [KSP:developers]: https://kerbalspaceprogram.com/index.php
 [KSP:reddit]: http://www.reddit.com/r/KerbalSpaceProgram
@@ -565,9 +573,12 @@ sneaky then they can of course be sneaky.
 [settings-window]: http://i.imgur.com/ogQbeso.png
 [settings-window-v10]: http://i.imgur.com/kArtbSx.png
 
+[tinypirate-video]: https://www.youtube.com/watch?v=UY7eBuReSYU
+
 [top]: #table-of-contents
 [0]: #top-0-people-facts-and-faqs
 [0a]: #top-0a-faqs
+[0b]: #top-0b-video
 [1]: #top-1-installation-and-interoperability
 [1a]: #top-1a-installation
 [1b]: #top-1b-gamedata-layout
