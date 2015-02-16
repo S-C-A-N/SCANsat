@@ -573,7 +573,7 @@ sneaky then they can of course be sneaky.
 [settings-window]: http://i.imgur.com/ogQbeso.png
 [settings-window-v10]: http://i.imgur.com/kArtbSx.png
 
-[tinypirate-video-screen]: https://www.youtube.com/watch?v=UY7eBuReSYU/0.jpg
+[tinypirate-video-screen]: http://img.youtube.com/vi/UY7eBuReSYU/0.jpg
 [tinypirate-video]: https://www.youtube.com/watch?v=UY7eBuReSYU
 
 [top]: #table-of-contents
