@@ -27,17 +27,30 @@ namespace SCANsat.SCAN_UI
 {
 	class SCANcolorSelection: SCAN_MBW
 	{
-		private bool paletteBox, reversePalette, oldReverseState, discretePalette, oldDiscreteState;
+		private bool dropDown, paletteBox, resourceBox;
+		private bool reversePalette, oldReverseState, discretePalette, oldDiscreteState;
 		private bool spaceCenterLock, trackingStationLock, clampState, oldClampState;
-		private Rect paletteRect;
+		private Rect ddRect;
 		private Palette dataPalette;
-		private int paletteSizeInt, oldPaletteSizeInt = 6;
+		private int paletteSizeInt = 6;
+		private int oldPaletteSizeInt = 6;
 		private int paletteIndex;
 		private SCANmapLegend currentLegend, previewLegend;
 		private float sizeSlider, sizeSliderMin, sizeSliderMax, terrainSliderMinMin, terrainSliderMinMax, terrainSliderMaxMin, terrainSliderMaxMax, clampSliderMin, clampSliderMax;
-		private float minHeightF, oldMinHeightF = -500;
-		private float maxHeightF, oldMaxHeightF = 8000;
+		private float minHeightF = -500;
+		private float oldMinHeightF = -500;
+		private float maxHeightF = 8000;
+		private float oldMaxHeightF = 8000;
 		private float clampHeightF = 0;
+		private int windowMode = 0;
+		private float hueSlider = 50f;
+		private SCANresource currentResource;
+		private float resourceMin = 0.1f;
+		private float resourceMax = 10f;
+		private float resourceTrans = 0.4f;
+		private Color resourceColorFull, resourceColorEmpty;
+		private bool stockBiomes = false;
+		private Color biomeColorLow, biomeColorHigh;
 		private const string lockID = "colorLockID";
 		internal static Rect defaultRect = new Rect(100, 400, 650, 330);
 
@@ -47,6 +60,11 @@ namespace SCANsat.SCAN_UI
 
 		private static SCANmap bigMap;
 		private SCANdata data;
+
+		private Texture2D minColorPreview = null;
+		private Texture2D minColorOld = null;
+		private Texture2D maxColorPreview = null;
+		private Texture2D maxColorOld = null;
 
 		protected override void Awake()
 		{
@@ -84,6 +102,9 @@ namespace SCANsat.SCAN_UI
 				if (bigMapObj.Data != null)
 					data = bigMapObj.Data;
 			}
+
+			if (windowMode > 3 || (windowMode > 2 && !SCANcontroller.controller.GlobalResourceOverlay))
+				windowMode = 0;
 		}
 
 		internal override void OnDestroy()
@@ -250,6 +271,12 @@ namespace SCANsat.SCAN_UI
 			{
 				drawPreviewLegend();
 			}
+
+			if (!dropDown)
+			{
+				paletteBox = false;
+				resourceBox = false;
+			}
 		}
 
 		protected override void DrawWindow(int id)
@@ -258,25 +285,60 @@ namespace SCANsat.SCAN_UI
 			closeBox(id);
 
 			growS();
-				growE();
+				windowTabs(id);					/* Draws the window selection tabs across the top */
+				if (windowMode == 0)
+				{
+					growE();
 					paletteTextures(id);		/* Draws the palette selection button and preview swatches */
 					paletteOptions(id);			/* All of the terrain and palette options */
-				stopE();
-				fillS(8);
-				growE();
+					stopE();
+					fillS(8);
+					growE();
 					palettePreview(id);			/* Draws the two preview palette legends */
 					fillS(10);
 					paletteConfirmation(id);	/* The buttons for default, apply, and cancel */
-				stopE();
+					stopE();
+				}
+				else if (windowMode == 1)
+				{
+					growE();
+						colorWheel(id);
+					stopE();
+				}
+				else if (windowMode == 2)
+				{
+					growE();
+						colorWheel(id);
+						growS();
+							biomeOptions(id);
+							biomeConfirm(id);
+						stopS();
+					stopE();
+				}
+				else if (windowMode == 3 && SCANcontroller.controller.GlobalResourceOverlay)
+				{
+					growE();
+						colorWheel(id);
+						growS();
+							resourceOptions(id);
+							resourceConfirm(id);
+						stopS();
+					stopE();
+				}
+				else
+					windowMode = 0;
 			stopS();
 
-			paletteSelectionBox(id);			/* Draw the drop down menu for the palette selection box */
+			dropDownBox(id);				/* Draw the drop down menu for the palette selection box */
 		}
 
 		protected override void DrawWindowPost(int id)
 		{
-			if (paletteBox && Event.current.type == EventType.mouseDown && !paletteRect.Contains(Event.current.mousePosition))
+			if (paletteBox && Event.current.type == EventType.mouseDown && !ddRect.Contains(Event.current.mousePosition))
+			{
+				dropDown = false;
 				paletteBox = false;
+			}
 
 			//These methods update all of the UI elements whenever any of the options are changed
 			if (reversePalette != oldReverseState)
@@ -337,6 +399,32 @@ namespace SCANsat.SCAN_UI
 			}
 		}
 
+		//Draw the window tab options
+		private void windowTabs(int id)
+		{
+			growE();
+				if (GUILayout.Button("Altimetry"))
+				{
+					windowMode = 0;
+				}
+				if (GUILayout.Button("Slope"))
+				{
+					windowMode = 1;
+				}
+				if (GUILayout.Button("Biome"))
+				{
+					windowMode = 2;
+				}
+				if (SCANcontroller.controller.GlobalResourceOverlay)
+				{
+					if (GUILayout.Button("Resources"))
+					{
+						windowMode = 3;
+					}
+				}
+			stopE();
+		}
+
 		//Draw the palette selection field
 		private void paletteTextures(int id)
 		{
@@ -346,6 +434,7 @@ namespace SCANsat.SCAN_UI
 				growE();
 					if (GUILayout.Button("Palette Style:", SCANskins.SCAN_buttonFixed, GUILayout.MaxWidth(120)))
 					{
+						dropDown = !dropDown;
 						paletteBox = !paletteBox;
 					}
 					fillS(10);
@@ -557,23 +646,229 @@ namespace SCANsat.SCAN_UI
 			stopS();
 		}
 
-		//Drop down menu for palette selection
-		private void paletteSelectionBox(int id)
+		private void colorWheel(int id)
 		{
-			if (paletteBox)
+			GUILayout.Label("Color Selection", SCANskins.SCAN_headline);
+
+			Rect r = new Rect(20, 20, 256, 256);
+			GUI.DrawTexture(r, SCANskins.SCAN_BigColorWheel);
+
+			r.x += 320;
+			GUI.DrawTexture(r, SCANskins.SCAN_BigColorWheel);
+
+			r.x -= 240;
+			r.y += 300;
+			r.width = 60;
+			r.height = 30;
+			GUI.DrawTexture(r, minColorPreview);
+
+			r.y += 32;
+			GUI.DrawTexture(r, minColorOld);
+
+			r.x += 256;
+			r.y -= 32;
+			GUI.DrawTexture(r, maxColorPreview);
+
+			r.y += 32;
+			GUI.DrawTexture(r, maxColorOld);
+
+			r.x = 600;
+			r.y = 20;
+			r.width = 30;
+			r.height = 200;
+
+			hueSlider = GUI.VerticalSlider(r, hueSlider, 100, 0, SCANskins.SCAN_vertSlider, SCANskins.SCAN_sliderThumb);
+		}
+
+		private void biomeOptions(int id)
+		{
+			GUILayout.Label("Biome Options", SCANskins.SCAN_headline);
+
+			stockBiomes = GUILayout.Toggle(stockBiomes, "Use Stock Biome Maps", SCANskins.SCAN_toggle);
+		}
+
+		private void resourceOptions(int id)
+		{
+			GUILayout.Label("Resource Options: " + data.Body.name, SCANskins.SCAN_headline);
+
+			growE();
+			if (GUILayout.Button("Resource Selection", SCANskins.SCAN_buttonFixed))
 			{
-				paletteRect = new Rect(40, 90, 100, 100);
-				GUI.Box(paletteRect, "", SCANskins.SCAN_dropDownBox);
-				for (int i = 0; i < Palette.kindNames.Length; i++)
+				dropDown = !dropDown;
+				resourceBox = !resourceBox;
+			}
+			fillS(10);
+			GUILayout.Label(currentResource.Name, SCANskins.SCAN_whiteReadoutLabel);
+			stopE();
+
+			growE();
+			fillS(10);
+			GUILayout.Label("Min: " + resourceMin + "%", SCANskins.SCAN_whiteReadoutLabel);
+
+			Rect r = GUILayoutUtility.GetLastRect();
+			r.x += 110;
+			r.width = 130;
+
+			resourceMin = GUI.HorizontalSlider(r, resourceMin, 0f, 10f).Mathf_Round(-2);
+
+			SCANuiUtil.drawSliderLabel(r, "0%", "100%");
+			stopE();
+			fillS(8);
+			growE();
+			fillS(10);
+			GUILayout.Label("Max: " + resourceMax + "%", SCANskins.SCAN_whiteReadoutLabel);
+
+			r = GUILayoutUtility.GetLastRect();
+			r.x += 110;
+			r.width = 130;
+
+			resourceMax = GUI.HorizontalSlider(r, resourceMax, 5, 100).Mathf_Round(-2);
+
+			SCANuiUtil.drawSliderLabel(r, "0%", "100%");
+			stopE();
+			fillS(8);
+			growE();
+			fillS(10);
+			GUILayout.Label("Trans: " + resourceTrans + "%", SCANskins.SCAN_whiteReadoutLabel);
+
+			r = GUILayoutUtility.GetLastRect();
+			r.x += 110;
+			r.width = 130;
+
+			resourceTrans = GUI.HorizontalSlider(r, resourceTrans, 0f, 100f).Mathf_Round(-2);
+
+			SCANuiUtil.drawSliderLabel(r, "0%", "100%");
+			stopE();
+		}
+
+		private void biomeConfirm(int id)
+		{
+			if (GUILayout.Button("Default Settings", GUILayout.Width(135)))
+			{
+				SCANcontroller.controller.LowBiomeColor = new Color();
+				SCANcontroller.controller.HighBiomeColor = new Color();
+				SCANcontroller.controller.useStockBiomes = stockBiomes;
+			}
+			fillS(6);
+			growE();
+			if (GUILayout.Button("Apply", GUILayout.Width(60)))
+			{
+				SCANcontroller.controller.LowBiomeColor = biomeColorLow;
+				SCANcontroller.controller.HighBiomeColor = biomeColorHigh;
+				SCANcontroller.controller.useStockBiomes = true;
+			}
+			fillS(10);
+			if (GUILayout.Button("Cancel", GUILayout.Width(60)))
+			{
+				InputLockManager.RemoveControlLock(lockID);
+				spaceCenterLock = false;
+				trackingStationLock = false;
+				Visible = false;
+			}
+			stopE();
+		}
+
+		private void resourceConfirm(int id)
+		{
+			if (GUILayout.Button("Save Global Values", GUILayout.Width(160)))
+			{
+				var allResourceList = SCANcontroller.controller.ResourceList.Values
+					.SelectMany(a => a)
+					.Where(a => a.Key == currentResource.Name)
+					.Select(b => b.Value).ToList();
+				foreach (SCANresource r in allResourceList)
 				{
-					Rect r = new Rect(paletteRect.x + 10, paletteRect.y + 5 + (i * 23), 80, 22);
-					if (GUI.Button(r, Palette.kindNames[i], SCANskins.SCAN_dropDownButton))
+					r.MinValue = resourceMin;
+					r.MaxValue = resourceMax;
+					r.Transparency = resourceTrans;
+					r.FullColor = resourceColorFull;
+					r.EmptyColor = resourceColorEmpty;
+				}
+			}
+			fillS(6);
+			if (GUILayout.Button("Revert All Values To Default", GUILayout.Width(200)))
+			{
+				var allResourceList = SCANcontroller.controller.ResourceList.Values
+					.SelectMany(a => a)
+					.Where(a => a.Key == currentResource.Name)
+					.Select(b => b.Value).ToList();
+				foreach (SCANresource r in allResourceList)
+				{
+					r.MinValue = r.DefaultMinValue;
+					r.MaxValue = r.DefaultMaxValue;
+					r.Transparency = 0.4f;
+					r.FullColor = r.ResourceType.ColorFull;
+					r.EmptyColor = r.ResourceType.ColorEmpty;
+				}
+			}
+			fillS(6);
+			if (GUILayout.Button("Default Settings", GUILayout.Width(135)))
+			{
+				currentResource.MinValue = currentResource.DefaultMinValue;
+				currentResource.MaxValue = currentResource.DefaultMaxValue;
+				currentResource.Transparency = 0.4f;
+				currentResource.FullColor = currentResource.ResourceType.ColorFull;
+				currentResource.EmptyColor = currentResource.ResourceType.ColorEmpty;
+			}
+			fillS(6);
+			growE();
+			if (GUILayout.Button("Apply", GUILayout.Width(60)))
+			{
+				currentResource.MinValue = resourceMin;
+				currentResource.MaxValue = resourceMax;
+				currentResource.Transparency = resourceTrans;
+				currentResource.FullColor = resourceColorFull;
+				currentResource.EmptyColor = resourceColorEmpty;
+			}
+			fillS(10);
+			if (GUILayout.Button("Cancel", GUILayout.Width(60)))
+			{
+				InputLockManager.RemoveControlLock(lockID);
+				spaceCenterLock = false;
+				trackingStationLock = false;
+				Visible = false;
+			}
+			stopE();
+		}
+
+		//Drop down menu for palette selection
+		private void dropDownBox(int id)
+		{
+			if (dropDown)
+			{
+				if (paletteBox && windowMode == 0)
+				{
+					ddRect = new Rect(40, 90, 100, 100);
+					GUI.Box(ddRect, "", SCANskins.SCAN_dropDownBox);
+					for (int i = 0; i < Palette.kindNames.Length; i++)
 					{
-						paletteBox = false;
-						palette.CurrentPalettes = palette.setCurrentPalettesType((Palette.Kind)i);
-						setSizeSlider((Palette.Kind)i);
+						Rect r = new Rect(ddRect.x + 10, ddRect.y + 5 + (i * 23), 80, 22);
+						if (GUI.Button(r, Palette.kindNames[i], SCANskins.SCAN_dropDownButton))
+						{
+							paletteBox = false;
+							palette.CurrentPalettes = palette.setCurrentPalettesType((Palette.Kind)i);
+							setSizeSlider((Palette.Kind)i);
+						}
 					}
 				}
+				else if (resourceBox && windowMode == 3)
+				{
+					ddRect = new Rect(40, 100, 100, 100);
+					GUI.Box(ddRect, "", SCANskins.SCAN_dropDownBox);
+					for (int i = 0; i < SCANcontroller.ResourceTypes.Count; i ++)
+					{
+						Rect r = new Rect(ddRect.x + 10, ddRect.y + 5 + (i * 23), 80, 22);
+						if (GUI.Button(r, SCANcontroller.controller.ResourceList[data.Body.name].ElementAt(i).Value.Name, SCANskins.SCAN_dropDownButton))
+						{
+							currentResource = SCANcontroller.controller.ResourceList[data.Body.name].ElementAt(i).Value;
+							resourceMin = currentResource.MinValue;
+							resourceMax = currentResource.MaxValue;
+							resourceTrans = currentResource.Transparency;
+						}
+					}
+				}
+				else
+					dropDown = false;
 			}
 		}
 
