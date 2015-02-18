@@ -162,8 +162,8 @@ S.C.A.N. is proud to collaborate with other KSP mods and modding teams. Followin
 
 
 * **SCANsat**
-  * [x] [**v8.0**][SCANsat:rel-thread] SCANsat Release **version: v8.0**
-  * [x] [**v9.0**][SCANsat:dev-thread] SCANsat Dev **version: v9.0**
+  * [x] [**v10.0**][SCANsat:rel-thread] SCANsat Release **version: v10.0**
+  * [x] [**v11.0**][SCANsat:dev-thread] SCANsat Dev **version: v11.0**
 
  **MM**, **RPM**, **Toolbar**, and **Resource Addons** are all **soft** dependencies. This means your experience with SCANsat will be enhanced if you are using these mods, but they are not necessary.
 
