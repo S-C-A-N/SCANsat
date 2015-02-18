@@ -31,8 +31,8 @@ namespace SCANsat.SCAN_Data
 			body = Body;
 			fullColor = full;
 			emptyColor = empty;
-			minValue = min;
-			maxValue = max;
+			minValue = defaultMinValue = min;
+			maxValue = defaultMaxValue = max;
 			resourceType = t;
 			type = resourceType.Type;
 			source = s;
@@ -41,7 +41,8 @@ namespace SCANsat.SCAN_Data
 		private string name;
 		private string body;
 		private Color fullColor, emptyColor;
-		private float minValue, maxValue;
+		private float minValue, maxValue, defaultMinValue, defaultMaxValue;
+		private float transparency = 0.4f;
 		private SCANtype type;
 		private SCANresourceType resourceType;
 		private SCANresource_Source source;
@@ -59,11 +60,13 @@ namespace SCANsat.SCAN_Data
 		public Color FullColor
 		{
 			get { return fullColor; }
+			internal set { fullColor = value; }
 		}
 
 		public Color EmptyColor
 		{
 			get { return emptyColor; }
+			internal set { emptyColor = value; }
 		}
 
 		public SCANtype Type
@@ -81,7 +84,7 @@ namespace SCANsat.SCAN_Data
 			get { return minValue; }
 			internal set
 			{
-				if (value >= 0)
+				if (value >= 0 && value < maxValue)
 					minValue = value;
 			}
 		}
@@ -91,8 +94,28 @@ namespace SCANsat.SCAN_Data
 			get { return maxValue; }
 			internal set
 			{
-				if (value >= 0)
+				if (value >= 0 && value > minValue)
 					maxValue = value;
+			}
+		}
+
+		public float DefaultMinValue
+		{
+			get { return defaultMinValue; }
+		}
+
+		public float DefaultMaxValue
+		{
+			get { return defaultMaxValue; }
+		}
+
+		public float Transparency
+		{
+			get { return transparency; }
+			internal set
+			{
+				if (value >= 0 && value <= 1)
+					transparency = value;
 			}
 		}
 
@@ -156,5 +179,6 @@ namespace SCANsat.SCAN_Data
 		{
 			get { return colorEmpty; }
 		}
+
 	}
 }
