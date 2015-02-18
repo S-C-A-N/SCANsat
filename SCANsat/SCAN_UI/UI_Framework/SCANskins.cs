@@ -64,6 +64,8 @@ namespace SCANsat.SCAN_UI.UI_Framework
 		internal static GUIStyle SCAN_settingsToggle;
 		internal static GUIStyle SCAN_labelSmallLeft;
 		internal static GUIStyle SCAN_labelSmallRight;
+		internal static GUIStyle SCAN_vertSlider;
+		internal static GUIStyle SCAN_sliderThumb;
 
 		//Styles for map overlay icons
 		internal static GUIStyle SCAN_orbitalLabelOn;
@@ -103,6 +105,9 @@ namespace SCANsat.SCAN_UI.UI_Framework
 		internal static Texture2D SCAN_SmallMapAppIcon;
 		internal static Texture2D SCAN_BigMapAppIcon;
 
+		//Color Wheel Texture
+		internal static Texture2D SCAN_BigColorWheel;
+
 		protected override void OnGUI_FirstRun()
 		{
 			initializeTextures();
@@ -132,6 +137,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			SCAN_ResizeIcon = GameDatabase.Instance.GetTexture("SCANsat/Icons/SCAN_Resize_Icon", false);
 			SCAN_SmallMapAppIcon = GameDatabase.Instance.GetTexture("SCANsat/Icons/SCANsat_AppLauncherSmall_Icon", false);
 			SCAN_BigMapAppIcon = GameDatabase.Instance.GetTexture("SCANsat/Icons/SCANsat_AppLauncherLarge_Icon", false);
+			SCAN_BigColorWheel = GameDatabase.Instance.GetTexture("SCANsat/Icons/SCANsat_BigColorWheel_Tex", false);
 		}
 
 		private static void initializeColors()
@@ -297,6 +303,12 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			SCAN_legendTex = new GUIStyle(SCAN_label);
 			SCAN_legendTex.name = "SCAN_LegendTex";
 			SCAN_legendTex.alignment = TextAnchor.MiddleCenter;
+
+			SCAN_vertSlider = new GUIStyle(SCAN_SkinsLibrary.DefKSPSkin.verticalSlider);
+			SCAN_vertSlider.name = "SCAN_VertSlider";
+
+			SCAN_sliderThumb = new GUIStyle(SCAN_SkinsLibrary.DefKSPSkin.verticalSliderThumb);
+			SCAN_sliderThumb.name = "SCAN_SliderThumb";
 
 			SCAN_tooltip = new GUIStyle(SCAN_SkinsLibrary.DefUnitySkin.box);
 			SCAN_tooltip.name = "SCAN_Tooltip";
