@@ -104,6 +104,8 @@ namespace SCANsat
 		public bool useStockAppLauncher = true;
 		[KSPField(isPersistant = true)]
 		public bool regolithBiomeLock = false;
+		[KSPField(isPersistant = true)]
+		public bool useStockBiomes = false;
 
 		/* Available resources for overlays; loaded from resource addon configs; only loaded once */
 		private static Dictionary<string, Dictionary<string, SCANresource>> resourceList;
@@ -136,6 +138,9 @@ namespace SCANsat
 
 		/* Governs resource overlay availability */
 		private static bool globalResourceOverlay = false;
+
+		private Color lowBiomeColor;
+		private Color highBiomeColor;
 
 		#region Public Accessors
 
@@ -230,6 +235,19 @@ namespace SCANsat
 		{
 			get { return globalResourceOverlay; }
 		}
+
+		public Color LowBiomeColor
+		{
+			get { return lowBiomeColor; }
+			internal set { lowBiomeColor = value; }
+		}
+
+		public Color HighBiomeColor
+		{
+			get { return highBiomeColor; }
+			internal set { highBiomeColor = value; }
+		}
+
 		#endregion
 
 		public override void OnLoad(ConfigNode node)
