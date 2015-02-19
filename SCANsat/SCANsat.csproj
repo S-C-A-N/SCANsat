@@ -100,6 +100,7 @@
     <Compile Include="SCANutil.cs" />
     <Compile Include="SCANversions.cs" />
     <Compile Include="SCAN_UI\UI_Framework\SCANskins.cs" />
+    <Compile Include="SCAN_UI\UI_Framework\SCANuiSlider.cs" />
     <Compile Include="SCAN_UI\UI_Framework\SCANuiUtil.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
