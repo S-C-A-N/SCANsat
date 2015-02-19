@@ -628,25 +628,31 @@ namespace SCANsat.SCAN_Map
 						else
 						{
 							Color elevation = palette.grey;
-							if (body.pqsController == null)
+							if (SCANcontroller.controller.biomeTransparency < 100)
 							{
-								baseColor = palette.lerp(palette.black, palette.white, UnityEngine.Random.value);
+								if (body.pqsController == null)
+								{
+									elevation = palette.grey;
+								}
+								else if (SCANUtil.isCovered(lon, lat, data, SCANtype.Altimetry))
+								{
+									projVal = terrainElevation(lon, lat, data, out scheme);
+									elevation = palette.lerp(palette.black, palette.white, Mathf.Clamp(projVal + 1500f, 0, 9000) / 9000f);
+								}
 							}
-							else if (SCANUtil.isCovered(lon, lat, data, SCANtype.Altimetry))
-							{
-								projVal = terrainElevation(lon, lat, data, out scheme);
-								elevation = palette.lerp(palette.black, palette.white, Mathf.Clamp(projVal + 1500f, 0, 9000) / 9000f);
-							}
-							Color bio1 = palette.xkcd_CamoGreen;
-							Color bio2 = palette.xkcd_Marigold;
+
 							if ((i > 0 && mapline[i - 1] != bio) || (mapstep > 0 && mapline[i] != bio))
 							{
-								//biome = palette.lerp(palette.xkcd_Puce, elevation, 0.5f);
 								biome = palette.white;
+							}
+							else if (SCANcontroller.controller.useStockBiomes)
+							{
+								Color c = SCANUtil.getBiome(body, lon, lat).mapColor;
+								biome = palette.lerp(c, elevation, SCANcontroller.controller.biomeTransparency / 100f);
 							}
 							else
 							{
-								biome = palette.lerp(palette.lerp(bio1, bio2, (float)bio), elevation, 0.5f);
+								biome = palette.lerp(palette.lerp(SCANcontroller.controller.LowBiomeColor, SCANcontroller.controller.HighBiomeColor, (float)bio), elevation, SCANcontroller.controller.biomeTransparency / 100f);
 							}
 						}
 
