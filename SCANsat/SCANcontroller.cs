@@ -106,6 +106,8 @@ namespace SCANsat
 		public bool regolithBiomeLock = false;
 		[KSPField(isPersistant = true)]
 		public bool useStockBiomes = false;
+		[KSPField(isPersistant = true)]
+		public float biomeTransparency = 40;
 
 		/* Available resources for overlays; loaded from resource addon configs; only loaded once */
 		private static Dictionary<string, Dictionary<string, SCANresource>> resourceList;
@@ -139,8 +141,8 @@ namespace SCANsat
 		/* Governs resource overlay availability */
 		private static bool globalResourceOverlay = false;
 
-		private Color lowBiomeColor;
-		private Color highBiomeColor;
+		private Color lowBiomeColor = palette.xkcd_CamoGreen;
+		private Color highBiomeColor = palette.xkcd_Marigold;
 
 		#region Public Accessors
 
@@ -253,6 +255,30 @@ namespace SCANsat
 		public override void OnLoad(ConfigNode node)
 		{
 			body_data = new Dictionary<string, SCANdata>();
+			if (node.HasValue("Biome Low Color"))
+			{
+				try
+				{
+					lowBiomeColor = ConfigNode.ParseColor(node.GetValue("Biome Low Color"));
+				}
+				catch (Exception e)
+				{
+					SCANUtil.SCANlog("Low Biome Color Format Incorrect; Reverting To Default: {0}", e);
+					lowBiomeColor = palette.xkcd_CamoGreen;
+				}
+			}
+			if (node.HasValue("Biome High Color"))
+			{
+				try
+				{
+					highBiomeColor = ConfigNode.ParseColor(node.GetValue("Biome High Color"));
+				}
+				catch (Exception e)
+				{
+					SCANUtil.SCANlog("High Biome Color Format Incorrect; Reverting To Default: {0}", e);
+					highBiomeColor = palette.xkcd_Marigold;
+				}
+			}
 			ConfigNode node_vessels = node.GetNode("Scanners");
 			if (node_vessels != null)
 			{
@@ -404,6 +430,8 @@ namespace SCANsat
 		{
 			if (HighLogic.LoadedScene != GameScenes.EDITOR)
 			{
+				node.AddValue("Biome Low Color", lowBiomeColor);
+				node.AddValue("Biome High Color", highBiomeColor);
 				ConfigNode node_vessels = new ConfigNode("Scanners");
 				foreach (Guid id in knownVessels.Keys)
 				{
