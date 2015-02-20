@@ -255,11 +255,11 @@ namespace SCANsat
 		public override void OnLoad(ConfigNode node)
 		{
 			body_data = new Dictionary<string, SCANdata>();
-			if (node.HasValue("Biome Low Color"))
+			if (node.HasValue("BiomeLowColor"))
 			{
 				try
 				{
-					lowBiomeColor = ConfigNode.ParseColor(node.GetValue("Biome Low Color"));
+					lowBiomeColor = ConfigNode.ParseColor(node.GetValue("BiomeLowColor"));
 				}
 				catch (Exception e)
 				{
@@ -267,11 +267,11 @@ namespace SCANsat
 					lowBiomeColor = palette.xkcd_CamoGreen;
 				}
 			}
-			if (node.HasValue("Biome High Color"))
+			if (node.HasValue("BiomeHighColor"))
 			{
 				try
 				{
-					highBiomeColor = ConfigNode.ParseColor(node.GetValue("Biome High Color"));
+					highBiomeColor = ConfigNode.ParseColor(node.GetValue("BiomeHighColor"));
 				}
 				catch (Exception e)
 				{
@@ -402,6 +402,22 @@ namespace SCANsat
 			{
 				SCANUtil.SCANlog("Something Went Wrong Loading Resource Data: {0}", e);
 			}
+			ConfigNode node_resources = node.GetNode("SCANResources");
+			if (node_resources != null)
+			{
+				foreach(ConfigNode node_resource_type in node_resources.GetNodes("ResourceType"))
+				{
+					if (node_resource_type != null)
+					{
+						string name = node_resource_type.GetValue("Resource");
+						string lowColor = node_resource_type.GetValue("MinColor");
+						string highColor = node_resource_type.GetValue("MaxColor");
+						string transparent = node_resource_type.GetValue("Transparency");
+						string minMaxValues = node_resource_type.GetValue("MinMaxValues");
+						loadCustomResourceValues(minMaxValues, name, lowColor, highColor, transparent);
+					}
+				}
+			}
 			try
 			{
 				if (HighLogic.LoadedScene == GameScenes.FLIGHT)
@@ -430,8 +446,8 @@ namespace SCANsat
 		{
 			if (HighLogic.LoadedScene != GameScenes.EDITOR)
 			{
-				node.AddValue("Biome Low Color", lowBiomeColor);
-				node.AddValue("Biome High Color", highBiomeColor);
+				node.AddValue("BiomeLowColor", lowBiomeColor);
+				node.AddValue("BiomeHighColor", highBiomeColor);
 				ConfigNode node_vessels = new ConfigNode("Scanners");
 				foreach (Guid id in knownVessels.Keys)
 				{
@@ -472,6 +488,32 @@ namespace SCANsat
 						node_progress.AddNode(node_body);
 					}
 					node.AddNode(node_progress);
+				}
+				if (resourceTypes.Count > 0 && resourceList.Count > 0)
+				{
+					ConfigNode node_resources = new ConfigNode("SCANResources");
+					foreach (SCANresourceType t in resourceTypes.Values)
+					{
+						SCANresource r = null;
+						int i = 0;
+						while (((r = resourceList.ElementAt(i).Value[t.Name]) == null) && i < resourceList.Count)
+						{
+							i++;
+						}
+						if (r != null)
+						{
+							ConfigNode node_resource_type = new ConfigNode("ResourceType");
+							node_resource_type.AddValue("Resource", r.Name);
+							node_resource_type.AddValue("MinColor", r.EmptyColor);
+							node_resource_type.AddValue("MaxColor", r.FullColor);
+							node_resource_type.AddValue("Transparency", r.Transparency);
+
+							string rMinMax = saveResources(t);
+							node_resource_type.AddValue("MinMaxValues", rMinMax);
+							node_resources.AddNode(node_resource_type);
+						}
+					}
+					node.AddNode(node_resources);
 				}
 			}
 		}
@@ -560,6 +602,111 @@ namespace SCANsat
 					data.ColorPalette = PaletteLoader.defaultPalette;
 					data.PaletteName = "Default";
 					data.PaletteSize = 7;
+				}
+			}
+		}
+
+		private string saveResources(SCANresourceType type)
+		{
+			List<string> sL = new List<string>();
+			foreach (string bodyName in resourceList.Keys)
+			{
+				CelestialBody b;
+				if ((b = FlightGlobals.Bodies.FirstOrDefault(a => a.name == bodyName)) != null)
+				{
+					if (resourceList[b.name].ContainsKey(type.Name))
+					{
+						SCANresource r = resourceList[b.name][type.Name];
+						string a = string.Format("{0}|{1:F3}|{2:F3}", b.flightGlobalsIndex, r.MinValue, r.MaxValue);
+						sL.Add(a);
+					}
+				}
+			}
+
+			return string.Join(",", sL.ToArray());
+		}
+
+		private void loadCustomResourceValues(string s, string resource, string low, string high, string trans)
+		{
+			Color lowColor;
+			Color highColor;
+			float transparent;
+			try
+			{
+				lowColor = ConfigNode.ParseColor(low);
+			}
+			catch (Exception e)
+			{
+				SCANUtil.SCANlog("Low Resource Color Format Incorrect; Reverting To Default: {0}", e);
+				lowColor = palette.xkcd_CamoGreen;
+			}
+
+			try
+			{
+				highColor = ConfigNode.ParseColor(high);
+			}
+			catch (Exception e)
+			{
+				SCANUtil.SCANlog("High Resource Color Format Incorrect; Reverting To Default: {0}", e);
+				highColor = palette.xkcd_CamoGreen;
+			}
+
+			if (!float.TryParse(trans, out transparent))
+				transparent = 0.4f;
+
+			var allResourceList = resourceList.Values
+					.SelectMany(a => a)
+					.Where(a => a.Key == resource)
+					.Select(b => b.Value).ToList();
+
+			foreach (SCANresource r in allResourceList)
+				{
+					r.Transparency = transparent;
+					r.FullColor = lowColor;
+					r.EmptyColor = highColor;
+				}
+
+			if (!string.IsNullOrEmpty(s) && !string.IsNullOrEmpty(resource))
+			{
+				string[] sA = s.Split(',');
+				for (int i = 0; i < sA.Length; i++)
+				{
+					string[] sB = sA[i].Split('|');
+					try
+					{
+						int j = 0;
+						if (!int.TryParse(sB[0], out j))
+							continue;
+						float min = 0;
+						float max = 0;
+						if (!float.TryParse(sB[1], out min))
+							continue;
+						if (!float.TryParse(sB[2], out max))
+							continue;
+						CelestialBody b;
+						if ((b = FlightGlobals.Bodies.FirstOrDefault(a => a.flightGlobalsIndex == j)) != null)
+						{
+							if (resourceList.ContainsKey(b.name))
+							{
+								if (resourceList[b.name].ContainsKey(resource))
+								{
+									SCANresource r = resourceList[b.name][resource];
+									r.MinValue = min;
+									r.MaxValue = max;
+								}
+								else
+									SCANUtil.SCANlog("No resource found with name: {0} in the master SCANresource list, skipping...", resource);
+							}
+							else
+								SCANUtil.SCANlog("No resources found assigned for Celestial Body: {0}, skipping...", b.name);
+						}
+						else
+							SCANUtil.SCANlog("No Celestial Body found matching this saved resource value: {0}, skipping...", j);
+					}
+					catch (Exception e)
+					{
+						SCANUtil.SCANlog("Something Went Wrong While Loading Custom Resource Settings; Reverting To Default Values: {0}", e);
+					}
 				}
 			}
 		}
