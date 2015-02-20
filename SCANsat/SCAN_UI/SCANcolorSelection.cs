@@ -34,16 +34,22 @@ namespace SCANsat.SCAN_UI
 		private Palette dataPalette;
 		private int paletteIndex;
 		private SCANmapLegend currentLegend, previewLegend;
+		private int windowMode = 0;
 
 		private SCANuiSlider minTerrainSlider, maxTerrainSlider, clampTerrainSlider, paletteSizeSlider, resourceMinSlider, resourceMaxSlider, resourceTransSlider, biomeTransSlider;
 
-		private float hueSlider = 50f;
+		private float satSlider = 50f;
+		private bool lowColorChange, highColorChange;
+		private Color colorLow, oldColorLow, colorHigh, oldColorHigh;
+		private Texture2D minColorPreview = new Texture2D(1, 1);
+		private Texture2D minColorOld = new Texture2D(1, 1);
+		private Texture2D maxColorPreview = new Texture2D(1, 1);
+		private Texture2D maxColorOld = new Texture2D(1, 1);
 
-		private int windowMode = 0;
 		private SCANresource currentResource;
-		private Color resourceColorFull, resourceColorEmpty;
+
 		private bool stockBiomes = false;
-		private Color biomeColorLow, biomeColorHigh;
+
 		private const string lockID = "colorLockID";
 		internal static Rect defaultRect = new Rect(100, 400, 650, 330);
 
@@ -53,11 +59,6 @@ namespace SCANsat.SCAN_UI
 
 		private static SCANmap bigMap;
 		private SCANdata data;
-
-		private Texture2D minColorPreview = null;
-		private Texture2D minColorOld = null;
-		private Texture2D maxColorPreview = null;
-		private Texture2D maxColorOld = null;
 
 		protected override void Awake()
 		{
@@ -613,23 +614,53 @@ namespace SCANsat.SCAN_UI
 		{
 			GUILayout.Label("Color Selection", SCANskins.SCAN_headline);
 
-			Rect r = new Rect(20, 20, 256, 256);
-			GUI.DrawTexture(r, SCANskins.SCAN_BigColorWheel);
+			GUILayout.Label("", GUILayout.Width(256), GUILayout.Height(256));
 
-			r.x += 320;
-			GUI.DrawTexture(r, SCANskins.SCAN_BigColorWheel);
+			Rect r = GUILayoutUtility.GetLastRect();
+			if (GUI.RepeatButton(r, SCANskins.SCAN_BigColorWheel, SCANskins.SCAN_texButton))
+			{
+				int a = (int)Input.mousePosition.x;
+				int b = Screen.height - (int)Input.mousePosition.y;
 
-			r.x -= 240;
-			r.y += 300;
+				if (lowColorChange)
+				{
+					colorLow = SCANskins.SCAN_BigColorWheel.GetPixel(a - (int)WindowRect.x - (int)r.x, -(b - (int)WindowRect.y - (int)r.y));
+
+					minColorPreview.SetPixel(0, 0, colorLow);
+					minColorPreview.Apply();
+				}
+				else if (highColorChange)
+				{
+					colorHigh = SCANskins.SCAN_BigColorWheel.GetPixel(a - (int)WindowRect.x - (int)r.x, -(b - (int)WindowRect.y - (int)r.y));
+
+					maxColorPreview.SetPixel(0, 0, colorHigh);
+					maxColorPreview.Apply();
+				}
+			}
+
+			r.x += 40;
+			r.y += 270;
 			r.width = 60;
 			r.height = 30;
+			lowColorChange = GUI.Toggle(r, !highColorChange, "");
+
+			r.x += 160;
+			highColorChange = GUI.Toggle(r, !lowColorChange, "");
+
+			r.x -= 160;
+			r.y += 30;
 			GUI.DrawTexture(r, minColorPreview);
 
 			r.y += 32;
 			GUI.DrawTexture(r, minColorOld);
 
-			r.x += 256;
+			r.x += 90;
+			GUI.Label(r, "Old", SCANskins.SCAN_headlineSmall);
+
 			r.y -= 32;
+			GUI.Label(r, "Preview", SCANskins.SCAN_headlineSmall);
+
+			r.x += 90;
 			GUI.DrawTexture(r, maxColorPreview);
 
 			r.y += 32;
@@ -640,7 +671,7 @@ namespace SCANsat.SCAN_UI
 			r.width = 30;
 			r.height = 200;
 
-			hueSlider = GUI.VerticalSlider(r, hueSlider, 100, 0, SCANskins.SCAN_vertSlider, SCANskins.SCAN_sliderThumb);
+			satSlider = GUI.VerticalSlider(r, satSlider, 100, 0, SCANskins.SCAN_vertSlider, SCANskins.SCAN_sliderThumb);
 		}
 
 		private void biomeOptions(int id)
@@ -698,8 +729,8 @@ namespace SCANsat.SCAN_UI
 			growE();
 			if (GUILayout.Button("Apply", GUILayout.Width(60)))
 			{
-				SCANcontroller.controller.LowBiomeColor = biomeColorLow;
-				SCANcontroller.controller.HighBiomeColor = biomeColorHigh;
+				SCANcontroller.controller.LowBiomeColor = colorLow;
+				SCANcontroller.controller.HighBiomeColor = colorHigh;
 				SCANcontroller.controller.useStockBiomes = true;
 				SCANcontroller.controller.biomeTransparency = biomeTransSlider.CurrentValue;
 			}
@@ -727,8 +758,8 @@ namespace SCANsat.SCAN_UI
 					r.MinValue = resourceMinSlider.CurrentValue;
 					r.MaxValue = resourceMaxSlider.CurrentValue;
 					r.Transparency = resourceTransSlider.CurrentValue;
-					r.FullColor = resourceColorFull;
-					r.EmptyColor = resourceColorEmpty;
+					r.FullColor = colorLow;
+					r.EmptyColor = colorHigh;
 				}
 			}
 			fillS(6);
@@ -763,8 +794,8 @@ namespace SCANsat.SCAN_UI
 				currentResource.MinValue = resourceMinSlider.CurrentValue;
 				currentResource.MaxValue = resourceMaxSlider.CurrentValue;
 				currentResource.Transparency = resourceTransSlider.CurrentValue;
-				currentResource.FullColor = resourceColorFull;
-				currentResource.EmptyColor = resourceColorEmpty;
+				currentResource.FullColor = colorLow;
+				currentResource.EmptyColor = colorHigh;
 			}
 			fillS(10);
 			if (GUILayout.Button("Cancel", GUILayout.Width(60)))
