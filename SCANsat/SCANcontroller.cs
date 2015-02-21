@@ -495,11 +495,10 @@ namespace SCANsat
 					foreach (SCANresourceType t in resourceTypes.Values)
 					{
 						SCANresource r = null;
-						int i = 0;
-						while (((r = resourceList.ElementAt(i).Value[t.Name]) == null) && i < resourceList.Count)
-						{
-							i++;
-						}
+
+						if (resourceList.ContainsKey(t.Name))
+							r = resourceList[t.Name].ElementAt(0).Value;
+
 						if (r != null)
 						{
 							ConfigNode node_resource_type = new ConfigNode("ResourceType");
@@ -609,16 +608,19 @@ namespace SCANsat
 		private string saveResources(SCANresourceType type)
 		{
 			List<string> sL = new List<string>();
-			foreach (string bodyName in resourceList.Keys)
+			if (resourceList.ContainsKey(type.Name))
 			{
-				CelestialBody b;
-				if ((b = FlightGlobals.Bodies.FirstOrDefault(a => a.name == bodyName)) != null)
+				foreach (string bodyName in resourceList[type.Name].Keys)
 				{
-					if (resourceList[b.name].ContainsKey(type.Name))
+					CelestialBody b;
+					if ((b = FlightGlobals.Bodies.FirstOrDefault(a => a.name == bodyName)) != null)
 					{
-						SCANresource r = resourceList[b.name][type.Name];
-						string a = string.Format("{0}|{1:F3}|{2:F3}", b.flightGlobalsIndex, r.MinValue, r.MaxValue);
-						sL.Add(a);
+						if (resourceList[type.Name].ContainsKey(b.name))
+						{
+							SCANresource r = resourceList[type.Name][b.name];
+							string a = string.Format("{0}|{1:F3}|{2:F3}", b.flightGlobalsIndex, r.MinValue, r.MaxValue);
+							sL.Add(a);
+						}
 					}
 				}
 			}
@@ -654,17 +656,17 @@ namespace SCANsat
 			if (!float.TryParse(trans, out transparent))
 				transparent = 0.4f;
 
-			var allResourceList = resourceList.Values
-					.SelectMany(a => a)
-					.Where(a => a.Key == resource)
-					.Select(b => b.Value).ToList();
+			if (resourceList.ContainsKey(resource))
+			{
+				var allResourceList = resourceList[resource].Values;
 
-			foreach (SCANresource r in allResourceList)
+				foreach (SCANresource r in allResourceList)
 				{
 					r.Transparency = transparent;
 					r.FullColor = lowColor;
 					r.EmptyColor = highColor;
 				}
+			}
 
 			if (!string.IsNullOrEmpty(s) && !string.IsNullOrEmpty(resource))
 			{
@@ -686,19 +688,19 @@ namespace SCANsat
 						CelestialBody b;
 						if ((b = FlightGlobals.Bodies.FirstOrDefault(a => a.flightGlobalsIndex == j)) != null)
 						{
-							if (resourceList.ContainsKey(b.name))
+							if (resourceList.ContainsKey(resource))
 							{
-								if (resourceList[b.name].ContainsKey(resource))
+								if (resourceList[resource].ContainsKey(b.name))
 								{
-									SCANresource r = resourceList[b.name][resource];
+									SCANresource r = resourceList[resource][b.name];
 									r.MinValue = min;
 									r.MaxValue = max;
 								}
 								else
-									SCANUtil.SCANlog("No resource found with name: {0} in the master SCANresource list, skipping...", resource);
+									SCANUtil.SCANlog("No resources found assigned for Celestial Body: {0}, skipping...", b.name);
 							}
 							else
-								SCANUtil.SCANlog("No resources found assigned for Celestial Body: {0}, skipping...", b.name);
+								SCANUtil.SCANlog("No resource found with name: {0} in the master SCANresource list, skipping...", resource);
 						}
 						else
 							SCANUtil.SCANlog("No Celestial Body found matching this saved resource value: {0}, skipping...", j);
