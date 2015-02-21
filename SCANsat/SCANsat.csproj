@@ -66,7 +66,6 @@
     <Compile Include="SCAN_Platform\Extensions\Math\UnityEngine.Mathf_.cs" />
     <Compile Include="SCAN_Platform\Extensions\Math\UnityEngine.Rect_.cs" />
     <Compile Include="SCAN_Platform\Extensions\MJExtensions.cs" />
-    <Compile Include="SCAN_Platform\Extensions\Time\UnityEngine.Event_.cs" />
     <Compile Include="SCAN_Platform\Logging.cs" />
     <Compile Include="SCAN_Platform\Palettes\ColorBrewer\ColorBrewer.cs" />
     <Compile Include="SCAN_Platform\Palettes\ColorBrewer\Include\Original.cs" />
