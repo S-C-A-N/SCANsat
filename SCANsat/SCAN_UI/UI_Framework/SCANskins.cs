@@ -137,7 +137,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			SCAN_ResizeIcon = GameDatabase.Instance.GetTexture("SCANsat/Icons/SCAN_Resize_Icon", false);
 			SCAN_SmallMapAppIcon = GameDatabase.Instance.GetTexture("SCANsat/Icons/SCANsat_AppLauncherSmall_Icon", false);
 			SCAN_BigMapAppIcon = GameDatabase.Instance.GetTexture("SCANsat/Icons/SCANsat_AppLauncherLarge_Icon", false);
-			SCAN_BigColorWheel = GameDatabase.Instance.GetTexture("SCANsat/Icons/SCANsat_BigColorWheel_Tex", false);
+			SCAN_BigColorWheel = GameDatabase.Instance.GetTexture("SCANsat/Icons/SCAN_BigColorWheel_Tex", false);
 		}
 
 		private static void initializeColors()
