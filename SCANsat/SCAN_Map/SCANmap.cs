@@ -628,7 +628,7 @@ namespace SCANsat.SCAN_Map
 						else
 						{
 							Color elevation = palette.grey;
-							if (SCANcontroller.controller.biomeTransparency < 100)
+							if (SCANcontroller.controller.biomeTransparency > 0)
 							{
 								if (body.pqsController == null)
 								{
