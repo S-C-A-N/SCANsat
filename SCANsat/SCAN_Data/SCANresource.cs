@@ -114,8 +114,8 @@ namespace SCANsat.SCAN_Data
 			get { return transparency; }
 			internal set
 			{
-				if (value >= 0 && value <= 1)
-					transparency = value;
+				if (value >= 0 && value <= 100)
+					transparency = value / 100;
 			}
 		}
 
