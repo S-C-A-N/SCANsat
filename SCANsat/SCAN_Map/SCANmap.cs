@@ -753,9 +753,9 @@ namespace SCANsat.SCAN_Map
 			else if (amount == 0)
 				return palette.lerp(BaseColor, palette.grey, 0.4f);
 			else if (SCANcontroller.controller.resourceOverlayType == 0 && SCANversions.RegolithFound)
-				return palette.lerp(BaseColor, palette.lerp(resource.EmptyColor, resource.FullColor, (float)amount / (resource.MaxValue - resource.MinValue)), 0.3f);
+				return palette.lerp(palette.lerp(resource.EmptyColor, resource.FullColor, (float)amount / (resource.MaxValue - resource.MinValue)), BaseColor, resource.Transparency);
 			else if (SCANcontroller.controller.resourceOverlayType == 1 && SCANversions.kethaneLoaded)
-				return palette.lerp(BaseColor, palette.lerp(resource.EmptyColor, resource.FullColor, (float)amount / resource.MaxValue), 0.8f);
+				return palette.lerp(palette.lerp(resource.EmptyColor, resource.FullColor, (float)amount / resource.MaxValue), BaseColor, 0.3f);
 
 			return BaseColor;
 		}
