@@ -66,6 +66,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 		internal static GUIStyle SCAN_labelSmallRight;
 		internal static GUIStyle SCAN_vertSlider;
 		internal static GUIStyle SCAN_sliderThumb;
+		internal static GUIStyle SCAN_colorWheelButton;
 
 		//Styles for map overlay icons
 		internal static GUIStyle SCAN_orbitalLabelOn;
@@ -190,6 +191,12 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			SCAN_texButton.hover.background = SCAN_SkinsLibrary.DefUnitySkin.label.normal.background;
 			SCAN_texButton.active.background = SCAN_SkinsLibrary.DefUnitySkin.label.normal.background;
 
+			SCAN_colorWheelButton = new GUIStyle(SCAN_texButton);
+			SCAN_colorWheelButton.name = "SCAN_ColorWheelButton";
+			SCAN_colorWheelButton.padding = new RectOffset(0, 0, 0, 0);
+			SCAN_colorWheelButton.margin = new RectOffset(0, 0, 0, 0);
+			SCAN_colorWheelButton.border = new RectOffset(0, 0, 0, 0);
+
 			SCAN_buttonBorderless = new GUIStyle(SCAN_button);
 			SCAN_buttonBorderless.name = "SCAN_ButtonBorderless";
 			SCAN_buttonBorderless.fontSize = 14;
@@ -287,6 +294,9 @@ namespace SCANsat.SCAN_UI.UI_Framework
 
 			SCAN_toggle = new GUIStyle(SCAN_SkinsLibrary.DefKSPSkin.toggle);
 			SCAN_toggle.name = "SCAN_Toggle";
+			SCAN_toggle.font = dotty;
+			SCAN_toggle.onNormal.textColor = palette.xkcd_YellowGreen;
+			SCAN_toggle.fontSize = 30;
 			SCAN_toggle.fixedHeight = 28;
 			SCAN_toggle.fixedWidth = 28;
 
