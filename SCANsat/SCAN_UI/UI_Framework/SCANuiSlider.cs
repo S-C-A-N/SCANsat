@@ -9,6 +9,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 		private float minValue, maxValue, currentValue;
 		private float oldValue;
 		private string title, units;
+		private int precision;
 
 		public float MinValue
 		{
@@ -36,7 +37,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			internal set { currentValue = value; }
 		}
 
-		public SCANuiSlider(float Min, float Max, float Value, string Title, string Units)
+		public SCANuiSlider(float Min, float Max, float Value, string Title, string Units, int Prec)
 		{
 			minValue = Min;
 			maxValue = Max;
@@ -44,6 +45,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			oldValue = Value;
 			title = Title;
 			units = Units;
+			precision = Prec;
 		}
 
 		public void drawSlider()
@@ -54,7 +56,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			r.x += 110;
 			r.width = 130;
 
-			currentValue = GUI.HorizontalSlider(r, currentValue, minValue, maxValue).Mathf_Round(-2);
+			currentValue = GUI.HorizontalSlider(r, currentValue, minValue, maxValue).Mathf_Round(precision);
 
 			SCANuiUtil.drawSliderLabel(r, minValue + units, maxValue + units);
 		}
