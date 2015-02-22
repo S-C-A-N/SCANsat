@@ -38,9 +38,14 @@ namespace SCANsat.SCAN_UI
 
 		private SCANuiSlider minTerrainSlider, maxTerrainSlider, clampTerrainSlider, paletteSizeSlider, resourceMinSlider, resourceMaxSlider, resourceTransSlider, biomeTransSlider;
 
-		private float satSlider = 50f;
+		private float satSlider = 1f;
+		private float oldSatSlider = 1f;
 		private bool lowColorChange, highColorChange;
-		private Color colorLow, oldColorLow, colorHigh, oldColorHigh;
+		private Color c = palette.grey;
+		private Color satC = palette.grey;
+		private Color colorLow = new Color();
+		private Color colorHigh = new Color();
+		private Color oldColorLow, oldColorHigh;
 		private Texture2D minColorPreview = new Texture2D(1, 1);
 		private Texture2D minColorOld = new Texture2D(1, 1);
 		private Texture2D maxColorPreview = new Texture2D(1, 1);
@@ -107,21 +112,21 @@ namespace SCANsat.SCAN_UI
 
 			stockBiomes = SCANcontroller.controller.useStockBiomes;
 
-			minTerrainSlider = new SCANuiSlider(data.DefaultMinHeight - 10000, data.MaxHeight - 100, data.MinHeight, "Min: ", "m");
-			maxTerrainSlider = new SCANuiSlider(data.MinHeight + 100, data.DefaultMaxHeight + 10000, data.MaxHeight, "Max: ", "m");
-			clampTerrainSlider = new SCANuiSlider(data.MinHeight + 10, data.MaxHeight - 10, data.ClampHeight ?? data.MinHeight + 10, "Clamp: ", "m");
-			paletteSizeSlider = new SCANuiSlider(3, 12, data.PaletteSize, "Palette Size: ", "");
+			minTerrainSlider = new SCANuiSlider(data.DefaultMinHeight - 10000, data.MaxHeight - 100, data.MinHeight, "Min: ", "m", -2);
+			maxTerrainSlider = new SCANuiSlider(data.MinHeight + 100, data.DefaultMaxHeight + 10000, data.MaxHeight, "Max: ", "m", -2);
+			clampTerrainSlider = new SCANuiSlider(data.MinHeight + 10, data.MaxHeight - 10, data.ClampHeight ?? data.MinHeight + 10, "Clamp: ", "m", -1);
+			paletteSizeSlider = new SCANuiSlider(3, 12, data.PaletteSize, "Palette Size: ", "", 0);
 
-			biomeTransSlider = new SCANuiSlider(0, 100, SCANcontroller.controller.biomeTransparency, "Terrain Trans: ", "%");
+			biomeTransSlider = new SCANuiSlider(0, 100, SCANcontroller.controller.biomeTransparency, "Terrain Trans: ", "%", 0);
 
 			if (SCANcontroller.controller.GlobalResourceOverlay)
 			{
 				currentResource = SCANcontroller.controller.ResourceList.ElementAt(0).Value.ElementAt(0).Value;
 				if (currentResource != null)
 				{
-					resourceMinSlider = new SCANuiSlider(0, 10, currentResource.MinValue, "Min: ", "%");
-					resourceMaxSlider = new SCANuiSlider(1, 100, currentResource.MaxValue, "Max: ", "%");
-					resourceTransSlider = new SCANuiSlider(0, 100, currentResource.Transparency, "Trans: ", "%");
+					resourceMinSlider = new SCANuiSlider(0, 10, currentResource.MinValue, "Min: ", "%", 1);
+					resourceMaxSlider = new SCANuiSlider(1, 100, currentResource.MaxValue, "Max: ", "%", 1);
+					resourceTransSlider = new SCANuiSlider(0, 100, currentResource.Transparency, "Trans: ", "%", 0);
 				}
 			}
 
@@ -333,7 +338,7 @@ namespace SCANsat.SCAN_UI
 				{
 					growE();
 						colorWheel(id);
-						fillS(100);
+						fillS(80);
 						growS();
 							biomeOptions(id);
 							biomeConfirm(id);
@@ -344,7 +349,7 @@ namespace SCANsat.SCAN_UI
 				{
 					growE();
 						colorWheel(id);
-						fillS(100);
+						fillS(80);
 						growS();
 							resourceOptions(id);
 							resourceConfirm(id);
@@ -381,6 +386,12 @@ namespace SCANsat.SCAN_UI
 			{
 				oldDiscreteState = discretePalette;
 				drawPreviewLegend();
+			}
+
+			if (oldSatSlider != satSlider)
+			{
+				oldSatSlider = satSlider;
+				satC = c * new Color(satSlider, satSlider, satSlider);
 			}
 
 			if (clampState != oldClampState)
@@ -634,67 +645,67 @@ namespace SCANsat.SCAN_UI
 			fillS(30);
 			growS();
 				GUILayout.Label("Color Selection", SCANskins.SCAN_headline);
-				GUILayout.Label("", GUILayout.Width(140), GUILayout.Height(140));
-				Rect r = GUILayoutUtility.GetLastRect();
+				growE();
+					fillS(30);
+					GUILayout.Label(SCANskins.SCAN_BigColorWheel);
+					Rect r = GUILayoutUtility.GetLastRect();
+				stopE();
 			stopS();
 
-			if (GUI.RepeatButton(r, SCANskins.SCAN_BigColorWheel, SCANskins.SCAN_texButton))
+			satSlider = GUI.VerticalSlider(new Rect(280, 60, 30, 200), satSlider, 1, 0, SCANskins.SCAN_vertSlider, SCANskins.SCAN_sliderThumb).Mathf_Round(2);
+
+			if (GUI.RepeatButton(r, "", SCANskins.SCAN_colorWheelButton))
 			{
 				int a = (int)Input.mousePosition.x;
 				int b = Screen.height - (int)Input.mousePosition.y;
 
-				if (lowColorChange)
-				{
-					colorLow = SCANskins.SCAN_BigColorWheel.GetPixel(a - (int)WindowRect.x - (int)r.x, -(b - (int)WindowRect.y - (int)r.y));
+				c = SCANskins.SCAN_BigColorWheel.GetPixel(a - (int)WindowRect.x - (int)r.x, -(b - (int)WindowRect.y - (int)r.y));
 
-					minColorPreview.SetPixel(0, 0, colorLow);
-					minColorPreview.Apply();
-				}
-				else if (highColorChange)
-				{
-					colorHigh = SCANskins.SCAN_BigColorWheel.GetPixel(a - (int)WindowRect.x - (int)r.x, -(b - (int)WindowRect.y - (int)r.y));
-
-					maxColorPreview.SetPixel(0, 0, colorHigh);
-					maxColorPreview.Apply();
-				}
+				satC = c * new Color(satSlider, satSlider, satSlider);
 			}
 
-			r.x += 20;
-			r.y += 150;
+			if (lowColorChange)
+			{
+				colorLow = satC;
+				minColorPreview.SetPixel(0, 0, colorLow);
+				minColorPreview.Apply();
+			}
+			else if (highColorChange)
+			{
+				colorHigh = satC;
+				maxColorPreview.SetPixel(0, 0, colorHigh);
+				maxColorPreview.Apply();
+			}
+
+			r.x -= 55;
+			r.y += 140;
 			r.width = 60;
 			r.height = 30;
-			lowColorChange = GUI.Toggle(r, !highColorChange, "");
+			lowColorChange = GUI.Toggle(r, !highColorChange, "Low");
 
-			r.x += 180;
-			highColorChange = GUI.Toggle(r, !lowColorChange, "");
+			r.x += 140;
+			highColorChange = GUI.Toggle(r, !lowColorChange, "High");
 
-			r.x -= 180;
+			r.x -= 130;
 			r.y += 30;
 			GUI.DrawTexture(r, minColorPreview);
 
 			r.y += 32;
 			GUI.DrawTexture(r, minColorOld);
 
-			r.x += 80;
-			r.width = 100;
+			r.x += 65;
+			r.width = 80;
 			GUI.Label(r, "Old", SCANskins.SCAN_headlineSmall);
 
 			r.y -= 32;
-			GUI.Label(r, "Preview", SCANskins.SCAN_headlineSmall);
+			GUI.Label(r, "New", SCANskins.SCAN_headlineSmall);
 
-			r.x += 120;
+			r.x += 85;
 			r.width = 60;
 			GUI.DrawTexture(r, maxColorPreview);
 
 			r.y += 32;
 			GUI.DrawTexture(r, maxColorOld);
-
-			r.x = 280;
-			r.y = 60;
-			r.width = 30;
-			r.height = 200;
-
-			satSlider = GUI.VerticalSlider(r, satSlider, 100, 0, SCANskins.SCAN_vertSlider, SCANskins.SCAN_sliderThumb);
 		}
 
 		private void biomeOptions(int id)
@@ -711,7 +722,7 @@ namespace SCANsat.SCAN_UI
 
 		private void resourceOptions(int id)
 		{
-			GUILayout.Label("Resource Options: " + data.Body.name, SCANskins.SCAN_headline);
+			GUILayout.Label("Resource Options: " + data.Body.name, SCANskins.SCAN_headlineSmall);
 
 			growE();
 				if (GUILayout.Button("Resource Selection", SCANskins.SCAN_buttonFixed))
@@ -823,8 +834,8 @@ namespace SCANsat.SCAN_UI
 				currentResource.MinValue = resourceMinSlider.CurrentValue;
 				currentResource.MaxValue = resourceMaxSlider.CurrentValue;
 				currentResource.Transparency = resourceTransSlider.CurrentValue;
-				currentResource.FullColor = colorLow;
-				currentResource.EmptyColor = colorHigh;
+				currentResource.FullColor = colorHigh;
+				currentResource.EmptyColor = colorLow;
 			}
 			fillS(10);
 			if (GUILayout.Button("Cancel", GUILayout.Width(60)))
