@@ -259,7 +259,7 @@ namespace SCANsat
 			{
 				try
 				{
-					lowBiomeColor = ConfigNode.ParseColor(node.GetValue("BiomeLowColor"));
+					lowBiomeColor = lowBiomeColor.FromHex(node.GetValue("BiomeLowColor"));
 				}
 				catch (Exception e)
 				{
@@ -271,7 +271,7 @@ namespace SCANsat
 			{
 				try
 				{
-					highBiomeColor = ConfigNode.ParseColor(node.GetValue("BiomeHighColor"));
+					highBiomeColor = highBiomeColor.FromHex(node.GetValue("BiomeHighColor"));
 				}
 				catch (Exception e)
 				{
@@ -446,8 +446,8 @@ namespace SCANsat
 		{
 			if (HighLogic.LoadedScene != GameScenes.EDITOR)
 			{
-				node.AddValue("BiomeLowColor", lowBiomeColor);
-				node.AddValue("BiomeHighColor", highBiomeColor);
+				node.AddValue("BiomeLowColor", lowBiomeColor.ToHex());
+				node.AddValue("BiomeHighColor", highBiomeColor.ToHex());
 				ConfigNode node_vessels = new ConfigNode("Scanners");
 				foreach (Guid id in knownVessels.Keys)
 				{
@@ -503,9 +503,9 @@ namespace SCANsat
 						{
 							ConfigNode node_resource_type = new ConfigNode("ResourceType");
 							node_resource_type.AddValue("Resource", r.Name);
-							node_resource_type.AddValue("MinColor", r.EmptyColor);
-							node_resource_type.AddValue("MaxColor", r.FullColor);
-							node_resource_type.AddValue("Transparency", r.Transparency);
+							node_resource_type.AddValue("MinColor", r.EmptyColor.ToHex());
+							node_resource_type.AddValue("MaxColor", r.FullColor.ToHex());
+							node_resource_type.AddValue("Transparency", r.Transparency * 100);
 
 							string rMinMax = saveResources(t);
 							node_resource_type.AddValue("MinMaxValues", rMinMax);
@@ -630,31 +630,37 @@ namespace SCANsat
 
 		private void loadCustomResourceValues(string s, string resource, string low, string high, string trans)
 		{
-			Color lowColor;
-			Color highColor;
+			Color lowColor = new Color();
+			Color highColor = new Color();
 			float transparent;
 			try
 			{
-				lowColor = ConfigNode.ParseColor(low);
+				lowColor = lowColor.FromHex(low);
 			}
 			catch (Exception e)
 			{
 				SCANUtil.SCANlog("Low Resource Color Format Incorrect; Reverting To Default: {0}", e);
-				lowColor = palette.xkcd_CamoGreen;
+				if (resourceTypes.ContainsKey(resource))
+					lowColor = resourceTypes[resource].ColorEmpty;
+				else
+					lowColor = palette.xkcd_DarkPurple;
 			}
 
 			try
 			{
-				highColor = ConfigNode.ParseColor(high);
+				highColor = highColor.FromHex(high);
 			}
 			catch (Exception e)
 			{
 				SCANUtil.SCANlog("High Resource Color Format Incorrect; Reverting To Default: {0}", e);
-				highColor = palette.xkcd_CamoGreen;
+				if (resourceTypes.ContainsKey(resource))
+					highColor = resourceTypes[resource].ColorFull;
+				else
+					highColor = palette.xkcd_Lemon;
 			}
 
 			if (!float.TryParse(trans, out transparent))
-				transparent = 0.4f;
+				transparent = 40f;
 
 			if (resourceList.ContainsKey(resource))
 			{
@@ -663,8 +669,8 @@ namespace SCANsat
 				foreach (SCANresource r in allResourceList)
 				{
 					r.Transparency = transparent;
-					r.FullColor = lowColor;
-					r.EmptyColor = highColor;
+					r.FullColor = highColor;
+					r.EmptyColor = lowColor;
 				}
 			}
 
@@ -677,13 +683,9 @@ namespace SCANsat
 					try
 					{
 						int j = 0;
-						if (!int.TryParse(sB[0], out j))
-							continue;
 						float min = 0;
 						float max = 0;
-						if (!float.TryParse(sB[1], out min))
-							continue;
-						if (!float.TryParse(sB[2], out max))
+						if (!int.TryParse(sB[0], out j))
 							continue;
 						CelestialBody b;
 						if ((b = FlightGlobals.Bodies.FirstOrDefault(a => a.flightGlobalsIndex == j)) != null)
@@ -693,6 +695,10 @@ namespace SCANsat
 								if (resourceList[resource].ContainsKey(b.name))
 								{
 									SCANresource r = resourceList[resource][b.name];
+									if (!float.TryParse(sB[1], out min))
+										min = r.MinValue;
+									if (!float.TryParse(sB[2], out max))
+										max = r.MaxValue;
 									r.MinValue = min;
 									r.MaxValue = max;
 								}
