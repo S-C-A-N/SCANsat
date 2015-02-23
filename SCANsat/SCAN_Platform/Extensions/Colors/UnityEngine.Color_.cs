@@ -2,7 +2,6 @@ using System;
 using System.Reflection;
 using System.Collections.Generic;
 
-
 using SG = System.Globalization;
 using Log = SCANsat.SCAN_Platform.Logging.ConsoleLogger;
 
@@ -55,9 +54,15 @@ namespace UnityEngine
 
 
 		public static string ToHex(this Color c) {
-			return	c.r.ToString("X2")
-				+	c.g.ToString("X2")
-				+	c.b.ToString("X2");
+			return	((Color32)c).r.ToString("X2")
+				+	((Color32)c).g.ToString("X2")
+				+	((Color32)c).b.ToString("X2");
+		}
+
+		public static string ToRGBString(this Color c) {
+			return	c.r.ToString("F3")
+				+	c.g.ToString("F3")
+				+	c.b.ToString("F3");
 		}
 
 		public static Color FromHex(this Color c, string s) {
@@ -65,7 +70,6 @@ namespace UnityEngine
 			byte g = byte.Parse ( s.Substring (2,2) , HEX_STYLE);
 			byte b = byte.Parse ( s.Substring (4,2) , HEX_STYLE);
 			return new Color(r/255f,g/255f,b/255f,1);
-
 		}
 
 		public static void initColorTable() {
