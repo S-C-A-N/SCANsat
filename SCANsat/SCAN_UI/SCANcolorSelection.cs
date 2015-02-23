@@ -126,7 +126,7 @@ namespace SCANsat.SCAN_UI
 				{
 					resourceMinSlider = new SCANuiSlider(0, 10, currentResource.MinValue, "Min: ", "%", 1);
 					resourceMaxSlider = new SCANuiSlider(1, 100, currentResource.MaxValue, "Max: ", "%", 1);
-					resourceTransSlider = new SCANuiSlider(0, 100, currentResource.Transparency, "Trans: ", "%", 0);
+					resourceTransSlider = new SCANuiSlider(0, 100, currentResource.Transparency * 100, "Trans: ", "%", 0);
 				}
 			}
 
@@ -812,7 +812,7 @@ namespace SCANsat.SCAN_UI
 					{
 						r.MinValue = r.DefaultMinValue;
 						r.MaxValue = r.DefaultMaxValue;
-						r.Transparency = 0.4f;
+						r.Transparency = 40f;
 						r.FullColor = r.ResourceType.ColorFull;
 						r.EmptyColor = r.ResourceType.ColorEmpty;
 					}
@@ -823,7 +823,7 @@ namespace SCANsat.SCAN_UI
 			{
 				currentResource.MinValue = currentResource.DefaultMinValue;
 				currentResource.MaxValue = currentResource.DefaultMaxValue;
-				currentResource.Transparency = 0.4f;
+				currentResource.Transparency = 40f;
 				currentResource.FullColor = currentResource.ResourceType.ColorFull;
 				currentResource.EmptyColor = currentResource.ResourceType.ColorEmpty;
 			}
@@ -872,19 +872,20 @@ namespace SCANsat.SCAN_UI
 				{
 					ddRect = new Rect(WindowRect.width - 340, 110, 160, 140);
 					GUI.Box(ddRect, "", SCANskins.SCAN_dropDownBox);
-					for (int i = 0; i < SCANcontroller.ResourceTypes.Count; i ++)
+					for (int i = 0; i < SCANcontroller.controller.ResourceList.Count; i ++)
 					{
-						scrollR = GUI.BeginScrollView(ddRect, scrollR, new Rect(0, 0, 140, 23 * SCANcontroller.ResourceTypes.Count));
+						string s = SCANcontroller.controller.ResourceList.ElementAt(i).Value.ElementAt(0).Value.Name;
+						scrollR = GUI.BeginScrollView(ddRect, scrollR, new Rect(0, 0, 140, 23 * SCANcontroller.controller.ResourceList.Count));
 						Rect r = new Rect(2, i * 23, 136, 22);
-						if (GUI.Button(r, SCANcontroller.ResourceTypes.ElementAt(i).Value.Name, SCANskins.SCAN_dropDownButton))
+						if (GUI.Button(r, s, SCANskins.SCAN_dropDownButton))
 						{
-							if (SCANcontroller.controller.ResourceList[SCANcontroller.ResourceTypes.ElementAt(i).Value.Name].ContainsKey(data.Body.name))
-								currentResource = SCANcontroller.controller.ResourceList[SCANcontroller.ResourceTypes.ElementAt(i).Value.Name][data.Body.name];
+							if (SCANcontroller.controller.ResourceList[s].ContainsKey(data.Body.name))
+								currentResource = SCANcontroller.controller.ResourceList[s][data.Body.name];
 							else
-								currentResource = SCANcontroller.controller.ResourceList[SCANcontroller.ResourceTypes.ElementAt(i).Value.Name].ElementAt(0).Value;
+								currentResource = SCANcontroller.controller.ResourceList[s].ElementAt(0).Value;
 							resourceMinSlider.CurrentValue = currentResource.MinValue;
 							resourceMaxSlider.CurrentValue = currentResource.MaxValue;
-							resourceTransSlider.CurrentValue = currentResource.Transparency;
+							resourceTransSlider.CurrentValue = currentResource.Transparency * 100;
 							dropDown = false;
 							resourceBox = false;
 						}
