@@ -823,9 +823,16 @@ namespace SCANsat.SCAN_UI
 			{
 				currentResource.MinValue = currentResource.DefaultMinValue;
 				currentResource.MaxValue = currentResource.DefaultMaxValue;
-				currentResource.Transparency = 40f;
-				currentResource.FullColor = currentResource.ResourceType.ColorFull;
-				currentResource.EmptyColor = currentResource.ResourceType.ColorEmpty;
+				if (SCANcontroller.controller.ResourceList.ContainsKey(currentResource.Name))
+				{
+					var allResourceList = SCANcontroller.controller.ResourceList[currentResource.Name].Values;
+					foreach (SCANresource r in allResourceList)
+					{
+						r.Transparency = 40f;
+						r.FullColor = currentResource.ResourceType.ColorFull;
+						r.EmptyColor = currentResource.ResourceType.ColorEmpty;
+					}
+				}
 			}
 			fillS(6);
 			growE();
@@ -833,9 +840,16 @@ namespace SCANsat.SCAN_UI
 			{
 				currentResource.MinValue = resourceMinSlider.CurrentValue;
 				currentResource.MaxValue = resourceMaxSlider.CurrentValue;
-				currentResource.Transparency = resourceTransSlider.CurrentValue;
-				currentResource.FullColor = colorHigh;
-				currentResource.EmptyColor = colorLow;
+				if (SCANcontroller.controller.ResourceList.ContainsKey(currentResource.Name))
+				{
+					var allResourceList = SCANcontroller.controller.ResourceList[currentResource.Name].Values;
+					foreach (SCANresource r in allResourceList)
+					{
+						r.Transparency = resourceTransSlider.CurrentValue;
+						r.FullColor = colorHigh;
+						r.EmptyColor = colorLow;
+					}
+				}
 			}
 			fillS(10);
 			if (GUILayout.Button("Cancel", GUILayout.Width(60)))
