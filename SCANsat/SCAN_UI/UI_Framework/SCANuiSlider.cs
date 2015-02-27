@@ -48,7 +48,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			precision = Prec;
 		}
 
-		public void drawSlider()
+		public void drawSlider(bool under)
 		{
 			GUILayout.Label(title + currentValue + units, SCANskins.SCAN_whiteReadoutLabel);
 
@@ -56,7 +56,10 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			r.x += 110;
 			r.width = 130;
 
-			currentValue = GUI.HorizontalSlider(r, currentValue, minValue, maxValue).Mathf_Round(precision);
+			if (under)
+				GUI.HorizontalSlider(r, currentValue, minValue, maxValue).Mathf_Round(precision);
+			else
+				currentValue = GUI.HorizontalSlider(r, currentValue, minValue, maxValue).Mathf_Round(precision);
 
 			SCANuiUtil.drawSliderLabel(r, minValue + units, maxValue + units);
 		}
