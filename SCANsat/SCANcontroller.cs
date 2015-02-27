@@ -793,7 +793,7 @@ namespace SCANsat
 							}
 							if (bodyResource == null)
 							{
-								addToResourceData(resource.Name, body.name, resource);
+								addToResourceData(resource.Name, body.name, SCANresource.resourceCopy(resource));
 							}
 							else
 							{
