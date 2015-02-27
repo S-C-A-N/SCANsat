@@ -61,7 +61,9 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			else
 				currentValue = GUI.HorizontalSlider(r, currentValue, minValue, maxValue).Mathf_Round(precision);
 
-			SCANuiUtil.drawSliderLabel(r, minValue + units, maxValue + units);
+			int i = precision <= 0 ? 0 : precision;
+			string labelPrecision = "F" + i.ToString();
+			SCANuiUtil.drawSliderLabel(r, minValue.ToString(labelPrecision) + units, maxValue.ToString(labelPrecision) + units);
 		}
 
 		public bool valueChanged()
