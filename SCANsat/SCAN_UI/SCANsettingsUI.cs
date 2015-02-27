@@ -276,8 +276,13 @@ namespace SCANsat.SCAN_UI
 			CelestialBody thisBody = null;
 			if (HighLogic.LoadedSceneIsFlight)
 				thisBody = FlightGlobals.currentMainBody;
-			else
+			else if (HighLogic.LoadedScene == GameScenes.SPACECENTER)
 				thisBody = Planetarium.fetch.Home;
+			else if (HighLogic.LoadedScene == GameScenes.TRACKSTATION)
+				thisBody = getTargetBody(MapView.MapCamera.target);
+			if (thisBody == null)
+				return;
+
 			GUILayout.Label("Data Management", SCANskins.SCAN_headline);
 			growE();
 			if (warningBoxOne || warningBoxAll)
@@ -298,6 +303,24 @@ namespace SCANsat.SCAN_UI
 			}
 			stopE();
 			fillS(8);
+		}
+
+		private CelestialBody getTargetBody(MapObject target)
+		{
+			if (target.type == MapObject.MapObjectType.CELESTIALBODY)
+			{
+				return target.celestialBody;
+			}
+			else if (target.type == MapObject.MapObjectType.MANEUVERNODE)
+			{
+				return target.maneuverNode.patch.referenceBody;
+			}
+			else if (target.type == MapObject.MapObjectType.VESSEL)
+			{
+				return target.vessel.mainBody;
+			}
+
+			return null;
 		}
 
 		//Resets all window positions, tooltip toggle
@@ -338,7 +361,15 @@ namespace SCANsat.SCAN_UI
 		private void gui_settings_window_mapFill(int id)
 		{
 			growE();
-			CelestialBody thisBody = FlightGlobals.currentMainBody;
+			CelestialBody thisBody = null;
+			if (HighLogic.LoadedSceneIsFlight)
+				thisBody = FlightGlobals.currentMainBody;
+			else if (HighLogic.LoadedScene == GameScenes.SPACECENTER)
+				thisBody = Planetarium.fetch.Home;
+			else if (HighLogic.LoadedScene == GameScenes.TRACKSTATION)
+				thisBody = getTargetBody(MapView.MapCamera.target);
+			if (thisBody == null)
+				return;
 			if (GUILayout.Button("Fill SCAN map of " + thisBody.theName, SCANskins.SCAN_buttonFixed))
 			{
 				SCANdata data = SCANUtil.getData(thisBody);
