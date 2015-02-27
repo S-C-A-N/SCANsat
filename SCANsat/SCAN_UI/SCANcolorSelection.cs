@@ -38,15 +38,15 @@ namespace SCANsat.SCAN_UI
 
 		private SCANuiSlider minTerrainSlider, maxTerrainSlider, clampTerrainSlider, paletteSizeSlider, resourceMinSlider, resourceMaxSlider, resourceTransSlider, biomeTransSlider;
 
-		private float satSlider = 1f;
-		private float oldSatSlider = 1f;
-		private bool lowColorChange, highColorChange, oldColorState, fineControlMode, oldFineControl;
+		private float valSlider = 1f;
+		private float oldValSlider = 1f;
+		private bool lowColorChange, oldColorState, fineControlMode, oldFineControl;
+		private int bodyIndex;
 		private Color c = new Color();
 		private Color sliderColorLow = new Color();
 		private Color sliderColorHigh = new Color();
 		private Color colorLow = new Color();
 		private Color colorHigh = new Color();
-		private Color oldColorLow, oldColorHigh;
 		private Texture2D minColorPreview = new Texture2D(1, 1);
 		private Texture2D minColorOld = new Texture2D(1, 1);
 		private Texture2D maxColorPreview = new Texture2D(1, 1);
@@ -129,6 +129,7 @@ namespace SCANsat.SCAN_UI
 					resourceMaxSlider = new SCANuiSlider(currentResource.MinValue + 0.1f, 100, currentResource.MaxValue, "Max: ", "%", 1);
 					resourceTransSlider = new SCANuiSlider(0, 100, currentResource.Transparency * 100, "Trans: ", "%", 0);
 				}
+				bodyIndex = data.Body.flightGlobalsIndex;
 			}
 
 			if (windowMode > 3 || (windowMode > 2 && !SCANcontroller.controller.GlobalResourceOverlay))
@@ -393,6 +394,58 @@ namespace SCANsat.SCAN_UI
 				{
 					setResourceSliders();
 				}
+
+				if (bodyIndex != data.Body.flightGlobalsIndex)
+				{
+					SCANUtil.SCANdebugLog("Trigger Body Change");
+					bodyIndex = data.Body.flightGlobalsIndex;
+					if (SCANcontroller.controller.ResourceList[currentResource.Name].ContainsKey(data.Body.name))
+						currentResource = SCANcontroller.controller.ResourceList[currentResource.Name][data.Body.name];
+					else
+						currentResource = SCANcontroller.controller.ResourceList[currentResource.Name].ElementAt(0).Value;
+
+					resourceMinSlider.CurrentValue = currentResource.MinValue;
+					resourceMaxSlider.CurrentValue = currentResource.MaxValue;
+
+					oldFineControl = fineControlMode = false;
+
+					setResourceSliders();
+				}
+
+				if (oldFineControl != fineControlMode)
+				{
+					oldFineControl = fineControlMode;
+					if (fineControlMode)
+					{
+						if (resourceMinSlider.CurrentValue < 5f)
+							resourceMinSlider.MinValue = 0f;
+						else
+							resourceMinSlider.MinValue = resourceMinSlider.CurrentValue - 5f;
+
+						if (resourceMinSlider.CurrentValue > 95f)
+							resourceMinSlider.MaxValue = 100f;
+						else if (resourceMaxSlider.CurrentValue < resourceMinSlider.CurrentValue + 5f)
+							resourceMinSlider.MaxValue = resourceMaxSlider.CurrentValue - 0.1f;
+						else
+							resourceMinSlider.MaxValue = resourceMinSlider.CurrentValue + 5f;
+
+						if (resourceMaxSlider.CurrentValue < 5f)
+							resourceMaxSlider.MinValue = 0f;
+						else if (resourceMinSlider.CurrentValue > resourceMaxSlider.CurrentValue - 5f)
+							resourceMaxSlider.MinValue = resourceMinSlider.CurrentValue + 0.1f;
+						else
+							resourceMaxSlider.MinValue = resourceMaxSlider.CurrentValue - 5f;
+
+						if (resourceMaxSlider.CurrentValue > 95f)
+							resourceMaxSlider.MaxValue = 100f;
+						else
+							resourceMaxSlider.MaxValue = resourceMaxSlider.CurrentValue + 5f;
+					}
+					else
+					{
+						setResourceSliders();
+					}
+				}
 			}
 
 			if (discretePalette != oldDiscreteState)
@@ -401,57 +454,31 @@ namespace SCANsat.SCAN_UI
 				drawPreviewLegend();
 			}
 
-			if (oldFineControl != fineControlMode)
+			if (oldColorState != lowColorChange)
 			{
-				oldFineControl = fineControlMode;
-				if (fineControlMode)
+				SCANUtil.SCANdebugLog("Low/High Toggled");
+				oldColorState = lowColorChange;
+				if (lowColorChange)
 				{
-					if (resourceMinSlider.CurrentValue < 5f)
-						resourceMinSlider.MinValue = 0f;
-					else
-						resourceMinSlider.MinValue = resourceMinSlider.CurrentValue - 5f;
-
-					if (resourceMinSlider.CurrentValue > 95f)
-						resourceMinSlider.MaxValue = 100f;
-					else if (resourceMaxSlider.CurrentValue < resourceMinSlider.CurrentValue + 5f)
-						resourceMinSlider.MaxValue = resourceMaxSlider.CurrentValue - 0.1f;
-					else
-						resourceMinSlider.MaxValue = resourceMinSlider.CurrentValue + 5f;
-
-					if (resourceMaxSlider.CurrentValue < 5f)
-						resourceMaxSlider.MinValue = 0f;
-					else if (resourceMinSlider.CurrentValue > resourceMaxSlider.CurrentValue - 5f)
-						resourceMaxSlider.MinValue = resourceMinSlider.CurrentValue + 0.1f;
-					else
-						resourceMaxSlider.MinValue = resourceMaxSlider.CurrentValue - 5f;
-
-					if (resourceMaxSlider.CurrentValue > 95f)
-						resourceMaxSlider.MaxValue = 100f;
-					else
-						resourceMaxSlider.MaxValue = resourceMaxSlider.CurrentValue + 5f;
+					c = sliderColorLow;
+					valSlider = sliderColorLow.Brightness().Mathf_Round(2) * 100f;
 				}
 				else
 				{
-					setResourceSliders();
+					c = sliderColorHigh;
+					valSlider = sliderColorHigh.Brightness().Mathf_Round(2) * 100f;
 				}
+				oldValSlider = valSlider;
 			}
 
-			if (oldColorState != highColorChange)
+			if (oldValSlider != valSlider)
 			{
-				oldColorState = highColorChange;
+				SCANUtil.SCANdebugLog("Value Slider Change");
+				oldValSlider = valSlider;
 				if (lowColorChange)
-					satSlider = sliderColorLow.Brightness();
-				else if (highColorChange)
-					satSlider = sliderColorHigh.Brightness();
-			}
-
-			if (oldSatSlider != satSlider)
-			{
-				oldSatSlider = satSlider;
-				if (lowColorChange)
-					sliderColorLow = c * new Color(satSlider, satSlider, satSlider);
-				if (highColorChange)
-					sliderColorHigh = c * new Color(satSlider, satSlider, satSlider);
+					sliderColorLow = c * new Color(valSlider / 100f, valSlider / 100f, valSlider / 100f);
+				else
+					sliderColorHigh = c * new Color(valSlider / 100f, valSlider / 100f, valSlider / 100f);
 			}
 
 			if (clampState != oldClampState)
@@ -500,15 +527,17 @@ namespace SCANsat.SCAN_UI
 				{
 					windowMode = 1;
 					lowColorChange = true;
-					highColorChange = false;
+					oldColorState = true;
 				}
 				if (GUILayout.Button("Biome"))
 				{
 					windowMode = 2;
 					lowColorChange = true;
-					highColorChange = false;
+					oldColorState = true;
 					colorLow = sliderColorLow = c = SCANcontroller.controller.LowBiomeColor;
 					colorHigh = sliderColorHigh = SCANcontroller.controller.HighBiomeColor;
+
+					oldValSlider = valSlider = sliderColorLow.Brightness().Mathf_Round(2) * 100f;
 
 					fineControlMode = oldFineControl = false;
 
@@ -524,12 +553,16 @@ namespace SCANsat.SCAN_UI
 					{
 						windowMode = 3;
 						lowColorChange = true;
-						highColorChange = false;
+						oldColorState = true;
 
 						fineControlMode = oldFineControl = false;
 
+						bodyIndex = data.Body.flightGlobalsIndex;
+
 						colorLow = sliderColorLow = c = currentResource.EmptyColor;
 						colorHigh = sliderColorHigh = currentResource.FullColor;
+
+						oldValSlider = valSlider = sliderColorLow.Brightness().Mathf_Round(2) * 100f;
 
 						minColorOld.SetPixel(0, 0, colorLow);
 						minColorOld.Apply();
@@ -739,7 +772,7 @@ namespace SCANsat.SCAN_UI
 				stopE();
 			stopS();
 
-			satSlider = GUI.VerticalSlider(new Rect(280, 60, 30, 200), satSlider, 1, 0, SCANskins.SCAN_vertSlider, SCANskins.SCAN_sliderThumb).Mathf_Round(2);
+			valSlider = GUI.VerticalSlider(new Rect(280, 60, 30, 200), valSlider, 100, 0, SCANskins.SCAN_vertSlider, SCANskins.SCAN_sliderThumb).Mathf_Round(0);
 
 			if (GUI.RepeatButton(r, "", SCANskins.SCAN_colorWheelButton))
 			{
@@ -749,51 +782,58 @@ namespace SCANsat.SCAN_UI
 				c = SCANskins.SCAN_BigColorWheel.GetPixel(a - (int)WindowRect.x - (int)r.x, -(b - (int)WindowRect.y - (int)r.y));
 
 				if (lowColorChange)
-					sliderColorLow = c * new Color(satSlider, satSlider, satSlider);
-				if (highColorChange)
-					sliderColorHigh = c * new Color(satSlider, satSlider, satSlider);
+					sliderColorLow = c * new Color(valSlider / 100f, valSlider / 100f, valSlider / 100f);
+				else
+					sliderColorHigh = c * new Color(valSlider / 100f, valSlider / 100f, valSlider / 100f);
 			}
 
 			if (lowColorChange)
 				colorLow = sliderColorLow;
-			if (highColorChange)
+			else
 				colorHigh = sliderColorHigh;
 
-			minColorPreview.SetPixel(0, 0, colorLow);
-			minColorPreview.Apply();
-
-			maxColorPreview.SetPixel(0, 0, colorHigh);
-			maxColorPreview.Apply();
-
 			r.x -= 55;
-			r.y += 140;
+			r.y += 145;
 			r.width = 60;
 			r.height = 30;
-			lowColorChange = GUI.Toggle(r, !highColorChange, "Low");
 
-			r.x += 140;
-			highColorChange = GUI.Toggle(r, !lowColorChange, "High");
+			colorSwatches(r, "Low", ref lowColorChange, true, minColorPreview, minColorOld, colorLow);
 
-			r.x -= 130;
+			r.x += 150;
+			colorSwatches(r, "High", ref lowColorChange, false, maxColorPreview, maxColorOld, colorHigh);
+
+			r.x -= 60;
 			r.y += 30;
-			GUI.DrawTexture(r, minColorPreview);
-
-			r.y += 32;
-			GUI.DrawTexture(r, minColorOld);
-
-			r.x += 65;
-			r.width = 80;
-			GUI.Label(r, "Old", SCANskins.SCAN_headlineSmall);
-
-			r.y -= 32;
 			GUI.Label(r, "New", SCANskins.SCAN_headlineSmall);
 
-			r.x += 85;
-			r.width = 60;
-			GUI.DrawTexture(r, maxColorPreview);
-
 			r.y += 32;
-			GUI.DrawTexture(r, maxColorOld);
+			GUI.Label(r, "Old", SCANskins.SCAN_headlineSmall);
+		}
+
+		private void colorSwatches(Rect R, string Title, ref bool Active, bool Low, Texture2D Preview, Texture2D Current, Color New)
+		{
+			bool active;
+			if (Low)
+				active = Active;
+			else
+				active = !Active;
+
+			active = GUI.Toggle(R, active, Title);
+
+			if (Low)
+				Active = active;
+			else
+				Active = !active;
+
+			R.x += 10;
+			R.y += 30;
+
+			Preview.SetPixel(0, 0, New);
+			Preview.Apply();
+			GUI.DrawTexture(R, Preview);
+
+			R.y += 32;
+			GUI.DrawTexture(R, Current);
 		}
 
 		private void biomeOptions(int id)
@@ -813,7 +853,7 @@ namespace SCANsat.SCAN_UI
 		{
 			GUILayout.Label("Resource Options: " + data.Body.name, SCANskins.SCAN_headline, GUILayout.Width(300));
 
-			fillS(20);
+			fillS(10);
 			growE();
 				if (GUILayout.Button("Resource Selection", SCANskins.SCAN_buttonFixed))
 				{
@@ -823,9 +863,11 @@ namespace SCANsat.SCAN_UI
 				fillS(10);
 				GUILayout.Label(currentResource.Name, SCANskins.SCAN_whiteReadoutLabel);
 			stopE();
-			fillS(8);
-			fineControlMode = GUILayout.Toggle(fineControlMode, "Fine Control Mode", SCANskins.SCAN_settingsToggle);
-			fillS(8);
+			fillS(20);
+			growE();
+				fillS(110);
+				fineControlMode = GUILayout.Toggle(fineControlMode, "Fine Control Mode", SCANskins.SCAN_settingsToggle);
+			stopE();
 			growE();
 				fillS(10);
 				resourceMinSlider.drawSlider(dropDown);
@@ -861,7 +903,7 @@ namespace SCANsat.SCAN_UI
 
 				if (lowColorChange)
 					c = colorLow;
-				else if (highColorChange)
+				else
 					c = colorHigh;
 
 				minColorPreview.SetPixel(0, 0, colorLow);
@@ -977,7 +1019,7 @@ namespace SCANsat.SCAN_UI
 
 				if (lowColorChange)
 					c = colorLow;
-				else if (highColorChange)
+				else
 					c = colorHigh;
 
 				minColorPreview.SetPixel(0, 0, colorLow);
@@ -1017,7 +1059,7 @@ namespace SCANsat.SCAN_UI
 
 				if (lowColorChange)
 					c = colorLow;
-				else if (highColorChange)
+				else
 					c = colorHigh;
 
 				minColorPreview.SetPixel(0, 0, colorLow);
