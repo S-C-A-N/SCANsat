@@ -47,6 +47,12 @@ namespace SCANsat.SCAN_Data
 		private SCANresourceType resourceType;
 		private SCANresource_Source source;
 
+		public static SCANresource resourceCopy(SCANresource r)
+		{
+			SCANresource res = new SCANresource(r.name, r.body, r.fullColor, r.emptyColor, r.minValue, r.maxValue, r.resourceType, r.source);
+			return res;
+		}
+
 		public string Name
 		{
 			get { return name; }
