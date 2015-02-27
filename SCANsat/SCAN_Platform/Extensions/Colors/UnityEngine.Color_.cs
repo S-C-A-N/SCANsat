@@ -9,8 +9,8 @@ namespace UnityEngine
 {
 	public static class Color_ {
 
-		private static Func<float,float,float,float>	minT = (a,b,c)	=> Mathf.Min(Mathf.Min(a,b),c);
-		private static Func<float,float,float,float> 	maxT = (a,b,c)	=> Mathf.Max(Mathf.Max(a,b),c);
+		private static Func<float,float,float,float>	minT = (a,b,c)	=> Mathf.Min(Mathf.Min(b,c),a);
+		private static Func<float,float,float,float> 	maxT = (a,b,c)	=> Mathf.Max(Mathf.Max(b,c),a);
 		private static Func<float,float,bool>		approxEq = Mathf.Approximately;
 
 		public static Dictionary<Color,string> knownColors;
@@ -37,8 +37,7 @@ namespace UnityEngine
 
 		public static float Brightness(this Color c) {
 			float maxv = maxT(c.r,c.g,c.b);
-			float minv = minT(c.r,c.g,c.b);
-			return (maxv + minv);
+			return maxv;
 		}
 
 		public static float Saturation(this Color c) {
