@@ -141,6 +141,9 @@ namespace SCANsat
 		/* Governs resource overlay availability */
 		private static bool globalResourceOverlay = false;
 
+		private readonly Color defaultLowBiomeColor = palette.xkcd_CamoGreen;
+		private readonly Color defaultHighBiomeColor = palette.xkcd_Marigold;
+
 		private Color lowBiomeColor = palette.xkcd_CamoGreen;
 		private Color highBiomeColor = palette.xkcd_Marigold;
 
@@ -248,6 +251,16 @@ namespace SCANsat
 		{
 			get { return highBiomeColor; }
 			internal set { highBiomeColor = value; }
+		}
+
+		public Color DefaultLowBiomeColor
+		{
+			get { return defaultLowBiomeColor; }
+		}
+
+		public Color DefaultHighBiomeColor
+		{
+			get { return defaultHighBiomeColor; }
 		}
 
 		#endregion
