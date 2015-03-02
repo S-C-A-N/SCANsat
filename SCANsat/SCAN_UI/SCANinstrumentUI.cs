@@ -105,9 +105,10 @@ namespace SCANsat.SCAN_UI
 			if (notMappingToday) noData(id);		/* to be shown when power is out *FixMe - non-functional */
 			else
 			{
-				if (biomeInfo(id)) ++parts;			/* show current biome info */
+				locationInfo(id);					/* always-on indicator for current lat/long */
 				if (altInfo(id)) ++parts;			/* show current altitude and slope */
 				if (anomalyInfo(id)) ++parts;		/* show nearest anomaly detail - including BTDT view */
+				if (biomeInfo(id)) ++parts;			/* show current biome info */
 				if (parts <= 0) noData(id);			/* nothing to show */
 			}
 			stopS();
@@ -117,7 +118,7 @@ namespace SCANsat.SCAN_UI
 		private void versionLabel(int id)
 		{
 			Rect r = new Rect(4, 0, 50, 18);
-			GUI.Label(r, SCANversions.SCANsatVersion, SCANskins.SCAN_whiteReadoutLabel);
+			GUI.Label(r, SCANmainMenuLoader.SCANsatVersion, SCANskins.SCAN_whiteReadoutLabel);
 		}
 
 		//Draw the close button in the upper right corner
@@ -135,12 +136,19 @@ namespace SCANsat.SCAN_UI
 			GUILayout.Label("NO DATA", SCANskins.SCAN_insWhiteLabel);
 		}
 
+		//Displays current vessel location info
+		private void locationInfo(int id)
+		{
+			GUILayout.Label(string.Format("Lat: {0:F2}°, Lon: {1:F2}°", SCANUtil.fixLatShift(v.latitude), SCANUtil.fixLonShift(v.longitude)), SCANskins.SCAN_insColorLabel);
+			fillS(-10);
+		}
+
 		//Display current biome info
 		private bool biomeInfo(int id)
 		{
 			if ((sensors & SCANtype.Biome) != SCANtype.Nothing && v.mainBody.BiomeMap != null)
 			{
-				GUILayout.Label(string.Format("Biome:  {0}", SCANUtil.getBiomeName(v.mainBody, v.longitude, v.latitude)), SCANskins.SCAN_insColorLabel);
+				GUILayout.Label(string.Format("Biome: {0}", SCANUtil.getBiomeName(v.mainBody, v.longitude, v.latitude)), SCANskins.SCAN_insColorLabel);
 				fillS(-10);
 				return true;
 			}
@@ -163,7 +171,7 @@ namespace SCANsat.SCAN_UI
 				if (h < 0)
 					h = v.altitude;
 
-				GUILayout.Label(string.Format("Altitude:  {0}", SCANuiUtil.distanceString(h, 100000)), SCANskins.SCAN_insColorLabel);
+				GUILayout.Label(string.Format("Altitude: {0}", SCANuiUtil.distanceString(h, 100000)), SCANskins.SCAN_insColorLabel);
 				fillS(-10);
 
 				//Calculate slope less frequently; the rapidly changing value makes it difficult to read otherwise
