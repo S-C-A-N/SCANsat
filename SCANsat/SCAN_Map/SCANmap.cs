@@ -366,8 +366,8 @@ namespace SCANsat.SCAN_Map
 				return;
 			body = b;
 			//SCANcontroller.controller.Resources(b); //Repopulate resource list when changing SOI
-			if (SCANcontroller.controller.GlobalResourceOverlay)
-				resource = SCANcontroller.controller.ResourceList[SCANcontroller.controller.resourceSelection][b.name];
+			if (SCANconfigLoader.GlobalResource)
+				resource = SCANcontroller.ResourceList[SCANcontroller.controller.resourceSelection][b.name];
 			resetMap();
 		}
 
@@ -381,9 +381,9 @@ namespace SCANsat.SCAN_Map
 		public void resetMap()
 		{
 			mapstep = 0;
-			if (SCANcontroller.controller.GlobalResourceOverlay)
+			if (SCANconfigLoader.GlobalResource)
 			{ //Make sure that a resource is initialized if necessary
-				if (resource == null && body != null) resource = SCANcontroller.controller.ResourceList[SCANcontroller.controller.resourceSelection][body.name];
+				if (resource == null && body != null) resource = SCANcontroller.ResourceList[SCANcontroller.controller.resourceSelection][body.name];
 				if (SCANcontroller.controller.resourceOverlayType == 1)
 					SCANcontroller.controller.KethaneReset = !SCANcontroller.controller.KethaneReset;
 			}
@@ -408,7 +408,7 @@ namespace SCANsat.SCAN_Map
 				case mapType.Slope: mode = "slope"; break;
 				case mapType.Biome: mode = "biome"; break;
 			}
-			if (SCANcontroller.controller.map_ResourceOverlay && SCANcontroller.controller.GlobalResourceOverlay && !string.IsNullOrEmpty(SCANcontroller.controller.resourceSelection))
+			if (SCANcontroller.controller.map_ResourceOverlay && SCANconfigLoader.GlobalResource && !string.IsNullOrEmpty(SCANcontroller.controller.resourceSelection))
 				mode += "-" + SCANcontroller.controller.resourceSelection;
 			if (SCANcontroller.controller.colours == 1)
 				mode += "-grey";
@@ -528,7 +528,7 @@ namespace SCANsat.SCAN_Map
 					}
 					mapline[i] = projVal;
 
-					if (SCANcontroller.controller.map_ResourceOverlay && SCANcontroller.controller.GlobalResourceOverlay)
+					if (SCANcontroller.controller.map_ResourceOverlay && SCANconfigLoader.GlobalResource)
 					{
 						pix[i] = resourceToColor(lon, lat, data, baseColor);
 					}
@@ -589,7 +589,7 @@ namespace SCANsat.SCAN_Map
 						}
 						mapline[i] = projVal;
 					}
-					if (SCANcontroller.controller.map_ResourceOverlay && SCANcontroller.controller.GlobalResourceOverlay)
+					if (SCANcontroller.controller.map_ResourceOverlay && SCANconfigLoader.GlobalResource)
 					{
 						pix[i] = resourceToColor(lon, lat, data, baseColor);
 					}
@@ -659,7 +659,7 @@ namespace SCANsat.SCAN_Map
 						baseColor = biome;
 						mapline[i] = bio;
 					}
-					if (SCANcontroller.controller.map_ResourceOverlay && SCANcontroller.controller.GlobalResourceOverlay)
+					if (SCANcontroller.controller.map_ResourceOverlay && SCANconfigLoader.GlobalResource)
 					{
 						pix[i] = resourceToColor(lon, lat, data, baseColor);
 					}
@@ -713,7 +713,7 @@ namespace SCANsat.SCAN_Map
 		private double resourceMapValue(double Lon, double Lat, SCANdata Data)
 		{
 			double amount = 0;
-			if (SCANcontroller.controller.resourceOverlayType == 0 && SCANversions.RegolithFound)
+			if (SCANcontroller.controller.resourceOverlayType == 0 && SCANmainMenuLoader.RegolithFound)
 			{
 				if (SCANUtil.isCovered(Lon, Lat, Data, resource.Type)) //check our new resource coverage map
 				{
@@ -752,9 +752,9 @@ namespace SCANsat.SCAN_Map
 				return BaseColor;
 			else if (amount == 0)
 				return palette.lerp(BaseColor, palette.grey, 0.4f);
-			else if (SCANcontroller.controller.resourceOverlayType == 0 && SCANversions.RegolithFound)
+			else if (SCANcontroller.controller.resourceOverlayType == 0 && SCANmainMenuLoader.RegolithFound)
 				return palette.lerp(palette.lerp(resource.EmptyColor, resource.FullColor, (float)amount / (resource.MaxValue - resource.MinValue)), BaseColor, resource.Transparency);
-			else if (SCANcontroller.controller.resourceOverlayType == 1 && SCANversions.kethaneLoaded)
+			else if (SCANcontroller.controller.resourceOverlayType == 1 && SCANmainMenuLoader.kethaneLoaded)
 				return palette.lerp(palette.lerp(resource.EmptyColor, resource.FullColor, (float)amount / resource.MaxValue), BaseColor, 0.3f);
 
 			return BaseColor;

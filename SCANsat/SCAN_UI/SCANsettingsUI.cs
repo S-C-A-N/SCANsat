@@ -161,7 +161,7 @@ namespace SCANsat.SCAN_UI
 		private void versionLabel(int id)
 		{
 			Rect r = new Rect(6, 0, 50, 18);
-			GUI.Label(r, SCANversions.SCANsatVersion, SCANskins.SCAN_whiteReadoutLabel);
+			GUI.Label(r, SCANmainMenuLoader.SCANsatVersion, SCANskins.SCAN_whiteReadoutLabel);
 		}
 
 		//Draw the close button in the upper right corner
@@ -228,7 +228,7 @@ namespace SCANsat.SCAN_UI
 		//Update the Kethane database to reset the map grid
 		private void gui_settings_rebuild_kethane(int id)
 		{
-			if (SCANcontroller.controller.resourceOverlayType == 1 && SCANcontroller.controller.GlobalResourceOverlay)
+			if (SCANcontroller.controller.resourceOverlayType == 1 && SCANconfigLoader.GlobalResource)
 			{ //Rebuild the Kethane database
 				if (GUILayout.Button("Rebuild Kethane Grid Database"))
 					SCANcontroller.controller.KethaneRebuild = !SCANcontroller.controller.KethaneRebuild;
@@ -331,7 +331,7 @@ namespace SCANsat.SCAN_UI
 				SCANcontroller.controller.useStockAppLauncher = GUILayout.Toggle(SCANcontroller.controller.useStockAppLauncher, "Stock Toolbar", SCANskins.SCAN_settingsToggle);
 
 				SCANcontroller.controller.toolTips = GUILayout.Toggle(SCANcontroller.controller.toolTips, "Tooltips", SCANskins.SCAN_settingsToggle);
-				if (SCANcontroller.controller.GlobalResourceOverlay && SCANversions.RegolithFound)
+				if (SCANconfigLoader.GlobalResource && SCANmainMenuLoader.RegolithFound)
 				{
 					SCANcontroller.controller.regolithBiomeLock = GUILayout.Toggle(SCANcontroller.controller.regolithBiomeLock, "Regolith Biome Lock", SCANskins.SCAN_settingsToggle);
 				}

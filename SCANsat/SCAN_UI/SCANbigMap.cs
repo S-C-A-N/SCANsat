@@ -98,8 +98,8 @@ namespace SCANsat.SCAN_UI
 				SCANcontroller.controller.addToBodyData(b, data);
 			}
 			bigmap.setBody(b);
-			if (SCANcontroller.controller.ResourceList.Count > 0)
-				bigmap.Resource = SCANcontroller.controller.ResourceList[SCANcontroller.controller.resourceSelection][b.name];
+			if (SCANcontroller.ResourceList.Count > 0)
+				bigmap.Resource = SCANcontroller.ResourceList[SCANcontroller.controller.resourceSelection][b.name];
 			TooltipsEnabled = SCANcontroller.controller.toolTips;
 		}
 
@@ -225,7 +225,7 @@ namespace SCANsat.SCAN_UI
 		private void versionLabel(int id)
 		{
 			Rect r = new Rect(6, 0, 50, 18);
-			GUI.Label(r, SCANversions.SCANsatVersion, SCANskins.SCAN_whiteReadoutLabel);
+			GUI.Label(r, SCANmainMenuLoader.SCANsatVersion, SCANskins.SCAN_whiteReadoutLabel);
 		}
 
 		//Draw the close button in upper right corner
@@ -261,7 +261,7 @@ namespace SCANsat.SCAN_UI
 					bigmap.resetMap();
 				}
 				fillS();
-				if (SCANcontroller.controller.GlobalResourceOverlay)
+				if (SCANconfigLoader.GlobalResource)
 				{
 					if (GUILayout.Button("Resources", SCANskins.SCAN_buttonFixed, GUILayout.MaxWidth(90)))
 					{
@@ -387,7 +387,7 @@ namespace SCANsat.SCAN_UI
 					SCANcontroller.controller.legend = !SCANcontroller.controller.legend;
 				}
 
-				if (SCANcontroller.controller.GlobalResourceOverlay)
+				if (SCANconfigLoader.GlobalResource)
 				{
 					fillS();
 					SCANcontroller.controller.map_ResourceOverlay = GUILayout.Toggle(SCANcontroller.controller.map_ResourceOverlay, textWithTT("", "Toggle Resources"));
@@ -668,8 +668,8 @@ namespace SCANsat.SCAN_UI
 			{
 				spotmap.setBody(b);
 
-				if (SCANcontroller.controller.GlobalResourceOverlay)
-					spotmap.Resource = SCANcontroller.controller.ResourceList[SCANcontroller.controller.resourceSelection][b.name];
+				if (SCANconfigLoader.GlobalResource)
+					spotmap.Resource = SCANcontroller.ResourceList[SCANcontroller.controller.resourceSelection][b.name];
 
 				GUI.Box(pos_spotmap, spotmap.getPartialMap());
 				SCANuiUtil.drawOrbit(pos_spotmap, spotmap, v, b);
@@ -728,15 +728,15 @@ namespace SCANsat.SCAN_UI
 			{
 				ddRect = new Rect(WindowRect.width - 290, 45, 120, 160);
 				GUI.Box(ddRect, "", SCANskins.SCAN_dropDownBox);
-				for (int i = 0; i < SCANcontroller.controller.ResourceList.Count; i++)
+				for (int i = 0; i < SCANcontroller.ResourceList.Count; i++)
 				{
-					scrollR = GUI.BeginScrollView(ddRect, scrollR, new Rect(0, 0, 100, 20 * SCANcontroller.controller.ResourceList.Count));
+					scrollR = GUI.BeginScrollView(ddRect, scrollR, new Rect(0, 0, 100, 20 * SCANcontroller.ResourceList.Count));
 					Rect r = new Rect(2, 20 * i, 96, 20);
-					if (GUI.Button(r, SCANcontroller.controller.ResourceList.ElementAt(i).Key, SCANskins.SCAN_dropDownButton))
+					if (GUI.Button(r, SCANcontroller.ResourceList.ElementAt(i).Key, SCANskins.SCAN_dropDownButton))
 					{
-						bigmap.Resource = SCANcontroller.controller.ResourceList.ElementAt(i).Value[b.name];
+						bigmap.Resource = SCANcontroller.ResourceList.ElementAt(i).Value[b.name];
 						SCANcontroller.controller.resourceSelection = bigmap.Resource.Name;
-						if (SCANcontroller.controller.ResourceList.ElementAt(i).Value[b.name].Source == SCANresource_Source.Kethane)
+						if (SCANcontroller.ResourceList.ElementAt(i).Value[b.name].Source == SCANresource_Source.Kethane)
 							SCANcontroller.controller.resourceOverlayType = 1;
 						else
 							SCANcontroller.controller.resourceOverlayType = 0;
