@@ -26,6 +26,18 @@ namespace SCANsat.SCAN_Data
 			body = b;
 		}
 
+		internal SCANterrainConfig(SCANterrainConfig copy)
+		{
+			minTerrain = copy.minTerrain;
+			maxTerrain = copy.maxTerrain;
+			clampTerrain = copy.clampTerrain;
+			colorPal = copy.colorPal;
+			palSize = copy.palSize;
+			palRev = copy.palRev;
+			palDis = copy.palDis;
+			body = copy.body;
+		}
+
 		public float MinTerrain
 		{
 			get { return minTerrain; }
