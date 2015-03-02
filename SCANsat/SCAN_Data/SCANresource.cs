@@ -25,7 +25,7 @@ namespace SCANsat.SCAN_Data
 
 	public class SCANresource
 	{
-		internal SCANresource(string n, string Body, Color full, Color empty, float min, float max, SCANresourceType t, SCANresource_Source s)
+		internal SCANresource(string n, string Body, Color full, Color empty, float min, float max)
 		{
 			name = n;
 			body = Body;
@@ -33,23 +33,23 @@ namespace SCANsat.SCAN_Data
 			emptyColor = empty;
 			minValue = defaultMinValue = min;
 			maxValue = defaultMaxValue = max;
-			resourceType = t;
-			type = resourceType.Type;
-			source = s;
+			//resourceType = t;
+			//type = resourceType.Type;
+			//source = s;
 		}
 
 		private string name;
 		private string body;
 		private Color fullColor, emptyColor;
 		private float minValue, maxValue, defaultMinValue, defaultMaxValue;
-		private float transparency = 0.4f;
-		private SCANtype type;
-		private SCANresourceType resourceType;
-		private SCANresource_Source source;
+		//private float transparency = 0.4f;
+		//private SCANtype type;
+		//private SCANresourceType resourceType;
+		//private SCANresource_Source source;
 
 		public static SCANresource resourceCopy(SCANresource r)
 		{
-			SCANresource res = new SCANresource(r.name, r.body, r.fullColor, r.emptyColor, r.minValue, r.maxValue, r.resourceType, r.source);
+			SCANresource res = new SCANresource(r.name, r.body, r.fullColor, r.emptyColor, r.minValue, r.maxValue);
 			return res;
 		}
 
@@ -75,15 +75,15 @@ namespace SCANsat.SCAN_Data
 			internal set { emptyColor = value; }
 		}
 
-		public SCANtype Type
-		{
-			get { return type; }
-		}
+		//public SCANtype Type
+		//{
+		//	get { return type; }
+		//}
 
-		public SCANresourceType ResourceType
-		{
-			get { return resourceType; }
-		}
+		//public SCANresourceType ResourceType
+		//{
+		//	get { return resourceType; }
+		//}
 
 		public float MinValue
 		{
@@ -115,20 +115,20 @@ namespace SCANsat.SCAN_Data
 			get { return defaultMaxValue; }
 		}
 
-		public float Transparency
-		{
-			get { return transparency; }
-			internal set
-			{
-				if (value >= 0 && value <= 100)
-					transparency = value / 100;
-			}
-		}
+		//public float Transparency
+		//{
+		//	get { return transparency; }
+		//	internal set
+		//	{
+		//		if (value >= 0 && value <= 100)
+		//			transparency = value / 100;
+		//	}
+		//}
 
-		public SCANresource_Source Source
-		{
-			get { return source; }
-		}
+		//public SCANresource_Source Source
+		//{
+		//	get { return source; }
+		//}
 	}
 
 	public class SCANresourceType
