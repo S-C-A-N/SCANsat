@@ -117,7 +117,7 @@ namespace SCANsat
 
 		private static Dictionary<string, SCANterrainConfig> terrainConfigData;
 
-		//private static Dictionary<string, SCANresourceData> resourceConfigData;
+		private static Dictionary<string, SCANresourceConfig> resourceConfigData;
 
 		/* Primary SCANsat vessel dictionary; loaded every time */
 		private Dictionary<Guid, SCANvessel> knownVessels = new Dictionary<Guid, SCANvessel>();
@@ -179,6 +179,20 @@ namespace SCANsat
 				terrainConfigData.Add(name, data);
 			else
 				Debug.LogError("[SCANsat] Warning: SCANterrain Data Dictionary Already Contains Key Of This Type");
+		}
+
+		public static Dictionary<string, SCANresourceConfig> ResourceConfigData
+		{
+			get { return resourceConfigData; }
+			internal set { resourceConfigData = value; }
+		}
+
+		public static void addToResourceConfigData (string name, SCANresourceConfig data)
+		{
+			if (!resourceConfigData.ContainsKey(name))
+				resourceConfigData.Add(name, data);
+			else
+				Debug.LogError("[SCANsat] Warning: SCANresource Data Dictionary Already Contains Key Of This Type");
 		}
 
 		public static Dictionary<string, Dictionary<string, SCANresource>> ResourceList
@@ -678,26 +692,15 @@ namespace SCANsat
 			Color lowColor = new Color();
 			Color highColor = new Color();
 			float transparent;
-			try
+			if (!SCANUtil.loadColor(ref lowColor, low))
 			{
-				lowColor = lowColor.FromHex(low);
-			}
-			catch (Exception e)
-			{
-				SCANUtil.SCANlog("Low Resource Color Format Incorrect; Reverting To Default: {0}", e);
 				if (resourceTypes.ContainsKey(resource))
 					lowColor = resourceTypes[resource].ColorEmpty;
 				else
 					lowColor = palette.xkcd_DarkPurple;
 			}
-
-			try
+			if (!SCANUtil.loadColor(ref highColor, high))
 			{
-				highColor = highColor.FromHex(high);
-			}
-			catch (Exception e)
-			{
-				SCANUtil.SCANlog("High Resource Color Format Incorrect; Reverting To Default: {0}", e);
 				if (resourceTypes.ContainsKey(resource))
 					highColor = resourceTypes[resource].ColorFull;
 				else

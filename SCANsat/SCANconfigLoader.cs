@@ -6,6 +6,7 @@ using SCANsat.SCAN_Platform.Palettes;
 using SCANsat.SCAN_Platform.Palettes.ColorBrewer;
 using SCANsat.SCAN_Platform.Palettes.FixedColors;
 using UnityEngine;
+using palette = SCANsat.SCAN_UI.UI_Framework.SCANpalette;
 
 namespace SCANsat
 {
@@ -202,64 +203,62 @@ namespace SCANsat
 		private static void loadTerrainConfigs()
 		{
 			SCANcontroller.TerrainConfigData = new Dictionary<string, SCANterrainConfig>();
-			foreach (ConfigNode altimetryNode in GameDatabase.Instance.GetConfigNodes("SCANSAT_ALTIMETRY"))
+			ConfigNode altimetryNode = GameDatabase.Instance.GetConfigNode("SCANSAT_ALTIMETRY");
+			if (altimetryNode != null)
 			{
-				if (altimetryNode != null)
+				float defaultMin, defaultMax;
+				string defaultPalette = "Default";
+				if (!float.TryParse(altimetryNode.GetValue("defaultMinHeightRange"), out defaultMin))
+					defaultMin = -1000f;
+				if (!float.TryParse(altimetryNode.GetValue("defaultMaxHeightRange"), out defaultMax))
+					defaultMax = 8000f;
+				if (altimetryNode.HasValue("defaultPalette"))
+					defaultPalette = altimetryNode.GetValue("defaultPalette");
+
+				foreach (ConfigNode terrainNode in GameDatabase.Instance.GetConfigNodes("SCANSAT_PLANETARY_CONFIG"))
 				{
-					float defaultMin, defaultMax;
-					string defaultPalette = "Default";
-					if (!float.TryParse(altimetryNode.GetValue("defaultMinHeightRange"), out defaultMin))
-						defaultMin = -1000f;
-					if (!float.TryParse(altimetryNode.GetValue("defaultMaxHeightRange"), out defaultMax))
-						defaultMax = 8000f;
-					if (altimetryNode.HasValue("defaultPalette"))
-						defaultPalette = altimetryNode.GetValue("defaultPalette");
-
-					foreach (ConfigNode terrainNode in GameDatabase.Instance.GetConfigNodes("SCANSAT_PLANETARY_CONFIG"))
+					if (terrainNode != null)
 					{
-						if (terrainNode != null)
+						int index, size;
+						float min, max, clampf;
+						float? clamp;
+						bool reverse, discrete;
+						string palette = defaultPalette;
+						Palette color;
+						CelestialBody body;
+						if (!int.TryParse(terrainNode.GetValue("index"), out index))
+							continue;
+
+						body = FlightGlobals.Bodies.FirstOrDefault(b => b.flightGlobalsIndex == index);
+
+						if (body == null)
+							continue;
+
+						if (!float.TryParse(terrainNode.GetValue("minHeightRange"), out min))
+							min = defaultMin;
+						if (!float.TryParse(terrainNode.GetValue("maxHeightRange"), out max))
+							max = defaultMax;
+						if (terrainNode.HasValue("clampHeight"))
 						{
-							int index, size;
-							float min, max, clampf;
-							float? clamp;
-							bool reverse, discrete;
-							string palette = defaultPalette;
-							Palette color;
-							CelestialBody body;
-							if (!int.TryParse(terrainNode.GetValue("index"), out index))
-								continue;
-
-							body = FlightGlobals.Bodies.FirstOrDefault(b => b.flightGlobalsIndex == index);
-
-							if (body == null)
-								continue;
-
-							if (!float.TryParse(terrainNode.GetValue("minHeightRange"), out min))
-								min = defaultMin;
-							if (!float.TryParse(terrainNode.GetValue("maxHeightRange"), out max))
-								max = defaultMax;
-							if (terrainNode.HasValue("clampHeight"))
-							{
-								if (float.TryParse(terrainNode.GetValue("clampHeight"), out clampf))
-									clamp = clampf;
-								else
-									clamp = null;
-							}
+							if (float.TryParse(terrainNode.GetValue("clampHeight"), out clampf))
+								clamp = clampf;
 							else
 								clamp = null;
-							if (!int.TryParse(terrainNode.GetValue("paletteSize"), out size))
-								size = 7;
-							if (!bool.TryParse(terrainNode.GetValue("paletteReverse"), out reverse))
-								reverse = false;
-							if (!bool.TryParse(terrainNode.GetValue("paletteDiscrete"), out discrete))
-								discrete = false;
-
-							color = paletteLoader(palette, size);
-
-							SCANterrainConfig data = new SCANterrainConfig(min, max, clamp, color, size, reverse, discrete, body);
-
-							SCANcontroller.addToTerrainConfigData(body.name, data);
 						}
+						else
+							clamp = null;
+						if (!int.TryParse(terrainNode.GetValue("paletteSize"), out size))
+							size = 7;
+						if (!bool.TryParse(terrainNode.GetValue("paletteReverse"), out reverse))
+							reverse = false;
+						if (!bool.TryParse(terrainNode.GetValue("paletteDiscrete"), out discrete))
+							discrete = false;
+
+						color = paletteLoader(palette, size);
+
+						SCANterrainConfig data = new SCANterrainConfig(min, max, clamp, color, size, reverse, discrete, body);
+
+						SCANcontroller.addToTerrainConfigData(body.name, data);
 					}
 				}
 			}
@@ -267,12 +266,85 @@ namespace SCANsat
 
 		private static void loadBiomeSlopeConfigs()
 		{
-
+			ConfigNode biomeNode = GameDatabase.Instance.GetConfigNode("SCANSAT_BIOME");
+			if (biomeNode != null)
+			{
+				string lowC, highC;
+				Color lowColor = new Color();
+				Color highColor = new Color();
+				float transparency;
+				bool stockBiome;
+				if (!float.TryParse(biomeNode.GetValue("biomeTransparency"), out transparency))
+					transparency = 40;
+				if (!bool.TryParse(biomeNode.GetValue("stockBiomeMap"), out stockBiome))
+					stockBiome = false;
+				lowC = biomeNode.GetValue("lowBiomeColor");
+				if (!SCANUtil.loadColor(ref lowColor, lowC))
+					lowColor = palette.xkcd_CamoGreen;
+				highC = biomeNode.GetValue("highBiomeColor");
+				if (!SCANUtil.loadColor(ref highColor, highC))
+					highColor = palette.xkcd_Marigold;
+			}
 		}
 
 		private static void loadResourceConfigs()
 		{
+			SCANcontroller.ResourceConfigData = new Dictionary<string, SCANresourceConfig>();
+			ConfigNode resourceNode = GameDatabase.Instance.GetConfigNode("SCANSAT_RESOURCE");
+			if (resourceNode != null)
+			{
+				foreach (ConfigNode resourceConfig in resourceNode.GetNodes("SCANSAT_RESOURCE_CONFIG"))
+				{
+					if (resourceConfig != null)
+					{
+						string name, lowC, highC;
+						Color lowColor = new Color();
+						Color highColor = new Color();
+						float transparency;
+						if (resourceConfig.HasValue("name"))
+							name = resourceConfig.GetValue("name");
+						else
+							continue;
+						lowC = resourceConfig.GetValue("lowResourceColor");
+						highC = resourceConfig.GetValue("highResourceColor");
+						if (!SCANUtil.loadColor(ref lowColor, lowC))
+							lowColor = lowColor;
+						if (!SCANUtil.loadColor(ref highColor, highC))
+							highColor = highColor;
+						if (!float.TryParse(resourceConfig.GetValue("resourceTransparency"), out transparency))
+							transparency = 20;
 
+						foreach (ConfigNode planetaryResourceConfig in resourceConfig.GetNodes("RESOURCE_PLANETARY_CONFIG"))
+						{
+							if (planetaryResourceConfig != null)
+							{
+								string bodyName;
+								int index;
+								float minValue, maxValue;
+								CelestialBody body;
+
+								if (planetaryResourceConfig.HasValue("name"))
+									bodyName = planetaryResourceConfig.GetValue("name");
+								else
+									continue;
+
+								if (!int.TryParse(planetaryResourceConfig.GetValue("index"), out index))
+									continue;
+
+								body = FlightGlobals.Bodies.FirstOrDefault(b => b.flightGlobalsIndex == index);
+
+								if (body == null)
+									continue;
+
+								if (!float.TryParse(planetaryResourceConfig.GetValue(""), out minValue))
+									minValue = 0.1f;
+								if (!float.TryParse(planetaryResourceConfig.GetValue(""), out maxValue))
+									maxValue = 10f;
+							}
+						}
+					}
+				}
+			}
 		}
 
 		internal static Palette paletteLoader(string name, int size)

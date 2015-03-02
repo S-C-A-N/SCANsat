@@ -360,6 +360,25 @@ namespace SCANsat
 			return count;
 		}
 
+		internal static bool loadColor(ref Color c, string s)
+		{
+			if (!string.IsNullOrEmpty(s))
+			{
+				try
+				{
+					c = c.FromHex(s);
+					return true;
+				}
+				catch (Exception e)
+				{
+					SCANlog("Error while loading color; incorrect format: {0}", e);
+					return false;
+				}
+			}
+			else
+				return false;
+		}
+
 		internal static void SCANlog(string log, params object[] stringObjects)
 		{
 			log = string.Format(log, stringObjects);
