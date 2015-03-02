@@ -117,7 +117,7 @@ namespace SCANsat
 
 		private static Dictionary<string, SCANterrainConfig> terrainConfigData;
 
-		private static Dictionary<string, SCANresourceConfig> resourceConfigData;
+		private static Dictionary<string, SCANresourceGlobal> resourceConfigData;
 
 		/* Primary SCANsat vessel dictionary; loaded every time */
 		private Dictionary<Guid, SCANvessel> knownVessels = new Dictionary<Guid, SCANvessel>();
@@ -181,13 +181,13 @@ namespace SCANsat
 				Debug.LogError("[SCANsat] Warning: SCANterrain Data Dictionary Already Contains Key Of This Type");
 		}
 
-		public static Dictionary<string, SCANresourceConfig> ResourceConfigData
+		public static Dictionary<string, SCANresourceGlobal> ResourceConfigData
 		{
 			get { return resourceConfigData; }
 			internal set { resourceConfigData = value; }
 		}
 
-		public static void addToResourceConfigData (string name, SCANresourceConfig data)
+		public static void addToResourceConfigData (string name, SCANresourceGlobal data)
 		{
 			if (!resourceConfigData.ContainsKey(name))
 				resourceConfigData.Add(name, data);

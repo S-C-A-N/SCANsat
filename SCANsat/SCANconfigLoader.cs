@@ -289,7 +289,7 @@ namespace SCANsat
 
 		private static void loadResourceConfigs()
 		{
-			SCANcontroller.ResourceConfigData = new Dictionary<string, SCANresourceConfig>();
+			SCANcontroller.ResourceConfigData = new Dictionary<string, SCANresourceGlobal>();
 			ConfigNode resourceNode = GameDatabase.Instance.GetConfigNode("SCANSAT_RESOURCE");
 			if (resourceNode != null)
 			{
