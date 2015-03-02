@@ -120,9 +120,12 @@ namespace SCANsat.SCAN_UI
 
 			biomeTransSlider = new SCANuiSlider(0, 100, SCANcontroller.controller.biomeTransparency, "Ter. Trans: ", "%", 0);
 
-			if (SCANcontroller.controller.GlobalResourceOverlay)
+			if (SCANconfigLoader.GlobalResource)
 			{
-				currentResource = SCANcontroller.controller.ResourceList.ElementAt(0).Value.ElementAt(0).Value;
+				if (SCANcontroller.ResourceList.ElementAt(0).Value.ContainsKey(data.Body.name))
+					currentResource = SCANcontroller.ResourceList.ElementAt(0).Value[data.Body.name];
+				else
+					currentResource = SCANcontroller.ResourceList.ElementAt(0).Value.ElementAt(0).Value;
 				if (currentResource != null)
 				{
 					resourceMinSlider = new SCANuiSlider(0, currentResource.MaxValue - 0.1f, currentResource.MinValue, "Min: ", "%", 1);
@@ -132,7 +135,7 @@ namespace SCANsat.SCAN_UI
 				bodyIndex = data.Body.flightGlobalsIndex;
 			}
 
-			if (windowMode > 3 || (windowMode > 2 && !SCANcontroller.controller.GlobalResourceOverlay))
+			if (windowMode > 3 || (windowMode > 2 && !SCANconfigLoader.GlobalResource))
 				windowMode = 0;
 
 			setSizeSlider(palette.CurrentPalette.kind);
@@ -348,7 +351,7 @@ namespace SCANsat.SCAN_UI
 						stopS();
 					stopE();
 				}
-				else if (windowMode == 3 && SCANcontroller.controller.GlobalResourceOverlay)
+				else if (windowMode == 3 && SCANconfigLoader.GlobalResource)
 				{
 					growE();
 						fillS(20);
@@ -399,10 +402,10 @@ namespace SCANsat.SCAN_UI
 				{
 					SCANUtil.SCANdebugLog("Trigger Body Change");
 					bodyIndex = data.Body.flightGlobalsIndex;
-					if (SCANcontroller.controller.ResourceList[currentResource.Name].ContainsKey(data.Body.name))
-						currentResource = SCANcontroller.controller.ResourceList[currentResource.Name][data.Body.name];
+					if (SCANcontroller.ResourceList[currentResource.Name].ContainsKey(data.Body.name))
+						currentResource = SCANcontroller.ResourceList[currentResource.Name][data.Body.name];
 					else
-						currentResource = SCANcontroller.controller.ResourceList[currentResource.Name].ElementAt(0).Value;
+						currentResource = SCANcontroller.ResourceList[currentResource.Name].ElementAt(0).Value;
 
 					resourceMinSlider.CurrentValue = currentResource.MinValue;
 					resourceMaxSlider.CurrentValue = currentResource.MaxValue;
@@ -499,7 +502,7 @@ namespace SCANsat.SCAN_UI
 		private void versionLabel(int id)
 		{
 			Rect r = new Rect(6, 0, 50, 18);
-			GUI.Label(r, SCANversions.SCANsatVersion, SCANskins.SCAN_whiteReadoutLabel);
+			GUI.Label(r, SCANmainMenuLoader.SCANsatVersion, SCANskins.SCAN_whiteReadoutLabel);
 		}
 
 		//Draw the close button in the upper right corner
@@ -547,7 +550,7 @@ namespace SCANsat.SCAN_UI
 					maxColorOld.SetPixel(0, 0, colorHigh);
 					maxColorOld.Apply();
 				}
-				if (SCANcontroller.controller.GlobalResourceOverlay)
+				if (SCANconfigLoader.GlobalResource)
 				{
 					if (GUILayout.Button("Resources"))
 					{
@@ -952,9 +955,9 @@ namespace SCANsat.SCAN_UI
 			{
 				currentResource.MinValue = resourceMinSlider.CurrentValue;
 				currentResource.MaxValue = resourceMaxSlider.CurrentValue;
-				if (SCANcontroller.controller.ResourceList.ContainsKey(currentResource.Name))
+				if (SCANcontroller.ResourceList.ContainsKey(currentResource.Name))
 				{
-					var allResourceList = SCANcontroller.controller.ResourceList[currentResource.Name].Values;
+					var allResourceList = SCANcontroller.ResourceList[currentResource.Name].Values;
 					foreach (SCANresource r in allResourceList)
 					{
 						r.Transparency = resourceTransSlider.CurrentValue;
@@ -972,9 +975,9 @@ namespace SCANsat.SCAN_UI
 			fillS(6);
 			if (GUILayout.Button("Save All Values", GUILayout.Width(120)))
 			{
-				if (SCANcontroller.controller.ResourceList.ContainsKey(currentResource.Name))
+				if (SCANcontroller.ResourceList.ContainsKey(currentResource.Name))
 				{
-					var allResourceList = SCANcontroller.controller.ResourceList[currentResource.Name].Values;
+					var allResourceList = SCANcontroller.ResourceList[currentResource.Name].Values;
 
 					foreach (SCANresource r in allResourceList)
 					{
@@ -999,9 +1002,9 @@ namespace SCANsat.SCAN_UI
 			{
 				currentResource.MinValue = currentResource.DefaultMinValue;
 				currentResource.MaxValue = currentResource.DefaultMaxValue;
-				if (SCANcontroller.controller.ResourceList.ContainsKey(currentResource.Name))
+				if (SCANcontroller.ResourceList.ContainsKey(currentResource.Name))
 				{
-					var allResourceList = SCANcontroller.controller.ResourceList[currentResource.Name].Values;
+					var allResourceList = SCANcontroller.ResourceList[currentResource.Name].Values;
 					foreach (SCANresource r in allResourceList)
 					{
 						r.Transparency = 40f;
@@ -1037,9 +1040,9 @@ namespace SCANsat.SCAN_UI
 			fillS(6);
 			if (GUILayout.Button("Revert All To Default", GUILayout.Width(140)))
 			{
-				if (SCANcontroller.controller.ResourceList.ContainsKey(currentResource.Name))
+				if (SCANcontroller.ResourceList.ContainsKey(currentResource.Name))
 				{
-					var allResourceList = SCANcontroller.controller.ResourceList[currentResource.Name].Values;
+					var allResourceList = SCANcontroller.ResourceList[currentResource.Name].Values;
 					foreach (SCANresource r in allResourceList)
 					{
 						r.MinValue = r.DefaultMinValue;
@@ -1101,21 +1104,36 @@ namespace SCANsat.SCAN_UI
 				{
 					ddRect = new Rect(WindowRect.width - 320, 135, 160, 140);
 					GUI.Box(ddRect, "", SCANskins.SCAN_dropDownBox);
-					for (int i = 0; i < SCANcontroller.controller.ResourceList.Count; i ++)
+					for (int i = 0; i < SCANcontroller.ResourceList.Count; i ++)
 					{
-						string s = SCANcontroller.controller.ResourceList.ElementAt(i).Value.ElementAt(0).Value.Name;
-						scrollR = GUI.BeginScrollView(ddRect, scrollR, new Rect(0, 0, 140, 23 * SCANcontroller.controller.ResourceList.Count));
+						string s = SCANcontroller.ResourceList.ElementAt(i).Value.ElementAt(0).Value.Name;
+						scrollR = GUI.BeginScrollView(ddRect, scrollR, new Rect(0, 0, 140, 23 * SCANcontroller.ResourceList.Count));
 						Rect r = new Rect(2, i * 23, 136, 22);
 						if (GUI.Button(r, s, SCANskins.SCAN_dropDownButton))
 						{
-							if (SCANcontroller.controller.ResourceList[s].ContainsKey(data.Body.name))
-								currentResource = SCANcontroller.controller.ResourceList[s][data.Body.name];
+							if (SCANcontroller.ResourceList[s].ContainsKey(data.Body.name))
+								currentResource = SCANcontroller.ResourceList[s][data.Body.name];
 							else
-								currentResource = SCANcontroller.controller.ResourceList[s].ElementAt(0).Value;
+								currentResource = SCANcontroller.ResourceList[s].ElementAt(0).Value;
 							resourceMinSlider.CurrentValue = currentResource.MinValue;
 							resourceMaxSlider.CurrentValue = currentResource.MaxValue;
 							resourceTransSlider.CurrentValue = currentResource.Transparency * 100;
 							fineControlMode = oldFineControl = false;
+							lowColorChange = true;
+							oldColorState = true;
+							colorLow = sliderColorLow = c = currentResource.EmptyColor;
+							colorHigh = sliderColorHigh = currentResource.FullColor;
+							minColorPreview.SetPixel(0, 0, colorLow);
+							minColorPreview.Apply();
+
+							maxColorPreview.SetPixel(0, 0, colorHigh);
+							maxColorPreview.Apply();
+
+							minColorOld.SetPixel(0, 0, colorLow);
+							minColorOld.Apply();
+
+							maxColorOld.SetPixel(0, 0, colorHigh);
+							maxColorOld.Apply();
 							setResourceSliders();
 							dropDown = false;
 							resourceBox = false;
@@ -1197,10 +1215,10 @@ namespace SCANsat.SCAN_UI
 		{
 			minTerrainSlider.MinValue = data.DefaultMinHeight - 10000f;
 			maxTerrainSlider.MaxValue = data.DefaultMaxHeight + 10000f;
-			minTerrainSlider.MaxValue = maxTerrainSlider.CurrentValue- 100f;
+			minTerrainSlider.MaxValue = maxTerrainSlider.CurrentValue - 100f;
 			maxTerrainSlider.MinValue = minTerrainSlider.CurrentValue + 100f;
 			clampTerrainSlider.MinValue = minTerrainSlider.CurrentValue + 10f;
-			clampTerrainSlider.MaxValue = maxTerrainSlider.MinValue - 10f;
+			clampTerrainSlider.MaxValue = maxTerrainSlider.CurrentValue - 10f;
 			if (clampTerrainSlider.CurrentValue < minTerrainSlider.CurrentValue + 10f)
 				clampTerrainSlider.CurrentValue = minTerrainSlider.CurrentValue + 10f;
 			else if (clampTerrainSlider.CurrentValue > maxTerrainSlider.CurrentValue - 10f)
