@@ -52,7 +52,7 @@ namespace SCANsat.SCAN_UI
 		private Texture2D maxColorPreview = new Texture2D(1, 1);
 		private Texture2D maxColorOld = new Texture2D(1, 1);
 
-		private SCANresource currentResource;
+		private SCANresourceBody currentResource;
 		private Vector2 scrollR;
 
 		private bool stockBiomes = false;
@@ -958,7 +958,7 @@ namespace SCANsat.SCAN_UI
 				if (SCANcontroller.ResourceList.ContainsKey(currentResource.Name))
 				{
 					var allResourceList = SCANcontroller.ResourceList[currentResource.Name].Values;
-					foreach (SCANresource r in allResourceList)
+					foreach (SCANresourceBody r in allResourceList)
 					{
 						r.Transparency = resourceTransSlider.CurrentValue;
 						r.FullColor = colorHigh;
@@ -979,7 +979,7 @@ namespace SCANsat.SCAN_UI
 				{
 					var allResourceList = SCANcontroller.ResourceList[currentResource.Name].Values;
 
-					foreach (SCANresource r in allResourceList)
+					foreach (SCANresourceBody r in allResourceList)
 					{
 						r.MinValue = resourceMinSlider.CurrentValue;
 						r.MaxValue = resourceMaxSlider.CurrentValue;
@@ -1005,7 +1005,7 @@ namespace SCANsat.SCAN_UI
 				if (SCANcontroller.ResourceList.ContainsKey(currentResource.Name))
 				{
 					var allResourceList = SCANcontroller.ResourceList[currentResource.Name].Values;
-					foreach (SCANresource r in allResourceList)
+					foreach (SCANresourceBody r in allResourceList)
 					{
 						r.Transparency = 40f;
 						r.FullColor = currentResource.ResourceType.ColorFull;
@@ -1043,7 +1043,7 @@ namespace SCANsat.SCAN_UI
 				if (SCANcontroller.ResourceList.ContainsKey(currentResource.Name))
 				{
 					var allResourceList = SCANcontroller.ResourceList[currentResource.Name].Values;
-					foreach (SCANresource r in allResourceList)
+					foreach (SCANresourceBody r in allResourceList)
 					{
 						r.MinValue = r.DefaultMinValue;
 						r.MaxValue = r.DefaultMaxValue;

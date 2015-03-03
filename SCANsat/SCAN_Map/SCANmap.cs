@@ -76,7 +76,7 @@ namespace SCANsat.SCAN_Map
 			get { return body; }
 		}
 
-		public SCANresource Resource
+		public SCANresourceGlobal Resource
 		{
 			get { return resource; }
 			internal set { resource = value; }
@@ -354,7 +354,7 @@ namespace SCANsat.SCAN_Map
 		private mapType mType;
 		private Texture2D map; // refs above: 214,215,216,232, below, and JSISCANsatRPM.
 		private CelestialBody body; // all refs are below
-		private SCANresource resource;
+		private SCANresourceGlobal resource;
 		private SCANmapLegend mapLegend;
 		private int mapstep; // all refs are below
 		private double[] mapline; // all refs are below
@@ -367,7 +367,7 @@ namespace SCANsat.SCAN_Map
 			body = b;
 			//SCANcontroller.controller.Resources(b); //Repopulate resource list when changing SOI
 			if (SCANconfigLoader.GlobalResource)
-				resource = SCANcontroller.ResourceList[SCANcontroller.controller.resourceSelection][b.name];
+				resource = SCANcontroller.ResourceList[SCANcontroller.controller.resourceSelection];
 			resetMap();
 		}
 
@@ -383,7 +383,8 @@ namespace SCANsat.SCAN_Map
 			mapstep = 0;
 			if (SCANconfigLoader.GlobalResource)
 			{ //Make sure that a resource is initialized if necessary
-				if (resource == null && body != null) resource = SCANcontroller.ResourceList[SCANcontroller.controller.resourceSelection][body.name];
+				if (resource == null && body != null)
+					resource = SCANcontroller.ResourceList[SCANcontroller.controller.resourceSelection];
 				if (SCANcontroller.controller.resourceOverlayType == 1)
 					SCANcontroller.controller.KethaneReset = !SCANcontroller.controller.KethaneReset;
 			}
@@ -715,14 +716,14 @@ namespace SCANsat.SCAN_Map
 			double amount = 0;
 			if (SCANcontroller.controller.resourceOverlayType == 0 && SCANmainMenuLoader.RegolithFound)
 			{
-				if (SCANUtil.isCovered(Lon, Lat, Data, resource.Type)) //check our new resource coverage map
+				if (SCANUtil.isCovered(Lon, Lat, Data, resource.SType)) //check our new resource coverage map
 				{
 					amount = SCANUtil.RegolithOverlay(Lat, Lon, resource.Name, body.flightGlobalsIndex); //grab the resource amount for the current pixel
 					amount *= 100;
-					if (amount >= resource.MinValue)
+					if (amount >= resource.CurrentBody.MinValue)
 					{
-						if (amount > resource.MaxValue)
-							amount = resource.MaxValue;
+						if (amount > resource.CurrentBody.MaxValue)
+							amount = resource.CurrentBody.MaxValue;
 					}
 					else
 						amount = 0;
@@ -732,7 +733,7 @@ namespace SCANsat.SCAN_Map
 			}
 			else if (SCANcontroller.controller.resourceOverlayType == 1)
 			{
-				if (SCANUtil.isCovered(Lon, Lat, Data, resource.Type))
+				if (SCANUtil.isCovered(Lon, Lat, Data, resource.SType))
 				{
 					int ilon = SCANUtil.icLON(Lon);
 					int ilat = SCANUtil.icLAT(Lat);
@@ -753,9 +754,9 @@ namespace SCANsat.SCAN_Map
 			else if (amount == 0)
 				return palette.lerp(BaseColor, palette.grey, 0.4f);
 			else if (SCANcontroller.controller.resourceOverlayType == 0 && SCANmainMenuLoader.RegolithFound)
-				return palette.lerp(palette.lerp(resource.EmptyColor, resource.FullColor, (float)amount / (resource.MaxValue - resource.MinValue)), BaseColor, resource.Transparency);
+				return palette.lerp(palette.lerp(resource.MinColor, resource.MaxColor, (float)amount / (resource.CurrentBody.MaxValue - resource.CurrentBody.MinValue)), BaseColor, resource.Transparency);
 			else if (SCANcontroller.controller.resourceOverlayType == 1 && SCANmainMenuLoader.kethaneLoaded)
-				return palette.lerp(palette.lerp(resource.EmptyColor, resource.FullColor, (float)amount / resource.MaxValue), BaseColor, 0.3f);
+				return palette.lerp(palette.lerp(resource.MinColor, resource.MaxColor, (float)amount / resource.CurrentBody.MaxValue), BaseColor, 0.3f);
 
 			return BaseColor;
 		}

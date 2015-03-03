@@ -98,8 +98,6 @@ namespace SCANsat.SCAN_UI
 				SCANcontroller.controller.addToBodyData(b, data);
 			}
 			bigmap.setBody(b);
-			if (SCANcontroller.ResourceList.Count > 0)
-				bigmap.Resource = SCANcontroller.ResourceList[SCANcontroller.controller.resourceSelection][b.name];
 			TooltipsEnabled = SCANcontroller.controller.toolTips;
 		}
 
@@ -668,9 +666,6 @@ namespace SCANsat.SCAN_UI
 			{
 				spotmap.setBody(b);
 
-				if (SCANconfigLoader.GlobalResource)
-					spotmap.Resource = SCANcontroller.ResourceList[SCANcontroller.controller.resourceSelection][b.name];
-
 				GUI.Box(pos_spotmap, spotmap.getPartialMap());
 				SCANuiUtil.drawOrbit(pos_spotmap, spotmap, v, b);
 				SCANuiUtil.drawMapLabels(pos_spotmap, v, spotmap, data, v.mainBody);
@@ -734,16 +729,17 @@ namespace SCANsat.SCAN_UI
 					Rect r = new Rect(2, 20 * i, 96, 20);
 					if (GUI.Button(r, SCANcontroller.ResourceList.ElementAt(i).Key, SCANskins.SCAN_dropDownButton))
 					{
-						bigmap.Resource = SCANcontroller.ResourceList.ElementAt(i).Value[b.name];
+						bigmap.Resource = SCANcontroller.ResourceList.ElementAt(i).Value;
+						bigmap.Resource.CurrentBodyConfig(b.name);
 						SCANcontroller.controller.resourceSelection = bigmap.Resource.Name;
-						if (SCANcontroller.ResourceList.ElementAt(i).Value[b.name].Source == SCANresource_Source.Kethane)
+						if (SCANcontroller.ResourceList.ElementAt(i).Value.Source == SCANresource_Source.Kethane)
 							SCANcontroller.controller.resourceOverlayType = 1;
 						else
 							SCANcontroller.controller.resourceOverlayType = 0;
 						if (SCANcontroller.controller.map_ResourceOverlay)
 							bigmap.resetMap();
 						drop_down_open = false;
-						SCANUtil.SCANdebugLog("Resource {0} Selected; Min Value: {1}; Max Value: {2}", bigmap.Resource.Name, bigmap.Resource.MinValue, bigmap.Resource.MaxValue);
+						SCANUtil.SCANdebugLog("Resource {0} Selected; Min Value: {1}; Max Value: {2}", bigmap.Resource.Name, bigmap.Resource.CurrentBody.MinValue, bigmap.Resource.CurrentBody.MaxValue);
 					}
 					GUI.EndScrollView();
 				}

@@ -89,8 +89,6 @@ namespace SCANsat.SCAN_UI
 				SCANcontroller.controller.addToBodyData(b, data);
 			}
 			bigmap.setBody(b);
-			if (SCANcontroller.ResourceList.Count > 0)
-			bigmap.Resource = SCANcontroller.ResourceList[SCANcontroller.controller.resourceSelection][b.name];
 			TooltipsEnabled = SCANcontroller.controller.toolTips;
 		}
 
@@ -606,9 +604,6 @@ namespace SCANsat.SCAN_UI
 			{
 				spotmap.setBody(b);
 
-				if (SCANconfigLoader.GlobalResource)
-					spotmap.Resource = SCANcontroller.ResourceList[SCANcontroller.controller.resourceSelection][b.name];
-
 				GUI.Box(pos_spotmap, spotmap.getPartialMap());
 				SCANuiUtil.drawMapLabels(pos_spotmap, null, spotmap, data, b);
 				zoomCloseRect = new Rect(pos_spotmap.x + 180, pos_spotmap.y, 18, 18);
@@ -672,9 +667,10 @@ namespace SCANsat.SCAN_UI
 					Rect r = new Rect(2, 20 * i, 96, 20);
 					if (GUI.Button(r, SCANcontroller.ResourceList.ElementAt(i).Key, SCANskins.SCAN_dropDownButton))
 					{
-						bigmap.Resource = SCANcontroller.ResourceList.ElementAt(i).Value[b.name];
+						bigmap.Resource = SCANcontroller.ResourceList.ElementAt(i).Value;
+						bigmap.Resource.CurrentBodyConfig(b.name);
 						SCANcontroller.controller.resourceSelection = bigmap.Resource.Name;
-						if (SCANcontroller.ResourceList.ElementAt(i).Value[b.name].Source == SCANresource_Source.Kethane)
+						if (SCANcontroller.ResourceList.ElementAt(i).Value.Source == SCANresource_Source.Kethane)
 							SCANcontroller.controller.resourceOverlayType = 1;
 						else
 							SCANcontroller.controller.resourceOverlayType = 0;

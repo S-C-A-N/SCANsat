@@ -158,7 +158,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 				{
 					if (SCANcontroller.controller.resourceOverlayType == 0 && SCANmainMenuLoader.RegolithFound)
 					{
-						if (SCANUtil.isCovered(lon, lat, data, mapObj.Resource.Type))
+						if (SCANUtil.isCovered(lon, lat, data, mapObj.Resource.SType))
 						{
 							double amount = SCANUtil.RegolithOverlay(lat, lon, mapObj.Resource.Name, mapObj.Body.flightGlobalsIndex);
 							string label;
@@ -170,16 +170,16 @@ namespace SCANsat.SCAN_UI.UI_Framework
 									amount = 1;
 								label = amount.ToString("P2");
 							}
-							info += palette.colored(mapObj.Resource.FullColor, mapObj.Resource.Name + ": " + label);
+							info += palette.colored(mapObj.Resource.MaxColor, mapObj.Resource.Name + ": " + label);
 						}
 					}
 					else if (SCANcontroller.controller.resourceOverlayType == 1)
 					{
-						if (SCANUtil.isCovered(lon, lat, data, mapObj.Resource.Type))
+						if (SCANUtil.isCovered(lon, lat, data, mapObj.Resource.SType))
 						{
 							double amount = data.KethaneValueMap[SCANUtil.icLON(lon), SCANUtil.icLAT(lat)];
 							if (amount < 0) amount = 0d;
-							info += palette.colored(mapObj.Resource.FullColor, mapObj.Resource.Name + ": " + amount.ToString("N1"));
+							info += palette.colored(mapObj.Resource.MaxColor, mapObj.Resource.Name + ": " + amount.ToString("N1"));
 						}
 					}
 				}
