@@ -51,30 +51,27 @@ namespace SCANsat
 
 		private static void loadResources() //Repopulates the master resources list with data from config nodes
 		{
-			SCANcontroller.ResourceList = new Dictionary<string, Dictionary<string, SCANresource>>();
+			SCANcontroller.ResourceList = new Dictionary<string, SCANresourceGlobal>();
 			if (SCANmainMenuLoader.RegolithFound)
 			{
 				foreach (ConfigNode node in GameDatabase.Instance.GetConfigNodes("REGOLITH_GLOBAL_RESOURCE"))
 				{
 					if (node != null)
 					{
-						SCANresource resource = null;
-						if ((resource = RegolithConfigLoad(node)) == null)
+						SCANresourceGlobal resource = null;
+						if ((resource = RegolithGlobalConfigLoad(node)) == null)
 							continue;
+
 						foreach (CelestialBody body in FlightGlobals.Bodies)
 						{
-							SCANresource bodyResource = null;
+							SCANresourceBody bodyResource = null;
 							foreach (ConfigNode bodyNode in GameDatabase.Instance.GetConfigNodes("REGOLITH_PLANETARY_RESOURCE"))
 							{
 								bodyResource = RegolithConfigLoad(bodyNode);
 								if (bodyResource == null)
 									continue;
-								if (string.IsNullOrEmpty(bodyResource.Body))
-								{
-									bodyResource = null;
-									continue;
-								}
-								if (bodyResource.Body == body.name)
+
+								if (bodyResource.Body.name == body.name)
 								{
 									if (bodyResource.Name == resource.Name)
 										break;
@@ -86,90 +83,90 @@ namespace SCANsat
 								}
 								bodyResource = null;
 							}
-							if (bodyResource == null)
+							if (bodyResource != null)
 							{
-								SCANcontroller.addToResourceData(resource.Name, body.name, SCANresource.resourceCopy(resource));
+								SCANresourceGlobal.addToBodyConfigs(resource, bodyResource.Body.name, bodyResource);
 							}
-							else
-							{
-								SCANcontroller.addToResourceData(bodyResource.Name, bodyResource.Body, bodyResource);
-							}
+
+							SCANcontroller.addToResourceData(resource.Name, resource);
 						}
 					}
 				}
 			}
-			if (SCANmainMenuLoader.kethaneLoaded)
-			{
-				foreach (ConfigNode node in GameDatabase.Instance.GetConfigNodes("KethaneResource"))
-				{
-					if (node != null)
-					{
-						string name = node.GetValue("Resource");
-						SCANresourceType type = null;
-						if ((type = OverlayResourceType(name)) == null)
-							continue;
-						Color full = type.ColorFull;
-						Color empty = type.ColorFull;
-						float max = 1000000f;
-						ConfigNode subNode = node.GetNode("Generator");
-						if (subNode != null)
-						{
-							float.TryParse(subNode.GetValue("MaxQuantity"), out max); //Global max quantity
-							foreach (CelestialBody Body in FlightGlobals.Bodies)
-							{
-								bool bodySubValue = false;
-								float subMax = 1000000f;
-								foreach (ConfigNode bodySubNode in subNode.GetNodes("Body"))
-								{
-									string body = bodySubNode.GetValue("name");
-									if (body == Body.name)
-									{
-										if (bodySubNode.HasValue("MaxQuantity"))
-										{
-											float.TryParse(bodySubNode.GetValue("MaxQuantity"), out subMax); //Optional body-specific max quantity
-											bodySubValue = true;
-											break;
-										}
-										break;
-									}
-								}
-								if (bodySubValue)
-									max = subMax;
-								SCANresource resource = new SCANresource(name, Body.name, full, empty, 0f, max, type, SCANresource_Source.Kethane);
-								SCANcontroller.addToResourceData(name, Body.name, resource);
-							}
-						}
-					}
-				}
-			}
+			//if (SCANmainMenuLoader.kethaneLoaded)
+			//{
+			//	foreach (ConfigNode node in GameDatabase.Instance.GetConfigNodes("KethaneResource"))
+			//	{
+			//		if (node != null)
+			//		{
+			//			string name = node.GetValue("Resource");
+			//			SCANresourceType type = null;
+			//			if ((type = OverlayResourceType(name)) == null)
+			//				continue;
+			//			Color full = type.ColorFull;
+			//			Color empty = type.ColorFull;
+			//			float max = 1000000f;
+			//			ConfigNode subNode = node.GetNode("Generator");
+			//			if (subNode != null)
+			//			{
+			//				float.TryParse(subNode.GetValue("MaxQuantity"), out max); //Global max quantity
+			//				foreach (CelestialBody Body in FlightGlobals.Bodies)
+			//				{
+			//					bool bodySubValue = false;
+			//					float subMax = 1000000f;
+			//					foreach (ConfigNode bodySubNode in subNode.GetNodes("Body"))
+			//					{
+			//						string body = bodySubNode.GetValue("name");
+			//						if (body == Body.name)
+			//						{
+			//							if (bodySubNode.HasValue("MaxQuantity"))
+			//							{
+			//								float.TryParse(bodySubNode.GetValue("MaxQuantity"), out subMax); //Optional body-specific max quantity
+			//								bodySubValue = true;
+			//								break;
+			//							}
+			//							break;
+			//						}
+			//					}
+			//					if (bodySubValue)
+			//						max = subMax;
+			//					SCANresourceBody resource = new SCANresourceBody(name, Body.name, full, empty, 0f, max, type, SCANresource_Source.Kethane);
+			//					SCANcontroller.addToResourceData(name, Body.name, resource);
+			//				}
+						//}
+					//}
+				//}
+			//}
+
 			if (SCANcontroller.ResourceList.Count == 0)
 				globalResource = false;
 			else
 				globalResource = true;
 		}
 
-		private static SCANresource RegolithConfigLoad(ConfigNode node)
+		private static SCANresourceGlobal RegolithGlobalConfigLoad(ConfigNode node)
 		{
-			float min = .001f;
-			float max = 10f;
 			string name = "";
-			string body = "";
 			int resourceType = 0;
+			float min = 0.01f;
+			float max = 10;
+
 			if (node.HasValue("ResourceName"))
 				name = node.GetValue("ResourceName");
 			else
 				return null;
+
 			SCANresourceType type = OverlayResourceType(name);
 			if (type == null)
 				return null;
 			if (type.Type == SCANtype.Nothing)
 				return null;
-			if (node.HasValue("PlanetName"))
-				body = node.GetValue("PlanetName");
+
 			if (!int.TryParse(node.GetValue("ResourceType"), out resourceType))
 				return null;
 			if (resourceType != 0)
 				return null;
+
 			ConfigNode distNode = node.GetNode("Distribution");
 			if (distNode != null)
 			{
@@ -180,7 +177,66 @@ namespace SCANsat
 			}
 			if (min == max)
 				max += 0.001f;
-			SCANresource SCANres = new SCANresource(name, body, type.ColorFull, type.ColorEmpty, min, max, type, SCANresource_Source.Regolith);
+
+			SCANresourceGlobal res = new SCANresourceGlobal(name, 40, type.ColorEmpty, type.ColorFull, type, 2);
+
+			foreach (CelestialBody b in FlightGlobals.Bodies)
+			{
+				SCANresourceBody r = new SCANresourceBody(name, b, min, max);
+				SCANresourceGlobal.addToBodyConfigs(res, b.name, r);
+			}
+
+			if (res != null)
+				return res;
+
+			return null;
+		}
+
+		private static SCANresourceBody RegolithConfigLoad(ConfigNode node)
+		{
+			float min = .001f;
+			float max = 10f;
+			string name = "";
+			string body = "";
+			CelestialBody b = null;
+			int resourceType = 0;
+
+			if (node.HasValue("ResourceName"))
+				name = node.GetValue("ResourceName");
+			else
+				return null;
+
+			if (node.HasValue("PlanetName"))
+				body = node.GetValue("PlanetName");
+			else
+				return null;
+
+			if (!int.TryParse(node.GetValue("ResourceType"), out resourceType))
+				return null;
+			if (resourceType != 0)
+				return null;
+
+			b = FlightGlobals.Bodies.FirstOrDefault(a => a.name == body);
+
+			if (b == null)
+				return null;
+
+			ConfigNode distNode = node.GetNode("Distribution");
+			if (distNode != null)
+			{
+				if (distNode.HasValue("MinAbundance"))
+					float.TryParse(distNode.GetValue("MinAbundance"), out min);
+				if (distNode.HasValue("MaxAbundance"))
+					float.TryParse(distNode.GetValue("MaxAbundance"), out max);
+			}
+			else
+				return null;
+
+			if (min == max)
+				max += 0.001f;
+
+			SCANresourceBody SCANres = new SCANresourceBody(name, b, min, max);
+
 			if (SCANres != null)
 				return SCANres;
 
@@ -289,7 +345,6 @@ namespace SCANsat
 
 		private static void loadResourceConfigs()
 		{
-			SCANcontroller.ResourceConfigData = new Dictionary<string, SCANresourceGlobal>();
 			ConfigNode resourceNode = GameDatabase.Instance.GetConfigNode("SCANSAT_RESOURCE");
 			if (resourceNode != null)
 			{
