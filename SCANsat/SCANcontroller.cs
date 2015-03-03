@@ -110,14 +110,12 @@ namespace SCANsat
 		public float biomeTransparency = 40;
 
 		/* Available resources for overlays; loaded from resource addon configs; only loaded once */
-		private static Dictionary<string, Dictionary<string, SCANresource>> resourceList;
+		private static Dictionary<string, SCANresourceGlobal> resourceList;
 
 		/* Resource types loaded from configs; only needs to be loaded once */
 		private static Dictionary<string, SCANresourceType> resourceTypes;
 
 		private static Dictionary<string, SCANterrainConfig> terrainConfigData;
-
-		private static Dictionary<string, SCANresourceGlobal> resourceConfigData;
 
 		/* Primary SCANsat vessel dictionary; loaded every time */
 		private Dictionary<Guid, SCANvessel> knownVessels = new Dictionary<Guid, SCANvessel>();
@@ -181,48 +179,20 @@ namespace SCANsat
 				Debug.LogError("[SCANsat] Warning: SCANterrain Data Dictionary Already Contains Key Of This Type");
 		}
 
-		public static Dictionary<string, SCANresourceGlobal> ResourceConfigData
-		{
-			get { return resourceConfigData; }
-			internal set { resourceConfigData = value; }
-		}
-
-		public static void addToResourceConfigData (string name, SCANresourceGlobal data)
-		{
-			if (!resourceConfigData.ContainsKey(name))
-				resourceConfigData.Add(name, data);
-			else
-				Debug.LogError("[SCANsat] Warning: SCANresource Data Dictionary Already Contains Key Of This Type");
-		}
-
-		public static Dictionary<string, Dictionary<string, SCANresource>> ResourceList
+		public static Dictionary<string, SCANresourceGlobal> ResourceList
 		{
 			get { return resourceList; }
 			internal set { resourceList = value; }
 		}
 		
-		public static void addToResourceData (string name, string body, SCANresource res)
+		public static void addToResourceData (string name, SCANresourceGlobal res)
 		{
 			if (!resourceList.ContainsKey(name))
 			{
-				Dictionary<string, SCANresource> subDict = new Dictionary<string, SCANresource>();
-				subDict.Add(body, res);
-				resourceList.Add(name, subDict);
+				resourceList.Add(name, res);
 			}
 			else
-			{
-				if (!resourceList[name].ContainsKey(body))
-					resourceList[name].Add(body, res);
-				else if (res.Source == SCANresource_Source.Regolith)
-				{
-					if (res.MinValue > resourceList[name][body].MinValue && res.MinValue < res.MaxValue)
-						resourceList[name][body].MinValue = res.MinValue;
-					if (res.MaxValue > resourceList[name][body].MaxValue && res.MaxValue > res.MinValue)
-						resourceList[name][body].MaxValue = res.MaxValue;
-				}
-				else
-					Debug.LogError(string.Format("[SCANsat] Warning: SCANResource Dictionary Already Contains Key of This Type: Resource: {0}; Body: {1}", name, body));
-			}
+				Debug.LogError(string.Format("[SCANsat] Warning: SCANResource Dictionary Already Contains Key of This Type: Resource: {0}", name));
 		}
 
 		public static Dictionary<string, SCANresourceType> ResourceTypes
@@ -553,17 +523,17 @@ namespace SCANsat
 					ConfigNode node_resources = new ConfigNode("SCANResources");
 					foreach (SCANresourceType t in resourceTypes.Values)
 					{
-						SCANresource r = null;
+						SCANresourceGlobal r = null;
 
 						if (resourceList.ContainsKey(t.Name))
-							r = resourceList[t.Name].ElementAt(0).Value;
+							r = resourceList[t.Name];
 
 						if (r != null)
 						{
 							ConfigNode node_resource_type = new ConfigNode("ResourceType");
 							node_resource_type.AddValue("Resource", r.Name);
-							node_resource_type.AddValue("MinColor", r.EmptyColor.ToHex());
-							node_resource_type.AddValue("MaxColor", r.FullColor.ToHex());
+							node_resource_type.AddValue("MinColor", r.MinColor.ToHex());
+							node_resource_type.AddValue("MaxColor", r.MaxColor.ToHex());
 							node_resource_type.AddValue("Transparency", r.Transparency * 100);
 
 							string rMinMax = saveResources(t);
@@ -669,18 +639,11 @@ namespace SCANsat
 			List<string> sL = new List<string>();
 			if (resourceList.ContainsKey(type.Name))
 			{
-				foreach (string bodyName in resourceList[type.Name].Keys)
+				SCANresourceGlobal r = resourceList[type.Name];
+				foreach (SCANresourceBody bodyRes in r.BodyConfigs.Values)
 				{
-					CelestialBody b;
-					if ((b = FlightGlobals.Bodies.FirstOrDefault(a => a.name == bodyName)) != null)
-					{
-						if (resourceList[type.Name].ContainsKey(b.name))
-						{
-							SCANresource r = resourceList[type.Name][b.name];
-							string a = string.Format("{0}|{1:F3}|{2:F3}", b.flightGlobalsIndex, r.MinValue, r.MaxValue);
-							sL.Add(a);
-						}
-					}
+					string a = string.Format("{0}|{1:F3}|{2:F3}", bodyRes.Body.flightGlobalsIndex, bodyRes.MinValue, bodyRes.MaxValue);
+					sL.Add(a);
 				}
 			}
 
@@ -689,6 +652,13 @@ namespace SCANsat
 
 		private void loadCustomResourceValues(string s, string resource, string low, string high, string trans)
 		{
+			SCANresourceGlobal r;
+
+			if (resourceList.ContainsKey(resource))
+				r = resourceList[resource];
+			else
+				return;
+
 			Color lowColor = new Color();
 			Color highColor = new Color();
 			float transparent;
@@ -710,19 +680,11 @@ namespace SCANsat
 			if (!float.TryParse(trans, out transparent))
 				transparent = 40f;
 
-			if (resourceList.ContainsKey(resource))
-			{
-				var allResourceList = resourceList[resource].Values;
+			r.MinColor = lowColor;
+			r.MaxColor = highColor;
+			r.Transparency = transparent;
 
-				foreach (SCANresource r in allResourceList)
-				{
-					r.Transparency = transparent;
-					r.FullColor = highColor;
-					r.EmptyColor = lowColor;
-				}
-			}
-
-			if (!string.IsNullOrEmpty(s) && !string.IsNullOrEmpty(resource))
+			if (!string.IsNullOrEmpty(s))
 			{
 				string[] sA = s.Split(',');
 				for (int i = 0; i < sA.Length; i++)
@@ -738,23 +700,18 @@ namespace SCANsat
 						CelestialBody b;
 						if ((b = FlightGlobals.Bodies.FirstOrDefault(a => a.flightGlobalsIndex == j)) != null)
 						{
-							if (resourceList.ContainsKey(resource))
+							if (r.BodyConfigs.ContainsKey(b.name))
 							{
-								if (resourceList[resource].ContainsKey(b.name))
-								{
-									SCANresource r = resourceList[resource][b.name];
-									if (!float.TryParse(sB[1], out min))
-										min = r.MinValue;
-									if (!float.TryParse(sB[2], out max))
-										max = r.MaxValue;
-									r.MinValue = min;
-									r.MaxValue = max;
-								}
-								else
-									SCANUtil.SCANlog("No resources found assigned for Celestial Body: {0}, skipping...", b.name);
+								SCANresourceBody res = r.BodyConfigs[b.name];
+								if (!float.TryParse(sB[1], out min))
+									min = res.DefaultMinValue;
+								if (!float.TryParse(sB[2], out max))
+									max = res.DefaultMaxValue;
+								res.MinValue = min;
+								res.MaxValue = max;
 							}
 							else
-								SCANUtil.SCANlog("No resource found with name: {0} in the master SCANresource list, skipping...", resource);
+								SCANUtil.SCANlog("No resources found assigned for Celestial Body: {0}, skipping...", b.name);
 						}
 						else
 							SCANUtil.SCANlog("No Celestial Body found matching this saved resource value: {0}, skipping...", j);
