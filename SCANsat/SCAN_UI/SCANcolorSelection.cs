@@ -813,32 +813,6 @@ namespace SCANsat.SCAN_UI
 			GUI.Label(r, "Old", SCANskins.SCAN_headlineSmall);
 		}
 
-		private void colorSwatches(Rect R, string Title, ref bool Active, bool Low, Texture2D Preview, Texture2D Current, Color New)
-		{
-			bool active;
-			if (Low)
-				active = Active;
-			else
-				active = !Active;
-
-			active = GUI.Toggle(R, active, Title);
-
-			if (Low)
-				Active = active;
-			else
-				Active = !active;
-
-			R.x += 10;
-			R.y += 30;
-
-			Preview.SetPixel(0, 0, New);
-			Preview.Apply();
-			GUI.DrawTexture(R, Preview);
-
-			R.y += 32;
-			GUI.DrawTexture(R, Current);
-		}
-
 		private void biomeOptions(int id)
 		{
 			GUILayout.Label("Biome Options", SCANskins.SCAN_headline, GUILayout.Width(300));
