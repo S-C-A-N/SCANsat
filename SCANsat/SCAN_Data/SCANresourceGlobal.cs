@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -13,20 +14,32 @@ namespace SCANsat.SCAN_Data
 		private SCANtype sType;
 		private SCANresourceType resourceType;
 		private SCANresource_Source source;
-		private Dictionary<string, SCANresource> bodyConfigs;
+		private Dictionary<string, SCANresourceBody> bodyConfigs;
+		private SCANresourceBody currentBody;
 
-		internal SCANresourceGlobal(string resource, float trans, Color minC, Color maxC, SCANtype t, SCANresourceType rType, SCANresource_Source s)
+		internal SCANresourceGlobal(string resource, float trans, Color minC, Color maxC, SCANresourceType t, int S)
 		{
 			name = resource;
 			transparency = trans;
 			minColor = minC;
 			maxColor = maxC;
-			sType = t;
-			resourceType = rType;
-			source = s;
+			resourceType = t;
+			sType = resourceType.Type;
+			source = (SCANresource_Source)S;
 		}
 
-		public static void addToBodyConfigs(SCANresourceGlobal G, string s, SCANresource r)
+		internal SCANresourceGlobal(SCANresourceGlobal copy)
+		{
+			name = copy.name;
+			transparency = copy.transparency;
+			minColor = copy.minColor;
+			maxColor = copy.maxColor;
+			sType = copy.sType;
+			resourceType = copy.resourceType;
+			source = copy.source;
+		}
+
+		public static void addToBodyConfigs(SCANresourceGlobal G, string s, SCANresourceBody r)
 		{
 			if (!G.bodyConfigs.ContainsKey(s))
 				G.bodyConfigs.Add(s, r);
@@ -42,16 +55,27 @@ namespace SCANsat.SCAN_Data
 		public float Transparency
 		{
 			get { return transparency; }
+			internal set
+			{
+				if (value < 0)
+					transparency = 0;
+				else if (value > 100)
+					transparency = 100;
+				else
+					transparency = value;
+			}
 		}
 
 		public Color MinColor
 		{
 			get { return minColor; }
+			internal set { minColor = value; }
 		}
 
 		public Color MaxColor
 		{
 			get { return maxColor; }
+			internal set { maxColor = value; }
 		}
 
 		public SCANtype SType
@@ -69,9 +93,22 @@ namespace SCANsat.SCAN_Data
 			get { return source; }
 		}
 
-		public Dictionary<string, SCANresource> BodyConfigs
+		public Dictionary<string, SCANresourceBody> BodyConfigs
 		{
 			get { return bodyConfigs; }
+		}
+
+		public void CurrentBodyConfig(string body)
+		{
+			if (bodyConfigs.ContainsKey(body))
+				currentBody = bodyConfigs[body];
+			else
+				currentBody = bodyConfigs.ElementAt(0).Value;
+		}
+
+		public SCANresourceBody CurrentBody
+		{
+			get { return currentBody; }
 		}
 	}
 }
