@@ -50,7 +50,6 @@
     <Compile Include="SCAN_Data\SCANanomaly.cs" />
     <Compile Include="SCAN_Data\SCANdata.cs" />
     <Compile Include="SCAN_Data\SCANresourceBody.cs" />
-    <Compile Include="SCAN_Data\SCANresourceConfig.cs" />
     <Compile Include="SCAN_Data\SCANresourceGlobal.cs" />
     <Compile Include="SCAN_Data\SCANresourceType.cs" />
     <Compile Include="SCAN_Data\SCANterrainConfig.cs" />
