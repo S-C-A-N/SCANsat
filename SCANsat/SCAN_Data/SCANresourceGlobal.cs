@@ -16,6 +16,7 @@ namespace SCANsat.SCAN_Data
 		private SCANresource_Source source;
 		private Dictionary<string, SCANresourceBody> bodyConfigs;
 		private SCANresourceBody currentBody;
+		private SCANconfig node;
 
 		internal SCANresourceGlobal(string resource, float trans, Color minC, Color maxC, SCANresourceType t, int S)
 		{
@@ -38,6 +39,18 @@ namespace SCANsat.SCAN_Data
 			resourceType = copy.resourceType;
 			source = copy.source;
 			bodyConfigs = copy.bodyConfigs;
+		}
+
+		internal void setNode(SCANconfig n)
+		{
+			node = n;
+		}
+
+		internal void setNode()
+		{
+			node.SCANTopNode.SetValue("lowResourceColor", minColor.ToHex());
+			node.SCANTopNode.SetValue("highResourceColor", maxColor.ToHex());
+			node.SCANTopNode.SetValue("resourceTransparency", transparency.ToString("F0"));
 		}
 
 		public static void addToBodyConfigs(SCANresourceGlobal G, string s, SCANresourceBody r)

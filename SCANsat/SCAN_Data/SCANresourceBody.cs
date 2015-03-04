@@ -18,6 +18,18 @@ namespace SCANsat.SCAN_Data
 		private string name;
 		private CelestialBody body;
 		private float minValue, maxValue, defaultMinValue, defaultMaxValue;
+		private ConfigNode node;
+
+		internal void setNode(ConfigNode n)
+		{
+			node = n;
+		}
+
+		internal void updateNode()
+		{
+			node.SetValue("lowResourceCutoff", minValue.ToString("F1"));
+			node.SetValue("highResourceCutoff", maxValue.ToString("F1"));
+		}
 
 		public static SCANresourceBody resourceCopy(SCANresourceBody r)
 		{
@@ -40,7 +52,7 @@ namespace SCANsat.SCAN_Data
 			get { return minValue; }
 			internal set
 			{
-				if (value >= 0 && value < maxValue)
+				if (value >= 0 && value < maxValue && value < 100)
 					minValue = value;
 			}
 		}
@@ -50,7 +62,7 @@ namespace SCANsat.SCAN_Data
 			get { return maxValue; }
 			internal set
 			{
-				if (value >= 0 && value > minValue)
+				if (value >= 0 && value > minValue && value <= 100)
 					maxValue = value;
 			}
 		}
