@@ -239,11 +239,6 @@ namespace SCANsat
 			get { return actualPasses; }
 		}
 
-		//public bool GlobalResourceOverlay
-		//{
-		//	get { return globalResourceOverlay; }
-		//}
-
 		public Color LowBiomeColor
 		{
 			get { return lowBiomeColor; }
@@ -336,6 +331,9 @@ namespace SCANsat
 				foreach (ConfigNode node_body in node_progress.GetNodes("Body"))
 				{
 					float min, max, clamp;
+					float? clampState = null;
+					Palette dataPalette;
+					string paletteName = "";
 					int pSize;
 					bool pRev, pDis, disabled;
 					string body_name = node_body.GetValue("Name");
@@ -373,29 +371,38 @@ namespace SCANsat
 							//Verify that saved data types can be converted, revert to default values otherwise
 							if (bool.TryParse(node_body.GetValue("Disabled"), out disabled))
 								data.Disabled = disabled;
-							if (float.TryParse(node_body.GetValue("MinHeightRange"), out min))
-								data.MinHeight = min;
-							if (float.TryParse(node_body.GetValue("MaxHeightRange"), out max))
-								data.MaxHeight = max;
+							if (!float.TryParse(node_body.GetValue("MinHeightRange"), out min))
+								min = data.DefaultMinHeight;
+							if (!float.TryParse(node_body.GetValue("MaxHeightRange"), out max))
+								max = data.DefaultMaxHeight;
 							if (node_body.HasValue("ClampHeight"))
 							{
 								if (float.TryParse(node_body.GetValue("ClampHeight"), out clamp))
-									data.ClampHeight = clamp;
+									clampState = clamp;
 							}
-							if (int.TryParse(node_body.GetValue("PaletteSize"), out pSize))
-								data.PaletteSize = pSize;
-							if (bool.TryParse(node_body.GetValue("PaletteReverse"), out pRev))
-								data.PaletteReverse = pRev;
-							if (bool.TryParse(node_body.GetValue("PaletteDiscrete"), out pDis))
-								data.PaletteDiscrete = pDis;
+							if (!int.TryParse(node_body.GetValue("PaletteSize"), out pSize))
+								pSize = data.DefaultColorPalette.size;
+							if (!bool.TryParse(node_body.GetValue("PaletteReverse"), out pRev))
+								pRev = data.DefaultReversePalette;
+							if (!bool.TryParse(node_body.GetValue("PaletteDiscrete"), out pDis))
+								pDis = false;
 							if (node_body.HasValue("PaletteName"))
-								data.PaletteName = node_body.GetValue("PaletteName");
-							data.ColorPalette = SCANconfigLoader.paletteLoader(data.PaletteName, data.PaletteSize);
-							if (data.ColorPalette == PaletteLoader.defaultPalette)
+								paletteName = node_body.GetValue("PaletteName");
+							dataPalette = SCANconfigLoader.paletteLoader(paletteName, pSize);
+							if (dataPalette == PaletteLoader.defaultPalette)
 							{
-								data.PaletteName = "Default";
-								data.PaletteSize = 7;
+								paletteName = "Default";
+								pSize = 7;
 							}
+
+							SCANterrainConfig dataTerrainConfig = new SCANterrainConfig(min, max, clampState, dataPalette, pSize, pRev, pDis, body);
+
+							if (terrainConfigData.ContainsKey(body.name))
+								terrainConfigData[body.name] = dataTerrainConfig;
+							else
+								addToTerrainConfigData(body.name, dataTerrainConfig);
+
+							data.TerrainConfig = dataTerrainConfig;
 						}
 						catch (Exception e)
 						{
@@ -505,14 +512,14 @@ namespace SCANsat
 						SCANdata body_scan = body_data[body_name];
 						node_body.AddValue("Name", body_name);
 						node_body.AddValue("Disabled", body_scan.Disabled);
-						node_body.AddValue("MinHeightRange", body_scan.MinHeight);
-						node_body.AddValue("MaxHeightRange", body_scan.MaxHeight);
-						if (body_scan.ClampHeight != null)
-							node_body.AddValue("ClampHeight", body_scan.ClampHeight);
-						node_body.AddValue("PaletteName", body_scan.PaletteName);
-						node_body.AddValue("PaletteSize", body_scan.PaletteSize);
-						node_body.AddValue("PaletteReverse", body_scan.PaletteReverse);
-						node_body.AddValue("PaletteDiscrete", body_scan.PaletteDiscrete);
+						node_body.AddValue("MinHeightRange", body_scan.TerrainConfig.MinTerrain);
+						node_body.AddValue("MaxHeightRange", body_scan.TerrainConfig.MaxTerrain);
+						if (body_scan.TerrainConfig.ClampTerrain != null)
+							node_body.AddValue("ClampHeight", body_scan.TerrainConfig.ClampTerrain);
+						node_body.AddValue("PaletteName", body_scan.TerrainConfig.ColorPal.name);
+						node_body.AddValue("PaletteSize", body_scan.TerrainConfig.PalSize);
+						node_body.AddValue("PaletteReverse", body_scan.TerrainConfig.PalRev);
+						node_body.AddValue("PaletteDiscrete", body_scan.TerrainConfig.PalDis);
 						node_body.AddValue("Map", body_scan.integerSerialize());
 						node_progress.AddNode(node_body);
 					}
@@ -593,46 +600,6 @@ namespace SCANsat
 			if (!body_data.ContainsKey(VC.to.name))
 				body_data.Add(VC.to.name, new SCANdata(VC.to));
 		}
-
-		//Method to handle loading of the saved color palette
-		//private void paletteLoad(SCANdata data)
-		//{
-		//	if (data.PaletteName == "Default" || string.IsNullOrEmpty(data.PaletteName))
-		//	{
-		//		data.ColorPalette = PaletteLoader.defaultPalette;
-		//		data.PaletteName = "Default";
-		//		data.PaletteSize = 7;
-		//	}
-		//	else
-		//	{
-		//		try
-		//		{
-		//			if (data.PaletteName == "blackForest" || data.PaletteName == "departure" || data.PaletteName == "northRhine" || data.PaletteName == "mars" || data.PaletteName == "wiki2" || data.PaletteName == "plumbago" || data.PaletteName == "cw1_013" || data.PaletteName == "arctic")
-		//			{
-		//				//Load the fixed size color palette by name through reflection
-		//				var fixedPallete = typeof(FixedColorPalettes);
-		//				var fPaletteMethod = fixedPallete.GetMethod(data.PaletteName);
-		//				var fColorP = fPaletteMethod.Invoke(null, null);
-		//				data.ColorPalette = (Palette)fColorP;
-		//			}
-		//			else
-		//			{
-		//				//Load the ColorBrewer method by name through reflection
-		//				var brewer = typeof(BrewerPalettes);
-		//				var bPaletteMethod = brewer.GetMethod(data.PaletteName);
-		//				var bColorP = bPaletteMethod.Invoke(null, new object[] { data.PaletteSize });
-		//				data.ColorPalette = (Palette)bColorP;
-		//			}
-		//		}
-		//		catch (Exception e)
-		//		{
-		//			SCANUtil.SCANlog("Error Loading Color Palette; Revert To Default: {0}", e);
-		//			data.ColorPalette = PaletteLoader.defaultPalette;
-		//			data.PaletteName = "Default";
-		//			data.PaletteSize = 7;
-		//		}
-		//	}
-		//}
 
 		private string saveResources(SCANresourceType type)
 		{
@@ -745,111 +712,6 @@ namespace SCANsat
 			public int frame;
 			public double lastUT;
 		}
-
-		//internal void loadResources() //Repopulates the master resources list with data from config nodes
-		//{
-		//	resourceList = new Dictionary<string, Dictionary<string, SCANresource>>();
-		//	if (SCANmainMenuLoader.RegolithFound)
-		//	{
-		//		foreach (ConfigNode node in GameDatabase.Instance.GetConfigNodes("REGOLITH_GLOBAL_RESOURCE"))
-		//		{
-		//			if (node != null)
-		//			{
-		//				SCANresource resource = null;
-		//				if ((resource = SCANUtil.RegolithConfigLoad(node)) == null)
-		//					continue;
-		//				foreach (CelestialBody body in FlightGlobals.Bodies)
-		//				{
-		//					SCANresource bodyResource = null;
-		//					foreach(ConfigNode bodyNode in GameDatabase.Instance.GetConfigNodes("REGOLITH_PLANETARY_RESOURCE"))
-		//					{
-		//						bodyResource = SCANUtil.RegolithConfigLoad(bodyNode);
-		//						if (bodyResource == null)
-		//							continue;
-		//						if (string.IsNullOrEmpty(bodyResource.Body))
-		//						{
-		//							bodyResource = null;
-		//							continue;
-		//						}
-		//						if (bodyResource.Body == body.name)
-		//						{
-		//							if (bodyResource.Name == resource.Name)
-		//								break;
-		//							else
-		//							{
-		//								bodyResource = null;
-		//								continue;
-		//							}
-		//						}
-		//						bodyResource = null;
-		//					}
-		//					if (bodyResource == null)
-		//					{
-		//						addToResourceData(resource.Name, body.name, SCANresource.resourceCopy(resource));
-		//					}
-		//					else
-		//					{
-		//						addToResourceData(bodyResource.Name, bodyResource.Body, bodyResource);
-		//					}
-		//				}
-		//			}
-		//		}
-		//	}
-		//	if (SCANmainMenuLoader.kethaneLoaded)
-		//	{
-		//		foreach (ConfigNode node in GameDatabase.Instance.GetConfigNodes("KethaneResource"))
-		//		{
-		//			if (node != null)
-		//			{
-		//				string name = node.GetValue("Resource");
-		//				SCANresourceType type = null;
-		//				if ((type = SCANUtil.OverlayResourceType(name)) == null)
-		//					continue;
-		//				Color full = type.ColorFull;
-		//				Color empty = type.ColorFull;
-		//				float max = 1000000f;
-		//				ConfigNode subNode = node.GetNode("Generator");
-		//				if (subNode != null)
-		//				{
-		//					float.TryParse(subNode.GetValue("MaxQuantity"), out max); //Global max quantity
-		//					foreach (CelestialBody Body in FlightGlobals.Bodies)
-		//					{
-		//						bool bodySubValue = false;
-		//						float subMax = 1000000f;
-		//						foreach (ConfigNode bodySubNode in subNode.GetNodes("Body"))
-		//						{
-		//							string body = bodySubNode.GetValue("name");
-		//							if (body == Body.name)
-		//							{
-		//								if (bodySubNode.HasValue("MaxQuantity"))
-		//								{
-		//									float.TryParse(bodySubNode.GetValue("MaxQuantity"), out subMax); //Optional body-specific max quantity
-		//									bodySubValue = true;
-		//									break;
-		//								}
-		//								break;
-		//							}
-		//						}
-		//						if (bodySubValue)
-		//							max = subMax;
-		//						SCANresource resource = new SCANresource(name, Body.name, full, empty, 0f, max, type, SCANresource_Source.Kethane);
-		//						addToResourceData(name, Body.name, resource);
-		//					}
-		//				}
-		//			}
-		//		}
-		//	}
-		//	if (resourceList.Count == 0)
-		//		globalResourceOverlay = false;
-		//	else
-		//	{
-		//		globalResourceOverlay = true;
-		//		if (string.IsNullOrEmpty(resourceSelection))
-		//			resourceSelection = resourceList.ElementAt(0).Key;
-		//		else if (!resourceList.ContainsKey(resourceSelection))
-		//			resourceSelection = resourceList.ElementAt(0).Key;
-		//	}
-		//}
 
 		internal void registerSensor(Vessel v, SCANtype sensors, double fov, double min_alt, double max_alt, double best_alt)
 		{
