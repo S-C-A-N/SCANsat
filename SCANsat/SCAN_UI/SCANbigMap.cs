@@ -654,7 +654,7 @@ namespace SCANsat.SCAN_UI
 			{
 				if (bigmap.MapLegend == null)
 					bigmap.MapLegend = new SCANmapLegend();
-				bigmap.MapLegend.Legend = bigmap.MapLegend.getLegend(data.MinHeight, data.MaxHeight, SCANcontroller.controller.colours, data);
+				bigmap.MapLegend.Legend = bigmap.MapLegend.getLegend(data.TerrainConfig.MinTerrain, data.TerrainConfig.MaxTerrain, SCANcontroller.controller.colours, data);
 				SCANuiUtil.drawLegend(data, bigmap.MapLegend);
 			}
 		}

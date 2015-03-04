@@ -112,13 +112,13 @@ namespace SCANsat.SCAN_UI.UI_Framework
 
 		public static Color heightToColor(float val, int scheme, SCANdata data)
 		{
-			Color32[] c = data.ColorPalette.colors;
-			if (data.PaletteReverse)
-				c = data.ColorPalette.colorsReverse;
+			Color32[] c = data.TerrainConfig.ColorPal.colors;
+			if (data.TerrainConfig.PalRev)
+				c = data.TerrainConfig.ColorPal.colorsReverse;
 			if (scheme == 0)
-				return heightToColor(val, data.MaxHeight, data.MinHeight, data.ClampHeight, data.PaletteDiscrete, c);
+				return heightToColor(val, data.TerrainConfig.MaxTerrain, data.TerrainConfig.MinTerrain, data.TerrainConfig.ClampTerrain, data.TerrainConfig.PalDis, c);
 			else
-				return heightToColor(val, data.MaxHeight, data.MinHeight, data.PaletteDiscrete);
+				return heightToColor(val, data.TerrainConfig.MaxTerrain, data.TerrainConfig.MinTerrain, data.TerrainConfig.PalDis);
 		}
 
 		private static Color heightToColor(float val, float max, float min, bool discrete)

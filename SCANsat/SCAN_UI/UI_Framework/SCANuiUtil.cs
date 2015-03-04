@@ -477,13 +477,13 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			Rect r = GUILayoutUtility.GetLastRect();
 			r.width -= 64;
 			GUI.DrawTexture(r, legend.Legend); //SCANmapLegend.getLegend(data.MinHeight, data.MaxHeight, SCANcontroller.controller.colours, data));
-			float minLabel = data.MinHeight;
-			float maxLabel = data.MaxHeight;
-			if (data.MinHeight % 1000 != 0)
+			float minLabel = data.TerrainConfig.MinTerrain;
+			float maxLabel = data.TerrainConfig.MaxTerrain;
+			if (data.TerrainConfig.MinTerrain % 1000 != 0)
 				minLabel += 500;
-			if (data.MaxHeight % 1000 != 0)
+			if (data.TerrainConfig.MaxTerrain % 1000 != 0)
 				maxLabel -= 500;
-			float range = data.MaxHeight - data.MinHeight;
+			float range = data.TerrainConfig.MaxTerrain - data.TerrainConfig.MinTerrain;
 			float step = 1000f;
 			if (range > 10000)
 				step = 2000;
@@ -491,7 +491,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 				step = 500;
 			for (float val = minLabel; val < maxLabel; val += step)
 			{
-				drawLegendLabel(r, val, data.MinHeight, data.MaxHeight);
+				drawLegendLabel(r, val, data.TerrainConfig.MinTerrain, data.TerrainConfig.MaxTerrain);
 			}
 		}
 
