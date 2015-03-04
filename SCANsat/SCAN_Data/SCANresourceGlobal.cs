@@ -37,6 +37,7 @@ namespace SCANsat.SCAN_Data
 			sType = copy.sType;
 			resourceType = copy.resourceType;
 			source = copy.source;
+			bodyConfigs = copy.bodyConfigs;
 		}
 
 		public static void addToBodyConfigs(SCANresourceGlobal G, string s, SCANresourceBody r)
