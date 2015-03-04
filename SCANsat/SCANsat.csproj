@@ -49,8 +49,10 @@
     <Compile Include="SCANconfigLoader.cs" />
     <Compile Include="SCAN_Data\SCANanomaly.cs" />
     <Compile Include="SCAN_Data\SCANdata.cs" />
-    <Compile Include="SCAN_Data\SCANresource.cs" />
+    <Compile Include="SCAN_Data\SCANresourceBody.cs" />
     <Compile Include="SCAN_Data\SCANresourceConfig.cs" />
+    <Compile Include="SCAN_Data\SCANresourceGlobal.cs" />
+    <Compile Include="SCAN_Data\SCANresourceType.cs" />
     <Compile Include="SCAN_Data\SCANterrainConfig.cs" />
     <Compile Include="SCAN_Data\SCANtype.cs" />
     <Compile Include="SCAN_Map\SCANmap.cs" />
@@ -102,6 +104,7 @@
     <Compile Include="SCANutil.cs" />
     <Compile Include="SCANmainMenuLoader.cs" />
     <Compile Include="SCAN_UI\UI_Framework\SCANskins.cs" />
+    <Compile Include="SCAN_UI\UI_Framework\SCANuiColorPicker.cs" />
     <Compile Include="SCAN_UI\UI_Framework\SCANuiSlider.cs" />
     <Compile Include="SCAN_UI\UI_Framework\SCANuiUtil.cs" />
   </ItemGroup>
