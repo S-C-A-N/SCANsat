@@ -31,14 +31,10 @@ namespace SCANsat.SCAN_Data
 		private float[,] kethaneValueMap = new float[360, 180]; //Store kethane cell data in here
 		private CelestialBody body;
 		private Texture2D map_small = new Texture2D(360, 180, TextureFormat.RGB24, false);
+		private SCANterrainConfig terrainConfig;
 
 		/* MAP: options */
-		private float minHeight, maxHeight;
-		private float? clampHeight;
-		private string paletteName;
-		private int paletteSize;
-		private bool paletteReverse, paletteDiscrete, disabled;
-		private Palette colorPalette;
+		private bool disabled;
 
 		/* MAP: default values */
 		private static float?[,] bodyHeightRange = new float?[17, 3]
@@ -66,25 +62,14 @@ namespace SCANsat.SCAN_Data
 			body = b;
 			if (b.flightGlobalsIndex <= 16)
 			{
-				minHeight = (float)bodyHeightRange[b.flightGlobalsIndex, 0];
-				maxHeight = (float)bodyHeightRange[b.flightGlobalsIndex, 1];
-				clampHeight = bodyHeightRange[b.flightGlobalsIndex, 2];
-				colorPalette = paletteDefaults[b.flightGlobalsIndex];
-				paletteName = colorPalette.name;
-				paletteSize = colorPalette.size;
-				paletteReverse = paletteReverseDefaults[b.flightGlobalsIndex];
+				terrainConfig = new SCANterrainConfig((float)bodyHeightRange[b.flightGlobalsIndex, 0], (float)bodyHeightRange[b.flightGlobalsIndex, 1], bodyHeightRange[b.flightGlobalsIndex, 2], paletteDefaults[b.flightGlobalsIndex], paletteDefaults[b.flightGlobalsIndex].size, paletteReverseDefaults[b.flightGlobalsIndex], false, body);
 			}
 			else
 			{
-				colorPalette = defaultPalette;
-				paletteName = colorPalette.name;
-				paletteSize = colorPalette.size;
-				minHeight = defaultMinHeight;
-				maxHeight = defaultMaxHeight;
+				float? clamp = null;
 				if (b.ocean)
-					clampHeight = 0;
-				else
-					clampHeight = defaultClampHeight;
+					clamp = 0;
+				terrainConfig = new SCANterrainConfig(defaultMinHeight, defaultMaxHeight, clamp, defaultPalette, defaultPalette.size, false, false, body);
 			}
 		}
 
@@ -118,24 +103,10 @@ namespace SCANsat.SCAN_Data
 			set { kethaneValueMap = value; }
 		}
 
-		public float MinHeight
+		public SCANterrainConfig TerrainConfig
 		{
-			get { return minHeight; }
-			internal set
-			{
-				if (value < maxHeight)
-					minHeight = value;
-			}
-		}
-
-		public float MaxHeight
-		{
-			get { return maxHeight; }
-			internal set
-			{
-				if (value > minHeight)
-					maxHeight = value;
-			}
+			get { return terrainConfig; }
+			internal set { terrainConfig = value; }
 		}
 
 		public float DefaultMinHeight
@@ -160,18 +131,6 @@ namespace SCANsat.SCAN_Data
 			}
 		}
 
-		public float? ClampHeight
-		{
-			get { return clampHeight; }
-			internal set
-			{
-				if (value == null)
-					clampHeight = null;
-				else if (value > minHeight && value < maxHeight)
-					clampHeight = value;
-			}
-		}
-
 		public float? DefaultClampHeight
 		{
 			get
@@ -181,30 +140,6 @@ namespace SCANsat.SCAN_Data
 				else
 					return defaultClampHeight;
 			}
-		}
-
-		public bool PaletteReverse
-		{
-			get { return paletteReverse; }
-			internal set { paletteReverse = value; }
-		}
-
-		public bool PaletteDiscrete
-		{
-			get { return paletteDiscrete; }
-			internal set { paletteDiscrete = value; }
-		}
-
-		public string PaletteName
-		{
-			get { return paletteName; }
-			internal set { paletteName = value; }
-		}
-
-		public Palette ColorPalette
-		{
-			get { return colorPalette; }
-			internal set { colorPalette = value; }
 		}
 
 		public Palette DefaultColorPalette
@@ -226,16 +161,6 @@ namespace SCANsat.SCAN_Data
 					return paletteReverseDefaults[body.flightGlobalsIndex];
 				else
 					return false;
-			}
-		}
-
-		public int PaletteSize
-		{
-			get { return paletteSize; }
-			internal set
-			{
-				if (value >= 3)
-					paletteSize = value;
 			}
 		}
 
