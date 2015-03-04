@@ -10,10 +10,84 @@ using palette = SCANsat.SCAN_UI.UI_Framework.SCANpalette;
 
 namespace SCANsat
 {
+	public class SCANconfig
+	{
+		private ConfigNode SCANtopNode;
+		private Dictionary<int, ConfigNode> subTerrainNodes = new Dictionary<int,ConfigNode>();
+		private Dictionary<string, SCANconfig> resourceNodes = new Dictionary<string,SCANconfig>();
+		private Dictionary<int, ConfigNode> subResourceNodes = new Dictionary<int,ConfigNode>();
+
+		internal SCANconfig(ConfigNode node)
+		{
+			SCANtopNode = node;
+		}
+
+		internal void addToTerrainNodes(int i, ConfigNode node)
+		{
+			if (!subTerrainNodes.ContainsKey(i))
+				subTerrainNodes.Add(i, node);
+			else
+				Debug.LogWarning("[SCANsat] Error During Terrain Node Loading; Config Node Already Exists");
+		}
+
+		internal void addToResourceNodes(string s, ConfigNode node)
+		{
+			if (!resourceNodes.ContainsKey(s))
+			{
+				SCANconfig rNode = new SCANconfig(node);
+				resourceNodes.Add(s, rNode);
+			}
+			else
+				Debug.LogWarning("[SCANsat] Error During Resource Node Loading; Config Node Already Exists");
+		}
+
+		internal void addToBodyResourceNodes(int i, ConfigNode node)
+		{
+			if (!subResourceNodes.ContainsKey(i))
+				subResourceNodes.Add(i, node);
+			else
+				Debug.LogWarning("[SCANsat] Error During Body Resource Node Loading; Config Node Already Exists");
+		}
+
+		public ConfigNode SCANTopNode
+		{
+			get { return SCANtopNode; }
+		}
+
+		public ConfigNode terrainNode(int i)
+		{
+			if (subTerrainNodes.ContainsKey(i))
+				return subTerrainNodes[i];
+			else
+				return null;
+		}
+
+		public SCANconfig resourceNode(string s)
+		{
+			if (resourceNodes.ContainsKey(s))
+				return resourceNodes[s];
+			else
+				return null;
+		}
+
+		public ConfigNode subResourceNode(int i)
+		{
+			if (subResourceNodes.ContainsKey(i))
+				return subResourceNodes[i];
+			else
+				return null;
+		}
+	}
+
 	static class SCANconfigLoader
 	{
 		private static bool globalResource = false;
 		private static bool initialized = false;
+
+		private const string configFile = "/GameData/SCANsat/Resources/SCANcolors.cfg";
+		private static readonly string fileLocation = (KSPUtil.ApplicationRootPath + configFile).Replace('\\', '/');
+
+		private static SCANconfig SCANnode;
 
 		public static bool GlobalResource
 		{
@@ -27,9 +101,26 @@ namespace SCANsat
 
 		internal static void resourceLoader()
 		{
+			ConfigNode node = loadTopNode();
+			if (node == null)
+				return;
+
+			SCANnode = new SCANconfig(node);
+
 			loadSCANtypes();
 			loadResources();
 			loadSCANcolorSettings();
+		}
+
+		internal static void saveConfigNode()
+		{
+			if (SCANnode != null)
+				SCANnode.SCANTopNode.Save(fileLocation);
+		}
+
+		private static ConfigNode loadTopNode()
+		{
+			return GameDatabase.Instance.GetConfigNode("SCANSAT_COLOR_CONFIG");
 		}
 
 		private static void loadSCANtypes()
@@ -266,7 +357,7 @@ namespace SCANsat
 		private static void loadTerrainConfigs()
 		{
 			SCANcontroller.TerrainConfigData = new Dictionary<string, SCANterrainConfig>();
-			ConfigNode altimetryNode = GameDatabase.Instance.GetConfigNode("SCANSAT_ALTIMETRY");
+			ConfigNode altimetryNode = SCANnode.SCANTopNode.GetNode("SCANSAT_ALTIMETRY");
 			if (altimetryNode != null)
 			{
 				float defaultMin, defaultMax;
@@ -322,6 +413,8 @@ namespace SCANsat
 						SCANterrainConfig data = new SCANterrainConfig(min, max, clamp, color, size, reverse, discrete, body);
 
 						SCANcontroller.addToTerrainConfigData(body.name, data);
+
+						SCANnode.addToTerrainNodes(index, terrainNode);
 					}
 				}
 			}
@@ -329,7 +422,7 @@ namespace SCANsat
 
 		private static void loadBiomeSlopeConfigs()
 		{
-			ConfigNode biomeNode = GameDatabase.Instance.GetConfigNode("SCANSAT_BIOME");
+			ConfigNode biomeNode = SCANnode.SCANTopNode.GetNode("SCANSAT_BIOME");
 			if (biomeNode != null)
 			{
 				string lowC, highC;
@@ -357,7 +450,7 @@ namespace SCANsat
 
 		private static void loadResourceConfigs()
 		{
-			ConfigNode resourceNode = GameDatabase.Instance.GetConfigNode("SCANSAT_RESOURCE");
+			ConfigNode resourceNode = SCANnode.SCANTopNode.GetNode("SCANSAT_RESOURCE");
 			if (resourceNode != null)
 			{
 				foreach (ConfigNode resourceConfig in resourceNode.GetNodes("SCANSAT_RESOURCE_CONFIG"))
@@ -409,6 +502,8 @@ namespace SCANsat
 						res.MaxColor = highColor;
 						res.Transparency = transparency;
 
+						SCANnode.addToResourceNodes(name, resourceConfig);
+
 						foreach (ConfigNode planetaryResourceConfig in resourceConfig.GetNodes("RESOURCE_PLANETARY_CONFIG"))
 						{
 							if (planetaryResourceConfig != null)
@@ -437,6 +532,8 @@ namespace SCANsat
 
 								res.CurrentBody.MinValue = minValue;
 								res.CurrentBody.MaxValue = maxValue;
+
+								SCANnode.resourceNode(name).addToBodyResourceNodes(index, planetaryResourceConfig);
 							}
 						}
 					}
