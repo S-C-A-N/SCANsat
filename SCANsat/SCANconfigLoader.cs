@@ -415,6 +415,8 @@ namespace SCANsat
 						SCANcontroller.addToTerrainConfigData(body.name, data);
 
 						SCANnode.addToTerrainNodes(index, terrainNode);
+
+						data.setNode(terrainNode);
 					}
 				}
 			}
@@ -504,6 +506,8 @@ namespace SCANsat
 
 						SCANnode.addToResourceNodes(name, resourceConfig);
 
+						res.setNode(SCANnode.resourceNode(name));
+
 						foreach (ConfigNode planetaryResourceConfig in resourceConfig.GetNodes("RESOURCE_PLANETARY_CONFIG"))
 						{
 							if (planetaryResourceConfig != null)
@@ -525,15 +529,17 @@ namespace SCANsat
 
 								res.CurrentBodyConfig(body.name);
 
-								if (!float.TryParse(planetaryResourceConfig.GetValue(""), out minValue))
+								if (!float.TryParse(planetaryResourceConfig.GetValue("lowResourceCutoff"), out minValue))
 									minValue = 0.1f;
-								if (!float.TryParse(planetaryResourceConfig.GetValue(""), out maxValue))
+								if (!float.TryParse(planetaryResourceConfig.GetValue("highResourceCutoff"), out maxValue))
 									maxValue = 10f;
 
 								res.CurrentBody.MinValue = minValue;
 								res.CurrentBody.MaxValue = maxValue;
 
 								SCANnode.resourceNode(name).addToBodyResourceNodes(index, planetaryResourceConfig);
+
+								res.CurrentBody.setNode(planetaryResourceConfig);
 							}
 						}
 					}
