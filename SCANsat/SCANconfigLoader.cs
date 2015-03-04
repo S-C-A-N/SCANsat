@@ -13,10 +13,16 @@ namespace SCANsat
 	static class SCANconfigLoader
 	{
 		private static bool globalResource = false;
+		private static bool initialized = false;
 
 		public static bool GlobalResource
 		{
 			get { return globalResource; }
+		}
+
+		public static bool Initialized
+		{
+			get { return initialized; }
 		}
 
 		internal static void resourceLoader()
@@ -253,7 +259,8 @@ namespace SCANsat
 		{
 			loadTerrainConfigs();
 			loadBiomeSlopeConfigs();
-			loadResourceConfigs();
+			if (initialized)
+				loadResourceConfigs();
 		}
 
 		private static void loadTerrainConfigs()
@@ -340,6 +347,11 @@ namespace SCANsat
 				highC = biomeNode.GetValue("highBiomeColor");
 				if (!SCANUtil.loadColor(ref highColor, highC))
 					highColor = palette.xkcd_Marigold;
+
+				SCANcontroller.controller.LowBiomeColor = lowColor;
+				SCANcontroller.controller.HighBiomeColor = highColor;
+				SCANcontroller.controller.useStockBiomes = stockBiome;
+				SCANcontroller.controller.biomeTransparency = transparency;
 			}
 		}
 
@@ -356,32 +368,54 @@ namespace SCANsat
 						Color lowColor = new Color();
 						Color highColor = new Color();
 						float transparency;
+						SCANresourceType rType = null;
+						SCANresourceGlobal res = null;
+
 						if (resourceConfig.HasValue("name"))
 							name = resourceConfig.GetValue("name");
 						else
 							continue;
+
+						if (SCANcontroller.ResourceTypes.ContainsKey(name))
+							rType = SCANcontroller.ResourceTypes[name];
+
+						if (SCANcontroller.ResourceList.ContainsKey(name))
+							res = SCANcontroller.ResourceList[name];
+
+						if (res == null)
+							continue;
+
 						lowC = resourceConfig.GetValue("lowResourceColor");
 						highC = resourceConfig.GetValue("highResourceColor");
 						if (!SCANUtil.loadColor(ref lowColor, lowC))
-							lowColor = lowColor;
+						{
+							if (rType != null)
+								lowColor = rType.ColorEmpty;
+							else
+								lowColor = palette.xkcd_DarkPurple;
+						}
 						if (!SCANUtil.loadColor(ref highColor, highC))
-							highColor = highColor;
+						{
+							if (rType != null)
+								highColor = rType.ColorFull;
+							else
+								highColor = palette.xkcd_Magenta;
+						}
+
 						if (!float.TryParse(resourceConfig.GetValue("resourceTransparency"), out transparency))
 							transparency = 20;
+
+						res.MinColor = lowColor;
+						res.MaxColor = highColor;
+						res.Transparency = transparency;
 
 						foreach (ConfigNode planetaryResourceConfig in resourceConfig.GetNodes("RESOURCE_PLANETARY_CONFIG"))
 						{
 							if (planetaryResourceConfig != null)
 							{
-								string bodyName;
 								int index;
 								float minValue, maxValue;
 								CelestialBody body;
-
-								if (planetaryResourceConfig.HasValue("name"))
-									bodyName = planetaryResourceConfig.GetValue("name");
-								else
-									continue;
 
 								if (!int.TryParse(planetaryResourceConfig.GetValue("index"), out index))
 									continue;
@@ -391,10 +425,18 @@ namespace SCANsat
 								if (body == null)
 									continue;
 
+								if (!res.BodyConfigs.ContainsKey(body.name))
+									continue;
+
+								res.CurrentBodyConfig(body.name);
+
 								if (!float.TryParse(planetaryResourceConfig.GetValue(""), out minValue))
 									minValue = 0.1f;
 								if (!float.TryParse(planetaryResourceConfig.GetValue(""), out maxValue))
 									maxValue = 10f;
+
+								res.CurrentBody.MinValue = minValue;
+								res.CurrentBody.MaxValue = maxValue;
 							}
 						}
 					}
