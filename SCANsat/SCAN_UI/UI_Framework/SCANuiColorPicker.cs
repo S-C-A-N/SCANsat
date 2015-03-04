@@ -9,7 +9,6 @@ namespace SCANsat.SCAN_UI.UI_Framework
 	{
 		private float valSlider, oldValSlider;
 		private bool lowColorChange, oldColorState;
-		private int bodyIndex;
 		private Color c = new Color();
 		private Color colorLow = new Color();
 		private Color colorHigh = new Color();
@@ -18,10 +17,27 @@ namespace SCANsat.SCAN_UI.UI_Framework
 		private Texture2D maxColorPreview = new Texture2D(1, 1);
 		private Texture2D maxColorOld = new Texture2D(1, 1);
 
-		internal SCANuiColorPicker (Color low, Color high)
+		public Color ColorLow
+		{
+			get { return colorLow; }
+		}
+
+		public Color ColorHigh
+		{
+			get { return colorHigh; }
+		}
+
+		public bool LowColorChange
+		{
+			get { return lowColorChange; }
+		}
+
+		internal SCANuiColorPicker (Color low, Color high, bool changeLow)
 		{
 			colorLow = low;
 			colorHigh = high;
+			lowColorChange = oldColorState = changeLow;
+			valSlider = oldValSlider = colorLow.Brightness().Mathf_Round(2) * 100f;
 		}
 
 		internal void drawColorSelector(Rect R)
@@ -97,7 +113,42 @@ namespace SCANsat.SCAN_UI.UI_Framework
 
 		internal void brightnessChanged()
 		{
+			if (oldValSlider != valSlider)
+			{
+				oldValSlider = valSlider;
+				if (lowColorChange)
+					colorLow = c * new Color(valSlider / 100f, valSlider / 100f, valSlider / 100f);
+				else
+					colorHigh = c * new Color(valSlider / 100f, valSlider / 100f, valSlider / 100f);
+			}
+		}
 
+		internal void colorStateChanged()
+		{
+			if (oldColorState != lowColorChange)
+			{
+				oldColorState = lowColorChange;
+				if (lowColorChange)
+				{
+					c = colorLow;
+					valSlider = colorLow.Brightness().Mathf_Round(2) * 100f;
+				}
+				else
+				{
+					c = colorHigh;
+					valSlider = colorHigh.Brightness().Mathf_Round(2) * 100f;
+				}
+				oldValSlider = valSlider;
+			}
+		}
+
+		internal void updateOldSwatches()
+		{
+			minColorOld.SetPixel(0, 0, colorLow);
+			minColorOld.Apply();
+
+			maxColorOld.SetPixel(0, 0, colorHigh);
+			maxColorOld.Apply();
 		}
 	}
 }
