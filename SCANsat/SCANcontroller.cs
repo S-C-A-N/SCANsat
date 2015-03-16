@@ -110,12 +110,12 @@ namespace SCANsat
 		public float biomeTransparency = 40;
 
 		/* Available resources for overlays; loaded from resource addon configs; only loaded once */
-		private static Dictionary<string, SCANresourceGlobal> resourceList;
+		private static Dictionary<string, SCANresourceGlobal> masterResourceNodes;
 
 		/* Resource types loaded from configs; only needs to be loaded once */
 		private static Dictionary<string, SCANresourceType> resourceTypes;
 
-		private static Dictionary<string, SCANterrainConfig> terrainConfigData;
+		private static Dictionary<string, SCANterrainConfig> masterTerrainNodes;
 
 		/* Primary SCANsat vessel dictionary; loaded every time */
 		private Dictionary<Guid, SCANvessel> knownVessels = new Dictionary<Guid, SCANvessel>();
@@ -165,31 +165,31 @@ namespace SCANsat
 				Debug.LogError("[SCANsat] Warning: SCANdata Dictionary Already Contains Key of This Type");
 		}
 
-		public static Dictionary<string, SCANterrainConfig> TerrainConfigData
+		public static Dictionary<string, SCANterrainConfig> MasterTerrainNodes
 		{
-			get { return terrainConfigData; }
-			internal set { terrainConfigData = value; }
+			get { return masterTerrainNodes; }
+			internal set { masterTerrainNodes = value; }
 		}
 
 		public static void addToTerrainConfigData (string name, SCANterrainConfig data)
 		{
-			if (!terrainConfigData.ContainsKey(name))
-				terrainConfigData.Add(name, data);
+			if (!masterTerrainNodes.ContainsKey(name))
+				masterTerrainNodes.Add(name, data);
 			else
 				Debug.LogError("[SCANsat] Warning: SCANterrain Data Dictionary Already Contains Key Of This Type");
 		}
 
-		public static Dictionary<string, SCANresourceGlobal> ResourceList
+		public static Dictionary<string, SCANresourceGlobal> MasterResourceNodes
 		{
-			get { return resourceList; }
-			internal set { resourceList = value; }
+			get { return masterResourceNodes; }
+			internal set { masterResourceNodes = value; }
 		}
 		
 		public static void addToResourceData (string name, SCANresourceGlobal res)
 		{
-			if (!resourceList.ContainsKey(name))
+			if (!masterResourceNodes.ContainsKey(name))
 			{
-				resourceList.Add(name, res);
+				masterResourceNodes.Add(name, res);
 			}
 			else
 				Debug.LogError(string.Format("[SCANsat] Warning: SCANResource Dictionary Already Contains Key of This Type: Resource: {0}", name));
@@ -397,8 +397,8 @@ namespace SCANsat
 
 							SCANterrainConfig dataTerrainConfig = new SCANterrainConfig(min, max, clampState, dataPalette, pSize, pRev, pDis, body);
 
-							if (terrainConfigData.ContainsKey(body.name))
-								terrainConfigData[body.name] = dataTerrainConfig;
+							if (masterTerrainNodes.ContainsKey(body.name))
+								masterTerrainNodes[body.name] = dataTerrainConfig;
 							else
 								addToTerrainConfigData(body.name, dataTerrainConfig);
 
@@ -416,9 +416,9 @@ namespace SCANsat
 			if (SCANconfigLoader.GlobalResource)
 			{
 				if (string.IsNullOrEmpty(resourceSelection))
-					resourceSelection = resourceList.ElementAt(0).Key;
-				else if (!resourceList.ContainsKey(resourceSelection))
-					resourceSelection = resourceList.ElementAt(0).Key;
+					resourceSelection = masterResourceNodes.ElementAt(0).Key;
+				else if (!masterResourceNodes.ContainsKey(resourceSelection))
+					resourceSelection = masterResourceNodes.ElementAt(0).Key;
 			}
 			//try
 			//{
@@ -525,15 +525,15 @@ namespace SCANsat
 					}
 					node.AddNode(node_progress);
 				}
-				if (resourceTypes.Count > 0 && resourceList.Count > 0)
+				if (resourceTypes.Count > 0 && masterResourceNodes.Count > 0)
 				{
 					ConfigNode node_resources = new ConfigNode("SCANResources");
 					foreach (SCANresourceType t in resourceTypes.Values)
 					{
 						SCANresourceGlobal r = null;
 
-						if (resourceList.ContainsKey(t.Name))
-							r = resourceList[t.Name];
+						if (masterResourceNodes.ContainsKey(t.Name))
+							r = masterResourceNodes[t.Name];
 
 						if (r != null)
 						{
@@ -604,9 +604,9 @@ namespace SCANsat
 		private string saveResources(SCANresourceType type)
 		{
 			List<string> sL = new List<string>();
-			if (resourceList.ContainsKey(type.Name))
+			if (masterResourceNodes.ContainsKey(type.Name))
 			{
-				SCANresourceGlobal r = resourceList[type.Name];
+				SCANresourceGlobal r = masterResourceNodes[type.Name];
 				foreach (SCANresourceBody bodyRes in r.BodyConfigs.Values)
 				{
 					string a = string.Format("{0}|{1:F3}|{2:F3}", bodyRes.Body.flightGlobalsIndex, bodyRes.MinValue, bodyRes.MaxValue);
@@ -621,8 +621,8 @@ namespace SCANsat
 		{
 			SCANresourceGlobal r;
 
-			if (resourceList.ContainsKey(resource))
-				r = resourceList[resource];
+			if (masterResourceNodes.ContainsKey(resource))
+				r = masterResourceNodes[resource];
 			else
 				return;
 
