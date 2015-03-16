@@ -121,7 +121,7 @@ namespace SCANsat.SCAN_UI
 
 			if (SCANconfigLoader.GlobalResource)
 			{
-				currentResource = new SCANresourceGlobal(SCANcontroller.ResourceList.ElementAt(0).Value);
+				currentResource = new SCANresourceGlobal(SCANcontroller.MasterResourceNodes.ElementAt(0).Value);
 				currentResource.CurrentBodyConfig(data.Body.name);
 
 				if (currentResource != null)
@@ -781,8 +781,8 @@ namespace SCANsat.SCAN_UI
 			growE();
 				if (GUILayout.Button("Save Values", GUILayout.Width(100)))
 				{
-					if (SCANcontroller.ResourceList.ContainsKey(currentResource.Name))
-						SCANcontroller.ResourceList[currentResource.Name] = currentResource;
+					if (SCANcontroller.MasterResourceNodes.ContainsKey(currentResource.Name))
+						SCANcontroller.MasterResourceNodes[currentResource.Name] = currentResource;
 
 					resourceColorPicker.updateOldSwatches();
 				}
@@ -797,8 +797,8 @@ namespace SCANsat.SCAN_UI
 						r.MaxValue = resourceMaxSlider.CurrentValue;
 					}
 
-					if (SCANcontroller.ResourceList.ContainsKey(currentResource.Name))
-						SCANcontroller.ResourceList[currentResource.Name] = currentResource;
+					if (SCANcontroller.MasterResourceNodes.ContainsKey(currentResource.Name))
+						SCANcontroller.MasterResourceNodes[currentResource.Name] = currentResource;
 
 					resourceColorPicker.updateOldSwatches();
 				}
@@ -813,8 +813,8 @@ namespace SCANsat.SCAN_UI
 					currentResource.MaxColor = currentResource.ResourceType.ColorFull;
 					currentResource.Transparency = 20f;
 
-					if (SCANcontroller.ResourceList.ContainsKey(currentResource.Name))
-						SCANcontroller.ResourceList[currentResource.Name] = currentResource;
+					if (SCANcontroller.MasterResourceNodes.ContainsKey(currentResource.Name))
+						SCANcontroller.MasterResourceNodes[currentResource.Name] = currentResource;
 
 					updateUI();
 				}
@@ -833,8 +833,8 @@ namespace SCANsat.SCAN_UI
 						r.MaxValue = r.DefaultMaxValue;
 					}
 
-					if (SCANcontroller.ResourceList.ContainsKey(currentResource.Name))
-						SCANcontroller.ResourceList[currentResource.Name] = currentResource;
+					if (SCANcontroller.MasterResourceNodes.ContainsKey(currentResource.Name))
+						SCANcontroller.MasterResourceNodes[currentResource.Name] = currentResource;
 
 					updateUI();
 				}
@@ -865,14 +865,14 @@ namespace SCANsat.SCAN_UI
 				{
 					ddRect = new Rect(WindowRect.width - 320, 135, 160, 140);
 					GUI.Box(ddRect, "", SCANskins.SCAN_dropDownBox);
-					for (int i = 0; i < SCANcontroller.ResourceList.Count; i ++)
+					for (int i = 0; i < SCANcontroller.MasterResourceNodes.Count; i ++)
 					{
-						string s = SCANcontroller.ResourceList.ElementAt(i).Value.Name;
-						scrollR = GUI.BeginScrollView(ddRect, scrollR, new Rect(0, 0, 140, 23 * SCANcontroller.ResourceList.Count));
+						string s = SCANcontroller.MasterResourceNodes.ElementAt(i).Value.Name;
+						scrollR = GUI.BeginScrollView(ddRect, scrollR, new Rect(0, 0, 140, 23 * SCANcontroller.MasterResourceNodes.Count));
 						Rect r = new Rect(2, i * 23, 136, 22);
 						if (GUI.Button(r, s, SCANskins.SCAN_dropDownButton))
 						{
-							currentResource = new SCANresourceGlobal(SCANcontroller.ResourceList.ElementAt(i).Value);
+							currentResource = new SCANresourceGlobal(SCANcontroller.MasterResourceNodes.ElementAt(i).Value);
 							currentResource.CurrentBodyConfig(data.Body.name);
 
 							fineControlMode = oldFineControl = false;

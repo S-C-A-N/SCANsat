@@ -661,16 +661,16 @@ namespace SCANsat.SCAN_UI
 			{
 				ddRect = new Rect(WindowRect.width - 290, 45, 120, 160);
 				GUI.Box(ddRect, "", SCANskins.SCAN_dropDownBox);
-				for (int i = 0; i < SCANcontroller.ResourceList.Count; i++)
+				for (int i = 0; i < SCANcontroller.MasterResourceNodes.Count; i++)
 				{
-					scrollR = GUI.BeginScrollView(ddRect, scrollR, new Rect(0, 0, 100, 20 * SCANcontroller.ResourceList.Count));
+					scrollR = GUI.BeginScrollView(ddRect, scrollR, new Rect(0, 0, 100, 20 * SCANcontroller.MasterResourceNodes.Count));
 					Rect r = new Rect(2, 20 * i, 96, 20);
-					if (GUI.Button(r, SCANcontroller.ResourceList.ElementAt(i).Key, SCANskins.SCAN_dropDownButton))
+					if (GUI.Button(r, SCANcontroller.MasterResourceNodes.ElementAt(i).Key, SCANskins.SCAN_dropDownButton))
 					{
-						bigmap.Resource = SCANcontroller.ResourceList.ElementAt(i).Value;
+						bigmap.Resource = SCANcontroller.MasterResourceNodes.ElementAt(i).Value;
 						bigmap.Resource.CurrentBodyConfig(b.name);
 						SCANcontroller.controller.resourceSelection = bigmap.Resource.Name;
-						if (SCANcontroller.ResourceList.ElementAt(i).Value.Source == SCANresource_Source.Kethane)
+						if (SCANcontroller.MasterResourceNodes.ElementAt(i).Value.Source == SCANresource_Source.Kethane)
 							SCANcontroller.controller.resourceOverlayType = 1;
 						else
 							SCANcontroller.controller.resourceOverlayType = 0;
