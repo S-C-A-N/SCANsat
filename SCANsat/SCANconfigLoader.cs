@@ -37,9 +37,6 @@ namespace SCANsat
 		[Persistent]
 		private List<SCANresourceGlobal> SCANsat_Resources = new List<SCANresourceGlobal>();
 
-		private static Dictionary<string, SCANterrainConfig> masterTerrainNodes = new Dictionary<string, SCANterrainConfig>();
-		private static Dictionary<string, SCANresourceGlobal> masterResourceNodes = new Dictionary<string, SCANresourceGlobal>();
-
 		internal SCAN_Color_Config(string filepath)
 		{
 			FilePath = filepath;
@@ -51,7 +48,7 @@ namespace SCANsat
 		{
 			try
 			{
-				masterTerrainNodes = SCANsat_Altimetry.ToDictionary(a => a.Name, a => a);
+				SCANcontroller.MasterTerrainNodes = SCANsat_Altimetry.ToDictionary(a => a.Name, a => a);
 			}
 			catch (Exception e)
 			{
@@ -60,7 +57,7 @@ namespace SCANsat
 
 			try
 			{
-				masterResourceNodes = SCANsat_Resources.ToDictionary(a => a.Name, a => a);
+				SCANcontroller.MasterResourceNodes = SCANsat_Resources.ToDictionary(a => a.Name, a => a);
 			}
 			catch (Exception e)
 			{
@@ -72,7 +69,7 @@ namespace SCANsat
 		{
 			try
 			{
-				SCANsat_Altimetry = masterTerrainNodes.Values.ToList();
+				SCANsat_Altimetry = SCANcontroller.MasterTerrainNodes.Values.ToList();
 			}
 			catch (Exception e)
 			{
@@ -81,7 +78,7 @@ namespace SCANsat
 
 			try
 			{
-				SCANsat_Resources = masterResourceNodes.Values.ToList();
+				SCANsat_Resources = SCANcontroller.MasterResourceNodes.Values.ToList();
 			}
 			catch (Exception e)
 			{
@@ -89,38 +86,58 @@ namespace SCANsat
 			}
 		}
 
-		internal void addToTerrainNodes(SCANterrainConfig c)
+		public float DefaultMinHeightRange
 		{
-			if (!masterTerrainNodes.ContainsKey(c.Name))
-				masterTerrainNodes.Add(c.Name, c);
-			else
-				Debug.LogWarning("[SCANsat] Error During Terrain Node Loading; Entry [" + c.Name + "] already Exists");
+			get { return defaultMinHeightRange; }
+			internal set { defaultMinHeightRange = value; }
+		}
+		
+		public float DefaultMaxHeightRange
+		{
+			get { return defaultMaxHeightRange; }
+			internal set { defaultMaxHeightRange = value; }
 		}
 
-		internal void addToResourceNodes(SCANresourceGlobal r)
+		public string DefaultPalette
 		{
-			if (!masterResourceNodes.ContainsKey(r.Name))
-			{
-				masterResourceNodes.Add(r.Name, r);
-			}
-			else
-				Debug.LogWarning("[SCANsat] Error During Resource Node Loading; Entry [" + r.Name + "] Already Exists");
+			get { return defaultPalette; }
+			internal set { defaultPalette = value; }
 		}
 
-		public SCANterrainConfig terrainNode(string n)
+		public Color LowBiomeColor
 		{
-			if (masterTerrainNodes.ContainsKey(n))
-				return masterTerrainNodes[n];
-			else
-				return null;
+			get { return lowBiomeColor; }
+			internal set { lowBiomeColor = value; }
 		}
 
-		public SCANresourceGlobal resourceNode(string s)
+		public Color HighBiomeColor
 		{
-			if (masterResourceNodes.ContainsKey(s))
-				return masterResourceNodes[s];
-			else
-				return null;
+			get { return highBiomeColor; }
+			internal set { highBiomeColor = value; }
+		}
+
+		public float BiomeTransparency
+		{
+			get { return biomeTransparency; }
+			internal set { biomeTransparency = value; }
+		}
+
+		public bool StockBiomeMap
+		{
+			get { return stockBiomeMap; }
+			internal set { stockBiomeMap = value; }
+		}
+
+		public Color LowSlopeColor
+		{
+			get { return lowSlopeColor; }
+			internal set { lowSlopeColor = value; }
+		}
+
+		public Color HighSlopeColor
+		{
+			get { return highSlopeColor; }
+			internal set { highSlopeColor = value; }
 		}
 	}
 
@@ -177,7 +194,7 @@ namespace SCANsat
 
 		private static void loadResources() //Repopulates the master resources list with data from config nodes
 		{
-			SCANcontroller.ResourceList = new Dictionary<string, SCANresourceGlobal>();
+			SCANcontroller.MasterResourceNodes = new Dictionary<string, SCANresourceGlobal>();
 			if (SCANmainMenuLoader.RegolithFound)
 			{
 				foreach (ConfigNode node in GameDatabase.Instance.GetConfigNodes("REGOLITH_GLOBAL_RESOURCE"))
@@ -264,7 +281,7 @@ namespace SCANsat
 				//}
 			//}
 
-			if (SCANcontroller.ResourceList.Count == 0)
+			if (SCANcontroller.MasterResourceNodes.Count == 0)
 				globalResource = false;
 			else
 				globalResource = true;
