@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using SCANsat.SCAN_Data;
+using SCANsat.SCAN_Platform;
 using SCANsat.SCAN_Platform.Palettes;
 using SCANsat.SCAN_Platform.Palettes.ColorBrewer;
 using SCANsat.SCAN_Platform.Palettes.FixedColors;
@@ -10,70 +11,114 @@ using palette = SCANsat.SCAN_UI.UI_Framework.SCANpalette;
 
 namespace SCANsat
 {
-	public class SCANconfig
+	public class SCAN_Color_Config : SCAN_ConfigNodeStorage
 	{
-		private ConfigNode SCANtopNode;
-		private Dictionary<int, ConfigNode> subTerrainNodes = new Dictionary<int,ConfigNode>();
-		private Dictionary<string, SCANconfig> resourceNodes = new Dictionary<string,SCANconfig>();
-		private Dictionary<int, ConfigNode> subResourceNodes = new Dictionary<int,ConfigNode>();
 
-		internal SCANconfig(ConfigNode node)
+		[Persistent]
+		private float defaultMinHeightRange = -1000;
+		[Persistent]
+		private float defaultMaxHeightRange = 8000;
+		[Persistent]
+		private string defaultPalette = "Default";
+		[Persistent]
+		private Color lowBiomeColor = palette.xkcd_CamoGreen;
+		[Persistent]
+		private Color highBiomeColor = palette.xkcd_Marigold;
+		[Persistent]
+		private float biomeTransparency = 40;
+		[Persistent]
+		private bool stockBiomeMap = false;
+		[Persistent]
+		private Color lowSlopeColor = palette.xkcd_PukeGreen;
+		[Persistent]
+		private Color highSlopeColor = palette.xkcd_Lemon;
+		[Persistent]
+		private List<SCANterrainConfig> SCANsat_Altimetry = new List<SCANterrainConfig>();
+		[Persistent]
+		private List<SCANresourceGlobal> SCANsat_Resources = new List<SCANresourceGlobal>();
+
+		private static Dictionary<string, SCANterrainConfig> masterTerrainNodes = new Dictionary<string, SCANterrainConfig>();
+		private static Dictionary<string, SCANresourceGlobal> masterResourceNodes = new Dictionary<string, SCANresourceGlobal>();
+
+		internal SCAN_Color_Config(string filepath)
 		{
-			SCANtopNode = node;
+			FilePath = filepath;
+
+			Load();
 		}
 
-		internal void addToTerrainNodes(int i, ConfigNode node)
+		public override void OnDecodeFromConfigNode()
 		{
-			if (!subTerrainNodes.ContainsKey(i))
-				subTerrainNodes.Add(i, node);
-			else
-				Debug.LogWarning("[SCANsat] Error During Terrain Node Loading; Config Node Already Exists");
-		}
-
-		internal void addToResourceNodes(string s, ConfigNode node)
-		{
-			if (!resourceNodes.ContainsKey(s))
+			try
 			{
-				SCANconfig rNode = new SCANconfig(node);
-				resourceNodes.Add(s, rNode);
+				masterTerrainNodes = SCANsat_Altimetry.ToDictionary(a => a.Name, a => a);
+			}
+			catch (Exception e)
+			{
+				SCANUtil.SCANlog("Error while loading SCANsat terrain config settings: {0}", e);
+			}
+
+			try
+			{
+				masterResourceNodes = SCANsat_Resources.ToDictionary(a => a.Name, a => a);
+			}
+			catch (Exception e)
+			{
+				SCANUtil.SCANlog("Error while loading SCANsat resource config settings: {0}", e);
+			}
+		}
+
+		public override void OnEncodeToConfigNode()
+		{
+			try
+			{
+				SCANsat_Altimetry = masterTerrainNodes.Values.ToList();
+			}
+			catch (Exception e)
+			{
+				SCANUtil.SCANlog("Error while saving SCANsat altimetry config data: {0}", e);
+			}
+
+			try
+			{
+				SCANsat_Resources = masterResourceNodes.Values.ToList();
+			}
+			catch (Exception e)
+			{
+				SCANUtil.SCANlog("Error while saving SCANsat resource config data: {0}", e);
+			}
+		}
+
+		internal void addToTerrainNodes(SCANterrainConfig c)
+		{
+			if (!masterTerrainNodes.ContainsKey(c.Name))
+				masterTerrainNodes.Add(c.Name, c);
+			else
+				Debug.LogWarning("[SCANsat] Error During Terrain Node Loading; Entry [" + c.Name + "] already Exists");
+		}
+
+		internal void addToResourceNodes(SCANresourceGlobal r)
+		{
+			if (!masterResourceNodes.ContainsKey(r.Name))
+			{
+				masterResourceNodes.Add(r.Name, r);
 			}
 			else
-				Debug.LogWarning("[SCANsat] Error During Resource Node Loading; Config Node Already Exists");
+				Debug.LogWarning("[SCANsat] Error During Resource Node Loading; Entry [" + r.Name + "] Already Exists");
 		}
 
-		internal void addToBodyResourceNodes(int i, ConfigNode node)
+		public SCANterrainConfig terrainNode(string n)
 		{
-			if (!subResourceNodes.ContainsKey(i))
-				subResourceNodes.Add(i, node);
-			else
-				Debug.LogWarning("[SCANsat] Error During Body Resource Node Loading; Config Node Already Exists");
-		}
-
-		public ConfigNode SCANTopNode
-		{
-			get { return SCANtopNode; }
-		}
-
-		public ConfigNode terrainNode(int i)
-		{
-			if (subTerrainNodes.ContainsKey(i))
-				return subTerrainNodes[i];
+			if (masterTerrainNodes.ContainsKey(n))
+				return masterTerrainNodes[n];
 			else
 				return null;
 		}
 
-		public SCANconfig resourceNode(string s)
+		public SCANresourceGlobal resourceNode(string s)
 		{
-			if (resourceNodes.ContainsKey(s))
-				return resourceNodes[s];
-			else
-				return null;
-		}
-
-		public ConfigNode subResourceNode(int i)
-		{
-			if (subResourceNodes.ContainsKey(i))
-				return subResourceNodes[i];
+			if (masterResourceNodes.ContainsKey(s))
+				return masterResourceNodes[s];
 			else
 				return null;
 		}
@@ -87,7 +132,7 @@ namespace SCANsat
 		private const string configFile = "/GameData/SCANsat/Resources/SCANcolors.cfg";
 		private static readonly string fileLocation = (KSPUtil.ApplicationRootPath + configFile).Replace('\\', '/');
 
-		private static SCANconfig SCANnode;
+		private static SCAN_Color_Config SCANnode;
 
 		public static bool GlobalResource
 		{
@@ -101,26 +146,10 @@ namespace SCANsat
 
 		internal static void resourceLoader()
 		{
-			ConfigNode node = loadTopNode();
-			if (node == null)
-				return;
-
-			SCANnode = new SCANconfig(node);
+			SCANnode = new SCAN_Color_Config(fileLocation);
 
 			loadSCANtypes();
 			loadResources();
-			loadSCANcolorSettings();
-		}
-
-		internal static void saveConfigNode()
-		{
-			if (SCANnode != null)
-				SCANnode.SCANTopNode.Save(fileLocation);
-		}
-
-		private static ConfigNode loadTopNode()
-		{
-			return GameDatabase.Instance.GetConfigNode("SCANSAT_COLOR_CONFIG");
 		}
 
 		private static void loadSCANtypes()
@@ -344,207 +373,6 @@ namespace SCANsat
 		{
 			var resourceType = SCANcontroller.ResourceTypes.FirstOrDefault(r => r.Value.Name == s).Value;
 			return resourceType;
-		}
-
-		private static void loadSCANcolorSettings()
-		{
-			loadTerrainConfigs();
-			loadBiomeSlopeConfigs();
-			if (initialized)
-				loadResourceConfigs();
-		}
-
-		private static void loadTerrainConfigs()
-		{
-			SCANcontroller.TerrainConfigData = new Dictionary<string, SCANterrainConfig>();
-			ConfigNode altimetryNode = SCANnode.SCANTopNode.GetNode("SCANSAT_ALTIMETRY");
-			if (altimetryNode != null)
-			{
-				float defaultMin, defaultMax;
-				string defaultPalette = "Default";
-				if (!float.TryParse(altimetryNode.GetValue("defaultMinHeightRange"), out defaultMin))
-					defaultMin = -1000f;
-				if (!float.TryParse(altimetryNode.GetValue("defaultMaxHeightRange"), out defaultMax))
-					defaultMax = 8000f;
-				if (altimetryNode.HasValue("defaultPalette"))
-					defaultPalette = altimetryNode.GetValue("defaultPalette");
-
-				foreach (ConfigNode terrainNode in GameDatabase.Instance.GetConfigNodes("SCANSAT_PLANETARY_CONFIG"))
-				{
-					if (terrainNode != null)
-					{
-						int index, size;
-						float min, max, clampf;
-						float? clamp;
-						bool reverse, discrete;
-						string palette = defaultPalette;
-						Palette color;
-						CelestialBody body;
-						if (!int.TryParse(terrainNode.GetValue("index"), out index))
-							continue;
-
-						body = FlightGlobals.Bodies.FirstOrDefault(b => b.flightGlobalsIndex == index);
-
-						if (body == null)
-							continue;
-
-						if (!float.TryParse(terrainNode.GetValue("minHeightRange"), out min))
-							min = defaultMin;
-						if (!float.TryParse(terrainNode.GetValue("maxHeightRange"), out max))
-							max = defaultMax;
-						if (terrainNode.HasValue("clampHeight"))
-						{
-							if (float.TryParse(terrainNode.GetValue("clampHeight"), out clampf))
-								clamp = clampf;
-							else
-								clamp = null;
-						}
-						else
-							clamp = null;
-						if (!int.TryParse(terrainNode.GetValue("paletteSize"), out size))
-							size = 7;
-						if (!bool.TryParse(terrainNode.GetValue("paletteReverse"), out reverse))
-							reverse = false;
-						if (!bool.TryParse(terrainNode.GetValue("paletteDiscrete"), out discrete))
-							discrete = false;
-
-						color = paletteLoader(palette, size);
-
-						SCANterrainConfig data = new SCANterrainConfig(min, max, clamp, color, size, reverse, discrete, body);
-
-						SCANcontroller.addToTerrainConfigData(body.name, data);
-
-						SCANnode.addToTerrainNodes(index, terrainNode);
-
-						data.setNode(terrainNode);
-					}
-				}
-			}
-		}
-
-		private static void loadBiomeSlopeConfigs()
-		{
-			ConfigNode biomeNode = SCANnode.SCANTopNode.GetNode("SCANSAT_BIOME");
-			if (biomeNode != null)
-			{
-				string lowC, highC;
-				Color lowColor = new Color();
-				Color highColor = new Color();
-				float transparency;
-				bool stockBiome;
-				if (!float.TryParse(biomeNode.GetValue("biomeTransparency"), out transparency))
-					transparency = 40;
-				if (!bool.TryParse(biomeNode.GetValue("stockBiomeMap"), out stockBiome))
-					stockBiome = false;
-				lowC = biomeNode.GetValue("lowBiomeColor");
-				if (!SCANUtil.loadColor(ref lowColor, lowC))
-					lowColor = palette.xkcd_CamoGreen;
-				highC = biomeNode.GetValue("highBiomeColor");
-				if (!SCANUtil.loadColor(ref highColor, highC))
-					highColor = palette.xkcd_Marigold;
-
-				SCANcontroller.controller.LowBiomeColor = lowColor;
-				SCANcontroller.controller.HighBiomeColor = highColor;
-				SCANcontroller.controller.useStockBiomes = stockBiome;
-				SCANcontroller.controller.biomeTransparency = transparency;
-			}
-		}
-
-		private static void loadResourceConfigs()
-		{
-			ConfigNode resourceNode = SCANnode.SCANTopNode.GetNode("SCANSAT_RESOURCE");
-			if (resourceNode != null)
-			{
-				foreach (ConfigNode resourceConfig in resourceNode.GetNodes("SCANSAT_RESOURCE_CONFIG"))
-				{
-					if (resourceConfig != null)
-					{
-						string name, lowC, highC;
-						Color lowColor = new Color();
-						Color highColor = new Color();
-						float transparency;
-						SCANresourceType rType = null;
-						SCANresourceGlobal res = null;
-
-						if (resourceConfig.HasValue("name"))
-							name = resourceConfig.GetValue("name");
-						else
-							continue;
-
-						if (SCANcontroller.ResourceTypes.ContainsKey(name))
-							rType = SCANcontroller.ResourceTypes[name];
-
-						if (SCANcontroller.ResourceList.ContainsKey(name))
-							res = SCANcontroller.ResourceList[name];
-
-						if (res == null)
-							continue;
-
-						lowC = resourceConfig.GetValue("lowResourceColor");
-						highC = resourceConfig.GetValue("highResourceColor");
-						if (!SCANUtil.loadColor(ref lowColor, lowC))
-						{
-							if (rType != null)
-								lowColor = rType.ColorEmpty;
-							else
-								lowColor = palette.xkcd_DarkPurple;
-						}
-						if (!SCANUtil.loadColor(ref highColor, highC))
-						{
-							if (rType != null)
-								highColor = rType.ColorFull;
-							else
-								highColor = palette.xkcd_Magenta;
-						}
-
-						if (!float.TryParse(resourceConfig.GetValue("resourceTransparency"), out transparency))
-							transparency = 20;
-
-						res.MinColor = lowColor;
-						res.MaxColor = highColor;
-						res.Transparency = transparency;
-
-						SCANnode.addToResourceNodes(name, resourceConfig);
-
-						res.setNode(SCANnode.resourceNode(name));
-
-						foreach (ConfigNode planetaryResourceConfig in resourceConfig.GetNodes("RESOURCE_PLANETARY_CONFIG"))
-						{
-							if (planetaryResourceConfig != null)
-							{
-								int index;
-								float minValue, maxValue;
-								CelestialBody body;
-
-								if (!int.TryParse(planetaryResourceConfig.GetValue("index"), out index))
-									continue;
-
-								body = FlightGlobals.Bodies.FirstOrDefault(b => b.flightGlobalsIndex == index);
-
-								if (body == null)
-									continue;
-
-								if (!res.BodyConfigs.ContainsKey(body.name))
-									continue;
-
-								res.CurrentBodyConfig(body.name);
-
-								if (!float.TryParse(planetaryResourceConfig.GetValue("lowResourceCutoff"), out minValue))
-									minValue = 0.1f;
-								if (!float.TryParse(planetaryResourceConfig.GetValue("highResourceCutoff"), out maxValue))
-									maxValue = 10f;
-
-								res.CurrentBody.MinValue = minValue;
-								res.CurrentBody.MaxValue = maxValue;
-
-								SCANnode.resourceNode(name).addToBodyResourceNodes(index, planetaryResourceConfig);
-
-								res.CurrentBody.setNode(planetaryResourceConfig);
-							}
-						}
-					}
-				}
-			}
 		}
 
 		internal static Palette paletteLoader(string name, int size)
