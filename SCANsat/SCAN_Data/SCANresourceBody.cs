@@ -3,37 +3,35 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
+using SCANsat.SCAN_Platform;
+
 namespace SCANsat.SCAN_Data
 {
-	public class SCANresourceBody
+	public class SCANresourceBody : SCAN_ConfigNodeStorage
 	{
+		[Persistent]
+		private string name;
+		[Persistent]
+		private int index;
+		[Persistent]
+		private float lowResourceCutoff;
+		[Persistent]
+		private float highResourceCutoff;
+		private CelestialBody body;
+		private float defaultMinValue, defaultMaxValue;
+
 		internal SCANresourceBody(string n, CelestialBody Body, float min, float max)
 		{
 			name = n;
 			body = Body;
-			minValue = defaultMinValue = min;
-			maxValue = defaultMaxValue = max;
-		}
-
-		private string name;
-		private CelestialBody body;
-		private float minValue, maxValue, defaultMinValue, defaultMaxValue;
-		private ConfigNode node;
-
-		internal void setNode(ConfigNode n)
-		{
-			node = n;
-		}
-
-		internal void updateNode()
-		{
-			node.SetValue("lowResourceCutoff", minValue.ToString("F1"));
-			node.SetValue("highResourceCutoff", maxValue.ToString("F1"));
+			index = body.flightGlobalsIndex;
+			lowResourceCutoff = defaultMinValue = min;
+			highResourceCutoff = defaultMaxValue = max;
 		}
 
 		public static SCANresourceBody resourceCopy(SCANresourceBody r)
 		{
-			SCANresourceBody res = new SCANresourceBody(r.name, r.body, r.minValue, r.maxValue);
+			SCANresourceBody res = new SCANresourceBody(r.name, r.body, r.lowResourceCutoff, r.highResourceCutoff);
 			return res;
 		}
 
@@ -49,21 +47,21 @@ namespace SCANsat.SCAN_Data
 
 		public float MinValue
 		{
-			get { return minValue; }
+			get { return lowResourceCutoff; }
 			internal set
 			{
-				if (value >= 0 && value < maxValue && value < 100)
-					minValue = value;
+				if (value >= 0 && value < highResourceCutoff && value < 100)
+					lowResourceCutoff = value;
 			}
 		}
 
 		public float MaxValue
 		{
-			get { return maxValue; }
+			get { return highResourceCutoff; }
 			internal set
 			{
-				if (value >= 0 && value > minValue && value <= 100)
-					maxValue = value;
+				if (value >= 0 && value > lowResourceCutoff && value <= 100)
+					highResourceCutoff = value;
 			}
 		}
 

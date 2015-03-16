@@ -3,27 +3,35 @@ using System.Linq;
 using System.Collections.Generic;
 using UnityEngine;
 
+using SCANsat.SCAN_Platform;
+
 namespace SCANsat.SCAN_Data
 {
-	public class SCANresourceGlobal
+	public class SCANresourceGlobal : SCAN_ConfigNodeStorage
 	{
+		[Persistent]
 		private string name;
-		private float transparency;
-		private Color minColor;
-		private Color maxColor;
+		[Persistent]
+		private Color lowResourceColor;
+		[Persistent]
+		private Color highResourceColor;
+		[Persistent]
+		private float resourceTransparency;
+		[Persistent]
+		private List<SCANresourceBody> Resource_Planetary_Config = new List<SCANresourceBody>();
+
 		private SCANtype sType;
 		private SCANresourceType resourceType;
 		private SCANresource_Source source;
-		private Dictionary<string, SCANresourceBody> bodyConfigs;
+		private Dictionary<string, SCANresourceBody> masterBodyConfigs;
 		private SCANresourceBody currentBody;
-		private SCANconfig node;
 
 		internal SCANresourceGlobal(string resource, float trans, Color minC, Color maxC, SCANresourceType t, int S)
 		{
 			name = resource;
-			transparency = trans;
-			minColor = minC;
-			maxColor = maxC;
+			resourceTransparency = trans;
+			lowResourceColor = minC;
+			highResourceColor = maxC;
 			resourceType = t;
 			sType = resourceType.Type;
 			source = (SCANresource_Source)S;
@@ -32,31 +40,43 @@ namespace SCANsat.SCAN_Data
 		internal SCANresourceGlobal(SCANresourceGlobal copy)
 		{
 			name = copy.name;
-			transparency = copy.transparency;
-			minColor = copy.minColor;
-			maxColor = copy.maxColor;
+			resourceTransparency = copy.resourceTransparency;
+			lowResourceColor = copy.lowResourceColor;
+			highResourceColor = copy.highResourceColor;
 			sType = copy.sType;
 			resourceType = copy.resourceType;
 			source = copy.source;
-			bodyConfigs = copy.bodyConfigs;
+			masterBodyConfigs = copy.masterBodyConfigs;
 		}
 
-		internal void setNode(SCANconfig n)
+		public override void OnDecodeFromConfigNode()
 		{
-			node = n;
+			try
+			{
+				masterBodyConfigs = Resource_Planetary_Config.ToDictionary(a => a.Name, a => a);
+			}
+			catch (Exception e)
+			{
+				SCANUtil.SCANlog("Error while loading SCANsat body resource config settings: {0}", e);
+			}
 		}
 
-		internal void setNode()
+		public override void OnEncodeToConfigNode()
 		{
-			node.SCANTopNode.SetValue("lowResourceColor", minColor.ToHex());
-			node.SCANTopNode.SetValue("highResourceColor", maxColor.ToHex());
-			node.SCANTopNode.SetValue("resourceTransparency", transparency.ToString("F0"));
+			try
+			{
+				Resource_Planetary_Config = masterBodyConfigs.Values.ToList();
+			}
+			catch (Exception e)
+			{
+				SCANUtil.SCANlog("Error while saving SCANsat altimetry config data: {0}", e);
+			}
 		}
 
 		public static void addToBodyConfigs(SCANresourceGlobal G, string s, SCANresourceBody r)
 		{
-			if (!G.bodyConfigs.ContainsKey(s))
-				G.bodyConfigs.Add(s, r);
+			if (!G.masterBodyConfigs.ContainsKey(s))
+				G.masterBodyConfigs.Add(s, r);
 			else
 				Debug.LogError("[SCANsat] Warning: SCANresource Dictionary Already Contains Key Of This Type");
 		}
@@ -68,28 +88,28 @@ namespace SCANsat.SCAN_Data
 
 		public float Transparency
 		{
-			get { return transparency; }
+			get { return resourceTransparency; }
 			internal set
 			{
 				if (value < 0)
-					transparency = 0;
+					resourceTransparency = 0;
 				else if (value > 100)
-					transparency = 100;
+					resourceTransparency = 100;
 				else
-					transparency = value;
+					resourceTransparency = value;
 			}
 		}
 
 		public Color MinColor
 		{
-			get { return minColor; }
-			internal set { minColor = value; }
+			get { return lowResourceColor; }
+			internal set { lowResourceColor = value; }
 		}
 
 		public Color MaxColor
 		{
-			get { return maxColor; }
-			internal set { maxColor = value; }
+			get { return highResourceColor; }
+			internal set { highResourceColor = value; }
 		}
 
 		public SCANtype SType
@@ -109,15 +129,15 @@ namespace SCANsat.SCAN_Data
 
 		public Dictionary<string, SCANresourceBody> BodyConfigs
 		{
-			get { return bodyConfigs; }
+			get { return masterBodyConfigs; }
 		}
 
 		public void CurrentBodyConfig(string body)
 		{
-			if (bodyConfigs.ContainsKey(body))
-				currentBody = bodyConfigs[body];
+			if (masterBodyConfigs.ContainsKey(body))
+				currentBody = masterBodyConfigs[body];
 			else
-				currentBody = bodyConfigs.ElementAt(0).Value;
+				currentBody = masterBodyConfigs.ElementAt(0).Value;
 		}
 
 		public SCANresourceBody CurrentBody

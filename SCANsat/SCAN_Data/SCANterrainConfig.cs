@@ -1,88 +1,75 @@
 ﻿using System;
+using SCANsat.SCAN_Platform;
 using SCANsat.SCAN_Platform.Palettes;
 
 namespace SCANsat.SCAN_Data
 {
-	public class SCANterrainConfig
+	public class SCANterrainConfig : SCAN_ConfigNodeStorage
 	{
-		private float minTerrain;
-		private float maxTerrain;
+		[Persistent]
+		private string name;
+		[Persistent]
+		private int index;
+		[Persistent]
+		private float minHeightRange;
+		[Persistent]
+		private float maxHeightRange;
+		[Persistent]
 		private float? clampTerrain;
+		[Persistent]
+		private string paletteName;
+		[Persistent]
+		private int paletteSize;
+		[Persistent]
+		private bool paletteReverse;
+		[Persistent]
+		private bool paletteDiscrete;
+
 		private Palette colorPal;
-		private int palSize;
-		private bool palRev;
-		private bool palDis;
 		private CelestialBody body;
-		private ConfigNode node;
 
 		internal SCANterrainConfig(float min, float max, float? clamp, Palette color, int size, bool reverse, bool discrete, CelestialBody b)
 		{
-			minTerrain = min;
-			maxTerrain = max;
+			minHeightRange = min;
+			maxHeightRange = max;
 			clampTerrain = clamp;
 			colorPal = color;
-			palSize = size;
-			palRev = reverse;
-			palDis = discrete;
+			paletteSize = size;
+			paletteReverse = reverse;
+			paletteDiscrete = discrete;
 			body = b;
+			index = body.flightGlobalsIndex;
 		}
 
 		internal SCANterrainConfig(SCANterrainConfig copy)
 		{
-			minTerrain = copy.minTerrain;
-			maxTerrain = copy.maxTerrain;
+			minHeightRange = copy.minHeightRange;
+			maxHeightRange = copy.maxHeightRange;
 			clampTerrain = copy.clampTerrain;
 			colorPal = copy.colorPal;
-			palSize = copy.palSize;
-			palRev = copy.palRev;
-			palDis = copy.palDis;
+			paletteSize = copy.paletteSize;
+			paletteReverse = copy.paletteReverse;
+			paletteDiscrete = copy.paletteDiscrete;
 			body = copy.body;
-		}
-
-		internal void setNode(ConfigNode n)
-		{
-			node = n;
-		}
-
-		internal void updateNode()
-		{
-			node.SetValue("minHeightRange", minTerrain.ToString("F0"));
-			node.SetValue("maxHeightRange", maxTerrain.ToString("F0"));
-			if (clampTerrain != null)
-			{
-				if (node.HasValue("clampHeight"))
-					node.SetValue("clampHeight", clampTerrain.Value.ToString("F0"));
-				else
-					node.AddValue("clampHeight", clampTerrain.Value.ToString("F0"));
-			}
-			else
-			{
-				if (node.HasValue("clampHeight"))
-					node.RemoveValue("clampHeight");
-			}
-			node.SetValue("paletteName", colorPal.name);
-			node.SetValue("paletteSize", palSize.ToString());
-			node.SetValue("paletteReverse", palRev.ToString());
-			node.SetValue("palatteDiscrete", palDis.ToString());
 		}
 
 		public float MinTerrain
 		{
-			get { return minTerrain; }
+			get { return minHeightRange; }
 			internal set
 			{
-				if (value < maxTerrain)
-					minTerrain = value;
+				if (value < maxHeightRange)
+					minHeightRange = value;
 			}
 		}
 
 		public float MaxTerrain
 		{
-			get { return maxTerrain; }
+			get { return maxHeightRange; }
 			internal set
 			{
-				if (value > minTerrain)
-					maxTerrain = value;
+				if (value > minHeightRange)
+					maxHeightRange = value;
 			}
 		}
 
@@ -93,7 +80,7 @@ namespace SCANsat.SCAN_Data
 			{
 				if (value == null)
 					clampTerrain = null;
-				else if (value > minTerrain && value < maxTerrain)
+				else if (value > minHeightRange && value < maxHeightRange)
 					clampTerrain = value;
 			}
 		}
@@ -106,25 +93,30 @@ namespace SCANsat.SCAN_Data
 
 		public int PalSize
 		{
-			get { return palSize; }
-			internal set { palSize = value; }
+			get { return paletteSize; }
+			internal set { paletteSize = value; }
 		}
 
 		public bool PalRev
 		{
-			get { return palRev; }
-			internal set { palRev = value; }
+			get { return paletteReverse; }
+			internal set { paletteReverse = value; }
 		}
 
 		public bool PalDis
 		{
-			get { return palDis; }
-			internal set { palDis = value; }
+			get { return paletteDiscrete; }
+			internal set { paletteDiscrete = value; }
 		}
 
 		public CelestialBody Body
 		{
 			get { return body; }
+		}
+
+		public string Name
+		{
+			get { return name; }
 		}
 	}
 
