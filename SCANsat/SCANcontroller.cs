@@ -117,13 +117,17 @@ namespace SCANsat
 		[KSPField(isPersistant = true)]
 		public Color highSlopeColor = palette.xkcd_Yellow;
 
-		/* Available resources for overlays; loaded from resource addon configs; only loaded once */
-		private static Dictionary<string, SCANresourceGlobal> masterResourceNodes;
+		/* Available resources for overlays; loaded from SCANsat configs; only loaded once */
+		private static Dictionary<string, SCANresourceGlobal> masterResourceNodes = new Dictionary<string,SCANresourceGlobal>();
 
-		/* Resource types loaded from configs; only needs to be loaded once */
-		private static Dictionary<string, SCANresourceType> resourceTypes;
+		/* Resource types loaded from SCANsat configs; only needs to be loaded once */
+		private static Dictionary<string, SCANresourceType> resourceTypes = new Dictionary<string,SCANresourceType>();
 
-		private static Dictionary<string, SCANterrainConfig> masterTerrainNodes;
+		/* Terrain height and color option containers loaded from SCANsat configs; only needs to be loaded once */
+		private static Dictionary<string, SCANterrainConfig> masterTerrainNodes = new Dictionary<string,SCANterrainConfig>();
+
+		/* List of resources currently loaded from resource addons */
+		private static List<string> loadedResources = new List<string>();
 
 		/* Primary SCANsat vessel dictionary; loaded every time */
 		private Dictionary<Guid, SCANvessel> knownVessels = new Dictionary<Guid, SCANvessel>();
@@ -170,7 +174,19 @@ namespace SCANsat
 		public static Dictionary<string, SCANterrainConfig> MasterTerrainNodes
 		{
 			get { return masterTerrainNodes; }
-			internal set { masterTerrainNodes = value; }
+		}
+
+		public static void setMasterTerrainNodes (List<SCANterrainConfig> terrainConfigs)
+		{
+			masterTerrainNodes.Clear();
+			try
+			{
+				masterTerrainNodes = terrainConfigs.ToDictionary(a => a.Name, a => a);
+			}
+			catch (Exception e)
+			{
+				SCANUtil.SCANlog("Error while loading SCANsat terrain config settings: {0}", e);
+			}
 		}
 
 		public static void addToTerrainConfigData (string name, SCANterrainConfig data)
@@ -184,7 +200,28 @@ namespace SCANsat
 		public static Dictionary<string, SCANresourceGlobal> MasterResourceNodes
 		{
 			get { return masterResourceNodes; }
-			internal set { masterResourceNodes = value; }
+		}
+
+		public static void setMasterResourceNodes (List<SCANresourceGlobal> resourceConfigs)
+		{
+			try
+			{
+				masterResourceNodes = resourceConfigs.ToDictionary(a => a.Name, a => a);
+			}
+			catch (Exception e)
+			{
+				SCANUtil.SCANlog("Error while loading SCANsat resource config settings: {0}", e);
+			}
+		}
+
+		public static SCANresourceGlobal getResourceNode (string resourceName)
+		{
+			if (masterResourceNodes.ContainsKey(resourceName))
+				return masterResourceNodes[resourceName];
+			else
+				SCANUtil.SCANlog("SCANsat resource [{0}] cannot be found in master resource storage list", resourceName);
+
+			return null;
 		}
 		
 		public static void addToResourceData (string name, SCANresourceGlobal res)
@@ -200,7 +237,37 @@ namespace SCANsat
 		public static Dictionary<string, SCANresourceType> ResourceTypes
 		{
 			get { return resourceTypes; }
-			internal set { resourceTypes = value; }
+		}
+
+		public static void addToResourceTypes (string name, SCANresourceType type)
+		{
+			if (!resourceTypes.ContainsKey(name))
+			{
+				resourceTypes.Add(name, type);
+			}
+			else
+				Debug.LogError(string.Format("[SCANsat] Warning: SCANResourceType Dictionary Already Contains Key of This Name: SCAN Resource Type: {0}", name));
+		}
+
+		public static void addToLoadedResourceNames (string name)
+		{
+			if (!loadedResources.Contains(name))
+				loadedResources.Add(name);
+			else
+				Debug.LogError(string.Format("[SCANsat] Warning: Loaded Resource List Already Contains Resource Of Name: {0}", name));
+		}
+
+		public static List<SCANresourceGlobal> setLoadedResourceList()
+		{
+			List<SCANresourceGlobal> rList = new List<SCANresourceGlobal>();
+
+			foreach (string r in loadedResources)
+			{
+				if (masterResourceNodes.ContainsKey(r))
+					rList.Add(masterResourceNodes[r]);
+			}
+
+			return rList;
 		}
 
 		public Dictionary<Guid, SCANvessel> Known_Vessels
