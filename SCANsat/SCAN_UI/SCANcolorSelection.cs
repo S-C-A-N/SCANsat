@@ -117,7 +117,7 @@ namespace SCANsat.SCAN_UI
 
 			biomeTransSlider = new SCANuiSlider(0, 100, SCANcontroller.controller.biomeTransparency, "Ter. Trans: ", "%", 0);
 
-			biomeColorPicker = new SCANuiColorPicker(SCANcontroller.controller.LowBiomeColor, SCANcontroller.controller.HighBiomeColor, true);
+			biomeColorPicker = new SCANuiColorPicker(SCANcontroller.controller.lowBiomeColor, SCANcontroller.controller.highBiomeColor, true);
 
 			if (SCANconfigLoader.GlobalResource)
 			{
@@ -740,14 +740,14 @@ namespace SCANsat.SCAN_UI
 			fillS(10);
 			if (GUILayout.Button("Default Settings", GUILayout.Width(135)))
 			{
-				SCANcontroller.controller.LowBiomeColor = SCANcontroller.controller.DefaultLowBiomeColor;
-				SCANcontroller.controller.HighBiomeColor = SCANcontroller.controller.DefaultHighBiomeColor;
+				SCANcontroller.controller.lowBiomeColor = SCANcontroller.controller.defaultLowBiomeColor;
+				SCANcontroller.controller.highBiomeColor = SCANcontroller.controller.defaultHighBiomeColor;
 				SCANcontroller.controller.useStockBiomes = false;
 				SCANcontroller.controller.biomeTransparency = 40f;
 
 				stockBiomes = false;
 
-				biomeColorPicker = new SCANuiColorPicker(SCANcontroller.controller.LowBiomeColor, SCANcontroller.controller.HighBiomeColor, biomeColorPicker.LowColorChange);
+				biomeColorPicker = new SCANuiColorPicker(SCANcontroller.controller.lowBiomeColor, SCANcontroller.controller.highBiomeColor, biomeColorPicker.LowColorChange);
 
 				biomeColorPicker.updateOldSwatches();
 
@@ -757,8 +757,8 @@ namespace SCANsat.SCAN_UI
 			growE();
 			if (GUILayout.Button("Apply", GUILayout.Width(60)))
 			{
-				SCANcontroller.controller.LowBiomeColor = biomeColorPicker.ColorLow;
-				SCANcontroller.controller.HighBiomeColor = biomeColorPicker.ColorHigh;
+				SCANcontroller.controller.lowBiomeColor = biomeColorPicker.ColorLow;
+				SCANcontroller.controller.highBiomeColor = biomeColorPicker.ColorHigh;
 				SCANcontroller.controller.useStockBiomes = stockBiomes;
 				SCANcontroller.controller.biomeTransparency = biomeTransSlider.CurrentValue;
 

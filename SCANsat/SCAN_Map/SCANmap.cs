@@ -653,7 +653,7 @@ namespace SCANsat.SCAN_Map
 							}
 							else
 							{
-								biome = palette.lerp(palette.lerp(SCANcontroller.controller.LowBiomeColor, SCANcontroller.controller.HighBiomeColor, (float)bio), elevation, SCANcontroller.controller.biomeTransparency / 100f);
+								biome = palette.lerp(palette.lerp(SCANcontroller.controller.lowBiomeColor, SCANcontroller.controller.highBiomeColor, (float)bio), elevation, SCANcontroller.controller.biomeTransparency / 100f);
 							}
 						}
 
