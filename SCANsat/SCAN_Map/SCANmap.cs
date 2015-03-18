@@ -367,7 +367,11 @@ namespace SCANsat.SCAN_Map
 			body = b;
 			//SCANcontroller.controller.Resources(b); //Repopulate resource list when changing SOI
 			if (SCANconfigLoader.GlobalResource)
+			{
 				resource = SCANcontroller.getResourceNode(SCANcontroller.controller.resourceSelection);
+				if (resource == null)
+					resource = SCANcontroller.GetFirstResource;
+			}
 			resetMap();
 		}
 
@@ -384,7 +388,11 @@ namespace SCANsat.SCAN_Map
 			if (SCANconfigLoader.GlobalResource)
 			{ //Make sure that a resource is initialized if necessary
 				if (resource == null && body != null)
+				{
 					resource = SCANcontroller.getResourceNode(SCANcontroller.controller.resourceSelection);
+					if (resource == null)
+						resource = SCANcontroller.GetFirstResource;
+				}
 				if (SCANcontroller.controller.resourceOverlayType == 1)
 					SCANcontroller.controller.KethaneReset = !SCANcontroller.controller.KethaneReset;
 			}
