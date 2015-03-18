@@ -11,143 +11,12 @@ using palette = SCANsat.SCAN_UI.UI_Framework.SCANpalette;
 
 namespace SCANsat
 {
-	public class SCAN_Color_Config : SCAN_ConfigNodeStorage
-	{
-
-		[Persistent]
-		private float defaultMinHeightRange = -1000;
-		[Persistent]
-		private float defaultMaxHeightRange = 8000;
-		[Persistent]
-		private string defaultPalette = "Default";
-		[Persistent]
-		private Color lowBiomeColor = palette.xkcd_CamoGreen;
-		[Persistent]
-		private Color highBiomeColor = palette.xkcd_Marigold;
-		[Persistent]
-		private float biomeTransparency = 40;
-		[Persistent]
-		private bool stockBiomeMap = false;
-		[Persistent]
-		private Color lowSlopeColor = palette.xkcd_PukeGreen;
-		[Persistent]
-		private Color highSlopeColor = palette.xkcd_Lemon;
-		[Persistent]
-		private List<SCANterrainConfig> SCANsat_Altimetry = new List<SCANterrainConfig>();
-		[Persistent]
-		private List<SCANresourceGlobal> SCANsat_Resources = new List<SCANresourceGlobal>();
-
-		internal SCAN_Color_Config(string filepath)
-		{
-			FilePath = filepath;
-
-			Load();
-		}
-
-		public override void OnDecodeFromConfigNode()
-		{
-			try
-			{
-				SCANcontroller.MasterTerrainNodes = SCANsat_Altimetry.ToDictionary(a => a.Name, a => a);
-			}
-			catch (Exception e)
-			{
-				SCANUtil.SCANlog("Error while loading SCANsat terrain config settings: {0}", e);
-			}
-
-			try
-			{
-				SCANcontroller.MasterResourceNodes = SCANsat_Resources.ToDictionary(a => a.Name, a => a);
-			}
-			catch (Exception e)
-			{
-				SCANUtil.SCANlog("Error while loading SCANsat resource config settings: {0}", e);
-			}
-		}
-
-		public override void OnEncodeToConfigNode()
-		{
-			try
-			{
-				SCANsat_Altimetry = SCANcontroller.MasterTerrainNodes.Values.ToList();
-			}
-			catch (Exception e)
-			{
-				SCANUtil.SCANlog("Error while saving SCANsat altimetry config data: {0}", e);
-			}
-
-			try
-			{
-				SCANsat_Resources = SCANcontroller.MasterResourceNodes.Values.ToList();
-			}
-			catch (Exception e)
-			{
-				SCANUtil.SCANlog("Error while saving SCANsat resource config data: {0}", e);
-			}
-		}
-
-		public float DefaultMinHeightRange
-		{
-			get { return defaultMinHeightRange; }
-			internal set { defaultMinHeightRange = value; }
-		}
-		
-		public float DefaultMaxHeightRange
-		{
-			get { return defaultMaxHeightRange; }
-			internal set { defaultMaxHeightRange = value; }
-		}
-
-		public string DefaultPalette
-		{
-			get { return defaultPalette; }
-			internal set { defaultPalette = value; }
-		}
-
-		public Color LowBiomeColor
-		{
-			get { return lowBiomeColor; }
-			internal set { lowBiomeColor = value; }
-		}
-
-		public Color HighBiomeColor
-		{
-			get { return highBiomeColor; }
-			internal set { highBiomeColor = value; }
-		}
-
-		public float BiomeTransparency
-		{
-			get { return biomeTransparency; }
-			internal set { biomeTransparency = value; }
-		}
-
-		public bool StockBiomeMap
-		{
-			get { return stockBiomeMap; }
-			internal set { stockBiomeMap = value; }
-		}
-
-		public Color LowSlopeColor
-		{
-			get { return lowSlopeColor; }
-			internal set { lowSlopeColor = value; }
-		}
-
-		public Color HighSlopeColor
-		{
-			get { return highSlopeColor; }
-			internal set { highSlopeColor = value; }
-		}
-	}
-
-	static class SCANconfigLoader
+	public static class SCANconfigLoader
 	{
 		private static bool globalResource = false;
 		private static bool initialized = false;
 
-		private const string configFile = "/GameData/SCANsat/Resources/SCANcolors.cfg";
-		private static readonly string fileLocation = (KSPUtil.ApplicationRootPath + configFile).Replace('\\', '/');
+		private const string configFile = "SCANcolors.cfg";
 
 		private static SCAN_Color_Config SCANnode;
 
@@ -163,10 +32,10 @@ namespace SCANsat
 
 		internal static void resourceLoader()
 		{
-			SCANnode = new SCAN_Color_Config(fileLocation);
-
 			loadSCANtypes();
 			loadResources();
+
+			SCANnode = new SCAN_Color_Config(configFile);
 		}
 
 		private static void loadSCANtypes()
@@ -210,25 +79,28 @@ namespace SCANsat
 							SCANresourceBody bodyResource = null;
 							foreach (ConfigNode bodyNode in GameDatabase.Instance.GetConfigNodes("REGOLITH_PLANETARY_RESOURCE"))
 							{
-								bodyResource = RegolithConfigLoad(bodyNode);
-								if (bodyResource == null)
-									continue;
-
-								if (bodyResource.Body.name == body.name)
+								if (bodyNode != null)
 								{
-									if (bodyResource.Name == resource.Name)
-										break;
-									else
-									{
-										bodyResource = null;
+									bodyResource = RegolithConfigLoad(bodyNode);
+									if (bodyResource == null)
 										continue;
+
+									if (bodyResource.Body.name == body.name)
+									{
+										if (bodyResource.Name == resource.Name)
+											break;
+										else
+										{
+											bodyResource = null;
+											continue;
+										}
 									}
+									bodyResource = null;
 								}
-								bodyResource = null;
 							}
 							if (bodyResource != null)
 							{
-								SCANresourceGlobal.addToBodyConfigs(resource, bodyResource.Body.name, bodyResource);
+								resource.addToBodyConfigs(bodyResource.Body.name, bodyResource);
 							}
 
 							SCANcontroller.addToResourceData(resource.Name, resource);
@@ -291,7 +163,7 @@ namespace SCANsat
 		{
 			string name = "";
 			int resourceType = 0;
-			float min = 0.01f;
+			float min = 0.001f;
 			float max = 10;
 
 			if (node.HasValue("ResourceName"))
@@ -314,9 +186,15 @@ namespace SCANsat
 			if (distNode != null)
 			{
 				if (distNode.HasValue("MinAbundance"))
-					float.TryParse(distNode.GetValue("MinAbundance"), out min);
+				{
+					if (!float.TryParse(distNode.GetValue("MinAbundance"), out min))
+						min = 0.001f;
+				}
 				if (distNode.HasValue("MaxAbundance"))
-					float.TryParse(distNode.GetValue("MaxAbundance"), out max);
+				{
+					if (!float.TryParse(distNode.GetValue("MaxAbundance"), out max))
+						max = 10f;
+				}
 			}
 			if (min == max)
 				max += 0.001f;
@@ -326,7 +204,7 @@ namespace SCANsat
 			foreach (CelestialBody b in FlightGlobals.Bodies)
 			{
 				SCANresourceBody r = new SCANresourceBody(name, b, min, max);
-				SCANresourceGlobal.addToBodyConfigs(res, b.name, r);
+				res.addToBodyConfigs(b.name, r);
 			}
 
 			if (res != null)
@@ -337,7 +215,7 @@ namespace SCANsat
 
 		private static SCANresourceBody RegolithConfigLoad(ConfigNode node)
 		{
-			float min = .001f;
+			float min = 0.001f;
 			float max = 10f;
 			string name = "";
 			string body = "";
@@ -368,9 +246,15 @@ namespace SCANsat
 			if (distNode != null)
 			{
 				if (distNode.HasValue("MinAbundance"))
-					float.TryParse(distNode.GetValue("MinAbundance"), out min);
+				{
+					if (!float.TryParse(distNode.GetValue("MinAbundance"), out min))
+						min = 0.001f;
+				}
 				if (distNode.HasValue("MaxAbundance"))
-					float.TryParse(distNode.GetValue("MaxAbundance"), out max);
+				{
+					if (!float.TryParse(distNode.GetValue("MaxAbundance"), out max))
+						max = 10f;
+				}
 			}
 			else
 				return null;
@@ -390,39 +274,6 @@ namespace SCANsat
 		{
 			var resourceType = SCANcontroller.ResourceTypes.FirstOrDefault(r => r.Value.Name == s).Value;
 			return resourceType;
-		}
-
-		internal static Palette paletteLoader(string name, int size)
-		{
-			if (name == "Default" || string.IsNullOrEmpty(name))
-				return PaletteLoader.defaultPalette;
-			else
-			{
-				try
-				{
-					if (name == "blackForest" || name == "departure" || name == "northRhine" || name == "mars" || name == "wiki2" || name == "plumbago" || name == "cw1_013" || name == "arctic")
-					{
-						//Load the fixed size color palette by name through reflection
-						var fixedPallete = typeof(FixedColorPalettes);
-						var fPaletteMethod = fixedPallete.GetMethod(name);
-						var fColorP = fPaletteMethod.Invoke(null, null);
-						return (Palette)fColorP;
-					}
-					else
-					{
-						//Load the ColorBrewer method by name through reflection
-						var brewer = typeof(BrewerPalettes);
-						var bPaletteMethod = brewer.GetMethod(name);
-						var bColorP = bPaletteMethod.Invoke(null, new object[] { size });
-						return (Palette)bColorP;
-					}
-				}
-				catch (Exception e)
-				{
-					SCANUtil.SCANlog("Error Loading Color Palette; Revert To Default: {0}", e);
-					return PaletteLoader.defaultPalette;
-				}
-			}
 		}
 	}
 }
