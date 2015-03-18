@@ -18,6 +18,9 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
 using SCANsat.SCAN_Platform;
+using SCANsat.SCAN_Platform.Palettes;
+using SCANsat.SCAN_Platform.Palettes.ColorBrewer;
+using SCANsat.SCAN_Platform.Palettes.FixedColors;
 using SCANsat.SCAN_Data;
 using palette = SCANsat.SCAN_UI.UI_Framework.SCANpalette;
 
@@ -292,23 +295,37 @@ namespace SCANsat
 			return count;
 		}
 
-		internal static bool loadColor(ref Color c, string s)
+		internal static Palette paletteLoader(string name, int size)
 		{
-			if (!string.IsNullOrEmpty(s))
+			if (name == "Default" || string.IsNullOrEmpty(name))
+				return PaletteLoader.defaultPalette;
+			else
 			{
 				try
 				{
-					c = c.FromHex(s);
-					return true;
+					if (name == "blackForest" || name == "departure" || name == "northRhine" || name == "mars" || name == "wiki2" || name == "plumbago" || name == "cw1_013" || name == "arctic")
+					{
+						//Load the fixed size color palette by name through reflection
+						var fixedPallete = typeof(FixedColorPalettes);
+						var fPaletteMethod = fixedPallete.GetMethod(name);
+						var fColorP = fPaletteMethod.Invoke(null, null);
+						return (Palette)fColorP;
+					}
+					else
+					{
+						//Load the ColorBrewer method by name through reflection
+						var brewer = typeof(BrewerPalettes);
+						var bPaletteMethod = brewer.GetMethod(name);
+						var bColorP = bPaletteMethod.Invoke(null, new object[] { size });
+						return (Palette)bColorP;
+					}
 				}
 				catch (Exception e)
 				{
-					SCANlog("Error while loading color; incorrect format: {0}", e);
-					return false;
+					SCANUtil.SCANlog("Error Loading Color Palette; Revert To Default: {0}", e);
+					return PaletteLoader.defaultPalette;
 				}
 			}
-			else
-				return false;
 		}
 
 		internal static void SCANlog(string log, params object[] stringObjects)
