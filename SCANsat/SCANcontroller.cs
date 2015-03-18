@@ -108,6 +108,14 @@ namespace SCANsat
 		public bool useStockBiomes = false;
 		[KSPField(isPersistant = true)]
 		public float biomeTransparency = 40;
+		[KSPField(isPersistant = true)]
+		public Color lowBiomeColor = palette.xkcd_CamoGreen;
+		[KSPField(isPersistant = true)]
+		public Color highBiomeColor = palette.xkcd_Marigold;
+		[KSPField(isPersistant = true)]
+		public Color lowSlopeColor = palette.xkcd_PukeGreen;
+		[KSPField(isPersistant = true)]
+		public Color highSlopeColor = palette.xkcd_Yellow;
 
 		/* Available resources for overlays; loaded from resource addon configs; only loaded once */
 		private static Dictionary<string, SCANresourceGlobal> masterResourceNodes;
@@ -140,14 +148,8 @@ namespace SCANsat
 		/* Used in case the loading process is interupted somehow */
 		private bool loaded = false;
 
-		/* Governs resource overlay availability */
-		//private static bool globalResourceOverlay = false;
-
-		private readonly Color defaultLowBiomeColor = palette.xkcd_CamoGreen;
-		private readonly Color defaultHighBiomeColor = palette.xkcd_Marigold;
-
-		private Color lowBiomeColor = palette.xkcd_CamoGreen;
-		private Color highBiomeColor = palette.xkcd_Marigold;
+		public readonly Color defaultLowBiomeColor = palette.xkcd_CamoGreen;
+		public readonly Color defaultHighBiomeColor = palette.xkcd_Marigold;
 
 		#region Public Accessors
 
@@ -239,18 +241,6 @@ namespace SCANsat
 			get { return actualPasses; }
 		}
 
-		public Color LowBiomeColor
-		{
-			get { return lowBiomeColor; }
-			internal set { lowBiomeColor = value; }
-		}
-
-		public Color HighBiomeColor
-		{
-			get { return highBiomeColor; }
-			internal set { highBiomeColor = value; }
-		}
-
 		public Color DefaultLowBiomeColor
 		{
 			get { return defaultLowBiomeColor; }
@@ -266,30 +256,7 @@ namespace SCANsat
 		public override void OnLoad(ConfigNode node)
 		{
 			body_data = new Dictionary<string, SCANdata>();
-			if (node.HasValue("BiomeLowColor"))
-			{
-				try
-				{
-					lowBiomeColor = lowBiomeColor.FromHex(node.GetValue("BiomeLowColor"));
-				}
-				catch (Exception e)
-				{
-					SCANUtil.SCANlog("Low Biome Color Format Incorrect; Reverting To Default: {0}", e);
-					lowBiomeColor = palette.xkcd_CamoGreen;
-				}
-			}
-			if (node.HasValue("BiomeHighColor"))
-			{
-				try
-				{
-					highBiomeColor = highBiomeColor.FromHex(node.GetValue("BiomeHighColor"));
-				}
-				catch (Exception e)
-				{
-					SCANUtil.SCANlog("High Biome Color Format Incorrect; Reverting To Default: {0}", e);
-					highBiomeColor = palette.xkcd_Marigold;
-				}
-			}
+
 			ConfigNode node_vessels = node.GetNode("Scanners");
 			if (node_vessels != null)
 			{
@@ -388,7 +355,7 @@ namespace SCANsat
 								pDis = false;
 							if (node_body.HasValue("PaletteName"))
 								paletteName = node_body.GetValue("PaletteName");
-							dataPalette = SCANconfigLoader.paletteLoader(paletteName, pSize);
+							dataPalette = SCANUtil.paletteLoader(paletteName, pSize);
 							if (dataPalette == PaletteLoader.defaultPalette)
 							{
 								paletteName = "Default";
@@ -420,24 +387,6 @@ namespace SCANsat
 				else if (!masterResourceNodes.ContainsKey(resourceSelection))
 					resourceSelection = masterResourceNodes.ElementAt(0).Key;
 			}
-			//try
-			//{
-			//	if (resourceTypes == null)
-			//		SCANUtil.loadSCANtypes();
-			//}
-			//catch (Exception e)
-			//{
-			//	SCANUtil.SCANlog("Something Went Wrong Loading Resource Configs: {0}", e);
-			//}
-			//try
-			//{
-			//	if (resourceList == null)
-			//		loadResources();
-			//}
-			//catch (Exception e)
-			//{
-			//	SCANUtil.SCANlog("Something Went Wrong Loading Resource Data: {0}", e);
-			//}
 			ConfigNode node_resources = node.GetNode("SCANResources");
 			if (node_resources != null)
 			{
@@ -482,8 +431,6 @@ namespace SCANsat
 		{
 			if (HighLogic.LoadedScene != GameScenes.EDITOR)
 			{
-				node.AddValue("BiomeLowColor", lowBiomeColor.ToHex());
-				node.AddValue("BiomeHighColor", highBiomeColor.ToHex());
 				ConfigNode node_vessels = new ConfigNode("Scanners");
 				foreach (Guid id in knownVessels.Keys)
 				{
@@ -539,8 +486,8 @@ namespace SCANsat
 						{
 							ConfigNode node_resource_type = new ConfigNode("ResourceType");
 							node_resource_type.AddValue("Resource", r.Name);
-							node_resource_type.AddValue("MinColor", r.MinColor.ToHex());
-							node_resource_type.AddValue("MaxColor", r.MaxColor.ToHex());
+							node_resource_type.AddValue("MinColor", r.MinColor);
+							node_resource_type.AddValue("MaxColor", r.MaxColor);
 							node_resource_type.AddValue("Transparency", r.Transparency * 100);
 
 							string rMinMax = saveResources(t);
@@ -629,19 +576,33 @@ namespace SCANsat
 			Color lowColor = new Color();
 			Color highColor = new Color();
 			float transparent;
-			if (!SCANUtil.loadColor(ref lowColor, low))
+
+			if (resourceTypes.ContainsKey(resource))
+				lowColor = resourceTypes[resource].ColorEmpty;
+			else
+				lowColor = palette.xkcd_DarkPurple;
+
+			try
 			{
-				if (resourceTypes.ContainsKey(resource))
-					lowColor = resourceTypes[resource].ColorEmpty;
-				else
-					lowColor = palette.xkcd_DarkPurple;
+				lowColor = ConfigNode.ParseColor(low);
 			}
-			if (!SCANUtil.loadColor(ref highColor, high))
+			catch (Exception e)
 			{
-				if (resourceTypes.ContainsKey(resource))
-					highColor = resourceTypes[resource].ColorFull;
-				else
-					highColor = palette.xkcd_Lemon;
+				SCANUtil.SCANlog("Error in parsing low color for resource [{0}]: ", resource, e);
+			}
+
+			if (resourceTypes.ContainsKey(resource))
+				highColor = resourceTypes[resource].ColorFull;
+			else
+				highColor = palette.xkcd_Lemon;
+
+			try
+			{
+				highColor = ConfigNode.ParseColor(high);
+			}
+			catch (Exception e)
+			{
+				SCANUtil.SCANlog("Error in parsing high color for resource [{0}]: ", resource, e);
 			}
 
 			if (!float.TryParse(trans, out transparent))
