@@ -20,10 +20,12 @@ namespace SCANsat.SCAN_Data
 		[Persistent]
 		private List<SCANresourceBody> Resource_Planetary_Config = new List<SCANresourceBody>();
 
+		private Dictionary<string, SCANresourceBody> masterBodyConfigs;
+
 		private SCANtype sType;
 		private SCANresourceType resourceType;
 		private SCANresource_Source source;
-		private Dictionary<string, SCANresourceBody> masterBodyConfigs;
+
 		private SCANresourceBody currentBody;
 
 		internal SCANresourceGlobal(string resource, float trans, Color minC, Color maxC, SCANresourceType t, int S)
@@ -73,10 +75,10 @@ namespace SCANsat.SCAN_Data
 			}
 		}
 
-		public static void addToBodyConfigs(SCANresourceGlobal G, string s, SCANresourceBody r)
+		public void addToBodyConfigs(string s, SCANresourceBody r)
 		{
-			if (!G.masterBodyConfigs.ContainsKey(s))
-				G.masterBodyConfigs.Add(s, r);
+			if (!masterBodyConfigs.ContainsKey(s))
+				masterBodyConfigs.Add(s, r);
 			else
 				Debug.LogError("[SCANsat] Warning: SCANresource Dictionary Already Contains Key Of This Type");
 		}
