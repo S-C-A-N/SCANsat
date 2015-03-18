@@ -33,6 +33,7 @@ namespace SCANsat.SCAN_UI
 		private bool drawGrid, currentGrid, currentColor, lastColor, lastResource, spaceCenterLock, trackingStationLock;
 		private bool drop_down_open, projection_drop_down, mapType_drop_down, resources_drop_down, planetoid_drop_down;
 		//private Texture2D overlay_static;
+		private List<SCANresourceGlobal> loadedResources = new List<SCANresourceGlobal>();
 		private Dictionary<int, List<List<Vector2d>>> gridLines = new Dictionary<int, List<List<Vector2d>>>();
 		private Rect ddRect, zoomCloseRect;
 		private Rect rc = new Rect(0, 0, 20, 20);
@@ -89,6 +90,10 @@ namespace SCANsat.SCAN_UI
 				SCANcontroller.controller.addToBodyData(b, data);
 			}
 			bigmap.setBody(b);
+			if (SCANconfigLoader.GlobalResource)
+			{
+				loadedResources = SCANcontroller.setLoadedResourceList();
+			}
 			TooltipsEnabled = SCANcontroller.controller.toolTips;
 		}
 
@@ -661,16 +666,16 @@ namespace SCANsat.SCAN_UI
 			{
 				ddRect = new Rect(WindowRect.width - 290, 45, 120, 160);
 				GUI.Box(ddRect, "", SCANskins.SCAN_dropDownBox);
-				for (int i = 0; i < SCANcontroller.MasterResourceNodes.Count; i++)
+				for (int i = 0; i < loadedResources.Count; i++)
 				{
-					scrollR = GUI.BeginScrollView(ddRect, scrollR, new Rect(0, 0, 100, 20 * SCANcontroller.MasterResourceNodes.Count));
+					scrollR = GUI.BeginScrollView(ddRect, scrollR, new Rect(0, 0, 100, 20 * loadedResources.Count));
 					Rect r = new Rect(2, 20 * i, 96, 20);
-					if (GUI.Button(r, SCANcontroller.MasterResourceNodes.ElementAt(i).Key, SCANskins.SCAN_dropDownButton))
+					if (GUI.Button(r, loadedResources[i].Name, SCANskins.SCAN_dropDownButton))
 					{
-						bigmap.Resource = SCANcontroller.MasterResourceNodes.ElementAt(i).Value;
+						bigmap.Resource = loadedResources[i];
 						bigmap.Resource.CurrentBodyConfig(b.name);
 						SCANcontroller.controller.resourceSelection = bigmap.Resource.Name;
-						if (SCANcontroller.MasterResourceNodes.ElementAt(i).Value.Source == SCANresource_Source.Kethane)
+						if (bigmap.Resource.Source == SCANresource_Source.Kethane)
 							SCANcontroller.controller.resourceOverlayType = 1;
 						else
 							SCANcontroller.controller.resourceOverlayType = 0;

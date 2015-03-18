@@ -48,6 +48,7 @@ namespace SCANsat.SCAN_UI
 		private int bodyIndex;
 
 		private SCANresourceGlobal currentResource;
+		private List<SCANresourceGlobal> loadedResources;
 
 		private Vector2 scrollR;
 		private const string lockID = "colorLockID";
@@ -121,7 +122,8 @@ namespace SCANsat.SCAN_UI
 
 			if (SCANconfigLoader.GlobalResource)
 			{
-				currentResource = new SCANresourceGlobal(SCANcontroller.MasterResourceNodes.ElementAt(0).Value);
+				loadedResources = SCANcontroller.setLoadedResourceList();
+				currentResource = loadedResources[0];
 				currentResource.CurrentBodyConfig(data.Body.name);
 
 				if (currentResource != null)
@@ -865,14 +867,13 @@ namespace SCANsat.SCAN_UI
 				{
 					ddRect = new Rect(WindowRect.width - 320, 135, 160, 140);
 					GUI.Box(ddRect, "", SCANskins.SCAN_dropDownBox);
-					for (int i = 0; i < SCANcontroller.MasterResourceNodes.Count; i ++)
+					for (int i = 0; i < loadedResources.Count; i ++)
 					{
-						string s = SCANcontroller.MasterResourceNodes.ElementAt(i).Value.Name;
-						scrollR = GUI.BeginScrollView(ddRect, scrollR, new Rect(0, 0, 140, 23 * SCANcontroller.MasterResourceNodes.Count));
+						scrollR = GUI.BeginScrollView(ddRect, scrollR, new Rect(0, 0, 140, 23 * loadedResources.Count));
 						Rect r = new Rect(2, i * 23, 136, 22);
-						if (GUI.Button(r, s, SCANskins.SCAN_dropDownButton))
+						if (GUI.Button(r, loadedResources[i].Name, SCANskins.SCAN_dropDownButton))
 						{
-							currentResource = new SCANresourceGlobal(SCANcontroller.MasterResourceNodes.ElementAt(i).Value);
+							currentResource = new SCANresourceGlobal(loadedResources[i]);
 							currentResource.CurrentBodyConfig(data.Body.name);
 
 							fineControlMode = oldFineControl = false;

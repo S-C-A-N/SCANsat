@@ -43,6 +43,8 @@ namespace SCANsat.SCAN_UI
 		private Rect pos_spotmap_x = new Rect(10f, 10f, 25f, 25f);
 		internal static Rect defaultRect = new Rect(250, 60, 780, 460);
 
+		private List<SCANresourceGlobal> loadedResources = new List<SCANresourceGlobal>();
+
 		//Values used for the orbit overlay - Need to fix this
 		internal static int[] eq_an_map, eq_dn_map;
 		internal static Texture2D eq_map;
@@ -98,6 +100,10 @@ namespace SCANsat.SCAN_UI
 				SCANcontroller.controller.addToBodyData(b, data);
 			}
 			bigmap.setBody(b);
+			if (SCANconfigLoader.GlobalResource)
+			{
+				loadedResources = SCANcontroller.setLoadedResourceList();
+			}
 			TooltipsEnabled = SCANcontroller.controller.toolTips;
 		}
 
@@ -723,16 +729,16 @@ namespace SCANsat.SCAN_UI
 			{
 				ddRect = new Rect(WindowRect.width - 290, 45, 120, 160);
 				GUI.Box(ddRect, "", SCANskins.SCAN_dropDownBox);
-				for (int i = 0; i < SCANcontroller.MasterResourceNodes.Count; i++)
+				for (int i = 0; i < loadedResources.Count; i++)
 				{
-					scrollR = GUI.BeginScrollView(ddRect, scrollR, new Rect(0, 0, 100, 20 * SCANcontroller.MasterResourceNodes.Count));
+					scrollR = GUI.BeginScrollView(ddRect, scrollR, new Rect(0, 0, 100, 20 * loadedResources.Count));
 					Rect r = new Rect(2, 20 * i, 96, 20);
-					if (GUI.Button(r, SCANcontroller.MasterResourceNodes.ElementAt(i).Key, SCANskins.SCAN_dropDownButton))
+					if (GUI.Button(r, loadedResources[i].Name, SCANskins.SCAN_dropDownButton))
 					{
-						bigmap.Resource = SCANcontroller.MasterResourceNodes.ElementAt(i).Value;
+						bigmap.Resource = loadedResources[i];
 						bigmap.Resource.CurrentBodyConfig(b.name);
 						SCANcontroller.controller.resourceSelection = bigmap.Resource.Name;
-						if (SCANcontroller.MasterResourceNodes.ElementAt(i).Value.Source == SCANresource_Source.Kethane)
+						if (bigmap.Resource.Source == SCANresource_Source.Kethane)
 							SCANcontroller.controller.resourceOverlayType = 1;
 						else
 							SCANcontroller.controller.resourceOverlayType = 0;
