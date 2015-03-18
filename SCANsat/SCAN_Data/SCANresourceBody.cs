@@ -10,7 +10,9 @@ namespace SCANsat.SCAN_Data
 	public class SCANresourceBody : SCAN_ConfigNodeStorage
 	{
 		[Persistent]
-		private string name;
+		private string resourceName;
+		[Persistent]
+		private string bodyName;
 		[Persistent]
 		private int index;
 		[Persistent]
@@ -21,31 +23,41 @@ namespace SCANsat.SCAN_Data
 		private CelestialBody body;
 		private float defaultMinValue, defaultMaxValue;
 
-		internal SCANresourceBody(string n, CelestialBody Body, float min, float max)
+		internal SCANresourceBody(string rName, CelestialBody Body, float min, float max)
 		{
-			name = n;
+			resourceName = rName;
 			body = Body;
+			bodyName = body.name;
 			index = body.flightGlobalsIndex;
 			lowResourceCutoff = defaultMinValue = min;
 			highResourceCutoff = defaultMaxValue = max;
 		}
 
-		public static SCANresourceBody resourceCopy(SCANresourceBody r)
+		internal SCANresourceBody(SCANresourceBody copy)
 		{
-			SCANresourceBody res = new SCANresourceBody(r.name, r.body, r.lowResourceCutoff, r.highResourceCutoff);
-			return res;
+			resourceName = copy.resourceName;
+			bodyName = copy.bodyName;
+			index = copy.index;
+			lowResourceCutoff = copy.lowResourceCutoff;
+			highResourceCutoff = copy.highResourceCutoff;
+			body = copy.body;
+			defaultMinValue = copy.defaultMinValue;
+			defaultMaxValue = copy.defaultMaxValue;
 		}
 
 		public override void OnDecodeFromConfigNode()
 		{
 			body = FlightGlobals.Bodies.FirstOrDefault(b => b.flightGlobalsIndex == index);
-			if (body != null)
-				name = body.name;
 		}
 
-		public string Name
+		public string BodyName
 		{
-			get { return name; }
+			get { return bodyName; }
+		}
+
+		public string ResourceName
+		{
+			get { return resourceName; }
 		}
 
 		public CelestialBody Body
