@@ -47,6 +47,7 @@
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SCANconfigLoader.cs" />
+    <Compile Include="SCAN_Color_Config.cs" />
     <Compile Include="SCAN_Data\SCANanomaly.cs" />
     <Compile Include="SCAN_Data\SCANdata.cs" />
     <Compile Include="SCAN_Data\SCANresourceBody.cs" />
@@ -79,6 +80,7 @@
     <Compile Include="SCAN_Platform\Palettes\Palettes.cs" />
     <Compile Include="SCAN_Platform\Palettes\Swatches.cs" />
     <Compile Include="SCAN_Platform\SCAN_CLZF2.cs" />
+    <Compile Include="SCAN_Platform\SCAN_ConfigNodeStorage.cs" />
     <Compile Include="SCAN_Platform\SCAN_KSPAddonImproved.cs" />
     <Compile Include="SCAN_Platform\SCAN_MBE.cs" />
     <Compile Include="SCAN_Platform\SCAN_MBW.cs" />
