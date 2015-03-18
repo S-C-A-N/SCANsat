@@ -367,7 +367,7 @@ namespace SCANsat.SCAN_Map
 			body = b;
 			//SCANcontroller.controller.Resources(b); //Repopulate resource list when changing SOI
 			if (SCANconfigLoader.GlobalResource)
-				resource = SCANcontroller.MasterResourceNodes[SCANcontroller.controller.resourceSelection];
+				resource = SCANcontroller.getResourceNode(SCANcontroller.controller.resourceSelection);
 			resetMap();
 		}
 
@@ -384,7 +384,7 @@ namespace SCANsat.SCAN_Map
 			if (SCANconfigLoader.GlobalResource)
 			{ //Make sure that a resource is initialized if necessary
 				if (resource == null && body != null)
-					resource = SCANcontroller.MasterResourceNodes[SCANcontroller.controller.resourceSelection];
+					resource = SCANcontroller.getResourceNode(SCANcontroller.controller.resourceSelection);
 				if (SCANcontroller.controller.resourceOverlayType == 1)
 					SCANcontroller.controller.KethaneReset = !SCANcontroller.controller.KethaneReset;
 			}
@@ -714,7 +714,7 @@ namespace SCANsat.SCAN_Map
 		private double resourceMapValue(double Lon, double Lat, SCANdata Data)
 		{
 			double amount = 0;
-			if (SCANcontroller.controller.resourceOverlayType == 0 && SCANmainMenuLoader.RegolithFound)
+			if (SCANcontroller.controller.resourceOverlayType == 0 && SCANmainMenuLoader.RegolithFound && resource != null)
 			{
 				if (SCANUtil.isCovered(Lon, Lat, Data, resource.SType)) //check our new resource coverage map
 				{
@@ -731,7 +731,7 @@ namespace SCANsat.SCAN_Map
 				else
 					amount = -1;
 			}
-			else if (SCANcontroller.controller.resourceOverlayType == 1)
+			else if (SCANcontroller.controller.resourceOverlayType == 1 && resource != null)
 			{
 				if (SCANUtil.isCovered(Lon, Lat, Data, resource.SType))
 				{
