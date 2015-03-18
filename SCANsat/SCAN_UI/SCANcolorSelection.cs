@@ -783,8 +783,9 @@ namespace SCANsat.SCAN_UI
 			growE();
 				if (GUILayout.Button("Save Values", GUILayout.Width(100)))
 				{
-					if (SCANcontroller.MasterResourceNodes.ContainsKey(currentResource.Name))
-						SCANcontroller.MasterResourceNodes[currentResource.Name] = currentResource;
+					SCANresourceGlobal resourceToUpdate = SCANcontroller.getResourceNode(currentResource.Name);
+					if (resourceToUpdate != null)
+						resourceToUpdate = currentResource;
 
 					resourceColorPicker.updateOldSwatches();
 				}
@@ -799,8 +800,9 @@ namespace SCANsat.SCAN_UI
 						r.MaxValue = resourceMaxSlider.CurrentValue;
 					}
 
-					if (SCANcontroller.MasterResourceNodes.ContainsKey(currentResource.Name))
-						SCANcontroller.MasterResourceNodes[currentResource.Name] = currentResource;
+					SCANresourceGlobal resourceToUpdate = SCANcontroller.getResourceNode(currentResource.Name);
+					if (resourceToUpdate != null)
+						resourceToUpdate = currentResource;
 
 					resourceColorPicker.updateOldSwatches();
 				}
@@ -815,8 +817,9 @@ namespace SCANsat.SCAN_UI
 					currentResource.MaxColor = currentResource.ResourceType.ColorFull;
 					currentResource.Transparency = 20f;
 
-					if (SCANcontroller.MasterResourceNodes.ContainsKey(currentResource.Name))
-						SCANcontroller.MasterResourceNodes[currentResource.Name] = currentResource;
+					SCANresourceGlobal resourceToUpdate = SCANcontroller.getResourceNode(currentResource.Name);
+					if (resourceToUpdate != null)
+						resourceToUpdate = currentResource;
 
 					updateUI();
 				}
@@ -835,8 +838,9 @@ namespace SCANsat.SCAN_UI
 						r.MaxValue = r.DefaultMaxValue;
 					}
 
-					if (SCANcontroller.MasterResourceNodes.ContainsKey(currentResource.Name))
-						SCANcontroller.MasterResourceNodes[currentResource.Name] = currentResource;
+					SCANresourceGlobal resourceToUpdate = SCANcontroller.getResourceNode(currentResource.Name);
+					if (resourceToUpdate != null)
+						resourceToUpdate = currentResource;
 
 					updateUI();
 				}

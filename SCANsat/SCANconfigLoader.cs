@@ -155,7 +155,7 @@ namespace SCANsat
 				//}
 			//}
 
-			if (SCANcontroller.MasterResourceNodes.Count == 0)
+			if (SCANcontroller.MasterResourceCount == 0)
 				globalResource = false;
 			else
 				globalResource = true;

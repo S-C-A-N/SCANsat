@@ -52,23 +52,8 @@ namespace SCANsat
 
 		public override void OnEncodeToConfigNode()
 		{
-			try
-			{
-				SCANsat_Altimetry = SCANcontroller.MasterTerrainNodes.Values.ToList();
-			}
-			catch (Exception e)
-			{
-				SCANUtil.SCANlog("Error while saving SCANsat altimetry config data: {0}", e);
-			}
-
-			try
-			{
-				SCANsat_Resources = SCANcontroller.MasterResourceNodes.Values.ToList();
-			}
-			catch (Exception e)
-			{
-				SCANUtil.SCANlog("Error while saving SCANsat resource config data: {0}", e);
-			}
+			SCANsat_Altimetry = SCANcontroller.EncodeTerrainConfigs;
+			SCANsat_Resources = SCANcontroller.EncodeResourceConfigs;
 		}
 
 		public float DefaultMinHeightRange
