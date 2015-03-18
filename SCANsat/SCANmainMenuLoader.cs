@@ -34,7 +34,7 @@ namespace SCANsat
 		private void Start()
 		{
 			findAssemblies(Assemblies);
-			SCANconfigLoader.resourceLoader();
+			SCANconfigLoader.configLoader();
 		}
 
 		private void findAssemblies(string[] assemblies)
