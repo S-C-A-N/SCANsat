@@ -30,7 +30,7 @@ namespace SCANsat
 			get { return initialized; }
 		}
 
-		internal static void resourceLoader()
+		internal static void configLoader()
 		{
 			loadSCANtypes();
 			loadResources();
@@ -40,7 +40,6 @@ namespace SCANsat
 
 		private static void loadSCANtypes()
 		{
-			SCANcontroller.ResourceTypes = new Dictionary<string, SCANresourceType>();
 			foreach (ConfigNode node in GameDatabase.Instance.GetConfigNodes("SCANSAT_SENSOR"))
 			{
 				string name = "";
@@ -56,14 +55,13 @@ namespace SCANsat
 					colorFull = node.GetValue("ColorFull");
 				if (node.HasValue("ColorEmpty"))
 					colorEmpty = node.GetValue("ColorEmpty");
-				if (!SCANcontroller.ResourceTypes.ContainsKey(name) && !string.IsNullOrEmpty(name))
-					SCANcontroller.ResourceTypes.Add(name, new SCANresourceType(name, i, colorFull, colorEmpty));
+
+				SCANcontroller.addToResourceTypes(name, new SCANresourceType(name, i, colorFull, colorEmpty));
 			}
 		}
 
 		private static void loadResources() //Repopulates the master resources list with data from config nodes
 		{
-			SCANcontroller.MasterResourceNodes = new Dictionary<string, SCANresourceGlobal>();
 			if (SCANmainMenuLoader.RegolithFound)
 			{
 				foreach (ConfigNode node in GameDatabase.Instance.GetConfigNodes("REGOLITH_GLOBAL_RESOURCE"))
@@ -87,7 +85,7 @@ namespace SCANsat
 
 									if (bodyResource.Body.name == body.name)
 									{
-										if (bodyResource.Name == resource.Name)
+										if (bodyResource.ResourceName == resource.Name)
 											break;
 										else
 										{
@@ -102,12 +100,16 @@ namespace SCANsat
 							{
 								resource.addToBodyConfigs(bodyResource.Body.name, bodyResource);
 							}
-
-							SCANcontroller.addToResourceData(resource.Name, resource);
+							else
+								resource.addToBodyConfigs(body.name, new SCANresourceBody(resource.Name, body, 0.001f, 10f));
 						}
+
+						SCANcontroller.addToLoadedResourceNames(resource.Name);
+						SCANcontroller.addToResourceData(resource.Name, resource);
 					}
 				}
 			}
+			
 			//if (SCANmainMenuLoader.kethaneLoaded)
 			//{
 			//	foreach (ConfigNode node in GameDatabase.Instance.GetConfigNodes("KethaneResource"))
