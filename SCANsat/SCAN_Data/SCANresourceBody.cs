@@ -17,6 +17,7 @@ namespace SCANsat.SCAN_Data
 		private float lowResourceCutoff;
 		[Persistent]
 		private float highResourceCutoff;
+
 		private CelestialBody body;
 		private float defaultMinValue, defaultMaxValue;
 
@@ -33,6 +34,13 @@ namespace SCANsat.SCAN_Data
 		{
 			SCANresourceBody res = new SCANresourceBody(r.name, r.body, r.lowResourceCutoff, r.highResourceCutoff);
 			return res;
+		}
+
+		public override void OnDecodeFromConfigNode()
+		{
+			body = FlightGlobals.Bodies.FirstOrDefault(b => b.flightGlobalsIndex == index);
+			if (body != null)
+				name = body.name;
 		}
 
 		public string Name

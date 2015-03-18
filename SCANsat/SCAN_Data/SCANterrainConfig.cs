@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using SCANsat.SCAN_Platform;
 using SCANsat.SCAN_Platform.Palettes;
 
@@ -34,10 +35,12 @@ namespace SCANsat.SCAN_Data
 			maxHeightRange = max;
 			clampTerrain = clamp;
 			colorPal = color;
+			paletteName = colorPal.name;
 			paletteSize = size;
 			paletteReverse = reverse;
 			paletteDiscrete = discrete;
 			body = b;
+			name = body.name;
 			index = body.flightGlobalsIndex;
 		}
 
@@ -47,10 +50,21 @@ namespace SCANsat.SCAN_Data
 			maxHeightRange = copy.maxHeightRange;
 			clampTerrain = copy.clampTerrain;
 			colorPal = copy.colorPal;
+			paletteName = copy.paletteName;
 			paletteSize = copy.paletteSize;
 			paletteReverse = copy.paletteReverse;
 			paletteDiscrete = copy.paletteDiscrete;
 			body = copy.body;
+			name = copy.name;
+		}
+
+		public override void OnDecodeFromConfigNode()
+		{
+			body = FlightGlobals.Bodies.FirstOrDefault(b => b.flightGlobalsIndex == index);
+			if (body != null)
+				name = body.name;
+
+			colorPal = SCANUtil.paletteLoader(paletteName, paletteSize);
 		}
 
 		public float MinTerrain
