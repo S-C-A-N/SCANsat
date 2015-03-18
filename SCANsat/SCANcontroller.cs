@@ -171,9 +171,21 @@ namespace SCANsat
 				Debug.LogError("[SCANsat] Warning: SCANdata Dictionary Already Contains Key of This Type");
 		}
 
-		public static Dictionary<string, SCANterrainConfig> MasterTerrainNodes
+		public static List<SCANterrainConfig> EncodeTerrainConfigs
 		{
-			get { return masterTerrainNodes; }
+			get
+			{
+				try
+				{
+					return masterTerrainNodes.Values.ToList();
+				}
+				catch (Exception e)
+				{
+					SCANUtil.SCANlog("Error while saving SCANsat altimetry config data: {0}", e);
+				}
+
+				return new List<SCANterrainConfig>();
+			}
 		}
 
 		public static void setMasterTerrainNodes (List<SCANterrainConfig> terrainConfigs)
@@ -189,6 +201,16 @@ namespace SCANsat
 			}
 		}
 
+		public static SCANterrainConfig getTerrainNode(string name)
+		{
+			if (masterTerrainNodes.ContainsKey(name))
+				return masterTerrainNodes[name];
+			else
+				SCANUtil.SCANlog("SCANsat terrain config [{0}] cannot be found in master terrain storage list", name);
+
+			return null;
+		}
+
 		public static void addToTerrainConfigData (string name, SCANterrainConfig data)
 		{
 			if (!masterTerrainNodes.ContainsKey(name))
@@ -197,9 +219,26 @@ namespace SCANsat
 				Debug.LogError("[SCANsat] Warning: SCANterrain Data Dictionary Already Contains Key Of This Type");
 		}
 
-		public static Dictionary<string, SCANresourceGlobal> MasterResourceNodes
+		public static int MasterResourceCount
 		{
-			get { return masterResourceNodes; }
+			get { return masterResourceNodes.Count; }
+		}
+
+		public static List<SCANresourceGlobal> EncodeResourceConfigs
+		{
+			get
+			{
+				try
+				{
+					return masterResourceNodes.Values.ToList();
+				}
+				catch (Exception e)
+				{
+					SCANUtil.SCANlog("Error while saving SCANsat resource config data: {0}", e);
+				}
+
+				return new List<SCANresourceGlobal>();
+			}
 		}
 
 		public static void setMasterResourceNodes (List<SCANresourceGlobal> resourceConfigs)
@@ -222,6 +261,19 @@ namespace SCANsat
 				SCANUtil.SCANlog("SCANsat resource [{0}] cannot be found in master resource storage list", resourceName);
 
 			return null;
+		}
+
+		public static SCANresourceGlobal GetFirstResource
+		{
+			get
+			{
+				if (masterResourceNodes.Count > 0)
+					return masterResourceNodes.ElementAt(0).Value;
+				else
+					SCANUtil.SCANlog("SCANsat resource storage list is empty; something probably went wrong here...");
+
+				return null;
+			}
 		}
 		
 		public static void addToResourceData (string name, SCANresourceGlobal res)
@@ -322,8 +374,6 @@ namespace SCANsat
 
 		public override void OnLoad(ConfigNode node)
 		{
-			body_data = new Dictionary<string, SCANdata>();
-
 			ConfigNode node_vessels = node.GetNode("Scanners");
 			if (node_vessels != null)
 			{
