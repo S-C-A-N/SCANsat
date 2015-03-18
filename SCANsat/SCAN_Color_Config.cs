@@ -46,23 +46,8 @@ namespace SCANsat
 
 		public override void OnDecodeFromConfigNode()
 		{
-			try
-			{
-				SCANcontroller.MasterTerrainNodes = SCANsat_Altimetry.ToDictionary(a => a.Name, a => a);
-			}
-			catch (Exception e)
-			{
-				SCANUtil.SCANlog("Error while loading SCANsat terrain config settings: {0}", e);
-			}
-
-			try
-			{
-				SCANcontroller.MasterResourceNodes = SCANsat_Resources.ToDictionary(a => a.Name, a => a);
-			}
-			catch (Exception e)
-			{
-				SCANUtil.SCANlog("Error while loading SCANsat resource config settings: {0}", e);
-			}
+			SCANcontroller.setMasterTerrainNodes(SCANsat_Altimetry);
+			SCANcontroller.setMasterResourceNodes(SCANsat_Resources);
 		}
 
 		public override void OnEncodeToConfigNode()
