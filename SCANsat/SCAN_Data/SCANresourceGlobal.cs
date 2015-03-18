@@ -55,7 +55,7 @@ namespace SCANsat.SCAN_Data
 		{
 			try
 			{
-				masterBodyConfigs = Resource_Planetary_Config.ToDictionary(a => a.Name, a => a);
+				masterBodyConfigs = Resource_Planetary_Config.ToDictionary(a => a.BodyName, a => a);
 			}
 			catch (Exception e)
 			{
