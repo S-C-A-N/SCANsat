@@ -16,7 +16,7 @@ namespace SCANsat.SCAN_Data
 		[Persistent]
 		private float maxHeightRange;
 		[Persistent]
-		private float? clampTerrain;
+		private string clampHeight;
 		[Persistent]
 		private string paletteName;
 		[Persistent]
@@ -28,12 +28,17 @@ namespace SCANsat.SCAN_Data
 
 		private Palette colorPal;
 		private CelestialBody body;
+		private float? clampTerrain;
 
 		internal SCANterrainConfig(float min, float max, float? clamp, Palette color, int size, bool reverse, bool discrete, CelestialBody b)
 		{
 			minHeightRange = min;
 			maxHeightRange = max;
 			clampTerrain = clamp;
+			if (clampTerrain == null)
+				clampHeight = "Null";
+			else
+				clampHeight = clampTerrain.Value.ToString("F0");
 			colorPal = color;
 			paletteName = colorPal.name;
 			paletteSize = size;
@@ -49,6 +54,7 @@ namespace SCANsat.SCAN_Data
 			minHeightRange = copy.minHeightRange;
 			maxHeightRange = copy.maxHeightRange;
 			clampTerrain = copy.clampTerrain;
+			clampHeight = copy.clampHeight;
 			colorPal = copy.colorPal;
 			paletteName = copy.paletteName;
 			paletteSize = copy.paletteSize;
@@ -65,6 +71,22 @@ namespace SCANsat.SCAN_Data
 				name = body.name;
 
 			colorPal = SCANUtil.paletteLoader(paletteName, paletteSize);
+
+			float tempClamp = 0;
+			if (clampHeight == "Null" || clampHeight == "null")
+				clampTerrain = null;
+			else if (float.TryParse(clampHeight, out tempClamp))
+				clampTerrain = tempClamp;
+			else
+				clampTerrain = null;
+		}
+
+		public override void OnEncodeToConfigNode()
+		{
+			if (clampTerrain == null)
+				clampHeight = "Null";
+			else
+				clampHeight = clampTerrain.Value.ToString("F0");
 		}
 
 		public float MinTerrain
