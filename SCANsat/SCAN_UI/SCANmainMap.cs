@@ -170,7 +170,7 @@ namespace SCANsat.SCAN_UI
 			{
 				int count = 2;
 				vesselInfo(v, mapRect, 1, true);
-				foreach (SCANcontroller.SCANvessel sV in SCANcontroller.controller.Known_Vessels.Values)
+				foreach (SCANcontroller.SCANvessel sV in SCANcontroller.controller.Known_Vessels)
 				{
 					if (sV.vessel == FlightGlobals.ActiveVessel)
 						continue;

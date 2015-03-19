@@ -210,10 +210,10 @@ namespace SCANsat.SCAN_UI
 			// scanning for individual SoIs
 			growE();
 			int count = 0;
-			foreach (var data in SCANcontroller.Body_Data)
+			foreach (SCANdata data in SCANcontroller.controller.GetAllData)
 			{
 				if (count == 0) growS();
-					data.Value.Disabled = !GUILayout.Toggle(!data.Value.Disabled, string.Format("{0} ({1:N1}%)", data.Key, SCANUtil.getCoveragePercentage(data.Value, SCANtype.Nothing)), SCANskins.SCAN_settingsToggle);
+					data.Disabled = !GUILayout.Toggle(!data.Disabled, string.Format("{0} ({1:N1}%)", data.Body.name, SCANUtil.getCoveragePercentage(data, SCANtype.Nothing)), SCANskins.SCAN_settingsToggle);
 				switch (count)
 				{
 					case 5: stopS(); count = 0; break;
@@ -432,7 +432,7 @@ namespace SCANsat.SCAN_UI
 				if (GUI.Button(r, "Confirm", SCANskins.SCAN_buttonWarning))
 				{
 					warningBoxAll = false;
-					foreach (SCANdata data in SCANcontroller.Body_Data.Values)
+					foreach (SCANdata data in SCANcontroller.controller.GetAllData)
 					{
 						data.reset();
 					}
