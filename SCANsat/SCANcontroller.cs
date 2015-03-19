@@ -132,8 +132,8 @@ namespace SCANsat
 		/* Primary SCANsat vessel dictionary; loaded every time */
 		private Dictionary<Guid, SCANvessel> knownVessels = new Dictionary<Guid, SCANvessel>();
 
-		/* Primary SCANdata dictionary; loaded every time; static to protect against null SCANcontroller instance */
-		private static Dictionary<string, SCANdata> body_data = new Dictionary<string,SCANdata>();
+		/* Primary SCANdata dictionary; loaded every time*/
+		private Dictionary<string, SCANdata> body_data = new Dictionary<string,SCANdata>();
 
 		/* Kethane integration */
 		private bool kethaneRebuild, kethaneReset, kethaneBusy = false;
@@ -157,9 +157,24 @@ namespace SCANsat
 
 		#region Public Accessors
 
-		public static Dictionary<string, SCANdata> Body_Data
+		public SCANdata getData(string bodyName)
 		{
-			get { return body_data; }
+			if (body_data.ContainsKey(bodyName))
+				return body_data[bodyName];
+			else
+				SCANUtil.SCANlog("No SCANdata object found for Celestial Body [{0}]", bodyName);
+
+			return null;
+		}
+
+		public List<SCANdata> GetAllData
+		{
+			get { return body_data.Values.ToList(); }
+		}
+
+		public int GetDataCount
+		{
+			get { return body_data.Count; }
 		}
 
 		/* Use this method to protect against duplicate dictionary keys */
@@ -322,9 +337,9 @@ namespace SCANsat
 			return rList;
 		}
 
-		public Dictionary<Guid, SCANvessel> Known_Vessels
+		public List<SCANvessel> Known_Vessels
 		{
-			get { return knownVessels; }
+			get { return knownVessels.Values.ToList(); }
 		}
 
 		public bool KethaneBusy
@@ -358,16 +373,6 @@ namespace SCANsat
 		public int ActualPasses
 		{
 			get { return actualPasses; }
-		}
-
-		public Color DefaultLowBiomeColor
-		{
-			get { return defaultLowBiomeColor; }
-		}
-
-		public Color DefaultHighBiomeColor
-		{
-			get { return defaultHighBiomeColor; }
 		}
 
 		#endregion
@@ -425,7 +430,7 @@ namespace SCANsat
 					CelestialBody body = FlightGlobals.Bodies.FirstOrDefault(b => b.name == body_name);
 					if (body != null)
 					{
-						SCANdata data = SCANUtil.getData(body);
+						SCANdata data = getData(body.name);
 						if (data == null)
 							data = new SCANdata(body);
 						if (!body_data.ContainsKey(body_name))
