@@ -17,6 +17,7 @@ namespace SCANsat
 		private static bool initialized = false;
 
 		private const string configFile = "SCANcolors.cfg";
+		private const string configNodeName = "SCAN_Color_Config";
 
 		private static SCAN_Color_Config SCANnode;
 
@@ -35,7 +36,7 @@ namespace SCANsat
 			loadSCANtypes();
 			loadResources();
 
-			SCANnode = new SCAN_Color_Config(configFile);
+			SCANnode = new SCAN_Color_Config(configFile, configNodeName);
 		}
 
 		private static void loadSCANtypes()

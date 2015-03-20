@@ -37,9 +37,10 @@ namespace SCANsat
 		[Persistent]
 		private List<SCANresourceGlobal> SCANsat_Resources = new List<SCANresourceGlobal>();
 
-		internal SCAN_Color_Config(string filepath)
+		internal SCAN_Color_Config(string filepath, string node)
 		{
 			FilePath = filepath;
+			TopNodeName = node;
 
 			Load();
 		}
