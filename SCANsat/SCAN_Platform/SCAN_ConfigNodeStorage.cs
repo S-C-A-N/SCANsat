@@ -17,7 +17,7 @@ namespace SCANsat.SCAN_Platform
 		public string FilePath
 		{
 			get { return _FilePath; }
-			set { _FilePath = System.IO.Path.Combine(_AssemblyFolder, value).Replace("\\", "/"); }
+			set { _FilePath = System.IO.Path.Combine(KSPUtil.ApplicationRootPath, "GameData/" + value + ".cfg").Replace("\\", "/"); }
 		}
 
 		private string topNodeName;
@@ -43,9 +43,8 @@ namespace SCANsat.SCAN_Platform
 				Log.Debug("Loading ConfigNode");
 				if (FileExists)
 				{
-					//ConfigNode cnToLoad = ConfigNode.Load(fileFullName);
-					ConfigNode cnUnwrapped = GameDatabase.Instance.GetConfigNode(topNodeName);
-					ConfigNode.LoadObjectFromConfig(this, cnUnwrapped);
+					ConfigNode cnToLoad = GameDatabase.Instance.GetConfigNode(topNodeName);
+					ConfigNode.LoadObjectFromConfig(this, cnToLoad);
 					return true;
 				}
 				else
