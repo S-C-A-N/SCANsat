@@ -161,8 +161,6 @@ namespace SCANsat
 		{
 			if (body_data.ContainsKey(bodyName))
 				return body_data[bodyName];
-			else
-				SCANUtil.SCANlog("No SCANdata object found for Celestial Body [{0}]", bodyName);
 
 			return null;
 		}
@@ -301,9 +299,14 @@ namespace SCANsat
 				Debug.LogError(string.Format("[SCANsat] Warning: SCANResource Dictionary Already Contains Key of This Type: Resource: {0}", name));
 		}
 
-		public static Dictionary<string, SCANresourceType> ResourceTypes
+		public static SCANresourceType getResourceType (string name)
 		{
-			get { return resourceTypes; }
+			if (resourceTypes.ContainsKey(name))
+				return resourceTypes[name];
+			else
+				SCANUtil.SCANlog("SCANsat resource type [{0}] cannot be found in master resource type storage list", name);
+
+			return null;
 		}
 
 		public static void addToResourceTypes (string name, SCANresourceType type)
@@ -597,22 +600,18 @@ namespace SCANsat
 				if (resourceTypes.Count > 0 && masterResourceNodes.Count > 0)
 				{
 					ConfigNode node_resources = new ConfigNode("SCANResources");
-					foreach (SCANresourceType t in resourceTypes.Values)
+					foreach (SCANresourceGlobal r in masterResourceNodes.Values)
 					{
-						SCANresourceGlobal r = null;
-
-						if (masterResourceNodes.ContainsKey(t.Name))
-							r = masterResourceNodes[t.Name];
-
 						if (r != null)
 						{
+							SCANUtil.SCANlog("Saving Resource: {0}", r.Name);
 							ConfigNode node_resource_type = new ConfigNode("ResourceType");
 							node_resource_type.AddValue("Resource", r.Name);
-							node_resource_type.AddValue("MinColor", r.MinColor);
-							node_resource_type.AddValue("MaxColor", r.MaxColor);
-							node_resource_type.AddValue("Transparency", r.Transparency * 100);
+							node_resource_type.AddValue("MinColor", ConfigNode.WriteColor(r.MinColor));
+							node_resource_type.AddValue("MaxColor", ConfigNode.WriteColor(r.MaxColor));
+							node_resource_type.AddValue("Transparency", r.Transparency);
 
-							string rMinMax = saveResources(t);
+							string rMinMax = saveResources(r);
 							node_resource_type.AddValue("MinMaxValues", rMinMax);
 							node_resources.AddNode(node_resource_type);
 						}
@@ -670,17 +669,13 @@ namespace SCANsat
 				body_data.Add(VC.to.name, new SCANdata(VC.to));
 		}
 
-		private string saveResources(SCANresourceType type)
+		private string saveResources(SCANresourceGlobal resource)
 		{
 			List<string> sL = new List<string>();
-			if (masterResourceNodes.ContainsKey(type.Name))
+			foreach (SCANresourceBody bodyRes in resource.BodyConfigs.Values)
 			{
-				SCANresourceGlobal r = masterResourceNodes[type.Name];
-				foreach (SCANresourceBody bodyRes in r.BodyConfigs.Values)
-				{
-					string a = string.Format("{0}|{1:F3}|{2:F3}", bodyRes.Body.flightGlobalsIndex, bodyRes.MinValue, bodyRes.MaxValue);
-					sL.Add(a);
-				}
+				string a = string.Format("{0}|{1:F3}|{2:F3}", bodyRes.Body.flightGlobalsIndex, bodyRes.MinValue, bodyRes.MaxValue);
+				sL.Add(a);
 			}
 
 			return string.Join(",", sL.ToArray());
