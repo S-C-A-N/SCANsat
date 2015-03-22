@@ -33,6 +33,10 @@ namespace SCANsat.SCAN_Data
 			highResourceCutoff = defaultMaxValue = max;
 		}
 
+		public SCANresourceBody()
+		{
+		}
+
 		internal SCANresourceBody(SCANresourceBody copy)
 		{
 			resourceName = copy.resourceName;
@@ -48,6 +52,14 @@ namespace SCANsat.SCAN_Data
 		public override void OnDecodeFromConfigNode()
 		{
 			body = FlightGlobals.Bodies.FirstOrDefault(b => b.flightGlobalsIndex == index);
+			SCANUtil.SCANdebugLog("Resource Body Decode");
+			SCANUtil.SCANdebugLog("-------->Resource Name               =>   {0}", resourceName);
+			SCANUtil.SCANdebugLog("-------->Body Name                   =>   {0}", bodyName);
+			SCANUtil.SCANdebugLog("-------->Body Index                  =>   {0}", index);
+			SCANUtil.SCANdebugLog("-------->Low Resource Cutoff         =>   {0}", lowResourceCutoff);
+			SCANUtil.SCANdebugLog("-------->High Resource Cutoff        =>   {0}", highResourceCutoff);
+			SCANUtil.SCANdebugLog("-------->Default Low Resource Cutoff =>   {0}", defaultMinValue);
+			SCANUtil.SCANdebugLog("-------->Default Max Resource Cutoff =>   {0}", defaultMaxValue);
 		}
 
 		public string BodyName

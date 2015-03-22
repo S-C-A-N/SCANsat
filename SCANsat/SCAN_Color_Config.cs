@@ -40,13 +40,23 @@ namespace SCANsat
 		internal SCAN_Color_Config(string filepath, string node)
 		{
 			FilePath = filepath;
-			TopNodeName = node;
+			TopNodeName = filepath + "/" + node;
 
 			Load();
 		}
 
 		public override void OnDecodeFromConfigNode()
 		{
+			SCANUtil.SCANdebugLog("SCANsat Color Config Decode");
+			SCANUtil.SCANdebugLog("-------->Default Min Height Range =>   {0}", defaultMinHeightRange);
+			SCANUtil.SCANdebugLog("-------->Default Max Height Range =>   {0}", defaultMaxHeightRange);
+			SCANUtil.SCANdebugLog("-------->Default Palette          =>   {0}", defaultPalette);
+			SCANUtil.SCANdebugLog("-------->Low Biome Color          =>   {0}", lowBiomeColor);
+			SCANUtil.SCANdebugLog("-------->High Biome Color         =>   {0}", highBiomeColor);
+			SCANUtil.SCANdebugLog("-------->Biome Transparency       =>   {0}", biomeTransparency);
+			SCANUtil.SCANdebugLog("-------->Stock Biome              =>   {0}", stockBiomeMap);
+			SCANUtil.SCANdebugLog("-------->Low Slope Color          =>   {0}", lowSlopeColor);
+			SCANUtil.SCANdebugLog("-------->High Slope Color         =>   {0}", highSlopeColor);
 			SCANcontroller.setMasterTerrainNodes(SCANsat_Altimetry);
 			SCANcontroller.setMasterResourceNodes(SCANsat_Resources);
 		}

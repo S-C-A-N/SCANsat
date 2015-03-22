@@ -20,7 +20,7 @@ namespace SCANsat.SCAN_Data
 		[Persistent]
 		private List<SCANresourceBody> Resource_Planetary_Config = new List<SCANresourceBody>();
 
-		private Dictionary<string, SCANresourceBody> masterBodyConfigs;
+		private Dictionary<string, SCANresourceBody> masterBodyConfigs = new Dictionary<string,SCANresourceBody>();
 
 		private SCANtype sType;
 		private SCANresourceType resourceType;
@@ -39,8 +39,13 @@ namespace SCANsat.SCAN_Data
 			source = (SCANresource_Source)S;
 		}
 
+		public SCANresourceGlobal()
+		{
+		}
+
 		internal SCANresourceGlobal(SCANresourceGlobal copy)
 		{
+			SCANUtil.SCANdebugLog("Preparing New Resource Copy");
 			name = copy.name;
 			resourceTransparency = copy.resourceTransparency;
 			lowResourceColor = copy.lowResourceColor;
@@ -48,11 +53,38 @@ namespace SCANsat.SCAN_Data
 			sType = copy.sType;
 			resourceType = copy.resourceType;
 			source = copy.source;
-			masterBodyConfigs = copy.masterBodyConfigs;
+			masterBodyConfigs = copyBodyConfigs(copy);
+		}
+
+		private Dictionary<string, SCANresourceBody> copyBodyConfigs(SCANresourceGlobal c)
+		{
+			SCANUtil.SCANdebugLog("Preparing New Body Config Database");
+			Dictionary<string, SCANresourceBody> newCopy = new Dictionary<string, SCANresourceBody>();
+			foreach (SCANresourceBody r in c.masterBodyConfigs.Values)
+			{
+				SCANUtil.SCANdebugLog("Copying SCAN Body Resource Config: [{0}]", r.BodyName);
+				SCANresourceBody newR = new SCANresourceBody(r);
+				if (!newCopy.ContainsKey(newR.BodyName))
+					newCopy.Add(newR.BodyName, newR);
+			}
+
+			return newCopy;
 		}
 
 		public override void OnDecodeFromConfigNode()
 		{
+			resourceType = SCANcontroller.getResourceType(name);
+			sType = resourceType.Type;
+			source = (SCANresource_Source)2;
+
+			SCANUtil.SCANdebugLog("Resource Global Decode");
+			SCANUtil.SCANdebugLog("-------->Resource Name           =>   {0}", name);
+			SCANUtil.SCANdebugLog("-------->Resource Transparency   =>   {0}", resourceTransparency);
+			SCANUtil.SCANdebugLog("-------->Low Resource Color      =>   {0}", lowResourceColor);
+			SCANUtil.SCANdebugLog("-------->High Resource Color     =>   {0}", highResourceColor);
+			SCANUtil.SCANdebugLog("-------->Resource Type           =>   {0}", resourceType.Name);
+			SCANUtil.SCANdebugLog("-------->SCAN Type               =>   {0}", sType);
+			SCANUtil.SCANdebugLog("-------->SCAN Resource Source    =>   {0}", source);
 			try
 			{
 				masterBodyConfigs = Resource_Planetary_Config.ToDictionary(a => a.BodyName, a => a);
@@ -75,12 +107,24 @@ namespace SCANsat.SCAN_Data
 			}
 		}
 
-		public void addToBodyConfigs(string s, SCANresourceBody r)
+		public void addToBodyConfigs(string s, SCANresourceBody r, bool warn)
 		{
 			if (!masterBodyConfigs.ContainsKey(s))
 				masterBodyConfigs.Add(s, r);
-			else
-				Debug.LogError("[SCANsat] Warning: SCANresource Dictionary Already Contains Key Of This Type");
+			else if (warn)
+				Debug.LogError(string.Format("[SCANsat] Warning: SCANresource Dictionary Already Contains Key Of This Type: [{0}] For Body: [{1}]", r.ResourceName, s));
+		}
+
+		public void logValues(string s)
+		{
+			SCANUtil.SCANdebugLog("Log SCAN Global Resource Values: {0}", s);
+			SCANUtil.SCANdebugLog("-------->Resource Name           =>   {0}", name);
+			SCANUtil.SCANdebugLog("-------->Resource Transparency   =>   {0}", resourceTransparency);
+			SCANUtil.SCANdebugLog("-------->Low Resource Color      =>   {0}", lowResourceColor);
+			SCANUtil.SCANdebugLog("-------->High Resource Color     =>   {0}", highResourceColor);
+			SCANUtil.SCANdebugLog("-------->Resource Type           =>   {0}", resourceType.Name);
+			SCANUtil.SCANdebugLog("-------->SCAN Type               =>   {0}", sType);
+			SCANUtil.SCANdebugLog("-------->SCAN Resource Source    =>   {0}", source);
 		}
 
 		public string Name
@@ -95,8 +139,8 @@ namespace SCANsat.SCAN_Data
 			{
 				if (value < 0)
 					resourceTransparency = 0;
-				else if (value > 100)
-					resourceTransparency = 100;
+				else if (value > 80)
+					resourceTransparency = 80;
 				else
 					resourceTransparency = value;
 			}

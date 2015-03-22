@@ -49,6 +49,10 @@ namespace SCANsat.SCAN_Data
 			index = body.flightGlobalsIndex;
 		}
 
+		public SCANterrainConfig()
+		{
+		}
+
 		internal SCANterrainConfig(SCANterrainConfig copy)
 		{
 			minHeightRange = copy.minHeightRange;
@@ -73,12 +77,23 @@ namespace SCANsat.SCAN_Data
 			colorPal = SCANUtil.paletteLoader(paletteName, paletteSize);
 
 			float tempClamp = 0;
-			if (clampHeight == "Null" || clampHeight == "null")
+			if (clampHeight == "Null" || clampHeight == "null" || string.IsNullOrEmpty(clampHeight))
 				clampTerrain = null;
 			else if (float.TryParse(clampHeight, out tempClamp))
 				clampTerrain = tempClamp;
 			else
 				clampTerrain = null;
+
+			SCANUtil.SCANdebugLog("SCANsat Terrain Config Decode");
+			SCANUtil.SCANdebugLog("-------->Body Name             =>   {0}", name);
+			SCANUtil.SCANdebugLog("-------->Body Index            =>   {0}", index);
+			SCANUtil.SCANdebugLog("-------->Min Height Range      =>   {0}", minHeightRange);
+			SCANUtil.SCANdebugLog("-------->Max Height Range      =>   {0}", maxHeightRange);
+			SCANUtil.SCANdebugLog("-------->Clamp Height          =>   {0}", clampHeight);
+			SCANUtil.SCANdebugLog("-------->Palette Name          =>   {0}", paletteName);
+			SCANUtil.SCANdebugLog("-------->Palette Size          =>   {0}", paletteSize);
+			SCANUtil.SCANdebugLog("-------->Palette Reverse       =>   {0}", paletteReverse);
+			SCANUtil.SCANdebugLog("-------->Palette Discrete      =>   {0}", paletteDiscrete);
 		}
 
 		public override void OnEncodeToConfigNode()
