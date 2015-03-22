@@ -16,7 +16,7 @@ namespace SCANsat
 		private static bool globalResource = false;
 		private static bool initialized = false;
 
-		private const string configFile = "SCANcolors.cfg";
+		private const string configFile = "SCANsat/Resources/SCANcolors";
 		private const string configNodeName = "SCAN_Color_Config";
 
 		private static SCAN_Color_Config SCANnode;
@@ -99,10 +99,10 @@ namespace SCANsat
 							}
 							if (bodyResource != null)
 							{
-								resource.addToBodyConfigs(bodyResource.Body.name, bodyResource);
+								resource.addToBodyConfigs(bodyResource.Body.name, bodyResource, false);
 							}
 							else
-								resource.addToBodyConfigs(body.name, new SCANresourceBody(resource.Name, body, 0.001f, 10f));
+								resource.addToBodyConfigs(body.name, new SCANresourceBody(resource.Name, body, 0.001f, 10f), false);
 						}
 
 						SCANcontroller.addToLoadedResourceNames(resource.Name);
@@ -207,7 +207,7 @@ namespace SCANsat
 			foreach (CelestialBody b in FlightGlobals.Bodies)
 			{
 				SCANresourceBody r = new SCANresourceBody(name, b, min, max);
-				res.addToBodyConfigs(b.name, r);
+				res.addToBodyConfigs(b.name, r, true);
 			}
 
 			if (res != null)
@@ -275,8 +275,7 @@ namespace SCANsat
 
 		private static SCANresourceType OverlayResourceType(string s)
 		{
-			var resourceType = SCANcontroller.ResourceTypes.FirstOrDefault(r => r.Value.Name == s).Value;
-			return resourceType;
+			return SCANcontroller.getResourceType(s);
 		}
 	}
 }
