@@ -148,7 +148,6 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			palette.SeqPaletteSet = palette.generatePaletteSet(7, Palette.Kind.Sequential);
 			palette.FixedPaletteSet = palette.generatePaletteSet(0, Palette.Kind.Fixed);
 			palette.CurrentPalettes = palette.DivPaletteSet;
-			palette.CurrentPalette = PaletteLoader.defaultPalette;
 		}
 
 		private static void initializeSkins()
