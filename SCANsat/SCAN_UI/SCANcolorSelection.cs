@@ -28,10 +28,9 @@ namespace SCANsat.SCAN_UI
 	class SCANcolorSelection: SCAN_MBW
 	{
 		private bool dropDown, paletteBox, resourceBox;
-		private bool reversePalette, oldReverseState, discretePalette, oldDiscreteState;
+		private bool oldReverseState, oldDiscreteState;
 		private bool spaceCenterLock, trackingStationLock, clampState, oldClampState;
 		private Rect ddRect;
-		private Palette dataPalette;
 		private int paletteIndex;
 		private SCANmapLegend currentLegend, previewLegend;
 		private int windowMode = 0;
@@ -123,14 +122,14 @@ namespace SCANsat.SCAN_UI
 			if (SCANconfigLoader.GlobalResource)
 			{
 				loadedResources = SCANcontroller.setLoadedResourceList();
-				currentResource = loadedResources[0];
+				currentResource = new SCANresourceGlobal(loadedResources[0]);
 				currentResource.CurrentBodyConfig(data.Body.name);
 
 				if (currentResource != null)
 				{
 					resourceMinSlider = new SCANuiSlider(0, currentResource.CurrentBody.MinValue - 0.1f, currentResource.CurrentBody.MinValue, "Min: ", "%", 1);
 					resourceMaxSlider = new SCANuiSlider(currentResource.CurrentBody.MinValue + 0.1f, 100, currentResource.CurrentBody.MaxValue, "Max: ", "%", 1);
-					resourceTransSlider = new SCANuiSlider(0, 100, currentResource.Transparency * 100, "Trans: ", "%", 0);
+					resourceTransSlider = new SCANuiSlider(0, 80, currentResource.Transparency, "Trans: ", "%", 0);
 
 					resourceColorPicker = new SCANuiColorPicker(currentResource.MinColor, currentResource.MaxColor, true);
 				}
@@ -141,7 +140,7 @@ namespace SCANsat.SCAN_UI
 			if (windowMode > 3 || (windowMode > 2 && !SCANconfigLoader.GlobalResource))
 				windowMode = 0;
 
-			setSizeSlider(palette.CurrentPalette.kind);
+			setSizeSlider(currentTerrain.ColorPal.kind);
 		}
 
 		internal override void OnDestroy()
@@ -283,7 +282,7 @@ namespace SCANsat.SCAN_UI
 			}
 
 			//This updates all of the fields whenever the palette selection is changed
-			if (windowMode == 0 && (currentLegend == null || currentTerrain.ColorPal != dataPalette))
+			if (windowMode == 0 && (currentLegend == null || currentTerrain.ColorPal != data.TerrainConfig.ColorPal))
 			{
 				currentTerrain = new SCANterrainConfig(data.TerrainConfig);
 
@@ -369,9 +368,9 @@ namespace SCANsat.SCAN_UI
 			//These methods update all of the UI elements whenever any of the options are changed
 			if (windowMode == 0)
 			{
-				if (reversePalette != oldReverseState)
+				if (currentTerrain.PalRev != oldReverseState)
 				{
-					oldReverseState = reversePalette;
+					oldReverseState = currentTerrain.PalRev;
 					drawPreviewLegend();
 				}
 
@@ -380,9 +379,9 @@ namespace SCANsat.SCAN_UI
 					setTerrainSliders();
 				}
 
-				if (discretePalette != oldDiscreteState)
+				if (currentTerrain.PalDis != oldDiscreteState)
 				{
-					oldDiscreteState = discretePalette;
+					oldDiscreteState = currentTerrain.PalDis;
 					drawPreviewLegend();
 				}
 
@@ -395,7 +394,7 @@ namespace SCANsat.SCAN_UI
 				if (paletteSizeSlider.valueChanged())
 				{
 					regenPaletteSets();
-					palette.CurrentPalette = palette.CurrentPalettes.availablePalettes[paletteIndex];
+					currentTerrain.ColorPal = palette.CurrentPalettes.availablePalettes[paletteIndex];
 					drawPreviewLegend();
 				}
 			}
@@ -566,8 +565,8 @@ namespace SCANsat.SCAN_UI
 						{
 							if (GUILayout.Button("", SCANskins.SCAN_texButton, GUILayout.Width(110), GUILayout.Height(25)))
 							{
-								palette.CurrentPalette = palette.CurrentPalettes.availablePalettes[i];
-								paletteIndex = palette.CurrentPalette.index;
+								currentTerrain.ColorPal = palette.CurrentPalettes.availablePalettes[i];
+								paletteIndex = currentTerrain.ColorPal.index;
 								drawPreviewLegend();
 							}
 						}
@@ -619,9 +618,9 @@ namespace SCANsat.SCAN_UI
 				}
 
 				growE();
-					reversePalette = GUILayout.Toggle(reversePalette, "Reverse Order", SCANskins.SCAN_settingsToggle);
+					currentTerrain.PalRev = GUILayout.Toggle(currentTerrain.PalRev, "Reverse Order", SCANskins.SCAN_settingsToggle);
 					fillS(10);
-					discretePalette = GUILayout.Toggle(discretePalette, "Discrete Gradient", SCANskins.SCAN_settingsToggle);
+					currentTerrain.PalDis = GUILayout.Toggle(currentTerrain.PalDis, "Discrete Gradient", SCANskins.SCAN_settingsToggle);
 				stopE();
 
 			stopS();
@@ -660,7 +659,7 @@ namespace SCANsat.SCAN_UI
 					currentTerrain.ColorPal = data.DefaultColorPalette;
 					currentTerrain.PalRev = data.DefaultReversePalette;
 					currentTerrain.PalDis = false;
-					currentTerrain.PalSize = dataPalette.size;
+					currentTerrain.PalSize = data.DefaultColorPalette.size;
 					
 					updateUI();
 				}
@@ -668,7 +667,11 @@ namespace SCANsat.SCAN_UI
 				growE();
 					if (GUILayout.Button("Apply", GUILayout.Width(60)))
 					{
+						updateCurrentTerrain();
+
 						data.TerrainConfig = currentTerrain;
+
+						currentTerrain = new SCANterrainConfig(data.TerrainConfig);
 
 						updateUI();
 
@@ -678,8 +681,6 @@ namespace SCANsat.SCAN_UI
 					fillS(10);
 					if (GUILayout.Button("Cancel", GUILayout.Width(60)))
 					{
-						palette.CurrentPalette = currentTerrain.ColorPal;
-
 						InputLockManager.RemoveControlLock(lockID);
 						spaceCenterLock = false;
 						trackingStationLock = false;
@@ -783,17 +784,27 @@ namespace SCANsat.SCAN_UI
 			growE();
 				if (GUILayout.Button("Save Values", GUILayout.Width(100)))
 				{
+					updateCurrentResource();
+					SCANUtil.SCANdebugLog("Saving Resource Config");
 					SCANresourceGlobal resourceToUpdate = SCANcontroller.getResourceNode(currentResource.Name);
 					if (resourceToUpdate != null)
+					{
+						currentResource.logValues("New");
+						resourceToUpdate.logValues("Old");
 						resourceToUpdate = currentResource;
+						resourceToUpdate.logValues("Updated");
 
-					resourceColorPicker.updateOldSwatches();
+						currentResource = new SCANresourceGlobal(resourceToUpdate);
+					}
+
+					updateUI();
 				}
 
 				fillS(6);
 
 				if (GUILayout.Button("Save All Values", GUILayout.Width(120)))
 				{
+					updateCurrentResource();
 					foreach (SCANresourceBody r in currentResource.BodyConfigs.Values)
 					{
 						r.MinValue = resourceMinSlider.CurrentValue;
@@ -802,9 +813,12 @@ namespace SCANsat.SCAN_UI
 
 					SCANresourceGlobal resourceToUpdate = SCANcontroller.getResourceNode(currentResource.Name);
 					if (resourceToUpdate != null)
+					{
 						resourceToUpdate = currentResource;
+						currentResource = new SCANresourceGlobal(resourceToUpdate);
+					}
 
-					resourceColorPicker.updateOldSwatches();
+					updateUI();
 				}
 			stopE();
 			fillS(8);
@@ -869,7 +883,7 @@ namespace SCANsat.SCAN_UI
 				}
 				else if (resourceBox && windowMode == 3)
 				{
-					ddRect = new Rect(WindowRect.width - 320, 135, 160, 140);
+					ddRect = new Rect(WindowRect.width - 320, 115, 160, 140);
 					GUI.Box(ddRect, "", SCANskins.SCAN_dropDownBox);
 					for (int i = 0; i < loadedResources.Count; i ++)
 					{
@@ -882,6 +896,8 @@ namespace SCANsat.SCAN_UI
 
 							fineControlMode = oldFineControl = false;
 
+							updateUI();
+
 							dropDown = false;
 							resourceBox = false;
 						}
@@ -893,6 +909,23 @@ namespace SCANsat.SCAN_UI
 			}
 		}
 
+		private void updateCurrentResource()
+		{
+			currentResource.MinColor = resourceColorPicker.ColorLow;
+			currentResource.MaxColor = resourceColorPicker.ColorHigh;
+			currentResource.Transparency = resourceTransSlider.CurrentValue;
+			currentResource.CurrentBody.MinValue = resourceMinSlider.CurrentValue;
+			currentResource.CurrentBody.MaxValue = resourceMaxSlider.CurrentValue;
+		}
+
+		private void updateCurrentTerrain()
+		{
+			currentTerrain.MinTerrain = minTerrainSlider.CurrentValue;
+			currentTerrain.MaxTerrain = maxTerrainSlider.CurrentValue;
+			if (clampState)
+				currentTerrain.ClampTerrain = clampTerrainSlider.CurrentValue;
+		}
+
 		private void updateUI()
 		{
 			if (windowMode == 0)
@@ -901,16 +934,18 @@ namespace SCANsat.SCAN_UI
 				maxTerrainSlider.CurrentValue = currentTerrain.MaxTerrain;
 				clampTerrainSlider.CurrentValue = currentTerrain.ClampTerrain ?? currentTerrain.MinTerrain + 10;
 				paletteSizeSlider.CurrentValue = currentTerrain.PalSize;
-				oldReverseState = reversePalette = currentTerrain.PalRev;
-				oldDiscreteState = discretePalette = currentTerrain.PalDis;
+				oldReverseState = currentTerrain.PalRev;
+				oldDiscreteState = currentTerrain.PalDis;
 				oldClampState = clampState = currentTerrain.ClampTerrain != null;
-				dataPalette = palette.CurrentPalette = currentTerrain.ColorPal;
-				palette.CurrentPalettes = palette.setCurrentPalettesType(dataPalette.kind);
-				palette.CurrentPalette = palette.CurrentPalettes.availablePalettes[0];
+				palette.CurrentPalettes = palette.setCurrentPalettesType(currentTerrain.ColorPal.kind);
 				minTerrainSlider.valueChanged();
+				maxTerrainSlider.valueChanged();
+				clampTerrainSlider.valueChanged();
+				paletteSizeSlider.valueChanged();
+				paletteIndex = currentTerrain.ColorPal.index;
 
 				regenPaletteSets();
-				setSizeSlider(dataPalette.kind);
+				setSizeSlider(currentTerrain.ColorPal.kind);
 				setTerrainSliders();
 				drawCurrentLegend();
 			}
@@ -918,7 +953,7 @@ namespace SCANsat.SCAN_UI
 			{
 				resourceMinSlider.CurrentValue = currentResource.CurrentBody.MinValue;
 				resourceMaxSlider.CurrentValue = currentResource.CurrentBody.MaxValue;
-				resourceTransSlider.CurrentValue = currentResource.Transparency * 100f;
+				resourceTransSlider.CurrentValue = currentResource.Transparency;
 
 				resourceColorPicker = new SCANuiColorPicker(currentResource.MinColor, currentResource.MaxColor, resourceColorPicker.LowColorChange);
 
@@ -940,13 +975,13 @@ namespace SCANsat.SCAN_UI
 		private void drawPreviewLegend()
 		{
 			float? clamp = null;
-			Color32[] c = palette.CurrentPalette.colors;
+			Color32[] c = currentTerrain.ColorPal.colors;
 			if (clampState)
 				clamp = (float?)clampTerrainSlider.CurrentValue;
-			if (reversePalette)
-				c = palette.CurrentPalette.colorsReverse;
+			if (currentTerrain.PalRev)
+				c = currentTerrain.ColorPal.colorsReverse;
 			previewLegend = new SCANmapLegend();
-			previewLegend.Legend = previewLegend.getLegend(maxTerrainSlider.CurrentValue, minTerrainSlider.CurrentValue, clamp, discretePalette, c);
+			previewLegend.Legend = previewLegend.getLegend(maxTerrainSlider.CurrentValue, minTerrainSlider.CurrentValue, clamp, currentTerrain.PalDis, c);
 		}
 
 		//Resets the palettes whenever the size slider is adjusted
