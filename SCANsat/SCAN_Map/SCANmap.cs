@@ -371,6 +371,7 @@ namespace SCANsat.SCAN_Map
 				resource = SCANcontroller.getResourceNode(SCANcontroller.controller.resourceSelection);
 				if (resource == null)
 					resource = SCANcontroller.GetFirstResource;
+				resource.CurrentBodyConfig(body.name);
 			}
 			resetMap();
 		}
@@ -392,6 +393,7 @@ namespace SCANsat.SCAN_Map
 					resource = SCANcontroller.getResourceNode(SCANcontroller.controller.resourceSelection);
 					if (resource == null)
 						resource = SCANcontroller.GetFirstResource;
+					resource.CurrentBodyConfig(body.name);
 				}
 				if (SCANcontroller.controller.resourceOverlayType == 1)
 					SCANcontroller.controller.KethaneReset = !SCANcontroller.controller.KethaneReset;
@@ -762,7 +764,7 @@ namespace SCANsat.SCAN_Map
 			else if (amount == 0)
 				return palette.lerp(BaseColor, palette.grey, 0.4f);
 			else if (SCANcontroller.controller.resourceOverlayType == 0 && SCANmainMenuLoader.RegolithFound)
-				return palette.lerp(palette.lerp(resource.MinColor, resource.MaxColor, (float)amount / (resource.CurrentBody.MaxValue - resource.CurrentBody.MinValue)), BaseColor, resource.Transparency);
+				return palette.lerp(palette.lerp(resource.MinColor, resource.MaxColor, (float)amount / (resource.CurrentBody.MaxValue - resource.CurrentBody.MinValue)), BaseColor, resource.Transparency / 100f);
 			else if (SCANcontroller.controller.resourceOverlayType == 1 && SCANmainMenuLoader.kethaneLoaded)
 				return palette.lerp(palette.lerp(resource.MinColor, resource.MaxColor, (float)amount / resource.CurrentBody.MaxValue), BaseColor, 0.3f);
 
