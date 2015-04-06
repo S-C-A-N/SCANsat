@@ -1,7 +1,6 @@
 ﻿using System;
 using UnityEngine;
 
-
 namespace SCANsat.SCAN_Platform.Palettes
 {
 	public class _Palettes
@@ -15,9 +14,10 @@ namespace SCANsat.SCAN_Platform.Palettes
 		{
 			availablePalettes = p;
 			int j = 0;
-			foreach (Palette pa in availablePalettes)
+			//foreach (Palette pa in availablePalettes)
+			for (int d = 0; i < availablePalettes.Length; i++ )
 			{
-				pa.index = j;
+				availablePalettes[d].index = j;
 				j++;
 			}
 			paletteType = pK;
@@ -51,7 +51,7 @@ namespace SCANsat.SCAN_Platform.Palettes
 					t.SetPixels(pix);
 					t.Apply();
 					paletteSwatch[i] = t;
-					availablePalettes[i].swatch = t;
+					//availablePalettes[i].swatch = t;
 				}
 				return paletteSwatch;
 			}
