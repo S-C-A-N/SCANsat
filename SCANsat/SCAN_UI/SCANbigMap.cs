@@ -274,7 +274,7 @@ namespace SCANsat.SCAN_UI
 					}
 					fillS(40);
 				}
-				if (GUILayout.Button("Planetoid", SCANskins.SCAN_buttonFixed, GUILayout.MaxWidth(90)))
+				if (GUILayout.Button("Celestial Body", SCANskins.SCAN_buttonFixed, GUILayout.MaxWidth(110)))
 				{
 					planetoid_drop_down = !planetoid_drop_down;
 					drop_down_open = !drop_down_open;
