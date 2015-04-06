@@ -165,6 +165,16 @@ namespace SCANsat
 			return null;
 		}
 
+		public SCANdata getData(int index)
+		{
+			if (body_data.Count >= index)
+				return body_data.ElementAt(index).Value;
+			else
+				SCANUtil.SCANdebugLog("SCANdata dictionary index out of range; something went wrong here...");
+
+			return null;
+		}
+
 		public List<SCANdata> GetAllData
 		{
 			get { return body_data.Values.ToList(); }
