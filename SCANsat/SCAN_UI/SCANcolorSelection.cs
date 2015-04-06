@@ -137,9 +137,9 @@ namespace SCANsat.SCAN_UI
 
 					resourceColorPicker = new SCANuiColorPicker(currentResource.MinColor, currentResource.MaxColor, true);
 				}
-
-				bodyIndex = data.Body.flightGlobalsIndex;
 			}
+
+			bodyIndex = data.Body.flightGlobalsIndex;
 
 			if (windowMode > 3 || (windowMode > 2 && !SCANconfigLoader.GlobalResource))
 				windowMode = 0;
@@ -286,8 +286,13 @@ namespace SCANsat.SCAN_UI
 			}
 
 			//This updates all of the fields whenever the palette selection is changed
-			if (windowMode == 0 && (currentLegend == null))// || currentTerrain.ColorPal.hash != data.TerrainConfig.ColorPal.hash))
+			if (windowMode == 0 && (currentLegend == null || bodyIndex != data.Body.flightGlobalsIndex))// || currentTerrain.ColorPal.hash != data.TerrainConfig.ColorPal.hash))
 			{
+				currentTerrain = new SCANterrainConfig(data.TerrainConfig);
+
+				SCANUtil.SCANdebugLog("Trigger Body Change");
+				bodyIndex = data.Body.flightGlobalsIndex;
+
 				currentTerrain = new SCANterrainConfig(data.TerrainConfig);
 
 				updateUI();
@@ -499,6 +504,12 @@ namespace SCANsat.SCAN_UI
 				if (GUILayout.Button("Altimetry"))
 				{
 					windowMode = 0;
+
+					currentTerrain = new SCANterrainConfig(data.TerrainConfig);
+
+					bodyIndex = data.Body.flightGlobalsIndex;
+
+					updateUI();
 				}
 				if (GUILayout.Button("Slope"))
 				{
