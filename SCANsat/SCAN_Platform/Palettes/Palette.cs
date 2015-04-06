@@ -6,21 +6,22 @@ using UnityEngine;
 
 namespace SCANsat.SCAN_Platform.Palettes
 {
-	[Serializable]
-	public class Palette
+	//[Serializable]
+	public struct Palette
 	{
 		public string name;
 		public Kind kind;
 		public int size;
-		public Texture2D swatch;
+		//public Texture2D swatch;
 		public int index;
+		public string hash;
 
-		public Swatches Swatches { get; private set; }
+		//public Swatches Swatches { get; private set; }
 
 		public Color32[] colors;
 		public Color32[] colorsReverse;
 
-		public List<Color> colors4;
+		//public List<Color> colors4;
 		//public List<uint32> _hexCodes = new List<uint32>();
 
 		public enum Kind {
@@ -55,33 +56,34 @@ namespace SCANsat.SCAN_Platform.Palettes
 		//public List<Color> colors;
 		//public List<uint32> _hexCodes = new List<uint32>();
 
-		public Palette () {
-			this.kind 	= Kind.Unknown;
-			this.blind	= Is.Unknown;
-			this.print	= Is.Unknown;
-			this.xerox	= Is.Unknown;
-			this.panel	= Is.Unknown;
-		}
+		//public Palette () {
+		//	this.kind 	= Kind.Unknown;
+		//	this.blind	= Is.Unknown;
+		//	this.print	= Is.Unknown;
+		//	this.xerox	= Is.Unknown;
+		//	this.panel	= Is.Unknown;
+		//	this.name	= "";
+		//}
 
-		public Palette(string name) : this(name,null) {}
-		public Palette(string name, IEnumerable<Swatch> cs) {
-			this.name = name;
-			this.Swatches = new Swatches();
+		//public Palette(string name) : this(name,null) {}
+		//public Palette(string name, IEnumerable<Swatch> cs) {
+		//	this.name = name;
+		//	this.Swatches = new Swatches();
 
-			if (colors != null)	this.Swatches.AddRange(cs);
-		}
-		public Palette(Color32[] cs, Kind k, Is blindSafe, Is printSafe, Is xeroxSafe, Is panelSafe) {
-			this.colors = cs;
-			this.colorsReverse = new Color32[cs.Length];
-			this.colors.CopyTo(this.colorsReverse, 0);
-			Array.Reverse(this.colorsReverse);
-			this.kind = k;
-			this.blind = blindSafe;
-			this.print = printSafe;
-			this.xerox = xeroxSafe;
-			this.panel = panelSafe;
-			this.size = cs.Length;
-		}
+		//	if (colors != null)	this.Swatches.AddRange(cs);
+		//}
+		//public Palette(Color32[] cs, Kind k, Is blindSafe, Is printSafe, Is xeroxSafe, Is panelSafe) {
+		//	this.colors = cs;
+		//	this.colorsReverse = new Color32[cs.Length];
+		//	this.colors.CopyTo(this.colorsReverse, 0);
+		//	Array.Reverse(this.colorsReverse);
+		//	this.kind = k;
+		//	this.blind = blindSafe;
+		//	this.print = printSafe;
+		//	this.xerox = xeroxSafe;
+		//	this.panel = panelSafe;
+		//	this.size = cs.Length;
+		//}
 		public Palette(Color32[] cs, string name, Kind k, Is blindSafe, Is printSafe, Is xeroxSafe, Is panelSafe) {
 			this.colors = cs;
 			this.colorsReverse = new Color32[cs.Length];
@@ -94,6 +96,8 @@ namespace SCANsat.SCAN_Platform.Palettes
 			this.xerox = xeroxSafe;
 			this.panel = panelSafe;
 			this.size = cs.Length;
+			this.index = 0;
+			this.hash = name + size;
 		}
 	}
 
