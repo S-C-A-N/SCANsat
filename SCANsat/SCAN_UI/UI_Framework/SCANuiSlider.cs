@@ -31,11 +31,11 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			}
 		}
 
-		public float CurrentValue
-		{
-			get { return currentValue; }
-			internal set { currentValue = value; }
-		}
+		//public float CurrentValue
+		//{
+		//	get { return currentValue; }
+		//	internal set { currentValue = value; }
+		//}
 
 		public SCANuiSlider(float Min, float Max, float Value, string Title, string Units, int Prec)
 		{
@@ -48,22 +48,26 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			precision = Prec;
 		}
 
-		public void drawSlider(bool under)
+		public float drawSlider(bool under, ref float value)
 		{
-			GUILayout.Label(title + currentValue + units, SCANskins.SCAN_whiteReadoutLabel);
+			GUILayout.Label(title + value + units, SCANskins.SCAN_whiteReadoutLabel);
 
 			Rect r = GUILayoutUtility.GetLastRect();
 			r.x += 110;
 			r.width = 130;
 
 			if (under)
-				GUI.HorizontalSlider(r, currentValue, minValue, maxValue).Mathf_Round(precision);
+				GUI.HorizontalSlider(r, value, minValue, maxValue).Mathf_Round(precision);
 			else
-				currentValue = GUI.HorizontalSlider(r, currentValue, minValue, maxValue).Mathf_Round(precision);
+				value = GUI.HorizontalSlider(r, value, minValue, maxValue).Mathf_Round(precision);
 
 			int i = precision <= 0 ? 0 : precision;
 			string labelPrecision = "F" + i.ToString();
 			SCANuiUtil.drawSliderLabel(r, minValue.ToString(labelPrecision) + units, maxValue.ToString(labelPrecision) + units);
+
+			currentValue = value;
+
+			return value;
 		}
 
 		public bool valueChanged()
