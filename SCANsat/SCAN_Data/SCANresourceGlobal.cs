@@ -173,9 +173,29 @@ namespace SCANsat.SCAN_Data
 			get { return source; }
 		}
 
-		public Dictionary<string, SCANresourceBody> BodyConfigs
+		public int getBodyCount
 		{
-			get { return masterBodyConfigs; }
+			get { return masterBodyConfigs.Count; }
+		}
+
+		public SCANresourceBody getBodyConfig (string body)
+		{
+			if (masterBodyConfigs.ContainsKey(body))
+				return masterBodyConfigs[body];
+			else
+				SCANUtil.SCANlog("SCANsat resource celestial body config is empty; something probably went wrong here");
+
+			return null;
+		}
+
+		public SCANresourceBody getBodyConfig (int i)
+		{
+			if (masterBodyConfigs.Count >= i)
+				return masterBodyConfigs.ElementAt(i).Value;
+			else
+				SCANUtil.SCANlog("SCANsat resource celestial body config is empty; something probably went wrong here");
+
+			return null;
 		}
 
 		public void CurrentBodyConfig(string body)
