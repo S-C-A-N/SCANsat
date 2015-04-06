@@ -756,18 +756,19 @@ namespace SCANsat.SCAN_UI
 				int j = 0;
 				ddRect = new Rect(WindowRect.width - 130, 45, 100, 160);
 				GUI.Box(ddRect, "", SCANskins.SCAN_dropDownBox);
-				for (int i = 0; i < FlightGlobals.Bodies.Count; i++)
+				for (int i = 0; i < SCANcontroller.controller.GetDataCount; i++)
 				{
 					scrollP = GUI.BeginScrollView(ddRect, scrollP, new Rect(0, 0, 80, (20 * SCANcontroller.controller.GetDataCount) + 1));
 
-					SCANdata dropDownData = SCANUtil.getData(FlightGlobals.Bodies[i]);
+					SCANdata dropDownData = SCANcontroller.controller.getData(i);
 					if (dropDownData != null)
 					{
 						Rect r = new Rect(2, 20 * j, 76, 20);
-						if (GUI.Button(r, FlightGlobals.Bodies[i].name, SCANskins.SCAN_dropDownButton))
+						if (GUI.Button(r, dropDownData.Body.name, SCANskins.SCAN_dropDownButton))
 						{
 							data = dropDownData;
-							bigmap.setBody(data.Body);
+							b = data.Body;
+							bigmap.setBody(b);
 							drop_down_open = false;
 						}
 						j++;
