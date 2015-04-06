@@ -224,6 +224,21 @@ namespace SCANsat
 			return null;
 		}
 
+		public static void updateTerrainConfig (SCANterrainConfig t)
+		{
+			SCANterrainConfig update = getTerrainNode(t.Name);
+			if (update != null)
+			{
+				update.MinTerrain = t.MinTerrain;
+				update.MaxTerrain = t.MaxTerrain;
+				update.ClampTerrain = t.ClampTerrain;
+				update.PalSize = t.PalSize;
+				update.PalRev = t.PalRev;
+				update.PalDis = t.PalDis;
+				update.ColorPal = t.ColorPal;
+			}
+		}
+
 		public static void addToTerrainConfigData (string name, SCANterrainConfig data)
 		{
 			if (!masterTerrainNodes.ContainsKey(name))
@@ -288,7 +303,43 @@ namespace SCANsat
 				return null;
 			}
 		}
-		
+
+		public static void updateSCANresource (SCANresourceGlobal r, bool all)
+		{
+			SCANresourceGlobal update = getResourceNode(r.Name);
+			if (update != null)
+			{
+				update.MinColor = r.MinColor;
+				update.MaxColor = r.MaxColor;
+				update.Transparency = r.Transparency;
+				if (all)
+				{
+					for (int i = 0; i < update.getBodyCount; i++)
+					{
+						SCANresourceBody b = update.getBodyConfig(i);
+						if (b != null)
+						{
+							SCANresourceBody bNew = r.getBodyConfig(b.BodyName);
+							if (bNew != null)
+							{
+								b.MinValue = bNew.MinValue;
+								b.MaxValue = bNew.MaxValue;
+							}
+						}
+					}
+				}
+				else
+				{
+					SCANresourceBody b = update.getBodyConfig(r.CurrentBody.BodyName);
+					if (b != null)
+					{
+						b.MinValue = r.CurrentBody.MinValue;
+						b.MaxValue = r.CurrentBody.MaxValue;
+					}
+				}
+			}
+		}
+
 		public static void addToResourceData (string name, SCANresourceGlobal res)
 		{
 			if (!masterResourceNodes.ContainsKey(name))
@@ -481,7 +532,7 @@ namespace SCANsat
 							if (node_body.HasValue("PaletteName"))
 								paletteName = node_body.GetValue("PaletteName");
 							dataPalette = SCANUtil.paletteLoader(paletteName, pSize);
-							if (dataPalette == PaletteLoader.defaultPalette)
+							if (dataPalette.hash == PaletteLoader.defaultPalette.hash)
 							{
 								paletteName = "Default";
 								pSize = 7;
@@ -672,10 +723,14 @@ namespace SCANsat
 		private string saveResources(SCANresourceGlobal resource)
 		{
 			List<string> sL = new List<string>();
-			foreach (SCANresourceBody bodyRes in resource.BodyConfigs.Values)
+			for (int j = 0; j < resource.getBodyCount; j++)
 			{
-				string a = string.Format("{0}|{1:F3}|{2:F3}", bodyRes.Body.flightGlobalsIndex, bodyRes.MinValue, bodyRes.MaxValue);
-				sL.Add(a);
+				SCANresourceBody bodyRes = resource.getBodyConfig(j);
+				if (bodyRes != null)
+				{
+					string a = string.Format("{0}|{1:F3}|{2:F3}", bodyRes.Body.flightGlobalsIndex, bodyRes.MinValue, bodyRes.MaxValue);
+					sL.Add(a);
+				}
 			}
 
 			return string.Join(",", sL.ToArray());
@@ -745,9 +800,9 @@ namespace SCANsat
 						CelestialBody b;
 						if ((b = FlightGlobals.Bodies.FirstOrDefault(a => a.flightGlobalsIndex == j)) != null)
 						{
-							if (r.BodyConfigs.ContainsKey(b.name))
+							SCANresourceBody res = r.getBodyConfig(b.name);
+							if (res != null)
 							{
-								SCANresourceBody res = r.BodyConfigs[b.name];
 								if (!float.TryParse(sB[1], out min))
 									min = res.DefaultMinValue;
 								if (!float.TryParse(sB[2], out max))
