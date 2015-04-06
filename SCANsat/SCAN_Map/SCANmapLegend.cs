@@ -35,7 +35,7 @@ namespace SCANsat.SCAN_Map
 
 		internal Texture2D getLegend(float min, float max, int scheme, SCANdata data)
 		{
-			if (legend != null && legendMin == min && legendMax == max && legendScheme == scheme && data.TerrainConfig.ColorPal== dataPalette)
+			if (legend != null && legendMin == min && legendMax == max && legendScheme == scheme && data.TerrainConfig.ColorPal.hash == dataPalette.hash)
 				return legend;
 			legend = new Texture2D(256, 1, TextureFormat.RGB24, false);
 			legendMin = min;
