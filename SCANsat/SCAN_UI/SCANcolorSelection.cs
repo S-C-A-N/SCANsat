@@ -36,18 +36,22 @@ namespace SCANsat.SCAN_UI
 		private int windowMode = 0;
 
 		private SCANterrainConfig currentTerrain;
+		private float minT, maxT, clampT, pSize;
 
 		private SCANuiSlider minTerrainSlider, maxTerrainSlider, clampTerrainSlider, paletteSizeSlider, resourceMinSlider, resourceMaxSlider, resourceTransSlider, biomeTransSlider;
 
 		private SCANuiColorPicker slopeColorPicker, biomeColorPicker, resourceColorPicker;
+		private float bTrans, rTrans;
 
 		private bool stockBiomes = false;
 
+		private SCANresourceGlobal currentResource;
+		private float lowRCutoff, highRCutoff;
+
+		private List<SCANresourceGlobal> loadedResources;
+
 		private bool fineControlMode, oldFineControl;
 		private int bodyIndex;
-
-		private SCANresourceGlobal currentResource;
-		private List<SCANresourceGlobal> loadedResources;
 
 		private Vector2 scrollR;
 		private const string lockID = "colorLockID";
@@ -282,7 +286,7 @@ namespace SCANsat.SCAN_UI
 			}
 
 			//This updates all of the fields whenever the palette selection is changed
-			if (windowMode == 0 && (currentLegend == null || currentTerrain.ColorPal != data.TerrainConfig.ColorPal))
+			if (windowMode == 0 && (currentLegend == null))// || currentTerrain.ColorPal.hash != data.TerrainConfig.ColorPal.hash))
 			{
 				currentTerrain = new SCANterrainConfig(data.TerrainConfig);
 
@@ -422,8 +426,8 @@ namespace SCANsat.SCAN_UI
 
 					currentResource.CurrentBodyConfig(data.Body.name);
 
-					resourceMinSlider.CurrentValue = currentResource.CurrentBody.MinValue;
-					resourceMaxSlider.CurrentValue = currentResource.CurrentBody.MaxValue;
+					lowRCutoff = currentResource.CurrentBody.MinValue;
+					highRCutoff = currentResource.CurrentBody.MaxValue;
 
 					oldFineControl = fineControlMode = false;
 
@@ -435,29 +439,29 @@ namespace SCANsat.SCAN_UI
 					oldFineControl = fineControlMode;
 					if (fineControlMode)
 					{
-						if (resourceMinSlider.CurrentValue < 5f)
+						if (lowRCutoff < 5f)
 							resourceMinSlider.MinValue = 0f;
 						else
-							resourceMinSlider.MinValue = resourceMinSlider.CurrentValue - 5f;
+							resourceMinSlider.MinValue = lowRCutoff - 5;
 
-						if (resourceMinSlider.CurrentValue > 95f)
+						if (lowRCutoff > 95f)
 							resourceMinSlider.MaxValue = 100f;
-						else if (resourceMaxSlider.CurrentValue < resourceMinSlider.CurrentValue + 5f)
-							resourceMinSlider.MaxValue = resourceMaxSlider.CurrentValue - 0.1f;
+						else if (highRCutoff < lowRCutoff + 5f)
+							resourceMinSlider.MaxValue = highRCutoff - 0.1f;
 						else
-							resourceMinSlider.MaxValue = resourceMinSlider.CurrentValue + 5f;
+							resourceMinSlider.MaxValue = lowRCutoff + 5f;
 
-						if (resourceMaxSlider.CurrentValue < 5f)
+						if (highRCutoff < 5f)
 							resourceMaxSlider.MinValue = 0f;
-						else if (resourceMinSlider.CurrentValue > resourceMaxSlider.CurrentValue - 5f)
-							resourceMaxSlider.MinValue = resourceMinSlider.CurrentValue + 0.1f;
+						else if (lowRCutoff > highRCutoff - 5f)
+							resourceMaxSlider.MinValue = lowRCutoff + 0.1f;
 						else
-							resourceMaxSlider.MinValue = resourceMaxSlider.CurrentValue - 5f;
+							resourceMaxSlider.MinValue = highRCutoff - 5f;
 
-						if (resourceMaxSlider.CurrentValue > 95f)
+						if (highRCutoff > 95f)
 							resourceMaxSlider.MaxValue = 100f;
 						else
-							resourceMaxSlider.MaxValue = resourceMaxSlider.CurrentValue + 5f;
+							resourceMaxSlider.MaxValue = highRCutoff + 5f;
 					}
 					else
 						setResourceSliders();
@@ -567,6 +571,7 @@ namespace SCANsat.SCAN_UI
 							{
 								currentTerrain.ColorPal = palette.CurrentPalettes.availablePalettes[i];
 								paletteIndex = currentTerrain.ColorPal.index;
+								updateUI();
 								drawPreviewLegend();
 							}
 						}
@@ -587,12 +592,12 @@ namespace SCANsat.SCAN_UI
 
 				growE();
 					fillS(10);
-					minTerrainSlider.drawSlider(false);
+					currentTerrain.MinTerrain = minTerrainSlider.drawSlider(false, ref minT);
 				stopE();
 				fillS(8);
 				growE();
 					fillS(10);
-					maxTerrainSlider.drawSlider(false);
+					currentTerrain.MaxTerrain = maxTerrainSlider.drawSlider(false, ref maxT);
 				stopE();
 				fillS(6);
 				growE();
@@ -604,7 +609,7 @@ namespace SCANsat.SCAN_UI
 					{
 						growE();
 							fillS(10);
-							clampTerrainSlider.drawSlider(false);
+							currentTerrain.ClampTerrain = clampTerrainSlider.drawSlider(false, ref clampT);
 						stopE();
 					}
 				fillS(6);
@@ -613,7 +618,7 @@ namespace SCANsat.SCAN_UI
 				{
 					growE();
 						fillS(10);
-						paletteSizeSlider.drawSlider(false);
+						currentTerrain.PalSize = (int)paletteSizeSlider.drawSlider(false, ref pSize);
 					stopE();
 				}
 
@@ -651,7 +656,7 @@ namespace SCANsat.SCAN_UI
 		{
 			growS();
 				fillS(6);
-				if (GUILayout.Button("Default Settings", GUILayout.Width(135)))
+				if (GUILayout.Button("Default Values", GUILayout.Width(135)))
 				{
 					currentTerrain.MinTerrain = data.DefaultMinHeight;
 					currentTerrain.MaxTerrain = data.DefaultMaxHeight;
@@ -662,16 +667,15 @@ namespace SCANsat.SCAN_UI
 					currentTerrain.PalSize = data.DefaultColorPalette.size;
 					
 					updateUI();
+
+					if (bigMap != null)
+						bigMap.resetMap();
 				}
 				fillS(6);
 				growE();
-					if (GUILayout.Button("Apply", GUILayout.Width(60)))
+					if (GUILayout.Button("Apply Values", GUILayout.Width(60)))
 					{
-						updateCurrentTerrain();
-
-						data.TerrainConfig = currentTerrain;
-
-						currentTerrain = new SCANterrainConfig(data.TerrainConfig);
+						SCANcontroller.updateTerrainConfig(currentTerrain);
 
 						updateUI();
 
@@ -699,7 +703,7 @@ namespace SCANsat.SCAN_UI
 			fillS(8);
 			growE();
 				fillS(10);
-				biomeTransSlider.drawSlider(false);
+				biomeTransSlider.drawSlider(false, ref bTrans);
 			stopE();
 		}
 
@@ -724,24 +728,24 @@ namespace SCANsat.SCAN_UI
 			stopE();
 			growE();
 				fillS(10);
-				resourceMinSlider.drawSlider(dropDown);
+				currentResource.CurrentBody.MinValue = resourceMinSlider.drawSlider(dropDown, ref lowRCutoff);
 			stopE();
 			fillS(8);
 			growE();
 				fillS(10);
-				resourceMaxSlider.drawSlider(dropDown);
+				currentResource.CurrentBody.MaxValue = resourceMaxSlider.drawSlider(dropDown, ref highRCutoff);
 			stopE();
 			fillS(8);
 			growE();
 				fillS(10);
-				resourceTransSlider.drawSlider(dropDown);
+				currentResource.Transparency = resourceTransSlider.drawSlider(dropDown, ref rTrans);
 			stopE();
 		}
 
 		private void biomeConfirm(int id)
 		{
 			fillS(10);
-			if (GUILayout.Button("Default Settings", GUILayout.Width(135)))
+			if (GUILayout.Button("Default Values", GUILayout.Width(135)))
 			{
 				SCANcontroller.controller.lowBiomeColor = SCANcontroller.controller.defaultLowBiomeColor;
 				SCANcontroller.controller.highBiomeColor = SCANcontroller.controller.defaultHighBiomeColor;
@@ -754,18 +758,24 @@ namespace SCANsat.SCAN_UI
 
 				biomeColorPicker.updateOldSwatches();
 
-				biomeTransSlider.CurrentValue = SCANcontroller.controller.biomeTransparency;
+				bTrans = SCANcontroller.controller.biomeTransparency;
+
+				if (bigMap != null)
+					bigMap.resetMap();
 			}
 			fillS(6);
 			growE();
-			if (GUILayout.Button("Apply", GUILayout.Width(60)))
+			if (GUILayout.Button("Apply Values", GUILayout.Width(60)))
 			{
 				SCANcontroller.controller.lowBiomeColor = biomeColorPicker.ColorLow;
 				SCANcontroller.controller.highBiomeColor = biomeColorPicker.ColorHigh;
 				SCANcontroller.controller.useStockBiomes = stockBiomes;
-				SCANcontroller.controller.biomeTransparency = biomeTransSlider.CurrentValue;
+				SCANcontroller.controller.biomeTransparency = bTrans;
 
 				biomeColorPicker.updateOldSwatches();
+
+				if (bigMap != null)
+					bigMap.resetMap();
 			}
 			fillS(10);
 			if (GUILayout.Button("Cancel", GUILayout.Width(60)))
@@ -782,48 +792,47 @@ namespace SCANsat.SCAN_UI
 		{
 			fillS(10);
 			growE();
-				if (GUILayout.Button("Save Values", GUILayout.Width(100)))
-				{
-					updateCurrentResource();
-					SCANUtil.SCANdebugLog("Saving Resource Config");
-					SCANresourceGlobal resourceToUpdate = SCANcontroller.getResourceNode(currentResource.Name);
-					if (resourceToUpdate != null)
-					{
-						currentResource.logValues("New");
-						resourceToUpdate.logValues("Old");
-						resourceToUpdate = currentResource;
-						resourceToUpdate.logValues("Updated");
+			if (GUILayout.Button("Apply Values", GUILayout.Width(100)))
+			{
+				currentResource.MinColor = resourceColorPicker.ColorLow;
+				currentResource.MaxColor = resourceColorPicker.ColorHigh;
 
-						currentResource = new SCANresourceGlobal(resourceToUpdate);
-					}
+				SCANcontroller.updateSCANresource(currentResource, false);
 
-					updateUI();
-				}
+				updateUI();
+
+				if (bigMap != null)
+					bigMap.resetMap();
+			}
 
 				fillS(6);
 
-				if (GUILayout.Button("Save All Values", GUILayout.Width(120)))
+				if (GUILayout.Button("Apply To All Planets", GUILayout.Width(120)))
 				{
-					updateCurrentResource();
-					foreach (SCANresourceBody r in currentResource.BodyConfigs.Values)
+					for (int i = 0; i < currentResource.getBodyCount; i++)
 					{
-						r.MinValue = resourceMinSlider.CurrentValue;
-						r.MaxValue = resourceMaxSlider.CurrentValue;
+						SCANresourceBody r = currentResource.getBodyConfig(i);
+						if (r != null)
+						{
+							r.MinValue = lowRCutoff;
+							r.MaxValue = highRCutoff;
+						}
 					}
 
-					SCANresourceGlobal resourceToUpdate = SCANcontroller.getResourceNode(currentResource.Name);
-					if (resourceToUpdate != null)
-					{
-						resourceToUpdate = currentResource;
-						currentResource = new SCANresourceGlobal(resourceToUpdate);
-					}
+					currentResource.MinColor = resourceColorPicker.ColorLow;
+					currentResource.MaxColor = resourceColorPicker.ColorHigh;
+
+					SCANcontroller.updateSCANresource(currentResource, true);
 
 					updateUI();
+
+					if (bigMap != null)
+						bigMap.resetMap();
 				}
 			stopE();
 			fillS(8);
 			growE();
-				if (GUILayout.Button("Default Settings", GUILayout.Width(110)))
+				if (GUILayout.Button("Default Values", GUILayout.Width(110)))
 				{
 					currentResource.CurrentBody.MinValue = currentResource.CurrentBody.DefaultMinValue;
 					currentResource.CurrentBody.MaxValue = currentResource.CurrentBody.DefaultMaxValue;
@@ -831,32 +840,38 @@ namespace SCANsat.SCAN_UI
 					currentResource.MaxColor = currentResource.ResourceType.ColorFull;
 					currentResource.Transparency = 20f;
 
-					SCANresourceGlobal resourceToUpdate = SCANcontroller.getResourceNode(currentResource.Name);
-					if (resourceToUpdate != null)
-						resourceToUpdate = currentResource;
+					SCANcontroller.updateSCANresource(currentResource, false);
 
 					updateUI();
+
+					if (bigMap != null)
+						bigMap.resetMap();
 				}
 
 				fillS(6);
 
-				if (GUILayout.Button("Revert All To Default", GUILayout.Width(140)))
+				if (GUILayout.Button("Default Values For All Planets", GUILayout.Width(140)))
 				{
 					currentResource.MinColor = currentResource.ResourceType.ColorEmpty;
 					currentResource.MaxColor = currentResource.ResourceType.ColorFull;
 					currentResource.Transparency = 20f;
 
-					foreach (SCANresourceBody r in currentResource.BodyConfigs.Values)
+					for (int i = 0; i < currentResource.getBodyCount; i++)
 					{
-						r.MinValue = r.DefaultMinValue;
-						r.MaxValue = r.DefaultMaxValue;
+						SCANresourceBody r = currentResource.getBodyConfig(i);
+						if (r != null)
+						{
+							r.MinValue = r.DefaultMinValue;
+							r.MaxValue = r.DefaultMaxValue;
+						}
 					}
 
-					SCANresourceGlobal resourceToUpdate = SCANcontroller.getResourceNode(currentResource.Name);
-					if (resourceToUpdate != null)
-						resourceToUpdate = currentResource;
+					SCANcontroller.updateSCANresource(currentResource, true);
 
 					updateUI();
+
+					if (bigMap != null)
+						bigMap.resetMap();
 				}
 			stopE();
 		}
@@ -876,7 +891,7 @@ namespace SCANsat.SCAN_UI
 						if (GUI.Button(r, Palette.kindNames[i], SCANskins.SCAN_dropDownButton))
 						{
 							paletteBox = false;
-							palette.CurrentPalettes = palette.setCurrentPalettesType((Palette.Kind)i);
+							palette.CurrentPalettes = palette.setCurrentPalettesType((Palette.Kind)i, (int)pSize);
 							setSizeSlider((Palette.Kind)i);
 						}
 					}
@@ -909,35 +924,18 @@ namespace SCANsat.SCAN_UI
 			}
 		}
 
-		private void updateCurrentResource()
-		{
-			currentResource.MinColor = resourceColorPicker.ColorLow;
-			currentResource.MaxColor = resourceColorPicker.ColorHigh;
-			currentResource.Transparency = resourceTransSlider.CurrentValue;
-			currentResource.CurrentBody.MinValue = resourceMinSlider.CurrentValue;
-			currentResource.CurrentBody.MaxValue = resourceMaxSlider.CurrentValue;
-		}
-
-		private void updateCurrentTerrain()
-		{
-			currentTerrain.MinTerrain = minTerrainSlider.CurrentValue;
-			currentTerrain.MaxTerrain = maxTerrainSlider.CurrentValue;
-			if (clampState)
-				currentTerrain.ClampTerrain = clampTerrainSlider.CurrentValue;
-		}
-
 		private void updateUI()
 		{
 			if (windowMode == 0)
 			{
-				minTerrainSlider.CurrentValue = currentTerrain.MinTerrain;
-				maxTerrainSlider.CurrentValue = currentTerrain.MaxTerrain;
-				clampTerrainSlider.CurrentValue = currentTerrain.ClampTerrain ?? currentTerrain.MinTerrain + 10;
-				paletteSizeSlider.CurrentValue = currentTerrain.PalSize;
+				minT = currentTerrain.MinTerrain;
+				maxT = currentTerrain.MaxTerrain;
+				clampT = currentTerrain.ClampTerrain ?? currentTerrain.MinTerrain + 10f;
+				pSize = currentTerrain.PalSize;
 				oldReverseState = currentTerrain.PalRev;
 				oldDiscreteState = currentTerrain.PalDis;
 				oldClampState = clampState = currentTerrain.ClampTerrain != null;
-				palette.CurrentPalettes = palette.setCurrentPalettesType(currentTerrain.ColorPal.kind);
+				palette.CurrentPalettes = palette.setCurrentPalettesType(currentTerrain.ColorPal.kind, (int)pSize);
 				minTerrainSlider.valueChanged();
 				maxTerrainSlider.valueChanged();
 				clampTerrainSlider.valueChanged();
@@ -951,9 +949,9 @@ namespace SCANsat.SCAN_UI
 			}
 			else if (windowMode == 3)
 			{
-				resourceMinSlider.CurrentValue = currentResource.CurrentBody.MinValue;
-				resourceMaxSlider.CurrentValue = currentResource.CurrentBody.MaxValue;
-				resourceTransSlider.CurrentValue = currentResource.Transparency;
+				lowRCutoff = currentResource.CurrentBody.MinValue;
+				highRCutoff = currentResource.CurrentBody.MaxValue;
+				rTrans = currentResource.Transparency;
 
 				resourceColorPicker = new SCANuiColorPicker(currentResource.MinColor, currentResource.MaxColor, resourceColorPicker.LowColorChange);
 
@@ -977,21 +975,22 @@ namespace SCANsat.SCAN_UI
 			float? clamp = null;
 			Color32[] c = currentTerrain.ColorPal.colors;
 			if (clampState)
-				clamp = (float?)clampTerrainSlider.CurrentValue;
+				clamp = clampT;
 			if (currentTerrain.PalRev)
 				c = currentTerrain.ColorPal.colorsReverse;
 			previewLegend = new SCANmapLegend();
-			previewLegend.Legend = previewLegend.getLegend(maxTerrainSlider.CurrentValue, minTerrainSlider.CurrentValue, clamp, currentTerrain.PalDis, c);
+			previewLegend.Legend = previewLegend.getLegend(maxT, minT, clamp, currentTerrain.PalDis, c);
 		}
 
 		//Resets the palettes whenever the size slider is adjusted
 		private void regenPaletteSets()
 		{
-			palette.DivPaletteSet = palette.generatePaletteSet((int)paletteSizeSlider.CurrentValue, Palette.Kind.Diverging);
-			palette.QualPaletteSet = palette.generatePaletteSet((int)paletteSizeSlider.CurrentValue, Palette.Kind.Qualitative);
-			palette.SeqPaletteSet = palette.generatePaletteSet((int)paletteSizeSlider.CurrentValue, Palette.Kind.Sequential);
-			palette.FixedPaletteSet = palette.generatePaletteSet(0, Palette.Kind.Fixed);
-			palette.CurrentPalettes = palette.setCurrentPalettesType(palette.getPaletteType);
+			//palette.DivPaletteSet = palette.generatePaletteSet((int)paletteSizeSlider.CurrentValue, Palette.Kind.Diverging);
+			//palette.QualPaletteSet = palette.generatePaletteSet((int)paletteSizeSlider.CurrentValue, Palette.Kind.Qualitative);
+			//palette.SeqPaletteSet = palette.generatePaletteSet((int)paletteSizeSlider.CurrentValue, Palette.Kind.Sequential);
+			//palette.FixedPaletteSet = palette.generatePaletteSet(0, Palette.Kind.Fixed);
+			palette.CurrentPalettes = palette.setCurrentPalettesType(palette.CurrentPalettes.paletteType, (int)pSize/*(int)paletteSizeSlider.CurrentValue*/);
+				//palette.setCurrentPalettesType(palette.CurrentPalettes.paletteType);
 		}
 
 		//Change the max range on the palette size slider based on palette type
@@ -1022,8 +1021,8 @@ namespace SCANsat.SCAN_UI
 			}
 
 			paletteSizeSlider.MaxValue = max;
-			if (paletteSizeSlider.CurrentValue > paletteSizeSlider.MaxValue)
-				paletteSizeSlider.CurrentValue = paletteSizeSlider.MaxValue;
+			if (pSize > paletteSizeSlider.MaxValue)
+				pSize = paletteSizeSlider.MaxValue;
 			
 		}
 
@@ -1032,31 +1031,31 @@ namespace SCANsat.SCAN_UI
 		{
 			minTerrainSlider.MinValue = data.DefaultMinHeight - 10000f;
 			maxTerrainSlider.MaxValue = data.DefaultMaxHeight + 10000f;
-			minTerrainSlider.MaxValue = maxTerrainSlider.CurrentValue - 100f;
-			maxTerrainSlider.MinValue = minTerrainSlider.CurrentValue + 100f;
-			clampTerrainSlider.MinValue = minTerrainSlider.CurrentValue + 10f;
-			clampTerrainSlider.MaxValue = maxTerrainSlider.CurrentValue - 10f;
-			if (clampTerrainSlider.CurrentValue < minTerrainSlider.CurrentValue + 10f)
-				clampTerrainSlider.CurrentValue = minTerrainSlider.CurrentValue + 10f;
-			else if (clampTerrainSlider.CurrentValue > maxTerrainSlider.CurrentValue - 10f)
-				clampTerrainSlider.CurrentValue = maxTerrainSlider.CurrentValue - 10f;
+			minTerrainSlider.MaxValue = maxT - 100f;
+			maxTerrainSlider.MinValue = minT + 100f;
+			clampTerrainSlider.MinValue = minT + 10f;
+			clampTerrainSlider.MaxValue = maxT - 10f;
+			if (clampT < minT + 10f)
+				clampT = minT + 10f;
+			else if (clampT > maxT - 10f)
+				clampT = maxT - 10f;
 		}
 
 		private void setResourceSliders()
 		{
 			if (fineControlMode)
 			{
-				if (resourceMaxSlider.CurrentValue < resourceMinSlider.CurrentValue + 5f)
-					resourceMinSlider.MaxValue = resourceMaxSlider.CurrentValue - 0.1f;
+				if (highRCutoff < lowRCutoff + 5f)
+					resourceMinSlider.MaxValue = highRCutoff - 0.1f;
 
-				if (resourceMinSlider.CurrentValue > resourceMaxSlider.CurrentValue - 5f)
-					resourceMaxSlider.MinValue = resourceMinSlider.CurrentValue + 0.1f;
+				if (lowRCutoff > highRCutoff - 5f)
+					resourceMaxSlider.MinValue = lowRCutoff + 0.1f;
 			}
 			else
 			{
 				resourceMinSlider.MinValue = 0f;
-				resourceMinSlider.MaxValue = resourceMaxSlider.CurrentValue - 0.1f;
-				resourceMaxSlider.MinValue = resourceMinSlider.CurrentValue + 0.1f;
+				resourceMinSlider.MaxValue = highRCutoff - 0.1f;
+				resourceMaxSlider.MinValue = lowRCutoff + 0.1f;
 				resourceMaxSlider.MaxValue = 100f;
 			}
 		}
