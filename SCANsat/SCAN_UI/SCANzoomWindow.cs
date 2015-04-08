@@ -31,21 +31,24 @@ namespace SCANsat.SCAN_UI
 		private SCANdata data;
 		private Vessel v;
 		private bool showOrbit, showAnomaly;
-		private float resizeW, resizeH, dragX;
+		private Vector2 dragStart, minSize, MaxSize;
+		private float resizeW, resizeH;
 		internal static Rect defaultRect = new Rect(10f, 10f, 340f, 260f);
 
 		protected override void Awake()
 		{
 			SCANUtil.SCANdebugLog("Awake SCAN Zoom Window");
 			WindowRect = defaultRect;
-			WindowRect_Min = new Rect(10f, 10f, 340f, 260f);
+			minSize = new Vector2(320, 240);
+			MaxSize = new Vector2(600, 460);
 			WindowOptions = new GUILayoutOption[2] { GUILayout.Width(340), GUILayout.Height(260) };
 			WindowStyle = SCANskins.SCAN_window;
 			Visible = false;
 			DragEnabled = true;
-			ClampEnabled = false;
+			ClampEnabled = true;
 			ResizeEnabled = false;
 			TooltipMouseOffset = new Vector2d(-10, -25);
+			ClampToScreenOffset = new RectOffset(-200, -200, -160, -160);
 
 			SCAN_SkinsLibrary.SetCurrent("SCAN_Unity");
 			SCAN_SkinsLibrary.SetCurrentTooltip();
@@ -122,8 +125,6 @@ namespace SCANsat.SCAN_UI
 			spotmap.MapScale = 10;
 			spotmap.centerAround(lon, lat);
 			spotmap.resetMap(t, false);
-			TextureRect.width = 320;
-			TextureRect.height = 240;
 		}
 
 		protected override void DrawWindowPre(int id)
@@ -136,18 +137,31 @@ namespace SCANsat.SCAN_UI
 				if (Input.GetMouseButtonUp(0))
 				{
 					IsResizing = false;
-					if (resizeW < WindowRect_Min.width)
-						resizeW = WindowRect_Min.width;
-					if (resizeH < WindowRect_Min.height)
-						resizeH = WindowRect_Min.height;
+					if (resizeW < minSize.x)
+						resizeW = minSize.x;
+					else if (resizeW > MaxSize.x)
+						resizeW = MaxSize.x;
+					if (resizeH < minSize.y)
+						resizeH = minSize.y;
+					else if (resizeH > MaxSize.y)
+						resizeH = MaxSize.y;
+
 					spotmap.setSize((int)resizeW, (int)resizeH);
-					WindowRect_Last = new Rect(0, 0, WindowRect.width, WindowRect.height);
+					spotmap.resetMap(spotmap.MType, false);
 				}
 				else
 				{
+					float yy = Input.mousePosition.y;
 					float xx = Input.mousePosition.x;
-					resizeW += xx - dragX;
-					dragX = xx;
+					if (Input.mousePosition.y < 0)
+						yy = 0;
+					if (Input.mousePosition.x < 0)
+						xx = 0;
+
+					resizeH += dragStart.y - yy;
+					dragStart.y = yy;
+					resizeW += xx - dragStart.x;
+					dragStart.x = xx;
 				}
 				if (Event.current.isMouse)
 					Event.current.Use();
@@ -259,15 +273,21 @@ namespace SCANsat.SCAN_UI
 		{
 			MapTexture = spotmap.getPartialMap();
 
-			//Set minimum map size during re-sizing
-			dW = resizeW;
-			if (dW < WindowRect_Min.width)
-				dW = WindowRect_Min.width;
-			dH = dW / 2f;
-
 			//A blank label used as a template for the actual map texture
 			if (IsResizing)
 			{
+				//Set minimum map size during re-sizing
+				dW = resizeW;
+				if (dW < minSize.x)
+					dW = minSize.x;
+				else if (dW > MaxSize.x)
+					dW = MaxSize.x;
+				dH = resizeH;
+				if (dH < minSize.y)
+					dH = minSize.y;
+				else if (dH > MaxSize.y)
+					dH = MaxSize.y;
+
 				GUILayout.Label("", GUILayout.Width(dW), GUILayout.Height(dH));
 			}
 			else
@@ -340,8 +360,6 @@ namespace SCANsat.SCAN_UI
 								spotmap.MapScale = spotmap.MapScale * 1.25f;
 								spotmap.centerAround(mlon, mlat);
 								spotmap.resetMap(spotmap.MType, false);
-								TextureRect.width = 180;
-								TextureRect.height = 180;
 							}
 						}
 					}
@@ -360,7 +378,7 @@ namespace SCANsat.SCAN_UI
 						}
 					}
 					//Middle click re-center
-					else if (Event.current.button == 2)
+					else if (Event.current.button == 2 || (Event.current.button == 1 && GameSettings.MODIFIER_KEY.GetKey()))
 					{
 						if (in_map)
 						{
@@ -382,8 +400,8 @@ namespace SCANsat.SCAN_UI
 				&& resizer.Contains(Event.current.mousePosition))
 				{
 					IsResizing = true;
-					WindowRect_Last = WindowRect;
-					dragX = Input.mousePosition.x;
+					dragStart.x = Input.mousePosition.x;
+					dragStart.y = Input.mousePosition.y;
 					resizeW = TextureRect.width;
 					resizeH = TextureRect.height;
 					Event.current.Use();
