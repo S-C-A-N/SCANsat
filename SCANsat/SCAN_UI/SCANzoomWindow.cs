@@ -162,12 +162,7 @@ namespace SCANsat.SCAN_UI
 			growS();
 				topBar(id);
 				drawMap(id);
-				//growE();
-				//GUILayout.Space(30);
-				//growS();
-						mouseOver(id);
-					//stopS();
-				//stopE();
+				mouseOver(id);
 			stopS();
 
 			mapLabels(id);
@@ -396,7 +391,7 @@ namespace SCANsat.SCAN_UI
 			}
 
 			//Draw the actual mouse over info label below the map
-			SCANuiUtil.mouseOverInfo(mlon, mlat, spotmap, data, b, in_map);
+			SCANuiUtil.mouseOverInfoSimple(mlon, mlat, spotmap, data, b, in_map);
 		}
 
 		private void mapLabels(int id)
