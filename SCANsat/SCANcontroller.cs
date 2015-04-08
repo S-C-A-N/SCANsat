@@ -142,8 +142,8 @@ namespace SCANsat
 		internal SCAN_MBW mainMap;
 		internal SCAN_MBW settingsWindow;
 		internal SCAN_MBW instrumentsWindow;
-		internal SCAN_MBW BigMap;
-		internal SCAN_MBW kscMap;
+		internal SCANBigMap BigMap;
+		internal SCANkscMap kscMap;
 		internal SCAN_MBW colorManager;
 
 		/* App launcher object */
