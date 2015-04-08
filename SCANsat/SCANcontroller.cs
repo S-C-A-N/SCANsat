@@ -589,27 +589,6 @@ namespace SCANsat
 					}
 				}
 			}
-			try
-			{
-				if (HighLogic.LoadedScene == GameScenes.FLIGHT)
-				{
-					mainMap = gameObject.AddComponent<SCANmainMap>();
-					settingsWindow = gameObject.AddComponent<SCANsettingsUI>();
-					instrumentsWindow = gameObject.AddComponent<SCANinstrumentUI>();
-					colorManager = gameObject.AddComponent<SCANcolorSelection>();
-					BigMap = gameObject.AddComponent<SCANBigMap>();
-				}
-				else if (HighLogic.LoadedScene == GameScenes.SPACECENTER || HighLogic.LoadedScene == GameScenes.TRACKSTATION)
-				{
-					kscMap = gameObject.AddComponent<SCANkscMap>();
-					settingsWindow = gameObject.AddComponent<SCANsettingsUI>();
-					colorManager = gameObject.AddComponent<SCANcolorSelection>();
-				}
-			}
-			catch (Exception e)
-			{
-				SCANUtil.SCANlog("Something Went Wrong Initializing UI Objects: {0}", e);
-			}
 			loaded = true;
 		}
 
@@ -697,6 +676,28 @@ namespace SCANsat
 			}
 			if (useStockAppLauncher)
 				appLauncher = gameObject.AddComponent<SCANappLauncher>();
+
+			try
+			{
+				if (HighLogic.LoadedScene == GameScenes.FLIGHT)
+				{
+					mainMap = gameObject.AddComponent<SCANmainMap>();
+					settingsWindow = gameObject.AddComponent<SCANsettingsUI>();
+					instrumentsWindow = gameObject.AddComponent<SCANinstrumentUI>();
+					colorManager = gameObject.AddComponent<SCANcolorSelection>();
+					BigMap = gameObject.AddComponent<SCANBigMap>();
+				}
+				else if (HighLogic.LoadedScene == GameScenes.SPACECENTER || HighLogic.LoadedScene == GameScenes.TRACKSTATION)
+				{
+					kscMap = gameObject.AddComponent<SCANkscMap>();
+					settingsWindow = gameObject.AddComponent<SCANsettingsUI>();
+					colorManager = gameObject.AddComponent<SCANcolorSelection>();
+				}
+			}
+			catch (Exception e)
+			{
+				SCANUtil.SCANlog("Something Went Wrong Initializing UI Objects: {0}", e);
+			}
 		}
 
 		private void Update()
