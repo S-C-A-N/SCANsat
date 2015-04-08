@@ -57,12 +57,12 @@ namespace SCANsat.SCAN_UI
 			InputLockManager.RemoveControlLock(lockID);
 		}
 
-		internal override void OnDestroy()
+		protected override void OnDestroy()
 		{
 			InputLockManager.RemoveControlLock(lockID);
 		}
 
-		internal override void Start()
+		protected override void Start()
 		{
 			oldTooltips = TooltipsEnabled = SCANcontroller.controller.toolTips;
 			stockToolbar = SCANcontroller.controller.useStockAppLauncher;

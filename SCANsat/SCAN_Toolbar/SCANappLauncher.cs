@@ -23,12 +23,12 @@ namespace SCANsat.SCAN_Toolbar
 	{
 		private ApplicationLauncherButton SCANappLauncherButton = null;
 
-		internal override void Start()
+		protected override void Start()
 		{
 			setupToolbar();
 		}
 
-		internal override void OnDestroy()
+		protected override void OnDestroy()
 		{
 			GameEvents.onGUIApplicationLauncherUnreadifying.Remove(removeButton);
 

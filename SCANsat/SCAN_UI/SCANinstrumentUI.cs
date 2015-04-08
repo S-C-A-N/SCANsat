@@ -51,7 +51,7 @@ namespace SCANsat.SCAN_UI
 			SCAN_SkinsLibrary.SetCurrent("SCAN_Unity");
 		}
 
-		internal override void Start()
+		protected override void Start()
 		{
 			GameEvents.onVesselSOIChanged.Add(soiChange);
 			data = SCANUtil.getData(FlightGlobals.currentMainBody);
@@ -63,7 +63,7 @@ namespace SCANsat.SCAN_UI
 			planetConstants(FlightGlobals.currentMainBody);
 		}
 
-		internal override void OnDestroy()
+		protected override void OnDestroy()
 		{
 			GameEvents.onVesselSOIChanged.Remove(soiChange);
 		}

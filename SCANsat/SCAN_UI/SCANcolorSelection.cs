@@ -79,7 +79,7 @@ namespace SCANsat.SCAN_UI
 			InputLockManager.RemoveControlLock(lockID);
 		}
 
-		internal override void Start()
+		protected override void Start()
 		{
 			if (HighLogic.LoadedScene == GameScenes.SPACECENTER || HighLogic.LoadedScene == GameScenes.TRACKSTATION)
 			{
@@ -147,7 +147,7 @@ namespace SCANsat.SCAN_UI
 			setSizeSlider(currentTerrain.ColorPal.kind);
 		}
 
-		internal override void OnDestroy()
+		protected override void OnDestroy()
 		{
 			InputLockManager.RemoveControlLock(lockID);
 		}

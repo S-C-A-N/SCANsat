@@ -50,7 +50,7 @@ namespace SCANsat.SCAN_UI
 			SCAN_SkinsLibrary.SetCurrentTooltip();
 		}
 
-		internal override void Start()
+		protected override void Start()
 		{
 			Visible = SCANcontroller.controller.mainMapVisible;
 			v = FlightGlobals.ActiveVessel;
