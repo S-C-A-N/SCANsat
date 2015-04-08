@@ -197,6 +197,65 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			readableLabel(posInfo, false);
 		}
 
+		internal static void mouseOverInfoSimple(double lon, double lat, SCANmap mapObj, SCANdata data, CelestialBody body, bool b)
+		{
+			string info = "";
+			string posInfo = "";
+
+			if (b)
+			{
+				if (SCANUtil.isCovered(lon, lat, data, SCANtype.AltimetryHiRes))
+				{
+					info += SCANUtil.getElevation(body, lon, lat).ToString("N0") + "m ";
+				}
+				else if (SCANUtil.isCovered(lon, lat, data, SCANtype.AltimetryLoRes))
+				{
+					info += (((int)SCANUtil.getElevation(body, lon, lat) / 500) * 500).ToString() + "m ";
+				}
+				if (SCANUtil.isCovered(lon, lat, data, SCANtype.Biome))
+				{
+					info += SCANUtil.getBiomeName(body, lon, lat) + " ";
+				}
+
+				if (SCANcontroller.controller.map_ResourceOverlay && SCANconfigLoader.GlobalResource) //Adds selected resource amount to big map legend
+				{
+					if (SCANcontroller.controller.resourceOverlayType == 0 && SCANmainMenuLoader.RegolithFound)
+					{
+						if (SCANUtil.isCovered(lon, lat, data, mapObj.Resource.SType))
+						{
+							double amount = SCANUtil.RegolithOverlay(lat, lon, mapObj.Resource.Name, mapObj.Body.flightGlobalsIndex);
+							string label;
+							if (amount < 0)
+								label = "Unknown";
+							else
+							{
+								if (amount > 1)
+									amount = 1;
+								label = amount.ToString("P2");
+							}
+							info += palette.colored(mapObj.Resource.MaxColor, mapObj.Resource.Name + ": " + label);
+						}
+					}
+					else if (SCANcontroller.controller.resourceOverlayType == 1)
+					{
+						if (SCANUtil.isCovered(lon, lat, data, mapObj.Resource.SType))
+						{
+							double amount = data.KethaneValueMap[SCANUtil.icLON(lon), SCANUtil.icLAT(lat)];
+							if (amount < 0) amount = 0d;
+							info += palette.colored(mapObj.Resource.MaxColor, mapObj.Resource.Name + ": " + amount.ToString("N1"));
+						}
+					}
+				}
+
+				posInfo += string.Format("{0} ({1:F2}°,{2:F2}°)", toDMS(lat, lon), lat, lon);
+			}
+
+			//Draw the readout info labels
+			readableLabel(info, false);
+			SCAN_MBW.fillS(-10);
+			readableLabel(posInfo, false);
+		}
+
 		//Method to handle active scanner display
 		internal static string InfoText(Vessel v, SCANdata data, bool b)
 		{
