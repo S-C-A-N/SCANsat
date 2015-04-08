@@ -43,6 +43,8 @@ namespace SCANsat.SCAN_UI
 		private Rect pos_spotmap_x = new Rect(10f, 10f, 25f, 25f);
 		internal static Rect defaultRect = new Rect(250, 60, 780, 460);
 
+		internal SCANzoomWindow spotMap;
+
 		private List<SCANresourceGlobal> loadedResources = new List<SCANresourceGlobal>();
 
 		//Values used for the orbit overlay - Need to fix this
@@ -67,7 +69,7 @@ namespace SCANsat.SCAN_UI
 			SCAN_SkinsLibrary.SetCurrentTooltip();
 		}
 
-		internal override void Start()
+		protected override void Start()
 		{
 			//Initialize the map object
 			Visible = SCANcontroller.controller.bigMapVisible;
@@ -116,6 +118,16 @@ namespace SCANsat.SCAN_UI
 		public SCANdata Data
 		{
 			get { return data; }
+		}
+
+		public Vessel V
+		{
+			get { return v; }
+		}
+
+		public CelestialBody Body
+		{
+			get { return b; }
 		}
 
 		protected override void DrawWindowPre(int id)
@@ -674,7 +686,7 @@ namespace SCANsat.SCAN_UI
 
 				GUI.Box(pos_spotmap, spotmap.getPartialMap());
 				SCANuiUtil.drawOrbit(pos_spotmap, spotmap, v, b);
-				SCANuiUtil.drawMapLabels(pos_spotmap, v, spotmap, data, v.mainBody);
+				SCANuiUtil.drawMapLabels(pos_spotmap, v, spotmap, data, v.mainBody, false);
 				zoomCloseRect = new Rect(pos_spotmap.x + 180, pos_spotmap.y, 18, 18);
 
 				if (GUI.Button(zoomCloseRect, SCANcontroller.controller.closeBox, SCANskins.SCAN_closeButton))
@@ -687,7 +699,7 @@ namespace SCANsat.SCAN_UI
 		//Draw the map overlay labels
 		private void mapLabels(int id)
 		{
-			SCANuiUtil.drawMapLabels(TextureRect, v, bigmap, data, b);
+			SCANuiUtil.drawMapLabels(TextureRect, v, bigmap, data, b, SCANcontroller.controller.map_markers);
 		}
 
 		//Draw the drop down menus if any have been opened

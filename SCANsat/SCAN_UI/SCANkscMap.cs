@@ -60,7 +60,7 @@ namespace SCANsat.SCAN_UI
 			InputLockManager.RemoveControlLock(lockID);
 		}
 
-		internal override void Start()
+		protected override void Start()
 		{
 			Visible = SCANcontroller.controller.kscMapVisible;
 			if (b == null)
@@ -97,7 +97,7 @@ namespace SCANsat.SCAN_UI
 			TooltipsEnabled = SCANcontroller.controller.toolTips;
 		}
 
-		internal override void OnDestroy()
+		protected override void OnDestroy()
 		{
 			InputLockManager.RemoveControlLock(lockID);
 		}
@@ -111,6 +111,11 @@ namespace SCANsat.SCAN_UI
 		public static SCANmap BigMap
 		{
 			get { return bigmap; }
+		}
+
+		public CelestialBody Body
+		{
+			get { return b; }
 		}
 
 		protected override void DrawWindowPre(int id)
@@ -610,7 +615,7 @@ namespace SCANsat.SCAN_UI
 				spotmap.setBody(b);
 
 				GUI.Box(pos_spotmap, spotmap.getPartialMap());
-				SCANuiUtil.drawMapLabels(pos_spotmap, null, spotmap, data, b);
+				SCANuiUtil.drawMapLabels(pos_spotmap, null, spotmap, data, b, SCANcontroller.controller.map_markers);
 				zoomCloseRect = new Rect(pos_spotmap.x + 180, pos_spotmap.y, 18, 18);
 
 				if (GUI.Button(zoomCloseRect, SCANcontroller.controller.closeBox, SCANskins.SCAN_closeButton))
@@ -624,7 +629,7 @@ namespace SCANsat.SCAN_UI
 		//Draw the map overlay labels
 		private void mapLabels (int id)
 		{
-			SCANuiUtil.drawMapLabels(TextureRect, null, bigmap, data, b);
+			SCANuiUtil.drawMapLabels(TextureRect, null, bigmap, data, b, false);
 		}
 
 		//Draw the drop down menus if any have been opened
