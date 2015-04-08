@@ -51,6 +51,16 @@ namespace SCANsat.SCAN_Map
 			get { return lat_offset; }
 		}
 
+		public double CenteredLong
+		{
+			get { return centeredLong; }
+		}
+
+		public double CenteredLat
+		{
+			get { return CenteredLat; }
+		}
+
 		public int MapWidth
 		{
 			get { return mapwidth; }
@@ -101,6 +111,7 @@ namespace SCANsat.SCAN_Map
 		private float[,] big_heightmap;
 		private CelestialBody big_heightmap_body;
 		private bool cache;
+		private double centeredLong, centeredLat;
 
 		private void terrainHeightToArray(double lon, double lat, int ilon, int ilat)
 		{
@@ -309,6 +320,8 @@ namespace SCANsat.SCAN_Map
 		{
 			lon_offset = 180 + lon - (mapwidth / mapscale) / 2;
 			lat_offset = 90 + lat - (mapheight / mapscale) / 2;
+			centeredLong = lon;
+			centeredLat = lat;
 		}
 
 		internal double scaleLatitude(double lat)
