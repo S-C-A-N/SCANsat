@@ -262,7 +262,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 
 		/* UI: conversions to and from DMS */
 		/* FIXME: These do not belong here. And they are only used once! */
-		internal static string toDMS(double thing, string neg, string pos)
+		private static string toDMS(double thing, string neg, string pos)
 		{
 			string dms = "";
 			if (thing >= 0)
@@ -374,7 +374,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 		}
 
 		//Handles various map labels; probably should be split up into multiple methods
-		internal static void drawMapLabels(Rect maprect, Vessel vessel, SCANmap map, SCANdata data, CelestialBody body)
+		internal static void drawMapLabels(Rect maprect, Vessel vessel, SCANmap map, SCANdata data, CelestialBody body, bool showAnom)
 		{
 			//This section handles flag and asteroid labels
 			foreach (Vessel v in FlightGlobals.Vessels)
@@ -395,7 +395,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 				}
 			}
 			//This section handles anomaly labels
-			if (SCANcontroller.controller.map_markers)
+			if (showAnom)
 			{
 				foreach (SCANanomaly anomaly in data.Anomalies)
 				{
