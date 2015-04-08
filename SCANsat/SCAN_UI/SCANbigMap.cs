@@ -26,7 +26,7 @@ namespace SCANsat.SCAN_UI
 {
 	class SCANBigMap : SCAN_MBW
 	{
-		private static SCANmap bigmap, spotmap;
+		private static SCANmap bigmap;//, spotmap;
 		private static CelestialBody b;
 		private string mapTypeTitle = "";
 		private SCANdata data;
@@ -107,6 +107,12 @@ namespace SCANsat.SCAN_UI
 				loadedResources = SCANcontroller.setLoadedResourceList();
 			}
 			TooltipsEnabled = SCANcontroller.controller.toolTips;
+		}
+
+		protected override void OnDestroy()
+		{
+			if (spotMap != null)
+				Destroy(spotMap);
 		}
 
 		//Properties used to sync with color selection window
@@ -198,7 +204,7 @@ namespace SCANsat.SCAN_UI
 				stopE();
 			stopS();
 
-			zoomMap(id);			/* Draw the zoom map */
+			//zoomMap(id);			/* Draw the zoom map */
 			mapLabels(id);			/* Draw the vessel/anomaly icons on the map */
 			if (drop_down_open)
 				dropDown(id);		/* Draw the drop down menus if any are open */
@@ -557,25 +563,25 @@ namespace SCANsat.SCAN_UI
 				mlon = bigmap.unprojectLongitude(mlo, mla);
 				mlat = bigmap.unprojectLatitude(mlo, mla);
 
-				if (spotmap != null)
-				{
-					if (mx >= pos_spotmap.x - TextureRect.x && my >= pos_spotmap.y - TextureRect.y && mx <= pos_spotmap.x + pos_spotmap.width - TextureRect.x && my <= pos_spotmap.y + pos_spotmap.height - TextureRect.y)
-					{
-						in_spotmap = true;
-						mlon = spotmap.Lon_Offset + ((mx - pos_spotmap.x + TextureRect.x) / spotmap.MapScale) - 180;
-						mlat = spotmap.Lat_Offset + ((pos_spotmap.height - (my - pos_spotmap.y + TextureRect.y)) / spotmap.MapScale) - 90;
-						if (mlat > 90)
-						{
-							mlon = (mlon + 360) % 360 - 180;
-							mlat = 180 - mlat;
-						}
-						else if (mlat < -90)
-						{
-							mlon = (mlon + 360) % 360 - 180;
-							mlat = -180 - mlat;
-						}
-					}
-				}
+				//if (spotmap != null)
+				//{
+				//	if (mx >= pos_spotmap.x - TextureRect.x && my >= pos_spotmap.y - TextureRect.y && mx <= pos_spotmap.x + pos_spotmap.width - TextureRect.x && my <= pos_spotmap.y + pos_spotmap.height - TextureRect.y)
+				//	{
+				//		in_spotmap = true;
+				//		mlon = spotmap.Lon_Offset + ((mx - pos_spotmap.x + TextureRect.x) / spotmap.MapScale) - 180;
+				//		mlat = spotmap.Lat_Offset + ((pos_spotmap.height - (my - pos_spotmap.y + TextureRect.y)) / spotmap.MapScale) - 90;
+				//		if (mlat > 90)
+				//		{
+				//			mlon = (mlon + 360) % 360 - 180;
+				//			mlat = 180 - mlat;
+				//		}
+				//		else if (mlat < -90)
+				//		{
+				//			mlon = (mlon + 360) % 360 - 180;
+				//			mlat = -180 - mlat;
+				//		}
+				//	}
+				//}
 
 				if (mlon >= -180 && mlon <= 180 && mlat >= -90 && mlat <= 90)
 				{
@@ -590,60 +596,68 @@ namespace SCANsat.SCAN_UI
 				{
 					if (Event.current.button == 1)
 					{
-						if (in_map || in_spotmap)
+						if (in_map)
 						{
-							if (bigmap.isMapComplete())
+							if (spotMap == null)
 							{
-								if (spotmap == null)
-								{
-									spotmap = new SCANmap();
-									spotmap.setSize(180, 180);
-								}
-								if (in_spotmap)
-								{
-									spotmap.MapScale = spotmap.MapScale * 1.25f;
-								}
-								else
-								{
-									spotmap.MapScale = 10;
-								}
-								spotmap.centerAround(mlon, mlat);
-								spotmap.resetMap(bigmap.MType, false);
-								pos_spotmap.width = 180;
-								pos_spotmap.height = 180;
-								if (!in_spotmap)
-								{
-									pos_spotmap.x = Event.current.mousePosition.x - pos_spotmap.width / 2;
-									pos_spotmap.y = Event.current.mousePosition.y - pos_spotmap.height / 2;
-									if (mx > TextureRect.width / 2)
-										pos_spotmap.x -= pos_spotmap.width;
-									else
-										pos_spotmap.x += pos_spotmap.height;
-									pos_spotmap.x = Math.Max(TextureRect.x, Math.Min(TextureRect.x + TextureRect.width - pos_spotmap.width, pos_spotmap.x));
-									pos_spotmap.y = Math.Max(TextureRect.y, Math.Min(TextureRect.y + TextureRect.height - pos_spotmap.height, pos_spotmap.y));
-								}
+								spotMap = gameObject.AddComponent<SCANzoomWindow>();
 							}
+							spotMap.setMapCenter(mlat, mlon, bigmap.MType);
 						}
+						//if (in_map || in_spotmap)
+						//{
+						//	if (bigmap.isMapComplete())
+						//	{
+						//		if (spotmap == null)
+						//		{
+						//			spotmap = new SCANmap();
+						//			spotmap.setSize(180, 180);
+						//		}
+						//		if (in_spotmap)
+						//		{
+						//			spotmap.MapScale = spotmap.MapScale * 1.25f;
+						//		}
+						//		else
+						//		{
+						//			spotmap.MapScale = 10;
+						//		}
+						//		spotmap.centerAround(mlon, mlat);
+						//		spotmap.resetMap(bigmap.MType, false);
+						//		pos_spotmap.width = 180;
+						//		pos_spotmap.height = 180;
+						//		if (!in_spotmap)
+						//		{
+						//			pos_spotmap.x = Event.current.mousePosition.x - pos_spotmap.width / 2;
+						//			pos_spotmap.y = Event.current.mousePosition.y - pos_spotmap.height / 2;
+						//			if (mx > TextureRect.width / 2)
+						//				pos_spotmap.x -= pos_spotmap.width;
+						//			else
+						//				pos_spotmap.x += pos_spotmap.height;
+						//			pos_spotmap.x = Math.Max(TextureRect.x, Math.Min(TextureRect.x + TextureRect.width - pos_spotmap.width, pos_spotmap.x));
+						//			pos_spotmap.y = Math.Max(TextureRect.y, Math.Min(TextureRect.y + TextureRect.height - pos_spotmap.height, pos_spotmap.y));
+						//		}
+						//	}
+						//}
 					}
-					else if (Event.current.button == 0)
-					{
-						if (spotmap != null)
-						{
-							if (in_spotmap)
-							{
-								if (bigmap.isMapComplete())
-								{
-									//spotmap.mapscale = spotmap.mapscale / 1.25f;
-									//if (spotmap.mapscale < 10)
-									//	spotmap.mapscale = 10;
-									spotmap.centerAround(mlon, mlat);
-									spotmap.resetMap(spotmap.MType, false);
-									Event.current.Use();
-								}
-							}
+					//else if (Event.current.button == 0)
+					//{
+					//	if (spotmap != null)
+					//	{
+					//		if (in_spotmap)
+					//		{
+					//			if (bigmap.isMapComplete())
+					//			{
+					//				//spotmap.mapscale = spotmap.mapscale / 1.25f;
+					//				//if (spotmap.mapscale < 10)
+					//				//	spotmap.mapscale = 10;
+					//				spotmap.centerAround(mlon, mlat);
+					//				spotmap.resetMap(spotmap.MType, false);
+					//				Event.current.Use();
+					//			}
+					//		}
 
-						}
-					}
+					//	}
+					//}
 					Event.current.Use();
 				}
 				//Handle clicking inside the re-size button
@@ -678,23 +692,23 @@ namespace SCANsat.SCAN_UI
 		}
 
 		//Draw the zoom map and its overlays
-		private void zoomMap(int id)
-		{
-			if (spotmap != null)
-			{
-				spotmap.setBody(b);
+		//private void zoomMap(int id)
+		//{
+		//	if (spotmap != null)
+		//	{
+		//		spotmap.setBody(b);
 
-				GUI.Box(pos_spotmap, spotmap.getPartialMap());
-				SCANuiUtil.drawOrbit(pos_spotmap, spotmap, v, b);
-				SCANuiUtil.drawMapLabels(pos_spotmap, v, spotmap, data, v.mainBody, false);
-				zoomCloseRect = new Rect(pos_spotmap.x + 180, pos_spotmap.y, 18, 18);
+		//		GUI.Box(pos_spotmap, spotmap.getPartialMap());
+		//		SCANuiUtil.drawOrbit(pos_spotmap, spotmap, v, b);
+		//		SCANuiUtil.drawMapLabels(pos_spotmap, v, spotmap, data, v.mainBody, false);
+		//		zoomCloseRect = new Rect(pos_spotmap.x + 180, pos_spotmap.y, 18, 18);
 
-				if (GUI.Button(zoomCloseRect, SCANcontroller.controller.closeBox, SCANskins.SCAN_closeButton))
-				{
-					spotmap = null;
-				}
-			}
-		}
+		//		if (GUI.Button(zoomCloseRect, SCANcontroller.controller.closeBox, SCANskins.SCAN_closeButton))
+		//		{
+		//			spotmap = null;
+		//		}
+		//	}
+		//}
 
 		//Draw the map overlay labels
 		private void mapLabels(int id)
