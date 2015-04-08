@@ -28,19 +28,18 @@ namespace SCANsat.SCAN_UI
 	{
 		private SCANmap spotmap;
 		private CelestialBody b;
-		private string mapTypeTitle = "";
 		private SCANdata data;
 		private Vessel v;
 		private bool showOrbit, showAnomaly;
 		private float resizeW, resizeH, dragX;
-		internal static Rect defaultRect = new Rect(10f, 10f, 180f, 180f);
+		internal static Rect defaultRect = new Rect(10f, 10f, 340f, 260f);
 
 		protected override void Awake()
 		{
-			WindowCaption = "Map of ";
+			SCANUtil.SCANdebugLog("Awake SCAN Zoom Window");
 			WindowRect = defaultRect;
-			WindowRect_Min = new Rect(10f, 10f, 180f, 180f);
-			WindowOptions = new GUILayoutOption[2] { GUILayout.Width(180), GUILayout.Height(180) };
+			WindowRect_Min = new Rect(10f, 10f, 340f, 260f);
+			WindowOptions = new GUILayoutOption[2] { GUILayout.Width(340), GUILayout.Height(260) };
 			WindowStyle = SCANskins.SCAN_window;
 			Visible = false;
 			DragEnabled = true;
@@ -50,12 +49,15 @@ namespace SCANsat.SCAN_UI
 
 			SCAN_SkinsLibrary.SetCurrent("SCAN_Unity");
 			SCAN_SkinsLibrary.SetCurrentTooltip();
+
+			Startup();
 		}
 
-		protected override void Start()
+		private void Startup()
 		{
+			SCANUtil.SCANdebugLog("Start SCAN Zoom Window");
 			//Initialize the map object
-			Visible = true;
+			Visible = false;
 			if (HighLogic.LoadedSceneIsFlight)
 			{
 				v = SCANcontroller.controller.BigMap.V;
@@ -71,7 +73,7 @@ namespace SCANsat.SCAN_UI
 			if (spotmap == null)
 			{
 				spotmap = new SCANmap();
-				spotmap.setSize(180, 180);
+				spotmap.setSize(320, 240);
 			}
 
 			showOrbit = SCANcontroller.controller.map_orbit;
@@ -80,6 +82,48 @@ namespace SCANsat.SCAN_UI
 			TooltipsEnabled = SCANcontroller.controller.toolTips;
 
 			spotmap.setBody(b);
+		}
+
+		protected override void Start()
+		{
+			//SCANUtil.SCANdebugLog("Start SCAN Zoom Window");
+			////Initialize the map object
+			//Visible = false;
+			//if (HighLogic.LoadedSceneIsFlight)
+			//{
+			//	v = SCANcontroller.controller.BigMap.V;
+			//	b = SCANcontroller.controller.BigMap.Body;
+			//	data = SCANcontroller.controller.BigMap.Data;
+			//}
+			//else if (HighLogic.LoadedSceneHasPlanetarium)
+			//{
+			//	v = null;
+			//	b = SCANcontroller.controller.kscMap.Body;
+			//	data = SCANcontroller.controller.kscMap.Data;
+			//}
+			//if (spotmap == null)
+			//{
+			//	spotmap = new SCANmap();
+			//	spotmap.setSize(180, 180);
+			//}
+
+			//showOrbit = SCANcontroller.controller.map_orbit;
+			//showAnomaly = SCANcontroller.controller.map_markers;
+
+			//TooltipsEnabled = SCANcontroller.controller.toolTips;
+
+			//spotmap.setBody(b);
+		}
+
+		public void setMapCenter(double lat, double lon, mapType t)
+		{
+			SCANUtil.SCANdebugLog("Centering Zoom Window");
+			Visible = true;
+			spotmap.MapScale = 10;
+			spotmap.centerAround(lon, lat);
+			spotmap.resetMap(t, false);
+			TextureRect.width = 320;
+			TextureRect.height = 240;
 		}
 
 		protected override void DrawWindowPre(int id)
@@ -118,9 +162,14 @@ namespace SCANsat.SCAN_UI
 			growS();
 				topBar(id);
 				drawMap(id);
+				//growE();
+				//GUILayout.Space(30);
+				//growS();
+						mouseOver(id);
+					//stopS();
+				//stopE();
 			stopS();
 
-			mouseOver(id);
 			mapLabels(id);
 		}
 
@@ -152,50 +201,63 @@ namespace SCANsat.SCAN_UI
 			showOrbit = GUILayout.Toggle(showOrbit, textWithTT("", "Toggle Orbit"));
 
 			Rect d = GUILayoutUtility.GetLastRect();
-			d.x += 34;
+			d.x += 30;
 			d.y += 2;
-			d.width = 48;
-			d.height = 24;
+			d.width = 40;
+			d.height = 20;
+
+			GUILayout.Label("", GUILayout.Width(30));
 
 			if (GUI.Button(d, iconWithTT(SCANskins.SCAN_OrbitIcon, "Toggle Orbit"), SCANskins.SCAN_buttonBorderless))
 			{
 				showOrbit = !showOrbit;
 			}
 
+			GUILayout.FlexibleSpace();
+
+			if (GUILayout.Button(iconWithTT(SCANskins.SCAN_FlagIcon, "Zoom Out"), SCANskins.SCAN_buttonBorderless, GUILayout.Width(24), GUILayout.Height(24)))
+			{
+				spotmap.MapScale = spotmap.MapScale / 1.25f;
+				spotmap.resetMap(); /* Add map type */
+			}
+
+			GUILayout.Label(spotmap.MapScale.ToString("N0") + " X", SCANskins.SCAN_whiteReadoutLabel, GUILayout.Width(28), GUILayout.Height(24));
+
+			if (GUILayout.Button(iconWithTT(SCANskins.SCAN_FlagIcon, "Zoom In"), SCANskins.SCAN_buttonBorderless, GUILayout.Width(24), GUILayout.Height(24)))
+			{
+				spotmap.MapScale = spotmap.MapScale * 1.25f;
+				spotmap.resetMap(); /* Add map type */
+			}
+
+			GUILayout.FlexibleSpace();
+
 			showAnomaly = GUILayout.Toggle(showAnomaly, textWithTT("", "Toggle Anomalies"));
 
 			d = GUILayoutUtility.GetLastRect();
-			d.x += 44;
+			d.x += 32;
 			d.y += 2;
-			d.width = 24;
-			d.height = 24;
+			d.width = 20;
+			d.height = 20;
 
 			if (GUI.Button(d, textWithTT(SCANcontroller.controller.anomalyMarker, "Toggle Anomalies"), SCANskins.SCAN_buttonBorderless))
 			{
 				showAnomaly = !showAnomaly;
 			}
 
-			if (GUILayout.Button(iconWithTT(SCANskins.SCAN_ZoomOutIcon, "Zoom Out"), SCANskins.SCAN_buttonBorderless))
-			{
-				spotmap.MapScale = spotmap.MapScale / 1.25f;
-				spotmap.resetMap(); /* Add map type */
-			}
-
-			GUILayout.Label(spotmap.MapScale.ToString("N0"), SCANskins.SCAN_label);
-
-			if (GUILayout.Button(iconWithTT(SCANskins.SCAN_ZoomInIcon, "Zoom In"), SCANskins.SCAN_buttonBorderless))
-			{
-				spotmap.MapScale = spotmap.MapScale * 1.25f;
-				spotmap.resetMap(); /* Add map type */
-			}
-
-			if (GUILayout.Button(iconWithTT(SCANskins.SCAN_ScreenshotIcon, "Export Map"), SCANskins.SCAN_windowButton))
-			{
-				if (spotmap.isMapComplete())
-					spotmap.exportPNG();
-			}
+			GUILayout.Space(30);
 
 			stopE();
+
+			//d.x = 15;
+			//d.y = WindowRect.height - 28;
+			//d.width = 24;
+			//d.height = 24;
+
+			//if (GUI.Button(d, iconWithTT(SCANskins.SCAN_ScreenshotIcon, "Export Map"), SCANskins.SCAN_windowButton))
+			//{
+			//	if (spotmap.isMapComplete())
+			//		spotmap.exportPNG();
+			//}
 		}
 
 		private void drawMap(int id)
@@ -248,10 +310,11 @@ namespace SCANsat.SCAN_UI
 			GUI.Label(resizer, SCANskins.SCAN_ResizeIcon);
 
 			//Handles mouse positioning and converting to lat/long coordinates
-			if (mx >= 0 && my >= 0 && mx < MapTexture.width && my < MapTexture.height)
+			if (mx >= 0 && my >= 0 && mx <= TextureRect.width && my <= TextureRect.height  /*mx >= 0 && my >= 0 && mx < MapTexture.width && my < MapTexture.height*/)
 			{
-				double mlo = spotmap.Lon_Offset + ((mx - TextureRect.x) / spotmap.MapScale) - 180;
-				double mla = spotmap.Lat_Offset + ((TextureRect.height - (my - TextureRect.y)) / spotmap.MapScale) - 90;
+				in_map = true;
+				double mlo = spotmap.Lon_Offset + (mx / spotmap.MapScale) - 180;
+				double mla = spotmap.Lat_Offset + ((TextureRect.height - my) / spotmap.MapScale) - 90;
 				mlon = spotmap.unprojectLongitude(mlo, mla);
 				mlat = spotmap.unprojectLatitude(mlo, mla);
 
