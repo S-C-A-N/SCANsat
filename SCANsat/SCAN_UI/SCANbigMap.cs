@@ -26,7 +26,7 @@ namespace SCANsat.SCAN_UI
 {
 	class SCANBigMap : SCAN_MBW
 	{
-		private static SCANmap bigmap;//, spotmap;
+		private static SCANmap bigmap;
 		private static CelestialBody b;
 		private string mapTypeTitle = "";
 		private SCANdata data;
