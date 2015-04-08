@@ -58,7 +58,7 @@ namespace SCANsat.SCAN_Map
 
 		public double CenteredLat
 		{
-			get { return CenteredLat; }
+			get { return centeredLat; }
 		}
 
 		public int MapWidth
