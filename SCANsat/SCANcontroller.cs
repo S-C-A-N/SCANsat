@@ -152,6 +152,10 @@ namespace SCANsat
 		/* Used in case the loading process is interupted somehow */
 		private bool loaded = false;
 
+		private bool unDocked, docked = false;
+		private Vessel PartFromVessel, PartToVessel, NewVessel, OldVessel;
+		private int timer = 0;
+
 		public readonly Color defaultLowBiomeColor = palette.xkcd_CamoGreen;
 		public readonly Color defaultHighBiomeColor = palette.xkcd_Marigold;
 
@@ -664,6 +668,8 @@ namespace SCANsat
 		private void Start()
 		{
 			GameEvents.onVesselSOIChanged.Add(SOIChange);
+			GameEvents.onVesselCreate.Add(newVesselCheck);
+			GameEvents.onPartCouple.Add(dockingCheck);
 			if (HighLogic.LoadedScene == GameScenes.FLIGHT)
 			{
 				if (!body_data.ContainsKey(FlightGlobals.currentMainBody.name))
@@ -706,11 +712,60 @@ namespace SCANsat
 			{
 				scanFromAllVessels();
 			}
+
+			if (unDocked || docked)
+			{
+				if (timer < 30)
+					timer++;
+				else
+				{
+					SCANUtil.SCANdebugLog("Docking/Undocking Check");
+					if (unDocked)
+					{
+						if (NewVessel != null)
+						{
+							removeVessel(NewVessel);
+							addVessel(NewVessel);
+							NewVessel = null;
+						}
+
+						if (OldVessel != null)
+						{
+							removeVessel(OldVessel);
+							addVessel(OldVessel);
+							OldVessel = null;
+						}
+					}
+
+					if (docked)
+					{
+						if (PartFromVessel != null)
+						{
+							removeVessel(PartFromVessel);
+							PartFromVessel = null;
+						}
+
+						if (PartToVessel != null)
+						{
+							removeVessel(PartToVessel);
+							PartToVessel = null;
+						}
+
+						addVessel(FlightGlobals.ActiveVessel);
+					}
+
+					unDocked = false;
+					docked = false;
+					timer = 0;
+				}
+			}
 		}
 
 		private void OnDestroy()
 		{
 			GameEvents.onVesselSOIChanged.Remove(SOIChange);
+			GameEvents.onVesselCreate.Remove(newVesselCheck);
+			GameEvents.onPartCouple.Remove(dockingCheck);
 			if (mainMap != null)
 				Destroy(mainMap);
 			if (settingsWindow != null)
@@ -723,6 +778,51 @@ namespace SCANsat
 				Destroy(BigMap);
 			if (appLauncher != null)
 				Destroy(appLauncher);
+		}
+
+		private void removeVessel(Vessel v)
+		{
+			SCANUtil.SCANdebugLog("Checking Vessel: {0}", v.name);
+			if (isVesselKnown(v))
+			{
+				SCANUtil.SCANdebugLog("Vessel Known: {0}", v.name);
+				foreach (SCANtype t in Enum.GetValues(typeof(SCANtype)))
+				{
+					SCANUtil.SCANdebugLog("Removing Sensor From Vessel: {0}", v.name);
+					unregisterSensor(v, t);
+				}
+			}
+		}
+
+		private void addVessel(Vessel v)
+		{
+			SCANUtil.SCANdebugLog("Adding New Vessel: {0}", v.name);
+			foreach (SCANsat s in v.FindPartModulesImplementing<SCANsat>())
+			{
+				if (s.scanningNow())
+				{
+					SCANUtil.SCANdebugLog("Registering Sensor: {0}", v.name);
+					registerSensor(v.id, (SCANtype)s.sensorType, s.fov, s.min_alt, s.max_alt, s.best_alt);
+				}
+			}
+		}
+
+		private void dockingCheck(GameEvents.FromToAction<Part, Part> Parts)
+		{
+			SCANUtil.SCANdebugLog("Docking Check");
+			PartFromVessel = Parts.from.vessel;
+			PartToVessel = Parts.to.vessel;
+
+			docked = true;
+		}
+
+		private void newVesselCheck(Vessel v)
+		{
+			SCANUtil.SCANdebugLog("New Vessel Check");
+			NewVessel = v;
+			OldVessel = FlightGlobals.ActiveVessel;
+
+			unDocked = true;
 		}
 
 		private void SOIChange(GameEvents.HostedFromToAction<Vessel, CelestialBody> VC)
@@ -869,7 +969,8 @@ namespace SCANsat
 		{
 			if (id == null)
 				return;
-			if (!knownVessels.ContainsKey(id)) knownVessels[id] = new SCANvessel();
+			if (!knownVessels.ContainsKey(id))
+				knownVessels[id] = new SCANvessel();
 			SCANvessel sv = knownVessels[id];
 			sv.id = id;
 			sv.vessel = FlightGlobals.Vessels.FirstOrDefault(a => a.id == id);
@@ -880,9 +981,14 @@ namespace SCANsat
 			}
 			foreach (SCANtype sensor in Enum.GetValues(typeof(SCANtype)))
 			{
-				if (SCANUtil.countBits((int)sensor) != 1) continue;
-				if ((sensor & sensors) == SCANtype.Nothing) continue;
-				double this_fov = fov, this_min_alt = min_alt, this_max_alt = max_alt, this_best_alt = best_alt;
+				if (SCANUtil.countBits((int)sensor) != 1)
+					continue;
+				if ((sensor & sensors) == SCANtype.Nothing)
+					continue;
+				double this_fov = fov;
+				double this_min_alt = min_alt;
+				double this_max_alt = max_alt;
+				double this_best_alt = best_alt;
 				if (this_max_alt <= 0)
 				{
 					this_min_alt = 5000;
@@ -898,7 +1004,8 @@ namespace SCANsat
 						this_fov = 1;
 					}
 				}
-				if (!sv.sensors.ContainsKey(sensor)) sv.sensors[sensor] = new SCANsensor();
+				if (!sv.sensors.ContainsKey(sensor))
+					sv.sensors[sensor] = new SCANsensor();
 				SCANsensor s = sv.sensors[sensor];
 				s.sensor = sensor;
 				s.fov = this_fov;
@@ -910,50 +1017,75 @@ namespace SCANsat
 
 		internal void unregisterSensor(Vessel v, SCANtype sensors)
 		{
-			if (!knownVessels.ContainsKey(v.id)) return;
+			if (!knownVessels.ContainsKey(v.id))
+				return;
+
 			SCANvessel sv = knownVessels[v.id];
 			sv.id = v.id;
 			sv.vessel = v;
 			foreach (SCANtype sensor in Enum.GetValues(typeof(SCANtype)))
 			{
-				if ((sensors & sensor) == SCANtype.Nothing) continue;
-				if (!sv.sensors.ContainsKey(sensor)) continue;
+				if ((sensors & sensor) == SCANtype.Nothing)
+					continue;
+				if (!sv.sensors.ContainsKey(sensor))
+					continue;
+
 				sv.sensors.Remove(sensor);
+			}
+			if (sv.sensors.Count == 0)
+			{
+				knownVessels.Remove(v.id);
+				SCANUtil.SCANdebugLog("Unregister Vessel");
 			}
 		}
 
 		internal bool isVesselKnown(Guid id, SCANtype sensor)
 		{
-			if (!knownVessels.ContainsKey(id)) return false;
+			if (!knownVessels.ContainsKey(id))
+				return false;
+
 			SCANtype all = SCANtype.Nothing;
-			foreach (SCANtype s in knownVessels[id].sensors.Keys) all |= s;
+			foreach (SCANtype s in knownVessels[id].sensors.Keys)
+				all |= s;
+
 			return (all & sensor) != SCANtype.Nothing;
 		}
 
 		private bool isVesselKnown(Guid id)
 		{
-			if (!knownVessels.ContainsKey(id)) return false;
+			if (!knownVessels.ContainsKey(id))
+				return false;
+
 			return knownVessels[id].sensors.Count > 0;
 		}
 
 		private bool isVesselKnown(Vessel v)
 		{
-			if (v.vesselType == VesselType.Debris) return false;
+			if (v.vesselType == VesselType.Debris)
+				return false;
+
 			return isVesselKnown(v.id);
 		}
 
 		internal SCANsensor getSensorStatus(Vessel v, SCANtype sensor)
 		{
-			if (!knownVessels.ContainsKey(v.id)) return null;
-			if (!knownVessels[v.id].sensors.ContainsKey(sensor)) return null;
+			if (!knownVessels.ContainsKey(v.id))
+				return null;
+			if (!knownVessels[v.id].sensors.ContainsKey(sensor))
+				return null;
+
 			return knownVessels[v.id].sensors[sensor];
 		}
 
 		internal SCANtype activeSensorsOnVessel(Guid id)
 		{
-			if (!knownVessels.ContainsKey(id)) return SCANtype.Nothing;
+			if (!knownVessels.ContainsKey(id))
+				return SCANtype.Nothing;
+
 			SCANtype sensors = SCANtype.Nothing;
-			foreach (SCANtype s in knownVessels[id].sensors.Keys) sensors |= s;
+			foreach (SCANtype s in knownVessels[id].sensors.Keys)
+				sensors |= s;
+
 			return sensors;
 		}
 
