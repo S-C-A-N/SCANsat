@@ -208,17 +208,20 @@ namespace SCANsat.SCAN_Data
 		{
 			get
 			{
-				if (waypoints == null)
+				if (WaypointManager.Instance() != null)
 				{
-					List<Waypoint> bodyWaypoints = new List<Waypoint>();
-					List<Waypoint> wp = WaypointManager.Instance().AllWaypoints();
-					for (int i = 0; i < wp.Count; i++)
+					if (waypoints == null)
 					{
-						if (wp[i].celestialName == body.name)
-							bodyWaypoints.Add(wp[i]);
-					}
+						List<Waypoint> bodyWaypoints = new List<Waypoint>();
+						List<Waypoint> wp = WaypointManager.Instance().AllWaypoints();
+						for (int i = 0; i < wp.Count; i++)
+						{
+							if (wp[i].celestialName == body.name)
+								bodyWaypoints.Add(wp[i]);
+						}
 
-					waypoints = bodyWaypoints.ToArray();
+						waypoints = bodyWaypoints.ToArray();
+					}
 				}
 
 				return waypoints;
