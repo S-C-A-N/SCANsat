@@ -366,6 +366,21 @@ namespace SCANsat.SCAN_UI
 
 				fillS();
 
+				SCANcontroller.controller.map_waypoints = GUILayout.Toggle(SCANcontroller.controller.map_waypoints, textWithTT("", "Toggle Waypoints"));
+
+				d = GUILayoutUtility.GetLastRect();
+				d.x += 44;
+				d.y += 2;
+				d.width = 24;
+				d.height = 24;
+
+				if (GUI.Button(d, iconWithTT(SCANskins.SCAN_WaypointIcon, "Toggle Waypoints"), SCANskins.SCAN_buttonBorderless))
+				{
+					SCANcontroller.controller.map_waypoints = !SCANcontroller.controller.map_waypoints;
+				}
+
+				fillS();
+
 				SCANcontroller.controller.map_flags = GUILayout.Toggle(SCANcontroller.controller.map_flags, textWithTT("", "Toggle Flags"));
 
 				d = GUILayoutUtility.GetLastRect();
@@ -713,7 +728,7 @@ namespace SCANsat.SCAN_UI
 		//Draw the map overlay labels
 		private void mapLabels(int id)
 		{
-			SCANuiUtil.drawMapLabels(TextureRect, v, bigmap, data, b, SCANcontroller.controller.map_markers);
+			SCANuiUtil.drawMapLabels(TextureRect, v, bigmap, data, b, SCANcontroller.controller.map_markers, SCANcontroller.controller.map_waypoints);
 		}
 
 		//Draw the drop down menus if any have been opened
