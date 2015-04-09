@@ -94,6 +94,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 		internal static Texture2D SCAN_RefreshIcon;
 		internal static Texture2D SCAN_ScreenshotIcon;
 		internal static Texture2D SCAN_ResizeIcon;
+		internal static Texture2D SCAN_WaypointIcon;
 
 		//Window Textures
 		internal static Texture2D SCAN_SettingsIcon;
@@ -145,6 +146,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			SCAN_BigColorWheel = GameDatabase.Instance.GetTexture("SCANsat/Icons/SCAN_BigColorWheel_Tex", false);
 			SCAN_ZoomInIcon = GameDatabase.Instance.GetTexture("SCANsat/Icons/SCAN_ZoomInIcon", false);
 			SCAN_ZoomOutIcon = GameDatabase.Instance.GetTexture("SCANsat/Icons/SCAN_ZoomOutIcon", false);
+			SCAN_WaypointIcon = GameDatabase.Instance.GetTexture("Squad/Contracts/Icons/marker", false);
 		}
 
 		private static void initializeColors()
