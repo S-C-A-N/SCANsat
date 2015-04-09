@@ -226,7 +226,7 @@ namespace SCANsat.SCAN_UI
 
 			GUILayout.FlexibleSpace();
 
-			if (GUILayout.Button(iconWithTT(SCANskins.SCAN_FlagIcon, "Zoom Out"), SCANskins.SCAN_windowButton, GUILayout.Width(24), GUILayout.Height(24)))
+			if (GUILayout.Button(iconWithTT(SCANskins.SCAN_ZoomOutIcon, "Zoom Out"), SCANskins.SCAN_buttonBorderless, GUILayout.Width(26), GUILayout.Height(26)))
 			{
 				spotmap.MapScale = spotmap.MapScale / 1.25f;
 				if (spotmap.MapScale < 2)
@@ -236,7 +236,7 @@ namespace SCANsat.SCAN_UI
 
 			GUILayout.Label(spotmap.MapScale.ToString("N1") + " X", SCANskins.SCAN_whiteLabelCenter, GUILayout.Width(40), GUILayout.Height(24));
 
-			if (GUILayout.Button(iconWithTT(SCANskins.SCAN_FlagIcon, "Zoom In"), SCANskins.SCAN_windowButton, GUILayout.Width(24), GUILayout.Height(24)))
+			if (GUILayout.Button(iconWithTT(SCANskins.SCAN_ZoomInIcon, "Zoom In"), SCANskins.SCAN_buttonBorderless, GUILayout.Width(26), GUILayout.Height(26)))
 			{
 				spotmap.MapScale = spotmap.MapScale * 1.25f;
 				spotmap.resetMap(); /* Add map type */
