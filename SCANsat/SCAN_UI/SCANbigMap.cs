@@ -563,7 +563,7 @@ namespace SCANsat.SCAN_UI
 		{
 			float mx = Event.current.mousePosition.x - TextureRect.x;
 			float my = Event.current.mousePosition.y - TextureRect.y;
-			bool in_map = false, in_spotmap = false;
+			bool in_map = false;//, in_spotmap = false;
 			double mlon = 0, mlat = 0;
 
 			//Draw the re-size label in the corner
