@@ -16,6 +16,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
+using FinePrint;
 using SCANsat.SCAN_Platform;
 using SCANsat.SCAN_Data;
 using SCANsat.SCAN_Map;
@@ -170,7 +171,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 									amount = 1;
 								label = amount.ToString("P2");
 							}
-							info += palette.colored(mapObj.Resource.MaxColor, mapObj.Resource.Name + ": " + label);
+							info += palette.colored(mapObj.Resource.MaxColor, mapObj.Resource.Name + ": " + label + " ");
 						}
 					}
 					else if (SCANcontroller.controller.resourceOverlayType == 1)
@@ -179,7 +180,20 @@ namespace SCANsat.SCAN_UI.UI_Framework
 						{
 							double amount = data.KethaneValueMap[SCANUtil.icLON(lon), SCANUtil.icLAT(lat)];
 							if (amount < 0) amount = 0d;
-							info += palette.colored(mapObj.Resource.MaxColor, mapObj.Resource.Name + ": " + amount.ToString("N1"));
+							info += palette.colored(mapObj.Resource.MaxColor, mapObj.Resource.Name + ": " + amount.ToString("N1") + " ");
+						}
+					}
+				}
+
+				if (SCANcontroller.controller.map_waypoints && WaypointManager.Instance() != null)
+				{
+					double range = ContractDefs.Survey.MaximumTriggerRange;
+					foreach (Waypoint p in data.Waypoints)
+					{
+						if (WaypointManager.Instance().Distance(lat, lon, p.altitude, p.latitude, p.longitude, p.altitude, body) <= range)
+						{
+							info += p.name + " ";
+							break;
 						}
 					}
 				}
@@ -233,7 +247,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 									amount = 1;
 								label = amount.ToString("P2");
 							}
-							info += palette.colored(mapObj.Resource.MaxColor, mapObj.Resource.Name + ": " + label);
+							info += palette.colored(mapObj.Resource.MaxColor, mapObj.Resource.Name + ": " + label + " ");
 						}
 					}
 					else if (SCANcontroller.controller.resourceOverlayType == 1)
@@ -242,7 +256,20 @@ namespace SCANsat.SCAN_UI.UI_Framework
 						{
 							double amount = data.KethaneValueMap[SCANUtil.icLON(lon), SCANUtil.icLAT(lat)];
 							if (amount < 0) amount = 0d;
-							info += palette.colored(mapObj.Resource.MaxColor, mapObj.Resource.Name + ": " + amount.ToString("N1"));
+							info += palette.colored(mapObj.Resource.MaxColor, mapObj.Resource.Name + ": " + amount.ToString("N1") + " ");
+						}
+					}
+				}
+
+				if (SCANcontroller.controller.map_waypoints && WaypointManager.Instance() != null)
+				{
+					double range = ContractDefs.Survey.MaximumTriggerRange;
+					foreach (Waypoint p in data.Waypoints)
+					{
+						if (WaypointManager.Instance().Distance(lat, lon, p.altitude, p.latitude, p.longitude, p.altitude, body) <= range)
+						{
+							info += p.name + " ";
+							break;
 						}
 					}
 				}
@@ -433,7 +460,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 		}
 
 		//Handles various map labels; probably should be split up into multiple methods
-		internal static void drawMapLabels(Rect maprect, Vessel vessel, SCANmap map, SCANdata data, CelestialBody body, bool showAnom)
+		internal static void drawMapLabels(Rect maprect, Vessel vessel, SCANmap map, SCANdata data, CelestialBody body, bool showAnom, bool showWaypoints)
 		{
 			//This section handles flag and asteroid labels
 			foreach (Vessel v in FlightGlobals.Vessels)
@@ -461,6 +488,13 @@ namespace SCANsat.SCAN_UI.UI_Framework
 					drawAnomalyLabel(maprect, map, anomaly);
 				}
 			}
+			if (showWaypoints)
+			{
+				foreach (Waypoint p in data.Waypoints)
+				{
+					drawWaypointLabel(maprect, map, p);
+				}
+			}
 			if (vessel != null)
 			{
 				if (vessel.mainBody == body)
@@ -469,12 +503,12 @@ namespace SCANsat.SCAN_UI.UI_Framework
 		}
 
 		//Method to draw anomaly labels on the map
-		internal static void drawAnomalyLabel(Rect maprect, SCANmap map, SCANanomaly anomaly)
+		private static void drawAnomalyLabel(Rect maprect, SCANmap map, SCANanomaly anomaly)
 		{
 			if (!anomaly.Known)
 				return;
-			double lon = (anomaly.Longitude + 360 + 180) % 360;
-			double lat = (anomaly.Latitude + 180 + 90) % 180;
+			double lon = SCANUtil.fixLon(anomaly.Longitude);
+			double lat = SCANUtil.fixLat(anomaly.Latitude);
 			if (map != null)
 			{
 				lat = (map.projectLatitude(anomaly.Longitude, anomaly.Latitude) + 90) % 180;
@@ -493,8 +527,44 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			drawLabel(r, txt, true, true, true);
 		}
 
+		private static void drawWaypointLabel(Rect maprect, SCANmap map, Waypoint p)
+		{
+			double lon = SCANUtil.fixLon(p.longitude);
+			double lat = SCANUtil.fixLat(p.latitude);
+			if (map != null)
+			{
+				lat = SCANUtil.fixLat(map.projectLatitude(p.longitude, p.latitude));// + 90) % 180;
+				lon = SCANUtil.fixLon(map.projectLongitude(p.longitude, p.latitude));// + 180) % 360;
+				lat = map.scaleLatitude(lat);
+				lon = map.scaleLongitude(lon);
+				if (lat < 0 || lon < 0 || lat > 180 || lon > 360)
+					return;
+			}
+			lon = lon * maprect.width / 360f;
+			lat = maprect.height - lat * maprect.height / 180f;
+
+			Rect r = new Rect(maprect.x + (float)lon, maprect.y + (float)lat, 16, 24);
+
+			r.x -= 8;
+			r.y -= 24;
+
+			drawMapIcon(r, SCANskins.SCAN_WaypointIcon);
+		}
+
+		private static void drawMapIcon(Rect pos, Texture2D tex, Rect texPos = new Rect(), bool texCoords = false)
+		{
+			if (texCoords)
+			{
+				GUI.DrawTextureWithTexCoords(pos, tex, texPos);
+			}
+			else
+			{
+				GUI.DrawTexture(pos, tex);
+			}
+		}
+
 		/* FIXME: This may use assumed, shared, static constants with Legend stuff in other SCANsat files */
-		internal static void drawLegendLabel(Rect r, float val, float min, float max)
+		private static void drawLegendLabel(Rect r, float val, float min, float max)
 		{
 			if (val < min || val > max)
 				return;
