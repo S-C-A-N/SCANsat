@@ -39,8 +39,8 @@ namespace SCANsat.SCAN_UI
 		{
 			SCANUtil.SCANdebugLog("Awake SCAN Zoom Window");
 			WindowRect = defaultRect;
-			minSize = new Vector2(320, 240);
-			MaxSize = new Vector2(600, 460);
+			minSize = new Vector2(310, 180);
+			MaxSize = new Vector2(540, 400);
 			WindowOptions = new GUILayoutOption[2] { GUILayout.Width(340), GUILayout.Height(260) };
 			WindowStyle = SCANskins.SCAN_window;
 			Visible = false;
@@ -136,6 +136,7 @@ namespace SCANsat.SCAN_UI
 			{
 				if (Input.GetMouseButtonUp(0))
 				{
+					double scale = spotmap.MapScale;
 					IsResizing = false;
 					if (resizeW < minSize.x)
 						resizeW = minSize.x;
@@ -147,6 +148,7 @@ namespace SCANsat.SCAN_UI
 						resizeH = MaxSize.y;
 
 					spotmap.setSize((int)resizeW, (int)resizeH);
+					spotmap.MapScale = scale;
 					spotmap.resetMap(spotmap.MType, false);
 				}
 				else
@@ -224,15 +226,17 @@ namespace SCANsat.SCAN_UI
 
 			GUILayout.FlexibleSpace();
 
-			if (GUILayout.Button(iconWithTT(SCANskins.SCAN_FlagIcon, "Zoom Out"), SCANskins.SCAN_buttonBorderless, GUILayout.Width(24), GUILayout.Height(24)))
+			if (GUILayout.Button(iconWithTT(SCANskins.SCAN_FlagIcon, "Zoom Out"), SCANskins.SCAN_windowButton, GUILayout.Width(24), GUILayout.Height(24)))
 			{
 				spotmap.MapScale = spotmap.MapScale / 1.25f;
+				if (spotmap.MapScale < 2)
+					spotmap.MapScale = 2;
 				spotmap.resetMap(); /* Add map type */
 			}
 
-			GUILayout.Label(spotmap.MapScale.ToString("N0") + " X", SCANskins.SCAN_whiteReadoutLabel, GUILayout.Width(28), GUILayout.Height(24));
+			GUILayout.Label(spotmap.MapScale.ToString("N1") + " X", SCANskins.SCAN_whiteLabelCenter, GUILayout.Width(40), GUILayout.Height(24));
 
-			if (GUILayout.Button(iconWithTT(SCANskins.SCAN_FlagIcon, "Zoom In"), SCANskins.SCAN_buttonBorderless, GUILayout.Width(24), GUILayout.Height(24)))
+			if (GUILayout.Button(iconWithTT(SCANskins.SCAN_FlagIcon, "Zoom In"), SCANskins.SCAN_windowButton, GUILayout.Width(24), GUILayout.Height(24)))
 			{
 				spotmap.MapScale = spotmap.MapScale * 1.25f;
 				spotmap.resetMap(); /* Add map type */
@@ -350,8 +354,21 @@ namespace SCANsat.SCAN_UI
 			{
 				if (Event.current.type == EventType.MouseUp)
 				{
+					//Middle click re-center
+					if (Event.current.button == 2 || (Event.current.button == 1 && GameSettings.MODIFIER_KEY.GetKey()))
+					{
+						if (in_map)
+						{
+							if (spotmap.isMapComplete())
+							{
+								spotmap.centerAround(mlon, mlat);
+								spotmap.resetMap(spotmap.MType, false);
+								Event.current.Use();
+							}
+						}
+					}
 					//Right click zoom in
-					if (Event.current.button == 1)
+					else if (Event.current.button == 1)
 					{
 						if (in_map)
 						{
@@ -371,19 +388,8 @@ namespace SCANsat.SCAN_UI
 							if (spotmap.isMapComplete())
 							{
 								spotmap.MapScale = spotmap.MapScale / 1.25f;
-								spotmap.centerAround(mlon, mlat);
-								spotmap.resetMap(spotmap.MType, false);
-								Event.current.Use();
-							}
-						}
-					}
-					//Middle click re-center
-					else if (Event.current.button == 2 || (Event.current.button == 1 && GameSettings.MODIFIER_KEY.GetKey()))
-					{
-						if (in_map)
-						{
-							if (spotmap.isMapComplete())
-							{
+								if (spotmap.MapScale < 2)
+									spotmap.MapScale = 2;
 								spotmap.centerAround(mlon, mlat);
 								spotmap.resetMap(spotmap.MType, false);
 								Event.current.Use();
