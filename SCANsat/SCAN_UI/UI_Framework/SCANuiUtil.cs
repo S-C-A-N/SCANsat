@@ -261,7 +261,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 					}
 				}
 
-				if (SCANcontroller.controller.map_waypoints && WaypointManager.Instance() != null)
+				if (SCANcontroller.controller.map_waypoints)
 				{
 					double range = ContractDefs.Survey.MaximumTriggerRange;
 					foreach (Waypoint p in data.Waypoints)
@@ -426,8 +426,8 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			double lat = SCANUtil.fixLat(vessel.latitude);
 			if (map != null)
 			{
-				lat = (map.projectLatitude(vessel.longitude, vessel.latitude) + 90) % 180;
-				lon = (map.projectLongitude(vessel.longitude, vessel.latitude) + 180) % 360;
+				lat = SCANUtil.fixLat(map.projectLatitude(vessel.longitude, vessel.latitude));
+				lon = SCANUtil.fixLon(map.projectLongitude(vessel.longitude, vessel.latitude));
 				lat = map.scaleLatitude(lat);
 				lon = map.scaleLongitude(lon);
 				if (lat < 0 || lon < 0 || lat > 180 || lon > 360)
@@ -511,8 +511,8 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			double lat = SCANUtil.fixLat(anomaly.Latitude);
 			if (map != null)
 			{
-				lat = (map.projectLatitude(anomaly.Longitude, anomaly.Latitude) + 90) % 180;
-				lon = (map.projectLongitude(anomaly.Longitude, anomaly.Latitude) + 180) % 360;
+				lat = SCANUtil.fixLat(map.projectLatitude(anomaly.Longitude, anomaly.Latitude));
+				lon = SCANUtil.fixLon(map.projectLongitude(anomaly.Longitude, anomaly.Latitude));
 				lat = map.scaleLatitude(lat);
 				lon = map.scaleLongitude(lon);
 				if (lat < 0 || lon < 0 || lat > 180 || lon > 360)
@@ -533,8 +533,8 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			double lat = SCANUtil.fixLat(p.latitude);
 			if (map != null)
 			{
-				lat = SCANUtil.fixLat(map.projectLatitude(p.longitude, p.latitude));// + 90) % 180;
-				lon = SCANUtil.fixLon(map.projectLongitude(p.longitude, p.latitude));// + 180) % 360;
+				lat = SCANUtil.fixLat(map.projectLatitude(p.longitude, p.latitude));
+				lon = SCANUtil.fixLon(map.projectLongitude(p.longitude, p.latitude));
 				lat = map.scaleLatitude(lat);
 				lon = map.scaleLongitude(lon);
 				if (lat < 0 || lon < 0 || lat > 180 || lon > 360)
@@ -543,23 +543,61 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			lon = lon * maprect.width / 360f;
 			lat = maprect.height - lat * maprect.height / 180f;
 
-			Rect r = new Rect(maprect.x + (float)lon, maprect.y + (float)lat, 16, 24);
+			Rect r = new Rect(maprect.x + (float)lon, maprect.y + (float)lat, 24, 24);
 
-			r.x -= 8;
+			r.x -= 12;
 			r.y -= 24;
 
-			drawMapIcon(r, SCANskins.SCAN_WaypointIcon);
+			drawMapIcon(r, SCANskins.SCAN_WaypointIcon, true);
 		}
 
-		private static void drawMapIcon(Rect pos, Texture2D tex, Rect texPos = new Rect(), bool texCoords = false)
+		internal static void drawMapIcon(Rect pos, Texture2D tex, bool outline = false, Color c = new Color(), bool flash = false, Rect texPos = new Rect(), bool texCoords = false)
 		{
 			if (texCoords)
 			{
+				var old = GUI.color;
+				if (outline)
+				{
+					GUI.color = palette.black;
+					pos.x -= 1;
+					GUI.DrawTextureWithTexCoords(pos, tex, texPos);
+					pos.x += 2;
+					GUI.DrawTextureWithTexCoords(pos, tex, texPos);
+					pos.x -= 1;
+					pos.y -= 1;
+					GUI.DrawTextureWithTexCoords(pos, tex, texPos);
+					pos.y += 2;
+					GUI.DrawTextureWithTexCoords(pos, tex, texPos);
+					pos.y -= 1;
+				}
+				if (flash)
+					GUI.color = c;
+
 				GUI.DrawTextureWithTexCoords(pos, tex, texPos);
+				GUI.color = old;
 			}
 			else
 			{
+				var old = GUI.color;
+				if (outline)
+				{
+					GUI.color = palette.black;
+					pos.x -= 1;
+					GUI.DrawTexture(pos, tex);
+					pos.x += 2;
+					GUI.DrawTexture(pos, tex);
+					pos.x -= 1;
+					pos.y -= 1;
+					GUI.DrawTexture(pos, tex);
+					pos.y += 2;
+					GUI.DrawTexture(pos, tex);
+					pos.y -= 1;
+				}
+				if (flash)
+					GUI.color = c;
+
 				GUI.DrawTexture(pos, tex);
+				GUI.color = old;
 			}
 		}
 
