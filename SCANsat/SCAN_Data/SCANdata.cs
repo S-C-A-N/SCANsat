@@ -14,6 +14,7 @@ using System;
 using System.Linq;
 using System.Collections.Generic;
 using UnityEngine;
+using FinePrint;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
 using SCANsat.SCAN_Platform;
@@ -194,6 +195,33 @@ namespace SCANsat.SCAN_Data
 					anomalies[i].Detail = SCANUtil.isCovered(anomalies[i].Longitude, anomalies[i].Latitude, this, SCANtype.AnomalyDetail);
 				}
 				return anomalies;
+			}
+		}
+
+		#endregion
+
+		#region Waypoints
+
+		private Waypoint[] waypoints;
+
+		public Waypoint[] Waypoints
+		{
+			get
+			{
+				if (waypoints == null)
+				{
+					List<Waypoint> bodyWaypoints = new List<Waypoint>();
+					List<Waypoint> wp = WaypointManager.Instance().AllWaypoints();
+					for (int i = 0; i < wp.Count; i++)
+					{
+						if (wp[i].celestialName == body.name)
+							bodyWaypoints.Add(wp[i]);
+					}
+
+					waypoints = bodyWaypoints.ToArray();
+				}
+
+				return waypoints;
 			}
 		}
 
