@@ -615,7 +615,7 @@ namespace SCANsat.SCAN_UI
 				spotmap.setBody(b);
 
 				GUI.Box(pos_spotmap, spotmap.getPartialMap());
-				SCANuiUtil.drawMapLabels(pos_spotmap, null, spotmap, data, b, SCANcontroller.controller.map_markers);
+				SCANuiUtil.drawMapLabels(pos_spotmap, null, spotmap, data, b, SCANcontroller.controller.map_markers, false);
 				zoomCloseRect = new Rect(pos_spotmap.x + 180, pos_spotmap.y, 18, 18);
 
 				if (GUI.Button(zoomCloseRect, SCANcontroller.controller.closeBox, SCANskins.SCAN_closeButton))
@@ -629,7 +629,7 @@ namespace SCANsat.SCAN_UI
 		//Draw the map overlay labels
 		private void mapLabels (int id)
 		{
-			SCANuiUtil.drawMapLabels(TextureRect, null, bigmap, data, b, false);
+			SCANuiUtil.drawMapLabels(TextureRect, null, bigmap, data, b, SCANcontroller.controller.map_markers, false);
 		}
 
 		//Draw the drop down menus if any have been opened
