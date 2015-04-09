@@ -426,7 +426,7 @@ namespace SCANsat.SCAN_UI
 				SCANuiUtil.drawOrbit(TextureRect, spotmap, v, b);
 			}
 
-			SCANuiUtil.drawMapLabels(TextureRect, v, spotmap, data, b, showAnomaly);
+			SCANuiUtil.drawMapLabels(TextureRect, v, spotmap, data, b, showAnomaly, SCANcontroller.controller.map_waypoints);
 		}
 
 	}
