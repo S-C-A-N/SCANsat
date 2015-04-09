@@ -48,6 +48,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 		internal static GUIStyle SCAN_activeReadoutLabel;
 		internal static GUIStyle SCAN_inactiveReadoutLabel;
 		internal static GUIStyle SCAN_shadowReadoutLabel;
+		internal static GUIStyle SCAN_whiteLabelCenter;
 
 		//Instrument readout styles
 		internal static GUIStyle SCAN_insColorLabel;
@@ -58,7 +59,6 @@ namespace SCANsat.SCAN_UI.UI_Framework
 		internal static GUIStyle SCAN_headline;
 		internal static GUIStyle SCAN_headlineSmall;
 		internal static GUIStyle SCAN_buttonWarning;
-		//internal static GUIStyle SCAN_texButton;
 		internal static GUIStyle SCAN_legendTex;
 		internal static GUIStyle SCAN_textBox;
 		internal static GUIStyle SCAN_settingsToggle;
@@ -250,6 +250,10 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			SCAN_shadowReadoutLabel = new GUIStyle(SCAN_readoutLabel);
 			SCAN_shadowReadoutLabel.name = "SCAN_ShadowLabel";
 			SCAN_shadowReadoutLabel.normal.textColor = palette.black;
+
+			SCAN_whiteLabelCenter = new GUIStyle(SCAN_whiteReadoutLabel);
+			SCAN_whiteLabelCenter.name = "SCAN_WhiteLabelCenter";
+			SCAN_whiteLabelCenter.alignment = TextAnchor.MiddleCenter;
 
 			//Initialize instrument styles
 			SCAN_insColorLabel = new GUIStyle(SCAN_label);
