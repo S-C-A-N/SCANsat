@@ -14,7 +14,9 @@ using System;
 using System.Linq;
 using System.Collections.Generic;
 using UnityEngine;
-using FinePrint;
+using Contracts;
+using FinePrint.Contracts;
+using FinePrint.Contracts.Parameters;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
 using SCANsat.SCAN_Platform;
@@ -202,22 +204,31 @@ namespace SCANsat.SCAN_Data
 
 		#region Waypoints
 
-		private Waypoint[] waypoints;
+		private SCANwaypoint[] waypoints;
 
-		public Waypoint[] Waypoints
+		public SCANwaypoint[] Waypoints
 		{
 			get
 			{
-				if (WaypointManager.Instance() != null)
+				if (ContractSystem.Instance != null)
 				{
 					if (waypoints == null)
 					{
-						List<Waypoint> bodyWaypoints = new List<Waypoint>();
-						List<Waypoint> wp = WaypointManager.Instance().AllWaypoints();
-						for (int i = 0; i < wp.Count; i++)
+						List<SCANwaypoint> bodyWaypoints = new List<SCANwaypoint>();
+						var wp = ContractSystem.Instance.GetCurrentActiveContracts<SurveyContract>();
+						for (int i = 0; i < wp.Length; i++)
 						{
-							if (wp[i].celestialName == body.name)
-								bodyWaypoints.Add(wp[i]);
+							if (wp[i].targetBody == body)
+							{
+								for (int j = 0; j < wp[i].AllParameters.Count(); j++ )
+								{
+									if (wp[i].AllParameters.ElementAt(j).GetType() == typeof(SurveyWaypointParameter))
+									{
+										SCANwaypoint p = new SCANwaypoint((SurveyWaypointParameter)wp[i].AllParameters.ElementAt(j));
+										bodyWaypoints.Add(p);
+									}
+								}
+							}
 						}
 
 						waypoints = bodyWaypoints.ToArray();
