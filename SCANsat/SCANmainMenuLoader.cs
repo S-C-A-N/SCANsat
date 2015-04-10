@@ -28,12 +28,16 @@ namespace SCANsat
 		internal static string SCANsatVersion = "";
 		public static bool kethaneLoaded = false;
 		internal static bool RegolithFound = false;
+		internal static bool FinePrintWaypoint = false;
+		internal static bool FinePrintFlightBand = false;
 
 		private List<AssemblyLog> assemblyList = new List<AssemblyLog>();
 
 		private void Start()
 		{
 			findAssemblies(Assemblies);
+			FinePrintWaypoint = SCANreflection.FinePrintWaypointReflection();
+			FinePrintFlightBand = SCANreflection.FinePrintFlightBandReflection();
 			SCANconfigLoader.configLoader();
 		}
 
