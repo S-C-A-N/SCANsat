@@ -15,6 +15,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using FinePrint;
+using FinePrint.Utilities;
 using SCANsat.SCAN_Platform;
 using SCANsat;
 using SCANsat.SCAN_UI.UI_Framework;
@@ -33,6 +35,7 @@ namespace SCANsat.SCAN_UI
 		private SCANdata data;
 		private Vessel v;
 		private double degreeOffset;
+		private double vlat, vlon;
 		private float lastUpdate = 0f;
 		private float updateInterval = 0.2f;
 		private double slopeAVG;
@@ -72,6 +75,9 @@ namespace SCANsat.SCAN_UI
 		{
 			v = FlightGlobals.ActiveVessel;
 
+			vlat = SCANUtil.fixLatShift(v.latitude);
+			vlon = SCANUtil.fixLonShift(v.longitude);
+
 			//Grab the active scanners on this vessel
 			sensors = SCANcontroller.controller.activeSensorsOnVessel(v.id);
 
@@ -79,15 +85,15 @@ namespace SCANsat.SCAN_UI
 			if (true)
 			{
 				//Check if region below the vessel is scanned
-				if (SCANUtil.isCovered(v.longitude, v.latitude, data, SCANtype.AltimetryLoRes))
+				if (SCANUtil.isCovered(vlon, vlat, data, SCANtype.AltimetryLoRes))
 				{
 					sensors |= SCANtype.Altimetry;
 				}
-				else if (SCANUtil.isCovered(v.longitude, v.latitude, data, SCANtype.AltimetryHiRes))
+				else if (SCANUtil.isCovered(vlon, vlat, data, SCANtype.AltimetryHiRes))
 				{
 					sensors |= SCANtype.Altimetry;
 				}
-				if (SCANUtil.isCovered(v.longitude, v.latitude, data, SCANtype.Biome))
+				if (SCANUtil.isCovered(vlon, vlat, data, SCANtype.Biome))
 				{
 					sensors |= SCANtype.Biome;
 				}
@@ -99,17 +105,15 @@ namespace SCANsat.SCAN_UI
 			versionLabel(id);				/* Standard version label and close button */
 			closeBox(id);
 
-			int parts = 0;
-
 			growS();
 			if (notMappingToday) noData(id);		/* to be shown when power is out *FixMe - non-functional */
 			else
 			{
 				locationInfo(id);					/* always-on indicator for current lat/long */
-				if (altInfo(id)) ++parts;			/* show current altitude and slope */
-				if (anomalyInfo(id)) ++parts;		/* show nearest anomaly detail - including BTDT view */
-				if (biomeInfo(id)) ++parts;			/* show current biome info */
-				if (parts <= 0) noData(id);			/* nothing to show */
+				altInfo(id);						/* show current altitude and slope */
+				biomeInfo(id);						/* show current biome info */
+				anomalyInfo(id);					/* show nearest anomaly detail - including BTDT view */
+				//if (parts <= 0) noData(id);		/* nothing to show */
 			}
 			stopS();
 		}
@@ -139,24 +143,39 @@ namespace SCANsat.SCAN_UI
 		//Displays current vessel location info
 		private void locationInfo(int id)
 		{
-			GUILayout.Label(string.Format("Lat: {0:F2}°, Lon: {1:F2}°", SCANUtil.fixLatShift(v.latitude), SCANUtil.fixLonShift(v.longitude)), SCANskins.SCAN_insColorLabel);
+			GUILayout.Label(string.Format("Lat: {0:F2}°, Lon: {1:F2}°", vlat, vlon), SCANskins.SCAN_insColorLabel);
 			fillS(-10);
 		}
 
 		//Display current biome info
-		private bool biomeInfo(int id)
+		private void biomeInfo(int id)
 		{
 			if ((sensors & SCANtype.Biome) != SCANtype.Nothing && v.mainBody.BiomeMap != null)
 			{
-				GUILayout.Label(string.Format("Biome: {0}", SCANUtil.getBiomeName(v.mainBody, v.longitude, v.latitude)), SCANskins.SCAN_insColorLabel);
+				GUILayout.Label(string.Format("Biome: {0}", SCANUtil.getBiomeName(v.mainBody, vlon, vlat)), SCANskins.SCAN_insColorLabel);
 				fillS(-10);
-				return true;
 			}
-			return false;
+
+			if (WaypointManager.Instance() != null)
+			{
+				foreach (SCANwaypoint p in data.Waypoints)
+				{
+					double range = waypointRange(p);
+
+					if (!SCANUtil.isCovered(p.Longitude, p.Latitude, data, SCANtype.Biome))
+						continue;
+
+					if (WaypointManager.Instance().Distance(vlat, vlon, v.altitude, p.Latitude, p.Longitude, v.altitude, data.Body) <= range)
+					{
+						GUILayout.Label(string.Format("Waypoint: {0}", p.Name), SCANskins.SCAN_insColorLabel);
+						break;
+					}
+				}
+			}
 		}
 
 		//Display the current vessel altitude
-		private bool altInfo(int id)
+		private void altInfo(int id)
 		{
 			if ((sensors & SCANtype.Altimetry) != SCANtype.Nothing)
 			{
@@ -191,20 +210,18 @@ namespace SCANsat.SCAN_UI
 						 * Note: Averageing is not the most accurate method
 						 */
 
-						double lon = v.longitude;
-						double lat = v.latitude;
-						double latOffset = degreeOffset * Math.Cos(Mathf.Deg2Rad * lat);
+						double latOffset = degreeOffset * Math.Cos(Mathf.Deg2Rad * vlat);
 						double[] e = new double[9];
 						double[] s = new double[8];
 						e[0] = pqs;
-						e[1] = SCANUtil.getElevation(v.mainBody, lon + latOffset, lat);
-						e[2] = SCANUtil.getElevation(v.mainBody, lon - latOffset, lat);
-						e[3] = SCANUtil.getElevation(v.mainBody, lon, lat + latOffset);
-						e[4] = SCANUtil.getElevation(v.mainBody, lon, lat - latOffset);
-						e[5] = SCANUtil.getElevation(v.mainBody, lon + latOffset, lat + latOffset);
-						e[6] = SCANUtil.getElevation(v.mainBody, lon + latOffset, lat - latOffset);
-						e[7] = SCANUtil.getElevation(v.mainBody, lon - latOffset, lat + latOffset);
-						e[8] = SCANUtil.getElevation(v.mainBody, lon - latOffset, lat - latOffset);
+						e[1] = SCANUtil.getElevation(v.mainBody, vlon + latOffset, vlat);
+						e[2] = SCANUtil.getElevation(v.mainBody, vlon - latOffset, vlat);
+						e[3] = SCANUtil.getElevation(v.mainBody, vlon, vlat + latOffset);
+						e[4] = SCANUtil.getElevation(v.mainBody, vlon, vlat - latOffset);
+						e[5] = SCANUtil.getElevation(v.mainBody, vlon + latOffset, vlat + latOffset);
+						e[6] = SCANUtil.getElevation(v.mainBody, vlon + latOffset, vlat - latOffset);
+						e[7] = SCANUtil.getElevation(v.mainBody, vlon - latOffset, vlat + latOffset);
+						e[8] = SCANUtil.getElevation(v.mainBody, vlon - latOffset, vlat - latOffset);
 
 						/* Calculate rise for each point on the grid
 						 * The distance is 5m for adjacent points and 7.071m for the points on the corners
@@ -227,14 +244,11 @@ namespace SCANsat.SCAN_UI
 					GUILayout.Label(string.Format("Slope: {0:F2}°", slopeAVG), SCANskins.SCAN_insColorLabel);
 					fillS(-10);
 				}
-
-				return true;
 			}
-			return false;
 		}
 
 		//Display info on the nearest anomaly *Need to separate the BTDT display*
-		private bool anomalyInfo(int id)
+		private void anomalyInfo(int id)
 		{
 			if ((sensors & SCANtype.AnomalyDetail) != SCANtype.Nothing)
 			{
@@ -278,11 +292,26 @@ namespace SCANsat.SCAN_UI
 							}
 						}
 					}
-					return true;
 				}
-				return false;
 			}
-			return false;
+		}
+
+		private double waypointRange(SCANwaypoint p)
+		{
+			double min = ContractDefs.Survey.MinimumTriggerRange;
+			double max = ContractDefs.Survey.MaximumTriggerRange;
+
+			switch (p.Band)
+			{
+				case FlightBand.GROUND:
+					return min;
+				case FlightBand.LOW:
+					return (min + max) / 2;
+				case FlightBand.HIGH:
+					return max;
+				default:
+					return max;
+			}
 		}
 
 		private void planetConstants (CelestialBody b)

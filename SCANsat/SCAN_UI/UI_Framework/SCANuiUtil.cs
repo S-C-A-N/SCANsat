@@ -188,11 +188,11 @@ namespace SCANsat.SCAN_UI.UI_Framework
 				if (SCANcontroller.controller.map_waypoints && WaypointManager.Instance() != null)
 				{
 					double range = ContractDefs.Survey.MaximumTriggerRange;
-					foreach (Waypoint p in data.Waypoints)
+					foreach (SCANwaypoint p in data.Waypoints)
 					{
-						if (WaypointManager.Instance().Distance(lat, lon, p.altitude, p.latitude, p.longitude, p.altitude, body) <= range)
+						if (WaypointManager.Instance().Distance(lat, lon, p.Way.altitude, p.Latitude, p.Longitude, p.Way.altitude, body) <= range)
 						{
-							info += p.name + " ";
+							info += p.Name + " ";
 							break;
 						}
 					}
@@ -264,11 +264,11 @@ namespace SCANsat.SCAN_UI.UI_Framework
 				if (SCANcontroller.controller.map_waypoints)
 				{
 					double range = ContractDefs.Survey.MaximumTriggerRange;
-					foreach (Waypoint p in data.Waypoints)
+					foreach (SCANwaypoint p in data.Waypoints)
 					{
-						if (WaypointManager.Instance().Distance(lat, lon, p.altitude, p.latitude, p.longitude, p.altitude, body) <= range)
+						if (WaypointManager.Instance().Distance(lat, lon, p.Way.altitude, p.Latitude, p.Longitude, p.Way.altitude, body) <= range)
 						{
-							info += p.name + " ";
+							info += p.Name + " ";
 							break;
 						}
 					}
@@ -490,9 +490,9 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			}
 			if (showWaypoints)
 			{
-				foreach (Waypoint p in data.Waypoints)
+				foreach (SCANwaypoint p in data.Waypoints)
 				{
-					drawWaypointLabel(maprect, map, p);
+					drawWaypointLabel(maprect, map, p, data);
 				}
 			}
 			if (vessel != null)
@@ -527,14 +527,18 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			drawLabel(r, txt, true, true, true);
 		}
 
-		private static void drawWaypointLabel(Rect maprect, SCANmap map, Waypoint p)
+		private static void drawWaypointLabel(Rect maprect, SCANmap map, SCANwaypoint p, SCANdata data)
 		{
-			double lon = SCANUtil.fixLon(p.longitude);
-			double lat = SCANUtil.fixLat(p.latitude);
+			double lon = SCANUtil.fixLon(p.Longitude);
+			double lat = SCANUtil.fixLat(p.Latitude);
+
+			if (!SCANUtil.isCovered(lon, lat, data, SCANtype.Biome))
+				return;
+
 			if (map != null)
 			{
-				lat = SCANUtil.fixLat(map.projectLatitude(p.longitude, p.latitude));
-				lon = SCANUtil.fixLon(map.projectLongitude(p.longitude, p.latitude));
+				lat = SCANUtil.fixLat(map.projectLatitude(p.Longitude, p.Latitude));
+				lon = SCANUtil.fixLon(map.projectLongitude(p.Longitude, p.Latitude));
 				lat = map.scaleLatitude(lat);
 				lon = map.scaleLongitude(lon);
 				if (lat < 0 || lon < 0 || lat > 180 || lon > 360)
