@@ -30,6 +30,12 @@ namespace SCANsat.SCAN_Data
 		private CelestialBody body;
 		private float? clampTerrain;
 
+		private float defaultMinHeight, defaultMaxHeight;
+		private Palette defaultPalette;
+		private int defaultPaletteSize;
+		private bool defaultReverse, defaultDiscrete;
+		private float? defaultClamp;
+
 		internal SCANterrainConfig(float min, float max, float? clamp, Palette color, int size, bool reverse, bool discrete, CelestialBody b)
 		{
 			minHeightRange = min;
@@ -47,6 +53,8 @@ namespace SCANsat.SCAN_Data
 			body = b;
 			name = body.name;
 			index = body.flightGlobalsIndex;
+
+			setDefaultValues();
 		}
 
 		public SCANterrainConfig()
@@ -84,6 +92,8 @@ namespace SCANsat.SCAN_Data
 			else
 				clampTerrain = null;
 
+			setDefaultValues();
+
 			SCANUtil.SCANdebugLog("SCANsat Terrain Config Decode");
 			SCANUtil.SCANdebugLog("-------->Body Name             =>   {0}", name);
 			SCANUtil.SCANdebugLog("-------->Body Index            =>   {0}", index);
@@ -96,6 +106,17 @@ namespace SCANsat.SCAN_Data
 			SCANUtil.SCANdebugLog("-------->Palette Discrete      =>   {0}", paletteDiscrete);
 		}
 
+		private void setDefaultValues()
+		{
+			defaultMinHeight = minHeightRange;
+			defaultMaxHeight = maxHeightRange;
+			defaultClamp = clampTerrain;
+			defaultPalette = colorPal;
+			defaultPaletteSize = paletteSize;
+			defaultDiscrete = paletteDiscrete;
+			defaultReverse = paletteReverse;
+		}
+
 		public override void OnEncodeToConfigNode()
 		{
 			SCANUtil.SCANdebugLog("Saving Terrain Node");
@@ -103,6 +124,8 @@ namespace SCANsat.SCAN_Data
 				clampHeight = "Null";
 			else
 				clampHeight = clampTerrain.Value.ToString("F0");
+
+			paletteName = colorPal.name;
 		}
 
 		public float MinTerrain
@@ -169,6 +192,41 @@ namespace SCANsat.SCAN_Data
 		public string Name
 		{
 			get { return name; }
+		}
+
+		public float DefaultMinHeight
+		{
+			get { return defaultMinHeight; }
+		}
+
+		public float DefaultMaxHeight
+		{
+			get { return defaultMaxHeight; }
+		}
+
+		public float? DefaultClampHeight
+		{
+			get { return defaultClamp; }
+		}
+
+		public Palette DefaultPalette
+		{
+			get { return defaultPalette; }
+		}
+
+		public int DefaultPaletteSize
+		{
+			get { return defaultPaletteSize; }
+		}
+
+		public bool DefaultReverse
+		{
+			get { return defaultReverse; }
+		}
+
+		public bool DefaultDiscrete
+		{
+			get { return defaultDiscrete; }
 		}
 	}
 

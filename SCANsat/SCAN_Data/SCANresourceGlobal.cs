@@ -16,7 +16,11 @@ namespace SCANsat.SCAN_Data
 		[Persistent]
 		private Color highResourceColor;
 		[Persistent]
-		private float resourceTransparency;
+		private float resourceTransparency = 20;
+		[Persistent]
+		private float defaultMinValue = 0.001f;
+		[Persistent]
+		private float defaultMaxValue = 0.1f;
 		[Persistent]
 		private List<SCANresourceBody> Resource_Planetary_Config = new List<SCANresourceBody>();
 
@@ -26,17 +30,25 @@ namespace SCANsat.SCAN_Data
 		private SCANresourceType resourceType;
 		private SCANresource_Source source;
 
+		private Color defaultLowColor;
+		private Color defaultHighColor;
+		private float defaultTrans;
+
 		private SCANresourceBody currentBody;
 
-		internal SCANresourceGlobal(string resource, float trans, Color minC, Color maxC, SCANresourceType t, int S)
+		internal SCANresourceGlobal(string resource, float trans, float defMin, float defMax, Color minC, Color maxC, SCANresourceType t, int S)
 		{
 			name = resource;
 			resourceTransparency = trans;
 			lowResourceColor = minC;
 			highResourceColor = maxC;
+			defaultMinValue = defMin;
+			defaultMaxValue = defMax;
 			resourceType = t;
 			sType = resourceType.Type;
 			source = (SCANresource_Source)S;
+
+			setDefaultValues();
 		}
 
 		public SCANresourceGlobal()
@@ -54,6 +66,11 @@ namespace SCANsat.SCAN_Data
 			resourceType = copy.resourceType;
 			source = copy.source;
 			masterBodyConfigs = copyBodyConfigs(copy);
+			defaultLowColor = copy.defaultLowColor;
+			defaultHighColor = copy.defaultHighColor;
+			defaultTrans = copy.defaultTrans;
+			defaultMinValue = copy.defaultMinValue;
+			defaultMaxValue = copy.defaultMaxValue;
 		}
 
 		private Dictionary<string, SCANresourceBody> copyBodyConfigs(SCANresourceGlobal c)
@@ -77,6 +94,8 @@ namespace SCANsat.SCAN_Data
 			sType = resourceType.Type;
 			source = (SCANresource_Source)2;
 
+			setDefaultValues();
+
 			SCANUtil.SCANdebugLog("Resource Global Decode");
 			SCANUtil.SCANdebugLog("-------->Resource Name           =>   {0}", name);
 			SCANUtil.SCANdebugLog("-------->Resource Transparency   =>   {0}", resourceTransparency);
@@ -93,6 +112,13 @@ namespace SCANsat.SCAN_Data
 			{
 				SCANUtil.SCANlog("Error while loading SCANsat body resource config settings: {0}", e);
 			}
+		}
+
+		private void setDefaultValues()
+		{
+			defaultLowColor = lowResourceColor;
+			defaultHighColor = highResourceColor;
+			defaultTrans = resourceTransparency;
 		}
 
 		public override void OnEncodeToConfigNode()
@@ -114,6 +140,16 @@ namespace SCANsat.SCAN_Data
 				masterBodyConfigs.Add(s, r);
 			else if (warn)
 				Debug.LogError(string.Format("[SCANsat] Warning: SCANresource Dictionary Already Contains Key Of This Type: [{0}] For Body: [{1}]", r.ResourceName, s));
+		}
+
+		public void updateBodyConfig(SCANresourceBody b)
+		{
+			SCANresourceBody update = getBodyConfig(b.BodyName);
+			if (update != null)
+			{
+				update.MinValue = b.MinValue;
+				update.MaxValue = b.MaxValue;
+			}
 		}
 
 		public void logValues(string s)
@@ -157,6 +193,16 @@ namespace SCANsat.SCAN_Data
 		{
 			get { return highResourceColor; }
 			internal set { highResourceColor = value; }
+		}
+
+		public float DefaultMinValue
+		{
+			get { return defaultMinValue; }
+		}
+
+		public float DefaultMaxValue
+		{
+			get { return defaultMaxValue; }
 		}
 
 		public SCANtype SType
@@ -210,6 +256,21 @@ namespace SCANsat.SCAN_Data
 		public SCANresourceBody CurrentBody
 		{
 			get { return currentBody; }
+		}
+
+		public Color DefaultLowColor
+		{
+			get { return defaultLowColor; }
+		}
+
+		public Color DefaultHighColor
+		{
+			get { return defaultHighColor; }
+		}
+
+		public float DefaultTrans
+		{
+			get { return defaultTrans; }
 		}
 	}
 }
