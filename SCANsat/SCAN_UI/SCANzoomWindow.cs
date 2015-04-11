@@ -127,6 +127,11 @@ namespace SCANsat.SCAN_UI
 			spotmap.resetMap(t, false);
 		}
 
+		public SCANmap SpotMap
+		{
+			get { return spotmap; }
+		}
+
 		protected override void DrawWindowPre(int id)
 		{
 			WindowCaption = SCANuiUtil.toDMS(spotmap.CenteredLat, spotmap.CenteredLong);
@@ -362,7 +367,7 @@ namespace SCANsat.SCAN_UI
 							if (spotmap.isMapComplete())
 							{
 								spotmap.centerAround(mlon, mlat);
-								spotmap.resetMap(spotmap.MType, false);
+								spotmap.resetMap();
 								Event.current.Use();
 							}
 						}
@@ -376,7 +381,7 @@ namespace SCANsat.SCAN_UI
 							{
 								spotmap.MapScale = spotmap.MapScale * 1.25f;
 								spotmap.centerAround(mlon, mlat);
-								spotmap.resetMap(spotmap.MType, false);
+								spotmap.resetMap();
 							}
 						}
 					}
@@ -391,7 +396,7 @@ namespace SCANsat.SCAN_UI
 								if (spotmap.MapScale < 2)
 									spotmap.MapScale = 2;
 								spotmap.centerAround(mlon, mlat);
-								spotmap.resetMap(spotmap.MType, false);
+								spotmap.resetMap();
 								Event.current.Use();
 							}
 						}
@@ -415,7 +420,7 @@ namespace SCANsat.SCAN_UI
 			}
 
 			//Draw the actual mouse over info label below the map
-			SCANuiUtil.mouseOverInfoSimple(mlon, mlat, spotmap, data, b, in_map);
+			SCANuiUtil.mouseOverInfoSimple(mlon, mlat, spotmap, data, spotmap.Body, in_map);
 		}
 
 		private void mapLabels(int id)
@@ -423,10 +428,10 @@ namespace SCANsat.SCAN_UI
 			//Draw the orbit overlays
 			if (showOrbit)
 			{
-				SCANuiUtil.drawOrbit(TextureRect, spotmap, v, b);
+				SCANuiUtil.drawOrbit(TextureRect, spotmap, v, spotmap.Body);
 			}
 
-			SCANuiUtil.drawMapLabels(TextureRect, v, spotmap, data, b, showAnomaly, SCANcontroller.controller.map_waypoints);
+			SCANuiUtil.drawMapLabels(TextureRect, v, spotmap, data, spotmap.Body, showAnomaly, SCANcontroller.controller.map_waypoints);
 		}
 
 	}
