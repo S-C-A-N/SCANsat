@@ -27,7 +27,7 @@ namespace SCANsat.SCAN_UI
 {
 	class SCANcolorSelection: SCAN_MBW
 	{
-		private bool dropDown, paletteBox, resourceBox;
+		private bool dropDown, paletteBox, resourceBox, saveWarning;
 		private bool oldReverseState, oldDiscreteState;
 		private bool spaceCenterLock, trackingStationLock, clampState, oldClampState;
 		private Rect ddRect;
@@ -55,7 +55,7 @@ namespace SCANsat.SCAN_UI
 
 		private Vector2 scrollR;
 		private const string lockID = "colorLockID";
-		internal static Rect defaultRect = new Rect(100, 400, 650, 360);
+		internal static Rect defaultRect = new Rect(100, 400, 780, 360);
 
 		//SCAN_MBW objects to sync the color selection fields to the currently displayed map
 		private SCANkscMap kscMapObj;
@@ -69,7 +69,7 @@ namespace SCANsat.SCAN_UI
 			WindowCaption = "S.C.A.N. Color Management";
 			WindowRect = defaultRect;
 			WindowStyle = SCANskins.SCAN_window;
-			WindowOptions = new GUILayoutOption[2] { GUILayout.Width(650), GUILayout.Height(360) };
+			WindowOptions = new GUILayoutOption[2] { GUILayout.Width(780), GUILayout.Height(360) };
 			Visible = false;
 			DragEnabled = true;
 			ClampToScreenOffset = new RectOffset(-450, -450, -250, -250);
@@ -119,7 +119,7 @@ namespace SCANsat.SCAN_UI
 
 			slopeColorPicker = new SCANuiColorPicker(palette.xkcd_Amber, palette.xkcd_Cerulean, true);
 
-			biomeTransSlider = new SCANuiSlider(0, 100, SCANcontroller.controller.biomeTransparency, "Ter. Trans: ", "%", 0);
+			biomeTransSlider = new SCANuiSlider(0, 80, SCANcontroller.controller.biomeTransparency, "Ter. Trans: ", "%", 0);
 
 			biomeColorPicker = new SCANuiColorPicker(SCANcontroller.controller.lowBiomeColor, SCANcontroller.controller.highBiomeColor, true);
 
@@ -286,7 +286,7 @@ namespace SCANsat.SCAN_UI
 			}
 
 			//This updates all of the fields whenever the palette selection is changed
-			if (windowMode == 0 && (currentLegend == null || bodyIndex != data.Body.flightGlobalsIndex))// || currentTerrain.ColorPal.hash != data.TerrainConfig.ColorPal.hash))
+			if (windowMode == 0 && (currentLegend == null || bodyIndex != data.Body.flightGlobalsIndex))
 			{
 				currentTerrain = new SCANterrainConfig(data.TerrainConfig);
 
@@ -307,6 +307,7 @@ namespace SCANsat.SCAN_UI
 			{
 				paletteBox = false;
 				resourceBox = false;
+				saveWarning = false;
 			}
 		}
 
@@ -326,7 +327,6 @@ namespace SCANsat.SCAN_UI
 					fillS(8);
 					growE();
 					palettePreview(id);			/* Draws the two preview palette legends */
-					fillS(10);
 					paletteConfirmation(id);	/* The buttons for default, apply, and cancel */
 					stopE();
 				}
@@ -339,9 +339,9 @@ namespace SCANsat.SCAN_UI
 				else if (windowMode == 2)
 				{
 					growE();
-						fillS(20);
+						fillS(10);
 						biomeColorPicker.drawColorSelector(WindowRect);
-						fillS(70);
+						fillS(80);
 						growS();
 							biomeOptions(id);
 							biomeConfirm(id);
@@ -351,9 +351,9 @@ namespace SCANsat.SCAN_UI
 				else if (windowMode == 3 && SCANconfigLoader.GlobalResource)
 				{
 					growE();
-						fillS(20);
+						fillS(10);
 						resourceColorPicker.drawColorSelector(WindowRect);
-						fillS(70);
+						fillS(90);
 						growS();
 							resourceOptions(id);
 							resourceConfirm(id);
@@ -520,6 +520,8 @@ namespace SCANsat.SCAN_UI
 					windowMode = 2;
 
 					fineControlMode = oldFineControl = false;
+
+					biomeColorPicker.updateOldSwatches();
 				}
 				if (SCANconfigLoader.GlobalResource)
 				{
@@ -546,7 +548,7 @@ namespace SCANsat.SCAN_UI
 				GUILayout.Label("Palette Selection", SCANskins.SCAN_headline);
 				fillS(12);
 				growE();
-					if (GUILayout.Button("Palette Style:", SCANskins.SCAN_buttonFixed, GUILayout.MaxWidth(120)))
+					if (GUILayout.Button("Palette Style:", GUILayout.MaxWidth(120)))
 					{
 						dropDown = !dropDown;
 						paletteBox = !paletteBox;
@@ -634,9 +636,9 @@ namespace SCANsat.SCAN_UI
 				}
 
 				growE();
-					currentTerrain.PalRev = GUILayout.Toggle(currentTerrain.PalRev, "Reverse Order", SCANskins.SCAN_settingsToggle);
+					currentTerrain.PalRev = GUILayout.Toggle(currentTerrain.PalRev, " Reverse Order", SCANskins.SCAN_boldToggle, GUILayout.Width(120));
 					fillS(10);
-					currentTerrain.PalDis = GUILayout.Toggle(currentTerrain.PalDis, "Discrete Gradient", SCANskins.SCAN_settingsToggle);
+					currentTerrain.PalDis = GUILayout.Toggle(currentTerrain.PalDis, " Discrete Gradient", SCANskins.SCAN_boldToggle, GUILayout.Width(140));
 				stopE();
 
 			stopS();
@@ -647,7 +649,6 @@ namespace SCANsat.SCAN_UI
 		{
 			growS();
 				GUILayout.Label("Current Palette", SCANskins.SCAN_headlineSmall);
-				fillS(8);
 				GUILayout.Label("", SCANskins.SCAN_legendTex, GUILayout.Width(180), GUILayout.Height(25));
 				Rect r = GUILayoutUtility.GetLastRect();
 				GUI.DrawTexture(r, currentLegend.Legend);
@@ -655,7 +656,6 @@ namespace SCANsat.SCAN_UI
 			fillS(8);
 			growS();
 				GUILayout.Label("New Palette", SCANskins.SCAN_headlineSmall);
-				fillS(8);
 				GUILayout.Label("", SCANskins.SCAN_legendTex, GUILayout.Width(180), GUILayout.Height(25));
 				r = GUILayoutUtility.GetLastRect();
 				GUI.DrawTexture(r, previewLegend.Legend);
@@ -667,41 +667,55 @@ namespace SCANsat.SCAN_UI
 		{
 			growS();
 				fillS(6);
-				if (GUILayout.Button("Default Values", GUILayout.Width(135)))
-				{
-					currentTerrain.MinTerrain = data.DefaultMinHeight;
-					currentTerrain.MaxTerrain = data.DefaultMaxHeight;
-					currentTerrain.ClampTerrain = data.DefaultClampHeight;
-					currentTerrain.ColorPal = data.DefaultColorPalette;
-					currentTerrain.PalRev = data.DefaultReversePalette;
-					currentTerrain.PalDis = false;
-					currentTerrain.PalSize = data.DefaultColorPalette.size;
-					
-					updateUI();
+					growE();
+						if (!dropDown)
+						{
+							if (GUILayout.Button("Apply Values", GUILayout.Width(110)))
+							{
+								SCANcontroller.updateTerrainConfig(currentTerrain);
 
-					if (bigMap != null)
-						bigMap.resetMap();
-				}
-				fillS(6);
-				growE();
-					if (GUILayout.Button("Apply Values", GUILayout.Width(60)))
-					{
-						SCANcontroller.updateTerrainConfig(currentTerrain);
+								updateUI();
 
-						updateUI();
+								if (bigMap != null)
+									bigMap.resetMap();
+							}
 
-						if (bigMap != null)
-							bigMap.resetMap();
-					}
-					fillS(10);
-					if (GUILayout.Button("Cancel", GUILayout.Width(60)))
-					{
-						InputLockManager.RemoveControlLock(lockID);
-						spaceCenterLock = false;
-						trackingStationLock = false;
-						Visible = false;
-					}
+							fillS(6);
+
+							if (GUILayout.Button("Default Values", GUILayout.Width(110)))
+							{
+								currentTerrain.MinTerrain = data.DefaultMinHeight;
+								currentTerrain.MaxTerrain = data.DefaultMaxHeight;
+								currentTerrain.ClampTerrain = data.DefaultClampHeight;
+								currentTerrain.ColorPal = data.DefaultColorPalette;
+								currentTerrain.PalRev = data.DefaultReversePalette;
+								currentTerrain.PalDis = false;
+								currentTerrain.PalSize = data.DefaultColorPalette.size;
+
+								updateUI();
+
+								if (bigMap != null)
+									bigMap.resetMap();
+							}
+						}
+						else
+						{
+							GUILayout.Label("Apply Values", SCANskins.SCAN_button, GUILayout.Width(110));
+							fillS(6);
+							GUILayout.Label("Default Values", SCANskins.SCAN_button, GUILayout.Width(110));
+						}
 				stopE();
+				fillS(8);
+				if (!dropDown)
+				{
+					if (GUILayout.Button("Save Values To Config", GUILayout.Width(180)))
+					{
+						dropDown = true;
+						saveWarning = true;
+					}
+				}
+				else
+					GUILayout.Label("Save Values To Config", SCANskins.SCAN_button, GUILayout.Width(180));
 			stopS();
 		}
 
@@ -724,7 +738,7 @@ namespace SCANsat.SCAN_UI
 
 			fillS(10);
 			growE();
-				if (GUILayout.Button("Resource Selection", SCANskins.SCAN_buttonFixed))
+				if (GUILayout.Button("Resource Selection:"))
 				{
 					dropDown = !dropDown;
 					resourceBox = !resourceBox;
@@ -735,7 +749,10 @@ namespace SCANsat.SCAN_UI
 			fillS(20);
 			growE();
 				fillS(110);
-				fineControlMode = GUILayout.Toggle(fineControlMode, "Fine Control Mode", SCANskins.SCAN_settingsToggle);
+				if (dropDown)
+					GUILayout.Toggle(fineControlMode, " Fine Control Mode", SCANskins.SCAN_boldToggle, GUILayout.Width(140));
+				else
+					fineControlMode = GUILayout.Toggle(fineControlMode, " Fine Control Mode", SCANskins.SCAN_boldToggle, GUILayout.Width(140));
 			stopE();
 			growE();
 				fillS(10);
@@ -756,135 +773,179 @@ namespace SCANsat.SCAN_UI
 		private void biomeConfirm(int id)
 		{
 			fillS(10);
-			if (GUILayout.Button("Default Values", GUILayout.Width(135)))
-			{
-				SCANcontroller.controller.lowBiomeColor = SCANcontroller.controller.defaultLowBiomeColor;
-				SCANcontroller.controller.highBiomeColor = SCANcontroller.controller.defaultHighBiomeColor;
-				SCANcontroller.controller.useStockBiomes = false;
-				SCANcontroller.controller.biomeTransparency = 40f;
 
-				stockBiomes = false;
-
-				biomeColorPicker = new SCANuiColorPicker(SCANcontroller.controller.lowBiomeColor, SCANcontroller.controller.highBiomeColor, biomeColorPicker.LowColorChange);
-
-				biomeColorPicker.updateOldSwatches();
-
-				bTrans = SCANcontroller.controller.biomeTransparency;
-
-				if (bigMap != null)
-					bigMap.resetMap();
-			}
-			fillS(6);
 			growE();
-			if (GUILayout.Button("Apply Values", GUILayout.Width(60)))
-			{
-				SCANcontroller.controller.lowBiomeColor = biomeColorPicker.ColorLow;
-				SCANcontroller.controller.highBiomeColor = biomeColorPicker.ColorHigh;
-				SCANcontroller.controller.useStockBiomes = stockBiomes;
-				SCANcontroller.controller.biomeTransparency = bTrans;
+				if (!dropDown)
+				{
+					if (GUILayout.Button("Apply Values", GUILayout.Width(110)))
+					{
+						SCANcontroller.controller.lowBiomeColor = biomeColorPicker.ColorLow;
+						SCANcontroller.controller.highBiomeColor = biomeColorPicker.ColorHigh;
+						SCANcontroller.controller.useStockBiomes = stockBiomes;
+						SCANcontroller.controller.biomeTransparency = bTrans;
 
-				biomeColorPicker.updateOldSwatches();
+						biomeColorPicker.updateOldSwatches();
 
-				if (bigMap != null)
-					bigMap.resetMap();
-			}
-			fillS(10);
-			if (GUILayout.Button("Cancel", GUILayout.Width(60)))
-			{
-				InputLockManager.RemoveControlLock(lockID);
-				spaceCenterLock = false;
-				trackingStationLock = false;
-				Visible = false;
-			}
+						if (bigMap != null)
+							bigMap.resetMap();
+					}
+
+					fillS(8);
+
+					if (GUILayout.Button("Default Values", GUILayout.Width(110)))
+					{
+						SCANcontroller.controller.lowBiomeColor = SCANcontroller.controller.defaultLowBiomeColor;
+						SCANcontroller.controller.highBiomeColor = SCANcontroller.controller.defaultHighBiomeColor;
+						SCANcontroller.controller.useStockBiomes = false;
+						SCANcontroller.controller.biomeTransparency = 40f;
+
+						stockBiomes = false;
+
+						biomeColorPicker = new SCANuiColorPicker(SCANcontroller.controller.lowBiomeColor, SCANcontroller.controller.highBiomeColor, biomeColorPicker.LowColorChange);
+
+						biomeColorPicker.updateOldSwatches();
+
+						bTrans = SCANcontroller.controller.biomeTransparency;
+
+						if (bigMap != null)
+							bigMap.resetMap();
+					}
+				}
+				else
+				{
+					GUILayout.Label("Apply Values", SCANskins.SCAN_button, GUILayout.Width(110));
+					fillS(8);
+					GUILayout.Label("Default Values", SCANskins.SCAN_button, GUILayout.Width(110));
+				}
 			stopE();
+			fillS(8);
+			if (!dropDown)
+			{
+				if (GUILayout.Button("Save Values To Config", GUILayout.Width(180)))
+				{
+					dropDown = true;
+					saveWarning = true;
+				}
+			}
+			else
+				GUILayout.Label("Save Values To Config", SCANskins.SCAN_button, GUILayout.Width(180));
 		}
 
 		private void resourceConfirm(int id)
 		{
 			fillS(10);
 			growE();
-			if (GUILayout.Button("Apply Values", GUILayout.Width(100)))
-			{
-				currentResource.MinColor = resourceColorPicker.ColorLow;
-				currentResource.MaxColor = resourceColorPicker.ColorHigh;
-
-				SCANcontroller.updateSCANresource(currentResource, false);
-
-				updateUI();
-
-				if (bigMap != null)
-					bigMap.resetMap();
-			}
-
-				fillS(6);
-
-				if (GUILayout.Button("Apply To All Planets", GUILayout.Width(120)))
+				if (!dropDown)
 				{
-					for (int i = 0; i < currentResource.getBodyCount; i++)
+					if (GUILayout.Button("Apply Values", GUILayout.Width(110)))
 					{
-						SCANresourceBody r = currentResource.getBodyConfig(i);
-						if (r != null)
-						{
-							r.MinValue = lowRCutoff;
-							r.MaxValue = highRCutoff;
-						}
+						currentResource.MinColor = resourceColorPicker.ColorLow;
+						currentResource.MaxColor = resourceColorPicker.ColorHigh;
+
+						SCANcontroller.updateSCANresource(currentResource, false);
+
+						updateUI();
+
+						if (bigMap != null)
+							bigMap.resetMap();
 					}
 
-					currentResource.MinColor = resourceColorPicker.ColorLow;
-					currentResource.MaxColor = resourceColorPicker.ColorHigh;
+					fillS(6);
 
-					SCANcontroller.updateSCANresource(currentResource, true);
+					if (GUILayout.Button("Apply To All Planets", GUILayout.Width(200)))
+					{
+						for (int i = 0; i < currentResource.getBodyCount; i++)
+						{
+							SCANresourceBody r = currentResource.getBodyConfig(i);
+							if (r != null)
+							{
+								r.MinValue = lowRCutoff;
+								r.MaxValue = highRCutoff;
+							}
+						}
 
-					updateUI();
+						currentResource.MinColor = resourceColorPicker.ColorLow;
+						currentResource.MaxColor = resourceColorPicker.ColorHigh;
 
-					if (bigMap != null)
-						bigMap.resetMap();
+						SCANcontroller.updateSCANresource(currentResource, true);
+
+						updateUI();
+
+						if (bigMap != null)
+							bigMap.resetMap();
+					}
+				}
+				else
+				{
+					GUILayout.Label("Apply Values", SCANskins.SCAN_button, GUILayout.Width(110));
+					fillS(6);
+					GUILayout.Label("Apply To All Planets", SCANskins.SCAN_button, GUILayout.Width(200));
 				}
 			stopE();
 			fillS(8);
 			growE();
-				if (GUILayout.Button("Default Values", GUILayout.Width(110)))
+				if (!dropDown)
 				{
-					currentResource.CurrentBody.MinValue = currentResource.CurrentBody.DefaultMinValue;
-					currentResource.CurrentBody.MaxValue = currentResource.CurrentBody.DefaultMaxValue;
-					currentResource.MinColor = currentResource.ResourceType.ColorEmpty;
-					currentResource.MaxColor = currentResource.ResourceType.ColorFull;
-					currentResource.Transparency = 20f;
-
-					SCANcontroller.updateSCANresource(currentResource, false);
-
-					updateUI();
-
-					if (bigMap != null)
-						bigMap.resetMap();
-				}
-
-				fillS(6);
-
-				if (GUILayout.Button("Default Values For All Planets", GUILayout.Width(140)))
-				{
-					currentResource.MinColor = currentResource.ResourceType.ColorEmpty;
-					currentResource.MaxColor = currentResource.ResourceType.ColorFull;
-					currentResource.Transparency = 20f;
-
-					for (int i = 0; i < currentResource.getBodyCount; i++)
+					if (GUILayout.Button("Default Values", GUILayout.Width(110)))
 					{
-						SCANresourceBody r = currentResource.getBodyConfig(i);
-						if (r != null)
-						{
-							r.MinValue = r.DefaultMinValue;
-							r.MaxValue = r.DefaultMaxValue;
-						}
+						currentResource.CurrentBody.MinValue = currentResource.CurrentBody.DefaultMinValue;
+						currentResource.CurrentBody.MaxValue = currentResource.CurrentBody.DefaultMaxValue;
+						currentResource.MinColor = currentResource.ResourceType.ColorEmpty;
+						currentResource.MaxColor = currentResource.ResourceType.ColorFull;
+						currentResource.Transparency = 20f;
+
+						SCANcontroller.updateSCANresource(currentResource, false);
+
+						updateUI();
+
+						if (bigMap != null)
+							bigMap.resetMap();
 					}
 
-					SCANcontroller.updateSCANresource(currentResource, true);
+					fillS(6);
 
-					updateUI();
+					if (GUILayout.Button("Default Values For All Planets", GUILayout.Width(200)))
+					{
+						currentResource.MinColor = currentResource.ResourceType.ColorEmpty;
+						currentResource.MaxColor = currentResource.ResourceType.ColorFull;
+						currentResource.Transparency = 20f;
 
-					if (bigMap != null)
-						bigMap.resetMap();
+						for (int i = 0; i < currentResource.getBodyCount; i++)
+						{
+							SCANresourceBody r = currentResource.getBodyConfig(i);
+							if (r != null)
+							{
+								r.MinValue = r.DefaultMinValue;
+								r.MaxValue = r.DefaultMaxValue;
+							}
+						}
+
+						SCANcontroller.updateSCANresource(currentResource, true);
+
+						updateUI();
+
+						if (bigMap != null)
+							bigMap.resetMap();
+					}
+				}
+				else
+				{
+					GUILayout.Label("Default Values", SCANskins.SCAN_button, GUILayout.Width(110));
+					fillS(6);
+					GUILayout.Label("Default Values For All Planets", SCANskins.SCAN_button, GUILayout.Width(200));
 				}
 			stopE();
+			fillS(8);
+			if (!dropDown)
+			{
+				if (GUILayout.Button("Save Values To Config", GUILayout.Width(180)))
+				{
+					dropDown = true;
+					saveWarning = true;
+				}
+			}
+			else
+				GUILayout.Label("Save Values To Config", SCANskins.SCAN_button, GUILayout.Width(180));
 		}
 
 		//Drop down menu for palette selection
@@ -895,7 +956,7 @@ namespace SCANsat.SCAN_UI
 				if (paletteBox && windowMode == 0)
 				{
 					ddRect = new Rect(40, 120, 100, 100);
-					GUI.Box(ddRect, "", SCANskins.SCAN_dropDownBox);
+					GUI.Box(ddRect, "");
 					for (int i = 0; i < Palette.kindNames.Length; i++)
 					{
 						Rect r = new Rect(ddRect.x + 10, ddRect.y + 5 + (i * 23), 80, 22);
@@ -909,8 +970,8 @@ namespace SCANsat.SCAN_UI
 				}
 				else if (resourceBox && windowMode == 3)
 				{
-					ddRect = new Rect(WindowRect.width - 320, 115, 160, 140);
-					GUI.Box(ddRect, "", SCANskins.SCAN_dropDownBox);
+					ddRect = new Rect(WindowRect.width - 440, 115, 160, 140);
+					GUI.Box(ddRect, "");
 					for (int i = 0; i < loadedResources.Count; i ++)
 					{
 						scrollR = GUI.BeginScrollView(ddRect, scrollR, new Rect(0, 0, 140, 23 * loadedResources.Count));
@@ -928,6 +989,25 @@ namespace SCANsat.SCAN_UI
 							resourceBox = false;
 						}
 						GUI.EndScrollView();
+					}
+				}
+				else if (saveWarning)
+				{
+					ddRect = new Rect(WindowRect.width - 182, WindowRect.height - 92, 180, 90);
+					GUI.Box(ddRect, "");
+					Rect r = new Rect(ddRect.x + 10, ddRect.y, 160, 60);
+					GUI.Label(r, "Overwrite Existing Config File?", SCANskins.SCAN_headlineSmall);
+
+					r.x += 40;
+					r.y += 55;
+					r.width = 80;
+					r.height = 30;
+
+					if (GUI.Button(r, "Confirm", SCANskins.SCAN_buttonWarning))
+					{
+						dropDown = false;
+						saveWarning = false;
+						SCANconfigLoader.SCANNode.Save();
 					}
 				}
 				else
@@ -977,7 +1057,6 @@ namespace SCANsat.SCAN_UI
 		{
 			currentLegend = new SCANmapLegend();
 			currentLegend.Legend = currentLegend.getLegend(0, data);
-			//currentLegend = SCANmapLegend.getLegend(0, data);
 		}
 
 		//Draws the palette swatch for the newly adjusted palette
@@ -996,12 +1075,7 @@ namespace SCANsat.SCAN_UI
 		//Resets the palettes whenever the size slider is adjusted
 		private void regenPaletteSets()
 		{
-			//palette.DivPaletteSet = palette.generatePaletteSet((int)paletteSizeSlider.CurrentValue, Palette.Kind.Diverging);
-			//palette.QualPaletteSet = palette.generatePaletteSet((int)paletteSizeSlider.CurrentValue, Palette.Kind.Qualitative);
-			//palette.SeqPaletteSet = palette.generatePaletteSet((int)paletteSizeSlider.CurrentValue, Palette.Kind.Sequential);
-			//palette.FixedPaletteSet = palette.generatePaletteSet(0, Palette.Kind.Fixed);
-			palette.CurrentPalettes = palette.setCurrentPalettesType(palette.CurrentPalettes.paletteType, (int)pSize/*(int)paletteSizeSlider.CurrentValue*/);
-				//palette.setCurrentPalettesType(palette.CurrentPalettes.paletteType);
+			palette.CurrentPalettes = palette.setCurrentPalettesType(palette.CurrentPalettes.paletteType, (int)pSize);
 		}
 
 		//Change the max range on the palette size slider based on palette type
