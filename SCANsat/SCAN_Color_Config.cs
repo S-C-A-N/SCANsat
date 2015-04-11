@@ -63,8 +63,18 @@ namespace SCANsat
 
 		public override void OnEncodeToConfigNode()
 		{
+			SCANUtil.SCANdebugLog("Saving Config Master Node");
 			SCANsat_Altimetry = SCANcontroller.EncodeTerrainConfigs;
 			SCANsat_Resources = SCANcontroller.EncodeResourceConfigs;
+
+			if (SCANcontroller.controller != null)
+			{
+				lowBiomeColor = SCANcontroller.controller.lowBiomeColor;
+				highBiomeColor = SCANcontroller.controller.highBiomeColor;
+				biomeTransparency = SCANcontroller.controller.biomeTransparency;
+				lowSlopeColor = SCANcontroller.controller.lowSlopeColor;
+				highSlopeColor = SCANcontroller.controller.highSlopeColor;
+			}
 		}
 
 		public float DefaultMinHeightRange

@@ -98,6 +98,7 @@ namespace SCANsat.SCAN_Data
 
 		public override void OnEncodeToConfigNode()
 		{
+			SCANUtil.SCANdebugLog("Saving Terrain Node");
 			if (clampTerrain == null)
 				clampHeight = "Null";
 			else

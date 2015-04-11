@@ -99,6 +99,7 @@ namespace SCANsat.SCAN_Data
 		{
 			try
 			{
+				SCANUtil.SCANdebugLog("Saving Master Resource Node");
 				Resource_Planetary_Config = masterBodyConfigs.Values.ToList();
 			}
 			catch (Exception e)
