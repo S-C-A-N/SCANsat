@@ -11,25 +11,29 @@ namespace SCANsat.SCAN_Data
 		internal SCANwaypoint(SurveyWaypointParameter p)
 		{
 			way = reflectWaypoint(p);
-			band = reflectFlightBand(p);
-			root = p.Root;
-			param = p;
-			name = way.name;
-			longitude = SCANUtil.fixLonShift(way.longitude);
-			latitude = SCANUtil.fixLatShift(way.latitude);
-			logWaypointData();
+			if (way != null)
+			{
+				band = reflectFlightBand(p);
+				root = p.Root;
+				param = p;
+				name = way.name;
+				longitude = SCANUtil.fixLonShift(way.longitude);
+				latitude = SCANUtil.fixLatShift(way.latitude);
+			}
 		}
 
 		internal SCANwaypoint(StationaryPointParameter p)
 		{
 			way = reflectWaypoint(p);
-			band = FlightBand.NONE;
-			root = p.Root;
-			param = p;
-			name = way.name;
-			longitude = SCANUtil.fixLonShift(way.longitude);
-			latitude = SCANUtil.fixLatShift(way.latitude);
-			logWaypointData();
+			if (way != null)
+			{
+				band = FlightBand.NONE;
+				root = p.Root;
+				param = p;
+				name = way.name;
+				longitude = SCANUtil.fixLonShift(way.longitude);
+				latitude = SCANUtil.fixLatShift(way.latitude);
+			}
 		}
 
 		internal SCANwaypoint(Waypoint p)
@@ -41,16 +45,6 @@ namespace SCANsat.SCAN_Data
 			name = way.name;
 			longitude = SCANUtil.fixLonShift(way.longitude);
 			latitude = SCANUtil.fixLatShift(way.latitude);
-			logWaypointData();
-		}
-
-		private void logWaypointData()
-		{
-			SCANUtil.SCANdebugLog("Waypoint Assigned -------------");
-			SCANUtil.SCANdebugLog("Waypoint Name:------------{0}", name);
-			SCANUtil.SCANdebugLog("Waypoint Flight Band:------{0}", band);
-			SCANUtil.SCANdebugLog("Waypoint Latitude:----------{0}", latitude);
-			SCANUtil.SCANdebugLog("Waypoint Longitude:------{0}", longitude);
 		}
 
 		private Waypoint way;
