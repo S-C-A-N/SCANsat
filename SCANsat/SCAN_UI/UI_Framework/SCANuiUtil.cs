@@ -269,7 +269,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 					}
 				}
 
-				if (SCANcontroller.controller.map_waypoints)
+				if (SCANcontroller.controller.map_waypoints && WaypointManager.Instance() != null)
 				{
 					double range = ContractDefs.Survey.MaximumTriggerRange;
 					foreach (SCANwaypoint p in data.Waypoints)
@@ -555,9 +555,6 @@ namespace SCANsat.SCAN_UI.UI_Framework
 		{
 			double lon = SCANUtil.fixLon(p.Longitude);
 			double lat = SCANUtil.fixLat(p.Latitude);
-
-			if (!SCANUtil.isCovered(lon, lat, data, SCANtype.Biome))
-				return;
 
 			if (map != null)
 			{
