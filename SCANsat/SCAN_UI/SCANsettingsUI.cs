@@ -142,9 +142,15 @@ namespace SCANsat.SCAN_UI
 				{
 					SCANcontroller.controller.BigMap.TooltipsEnabled = SCANcontroller.controller.toolTips;
 					SCANcontroller.controller.mainMap.TooltipsEnabled = SCANcontroller.controller.toolTips;
+					if (SCANcontroller.controller.BigMap.spotMap != null)
+						SCANcontroller.controller.BigMap.spotMap.TooltipsEnabled = SCANcontroller.controller.toolTips;
 				}
 				if (HighLogic.LoadedScene == GameScenes.SPACECENTER || HighLogic.LoadedScene == GameScenes.TRACKSTATION)
+				{
 					SCANcontroller.controller.kscMap.TooltipsEnabled = SCANcontroller.controller.toolTips;
+					if (SCANcontroller.controller.kscMap.spotMap != null)
+						SCANcontroller.controller.kscMap.spotMap.TooltipsEnabled = SCANcontroller.controller.toolTips;
+				}
 			}
 
 			if (stockToolbar != SCANcontroller.controller.useStockAppLauncher)
@@ -251,7 +257,7 @@ namespace SCANsat.SCAN_UI
 				}
 				else
 				{
-					if (GUILayout.Button(twnames[i], SCANskins.SCAN_buttonFixed))
+					if (GUILayout.Button(twnames[i]))
 						SCANcontroller.controller.timeWarpResolution = twvals[i];
 				}
 			}
@@ -337,7 +343,7 @@ namespace SCANsat.SCAN_UI
 				}
 			stopE();
 			fillS(8);
-			if (GUILayout.Button("Reset window positions", SCANskins.SCAN_buttonFixed))
+			if (GUILayout.Button("Reset window positions"))
 			{
 				if (HighLogic.LoadedSceneIsFlight)
 				{
@@ -370,7 +376,7 @@ namespace SCANsat.SCAN_UI
 				thisBody = getTargetBody(MapView.MapCamera.target);
 			if (thisBody == null)
 				return;
-			if (GUILayout.Button("Fill SCAN map of " + thisBody.theName, SCANskins.SCAN_buttonFixed))
+			if (GUILayout.Button("Fill SCAN map of " + thisBody.theName))
 			{
 				SCANdata data = SCANUtil.getData(thisBody);
 				if (data == null)
@@ -380,7 +386,7 @@ namespace SCANsat.SCAN_UI
 				}
 				data.fillMap();
 			}
-			if (GUILayout.Button("Fill SCAN map for all planets", SCANskins.SCAN_buttonFixed))
+			if (GUILayout.Button("Fill SCAN map for all planets"))
 			{
 				foreach (CelestialBody b in FlightGlobals.Bodies)
 				{
@@ -404,7 +410,7 @@ namespace SCANsat.SCAN_UI
 			{
 				CelestialBody thisBody = FlightGlobals.currentMainBody;
 				warningRect = new Rect(WindowRect.width - (WindowRect.width / 2)- 150, WindowRect.height - 125, 300, 90);
-				GUI.Box(warningRect, "", SCANskins.SCAN_dropDownBox);
+				GUI.Box(warningRect, "");
 				Rect r = new Rect(warningRect.x + 10, warningRect.y + 5, 280, 40);
 				GUI.Label(r, "Erase all data for " + thisBody.theName + "?", SCANskins.SCAN_headlineSmall);
 				r.x += 90;
@@ -422,7 +428,7 @@ namespace SCANsat.SCAN_UI
 			else if (warningBoxAll)
 			{
 				warningRect = new Rect(WindowRect.width - (WindowRect.width / 2) - 120, WindowRect.height - 160, 240, 90);
-				GUI.Box(warningRect, "", SCANskins.SCAN_dropDownBox);
+				GUI.Box(warningRect, "");
 				Rect r = new Rect(warningRect.x + 10, warningRect.y + 5, 220, 40);
 				GUI.Label(r, "Erase <b>all</b> data ?", SCANskins.SCAN_headlineSmall);
 				r.x += 70;
