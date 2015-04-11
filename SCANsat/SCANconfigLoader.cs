@@ -39,9 +39,10 @@ namespace SCANsat
 		internal static void configLoader()
 		{
 			loadSCANtypes();
-			loadResources();
 
 			SCANnode = new SCAN_Color_Config(configFile, configNodeName);
+
+			loadResources();
 		}
 
 		private static void loadSCANtypes()
@@ -50,23 +51,17 @@ namespace SCANsat
 			{
 				string name = "";
 				int i = 0;
-				string colorFull = "";
-				string colorEmpty = "";
 				if (node.HasValue("name"))
 					name = node.GetValue("name");
 				if (node.HasValue("SCANtype"))
 					if (!int.TryParse(node.GetValue("SCANtype"), out i))
 						continue;
-				if (node.HasValue("ColorFull"))
-					colorFull = node.GetValue("ColorFull");
-				if (node.HasValue("ColorEmpty"))
-					colorEmpty = node.GetValue("ColorEmpty");
 
-				SCANcontroller.addToResourceTypes(name, new SCANresourceType(name, i, colorFull, colorEmpty));
+				SCANcontroller.addToResourceTypes(name, new SCANresourceType(name, i));
 			}
 		}
 
-		private static void loadResources() //Repopulates the master resources list with data from config nodes
+		private static void loadResources()
 		{
 			if (SCANmainMenuLoader.RegolithFound)
 			{
@@ -74,44 +69,54 @@ namespace SCANsat
 				{
 					if (node != null)
 					{
-						SCANresourceGlobal resource = null;
-						if ((resource = RegolithGlobalConfigLoad(node)) == null)
+						string name = "";
+						int resourceType;
+
+						if (node.HasValue("ResourceName"))
+							name = node.GetValue("ResourceName");
+						else
 							continue;
 
-						foreach (CelestialBody body in FlightGlobals.Bodies)
-						{
-							SCANresourceBody bodyResource = null;
-							foreach (ConfigNode bodyNode in GameDatabase.Instance.GetConfigNodes("REGOLITH_PLANETARY_RESOURCE"))
-							{
-								if (bodyNode != null)
-								{
-									bodyResource = RegolithConfigLoad(bodyNode);
-									if (bodyResource == null)
-										continue;
+						if (!int.TryParse(node.GetValue("ResourceType"), out resourceType))
+							continue;
+						if (resourceType != 0)
+							continue;
 
-									if (bodyResource.Body.name == body.name)
-									{
-										if (bodyResource.ResourceName == resource.Name)
-											break;
-										else
-										{
-											bodyResource = null;
-											continue;
-										}
-									}
-									bodyResource = null;
+						SCANresourceGlobal resource = SCANcontroller.getResourceNode(name);
+
+						if (resource != null)
+						{
+							foreach (CelestialBody b in FlightGlobals.Bodies)
+							{
+								SCANresourceBody rBody = resource.getBodyConfig(b.name);
+								if (rBody == null)
+								{
+									SCANresourceBody bodyResource = RegolithConfigLoad(b, resource);
+
+									if (bodyResource != null)
+										resource.addToBodyConfigs(b.name, bodyResource, true);
+									else
+										resource.addToBodyConfigs(b.name, new SCANresourceBody(resource.Name, b, resource.DefaultMinValue, resource.DefaultMaxValue), true);
 								}
 							}
-							if (bodyResource != null)
-							{
-								resource.addToBodyConfigs(bodyResource.Body.name, bodyResource, false);
-							}
-							else
-								resource.addToBodyConfigs(body.name, new SCANresourceBody(resource.Name, body, 0.001f, 10f), false);
+							SCANcontroller.addToLoadedResourceNames(resource.Name);
 						}
+						else
+						{
+							if ((resource = RegolithGlobalConfigLoad(node)) == null)
+								continue;
 
-						SCANcontroller.addToLoadedResourceNames(resource.Name);
-						SCANcontroller.addToResourceData(resource.Name, resource);
+							foreach (CelestialBody body in FlightGlobals.Bodies)
+							{
+								SCANresourceBody bodyResource = RegolithConfigLoad(body, resource);
+
+								if (bodyResource != null)
+									resource.updateBodyConfig(bodyResource);
+							}
+
+							SCANcontroller.addToLoadedResourceNames(resource.Name);
+							SCANcontroller.addToResourceData(resource.Name, resource);
+						}
 					}
 				}
 			}
@@ -201,13 +206,13 @@ namespace SCANsat
 				if (distNode.HasValue("MaxAbundance"))
 				{
 					if (!float.TryParse(distNode.GetValue("MaxAbundance"), out max))
-						max = 10f;
+						max = 0.1f;
 				}
 			}
 			if (min == max)
 				max += 0.001f;
 
-			SCANresourceGlobal res = new SCANresourceGlobal(name, 40, type.ColorEmpty, type.ColorFull, type, 2);
+			SCANresourceGlobal res = new SCANresourceGlobal(name, 20, min, max, palette.magenta, palette.cb_reddishPurple, type, 2);
 
 			foreach (CelestialBody b in FlightGlobals.Bodies)
 			{
@@ -215,10 +220,36 @@ namespace SCANsat
 				res.addToBodyConfigs(b.name, r, true);
 			}
 
-			if (res != null)
-				return res;
+			return res;
+		}
 
-			return null;
+		private static SCANresourceBody RegolithConfigLoad(CelestialBody body, SCANresourceGlobal r)
+		{
+			SCANresourceBody bodyResource = null;
+
+			foreach (ConfigNode bodyNode in GameDatabase.Instance.GetConfigNodes("REGOLITH_PLANETARY_RESOURCE"))
+			{
+				if (bodyNode != null)
+				{
+					bodyResource = RegolithConfigLoad(bodyNode);
+					if (bodyResource == null)
+						continue;
+
+					if (bodyResource.Body.name == body.name)
+					{
+						if (bodyResource.ResourceName == r.Name)
+							break;
+						else
+						{
+							bodyResource = null;
+							continue;
+						}
+					}
+					bodyResource = null;
+				}
+			}
+
+			return bodyResource;
 		}
 
 		private static SCANresourceBody RegolithConfigLoad(ConfigNode node)
@@ -270,12 +301,9 @@ namespace SCANsat
 			if (min == max)
 				max += 0.001f;
 
-			SCANresourceBody SCANres = new SCANresourceBody(name, b, min, max);
+			SCANresourceBody bodyRes = new SCANresourceBody(name, b, min, max);
 
-			if (SCANres != null)
-				return SCANres;
-
-			return null;
+			return bodyRes;
 		}
 
 		private static SCANresourceType OverlayResourceType(string s)
