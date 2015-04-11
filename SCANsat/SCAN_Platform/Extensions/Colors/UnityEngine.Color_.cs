@@ -44,11 +44,121 @@ namespace UnityEngine
 			float maxv = maxT(c.r,c.g,c.b);
 			float minv = minT(c.r,c.g,c.b);
 			float sum = maxv + minv;
+			
 
 			if (approxEq(minv,maxv))	return 0.0f;
 			if (sum > 1f)				sum = 2f - sum;
 
 			return (maxv - minv) / sum;
+		}
+
+		public static float Hue(this Color c)
+		{
+			float h = 0.0f;
+			float maxv = maxT(c.r, c.g, c.b);
+			float minv = minT(c.r, c.g, c.b);
+			float diff = maxv - minv;
+
+			if (approxEq(minv, maxv)) return h;
+
+			float r_dist = (maxv - c.r) / diff;
+			float g_dist = (maxv - c.g) / diff;
+			float b_dist = (maxv - c.b) / diff;
+
+			if (c.r == maxv)
+				h = b_dist - g_dist;
+			else if (c.g == maxv)
+				h = 2 + r_dist - b_dist;
+			else
+				h = 4 + g_dist - r_dist;
+
+			h *= 60;
+			if (h < 0)
+				h += 360;
+			if (h > 360)
+				h -= 360;
+
+			h /= 360;
+
+			return h;
+		}
+
+		//I found this useful little snippet here: http://www.splinter.com.au/converting-hsv-to-rgb-colour-using-c/
+		//This takes a color's hue and saturation and converts it to the maximum brightness using an HSV color
+		public static Color maxBright(this Color c)
+		{
+			Color maxC = c;
+			float sat = c.Saturation();
+			float hue = c.Hue();
+			float r, g, b;
+
+			if (sat <= 0)
+				r = g = b = 0;
+			else
+			{
+				float h = hue * 6;
+				int i = (int)Math.Floor(h);
+				float f = h - i;
+				float pv = 1 - sat;
+				float qv = 1 - sat * f;
+				float tv = 1 - sat * (1 - f);
+
+				switch (i)
+				{
+					case 0:
+						r = 1;
+						g = tv;
+						b = pv;
+						break;
+					case 1:
+						r = qv;
+						g = 1;
+						b = pv;
+						break;
+					case 2:
+						r = pv;
+						g = 1;
+						b = tv;
+						break;
+					case 3:
+						r = pv;
+						g = qv;
+						b = 1;
+						break;
+					case 4:
+						r = tv;
+						g = pv;
+						b = 1;
+						break;
+					case 5:
+						r = 1;
+						g = pv;
+						b = qv;
+						break;
+
+					default:
+						r = g = b = 1;
+						break;
+				}
+			}
+
+			r = clamp(r);
+			g = clamp(g);
+			b = clamp(b);
+
+			maxC = new Color(r, g, b);
+
+			return maxC;
+		}
+
+		private static float clamp(float f)
+		{
+			if (f < 0)
+				return 0.0f;
+			if (f > 1)
+				return 1.0f;
+
+			return f;
 		}
 
 
