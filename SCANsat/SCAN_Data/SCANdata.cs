@@ -40,40 +40,20 @@ namespace SCANsat.SCAN_Data
 		/* MAP: options */
 		private bool disabled;
 
-		/* MAP: default values */
-		private static float?[,] bodyHeightRange = new float?[17, 3]
-		{
-			{ 0, 1000, null }, { -1500, 6500, 0 }, { -500, 7000, null }, { -500, 5500, null },
-			{ 0, 6500, null }, { -2000, 7000, 0 }, { 0, 7500, null }, { 0, 12000, null }, { 0, 1000, null },
-			{ -3000, 6000, 0 }, { -500, 7500, null }, { 2000, 21500, null }, { -500, 11000, null },
-			{ 1500, 6000, null }, { 500, 5500, null }, { 0, 5500, null }, { -500, 3500, null }
-		};
-		private static Palette[] paletteDefaults = { PaletteLoader.defaultPalette, PaletteLoader.defaultPalette,
-			BrewerPalettes.RdGy(11), BrewerPalettes.Paired(9), BrewerPalettes.PuBuGn(6), BrewerPalettes.BuPu(7),
-			BrewerPalettes.BuGn(9), BrewerPalettes.BrBG(8), PaletteLoader.defaultPalette, BrewerPalettes.YlGnBu(8),
-			BrewerPalettes.Set1(9), BrewerPalettes.PuOr(7), BrewerPalettes.Set3(8), BrewerPalettes.Accent(7),
-			BrewerPalettes.Spectral(8), BrewerPalettes.Pastel1(9), BrewerPalettes.RdYlGn(10) };
-		private static bool[] paletteReverseDefaults = { false, false, true, false, false, true, false, false,
-			false, true, false, false, false, false, true, false, false };
-		private const float defaultMinHeight = -1000f;
-		private const float defaultMaxHeight = 8000f;
-		private float? defaultClampHeight = null;
-		private Palette defaultPalette = PaletteLoader.defaultPalette;
-
 		/* MAP: constructor */
 		internal SCANdata(CelestialBody b)
 		{
 			body = b;
-			if (b.flightGlobalsIndex <= 16)
+			float? clamp = null;
+			if (b.ocean)
+				clamp = 0;
+
+			terrainConfig = SCANcontroller.getTerrainNode(b.name);
+
+			if (terrainConfig == null)
 			{
-				terrainConfig = new SCANterrainConfig((float)bodyHeightRange[b.flightGlobalsIndex, 0], (float)bodyHeightRange[b.flightGlobalsIndex, 1], bodyHeightRange[b.flightGlobalsIndex, 2], paletteDefaults[b.flightGlobalsIndex], paletteDefaults[b.flightGlobalsIndex].size, paletteReverseDefaults[b.flightGlobalsIndex], false, body);
-			}
-			else
-			{
-				float? clamp = null;
-				if (b.ocean)
-					clamp = 0;
-				terrainConfig = new SCANterrainConfig(defaultMinHeight, defaultMaxHeight, clamp, defaultPalette, defaultPalette.size, false, false, body);
+				terrainConfig = new SCANterrainConfig(SCANconfigLoader.SCANNode.DefaultMinHeightRange, SCANconfigLoader.SCANNode.DefaultMaxHeightRange, clamp, SCANUtil.paletteLoader(SCANconfigLoader.SCANNode.DefaultPalette, 7), 7, false, false, body);
+				SCANcontroller.addToTerrainConfigData(body.name, terrainConfig);
 			}
 		}
 
@@ -111,61 +91,6 @@ namespace SCANsat.SCAN_Data
 		{
 			get { return terrainConfig; }
 			internal set { terrainConfig = value; }
-		}
-
-		public float DefaultMinHeight
-		{
-			get
-			{
-				if (body.flightGlobalsIndex < 17)
-					return (float)bodyHeightRange[body.flightGlobalsIndex, 0];
-				else
-					return -1000f;
-			}
-		}
-
-		public float DefaultMaxHeight
-		{
-			get
-			{
-				if (body.flightGlobalsIndex < 17)
-					return (float)bodyHeightRange[body.flightGlobalsIndex, 1];
-				else
-					return 8000f;
-			}
-		}
-
-		public float? DefaultClampHeight
-		{
-			get
-			{
-				if (body.flightGlobalsIndex < 17)
-					return bodyHeightRange[body.flightGlobalsIndex, 2];
-				else
-					return defaultClampHeight;
-			}
-		}
-
-		public Palette DefaultColorPalette
-		{
-			get
-			{
-				if (body.flightGlobalsIndex < 17)
-					return paletteDefaults[body.flightGlobalsIndex];
-				else
-					return paletteDefaults[0];
-			}
-		}
-
-		public bool DefaultReversePalette
-		{
-			get
-			{
-				if (body.flightGlobalsIndex < 17)
-					return paletteReverseDefaults[body.flightGlobalsIndex];
-				else
-					return false;
-			}
 		}
 
 		public bool Disabled
