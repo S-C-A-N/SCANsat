@@ -15,6 +15,7 @@ using System.Linq;
 using System.Collections.Generic;
 using UnityEngine;
 using Contracts;
+using FinePrint;
 using FinePrint.Contracts;
 using FinePrint.Contracts.Parameters;
 using System.IO;
@@ -215,17 +216,80 @@ namespace SCANsat.SCAN_Data
 					if (waypoints == null)
 					{
 						List<SCANwaypoint> bodyWaypoints = new List<SCANwaypoint>();
-						var wp = ContractSystem.Instance.GetCurrentActiveContracts<SurveyContract>();
-						for (int i = 0; i < wp.Length; i++)
+						var surveys = ContractSystem.Instance.GetCurrentActiveContracts<SurveyContract>();
+						for (int i = 0; i < surveys.Length; i++)
 						{
-							if (wp[i].targetBody == body)
+							if (surveys[i].targetBody == body)
 							{
-								for (int j = 0; j < wp[i].AllParameters.Count(); j++ )
+								for (int j = 0; j < surveys[i].AllParameters.Count(); j++)
 								{
-									if (wp[i].AllParameters.ElementAt(j).GetType() == typeof(SurveyWaypointParameter))
+									if (surveys[i].AllParameters.ElementAt(j).GetType() == typeof(SurveyWaypointParameter))
 									{
-										SCANwaypoint p = new SCANwaypoint((SurveyWaypointParameter)wp[i].AllParameters.ElementAt(j));
-										bodyWaypoints.Add(p);
+										SurveyWaypointParameter s = (SurveyWaypointParameter)surveys[i].AllParameters.ElementAt(j);
+
+										if (s.State == ParameterState.Incomplete)
+										{
+											SCANwaypoint p = new SCANwaypoint(s);
+											bodyWaypoints.Add(p);
+										}
+									}
+								}
+							}
+						}
+
+						var stationary = ContractSystem.Instance.GetCurrentActiveContracts<SatelliteContract>();
+						for (int i = 0; i < stationary.Length; i++)
+						{
+							SpecificOrbitParameter orbit = stationary[i].GetParameter<SpecificOrbitParameter>();
+							if (orbit == null)
+								continue;
+
+							if (orbit.targetBody == body)
+							{
+								for (int j = 0; j < stationary[i].AllParameters.Count(); j++)
+								{
+									if (stationary[i].AllParameters.ElementAt(j).GetType() == typeof(StationaryPointParameter))
+									{
+										StationaryPointParameter s = (StationaryPointParameter)stationary[i].AllParameters.ElementAt(j);
+
+										if (s.State == ParameterState.Incomplete)
+										{
+											SCANwaypoint p = new SCANwaypoint(s);
+											bodyWaypoints.Add(p);
+										}
+									}
+								}
+							}
+						}
+
+						if (WaypointManager.Instance() != null)
+						{
+							var remaining = WaypointManager.Instance().AllWaypoints();
+							for (int i = 0; i < remaining.Count; i++)
+							{
+								Waypoint p = remaining[i];
+								SCANUtil.SCANdebugLog("Checking Other Waypoint: {0}", p.name);
+								if (p.isOnSurface)
+								{
+									SCANUtil.SCANdebugLog("Surface Waypoint");
+									if (p.isNavigatable)
+									{
+										SCANUtil.SCANdebugLog("Navigatable Waypoint");
+										if (p.celestialName == body.GetName())
+										{
+											if (p.contractReference != null)
+											{
+												if (p.contractReference.ContractState == Contract.State.Active)
+												{
+													SCANUtil.SCANdebugLog("Checking If Other Waypoint: [{0}] Already Added", p.name);
+													if (!bodyWaypoints.Any(a => a.Way == p))
+													{
+														SCANUtil.SCANdebugLog("Add Other Waypoint Type: {0}", p.name);
+														bodyWaypoints.Add(new SCANwaypoint(p));
+													}
+												}
+											}
+										}
 									}
 								}
 							}
