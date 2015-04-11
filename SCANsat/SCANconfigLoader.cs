@@ -21,6 +21,11 @@ namespace SCANsat
 
 		private static SCAN_Color_Config SCANnode;
 
+		public static SCAN_Color_Config SCANNode
+		{
+			get { return SCANnode; }
+		}
+
 		public static bool GlobalResource
 		{
 			get { return globalResource; }
