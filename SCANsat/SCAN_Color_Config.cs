@@ -19,6 +19,10 @@ namespace SCANsat
 		[Persistent]
 		private float defaultMaxHeightRange = 8000;
 		[Persistent]
+		private float rangeAboveMaxHeight = 10000;
+		[Persistent]
+		private float rangeBelowMinHeight = 10000;
+		[Persistent]
 		private string defaultPalette = "Default";
 		[Persistent]
 		private Color lowBiomeColor = palette.xkcd_CamoGreen;
@@ -80,55 +84,56 @@ namespace SCANsat
 		public float DefaultMinHeightRange
 		{
 			get { return defaultMinHeightRange; }
-			internal set { defaultMinHeightRange = value; }
 		}
 
 		public float DefaultMaxHeightRange
 		{
 			get { return defaultMaxHeightRange; }
-			internal set { defaultMaxHeightRange = value; }
+		}
+
+		public float RangeAboveMaxHeight
+		{
+			get { return rangeAboveMaxHeight; }
+		}
+
+		public float RangeBelowMinHeight
+		{
+			get { return rangeBelowMinHeight; }
 		}
 
 		public string DefaultPalette
 		{
 			get { return defaultPalette; }
-			internal set { defaultPalette = value; }
 		}
 
 		public Color LowBiomeColor
 		{
 			get { return lowBiomeColor; }
-			internal set { lowBiomeColor = value; }
 		}
 
 		public Color HighBiomeColor
 		{
 			get { return highBiomeColor; }
-			internal set { highBiomeColor = value; }
 		}
 
 		public float BiomeTransparency
 		{
 			get { return biomeTransparency; }
-			internal set { biomeTransparency = value; }
 		}
 
 		public bool StockBiomeMap
 		{
 			get { return stockBiomeMap; }
-			internal set { stockBiomeMap = value; }
 		}
 
 		public Color LowSlopeColor
 		{
 			get { return lowSlopeColor; }
-			internal set { lowSlopeColor = value; }
 		}
 
 		public Color HighSlopeColor
 		{
 			get { return highSlopeColor; }
-			internal set { highSlopeColor = value; }
 		}
 	}
 }
