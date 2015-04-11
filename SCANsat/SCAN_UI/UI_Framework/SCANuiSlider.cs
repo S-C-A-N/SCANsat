@@ -54,7 +54,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 
 			Rect r = GUILayoutUtility.GetLastRect();
 			r.x += 110;
-			r.width = 130;
+			r.width = 260;
 
 			if (under)
 				GUI.HorizontalSlider(r, value, minValue, maxValue).Mathf_Round(precision);
