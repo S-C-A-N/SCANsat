@@ -211,9 +211,9 @@ namespace SCANsat.SCAN_Data
 		{
 			get
 			{
-				if (ContractSystem.Instance != null)
+				if (waypoints == null)
 				{
-					if (waypoints == null)
+					if (ContractSystem.Instance != null)
 					{
 						List<SCANwaypoint> bodyWaypoints = new List<SCANwaypoint>();
 						var surveys = ContractSystem.Instance.GetCurrentActiveContracts<SurveyContract>();
@@ -226,11 +226,11 @@ namespace SCANsat.SCAN_Data
 									if (surveys[i].AllParameters.ElementAt(j).GetType() == typeof(SurveyWaypointParameter))
 									{
 										SurveyWaypointParameter s = (SurveyWaypointParameter)surveys[i].AllParameters.ElementAt(j);
-
 										if (s.State == ParameterState.Incomplete)
 										{
 											SCANwaypoint p = new SCANwaypoint(s);
-											bodyWaypoints.Add(p);
+											if (p.Way != null)
+												bodyWaypoints.Add(p);
 										}
 									}
 								}
@@ -251,11 +251,11 @@ namespace SCANsat.SCAN_Data
 									if (stationary[i].AllParameters.ElementAt(j).GetType() == typeof(StationaryPointParameter))
 									{
 										StationaryPointParameter s = (StationaryPointParameter)stationary[i].AllParameters.ElementAt(j);
-
 										if (s.State == ParameterState.Incomplete)
 										{
 											SCANwaypoint p = new SCANwaypoint(s);
-											bodyWaypoints.Add(p);
+											if (p.Way != null)
+												bodyWaypoints.Add(p);
 										}
 									}
 								}
@@ -268,25 +268,17 @@ namespace SCANsat.SCAN_Data
 							for (int i = 0; i < remaining.Count; i++)
 							{
 								Waypoint p = remaining[i];
-								SCANUtil.SCANdebugLog("Checking Other Waypoint: {0}", p.name);
-								if (p.isOnSurface)
+								if (p.isOnSurface && p.isNavigatable)
 								{
-									SCANUtil.SCANdebugLog("Surface Waypoint");
-									if (p.isNavigatable)
+									if (p.celestialName == body.GetName())
 									{
-										SCANUtil.SCANdebugLog("Navigatable Waypoint");
-										if (p.celestialName == body.GetName())
+										if (p.contractReference != null)
 										{
-											if (p.contractReference != null)
+											if (p.contractReference.ContractState == Contract.State.Active)
 											{
-												if (p.contractReference.ContractState == Contract.State.Active)
+												if (!bodyWaypoints.Any(a => a.Way == p))
 												{
-													SCANUtil.SCANdebugLog("Checking If Other Waypoint: [{0}] Already Added", p.name);
-													if (!bodyWaypoints.Any(a => a.Way == p))
-													{
-														SCANUtil.SCANdebugLog("Add Other Waypoint Type: {0}", p.name);
-														bodyWaypoints.Add(new SCANwaypoint(p));
-													}
+													bodyWaypoints.Add(new SCANwaypoint(p));
 												}
 											}
 										}
