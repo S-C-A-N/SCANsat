@@ -34,7 +34,8 @@ namespace SCANsat.SCAN_UI.UI_Framework
 
 		internal SCANuiColorPicker (Color low, Color high, bool changeLow)
 		{
-			colorLow = low;
+			colorLow = c= low;
+			c = colorLow.maxBright();
 			colorHigh = high;
 			lowColorChange = oldColorState = changeLow;
 			valSlider = oldValSlider = colorLow.Brightness().Mathf_Round(2) * 100f;
@@ -42,7 +43,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 
 		internal void drawColorSelector(Rect R)
 		{
-			GUILayout.Space(30);
+			GUILayout.Space(20);
 			GUILayout.BeginVertical();
 				GUILayout.Label("Color Selection", SCANskins.SCAN_headline);
 				GUILayout.BeginHorizontal();
@@ -52,7 +53,9 @@ namespace SCANsat.SCAN_UI.UI_Framework
 				GUILayout.EndHorizontal();
 			GUILayout.EndVertical();
 
-			valSlider = GUI.VerticalSlider(new Rect(280, 60, 30, 200), valSlider, 100, 0, SCANskins.SCAN_vertSlider, SCANskins.SCAN_sliderThumb).Mathf_Round(0);
+			GUI.Label(new Rect(275, 70, 60, 30), "Value:", SCANskins.SCAN_headlineSmall);
+
+			valSlider = GUI.VerticalSlider(new Rect(300, 100, 30, 200), valSlider, 100, 0, SCANskins.SCAN_vertSlider, SCANskins.SCAN_sliderThumb).Mathf_Round(0);
 
 			if (GUI.RepeatButton(r, "", SCANskins.SCAN_colorWheelButton))
 			{
@@ -130,12 +133,12 @@ namespace SCANsat.SCAN_UI.UI_Framework
 				oldColorState = lowColorChange;
 				if (lowColorChange)
 				{
-					c = colorLow;
+					c = colorLow.maxBright();
 					valSlider = colorLow.Brightness().Mathf_Round(2) * 100f;
 				}
 				else
 				{
-					c = colorHigh;
+					c = colorHigh.maxBright();
 					valSlider = colorHigh.Brightness().Mathf_Round(2) * 100f;
 				}
 				oldValSlider = valSlider;
