@@ -112,8 +112,8 @@ namespace SCANsat.SCAN_UI
 
 			stockBiomes = SCANcontroller.controller.useStockBiomes;
 
-			minTerrainSlider = new SCANuiSlider(data.DefaultMinHeight - 10000, data.TerrainConfig.MaxTerrain - 100, data.TerrainConfig.MinTerrain, "Min: ", "m", -2);
-			maxTerrainSlider = new SCANuiSlider(data.TerrainConfig.MinTerrain + 100, data.DefaultMaxHeight + 10000, data.TerrainConfig.MaxTerrain, "Max: ", "m", -2);
+			minTerrainSlider = new SCANuiSlider(data.TerrainConfig.DefaultMinHeight - SCANconfigLoader.SCANNode.RangeBelowMinHeight, data.TerrainConfig.MaxTerrain - 100, data.TerrainConfig.MinTerrain, "Min: ", "m", -2);
+			maxTerrainSlider = new SCANuiSlider(data.TerrainConfig.MinTerrain + 100, data.TerrainConfig.DefaultMaxHeight + SCANconfigLoader.SCANNode.RangeAboveMaxHeight, data.TerrainConfig.MaxTerrain, "Max: ", "m", -2);
 			clampTerrainSlider = new SCANuiSlider(data.TerrainConfig.MinTerrain + 10, data.TerrainConfig.MaxTerrain - 10, data.TerrainConfig.ClampTerrain ?? data.TerrainConfig.MinTerrain + 10, "Clamp: ", "m", -1);
 			paletteSizeSlider = new SCANuiSlider(3, 12, data.TerrainConfig.PalSize, "Palette Size: ", "", 0);
 
@@ -684,13 +684,13 @@ namespace SCANsat.SCAN_UI
 
 							if (GUILayout.Button("Default Values", GUILayout.Width(110)))
 							{
-								currentTerrain.MinTerrain = data.DefaultMinHeight;
-								currentTerrain.MaxTerrain = data.DefaultMaxHeight;
-								currentTerrain.ClampTerrain = data.DefaultClampHeight;
-								currentTerrain.ColorPal = data.DefaultColorPalette;
-								currentTerrain.PalRev = data.DefaultReversePalette;
-								currentTerrain.PalDis = false;
-								currentTerrain.PalSize = data.DefaultColorPalette.size;
+								currentTerrain.MinTerrain = data.TerrainConfig.DefaultMinHeight;
+								currentTerrain.MaxTerrain = data.TerrainConfig.DefaultMaxHeight;
+								currentTerrain.ClampTerrain = data.TerrainConfig.DefaultClampHeight;
+								currentTerrain.ColorPal = data.TerrainConfig.DefaultPalette;
+								currentTerrain.PalRev = data.TerrainConfig.DefaultReverse;
+								currentTerrain.PalDis = data.TerrainConfig.DefaultDiscrete;
+								currentTerrain.PalSize = data.TerrainConfig.DefaultPaletteSize;
 
 								updateUI();
 
@@ -794,10 +794,10 @@ namespace SCANsat.SCAN_UI
 
 					if (GUILayout.Button("Default Values", GUILayout.Width(110)))
 					{
-						SCANcontroller.controller.lowBiomeColor = SCANcontroller.controller.defaultLowBiomeColor;
-						SCANcontroller.controller.highBiomeColor = SCANcontroller.controller.defaultHighBiomeColor;
-						SCANcontroller.controller.useStockBiomes = false;
-						SCANcontroller.controller.biomeTransparency = 40f;
+						SCANcontroller.controller.lowBiomeColor = SCANconfigLoader.SCANNode.LowBiomeColor;
+						SCANcontroller.controller.highBiomeColor = SCANconfigLoader.SCANNode.HighBiomeColor;
+						SCANcontroller.controller.useStockBiomes = SCANconfigLoader.SCANNode.StockBiomeMap;
+						SCANcontroller.controller.biomeTransparency = SCANconfigLoader.SCANNode.BiomeTransparency;
 
 						stockBiomes = false;
 
@@ -890,9 +890,9 @@ namespace SCANsat.SCAN_UI
 					{
 						currentResource.CurrentBody.MinValue = currentResource.CurrentBody.DefaultMinValue;
 						currentResource.CurrentBody.MaxValue = currentResource.CurrentBody.DefaultMaxValue;
-						currentResource.MinColor = currentResource.ResourceType.ColorEmpty;
-						currentResource.MaxColor = currentResource.ResourceType.ColorFull;
-						currentResource.Transparency = 20f;
+						currentResource.MinColor = currentResource.DefaultLowColor;
+						currentResource.MaxColor = currentResource.DefaultHighColor;
+						currentResource.Transparency = currentResource.DefaultTrans;
 
 						SCANcontroller.updateSCANresource(currentResource, false);
 
@@ -906,9 +906,9 @@ namespace SCANsat.SCAN_UI
 
 					if (GUILayout.Button("Default Values For All Planets", GUILayout.Width(200)))
 					{
-						currentResource.MinColor = currentResource.ResourceType.ColorEmpty;
-						currentResource.MaxColor = currentResource.ResourceType.ColorFull;
-						currentResource.Transparency = 20f;
+						currentResource.MinColor = currentResource.DefaultLowColor;
+						currentResource.MaxColor = currentResource.DefaultHighColor;
+						currentResource.Transparency = currentResource.DefaultTrans;
 
 						for (int i = 0; i < currentResource.getBodyCount; i++)
 						{
@@ -1114,8 +1114,8 @@ namespace SCANsat.SCAN_UI
 		//Dynamically adjust the min and max values on all of the terrain height sliders; avoids impossible values
 		private void setTerrainSliders()
 		{
-			minTerrainSlider.MinValue = data.DefaultMinHeight - 10000f;
-			maxTerrainSlider.MaxValue = data.DefaultMaxHeight + 10000f;
+			minTerrainSlider.MinValue = data.TerrainConfig.DefaultMinHeight - SCANconfigLoader.SCANNode.RangeBelowMinHeight;
+			maxTerrainSlider.MaxValue = data.TerrainConfig.DefaultMaxHeight + SCANconfigLoader.SCANNode.RangeAboveMaxHeight;
 			minTerrainSlider.MaxValue = maxT - 100f;
 			maxTerrainSlider.MinValue = minT + 100f;
 			clampTerrainSlider.MinValue = minT + 10f;
