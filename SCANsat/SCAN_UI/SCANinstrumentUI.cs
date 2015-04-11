@@ -145,16 +145,6 @@ namespace SCANsat.SCAN_UI
 		{
 			GUILayout.Label(string.Format("Lat: {0:F2}°, Lon: {1:F2}°", vlat, vlon), SCANskins.SCAN_insColorLabel);
 			fillS(-10);
-		}
-
-		//Display current biome info
-		private void biomeInfo(int id)
-		{
-			if ((sensors & SCANtype.Biome) != SCANtype.Nothing && v.mainBody.BiomeMap != null)
-			{
-				GUILayout.Label(string.Format("Biome: {0}", SCANUtil.getBiomeName(v.mainBody, vlon, vlat)), SCANskins.SCAN_insColorLabel);
-				fillS(-10);
-			}
 
 			if (WaypointManager.Instance() != null)
 			{
@@ -174,15 +164,23 @@ namespace SCANsat.SCAN_UI
 
 					double range = waypointRange(p);
 
-					if (!SCANUtil.isCovered(p.Longitude, p.Latitude, data, SCANtype.Biome))
-						continue;
-
 					if (WaypointManager.Instance().Distance(vlat, vlon, v.altitude, p.Latitude, p.Longitude, v.altitude, data.Body) <= range)
 					{
 						GUILayout.Label(string.Format("Waypoint: {0}", p.Name), SCANskins.SCAN_insColorLabel);
+						fillS(-10);
 						break;
 					}
 				}
+			}
+		}
+
+		//Display current biome info
+		private void biomeInfo(int id)
+		{
+			if ((sensors & SCANtype.Biome) != SCANtype.Nothing && v.mainBody.BiomeMap != null)
+			{
+				GUILayout.Label(string.Format("Biome: {0}", SCANUtil.getBiomeName(v.mainBody, vlon, vlat)), SCANskins.SCAN_insColorLabel);
+				fillS(-10);
 			}
 		}
 
