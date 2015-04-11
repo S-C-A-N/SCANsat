@@ -761,6 +761,8 @@ namespace SCANsat.SCAN_UI
 					if (GUI.Button(r, SCANmapType.mapTypeNames[i], SCANskins.SCAN_dropDownButton))
 					{
 						bigmap.resetMap((mapType)i, true);
+						if (spotMap != null)
+							spotMap.SpotMap.resetMap((mapType)i, false);
 						drop_down_open = false;
 					}
 				}
@@ -778,13 +780,25 @@ namespace SCANsat.SCAN_UI
 					{
 						bigmap.Resource = loadedResources[i];
 						bigmap.Resource.CurrentBodyConfig(b.name);
+
+						if (spotMap != null)
+						{
+							spotMap.SpotMap.Resource = loadedResources[i];
+							spotMap.SpotMap.Resource.CurrentBodyConfig(b.name);
+						}
+
 						SCANcontroller.controller.resourceSelection = bigmap.Resource.Name;
 						if (bigmap.Resource.Source == SCANresource_Source.Kethane)
 							SCANcontroller.controller.resourceOverlayType = 1;
 						else
 							SCANcontroller.controller.resourceOverlayType = 0;
 						if (SCANcontroller.controller.map_ResourceOverlay)
+						{
 							bigmap.resetMap();
+							if (spotMap != null)
+								spotMap.SpotMap.resetMap();
+						}
+
 						drop_down_open = false;
 						SCANUtil.SCANdebugLog("Resource {0} Selected; Min Value: {1}; Max Value: {2}", bigmap.Resource.Name, bigmap.Resource.CurrentBody.MinValue, bigmap.Resource.CurrentBody.MaxValue);
 					}
@@ -810,6 +824,8 @@ namespace SCANsat.SCAN_UI
 							data = dropDownData;
 							b = data.Body;
 							bigmap.setBody(b);
+							if (spotMap != null)
+								spotMap.SpotMap.setBody(b);
 							drop_down_open = false;
 						}
 						j++;
