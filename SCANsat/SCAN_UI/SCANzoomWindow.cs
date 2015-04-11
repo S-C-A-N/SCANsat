@@ -30,23 +30,21 @@ namespace SCANsat.SCAN_UI
 		private CelestialBody b;
 		private SCANdata data;
 		private Vessel v;
-		private bool showOrbit, showAnomaly;
-		private Vector2 dragStart, minSize, MaxSize;
+		private bool showOrbit, showAnomaly, showWaypoints;
+		private Vector2 dragStart;
 		private float resizeW, resizeH;
 		internal static Rect defaultRect = new Rect(10f, 10f, 340f, 260f);
 
 		protected override void Awake()
 		{
-			SCANUtil.SCANdebugLog("Awake SCAN Zoom Window");
 			WindowRect = defaultRect;
-			minSize = new Vector2(310, 180);
-			MaxSize = new Vector2(540, 400);
+			WindowSize_Min = new Vector2(310, 180);
+			WindowSize_Max = new Vector2(540, 400);
 			WindowOptions = new GUILayoutOption[2] { GUILayout.Width(340), GUILayout.Height(260) };
 			WindowStyle = SCANskins.SCAN_window;
 			Visible = false;
 			DragEnabled = true;
 			ClampEnabled = true;
-			ResizeEnabled = false;
 			TooltipMouseOffset = new Vector2d(-10, -25);
 			ClampToScreenOffset = new RectOffset(-200, -200, -160, -160);
 
@@ -58,7 +56,6 @@ namespace SCANsat.SCAN_UI
 
 		private void Startup()
 		{
-			SCANUtil.SCANdebugLog("Start SCAN Zoom Window");
 			//Initialize the map object
 			Visible = false;
 			if (HighLogic.LoadedSceneIsFlight)
@@ -82,49 +79,32 @@ namespace SCANsat.SCAN_UI
 			showOrbit = SCANcontroller.controller.map_orbit;
 			showAnomaly = SCANcontroller.controller.map_markers;
 
+			if (HighLogic.LoadedScene == GameScenes.SPACECENTER)
+				showWaypoints = false;
+			else
+				showWaypoints = SCANcontroller.controller.map_waypoints;
+
 			TooltipsEnabled = SCANcontroller.controller.toolTips;
 
 			spotmap.setBody(b);
 		}
 
-		protected override void Start()
-		{
-			//SCANUtil.SCANdebugLog("Start SCAN Zoom Window");
-			////Initialize the map object
-			//Visible = false;
-			//if (HighLogic.LoadedSceneIsFlight)
-			//{
-			//	v = SCANcontroller.controller.BigMap.V;
-			//	b = SCANcontroller.controller.BigMap.Body;
-			//	data = SCANcontroller.controller.BigMap.Data;
-			//}
-			//else if (HighLogic.LoadedSceneHasPlanetarium)
-			//{
-			//	v = null;
-			//	b = SCANcontroller.controller.kscMap.Body;
-			//	data = SCANcontroller.controller.kscMap.Data;
-			//}
-			//if (spotmap == null)
-			//{
-			//	spotmap = new SCANmap();
-			//	spotmap.setSize(180, 180);
-			//}
-
-			//showOrbit = SCANcontroller.controller.map_orbit;
-			//showAnomaly = SCANcontroller.controller.map_markers;
-
-			//TooltipsEnabled = SCANcontroller.controller.toolTips;
-
-			//spotmap.setBody(b);
-		}
-
-		public void setMapCenter(double lat, double lon, mapType t)
+		public void setMapCenter(double lat, double lon, mapType t, MapProjection p)
 		{
 			SCANUtil.SCANdebugLog("Centering Zoom Window");
 			Visible = true;
 			spotmap.MapScale = 10;
 			spotmap.centerAround(lon, lat);
+			if (p == MapProjection.Polar)
+				spotmap.setProjection(p);
 			spotmap.resetMap(t, false);
+		}
+
+		public void setBody(SCANdata d)
+		{
+			data = d;
+			b = data.Body;
+			spotmap.setBody(b);
 		}
 
 		public SCANmap SpotMap
@@ -136,21 +116,20 @@ namespace SCANsat.SCAN_UI
 		{
 			WindowCaption = SCANuiUtil.toDMS(spotmap.CenteredLat, spotmap.CenteredLong);
 
-			//Re-sizing code; moved here from SCAN_MBW
 			if (IsResizing && !inRepaint())
 			{
 				if (Input.GetMouseButtonUp(0))
 				{
 					double scale = spotmap.MapScale;
 					IsResizing = false;
-					if (resizeW < minSize.x)
-						resizeW = minSize.x;
-					else if (resizeW > MaxSize.x)
-						resizeW = MaxSize.x;
-					if (resizeH < minSize.y)
-						resizeH = minSize.y;
-					else if (resizeH > MaxSize.y)
-						resizeH = MaxSize.y;
+					if (resizeW < WindowSize_Min.x)
+						resizeW = WindowSize_Min.x;
+					else if (resizeW > WindowSize_Max.x)
+						resizeW = WindowSize_Max.x;
+					if (resizeH < WindowSize_Min.y)
+						resizeH = WindowSize_Min.y;
+					else if (resizeH > WindowSize_Max.y)
+						resizeH = WindowSize_Max.y;
 
 					spotmap.setSize((int)resizeW, (int)resizeH);
 					spotmap.MapScale = scale;
@@ -236,7 +215,7 @@ namespace SCANsat.SCAN_UI
 				spotmap.MapScale = spotmap.MapScale / 1.25f;
 				if (spotmap.MapScale < 2)
 					spotmap.MapScale = 2;
-				spotmap.resetMap(); /* Add map type */
+				spotmap.resetMap();
 			}
 
 			GUILayout.Label(spotmap.MapScale.ToString("N1") + " X", SCANskins.SCAN_whiteLabelCenter, GUILayout.Width(40), GUILayout.Height(24));
@@ -244,15 +223,33 @@ namespace SCANsat.SCAN_UI
 			if (GUILayout.Button(iconWithTT(SCANskins.SCAN_ZoomInIcon, "Zoom In"), SCANskins.SCAN_buttonBorderless, GUILayout.Width(26), GUILayout.Height(26)))
 			{
 				spotmap.MapScale = spotmap.MapScale * 1.25f;
-				spotmap.resetMap(); /* Add map type */
+				spotmap.resetMap();
 			}
 
 			GUILayout.FlexibleSpace();
 
+			if (HighLogic.LoadedScene != GameScenes.SPACECENTER)
+			{
+				showWaypoints = GUILayout.Toggle(showWaypoints, textWithTT("", "Toggle Waypoints"));
+
+				d = GUILayoutUtility.GetLastRect();
+				d.x += 28;
+				d.y += 2;
+				d.width = 20;
+				d.height = 20;
+
+				if (GUI.Button(d, iconWithTT(SCANskins.SCAN_WaypointIcon, "Toggle Waypoints"), SCANskins.SCAN_buttonBorderless))
+				{
+					showWaypoints = !showWaypoints;
+				}
+
+				GUILayout.Space(16);
+			}
+
 			showAnomaly = GUILayout.Toggle(showAnomaly, textWithTT("", "Toggle Anomalies"));
 
 			d = GUILayoutUtility.GetLastRect();
-			d.x += 32;
+			d.x += 26;
 			d.y += 2;
 			d.width = 20;
 			d.height = 20;
@@ -262,20 +259,9 @@ namespace SCANsat.SCAN_UI
 				showAnomaly = !showAnomaly;
 			}
 
-			GUILayout.Space(30);
+			GUILayout.Space(16);
 
 			stopE();
-
-			//d.x = 15;
-			//d.y = WindowRect.height - 28;
-			//d.width = 24;
-			//d.height = 24;
-
-			//if (GUI.Button(d, iconWithTT(SCANskins.SCAN_ScreenshotIcon, "Export Map"), SCANskins.SCAN_windowButton))
-			//{
-			//	if (spotmap.isMapComplete())
-			//		spotmap.exportPNG();
-			//}
 		}
 
 		private void drawMap(int id)
@@ -287,15 +273,15 @@ namespace SCANsat.SCAN_UI
 			{
 				//Set minimum map size during re-sizing
 				dW = resizeW;
-				if (dW < minSize.x)
-					dW = minSize.x;
-				else if (dW > MaxSize.x)
-					dW = MaxSize.x;
+				if (dW < WindowSize_Min.x)
+					dW = WindowSize_Min.x;
+				else if (dW > WindowSize_Max.x)
+					dW = WindowSize_Max.x;
 				dH = resizeH;
-				if (dH < minSize.y)
-					dH = minSize.y;
-				else if (dH > MaxSize.y)
-					dH = MaxSize.y;
+				if (dH < WindowSize_Min.y)
+					dH = WindowSize_Min.y;
+				else if (dH > WindowSize_Max.y)
+					dH = WindowSize_Max.y;
 
 				GUILayout.Label("", GUILayout.Width(dW), GUILayout.Height(dH));
 			}
@@ -431,7 +417,7 @@ namespace SCANsat.SCAN_UI
 				SCANuiUtil.drawOrbit(TextureRect, spotmap, v, spotmap.Body);
 			}
 
-			SCANuiUtil.drawMapLabels(TextureRect, v, spotmap, data, spotmap.Body, showAnomaly, SCANcontroller.controller.map_waypoints);
+			SCANuiUtil.drawMapLabels(TextureRect, v, spotmap, data, spotmap.Body, showAnomaly, showWaypoints);
 		}
 
 	}
