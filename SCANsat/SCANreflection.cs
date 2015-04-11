@@ -186,11 +186,6 @@ namespace SCANsat
 
 				var field = sType.GetFields(BindingFlags.NonPublic | BindingFlags.Instance);
 
-				//for (int i = 0; i < field.Length; i++)
-				//{
-				//	SCANUtil.SCANlog("Field {0}: {1}", i, field[i].GetValue(new StationaryPointParameter()).GetType().Name);
-				//}
-
 				_FinePrintStationaryWaypoint = field[0];
 
 				if (_FinePrintStationaryWaypoint == null)
@@ -224,8 +219,6 @@ namespace SCANsat
 			try
 			{
 				Type sType = typeof(SurveyWaypointParameter);
-
-				//_FinePrintFlightBand = sType.GetField(FinePrintFlightBandName, BindingFlags.NonPublic | BindingFlags.Instance);
 
 				var field = sType.GetFields(BindingFlags.NonPublic | BindingFlags.Instance);
 
