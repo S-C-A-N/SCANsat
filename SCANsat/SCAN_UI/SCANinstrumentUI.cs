@@ -160,6 +160,18 @@ namespace SCANsat.SCAN_UI
 			{
 				foreach (SCANwaypoint p in data.Waypoints)
 				{
+					if (p.Band == FlightBand.NONE)
+						continue;
+
+					if (p.Root.ContractState != Contracts.Contract.State.Active)
+						continue;
+
+					if (p.Param != null)
+					{
+						if (p.Param.State != Contracts.ParameterState.Incomplete)
+							continue;
+					}
+
 					double range = waypointRange(p);
 
 					if (!SCANUtil.isCovered(p.Longitude, p.Latitude, data, SCANtype.Biome))

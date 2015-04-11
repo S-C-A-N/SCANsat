@@ -190,6 +190,14 @@ namespace SCANsat.SCAN_UI.UI_Framework
 					double range = ContractDefs.Survey.MaximumTriggerRange;
 					foreach (SCANwaypoint p in data.Waypoints)
 					{
+						if (p.Root.ContractState != Contracts.Contract.State.Active)
+							continue;
+						if (p.Param != null)
+						{
+							if (p.Param.State != Contracts.ParameterState.Incomplete)
+								continue;
+						}
+
 						if (WaypointManager.Instance().Distance(lat, lon, p.Way.altitude, p.Latitude, p.Longitude, p.Way.altitude, body) <= range)
 						{
 							info += p.Name + " ";
@@ -266,6 +274,14 @@ namespace SCANsat.SCAN_UI.UI_Framework
 					double range = ContractDefs.Survey.MaximumTriggerRange;
 					foreach (SCANwaypoint p in data.Waypoints)
 					{
+						if (p.Root.ContractState != Contracts.Contract.State.Active)
+							continue;
+						if (p.Param != null)
+						{
+							if (p.Param.State != Contracts.ParameterState.Incomplete)
+								continue;
+						}
+
 						if (WaypointManager.Instance().Distance(lat, lon, p.Way.altitude, p.Latitude, p.Longitude, p.Way.altitude, body) <= range)
 						{
 							info += p.Name + " ";
@@ -492,6 +508,14 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			{
 				foreach (SCANwaypoint p in data.Waypoints)
 				{
+					if (p.Root.ContractState != Contracts.Contract.State.Active)
+						continue;
+					if (p.Param != null)
+					{
+						if (p.Param.State != Contracts.ParameterState.Incomplete)
+							continue;
+					}
+
 					drawWaypointLabel(maprect, map, p, data);
 				}
 			}
@@ -576,6 +600,8 @@ namespace SCANsat.SCAN_UI.UI_Framework
 				}
 				if (flash)
 					GUI.color = c;
+				else
+					GUI.color = old;
 
 				GUI.DrawTextureWithTexCoords(pos, tex, texPos);
 				GUI.color = old;
@@ -599,6 +625,8 @@ namespace SCANsat.SCAN_UI.UI_Framework
 				}
 				if (flash)
 					GUI.color = c;
+				else
+					GUI.color = old;
 
 				GUI.DrawTexture(pos, tex);
 				GUI.color = old;
