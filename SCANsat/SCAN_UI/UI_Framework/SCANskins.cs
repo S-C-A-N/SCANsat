@@ -36,7 +36,6 @@ namespace SCANsat.SCAN_UI.UI_Framework
 		//Button styles
 		internal static GUIStyle SCAN_button;
 		internal static GUIStyle SCAN_buttonActive;
-		internal static GUIStyle SCAN_buttonFixed;
 		internal static GUIStyle SCAN_windowButton;
 		internal static GUIStyle SCAN_texButton;
 		internal static GUIStyle SCAN_buttonBorderless;
@@ -62,6 +61,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 		internal static GUIStyle SCAN_legendTex;
 		internal static GUIStyle SCAN_textBox;
 		internal static GUIStyle SCAN_settingsToggle;
+		internal static GUIStyle SCAN_boldToggle;
 		internal static GUIStyle SCAN_labelSmallLeft;
 		internal static GUIStyle SCAN_labelSmallRight;
 		internal static GUIStyle SCAN_vertSlider;
@@ -151,10 +151,6 @@ namespace SCANsat.SCAN_UI.UI_Framework
 
 		private static void initializeColors()
 		{
-			//palette.DivPaletteSet = palette.generatePaletteSet(7, Palette.Kind.Diverging);
-			//palette.QualPaletteSet = palette.generatePaletteSet(7, Palette.Kind.Qualitative);
-			//palette.SeqPaletteSet = palette.generatePaletteSet(7, Palette.Kind.Sequential);
-			//palette.FixedPaletteSet = palette.generatePaletteSet(0, Palette.Kind.Fixed);
 			palette.CurrentPalettes = palette.setCurrentPalettesType(Palette.Kind.Diverging, 7);
 		}
 
@@ -177,15 +173,11 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			SCAN_button = new GUIStyle(SCAN_SkinsLibrary.DefUnitySkin.button);
 			SCAN_button.name = "SCAN_Button";
 			SCAN_button.alignment = TextAnchor.MiddleCenter;
-			SCAN_button.active.textColor = palette.xkcd_PukeGreen;
+			SCAN_button.fontStyle = FontStyle.Bold;
 
 			SCAN_buttonActive = new GUIStyle(SCAN_button);
 			SCAN_buttonActive.name = "SCAN_ButtonActive";
 			SCAN_buttonActive.normal.textColor = palette.xkcd_PukeGreen;
-
-			SCAN_buttonFixed = new GUIStyle(SCAN_button);
-			SCAN_buttonFixed.name = "SCAN_ButtonFixed";
-			SCAN_buttonFixed.active.textColor = SCAN_buttonFixed.normal.textColor;
 
 			SCAN_windowButton = new GUIStyle(SCAN_button);
 			SCAN_windowButton.name = "SCAN_WindowButton";
@@ -312,11 +304,16 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			SCAN_toggle.fixedWidth = 28;
 
 			SCAN_settingsToggle = new GUIStyle(SCAN_SkinsLibrary.DefUnitySkin.toggle);
+			SCAN_settingsToggle.name = "SCAN_SettingsToggle";
 			SCAN_settingsToggle.onNormal.background = SCAN_toggleOn;
 			SCAN_settingsToggle.onHover.background = SCAN_toggleOnHover;
 			SCAN_settingsToggle.onNormal.background.wrapMode = TextureWrapMode.Clamp;
 			SCAN_settingsToggle.onHover.background.wrapMode = TextureWrapMode.Clamp;
 			SCAN_settingsToggle.border = new RectOffset(15, 0, 1, 1);
+
+			SCAN_boldToggle = new GUIStyle(SCAN_settingsToggle);
+			SCAN_boldToggle.name = "SCAN_BoldToggle";
+			SCAN_boldToggle.fontStyle = FontStyle.Bold;
 
 			SCAN_textBox = new GUIStyle(SCAN_SkinsLibrary.DefUnitySkin.textField);
 			SCAN_textBox.name = "SCAN_TextBox";
@@ -354,12 +351,14 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			SCAN_SkinsLibrary.knownSkins["SCAN_Unity"].button = new GUIStyle(SCAN_button);
 			SCAN_SkinsLibrary.knownSkins["SCAN_Unity"].toggle = new GUIStyle(SCAN_toggle);
 			SCAN_SkinsLibrary.knownSkins["SCAN_Unity"].label = new GUIStyle(SCAN_label);
+			SCAN_SkinsLibrary.knownSkins["SCAN_Unity"].box = new GUIStyle(SCAN_dropDownBox);
 
 			SCAN_SkinsLibrary.AddStyle(SCAN_window, "SCAN_Unity");
 			SCAN_SkinsLibrary.AddStyle(SCAN_button, "SCAN_Unity");
 			SCAN_SkinsLibrary.AddStyle(SCAN_toggle, "SCAN_Unity");
 			SCAN_SkinsLibrary.AddStyle(SCAN_label, "SCAN_Unity");
 			SCAN_SkinsLibrary.AddStyle(SCAN_tooltip, "SCAN_Unity");
+			SCAN_SkinsLibrary.AddStyle(SCAN_dropDownBox, "SCAN_Unity");
 		}
 
 	}
