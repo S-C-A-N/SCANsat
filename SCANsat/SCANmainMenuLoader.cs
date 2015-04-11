@@ -30,6 +30,7 @@ namespace SCANsat
 		internal static bool RegolithFound = false;
 		internal static bool FinePrintWaypoint = false;
 		internal static bool FinePrintFlightBand = false;
+		internal static bool FinePrintStationaryWaypoint = false;
 
 		private List<AssemblyLog> assemblyList = new List<AssemblyLog>();
 
@@ -37,6 +38,7 @@ namespace SCANsat
 		{
 			findAssemblies(Assemblies);
 			FinePrintWaypoint = SCANreflection.FinePrintWaypointReflection();
+			FinePrintStationaryWaypoint = SCANreflection.FinePrintStationaryWaypointReflection();
 			FinePrintFlightBand = SCANreflection.FinePrintFlightBandReflection();
 			SCANconfigLoader.configLoader();
 		}

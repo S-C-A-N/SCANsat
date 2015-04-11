@@ -27,12 +27,11 @@ namespace SCANsat
 		private const string RegolithTypeName = "Regolith.Common.RegolithResourceMap";
 		private const string RegolithAssemblyName = "Regolith";
 		private const string RegolithMethodName = "GetAbundance";
-		private const string FinePrintWaypointName = "wp";
-		private const string FinePrintFlightBandName = "band";
 
 		private static bool RegolithRun = false;
 		private static bool FinePrintWaypointRun = false;
 		private static bool FinePrintFlightBandRun = false;
+		private static bool FinePrintStationaryWaypointRun = false;
 
 		private delegate float RegolithPosAbundance(double lat, double lon, string resource, int body, int type, int altitude, bool biomes);
 
@@ -40,6 +39,7 @@ namespace SCANsat
 
 		private static FieldInfo _FinePrintWaypoint;
 		private static FieldInfo _FinePrintFlightBand;
+		private static FieldInfo _FinePrintStationaryWaypoint;
 
 		internal static float RegolithAbundanceValue(double lat, double lon, string resource, int body, int type, int altitude, bool biomes)
 		{
@@ -56,6 +56,21 @@ namespace SCANsat
 			catch (Exception e)
 			{
 				SCANUtil.SCANlog("Error in detecting FinePrint Waypoint object: {0}", e);
+			}
+
+			return w;
+		}
+
+		internal static Waypoint FinePrintStationaryWaypointObject(StationaryPointParameter p)
+		{
+			Waypoint w = null;
+			try
+			{
+				w = (Waypoint)_FinePrintStationaryWaypoint.GetValue(p);
+			}
+			catch (Exception e)
+			{
+				SCANUtil.SCANlog("Error in detecting FinePrint Stationary Waypoint object: {0}", e);
 			}
 
 			return w;
@@ -135,11 +150,6 @@ namespace SCANsat
 
 				var field = sType.GetFields(BindingFlags.NonPublic | BindingFlags.Instance);
 
-				//for (int i = 0; i < field.Length; i++ )
-				//{
-				//	SCANUtil.SCANlog("Field {0}: {1}", i, field[i].GetValue(new SurveyWaypointParameter()).GetType().Name);
-				//}
-
 				_FinePrintWaypoint = field[0];
 
 				if (_FinePrintWaypoint == null)
@@ -155,6 +165,47 @@ namespace SCANsat
 			catch (Exception e)
 			{
 				SCANUtil.SCANlog("Error in assigning FinePrint Waypoint method: {0}", e);
+			}
+
+			return false;
+		}
+
+		internal static bool FinePrintStationaryWaypointReflection()
+		{
+			if (_FinePrintStationaryWaypoint != null)
+				return true;
+
+			if (FinePrintStationaryWaypointRun)
+				return false;
+
+			FinePrintStationaryWaypointRun = true;
+
+			try
+			{
+				Type sType = typeof(StationaryPointParameter);
+
+				var field = sType.GetFields(BindingFlags.NonPublic | BindingFlags.Instance);
+
+				//for (int i = 0; i < field.Length; i++)
+				//{
+				//	SCANUtil.SCANlog("Field {0}: {1}", i, field[i].GetValue(new StationaryPointParameter()).GetType().Name);
+				//}
+
+				_FinePrintStationaryWaypoint = field[0];
+
+				if (_FinePrintStationaryWaypoint == null)
+				{
+					SCANUtil.SCANlog("FinePrint Stationary Waypoint Field Not Found");
+					return false;
+				}
+
+				SCANUtil.SCANlog("FinePrint Stationary Waypoint Field Assigned");
+
+				return _FinePrintWaypoint != null;
+			}
+			catch (Exception e)
+			{
+				SCANUtil.SCANlog("Error in assigning FinePrint Stationary Waypoint method: {0}", e);
 			}
 
 			return false;
