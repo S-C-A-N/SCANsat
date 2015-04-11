@@ -27,9 +27,8 @@ namespace SCANsat.SCAN_Data
 	{
 		private string name;
 		private SCANtype type;
-		private Color colorFull, colorEmpty;
 
-		internal SCANresourceType(string s, int i, string Full, string Empty)
+		internal SCANresourceType(string s, int i)
 		{
 			name = s;
 			type = (SCANtype)i;
@@ -37,24 +36,6 @@ namespace SCANsat.SCAN_Data
 			{
 				Debug.LogWarning("[SCANsat] Attempt To Override Default SCANsat Sensors; Resetting Resource Scanner Type To 0");
 				type = SCANtype.Nothing;
-			}
-			try
-			{
-				colorFull = ConfigNode.ParseColor(Full);
-			}
-			catch (Exception e)
-			{
-				SCANUtil.SCANlog("Color Format Incorrect; Reverting To Default Full Resource Color: {0}", e);
-				colorFull = palette.cb_reddishPurple;
-			}
-			try
-			{
-				colorEmpty = ConfigNode.ParseColor(Empty);
-			}
-			catch (Exception e)
-			{
-				SCANUtil.SCANlog("Color Format Incorrect; Reverting To Default Empty Resource Color: {0}", e);
-				colorEmpty = palette.magenta;
 			}
 		}
 
@@ -66,16 +47,6 @@ namespace SCANsat.SCAN_Data
 		public SCANtype Type
 		{
 			get { return type;}
-		}
-
-		public Color ColorFull
-		{
-			get { return colorFull; }
-		}
-
-		public Color ColorEmpty
-		{
-			get { return colorEmpty; }
 		}
 
 	}
