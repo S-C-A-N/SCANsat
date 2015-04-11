@@ -158,9 +158,6 @@ namespace SCANsat
 		private Vessel PartFromVessel, PartToVessel, NewVessel, OldVessel;
 		private int timer = 0;
 
-		public readonly Color defaultLowBiomeColor = palette.xkcd_CamoGreen;
-		public readonly Color defaultHighBiomeColor = palette.xkcd_Marigold;
-
 		#region Public Accessors
 
 		public SCANdata getData(string bodyName)
@@ -266,7 +263,7 @@ namespace SCANsat
 
 		public static int MasterResourceCount
 		{
-			get { return masterResourceNodes.Count; }
+			get { return loadedResources.Count; }
 		}
 
 		public static List<SCANresourceGlobal> EncodeResourceConfigs
@@ -533,20 +530,20 @@ namespace SCANsat
 							if (bool.TryParse(node_body.GetValue("Disabled"), out disabled))
 								data.Disabled = disabled;
 							if (!float.TryParse(node_body.GetValue("MinHeightRange"), out min))
-								min = data.DefaultMinHeight;
+								min = data.TerrainConfig.DefaultMinHeight;
 							if (!float.TryParse(node_body.GetValue("MaxHeightRange"), out max))
-								max = data.DefaultMaxHeight;
+								max = data.TerrainConfig.DefaultMaxHeight;
 							if (node_body.HasValue("ClampHeight"))
 							{
 								if (float.TryParse(node_body.GetValue("ClampHeight"), out clamp))
 									clampState = clamp;
 							}
 							if (!int.TryParse(node_body.GetValue("PaletteSize"), out pSize))
-								pSize = data.DefaultColorPalette.size;
+								pSize = data.TerrainConfig.DefaultPaletteSize;
 							if (!bool.TryParse(node_body.GetValue("PaletteReverse"), out pRev))
-								pRev = data.DefaultReversePalette;
+								pRev = data.TerrainConfig.DefaultReverse;
 							if (!bool.TryParse(node_body.GetValue("PaletteDiscrete"), out pDis))
-								pDis = false;
+								pDis = data.TerrainConfig.DefaultDiscrete;
 							if (node_body.HasValue("PaletteName"))
 								paletteName = node_body.GetValue("PaletteName");
 							dataPalette = SCANUtil.paletteLoader(paletteName, pSize);
@@ -556,12 +553,12 @@ namespace SCANsat
 								pSize = 7;
 							}
 
-							SCANterrainConfig dataTerrainConfig = new SCANterrainConfig(min, max, clampState, dataPalette, pSize, pRev, pDis, body);
+							SCANterrainConfig dataTerrainConfig = getTerrainNode(body.name);
 
-							if (masterTerrainNodes.ContainsKey(body.name))
-								masterTerrainNodes[body.name] = dataTerrainConfig;
+							if (dataTerrainConfig == null)
+								dataTerrainConfig = new SCANterrainConfig(min, max, clampState, dataPalette, pSize, pRev, pDis, body);
 							else
-								addToTerrainConfigData(body.name, dataTerrainConfig);
+								setNewTerrainConfigValues(dataTerrainConfig, min, max, clampState, dataPalette, pSize, pRev, pDis);
 
 							data.TerrainConfig = dataTerrainConfig;
 						}
@@ -835,6 +832,17 @@ namespace SCANsat
 				body_data.Add(VC.to.name, new SCANdata(VC.to));
 		}
 
+		private void setNewTerrainConfigValues(SCANterrainConfig terrain, float min, float max, float? clamp, Palette c, int size, bool reverse, bool discrete)
+		{
+			terrain.MinTerrain = min;
+			terrain.MaxTerrain = max;
+			terrain.ClampTerrain = clamp;
+			terrain.ColorPal = c;
+			terrain.PalSize = size;
+			terrain.PalRev = reverse;
+			terrain.PalDis = discrete;
+		}
+
 		private string saveResources(SCANresourceGlobal resource)
 		{
 			List<string> sL = new List<string>();
@@ -862,12 +870,7 @@ namespace SCANsat
 
 			Color lowColor = new Color();
 			Color highColor = new Color();
-			float transparent;
-
-			if (resourceTypes.ContainsKey(resource))
-				lowColor = resourceTypes[resource].ColorEmpty;
-			else
-				lowColor = palette.xkcd_DarkPurple;
+			float transparent = 0;
 
 			try
 			{
@@ -875,13 +878,9 @@ namespace SCANsat
 			}
 			catch (Exception e)
 			{
+				lowColor = r.DefaultLowColor;
 				SCANUtil.SCANlog("Error in parsing low color for resource [{0}]: ", resource, e);
 			}
-
-			if (resourceTypes.ContainsKey(resource))
-				highColor = resourceTypes[resource].ColorFull;
-			else
-				highColor = palette.xkcd_Lemon;
 
 			try
 			{
@@ -889,11 +888,12 @@ namespace SCANsat
 			}
 			catch (Exception e)
 			{
+				highColor = r.DefaultHighColor;
 				SCANUtil.SCANlog("Error in parsing high color for resource [{0}]: ", resource, e);
 			}
 
 			if (!float.TryParse(trans, out transparent))
-				transparent = 40f;
+				transparent = r.DefaultTrans;
 
 			r.MinColor = lowColor;
 			r.MaxColor = highColor;
