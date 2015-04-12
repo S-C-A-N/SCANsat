@@ -18,7 +18,7 @@ namespace SCANsat.SCAN_Data
 		[Persistent]
 		private float lowResourceCutoff = 0.001f;
 		[Persistent]
-		private float highResourceCutoff = 0.1f;
+		private float highResourceCutoff = 10f;
 
 		private CelestialBody body;
 		private float defaultMinValue, defaultMaxValue;

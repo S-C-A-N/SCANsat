@@ -20,7 +20,7 @@ namespace SCANsat.SCAN_Data
 		[Persistent]
 		private float defaultMinValue = 0.001f;
 		[Persistent]
-		private float defaultMaxValue = 0.1f;
+		private float defaultMaxValue = 10f;
 		[Persistent]
 		private List<SCANresourceBody> Resource_Planetary_Config = new List<SCANresourceBody>();
 
