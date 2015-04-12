@@ -720,7 +720,6 @@ namespace SCANsat
 					timer++;
 				else
 				{
-					SCANUtil.SCANdebugLog("Docking/Undocking Check");
 					if (unDocked)
 					{
 						if (NewVessel != null)
@@ -783,34 +782,24 @@ namespace SCANsat
 
 		private void removeVessel(Vessel v)
 		{
-			SCANUtil.SCANdebugLog("Checking Vessel: {0}", v.name);
 			if (isVesselKnown(v))
 			{
-				SCANUtil.SCANdebugLog("Vessel Known: {0}", v.name);
 				foreach (SCANtype t in Enum.GetValues(typeof(SCANtype)))
-				{
-					SCANUtil.SCANdebugLog("Removing Sensor From Vessel: {0}", v.name);
 					unregisterSensor(v, t);
-				}
 			}
 		}
 
 		private void addVessel(Vessel v)
 		{
-			SCANUtil.SCANdebugLog("Adding New Vessel: {0}", v.name);
 			foreach (SCANsat s in v.FindPartModulesImplementing<SCANsat>())
 			{
 				if (s.scanningNow())
-				{
-					SCANUtil.SCANdebugLog("Registering Sensor: {0}", v.name);
 					registerSensor(v.id, (SCANtype)s.sensorType, s.fov, s.min_alt, s.max_alt, s.best_alt);
-				}
 			}
 		}
 
 		private void dockingCheck(GameEvents.FromToAction<Part, Part> Parts)
 		{
-			SCANUtil.SCANdebugLog("Docking Check");
 			PartFromVessel = Parts.from.vessel;
 			PartToVessel = Parts.to.vessel;
 
@@ -819,11 +808,16 @@ namespace SCANsat
 
 		private void newVesselCheck(Vessel v)
 		{
-			SCANUtil.SCANdebugLog("New Vessel Check");
-			NewVessel = v;
-			OldVessel = FlightGlobals.ActiveVessel;
+			if (v.loaded)
+			{
+				if (v.Parts.Count > 1)
+					NewVessel = v;
+				else
+					NewVessel = null;
+				OldVessel = FlightGlobals.ActiveVessel;
 
-			unDocked = true;
+				unDocked = true;
+			}
 		}
 
 		private void SOIChange(GameEvents.HostedFromToAction<Vessel, CelestialBody> VC)
