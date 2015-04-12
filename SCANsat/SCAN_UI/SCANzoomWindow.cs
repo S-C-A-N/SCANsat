@@ -91,12 +91,13 @@ namespace SCANsat.SCAN_UI
 
 		public void setMapCenter(double lat, double lon, mapType t, MapProjection p)
 		{
-			SCANUtil.SCANdebugLog("Centering Zoom Window");
 			Visible = true;
 			spotmap.MapScale = 10;
-			spotmap.centerAround(lon, lat);
 			if (p == MapProjection.Polar)
 				spotmap.setProjection(p);
+			else
+				spotmap.setProjection(MapProjection.Rectangular);
+			spotmap.centerAround(lon, lat);
 			spotmap.resetMap(t, false);
 		}
 
@@ -183,7 +184,7 @@ namespace SCANsat.SCAN_UI
 		//Draw the close button in upper right corner
 		private void closeBox(int id)
 		{
-			Rect r = new Rect(WindowRect.width - 20, 0, 18, 18);
+			Rect r = new Rect(WindowRect.width - 20, 1, 18, 18);
 			if (GUI.Button(r, SCANcontroller.controller.closeBox, SCANskins.SCAN_closeButton))
 			{
 				Visible = false;
@@ -322,11 +323,15 @@ namespace SCANsat.SCAN_UI
 			//Handles mouse positioning and converting to lat/long coordinates
 			if (mx >= 0 && my >= 0 && mx <= TextureRect.width && my <= TextureRect.height  /*mx >= 0 && my >= 0 && mx < MapTexture.width && my < MapTexture.height*/)
 			{
-				in_map = true;
 				double mlo = spotmap.Lon_Offset + (mx / spotmap.MapScale) - 180;
 				double mla = spotmap.Lat_Offset + ((TextureRect.height - my) / spotmap.MapScale) - 90;
 				mlon = spotmap.unprojectLongitude(mlo, mla);
 				mlat = spotmap.unprojectLatitude(mlo, mla);
+
+				if (mlon >= -180 && mlon <= 180 && mlat >= -90 && mlat <= 90)
+				{
+					in_map = true;
+				}
 
 				if (mlat > 90)
 				{
