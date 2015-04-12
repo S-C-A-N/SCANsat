@@ -238,7 +238,7 @@ namespace SCANsat.SCAN_UI
 		//Draw the close button in upper right corner
 		private void closeBox(int id)
 		{
-			Rect r = new Rect(WindowRect.width - 20, 0, 18, 18);
+			Rect r = new Rect(WindowRect.width - 20, 1, 18, 18);
 			if (GUI.Button(r, SCANcontroller.controller.closeBox, SCANskins.SCAN_closeButton))
 			{
 				InputLockManager.RemoveControlLock(lockID);
@@ -579,12 +579,16 @@ namespace SCANsat.SCAN_UI
 					if (GUI.Button(r, SCANmapProjection.projectionNames[i], SCANskins.SCAN_dropDownButton))
 					{
 						bigmap.setProjection((MapProjection)i);
+						bigmap.resetMap();
 						if (spotMap != null)
 						{
 							if ((MapProjection)i == MapProjection.Polar)
 								spotMap.SpotMap.setProjection(MapProjection.Polar);
 							else
 								spotMap.SpotMap.setProjection(MapProjection.Rectangular);
+
+							spotMap.SpotMap.centerAround(spotMap.SpotMap.CenteredLong, spotMap.SpotMap.CenteredLat);
+							spotMap.SpotMap.resetMap();
 						}
 						SCANcontroller.controller.projection = i;
 						drawGrid = true;
