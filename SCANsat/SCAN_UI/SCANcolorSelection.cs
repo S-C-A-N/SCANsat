@@ -119,7 +119,8 @@ namespace SCANsat.SCAN_UI
 
 			slopeColorPicker = new SCANuiColorPicker(palette.xkcd_Amber, palette.xkcd_Cerulean, true);
 
-			biomeTransSlider = new SCANuiSlider(0, 80, SCANcontroller.controller.biomeTransparency, "Ter. Trans: ", "%", 0);
+			bTrans = SCANcontroller.controller.biomeTransparency;
+			biomeTransSlider = new SCANuiSlider(0, 80, bTrans, "Ter. Trans: ", "%", 0);
 
 			biomeColorPicker = new SCANuiColorPicker(SCANcontroller.controller.lowBiomeColor, SCANcontroller.controller.highBiomeColor, true);
 
@@ -846,7 +847,7 @@ namespace SCANsat.SCAN_UI
 
 						updateUI();
 
-						if (bigMap != null)
+						if (bigMap != null && SCANcontroller.controller.map_ResourceOverlay)
 							bigMap.resetMap();
 					}
 
@@ -871,7 +872,7 @@ namespace SCANsat.SCAN_UI
 
 						updateUI();
 
-						if (bigMap != null)
+						if (bigMap != null && SCANcontroller.controller.map_ResourceOverlay)
 							bigMap.resetMap();
 					}
 				}
@@ -898,7 +899,7 @@ namespace SCANsat.SCAN_UI
 
 						updateUI();
 
-						if (bigMap != null)
+						if (bigMap != null && SCANcontroller.controller.map_ResourceOverlay)
 							bigMap.resetMap();
 					}
 
@@ -924,7 +925,7 @@ namespace SCANsat.SCAN_UI
 
 						updateUI();
 
-						if (bigMap != null)
+						if (bigMap != null && SCANcontroller.controller.map_ResourceOverlay)
 							bigMap.resetMap();
 					}
 				}
