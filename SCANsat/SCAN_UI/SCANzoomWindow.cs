@@ -134,6 +134,7 @@ namespace SCANsat.SCAN_UI
 
 					spotmap.setSize((int)resizeW, (int)resizeH);
 					spotmap.MapScale = scale;
+					spotmap.centerAround(spotmap.CenteredLong, spotmap.CenteredLat);
 					spotmap.resetMap(spotmap.MType, false);
 				}
 				else
@@ -216,6 +217,7 @@ namespace SCANsat.SCAN_UI
 				spotmap.MapScale = spotmap.MapScale / 1.25f;
 				if (spotmap.MapScale < 2)
 					spotmap.MapScale = 2;
+				spotmap.centerAround(spotmap.CenteredLong, spotmap.CenteredLat);
 				spotmap.resetMap();
 			}
 
@@ -224,6 +226,7 @@ namespace SCANsat.SCAN_UI
 			if (GUILayout.Button(iconWithTT(SCANskins.SCAN_ZoomInIcon, "Zoom In"), SCANskins.SCAN_buttonBorderless, GUILayout.Width(26), GUILayout.Height(26)))
 			{
 				spotmap.MapScale = spotmap.MapScale * 1.25f;
+				spotmap.centerAround(spotmap.CenteredLong, spotmap.CenteredLat);
 				spotmap.resetMap();
 			}
 
@@ -355,12 +358,8 @@ namespace SCANsat.SCAN_UI
 					{
 						if (in_map)
 						{
-							if (spotmap.isMapComplete())
-							{
-								spotmap.centerAround(mlon, mlat);
-								spotmap.resetMap();
-								Event.current.Use();
-							}
+							spotmap.centerAround(mlon, mlat);
+							spotmap.resetMap();
 						}
 					}
 					//Right click zoom in
@@ -368,12 +367,9 @@ namespace SCANsat.SCAN_UI
 					{
 						if (in_map)
 						{
-							if (spotmap.isMapComplete())
-							{
-								spotmap.MapScale = spotmap.MapScale * 1.25f;
-								spotmap.centerAround(mlon, mlat);
-								spotmap.resetMap();
-							}
+							spotmap.MapScale = spotmap.MapScale * 1.25f;
+							spotmap.centerAround(mlon, mlat);
+							spotmap.resetMap();
 						}
 					}
 					//Left click zoom out
@@ -381,15 +377,11 @@ namespace SCANsat.SCAN_UI
 					{
 						if (in_map)
 						{
-							if (spotmap.isMapComplete())
-							{
-								spotmap.MapScale = spotmap.MapScale / 1.25f;
-								if (spotmap.MapScale < 2)
-									spotmap.MapScale = 2;
-								spotmap.centerAround(mlon, mlat);
-								spotmap.resetMap();
-								Event.current.Use();
-							}
+							spotmap.MapScale = spotmap.MapScale / 1.25f;
+							if (spotmap.MapScale < 2)
+								spotmap.MapScale = 2;
+							spotmap.centerAround(mlon, mlat);
+							spotmap.resetMap();
 						}
 					}
 					Event.current.Use();
