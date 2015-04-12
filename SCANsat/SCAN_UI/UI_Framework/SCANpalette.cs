@@ -112,13 +112,13 @@ namespace SCANsat.SCAN_UI.UI_Framework
 
 		public static Color heightToColor(float val, int scheme, SCANdata data)
 		{
-			Color32[] c = data.ColorPalette.colors;
-			if (data.PaletteReverse)
-				c = data.ColorPalette.colorsReverse;
+			Color32[] c = data.TerrainConfig.ColorPal.colors;
+			if (data.TerrainConfig.PalRev)
+				c = data.TerrainConfig.ColorPal.colorsReverse;
 			if (scheme == 0)
-				return heightToColor(val, data.MaxHeight, data.MinHeight, data.ClampHeight, data.PaletteDiscrete, c);
+				return heightToColor(val, data.TerrainConfig.MaxTerrain, data.TerrainConfig.MinTerrain, data.TerrainConfig.ClampTerrain, data.TerrainConfig.PalDis, c);
 			else
-				return heightToColor(val, data.MaxHeight, data.MinHeight, data.PaletteDiscrete);
+				return heightToColor(val, data.TerrainConfig.MaxTerrain, data.TerrainConfig.MinTerrain, data.TerrainConfig.PalDis);
 		}
 
 		private static Color heightToColor(float val, float max, float min, bool discrete)
@@ -269,37 +269,42 @@ namespace SCANsat.SCAN_UI.UI_Framework
 		}
 
 		private static _Palettes currentPaletteSet;
-		private static _Palettes divPaletteSet;
-		private static _Palettes qualPaletteSet;
-		private static _Palettes seqPaletteSet;
-		private static _Palettes fixedPaletteSet;
-		private static Palette.Kind currentPaletteType;
-		private static string currentPaletteTypeName;
-		private static int currentPaletteSetSize;
-		private static Palette currentHeightPalette;
+		//private static _Palettes divPaletteSet;
+		//private static _Palettes qualPaletteSet;
+		//private static _Palettes seqPaletteSet;
+		//private static _Palettes fixedPaletteSet;
+		//private static Palette currentHeightPalette;
 		private static Palette greyScalePalette = BrewerPalettes.Greys(9);
 
-		internal static _Palettes generatePaletteSet(int size, Palette.Kind type)
+		private static _Palettes generatePaletteSet(int size, Palette.Kind type)
 		{
 			PaletteLoader.generatePalettes(type, size);
 			return new _Palettes(PaletteLoader.palettes.ToArray(), type, size);
 		}
 
-		internal static _Palettes setCurrentPalettesType(Palette.Kind type)
+		internal static _Palettes setCurrentPalettesType(Palette.Kind type, int size)
 		{
 			switch (type)
 			{
-				case Palette.Kind.Diverging:
-					return divPaletteSet; 
-				case Palette.Kind.Qualitative:
-					return qualPaletteSet;
-				case Palette.Kind.Sequential:
-					return seqPaletteSet;
 				case Palette.Kind.Fixed:
-					return fixedPaletteSet;
+					return generatePaletteSet(0, Palette.Kind.Fixed);
 				default:
-					return divPaletteSet;
+					return generatePaletteSet(size, type);
 			}
+			//switch (type)
+			//{
+			//	case Palette.Kind.Diverging:
+			//		return generatePaletteSet(size, type);
+			//		//return divPaletteSet; 
+			//	case Palette.Kind.Qualitative:
+			//		//return qualPaletteSet;
+			//	case Palette.Kind.Sequential:
+			//		//return seqPaletteSet;
+			//	case Palette.Kind.Fixed:
+			//		//return fixedPaletteSet;
+			//	default:
+			//		//return divPaletteSet;
+			//}
 		}
 
 		public static Palette GreyScalePalette
@@ -313,51 +318,43 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			internal set
 			{
 				currentPaletteSet = value;
-				currentPaletteTypeName = value.paletteType.ToString();
-				currentPaletteType = value.paletteType;
-				currentPaletteSetSize = value.size;
 			}
 		}
 
 		public static string getPaletteTypeName
 		{
-			get { return currentPaletteTypeName; }
-		}
-
-		public static Palette.Kind getPaletteType
-		{
-			get { return currentPaletteType; }
+			get { return currentPaletteSet.paletteType.ToString(); }
 		}
 		
-		public static _Palettes DivPaletteSet
-		{
-			get { return divPaletteSet; }
-			internal set { divPaletteSet = value; }
-		}
+		//public static _Palettes DivPaletteSet
+		//{
+		//	get { return divPaletteSet; }
+		//	internal set { divPaletteSet = value; }
+		//}
 
-		public static _Palettes QualPaletteSet
-		{
-			get { return qualPaletteSet; }
-			internal set { qualPaletteSet = value; }
-		}
+		//public static _Palettes QualPaletteSet
+		//{
+		//	get { return qualPaletteSet; }
+		//	internal set { qualPaletteSet = value; }
+		//}
 
-		public static _Palettes SeqPaletteSet
-		{
-			get { return seqPaletteSet; }
-			internal set { seqPaletteSet = value; }
-		}
+		//public static _Palettes SeqPaletteSet
+		//{
+		//	get { return seqPaletteSet; }
+		//	internal set { seqPaletteSet = value; }
+		//}
 
-		public static _Palettes FixedPaletteSet
-		{
-			get { return fixedPaletteSet; }
-			internal set { fixedPaletteSet = value; }
-		}
+		//public static _Palettes FixedPaletteSet
+		//{
+		//	get { return fixedPaletteSet; }
+		//	internal set { fixedPaletteSet = value; }
+		//}
 
-		public static Palette CurrentPalette
-		{
-			get { return currentHeightPalette; }
-			internal set { currentHeightPalette = value; }
-		}
+		//public static Palette CurrentPalette
+		//{
+		//	get { return currentHeightPalette; }
+		//	internal set { currentHeightPalette = value; }
+		//}
 
 	}
 }

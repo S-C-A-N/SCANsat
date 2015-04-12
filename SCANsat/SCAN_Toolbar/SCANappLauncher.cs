@@ -23,12 +23,12 @@ namespace SCANsat.SCAN_Toolbar
 	{
 		private ApplicationLauncherButton SCANappLauncherButton = null;
 
-		internal override void Start()
+		protected override void Start()
 		{
 			setupToolbar();
 		}
 
-		internal override void OnDestroy()
+		protected override void OnDestroy()
 		{
 			GameEvents.onGUIApplicationLauncherUnreadifying.Remove(removeButton);
 
@@ -63,9 +63,12 @@ namespace SCANsat.SCAN_Toolbar
 
 		private void removeButton(GameScenes scene)
 		{
-			ApplicationLauncher.Instance.RemoveModApplication(SCANappLauncherButton);
-			SCANappLauncherButton = null;
-			SCANUtil.SCANdebugLog("App Launcher Button Removed");
+			if (SCANappLauncherButton != null)
+			{
+				ApplicationLauncher.Instance.RemoveModApplication(SCANappLauncherButton);
+				SCANappLauncherButton = null;
+				SCANUtil.SCANdebugLog("App Launcher Button Removed");
+			}
 		}
 
 		private void toggleFlight()

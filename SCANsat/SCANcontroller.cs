@@ -62,6 +62,8 @@ namespace SCANsat
 		[KSPField(isPersistant = true)]
 		public bool map_flags = true;
 		[KSPField(isPersistant = true)]
+		public bool map_waypoints = true;
+		[KSPField(isPersistant = true)]
 		public bool map_orbit = true;
 		[KSPField(isPersistant = true)]
 		public bool map_asteroids = true;
@@ -102,18 +104,38 @@ namespace SCANsat
 		public bool toolTips = true;
 		[KSPField(isPersistant = true)]
 		public bool useStockAppLauncher = true;
+		[KSPField(isPersistant = true)]
+		public bool regolithBiomeLock = false;
+		[KSPField(isPersistant = true)]
+		public bool useStockBiomes = false;
+		[KSPField(isPersistant = true)]
+		public float biomeTransparency = 40;
+		[KSPField(isPersistant = true)]
+		public Color lowBiomeColor = palette.xkcd_CamoGreen;
+		[KSPField(isPersistant = true)]
+		public Color highBiomeColor = palette.xkcd_Marigold;
+		//[KSPField(isPersistant = true)]
+		//public Color lowSlopeColor = palette.xkcd_PukeGreen;
+		//[KSPField(isPersistant = true)]
+		//public Color highSlopeColor = palette.xkcd_Yellow;
 
-		/* Available resources for overlays; loaded from resource addon configs; only loaded once */
-		private static Dictionary<string, Dictionary<string, SCANresource>> resourceList;
+		/* Available resources for overlays; loaded from SCANsat configs; only loaded once */
+		private static Dictionary<string, SCANresourceGlobal> masterResourceNodes = new Dictionary<string,SCANresourceGlobal>();
+
+		/* Resource types loaded from SCANsat configs; only needs to be loaded once */
+		private static Dictionary<string, SCANresourceType> resourceTypes = new Dictionary<string,SCANresourceType>();
+
+		/* Terrain height and color option containers loaded from SCANsat configs; only needs to be loaded once */
+		private static Dictionary<string, SCANterrainConfig> masterTerrainNodes = new Dictionary<string,SCANterrainConfig>();
+
+		/* List of resources currently loaded from resource addons */
+		private static List<string> loadedResources = new List<string>();
 
 		/* Primary SCANsat vessel dictionary; loaded every time */
 		private Dictionary<Guid, SCANvessel> knownVessels = new Dictionary<Guid, SCANvessel>();
 
-		/* Primary SCANdata dictionary; loaded every time; static to protect against null SCANcontroller instance */
-		private static Dictionary<string, SCANdata> body_data = new Dictionary<string,SCANdata>();
-
-		/* Resource types loaded from configs; only needs to be loaded once */
-		private static Dictionary<string, SCANresourceType> resourceTypes;
+		/* Primary SCANdata dictionary; loaded every time*/
+		private Dictionary<string, SCANdata> body_data = new Dictionary<string,SCANdata>();
 
 		/* Kethane integration */
 		private bool kethaneRebuild, kethaneReset, kethaneBusy = false;
@@ -122,8 +144,8 @@ namespace SCANsat
 		internal SCAN_MBW mainMap;
 		internal SCAN_MBW settingsWindow;
 		internal SCAN_MBW instrumentsWindow;
-		internal SCAN_MBW newBigMap;
-		internal SCAN_MBW kscMap;
+		internal SCANBigMap BigMap;
+		internal SCANkscMap kscMap;
 		internal SCAN_MBW colorManager;
 
 		/* App launcher object */
@@ -132,14 +154,38 @@ namespace SCANsat
 		/* Used in case the loading process is interupted somehow */
 		private bool loaded = false;
 
-		/* Governs resource overlay availability */
-		private static bool globalResourceOverlay = false;
+		private bool unDocked, docked = false;
+		private Vessel PartFromVessel, PartToVessel, NewVessel, OldVessel;
+		private int timer = 0;
 
 		#region Public Accessors
 
-		public static Dictionary<string, SCANdata> Body_Data
+		public SCANdata getData(string bodyName)
 		{
-			get { return body_data; }
+			if (body_data.ContainsKey(bodyName))
+				return body_data[bodyName];
+
+			return null;
+		}
+
+		public SCANdata getData(int index)
+		{
+			if (body_data.Count >= index)
+				return body_data.ElementAt(index).Value;
+			else
+				SCANUtil.SCANdebugLog("SCANdata dictionary index out of range; something went wrong here...");
+
+			return null;
+		}
+
+		public List<SCANdata> GetAllData
+		{
+			get { return body_data.Values.ToList(); }
+		}
+
+		public int GetDataCount
+		{
+			get { return body_data.Count; }
 		}
 
 		/* Use this method to protect against duplicate dictionary keys */
@@ -151,44 +197,218 @@ namespace SCANsat
 				Debug.LogError("[SCANsat] Warning: SCANdata Dictionary Already Contains Key of This Type");
 		}
 
-		public Dictionary<string, Dictionary<string, SCANresource>> ResourceList
+		public static List<SCANterrainConfig> EncodeTerrainConfigs
 		{
-			get { return resourceList; }
-		}
-		
-		public void addToResourceData (string name, string body, SCANresource res)
-		{
-			if (!resourceList.ContainsKey(name))
+			get
 			{
-				Dictionary<string, SCANresource> subDict = new Dictionary<string, SCANresource>();
-				subDict.Add(body, res);
-				resourceList.Add(name, subDict);
-			}
-			else
-			{
-				if (!resourceList[name].ContainsKey(body))
-					resourceList[name].Add(body, res);
-				else if (res.Source == SCANresource_Source.Regolith)
+				try
 				{
-					if (res.MinValue > resourceList[name][body].MinValue && res.MinValue < res.MaxValue)
-						resourceList[name][body].MinValue = res.MinValue;
-					if (res.MaxValue > resourceList[name][body].MaxValue && res.MaxValue > res.MinValue)
-						resourceList[name][body].MaxValue = res.MaxValue;
+					SCANUtil.SCANdebugLog("Saving Terrain Nodes");
+					return masterTerrainNodes.Values.ToList();
+				}
+				catch (Exception e)
+				{
+					SCANUtil.SCANlog("Error while saving SCANsat altimetry config data: {0}", e);
+				}
+
+				return new List<SCANterrainConfig>();
+			}
+		}
+
+		public static void setMasterTerrainNodes (List<SCANterrainConfig> terrainConfigs)
+		{
+			masterTerrainNodes.Clear();
+			try
+			{
+				masterTerrainNodes = terrainConfigs.ToDictionary(a => a.Name, a => a);
+			}
+			catch (Exception e)
+			{
+				SCANUtil.SCANlog("Error while loading SCANsat terrain config settings: {0}", e);
+			}
+		}
+
+		public static SCANterrainConfig getTerrainNode(string name)
+		{
+			if (masterTerrainNodes.ContainsKey(name))
+				return masterTerrainNodes[name];
+			else
+				SCANUtil.SCANlog("SCANsat terrain config [{0}] cannot be found in master terrain storage list", name);
+
+			return null;
+		}
+
+		public static void updateTerrainConfig (SCANterrainConfig t)
+		{
+			SCANterrainConfig update = getTerrainNode(t.Name);
+			if (update != null)
+			{
+				update.MinTerrain = t.MinTerrain;
+				update.MaxTerrain = t.MaxTerrain;
+				update.ClampTerrain = t.ClampTerrain;
+				update.PalSize = t.PalSize;
+				update.PalRev = t.PalRev;
+				update.PalDis = t.PalDis;
+				update.ColorPal = t.ColorPal;
+			}
+		}
+
+		public static void addToTerrainConfigData (string name, SCANterrainConfig data)
+		{
+			if (!masterTerrainNodes.ContainsKey(name))
+				masterTerrainNodes.Add(name, data);
+			else
+				Debug.LogError("[SCANsat] Warning: SCANterrain Data Dictionary Already Contains Key Of This Type");
+		}
+
+		public static int MasterResourceCount
+		{
+			get { return loadedResources.Count; }
+		}
+
+		public static List<SCANresourceGlobal> EncodeResourceConfigs
+		{
+			get
+			{
+				try
+				{
+					SCANUtil.SCANdebugLog("Saving Resource Nodes");
+					return masterResourceNodes.Values.ToList();
+				}
+				catch (Exception e)
+				{
+					SCANUtil.SCANlog("Error while saving SCANsat resource config data: {0}", e);
+				}
+
+				return new List<SCANresourceGlobal>();
+			}
+		}
+
+		public static void setMasterResourceNodes (List<SCANresourceGlobal> resourceConfigs)
+		{
+			try
+			{
+				masterResourceNodes = resourceConfigs.ToDictionary(a => a.Name, a => a);
+			}
+			catch (Exception e)
+			{
+				SCANUtil.SCANlog("Error while loading SCANsat resource config settings: {0}", e);
+			}
+		}
+
+		public static SCANresourceGlobal getResourceNode (string resourceName)
+		{
+			if (masterResourceNodes.ContainsKey(resourceName))
+				return masterResourceNodes[resourceName];
+			else
+				SCANUtil.SCANlog("SCANsat resource [{0}] cannot be found in master resource storage list", resourceName);
+
+			return null;
+		}
+
+		public static SCANresourceGlobal GetFirstResource
+		{
+			get
+			{
+				if (masterResourceNodes.Count > 0)
+					return masterResourceNodes.ElementAt(0).Value;
+				else
+					SCANUtil.SCANlog("SCANsat resource storage list is empty; something probably went wrong here...");
+
+				return null;
+			}
+		}
+
+		public static void updateSCANresource (SCANresourceGlobal r, bool all)
+		{
+			SCANresourceGlobal update = getResourceNode(r.Name);
+			if (update != null)
+			{
+				update.MinColor = r.MinColor;
+				update.MaxColor = r.MaxColor;
+				update.Transparency = r.Transparency;
+				if (all)
+				{
+					for (int i = 0; i < update.getBodyCount; i++)
+					{
+						SCANresourceBody b = update.getBodyConfig(i);
+						if (b != null)
+						{
+							SCANresourceBody bNew = r.getBodyConfig(b.BodyName);
+							if (bNew != null)
+							{
+								b.MinValue = bNew.MinValue;
+								b.MaxValue = bNew.MaxValue;
+							}
+						}
+					}
 				}
 				else
-					Debug.LogError(string.Format("[SCANsat] Warning: SCANResource Dictionary Already Contains Key of This Type: Resource: {0}; Body: {1}", name, body));
+				{
+					SCANresourceBody b = update.getBodyConfig(r.CurrentBody.BodyName);
+					if (b != null)
+					{
+						b.MinValue = r.CurrentBody.MinValue;
+						b.MaxValue = r.CurrentBody.MaxValue;
+					}
+				}
 			}
 		}
 
-		public static Dictionary<string, SCANresourceType> ResourceTypes
+		public static void addToResourceData (string name, SCANresourceGlobal res)
 		{
-			get { return resourceTypes; }
-			internal set { resourceTypes = value; }
+			if (!masterResourceNodes.ContainsKey(name))
+			{
+				masterResourceNodes.Add(name, res);
+			}
+			else
+				Debug.LogError(string.Format("[SCANsat] Warning: SCANResource Dictionary Already Contains Key of This Type: Resource: {0}", name));
 		}
 
-		public Dictionary<Guid, SCANvessel> Known_Vessels
+		public static SCANresourceType getResourceType (string name)
 		{
-			get { return knownVessels; }
+			if (resourceTypes.ContainsKey(name))
+				return resourceTypes[name];
+			else
+				SCANUtil.SCANlog("SCANsat resource type [{0}] cannot be found in master resource type storage list", name);
+
+			return null;
+		}
+
+		public static void addToResourceTypes (string name, SCANresourceType type)
+		{
+			if (!resourceTypes.ContainsKey(name))
+			{
+				resourceTypes.Add(name, type);
+			}
+			else
+				Debug.LogError(string.Format("[SCANsat] Warning: SCANResourceType Dictionary Already Contains Key of This Name: SCAN Resource Type: {0}", name));
+		}
+
+		public static void addToLoadedResourceNames (string name)
+		{
+			if (!loadedResources.Contains(name))
+				loadedResources.Add(name);
+			else
+				Debug.LogError(string.Format("[SCANsat] Warning: Loaded Resource List Already Contains Resource Of Name: {0}", name));
+		}
+
+		public static List<SCANresourceGlobal> setLoadedResourceList()
+		{
+			List<SCANresourceGlobal> rList = new List<SCANresourceGlobal>();
+
+			foreach (string r in loadedResources)
+			{
+				if (masterResourceNodes.ContainsKey(r))
+					rList.Add(masterResourceNodes[r]);
+			}
+
+			return rList;
+		}
+
+		public List<SCANvessel> Known_Vessels
+		{
+			get { return knownVessels.Values.ToList(); }
 		}
 
 		public bool KethaneBusy
@@ -224,15 +444,10 @@ namespace SCANsat
 			get { return actualPasses; }
 		}
 
-		public bool GlobalResourceOverlay
-		{
-			get { return globalResourceOverlay; }
-		}
 		#endregion
 
 		public override void OnLoad(ConfigNode node)
 		{
-			body_data = new Dictionary<string, SCANdata>();
 			ConfigNode node_vessels = node.GetNode("Scanners");
 			if (node_vessels != null)
 			{
@@ -274,6 +489,9 @@ namespace SCANsat
 				foreach (ConfigNode node_body in node_progress.GetNodes("Body"))
 				{
 					float min, max, clamp;
+					float? clampState = null;
+					Palette dataPalette;
+					string paletteName = "";
 					int pSize;
 					bool pRev, pDis, disabled;
 					string body_name = node_body.GetValue("Name");
@@ -281,7 +499,7 @@ namespace SCANsat
 					CelestialBody body = FlightGlobals.Bodies.FirstOrDefault(b => b.name == body_name);
 					if (body != null)
 					{
-						SCANdata data = SCANUtil.getData(body);
+						SCANdata data = getData(body.name);
 						if (data == null)
 							data = new SCANdata(body);
 						if (!body_data.ContainsKey(body_name))
@@ -311,24 +529,38 @@ namespace SCANsat
 							//Verify that saved data types can be converted, revert to default values otherwise
 							if (bool.TryParse(node_body.GetValue("Disabled"), out disabled))
 								data.Disabled = disabled;
-							if (float.TryParse(node_body.GetValue("MinHeightRange"), out min))
-								data.MinHeight = min;
-							if (float.TryParse(node_body.GetValue("MaxHeightRange"), out max))
-								data.MaxHeight = max;
+							if (!float.TryParse(node_body.GetValue("MinHeightRange"), out min))
+								min = data.TerrainConfig.DefaultMinHeight;
+							if (!float.TryParse(node_body.GetValue("MaxHeightRange"), out max))
+								max = data.TerrainConfig.DefaultMaxHeight;
 							if (node_body.HasValue("ClampHeight"))
 							{
 								if (float.TryParse(node_body.GetValue("ClampHeight"), out clamp))
-									data.ClampHeight = clamp;
+									clampState = clamp;
 							}
-							if (int.TryParse(node_body.GetValue("PaletteSize"), out pSize))
-								data.PaletteSize = pSize;
-							if (bool.TryParse(node_body.GetValue("PaletteReverse"), out pRev))
-								data.PaletteReverse = pRev;
-							if (bool.TryParse(node_body.GetValue("PaletteDiscrete"), out pDis))
-								data.PaletteDiscrete = pDis;
+							if (!int.TryParse(node_body.GetValue("PaletteSize"), out pSize))
+								pSize = data.TerrainConfig.DefaultPaletteSize;
+							if (!bool.TryParse(node_body.GetValue("PaletteReverse"), out pRev))
+								pRev = data.TerrainConfig.DefaultReverse;
+							if (!bool.TryParse(node_body.GetValue("PaletteDiscrete"), out pDis))
+								pDis = data.TerrainConfig.DefaultDiscrete;
 							if (node_body.HasValue("PaletteName"))
-								data.PaletteName = node_body.GetValue("PaletteName");
-							paletteLoad(data);
+								paletteName = node_body.GetValue("PaletteName");
+							dataPalette = SCANUtil.paletteLoader(paletteName, pSize);
+							if (dataPalette.hash == PaletteLoader.defaultPalette.hash)
+							{
+								paletteName = "Default";
+								pSize = 7;
+							}
+
+							SCANterrainConfig dataTerrainConfig = getTerrainNode(body.name);
+
+							if (dataTerrainConfig == null)
+								dataTerrainConfig = new SCANterrainConfig(min, max, clampState, dataPalette, pSize, pRev, pDis, body);
+							else
+								setNewTerrainConfigValues(dataTerrainConfig, min, max, clampState, dataPalette, pSize, pRev, pDis);
+
+							data.TerrainConfig = dataTerrainConfig;
 						}
 						catch (Exception e)
 						{
@@ -338,44 +570,29 @@ namespace SCANsat
 				}
 			}
 			dataRebuild = false; //Used for the one-time update to the new integer array
-			try
+
+			if (SCANconfigLoader.GlobalResource)
 			{
-				if (resourceTypes == null)
-					SCANUtil.loadSCANtypes();
+				if (string.IsNullOrEmpty(resourceSelection))
+					resourceSelection = masterResourceNodes.ElementAt(0).Key;
+				else if (!masterResourceNodes.ContainsKey(resourceSelection))
+					resourceSelection = masterResourceNodes.ElementAt(0).Key;
 			}
-			catch (Exception e)
+			ConfigNode node_resources = node.GetNode("SCANResources");
+			if (node_resources != null)
 			{
-				SCANUtil.SCANlog("Something Went Wrong Loading Resource Configs: {0}", e);
-			}
-			try
-			{
-				if (resourceList == null)
-					loadResources();
-			}
-			catch (Exception e)
-			{
-				SCANUtil.SCANlog("Something Went Wrong Loading Resource Data: {0}", e);
-			}
-			try
-			{
-				if (HighLogic.LoadedScene == GameScenes.FLIGHT)
+				foreach(ConfigNode node_resource_type in node_resources.GetNodes("ResourceType"))
 				{
-					mainMap = gameObject.AddComponent<SCANmainMap>();
-					settingsWindow = gameObject.AddComponent<SCANsettingsUI>();
-					instrumentsWindow = gameObject.AddComponent<SCANinstrumentUI>();
-					colorManager = gameObject.AddComponent<SCANcolorSelection>();
-					newBigMap = gameObject.AddComponent<SCANnewBigMap>();
+					if (node_resource_type != null)
+					{
+						string name = node_resource_type.GetValue("Resource");
+						string lowColor = node_resource_type.GetValue("MinColor");
+						string highColor = node_resource_type.GetValue("MaxColor");
+						string transparent = node_resource_type.GetValue("Transparency");
+						string minMaxValues = node_resource_type.GetValue("MinMaxValues");
+						loadCustomResourceValues(minMaxValues, name, lowColor, highColor, transparent);
+					}
 				}
-				else if (HighLogic.LoadedScene == GameScenes.SPACECENTER || HighLogic.LoadedScene == GameScenes.TRACKSTATION)
-				{
-					kscMap = gameObject.AddComponent<SCANkscMap>();
-					settingsWindow = gameObject.AddComponent<SCANsettingsUI>();
-					colorManager = gameObject.AddComponent<SCANcolorSelection>();
-				}
-			}
-			catch (Exception e)
-			{
-				SCANUtil.SCANlog("Something Went Wrong Initializing UI Objects: {0}", e);
 			}
 			loaded = true;
 		}
@@ -412,18 +629,39 @@ namespace SCANsat
 						SCANdata body_scan = body_data[body_name];
 						node_body.AddValue("Name", body_name);
 						node_body.AddValue("Disabled", body_scan.Disabled);
-						node_body.AddValue("MinHeightRange", body_scan.MinHeight);
-						node_body.AddValue("MaxHeightRange", body_scan.MaxHeight);
-						if (body_scan.ClampHeight != null)
-							node_body.AddValue("ClampHeight", body_scan.ClampHeight);
-						node_body.AddValue("PaletteName", body_scan.PaletteName);
-						node_body.AddValue("PaletteSize", body_scan.PaletteSize);
-						node_body.AddValue("PaletteReverse", body_scan.PaletteReverse);
-						node_body.AddValue("PaletteDiscrete", body_scan.PaletteDiscrete);
+						node_body.AddValue("MinHeightRange", body_scan.TerrainConfig.MinTerrain);
+						node_body.AddValue("MaxHeightRange", body_scan.TerrainConfig.MaxTerrain);
+						if (body_scan.TerrainConfig.ClampTerrain != null)
+							node_body.AddValue("ClampHeight", body_scan.TerrainConfig.ClampTerrain);
+						node_body.AddValue("PaletteName", body_scan.TerrainConfig.ColorPal.name);
+						node_body.AddValue("PaletteSize", body_scan.TerrainConfig.PalSize);
+						node_body.AddValue("PaletteReverse", body_scan.TerrainConfig.PalRev);
+						node_body.AddValue("PaletteDiscrete", body_scan.TerrainConfig.PalDis);
 						node_body.AddValue("Map", body_scan.integerSerialize());
 						node_progress.AddNode(node_body);
 					}
 					node.AddNode(node_progress);
+				}
+				if (resourceTypes.Count > 0 && masterResourceNodes.Count > 0)
+				{
+					ConfigNode node_resources = new ConfigNode("SCANResources");
+					foreach (SCANresourceGlobal r in masterResourceNodes.Values)
+					{
+						if (r != null)
+						{
+							SCANUtil.SCANdebugLog("Saving Resource: {0}", r.Name);
+							ConfigNode node_resource_type = new ConfigNode("ResourceType");
+							node_resource_type.AddValue("Resource", r.Name);
+							node_resource_type.AddValue("MinColor", ConfigNode.WriteColor(r.MinColor));
+							node_resource_type.AddValue("MaxColor", ConfigNode.WriteColor(r.MaxColor));
+							node_resource_type.AddValue("Transparency", r.Transparency);
+
+							string rMinMax = saveResources(r);
+							node_resource_type.AddValue("MinMaxValues", rMinMax);
+							node_resources.AddNode(node_resource_type);
+						}
+					}
+					node.AddNode(node_resources);
 				}
 			}
 		}
@@ -431,6 +669,8 @@ namespace SCANsat
 		private void Start()
 		{
 			GameEvents.onVesselSOIChanged.Add(SOIChange);
+			GameEvents.onVesselCreate.Add(newVesselCheck);
+			GameEvents.onPartCouple.Add(dockingCheck);
 			if (HighLogic.LoadedScene == GameScenes.FLIGHT)
 			{
 				if (!body_data.ContainsKey(FlightGlobals.currentMainBody.name))
@@ -443,6 +683,28 @@ namespace SCANsat
 			}
 			if (useStockAppLauncher)
 				appLauncher = gameObject.AddComponent<SCANappLauncher>();
+
+			try
+			{
+				if (HighLogic.LoadedScene == GameScenes.FLIGHT)
+				{
+					mainMap = gameObject.AddComponent<SCANmainMap>();
+					settingsWindow = gameObject.AddComponent<SCANsettingsUI>();
+					instrumentsWindow = gameObject.AddComponent<SCANinstrumentUI>();
+					colorManager = gameObject.AddComponent<SCANcolorSelection>();
+					BigMap = gameObject.AddComponent<SCANBigMap>();
+				}
+				else if (HighLogic.LoadedScene == GameScenes.SPACECENTER || HighLogic.LoadedScene == GameScenes.TRACKSTATION)
+				{
+					kscMap = gameObject.AddComponent<SCANkscMap>();
+					settingsWindow = gameObject.AddComponent<SCANsettingsUI>();
+					colorManager = gameObject.AddComponent<SCANcolorSelection>();
+				}
+			}
+			catch (Exception e)
+			{
+				SCANUtil.SCANlog("Something Went Wrong Initializing UI Objects: {0}", e);
+			}
 		}
 
 		private void Update()
@@ -451,11 +713,59 @@ namespace SCANsat
 			{
 				scanFromAllVessels();
 			}
+
+			if (unDocked || docked)
+			{
+				if (timer < 30)
+					timer++;
+				else
+				{
+					if (unDocked)
+					{
+						if (NewVessel != null)
+						{
+							removeVessel(NewVessel);
+							addVessel(NewVessel);
+							NewVessel = null;
+						}
+
+						if (OldVessel != null)
+						{
+							removeVessel(OldVessel);
+							addVessel(OldVessel);
+							OldVessel = null;
+						}
+					}
+
+					if (docked)
+					{
+						if (PartFromVessel != null)
+						{
+							removeVessel(PartFromVessel);
+							PartFromVessel = null;
+						}
+
+						if (PartToVessel != null)
+						{
+							removeVessel(PartToVessel);
+							PartToVessel = null;
+						}
+
+						addVessel(FlightGlobals.ActiveVessel);
+					}
+
+					unDocked = false;
+					docked = false;
+					timer = 0;
+				}
+			}
 		}
 
 		private void OnDestroy()
 		{
 			GameEvents.onVesselSOIChanged.Remove(SOIChange);
+			GameEvents.onVesselCreate.Remove(newVesselCheck);
+			GameEvents.onPartCouple.Remove(dockingCheck);
 			if (mainMap != null)
 				Destroy(mainMap);
 			if (settingsWindow != null)
@@ -464,10 +774,50 @@ namespace SCANsat
 				Destroy(instrumentsWindow);
 			if (kscMap != null)
 				Destroy(kscMap);
-			if (newBigMap != null)
-				Destroy(newBigMap);
+			if (BigMap != null)
+				Destroy(BigMap);
 			if (appLauncher != null)
 				Destroy(appLauncher);
+		}
+
+		private void removeVessel(Vessel v)
+		{
+			if (isVesselKnown(v))
+			{
+				foreach (SCANtype t in Enum.GetValues(typeof(SCANtype)))
+					unregisterSensor(v, t);
+			}
+		}
+
+		private void addVessel(Vessel v)
+		{
+			foreach (SCANsat s in v.FindPartModulesImplementing<SCANsat>())
+			{
+				if (s.scanningNow())
+					registerSensor(v.id, (SCANtype)s.sensorType, s.fov, s.min_alt, s.max_alt, s.best_alt);
+			}
+		}
+
+		private void dockingCheck(GameEvents.FromToAction<Part, Part> Parts)
+		{
+			PartFromVessel = Parts.from.vessel;
+			PartToVessel = Parts.to.vessel;
+
+			docked = true;
+		}
+
+		private void newVesselCheck(Vessel v)
+		{
+			if (v.loaded)
+			{
+				if (v.Parts.Count > 1)
+					NewVessel = v;
+				else
+					NewVessel = null;
+				OldVessel = FlightGlobals.ActiveVessel;
+
+				unDocked = true;
+			}
 		}
 
 		private void SOIChange(GameEvents.HostedFromToAction<Vessel, CelestialBody> VC)
@@ -476,42 +826,109 @@ namespace SCANsat
 				body_data.Add(VC.to.name, new SCANdata(VC.to));
 		}
 
-		//Method to handle loading of the saved color palette
-		private void paletteLoad(SCANdata data)
+		private void setNewTerrainConfigValues(SCANterrainConfig terrain, float min, float max, float? clamp, Palette c, int size, bool reverse, bool discrete)
 		{
-			if (data.PaletteName == "Default" || string.IsNullOrEmpty(data.PaletteName))
+			terrain.MinTerrain = min;
+			terrain.MaxTerrain = max;
+			terrain.ClampTerrain = clamp;
+			terrain.ColorPal = c;
+			terrain.PalSize = size;
+			terrain.PalRev = reverse;
+			terrain.PalDis = discrete;
+		}
+
+		private string saveResources(SCANresourceGlobal resource)
+		{
+			List<string> sL = new List<string>();
+			for (int j = 0; j < resource.getBodyCount; j++)
 			{
-				data.ColorPalette = PaletteLoader.defaultPalette;
-				data.PaletteName = "Default";
-				data.PaletteSize = 7;
-			}
-			else
-			{
-				try
+				SCANresourceBody bodyRes = resource.getBodyConfig(j);
+				if (bodyRes != null)
 				{
-					if (data.PaletteName == "blackForest" || data.PaletteName == "departure" || data.PaletteName == "northRhine" || data.PaletteName == "mars" || data.PaletteName == "wiki2" || data.PaletteName == "plumbago" || data.PaletteName == "cw1_013" || data.PaletteName == "arctic")
-					{
-						//Load the fixed size color palette by name through reflection
-						var fixedPallete = typeof(FixedColorPalettes);
-						var fPaletteMethod = fixedPallete.GetMethod(data.PaletteName);
-						var fColorP = fPaletteMethod.Invoke(null, null);
-						data.ColorPalette = (Palette)fColorP;
-					}
-					else
-					{
-						//Load the ColorBrewer method by name through reflection
-						var brewer = typeof(BrewerPalettes);
-						var bPaletteMethod = brewer.GetMethod(data.PaletteName);
-						var bColorP = bPaletteMethod.Invoke(null, new object[] { data.PaletteSize });
-						data.ColorPalette = (Palette)bColorP;
-					}
+					string a = string.Format("{0}|{1:F3}|{2:F3}", bodyRes.Index, bodyRes.MinValue, bodyRes.MaxValue);
+					sL.Add(a);
 				}
-				catch (Exception e)
+			}
+
+			return string.Join(",", sL.ToArray());
+		}
+
+		private void loadCustomResourceValues(string s, string resource, string low, string high, string trans)
+		{
+			SCANresourceGlobal r;
+
+			if (masterResourceNodes.ContainsKey(resource))
+				r = masterResourceNodes[resource];
+			else
+				return;
+
+			Color lowColor = new Color();
+			Color highColor = new Color();
+			float transparent = 0;
+
+			try
+			{
+				lowColor = ConfigNode.ParseColor(low);
+			}
+			catch (Exception e)
+			{
+				lowColor = r.DefaultLowColor;
+				SCANUtil.SCANlog("Error in parsing low color for resource [{0}]: ", resource, e);
+			}
+
+			try
+			{
+				highColor = ConfigNode.ParseColor(high);
+			}
+			catch (Exception e)
+			{
+				highColor = r.DefaultHighColor;
+				SCANUtil.SCANlog("Error in parsing high color for resource [{0}]: ", resource, e);
+			}
+
+			if (!float.TryParse(trans, out transparent))
+				transparent = r.DefaultTrans;
+
+			r.MinColor = lowColor;
+			r.MaxColor = highColor;
+			r.Transparency = transparent;
+
+			if (!string.IsNullOrEmpty(s))
+			{
+				string[] sA = s.Split(',');
+				for (int i = 0; i < sA.Length; i++)
 				{
-					SCANUtil.SCANlog("Error Loading Color Palette; Revert To Default: {0}", e);
-					data.ColorPalette = PaletteLoader.defaultPalette;
-					data.PaletteName = "Default";
-					data.PaletteSize = 7;
+					string[] sB = sA[i].Split('|');
+					try
+					{
+						int j = 0;
+						float min = 0;
+						float max = 0;
+						if (!int.TryParse(sB[0], out j))
+							continue;
+						CelestialBody b;
+						if ((b = FlightGlobals.Bodies.FirstOrDefault(a => a.flightGlobalsIndex == j)) != null)
+						{
+							SCANresourceBody res = r.getBodyConfig(b.name);
+							if (res != null)
+							{
+								if (!float.TryParse(sB[1], out min))
+									min = res.DefaultMinValue;
+								if (!float.TryParse(sB[2], out max))
+									max = res.DefaultMaxValue;
+								res.MinValue = min;
+								res.MaxValue = max;
+							}
+							else
+								SCANUtil.SCANlog("No resources found assigned for Celestial Body: {0}, skipping...", b.name);
+						}
+						else
+							SCANUtil.SCANlog("No Celestial Body found matching this saved resource value: {0}, skipping...", j);
+					}
+					catch (Exception e)
+					{
+						SCANUtil.SCANlog("Something Went Wrong While Loading Custom Resource Settings; Reverting To Default Values: {0}", e);
+					}
 				}
 			}
 		}
@@ -538,111 +955,6 @@ namespace SCANsat
 			public double lastUT;
 		}
 
-		internal void loadResources() //Repopulates the master resources list with data from config nodes
-		{
-			resourceList = new Dictionary<string, Dictionary<string, SCANresource>>();
-			if (SCANversions.RegolithFound)
-			{
-				foreach (ConfigNode node in GameDatabase.Instance.GetConfigNodes("REGOLITH_GLOBAL_RESOURCE"))
-				{
-					if (node != null)
-					{
-						SCANresource resource = null;
-						if ((resource = SCANUtil.RegolithConfigLoad(node)) == null)
-							continue;
-						foreach (CelestialBody body in FlightGlobals.Bodies)
-						{
-							SCANresource bodyResource = null;
-							foreach(ConfigNode bodyNode in GameDatabase.Instance.GetConfigNodes("REGOLITH_PLANETARY_RESOURCE"))
-							{
-								bodyResource = SCANUtil.RegolithConfigLoad(bodyNode);
-								if (bodyResource == null)
-									continue;
-								if (string.IsNullOrEmpty(bodyResource.Body))
-								{
-									bodyResource = null;
-									continue;
-								}
-								if (bodyResource.Body == body.name)
-								{
-									if (bodyResource.Name == resource.Name)
-										break;
-									else
-									{
-										bodyResource = null;
-										continue;
-									}
-								}
-								bodyResource = null;
-							}
-							if (bodyResource == null)
-							{
-								addToResourceData(resource.Name, body.name, resource);
-							}
-							else
-							{
-								addToResourceData(bodyResource.Name, bodyResource.Body, bodyResource);
-							}
-						}
-					}
-				}
-			}
-			if (SCANversions.kethaneLoaded)
-			{
-				foreach (ConfigNode node in GameDatabase.Instance.GetConfigNodes("KethaneResource"))
-				{
-					if (node != null)
-					{
-						string name = node.GetValue("Resource");
-						SCANresourceType type = null;
-						if ((type = SCANUtil.OverlayResourceType(name)) == null)
-							continue;
-						Color full = type.ColorFull;
-						Color empty = type.ColorFull;
-						float max = 1000000f;
-						ConfigNode subNode = node.GetNode("Generator");
-						if (subNode != null)
-						{
-							float.TryParse(subNode.GetValue("MaxQuantity"), out max); //Global max quantity
-							foreach (CelestialBody Body in FlightGlobals.Bodies)
-							{
-								bool bodySubValue = false;
-								float subMax = 1000000f;
-								foreach (ConfigNode bodySubNode in subNode.GetNodes("Body"))
-								{
-									string body = bodySubNode.GetValue("name");
-									if (body == Body.name)
-									{
-										if (bodySubNode.HasValue("MaxQuantity"))
-										{
-											float.TryParse(bodySubNode.GetValue("MaxQuantity"), out subMax); //Optional body-specific max quantity
-											bodySubValue = true;
-											break;
-										}
-										break;
-									}
-								}
-								if (bodySubValue)
-									max = subMax;
-								SCANresource resource = new SCANresource(name, Body.name, full, empty, 0f, max, type, SCANresource_Source.Kethane);
-								addToResourceData(name, Body.name, resource);
-							}
-						}
-					}
-				}
-			}
-			if (resourceList.Count == 0)
-				globalResourceOverlay = false;
-			else
-			{
-				globalResourceOverlay = true;
-				if (string.IsNullOrEmpty(resourceSelection))
-					resourceSelection = resourceList.ElementAt(0).Key;
-				else if (!resourceList.ContainsKey(resourceSelection))
-					resourceSelection = resourceList.ElementAt(0).Key;
-			}
-		}
-
 		internal void registerSensor(Vessel v, SCANtype sensors, double fov, double min_alt, double max_alt, double best_alt)
 		{
 			registerSensor(v.id, sensors, fov, min_alt, max_alt, best_alt);
@@ -655,7 +967,8 @@ namespace SCANsat
 		{
 			if (id == null)
 				return;
-			if (!knownVessels.ContainsKey(id)) knownVessels[id] = new SCANvessel();
+			if (!knownVessels.ContainsKey(id))
+				knownVessels[id] = new SCANvessel();
 			SCANvessel sv = knownVessels[id];
 			sv.id = id;
 			sv.vessel = FlightGlobals.Vessels.FirstOrDefault(a => a.id == id);
@@ -666,9 +979,14 @@ namespace SCANsat
 			}
 			foreach (SCANtype sensor in Enum.GetValues(typeof(SCANtype)))
 			{
-				if (SCANUtil.countBits((int)sensor) != 1) continue;
-				if ((sensor & sensors) == SCANtype.Nothing) continue;
-				double this_fov = fov, this_min_alt = min_alt, this_max_alt = max_alt, this_best_alt = best_alt;
+				if (SCANUtil.countBits((int)sensor) != 1)
+					continue;
+				if ((sensor & sensors) == SCANtype.Nothing)
+					continue;
+				double this_fov = fov;
+				double this_min_alt = min_alt;
+				double this_max_alt = max_alt;
+				double this_best_alt = best_alt;
 				if (this_max_alt <= 0)
 				{
 					this_min_alt = 5000;
@@ -684,7 +1002,8 @@ namespace SCANsat
 						this_fov = 1;
 					}
 				}
-				if (!sv.sensors.ContainsKey(sensor)) sv.sensors[sensor] = new SCANsensor();
+				if (!sv.sensors.ContainsKey(sensor))
+					sv.sensors[sensor] = new SCANsensor();
 				SCANsensor s = sv.sensors[sensor];
 				s.sensor = sensor;
 				s.fov = this_fov;
@@ -696,50 +1015,75 @@ namespace SCANsat
 
 		internal void unregisterSensor(Vessel v, SCANtype sensors)
 		{
-			if (!knownVessels.ContainsKey(v.id)) return;
+			if (!knownVessels.ContainsKey(v.id))
+				return;
+
 			SCANvessel sv = knownVessels[v.id];
 			sv.id = v.id;
 			sv.vessel = v;
 			foreach (SCANtype sensor in Enum.GetValues(typeof(SCANtype)))
 			{
-				if ((sensors & sensor) == SCANtype.Nothing) continue;
-				if (!sv.sensors.ContainsKey(sensor)) continue;
+				if ((sensors & sensor) == SCANtype.Nothing)
+					continue;
+				if (!sv.sensors.ContainsKey(sensor))
+					continue;
+
 				sv.sensors.Remove(sensor);
+			}
+			if (sv.sensors.Count == 0)
+			{
+				knownVessels.Remove(v.id);
+				SCANUtil.SCANdebugLog("Unregister Vessel");
 			}
 		}
 
 		internal bool isVesselKnown(Guid id, SCANtype sensor)
 		{
-			if (!knownVessels.ContainsKey(id)) return false;
+			if (!knownVessels.ContainsKey(id))
+				return false;
+
 			SCANtype all = SCANtype.Nothing;
-			foreach (SCANtype s in knownVessels[id].sensors.Keys) all |= s;
+			foreach (SCANtype s in knownVessels[id].sensors.Keys)
+				all |= s;
+
 			return (all & sensor) != SCANtype.Nothing;
 		}
 
 		private bool isVesselKnown(Guid id)
 		{
-			if (!knownVessels.ContainsKey(id)) return false;
+			if (!knownVessels.ContainsKey(id))
+				return false;
+
 			return knownVessels[id].sensors.Count > 0;
 		}
 
 		private bool isVesselKnown(Vessel v)
 		{
-			if (v.vesselType == VesselType.Debris) return false;
+			if (v.vesselType == VesselType.Debris)
+				return false;
+
 			return isVesselKnown(v.id);
 		}
 
 		internal SCANsensor getSensorStatus(Vessel v, SCANtype sensor)
 		{
-			if (!knownVessels.ContainsKey(v.id)) return null;
-			if (!knownVessels[v.id].sensors.ContainsKey(sensor)) return null;
+			if (!knownVessels.ContainsKey(v.id))
+				return null;
+			if (!knownVessels[v.id].sensors.ContainsKey(sensor))
+				return null;
+
 			return knownVessels[v.id].sensors[sensor];
 		}
 
 		internal SCANtype activeSensorsOnVessel(Guid id)
 		{
-			if (!knownVessels.ContainsKey(id)) return SCANtype.Nothing;
+			if (!knownVessels.ContainsKey(id))
+				return SCANtype.Nothing;
+
 			SCANtype sensors = SCANtype.Nothing;
-			foreach (SCANtype s in knownVessels[id].sensors.Keys) sensors |= s;
+			foreach (SCANtype s in knownVessels[id].sensors.Keys)
+				sensors |= s;
+
 			return sensors;
 		}
 
@@ -926,115 +1270,6 @@ namespace SCANsat
 			res = scanQueue.Dequeue();
 			goto loop;
 		}
-
-
-		#region Unused code
-
-		//public static int countBits(int i) {
-		//    int count;
-		//    for(count=0; i!=0; ++count) i &= (i - 1);
-		//    return count;
-		//}
-
-		//**** Most commented code moved to SCANUtil****
-		//public ScienceData getAvailableScience(Vessel v, SCANdata.SCANtype sensor, bool notZero) {
-		//    SCANdata data = getData(v.mainBody);
-		//    ScienceData sd = null;
-		//    ScienceExperiment se = null;
-		//    ScienceSubject su = null;
-		//    bool found = false;
-		//    string id = null;
-		//    double coverage = 0f;
-
-		//    if(v.mainBody.pqsController != null) {
-		//        if(!found && (sensor & SCANdata.SCANtype.AltimetryLoRes) != SCANdata.SCANtype.Nothing) {
-		//            found = true;
-		//            id = "SCANsatAltimetryLoRes";
-		//            coverage = data.getCoveragePercentage(SCANdata.SCANtype.AltimetryLoRes);
-		//        }
-		//        if(!found && (sensor & SCANdata.SCANtype.AltimetryHiRes) != SCANdata.SCANtype.Nothing) {
-		//            found = true;
-		//            id = "SCANsatAltimetryHiRes";
-		//            coverage = data.getCoveragePercentage(SCANdata.SCANtype.AltimetryHiRes);
-		//        }
-		//    }
-		//    if(v.mainBody.BiomeMap != null) {
-		//        if(!found && (sensor & SCANdata.SCANtype.Biome) != SCANdata.SCANtype.Nothing) {
-		//            found = true;
-		//            id = "SCANsatBiomeAnomaly";
-		//            coverage = data.getCoveragePercentage(SCANdata.SCANtype.Biome); //This should only really check biomes, and it screws up with the changes made to getCoveragePercentage
-		//        }
-		//    }
-
-		//    if(!found) return null;
-
-		//    se = ResearchAndDevelopment.GetExperiment(id);
-		//    if(se == null) return null;
-
-		//    su = ResearchAndDevelopment.GetExperimentSubject(se, ExperimentSituations.InSpaceHigh, v.mainBody, "surface");
-		//    if(su == null) return null;
-
-		//    print("[SCANsat] coverage " + coverage.ToString("F1") + ", science cap " + su.scienceCap.ToString("F1") + ", subject value " + su.subjectValue.ToString("F2") + ", science value " + su.scientificValue.ToString("F2") + ", science " + su.science.ToString("F2"));
-		//    su.scientificValue = 1;
-
-		//    float science = (float)coverage;
-		//    if(science > 95) science = 100;
-		//    if(science < 30) science = 0;
-		//    science = science / 100f;
-		//    science = Mathf.Max(0, (science * su.scienceCap) - su.science);
-
-		//    print("[SCANsat] remaining science: " + science.ToString("F1") + ", base = " + (se.baseValue).ToString("F1"));
-
-		//    science /= Mathf.Max(0.1f, su.scientificValue);
-		//    science /= su.subjectValue;
-
-		//    print("[SCANsat] result = " + science.ToString("F2"));
-
-		//    if(notZero && science <= 0) science = 0.00001f;
-
-		//    sd = new ScienceData(science * su.dataScale, 1f, 0f, su.id, se.experimentTitle + " of " + v.mainBody.theName);
-		//    su.title = sd.title;
-		//    return sd;
-		//}
-
-		//public SCANdata getData(string name) {
-		//    if(!SCANUtil.body_data.ContainsKey(name)) {
-		//        SCANUtil.body_data[name] = new SCANdata();
-		//        SCANUtil.body_data[name].resetImages();
-		//    }
-		//    return SCANUtil.body_data[name];
-		//}
-
-		//public SCANdata getData(CelestialBody body) {
-		//    SCANdata data = getData(body.bodyName);
-		//    data.body = body;
-		//    return data;
-		//}
-
-		//public void registerPass(CelestialBody body, float lon, float lat, SCANdata.SCANtype type) {
-		//    getData(body).registerPass(lon, lat, type);
-		//}
-
-		//public double fixLatitude(double lat) {
-		//    return (lat + 90 + 180) % 180 - 90;
-		//}
-
-		//public double fixLongitude(double lon) {
-		//    return (lon + 180 + 360) % 360 - 180;
-		//}
-
-		//****Unused****//
-		//protected static HashSet<string> disabledBodies = new HashSet<string>();
-		//public static bool bodyIsDisabled(string name) {
-		//    return disabledBodies.Contains(name);
-		//}
-
-		//public static void setBodyDisabled(string name, bool disabled) {
-		//    if(disabled) disabledBodies.Add(name);
-		//    else disabledBodies.Remove(name);
-		//}
-
-		#endregion
 
 	}
 }

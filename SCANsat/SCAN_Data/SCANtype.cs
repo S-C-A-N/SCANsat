@@ -29,7 +29,7 @@ namespace SCANsat.SCAN_Data
 		Ore = 1 << 7,             // Ore - Regolith & K-type - EPL & MKS
 		Kethane_3 = 1 << 8,       // Reserved - K-type
 		Kethane_4 = 1 << 9,       // Reserved - K-type
-		Uranium = 1 << 10,        // Uranium - Regolith - KSPI
+		Uraninite = 1 << 10,        // Uranium - Regolith - KSPI
 		Thorium = 1 << 11,        // Thorium - Regolith - KSPI
 		Alumina = 1 << 12,        // Alumina - Regolith - KSPI
 		Water = 1 << 13,          // Water - Regolith - KSPI

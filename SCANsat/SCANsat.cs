@@ -119,7 +119,7 @@ namespace SCANsat
 					}
 					else
 					{
-						if (sensorType == 0 || SCANcontroller.controller.isVesselKnown(vessel.id, (SCANtype)sensorType))
+						if (sensorType != 0 || SCANcontroller.controller.isVesselKnown(vessel.id, (SCANtype)sensorType))
 						{
 							if (TimeWarp.CurrentRate < 1500)
 							{
@@ -266,9 +266,6 @@ namespace SCANsat
 				if (!SCANcontroller.controller.useStockAppLauncher)
 					SCANcontroller.controller.mainMap.Visible = true;
 			}
-#if DEBUG
-			//SCANui.minimode = (SCANui.minimode > 0 ? 2 : -SCANui.minimode);
-#endif
 			registerScanner();
 			animate(1, 0);
 		}
@@ -418,7 +415,7 @@ namespace SCANsat
 				altitude = "Too low";
 			else if (vessel.altitude < best_alt)
 				altitude = "Sub-optimal";
-			else if (vessel.altitude > best_alt && vessel.altitude < max_alt)
+			else if (vessel.altitude >= best_alt && vessel.altitude <= max_alt)
 				altitude = "Ideal";
 			else if (vessel.altitude > max_alt)
 				altitude = "Too high";

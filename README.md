@@ -1,5 +1,6 @@
 ### [**SCANsat**][top]: Real Scanning, Real Science, Warp Speed!
 [![][shield:support-ksp]][KSP:developers]&nbsp;
+[![][shield:ckan]][CKAN:org]&nbsp;
 [![][shield:license-bsd]][SCANsat:rel-license]&nbsp;
 [![][shield:license-mit]][SCANsat:dev-license]&nbsp;
 [![][shield:license-cc-by-sa]][SCANsat:dev-license]&nbsp;
@@ -23,6 +24,7 @@
 
 * [0. People, Facts, and FAQs][0]
   * [a. FAQs][0a]
+  * [b. Video Overview][0b]
 * [1. Installation and Interoperability][1]
   * [a. Installation][1a]
   * [b. GameData Layout][1b]
@@ -98,7 +100,7 @@ As of August 2014, the vast majority of code is damny's and DMagic's; and techno
 In addition to the authors, the following people have contributed:
   + (Models, Graphics, Textures) [Milkshakefiend][Milkshakefiend]
   
-  + (Science results text) [Olympic1][Olympic1]
+  + (Science results text) [madsailor][madsailor]
 
 #### Licenses
 
@@ -124,6 +126,12 @@ For licensing information, please see the [included LICENSE.txt][SCANsat:rel-lic
     * **Yes/No.** Contracts are currently only supported through [**third-party addons**][6d].
   * Can you add <some feature or change> to SCANsat?
     * **Probably!** First, check the issues page to see if it's already been requested. If not, add a new issue. Even better, attempt to add the feature yourself and submit a pull request. We'll catch the bugs for you!
+
+### [:top:][top] 0b. Video Overview
+
+##### SCANsat overview and review by: [TinyPirate][tinypirate]
+   * Watch this quick video on the features and functions of SCANsat
+[![][tinypirate-video-screen]][tinypirate-video]
 
 
 
@@ -154,8 +162,8 @@ S.C.A.N. is proud to collaborate with other KSP mods and modding teams. Followin
 
 
 * **SCANsat**
-  * [x] [**v8.0**][SCANsat:rel-thread] SCANsat Release **version: v8.0**
-  * [x] [**v9.0**][SCANsat:dev-thread] SCANsat Dev **version: v9.0**
+  * [x] [**v10.0**][SCANsat:rel-thread] SCANsat Release **version: v10.0**
+  * [x] [**v11.0**][SCANsat:dev-thread] SCANsat Dev **version: v11.0**
 
  **MM**, **RPM**, **Toolbar**, and **Resource Addons** are all **soft** dependencies. This means your experience with SCANsat will be enhanced if you are using these mods, but they are not necessary.
 
@@ -228,6 +236,9 @@ Each of the two resource systems can be enabled through the **SCANsat** Big Map:
 [![][shield:jenkins-orsx]][SCANsat:orsx-jenkins]
 
 **Regolith** support is built internal to SCANsat. If you have a **Regolith** DLL loaded anywhere SCANsat will only target the newest version.
+
+Check for the **Regolith Biome Lock** toggle in the SCANsat settings menu to enable or disable biome-based restrictions on resource scanning accuracy. With the biome lock active resource scanning will be of only limited accuracy until you have explored the surface of the planet and/or the specific biomes.
+> ![][resource-biome-lock]
 
 With any **Regolith**-using mod installed, you can select their resources in the drop down menu from the Big Map or KSC Map, and enable their overlay with the resource icon.
 For instance the **Karbonite** mod's resources can be viewed:
@@ -457,15 +468,19 @@ Notice that the only gaps in coverage are those at the poles (ie, the selected i
 ### [:top:][top] 11. Settings Menu
 ------------------------------------------
 
-![][settings-window]
+![][settings-window-v10]
 
 The settings menu has a various general options
-* The marker used for anomalies can be specified
-* Background scanning can be controlled for each planet
-* Background scanning resolution can be lowered for better performance (watch for short pauses when several scanners are active at very high timewarp; reducing the scanning resolution can help with this)
-* Toggles control the availability of the stock app launcher button and the tooltips for various icons on other windows
-* If the windows are ever dragged off screen there is an option to reset all windows to their default positions
-* Data can be deleted for any or all planets; a confirmation box will appear when these options are selected
+* The marker used for **Anomalies** can be specified
+* **Background scanning** can be controlled for each planet
+* **Background scanning** resolution can be lowered for better performance (watch for short pauses when several scanners are active at very high timewarp; reducing the scanning resolution can help with this)
+* Toggles control the availability of the **Stock App Launcher** button, the **Tooltips** for various icons on other windows, and the **Regolith Biome Lock** if available
+* If the windows are ever dragged off screen there is an option to **Reset All Windows** to their default positions
+* **Scanning Data** can be deleted for any or all planets; a confirmation box will appear when these options are selected
+* The numbers under the **Time Warp Resolution** indicate the following
+    * **Vessels:** The number of vessels with any active SCANsat sensors present
+	* **Sensors:** The total number of SCANsat sensors on all vessels; note that all combination sensors are separated into their invidual components, i.e. the Multi-Spectral scanner consists of two sensors, Biomes and Anomalies.
+	* **Passes:** The number of scanning passes recorded per second, this number can easily be in the tens of thousands at high time warp with multiple vessels and sensors active.
 
 ### [:top:][top] 12. Note Concerning Data Sources
 ------------------------------------------
@@ -487,11 +502,13 @@ sneaky then they can of course be sneaky.
 
 
 
-[technogeeky]: http://forum.kerbalspaceprogram.com/members/110153-technogeeky
-[DMagic]: http://forum.kerbalspaceprogram.com/members/59127-DMagic
-[damny]: http://forum.kerbalspaceprogram.com/members/80692-damny
-[Milkshakefiend]: http://forum.kerbalspaceprogram.com/members/72507-Milkshakefiend
+[technogeeky]: http://forum.kerbalspaceprogram.com/members/110153
+[DMagic]: http://forum.kerbalspaceprogram.com/members/59127
+[damny]: http://forum.kerbalspaceprogram.com/members/80692
+[Milkshakefiend]: http://forum.kerbalspaceprogram.com/members/72507
 [Olympic1]: http://forum.kerbalspaceprogram.com/members/81815
+[madsailor]: http://forum.kerbalspaceprogram.com/members/123944
+[tinypirate]: http://forum.kerbalspaceprogram.com/members/79868
 
 [KSP:developers]: https://kerbalspaceprogram.com/index.php
 [KSP:reddit]: http://www.reddit.com/r/KerbalSpaceProgram
@@ -544,6 +561,7 @@ sneaky then they can of course be sneaky.
 [resource-orsx-karbonite-v2]: http://i.imgur.com/qVlHzSN.png
 [resource-scanner]: http://i.imgur.com/7Q7a7aD.gif
 [resource-bigmap]: http://i.imgur.com/aFu2U3F.gif
+[resource-biome-lock]: http://i.imgur.com/yJJEyjx.png
 
 [color-window]: http://i.imgur.com/XM2ynyZ.png
 [color-palette-switch]: http://i.imgur.com/0XdMGSy.gif
@@ -553,10 +571,15 @@ sneaky then they can of course be sneaky.
 [instruments-btdt]: http://i.imgur.com/tybbDap.gif
 
 [settings-window]: http://i.imgur.com/ogQbeso.png
+[settings-window-v10]: http://i.imgur.com/kArtbSx.png
+
+[tinypirate-video-screen]: http://img.youtube.com/vi/UY7eBuReSYU/0.jpg
+[tinypirate-video]: https://www.youtube.com/watch?v=UY7eBuReSYU
 
 [top]: #table-of-contents
 [0]: #top-0-people-facts-and-faqs
 [0a]: #top-0a-faqs
+[0b]: #top-0b-video-overview
 [1]: #top-1-installation-and-interoperability
 [1a]: #top-1a-installation
 [1b]: #top-1b-gamedata-layout
@@ -605,17 +628,20 @@ sneaky then they can of course be sneaky.
 [shield:support-toolbar]: http://img.shields.io/badge/works%20with%20Blizzy's%20Toolbar-1.7.8-7c69c0.svg
 [shield:support-alcor]: http://img.shields.io/badge/works%20with%20ALCOR-0.9-299bc7.svg
 [shield:support-kspi]: http://img.shields.io/badge/works%20with%20Interstellar-0.13-a62374.svg
-[shield:support-usi]:http://img.shields.io/badge/works%20with%20USI-0.22.3-34c566.svg
-[shield:support-karbonite]: http://img.shields.io/badge/works%20with%20Karbonite-0.5.1-ff8c00.svg
+[shield:support-usi]:http://img.shields.io/badge/works%20with%20USI-0.22.6-34c566.svg
+[shield:support-karbonite]: http://img.shields.io/badge/works%20with%20Karbonite-0.5.5-ff8c00.svg
 [shield:support-epl]: http://img.shields.io/badge/works%20with%20EPL-4.2.3-ff8c00.svg
 [shield:support-ctt]: http://img.shields.io/badge/works%20with%20CTT-1.1-blue.svg
 [shield:support-tm]: http://img.shields.io/badge/works%20with%20TechManager-1.5-lightgrey.svg
-[shield:support-reg]: https://img.shields.io/badge/works%20with%20Regolith-1.1-000000.svg
+[shield:support-reg]: https://img.shields.io/badge/works%20with%20Regolith-1.5-000000.svg
 [shield:support-ccfg]: https://img.shields.io/badge/works%20with%20Contract%20Configurator-6.0-yellowgreen.svg
+[shield:ckan]: https://img.shields.io/badge/CKAN-Indexed-brightgreen.svg
 
 [shield:gittip-tg-img]: http://img.shields.io/gittip/technogeeky.png
 [shield:gittip-tg]: https://www.gittip.com/technogeeky/
 [shield:github-issues]: http://img.shields.io/github/issues/technogeeky/SCANsat.svg
+
+[CKAN:org]: http://ksp-ckan.org/
 
 [SCANsat:organization]: https://github.com/S-C-A-N
 [SCANsat:logo]: http://i.imgur.com/GArPFFB.png

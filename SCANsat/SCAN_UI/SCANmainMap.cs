@@ -50,7 +50,7 @@ namespace SCANsat.SCAN_UI
 			SCAN_SkinsLibrary.SetCurrentTooltip();
 		}
 
-		internal override void Start()
+		protected override void Start()
 		{
 			Visible = SCANcontroller.controller.mainMapVisible;
 			v = FlightGlobals.ActiveVessel;
@@ -97,7 +97,7 @@ namespace SCANsat.SCAN_UI
 		private void versionLabel(int id)
 		{
 			Rect r = new Rect(6, 0, 50, 18);
-			GUI.Label(r, SCANversions.SCANsatVersion, SCANskins.SCAN_whiteReadoutLabel);
+			GUI.Label(r, SCANmainMenuLoader.SCANsatVersion, SCANskins.SCAN_whiteReadoutLabel);
 		}
 
 		//Draw the top menu items
@@ -114,7 +114,8 @@ namespace SCANsat.SCAN_UI
 				if (GUI.Button(r, "+", SCANskins.SCAN_buttonBorderless))
 					showVesselInfo = !showVesselInfo;
 			}
-			r.x += 16;
+			r.x += 20;
+			r.y += 1;
 			if (GUI.Button(r, SCANcontroller.controller.closeBox, SCANskins.SCAN_closeButton))
 			{
 				Visible = false;
@@ -146,7 +147,7 @@ namespace SCANsat.SCAN_UI
 			//fillS();
 			if (GUILayout.Button(iconWithTT(SCANskins.SCAN_BigMapIcon, "Big Map"), SCANskins.SCAN_windowButton, GUILayout.Height(32), GUILayout.Width(32)))
 			{
-				SCANcontroller.controller.newBigMap.Visible = !SCANcontroller.controller.newBigMap.Visible;
+				SCANcontroller.controller.BigMap.Visible = !SCANcontroller.controller.BigMap.Visible;
 				SCANcontroller.controller.bigMapVisible = !SCANcontroller.controller.bigMapVisible;
 			}
 			if (GUILayout.Button(iconWithTT(SCANskins.SCAN_InstrumentIcon, "Instrument Window"), SCANskins.SCAN_windowButton, GUILayout.Height(32), GUILayout.Width(32)))
@@ -170,7 +171,7 @@ namespace SCANsat.SCAN_UI
 			{
 				int count = 2;
 				vesselInfo(v, mapRect, 1, true);
-				foreach (SCANcontroller.SCANvessel sV in SCANcontroller.controller.Known_Vessels.Values)
+				foreach (SCANcontroller.SCANvessel sV in SCANcontroller.controller.Known_Vessels)
 				{
 					if (sV.vessel == FlightGlobals.ActiveVessel)
 						continue;

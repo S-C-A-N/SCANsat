@@ -65,7 +65,7 @@ namespace SCANsat.SCAN_Toolbar
 				{
 					if (SCANcontroller.controller != null)
 					{
-						SCANcontroller.controller.newBigMap.Visible = !SCANcontroller.controller.newBigMap.Visible;
+						SCANcontroller.controller.BigMap.Visible = !SCANcontroller.controller.BigMap.Visible;
 						SCANcontroller.controller.bigMapVisible = !SCANcontroller.controller.bigMapVisible;
 					}
 				};
@@ -132,7 +132,7 @@ namespace SCANsat.SCAN_Toolbar
 				};
 			bigMap.OnClick += (e2) =>
 				{
-					SCANcontroller.controller.newBigMap.Visible = !SCANcontroller.controller.newBigMap.Visible;
+					SCANcontroller.controller.BigMap.Visible = !SCANcontroller.controller.BigMap.Visible;
 					SCANcontroller.controller.bigMapVisible = !SCANcontroller.controller.bigMapVisible;
 				};
 			settings.OnClick += (e2) =>
