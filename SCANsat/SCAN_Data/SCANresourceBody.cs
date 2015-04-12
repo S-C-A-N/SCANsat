@@ -81,6 +81,11 @@ namespace SCANsat.SCAN_Data
 			get { return body; }
 		}
 
+		public int Index
+		{
+			get { return index; }
+		}
+
 		public float MinValue
 		{
 			get { return lowResourceCutoff; }
