@@ -114,7 +114,8 @@ namespace SCANsat.SCAN_UI
 				if (GUI.Button(r, "+", SCANskins.SCAN_buttonBorderless))
 					showVesselInfo = !showVesselInfo;
 			}
-			r.x += 16;
+			r.x += 20;
+			r.y += 1;
 			if (GUI.Button(r, SCANcontroller.controller.closeBox, SCANskins.SCAN_closeButton))
 			{
 				Visible = false;

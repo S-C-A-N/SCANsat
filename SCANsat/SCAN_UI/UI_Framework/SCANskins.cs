@@ -206,6 +206,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			SCAN_closeButton = new GUIStyle(SCAN_buttonBorderless);
 			SCAN_closeButton.name = "SCAN_CloseButton";
 			SCAN_closeButton.normal.textColor = palette.cb_vermillion;
+			SCAN_closeButton.alignment = TextAnchor.MiddleLeft;
 
 			//Initialize drop down menu styles
 			SCAN_dropDownBox = new GUIStyle(SCAN_SkinsLibrary.DefUnitySkin.box);
