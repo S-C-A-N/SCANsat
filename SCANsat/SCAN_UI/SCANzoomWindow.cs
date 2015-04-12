@@ -417,7 +417,7 @@ namespace SCANsat.SCAN_UI
 		private void mapLabels(int id)
 		{
 			//Draw the orbit overlays
-			if (showOrbit)
+			if (showOrbit && HighLogic.LoadedSceneIsFlight)
 			{
 				SCANuiUtil.drawOrbit(TextureRect, spotmap, v, spotmap.Body);
 			}
