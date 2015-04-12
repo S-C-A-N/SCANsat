@@ -114,10 +114,10 @@ namespace SCANsat
 		public Color lowBiomeColor = palette.xkcd_CamoGreen;
 		[KSPField(isPersistant = true)]
 		public Color highBiomeColor = palette.xkcd_Marigold;
-		[KSPField(isPersistant = true)]
-		public Color lowSlopeColor = palette.xkcd_PukeGreen;
-		[KSPField(isPersistant = true)]
-		public Color highSlopeColor = palette.xkcd_Yellow;
+		//[KSPField(isPersistant = true)]
+		//public Color lowSlopeColor = palette.xkcd_PukeGreen;
+		//[KSPField(isPersistant = true)]
+		//public Color highSlopeColor = palette.xkcd_Yellow;
 
 		/* Available resources for overlays; loaded from SCANsat configs; only loaded once */
 		private static Dictionary<string, SCANresourceGlobal> masterResourceNodes = new Dictionary<string,SCANresourceGlobal>();

@@ -117,7 +117,7 @@ namespace SCANsat.SCAN_UI
 			clampTerrainSlider = new SCANuiSlider(data.TerrainConfig.MinTerrain + 10, data.TerrainConfig.MaxTerrain - 10, data.TerrainConfig.ClampTerrain ?? data.TerrainConfig.MinTerrain + 10, "Clamp: ", "m", -1);
 			paletteSizeSlider = new SCANuiSlider(3, 12, data.TerrainConfig.PalSize, "Palette Size: ", "", 0);
 
-			slopeColorPicker = new SCANuiColorPicker(SCANcontroller.controller.lowSlopeColor, SCANcontroller.controller.highSlopeColor, true);
+			//slopeColorPicker = new SCANuiColorPicker(SCANcontroller.controller.lowSlopeColor, SCANcontroller.controller.highSlopeColor, true);
 
 			bTrans = SCANcontroller.controller.biomeTransparency;
 			biomeTransSlider = new SCANuiSlider(0, 80, bTrans, "Ter. Trans: ", "%", 0);
@@ -333,26 +333,26 @@ namespace SCANsat.SCAN_UI
 				}
 				else if (windowMode == 1)
 				{
-					growE();
-						fillS(10);
-						slopeColorPicker.drawColorSelector(WindowRect);
-						fillS(80);
-						growS();
-							slopeOptions(id);
-							slopeConfirm(id);
-						stopS();
-					stopE();
+					//growE();
+					//	fillS(10);
+					//	slopeColorPicker.drawColorSelector(WindowRect);
+					//	fillS(80);
+					//	growS();
+					//		slopeOptions(id);
+					//		slopeConfirm(id);
+					//	stopS();
+					//stopE();
 				}
 				else if (windowMode == 2)
 				{
 					growE();
-						fillS(10);
-						biomeColorPicker.drawColorSelector(WindowRect);
-						fillS(80);
-						growS();
-							biomeOptions(id);
-							biomeConfirm(id);
-						stopS();
+					fillS(10);
+					biomeColorPicker.drawColorSelector(WindowRect);
+					fillS(80);
+					growS();
+					biomeOptions(id);
+					biomeConfirm(id);
+					stopS();
 					stopE();
 				}
 				else if (windowMode == 3 && SCANconfigLoader.GlobalResource)
@@ -416,8 +416,8 @@ namespace SCANsat.SCAN_UI
 			}
 			else if (windowMode == 1)
 			{
-				slopeColorPicker.colorStateChanged();
-				slopeColorPicker.brightnessChanged();
+				//slopeColorPicker.colorStateChanged();
+				//slopeColorPicker.brightnessChanged();
 			}
 			else if (windowMode == 2)
 			{
@@ -518,12 +518,12 @@ namespace SCANsat.SCAN_UI
 
 					updateUI();
 				}
-				if (GUILayout.Button("Slope"))
-				{
-					windowMode = 1;
+				//if (GUILayout.Button("Slope"))
+				//{
+				//	windowMode = 1;
 
-					slopeColorPicker.updateOldSwatches();
-				}
+				//	slopeColorPicker.updateOldSwatches();
+				//}
 				if (GUILayout.Button("Biome"))
 				{
 					windowMode = 2;
@@ -747,10 +747,10 @@ namespace SCANsat.SCAN_UI
 			stopE();
 		}
 
-		private void slopeOptions(int id)
-		{
+		//private void slopeOptions(int id)
+		//{
 
-		}
+		//}
 
 		private void resourceOptions(int id)
 		{
@@ -857,65 +857,65 @@ namespace SCANsat.SCAN_UI
 				GUILayout.Label("Save Values To Config", SCANskins.SCAN_button, GUILayout.Width(180));
 		}
 
-		private void slopeConfirm(int id)
-		{
-			fillS(10);
+		//private void slopeConfirm(int id)
+		//{
+		//	fillS(10);
 
-			growE();
-			if (!dropDown)
-			{
-				if (GUILayout.Button("Apply Values", GUILayout.Width(110)))
-				{
-					SCANcontroller.controller.lowSlopeColor = slopeColorPicker.ColorLow;
-					SCANcontroller.controller.highSlopeColor = slopeColorPicker.ColorHigh;
+		//	growE();
+		//	if (!dropDown)
+		//	{
+		//		if (GUILayout.Button("Apply Values", GUILayout.Width(110)))
+		//		{
+		//			SCANcontroller.controller.lowSlopeColor = slopeColorPicker.ColorLow;
+		//			SCANcontroller.controller.highSlopeColor = slopeColorPicker.ColorHigh;
 
-					slopeColorPicker.updateOldSwatches();
+		//			slopeColorPicker.updateOldSwatches();
 
-					if (bigMap != null)
-					{
-						if (bigMap.MType == mapType.Slope)
-							bigMap.resetMap();
-					}
+		//			if (bigMap != null)
+		//			{
+		//				if (bigMap.MType == mapType.Slope)
+		//					bigMap.resetMap();
+		//			}
 
-				}
+		//		}
 
-				fillS(8);
+		//		fillS(8);
 
-				if (GUILayout.Button("Default Values", GUILayout.Width(110)))
-				{
-					SCANcontroller.controller.lowSlopeColor = SCANconfigLoader.SCANNode.LowSlopeColor;
-					SCANcontroller.controller.highSlopeColor = SCANconfigLoader.SCANNode.HighSlopeColor;
+		//		if (GUILayout.Button("Default Values", GUILayout.Width(110)))
+		//		{
+		//			SCANcontroller.controller.lowSlopeColor = SCANconfigLoader.SCANNode.LowSlopeColor;
+		//			SCANcontroller.controller.highSlopeColor = SCANconfigLoader.SCANNode.HighSlopeColor;
 
-					slopeColorPicker = new SCANuiColorPicker(SCANcontroller.controller.lowSlopeColor, SCANcontroller.controller.highSlopeColor, slopeColorPicker.LowColorChange);
+		//			slopeColorPicker = new SCANuiColorPicker(SCANcontroller.controller.lowSlopeColor, SCANcontroller.controller.highSlopeColor, slopeColorPicker.LowColorChange);
 
-					slopeColorPicker.updateOldSwatches();
+		//			slopeColorPicker.updateOldSwatches();
 
-					if (bigMap != null)
-					{
-						if (bigMap.MType == mapType.Slope)
-							bigMap.resetMap();
-					}
-				}
-			}
-			else
-			{
-				GUILayout.Label("Apply Values", SCANskins.SCAN_button, GUILayout.Width(110));
-				fillS(8);
-				GUILayout.Label("Default Values", SCANskins.SCAN_button, GUILayout.Width(110));
-			}
-			stopE();
-			fillS(8);
-			if (!dropDown)
-			{
-				if (GUILayout.Button("Save Values To Config", GUILayout.Width(180)))
-				{
-					dropDown = true;
-					saveWarning = true;
-				}
-			}
-			else
-				GUILayout.Label("Save Values To Config", SCANskins.SCAN_button, GUILayout.Width(180));
-		}
+		//			if (bigMap != null)
+		//			{
+		//				if (bigMap.MType == mapType.Slope)
+		//					bigMap.resetMap();
+		//			}
+		//		}
+		//	}
+		//	else
+		//	{
+		//		GUILayout.Label("Apply Values", SCANskins.SCAN_button, GUILayout.Width(110));
+		//		fillS(8);
+		//		GUILayout.Label("Default Values", SCANskins.SCAN_button, GUILayout.Width(110));
+		//	}
+		//	stopE();
+		//	fillS(8);
+		//	if (!dropDown)
+		//	{
+		//		if (GUILayout.Button("Save Values To Config", GUILayout.Width(180)))
+		//		{
+		//			dropDown = true;
+		//			saveWarning = true;
+		//		}
+		//	}
+		//	else
+		//		GUILayout.Label("Save Values To Config", SCANskins.SCAN_button, GUILayout.Width(180));
+		//}
 
 		private void resourceConfirm(int id)
 		{

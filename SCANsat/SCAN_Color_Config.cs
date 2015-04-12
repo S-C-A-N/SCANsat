@@ -67,6 +67,8 @@ namespace SCANsat
 
 		public override void OnEncodeToConfigNode()
 		{
+			SCANUtil.SCANlog("Saving SCANsat configuration file...");
+			SCANUtil.SCANlog("SCANcolors.cfg saved to ---> {0}", FilePath);
 			SCANUtil.SCANdebugLog("Saving Config Master Node");
 			SCANsat_Altimetry = SCANcontroller.EncodeTerrainConfigs;
 			SCANsat_Resources = SCANcontroller.EncodeResourceConfigs;
@@ -76,8 +78,8 @@ namespace SCANsat
 				lowBiomeColor = SCANcontroller.controller.lowBiomeColor;
 				highBiomeColor = SCANcontroller.controller.highBiomeColor;
 				biomeTransparency = SCANcontroller.controller.biomeTransparency;
-				lowSlopeColor = SCANcontroller.controller.lowSlopeColor;
-				highSlopeColor = SCANcontroller.controller.highSlopeColor;
+				//lowSlopeColor = SCANcontroller.controller.lowSlopeColor;
+				//highSlopeColor = SCANcontroller.controller.highSlopeColor;
 			}
 		}
 

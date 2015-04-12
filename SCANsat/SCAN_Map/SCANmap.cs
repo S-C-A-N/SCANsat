@@ -610,15 +610,15 @@ namespace SCANsat.SCAN_Map
 							}
 							else
 							{
-								//if (v < 1)
-								//{
-								//	baseColor = palette.lerp(palette.xkcd_PukeGreen, palette.xkcd_Lemon, v);
-								//}
-								//else
-								//{
-									//baseColor = palette.lerp(palette.xkcd_Lemon, palette.xkcd_OrangeRed, v - 1);
-								//}
-								baseColor = palette.lerp(SCANcontroller.controller.lowSlopeColor, SCANcontroller.controller.highSlopeColor, v / 2f);
+								if (v < 1)
+								{
+									baseColor = palette.lerp(palette.xkcd_PukeGreen, palette.xkcd_Lemon, v);
+								}
+								else
+								{
+									baseColor = palette.lerp(palette.xkcd_Lemon, palette.xkcd_OrangeRed, v - 1);
+								}
+								//baseColor = palette.lerp(SCANcontroller.controller.lowSlopeColor, SCANcontroller.controller.highSlopeColor, v / 2f);
 							}
 						}
 						mapline[i] = projVal;
