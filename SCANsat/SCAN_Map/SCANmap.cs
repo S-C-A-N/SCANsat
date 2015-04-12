@@ -130,7 +130,6 @@ namespace SCANsat.SCAN_Map
 			if (projection == p)
 				return;
 			projection = p;
-			resetMap();
 		}
 
 		internal double projectLongitude(double lon, double lat)
@@ -318,8 +317,18 @@ namespace SCANsat.SCAN_Map
 
 		internal void centerAround(double lon, double lat)
 		{
-			lon_offset = 180 + lon - (mapwidth / mapscale) / 2;
-			lat_offset = 90 + lat - (mapheight / mapscale) / 2;
+			if (projection == MapProjection.Polar)
+			{
+				double lo = projectLongitude(lon, lat);
+				double la = projectLatitude(lon, lat);
+				lon_offset = 180 + lo - (mapwidth / mapscale) / 2;
+				lat_offset = 90 + la - (mapheight / mapscale) / 2;
+			}
+			else
+			{
+				lon_offset = 180 + lon - (mapwidth / mapscale) / 2;
+				lat_offset = 90 + lat - (mapheight / mapscale) / 2;
+			}
 			centeredLong = lon;
 			centeredLat = lat;
 		}
