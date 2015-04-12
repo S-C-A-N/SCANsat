@@ -649,7 +649,7 @@ namespace SCANsat
 					{
 						if (r != null)
 						{
-							SCANUtil.SCANlog("Saving Resource: {0}", r.Name);
+							SCANUtil.SCANdebugLog("Saving Resource: {0}", r.Name);
 							ConfigNode node_resource_type = new ConfigNode("ResourceType");
 							node_resource_type.AddValue("Resource", r.Name);
 							node_resource_type.AddValue("MinColor", ConfigNode.WriteColor(r.MinColor));
@@ -845,7 +845,7 @@ namespace SCANsat
 				SCANresourceBody bodyRes = resource.getBodyConfig(j);
 				if (bodyRes != null)
 				{
-					string a = string.Format("{0}|{1:F3}|{2:F3}", bodyRes.Body.flightGlobalsIndex, bodyRes.MinValue, bodyRes.MaxValue);
+					string a = string.Format("{0}|{1:F3}|{2:F3}", bodyRes.Index, bodyRes.MinValue, bodyRes.MaxValue);
 					sL.Add(a);
 				}
 			}
