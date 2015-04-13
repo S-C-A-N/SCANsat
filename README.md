@@ -8,7 +8,6 @@
 > ###### **Example SAR scan of Kerbin at 1000x and then 10,000x warp**
 
 [![][shield:support-rpm]][RPM:release]&nbsp;
-[![][shield:support-ket]][Kethane:release]&nbsp;
 [![][shield:support-reg]][reg:release]&nbsp;
 [![][shield:support-mm]][mm:release]&nbsp;
 [![][shield:support-toolbar]][toolbar:release]&nbsp;
@@ -33,7 +32,6 @@
   * [a. Native SCANsat][2a]
   * [b. Resource Scans][2b]
   * [c. Regolith][2c]
-  * [d. Kethane][2d] [![][shield:support-ket]][kethane:release][![][shield:jenkins-ket]][SCANsat:ket-jenkins]
 * [3. Basic Usage][3]
   * [a. FAQ: Finding a Good Altitude][3a]
   * [b. Mismatched Scanners][3b]
@@ -56,7 +54,6 @@
   * [a. Terrain Colors and Options][9a]
   * [b. Biome Colors and Options][9b]
   * [c. Resource Colors and Options][9c]
-
 * [10 Background Scanning][10]
 * [11. Time Warp][11]
 * [12. Settings Menu][12]
@@ -158,12 +155,10 @@ S.C.A.N. is proud to collaborate with other KSP mods and modding teams. Followin
 
 **Built Using** | **Supported By**
 :---: | :---:
-[![Support for Kethane][kethane:logo]][kethane:release] | [![Support for MKS][usi:logo]][usi:release]
-[**Regolith**][reg:release] | [![Support for ALCOR][alcor:logo]][alcor:release]
+[**Regolith**][reg:release]| [![Support for MKS][usi:logo]][usi:release]
+[**ModuleManager**][mm:release]  | [![Support for ALCOR][alcor:logo]][alcor:release]
 [**RasterPropMonitor**][rpm:release]  | [![Support for Karbonite][karbonite:logo]][karbonite:release]
 [**Blizzy78's Toolbar**][toolbar:release] | [![Support for Community Tech Tree][ctt:logo]][ctt:release]
-[**ModuleManager**][mm:release] | [**Extraplanetary Launchpads**][epl:release]
-
 
 
 * **SCANsat**
@@ -182,8 +177,6 @@ S.C.A.N. is proud to collaborate with other KSP mods and modding teams. Followin
   * [x] [![][shield:support-reg]][reg:release]
   * [x] via (Regolith) <- [![][shield:support-usi]][usi:release]
   * [x] via (Regolith) <- [![][shield:support-karbonite]][karbonite:release]
-  * [x] [![][shield:support-ket]][kethane:release]
-  * [x] via (Kethane) <- [![][shield:support-epl]][epl:release]
 
 
 ### [:top:][top] 2. Types of Scans 
@@ -249,17 +242,7 @@ With any **Regolith**-using mod installed, you can select their resources in the
 For instance the **Karbonite** mod's resources can be viewed:
 > ![][resource-orsx-karbonite-v2]
 
-##### [:top:][top] 2d. Kethane
-[![][shield:jenkins-ket]][SCANsat:ket-jenkins]
-
-**Kethane** support is built using an included extra DLL file. 
-
-This file will only be loaded if you have a Kethane installed in its usual location. If Kethane is not installed, this DLL will simply unloaded from memory. **Kethane** also checks to see if you have multiple versions of it installed, and warns you.
-
-Once it is installed correctly, you will be able to enable Kethane resources in the settings menu:
-> ![][resource-kethane]
-
-Both of the two resource systems will work in IVA, too:
+Resource overlays will work in IVA, too:
 > ![][resource-iva]
 
 ### [:top:][top] 3. Basic Usage
