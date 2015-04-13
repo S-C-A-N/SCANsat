@@ -138,9 +138,9 @@ namespace SCANsat.SCAN_Data
 			{
 				if (waypoints == null)
 				{
+					List<SCANwaypoint> bodyWaypoints = new List<SCANwaypoint>();
 					if (ContractSystem.Instance != null)
 					{
-						List<SCANwaypoint> bodyWaypoints = new List<SCANwaypoint>();
 						var surveys = ContractSystem.Instance.GetCurrentActiveContracts<SurveyContract>();
 						for (int i = 0; i < surveys.Length; i++)
 						{
@@ -211,9 +211,8 @@ namespace SCANsat.SCAN_Data
 								}
 							}
 						}
-
-						waypoints = bodyWaypoints.ToArray();
 					}
+					waypoints = bodyWaypoints.ToArray();
 				}
 
 				return waypoints;
