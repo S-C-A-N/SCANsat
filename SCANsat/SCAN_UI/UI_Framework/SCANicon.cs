@@ -107,24 +107,6 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			grid_pos.y = 0.2f * (4 - (int)icon / 5);
 
 			SCANuiUtil.drawMapIcon(pos_icon, MapView.OrbitIconsMap, outline, c, true, grid_pos, true);
-
-			//if (outline)
-			//{
-			//	GUI.color = palette.black;
-			//	pos_icon.x -= 1;
-			//	GUI.DrawTextureWithTexCoords(pos_icon, MapView.OrbitIconsMap, grid_pos);
-			//	pos_icon.x += 2;
-			//	GUI.DrawTextureWithTexCoords(pos_icon, MapView.OrbitIconsMap, grid_pos);
-			//	pos_icon.x -= 1;
-			//	pos_icon.y -= 1;
-			//	GUI.DrawTextureWithTexCoords(pos_icon, MapView.OrbitIconsMap, grid_pos);
-			//	pos_icon.y += 2;
-			//	GUI.DrawTextureWithTexCoords(pos_icon, MapView.OrbitIconsMap, grid_pos);
-			//	pos_icon.y -= 1;
-			//}
-			//GUI.color = c;
-			//GUI.DrawTextureWithTexCoords(pos_icon, MapView.OrbitIconsMap, grid_pos);
-			//GUI.color = old;
 		}
 
 		internal static void drawOrbitIconGL(int x, int y, OrbitIcon icon, Color c, Color shadow, Material iconMat, int size = 32 /*px*/, bool outline = false)
@@ -143,23 +125,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			grid_pos.x = 0.2f * ((int)icon % 5);
 			grid_pos.y = 0.2f * (4 - (int)icon / 5);
 
-			if (outline)
-			{
-				iconMat.color = shadow;
-				pos_icon.x -= 1;
-				Graphics.DrawTexture(pos_icon, MapView.OrbitIconsMap, grid_pos, 0, 0, 0, 0, iconMat);
-				pos_icon.x += 2;
-				Graphics.DrawTexture(pos_icon, MapView.OrbitIconsMap, grid_pos, 0, 0, 0, 0, iconMat);
-				pos_icon.x -= 1;
-				pos_icon.y -= 1;
-				Graphics.DrawTexture(pos_icon, MapView.OrbitIconsMap, grid_pos, 0, 0, 0, 0, iconMat);
-				pos_icon.y += 2;
-				Graphics.DrawTexture(pos_icon, MapView.OrbitIconsMap, grid_pos, 0, 0, 0, 0, iconMat);
-				pos_icon.y -= 1;
-			}
-
-			iconMat.color = c;
-			Graphics.DrawTexture(pos_icon, MapView.OrbitIconsMap, grid_pos, 0, 0, 0, 0, iconMat);
+			SCANuiUtil.drawMapIconGL(pos_icon, MapView.OrbitIconsMap, c, iconMat, shadow, outline, grid_pos, true);
 		}
 
 		public static void drawIcon(Color c, int size = 32 /*px*/, bool outline = false)
