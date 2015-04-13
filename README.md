@@ -573,9 +573,9 @@ sneaky then they can of course be sneaky.
 [bigmap-scan-100x]: http://i.imgur.com/bcht47p.gif
 [bigmap-anim]: http://i.imgur.com/kxyl8xR.gif
 [bigmap-anim-v2]: http://i.imgur.com/lwyVBAN.gif
-[bigmap-zoom-open]: http://i.imgur.com/7egRRTU.gifv
+[bigmap-zoom-open]: http://i.imgur.com/7egRRTU.gif
 
-[zoommap-in]: http://i.imgur.com/tTCYDfP.gifv
+[zoommap-in]: http://i.imgur.com/tTCYDfP.gif
 
 [resource-kethane]: http://i.imgur.com/naJIsvB.gif
 [resource-kethane2]: http://i.imgur.com/AT2b4G7.jpg?1
@@ -593,8 +593,8 @@ sneaky then they can of course be sneaky.
 [color-window]: http://i.imgur.com/XM2ynyZ.png
 [color-palette-switch]: http://i.imgur.com/0XdMGSy.gif
 [color-clamp-terrain]: http://i.imgur.com/8dgFLGj.gif
-[color-biome]: http://i.imgur.com/NdA1DVY.gifv
-[color-resource]: http://i.imgur.com/9NR8gvP.gifv
+[color-biome]: http://i.imgur.com/NdA1DVY.gif
+[color-resource]: http://i.imgur.com/9NR8gvP.gif
 
 [instruments-small]: http://i.imgur.com/DwkwCI5.gif
 [instruments-btdt]: http://i.imgur.com/tybbDap.gif
