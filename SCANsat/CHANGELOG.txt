@@ -1,3 +1,11 @@
+Version 11.2 - 2014-4-12
+------------------------
+
+- Fix a bug preventing maps from working in sandbox or science mode saves
+
+- Add waypoint icons to IVA maps through RPM
+
+
 Version 11.1 - 2015-4-12
 ------------------------
 

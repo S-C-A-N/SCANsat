@@ -630,6 +630,51 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			}
 		}
 
+		internal static void drawMapIconGL(Rect pos, Texture2D tex, Color c, Material iconMat, Color shadow = new Color(), bool outline = false, Rect texPos = new Rect(), bool texCoords = false)
+		{
+			if (texCoords)
+			{
+				if (outline)
+				{
+					iconMat.color = shadow;
+					pos.x -= 1;
+					Graphics.DrawTexture(pos, tex, texPos, 0, 0, 0, 0, iconMat);
+					pos.x += 2;
+					Graphics.DrawTexture(pos, tex, texPos, 0, 0, 0, 0, iconMat);
+					pos.x -= 1;
+					pos.y -= 1;
+					Graphics.DrawTexture(pos, tex, texPos, 0, 0, 0, 0, iconMat);
+					pos.y += 2;
+					Graphics.DrawTexture(pos, tex, texPos, 0, 0, 0, 0, iconMat);
+					pos.y -= 1;
+				}
+				iconMat.color = c;
+
+				Graphics.DrawTexture(pos, tex, texPos, 0, 0, 0, 0, iconMat);
+			}
+			else
+			{
+				if (outline)
+				{
+					iconMat.color = shadow;
+					pos.x -= 1;
+					Graphics.DrawTexture(pos, tex, 0, 0, 0, 0, iconMat);
+					pos.x += 2;
+					Graphics.DrawTexture(pos, tex, 0, 0, 0, 0, iconMat);
+					pos.x -= 1;
+					pos.y -= 1;
+					Graphics.DrawTexture(pos, tex, 0, 0, 0, 0, iconMat);
+					pos.y += 2;
+					Graphics.DrawTexture(pos, tex, 0, 0, 0, 0, iconMat);
+					pos.y -= 1;
+				}
+				iconMat.color = c;
+
+				Graphics.DrawTexture(pos, tex);
+			}
+
+		}
+
 		/* FIXME: This may use assumed, shared, static constants with Legend stuff in other SCANsat files */
 		private static void drawLegendLabel(Rect r, float val, float min, float max)
 		{
