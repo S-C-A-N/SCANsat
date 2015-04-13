@@ -235,7 +235,7 @@ Each of the two resource systems can be enabled through the **SCANsat** Big Map:
 
 **Regolith** support is built internal to SCANsat. If you have a **Regolith** DLL loaded anywhere SCANsat will only target the newest version.
 
-Check for the **Regolith Biome Lock** toggle in the SCANsat settings menu to enable or disable biome-based restrictions on resource scanning accuracy. With the biome lock active resource scanning will be of only limited accuracy until you have explored the surface of the planet and/or the specific biomes.
+Check for the **Regolith Biome Lock** toggle in the SCANsat settings menu to enable or disable biome-based restrictions on resource scanning accuracy. With the biome lock active resource scanning will be of only limited accuracy until you have explored the surface of the planet and/or the specific biomes. With no data from the surface, orbital scans will only show the minimum possible resource concentration.
 > ![][resource-biome-lock]
 
 With any **Regolith**-using mod installed, you can select their resources in the drop down menu from the Big Map or KSC Map, and enable their overlay with the resource icon.
@@ -667,7 +667,7 @@ sneaky then they can of course be sneaky.
 [shield:support-ctt]: http://img.shields.io/badge/works%20with%20CTT-1.1-blue.svg
 [shield:support-tm]: http://img.shields.io/badge/works%20with%20TechManager-1.5-lightgrey.svg
 [shield:support-reg]: https://img.shields.io/badge/works%20with%20Regolith-1.7-000000.svg
-[shield:support-ccfg]: https://img.shields.io/badge/works%20with%20Contract%20Configurator-6.0-yellowgreen.svg
+[shield:support-ccfg]: https://img.shields.io/badge/works%20with%20Contract%20Configurator-7.11-yellowgreen.svg
 [shield:ckan]: https://img.shields.io/badge/CKAN-Indexed-brightgreen.svg
 
 [shield:gittip-tg-img]: http://img.shields.io/gittip/technogeeky.png
