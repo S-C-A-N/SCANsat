@@ -39,23 +39,28 @@
   * [b. Mismatched Scanners][3b]
 * [4. Big Map][4]
   * [a. Big Map Options][4a]
-* [5. Parts and Sensors Types][5]
-  * [a. RADAR][5a]
-  * [b. SAR][5b]
-  * [c. Multi][5c]
-  * [d. BTDT][5d]
-  * [e. MapTraq (deprecated)][5e]
-* [6. (Career Mode) Research and Development][6]
-  * [a. Community Tech Tree Support][6a]
-  * [b. Minimum Scan for Science (30%)][6b]
-  * [c. Getting Maximum Science][6c]
-  * [d. Contracts][6d]
-* [7. Color Management][7]
-* [8. Instrument Window][8]
-* [9. Background Scanning][9]
-* [10. Time Warp][10]
-* [11. Settings Menu][11]
-* [12. Note: Data Sources][12]
+* [5. Zoom Map][5]
+* [6. Instrument Window][6]
+* [7. Parts and Sensors Types][7]
+  * [a. RADAR][7a]
+  * [b. SAR][7b]
+  * [c. Multi][7c]
+  * [d. BTDT][7d]
+  * [e. MapTraq (deprecated)][7e]
+* [8. (Career Mode) Research and Development][8]
+  * [a. Community Tech Tree Support][8a]
+  * [b. Minimum Scan for Science (30%)][8b]
+  * [c. Getting Maximum Science][8c]
+  * [d. Contracts][8d]
+* [9. Color Management][9]
+  * [a. Terrain Colors and Options][9a]
+  * [b. Biome Colors and Options][9b]
+  * [c. Resource Colors and Options][9c]
+
+* [10 Background Scanning][10]
+* [11. Time Warp][11]
+* [12. Settings Menu][12]
+* [13. Note: Data Sources][13]
 
 **WARNING**:
 
@@ -334,7 +339,43 @@ The camera icon in the lower-right exports a copy of the map.
 
 The re-size icon in the lower-right corner can be dragged to re-size the map.
 
-### [:top:][top] 5. Parts and Sensor Types
+### [:top:][top] 5. Zoom Map
+------------------------------------------
+
+![][bigmap-zoom-open]
+
+A separate, small map can be opened from the big map by right-clicking somewhere within the big map. This new window will be centered on the mouse cursor's location and zoomed in by a factor of 10. Icons on the zoom map can be used to zoom in or out, to a minimum of 2X zoom.
+
+The zoom scale and map center can be controlled by clicking within the zoom map.
+* Left-click to zoom out and re-center the map at the mouse cursor.
+* Right-click to zoom in and re-center the map at the mouse cursor.
+* Middle-click or Modifier Key (usually Alt on Windows) + Right-click will re-center the map without changing the scale.
+
+The vessel orbit overlay, waypoint icons, and anomaly locations can be toggle on and off independently of the big map settings.
+
+The zoom map also features mouse-over information for the cursor location similar to that shown on the big map.
+
+Different map types, resource overlays and polar projections are all applied to the zoom map as well.
+![][zoommap-in]
+
+### [:top:][top] 6. Instrument Window
+------------------------------------------
+
+![][instruments-small]
+
+The instruments window provides a readout of several types of data based on current scanning coverage.
+
+* **Location** Shows the vessel's current coordinates; not dependent on scanning coverage
+* **Waypoint** Shows if the vessel is inside of a current FinePrint waypoint; not dependent on scanning coverage
+* **Altitude** Shows the vessel's current altitude above the terrain
+* **Slope** Shows a highly localized slope based on a 3X3 grid centered 5m around the vessel
+* **Biome** Shows the biome that the current vessel is in or over
+* **Anomaly** Shows the nearest anomaly and its distance from the vessel
+* **BTDT Anomaly** Shows detailed information and a crude image about the nearest anomaly; scroll the mouse wheel when positioned over the anomaly window to switch between different structures if more than one is found
+
+![][instruments-btdt]
+
+### [:top:][top] 7. Parts and Sensor Types
 ------------------------------------------
 
 | **Part** | **Scan Type** | **FOV** | Altitude (**Min**) | (**Ideal**) | (**Max**) 
@@ -345,20 +386,19 @@ The re-size icon in the lower-right corner can be dragged to re-size the map.
 | [Been There Done That®][5d] | **Anomaly** | 1 | 0 m | 0 m | 2 km
 | [MapTraq® (deprecated)][5e] | **None** | N/A | N/A | N/A | N/A 
 
-#### [:top:][top] 5a. The RADAR Altimetry Sensor
+#### [:top:][top] 7a. The RADAR Altimetry Sensor
 ![RADAR][vab-radar]
-#### [:top:][top] 5b. The SAR Altimetry Sensor
+#### [:top:][top] 7b. The SAR Altimetry Sensor
 ![SAR][vab-sar]
-#### [:top:][top] 5c. The Multispectral Sensor
+#### [:top:][top] 7c. The Multispectral Sensor
 ![Multi][vab-multi]
-#### [:top:][top] 5d. Been There Done That
+#### [:top:][top] 7d. Been There Done That
 ![BTDT][vab-btdt]
-#### [:top:][top] 5e. MapTraq (deprecated)
-![MapTraq][vab-maptraq]
- 
+#### [:top:][top] 7e. MapTraq (deprecated)
+![MapTraq][vab-maptraq] 
 
 
-### [:top:][top] 6. (Career Mode) Research and Development
+### [:top:][top] 8. (Career Mode) Research and Development
 ------------------------------------------
 
 The **RADAR Altimetry** sensor can be unlocked in **Science Tech**.
@@ -369,7 +409,7 @@ The **Multispectral** sensor can be unlocked in **Advanced Exploration**.
 
 The **BTDT** sensor can be unlocked in **Field Science**.
 
-##### [:top:][top] 6a. Community Tech Tree Support
+##### [:top:][top] 8a. Community Tech Tree Support
 When the [Community Tech Tree][ctt:release] and [TechManager][techmanager:release] addons are installed SCANsat parts will default to different tech tree nodes.
 
 The **RADAR Altimetry** sensor can be unlocked in **Orbital Surveys**.
@@ -380,24 +420,24 @@ The **Multispectral** sensor can be unlocked in **Advanced Surveys**.
 
 The **BTDT** sensor can be unlocked in **Field Science**.
 
-##### [:top:][top] 6b. Minimum Scan for Science
+##### [:top:][top] 8b. Minimum Scan for Science
 Once you scan at least 30% of a particular map, you can use **Analyze Data** to get delicious science:
 
 ![30% is your minimum][science-min]
 
-##### [:top:][top] 6c. Getting Maximum Science
+##### [:top:][top] 8c. Getting Maximum Science
 Between 30% and 100%, you will get a number of science points proportional to the percentage. Really,
 the upper cutoff is 95% in case you didn't scan the whole map.
 
 ![Scan 95% to get all science][science-max]
 
-##### [:top:][top] 6d. Contract Support
+##### [:top:][top] 8d. Contract Support
 Career mode contracts are supported through third party addons.
 
 * [Contract Configurator Forum Thread][cconfig:release]
 * [SCANsat Contract Pack][ccfgSCANsat:release]
 
-### [:top:][top] 7. Color Management
+### [:top:][top] 9. Color Management
 ------------------------------------------
 
 ![][color-window]
@@ -406,6 +446,7 @@ SCANsat provides multiple options for map color configurations and terrain level
 
 The color management window can be accessed from the big or small map with the color palette icon, or from the toolbar menu.
 
+##### [:top:][top] 9a. Terrain Colors and Options
 On the left are the various color palettes available; there are four different styles that can be selected from the drop down menu. 
 Palettes can be customized by changing the number of colors in the palette, reversing the order, or making the palette use discrete
 color transitions, rather than the smooth gradient used by default.
@@ -424,22 +465,22 @@ from ocean to solid terrain more pronounced.
 All stock KSP planets have default color palette and terrain height values appropriate for the planet's terrain. Standard default values are used
 for any addon planets.
 
-### [:top:][top] 8. Instrument Window
-------------------------------------------
+##### [:top:][top] 9b. Biome Colors and Options
+Biome map colors and options can be controlled in the **Biome** tab of the window.
+* The end-point colors can be selected using the HSV color-picker; the value slider controls the brightness of the color.
+* Terrain transparency is controlled with a slider.
+* Stock style biome maps can be used in place of SCANsat's custom colors
+![][color-biome]
 
-![][instruments-small]
+##### [:top:][top] 9c. Resource Colors and Options
+Resource overlays can also be adjusted, using the **Resource** tab.
+* Resource colors are selected in the same manner as biome colors.
+* Upper and lower resource cutoff values can be adjusted with the sliders; use fine control mode for small adjustments.
+* Each resource can be adjusted separately and the values can be applied to the current planet or all planets.
+* Most planets share the same resource value settings; it is easiest to set values for all planets then set the values individually where needed (ie water has a higher value on Kerbin than elsewhere).
+![][color-resource]
 
-The instruments window provides a readout of several types of data based on current scanning coverage.
-
-* **Biome** Shows the biome that the current vessel is in or over
-* **Altitude** Shows the vessel's current altitude above the terrain
-* **Slope** Shows a highly localized slope based on a 3X3 grid centered 5m around the vessel
-* **Anomaly** Shows the nearest anomaly and its distance from the vessel
-* **BTDT Anomaly** Shows detailed information and a crude image about the nearest anomaly; scroll the mouse wheel when positioned over the anomaly window to switch between different structures if more than one is found
-
-![][instruments-btdt]
-
-### [:top:][top] 9. Background Scanning
+### [:top:][top] 10. Background Scanning
 ------------------------------------------
 
 ![Note the background scanning (non-active vessels are scanning)][small-scan]
@@ -448,7 +489,7 @@ Unlike some other KSP scanning systems, SCANsat allows scanning with multiple
 vessels.  All online scanners scan at the same time during any scene where time progresses; no active SCANsat
 parts are necessary. 
 
-### [:top:][top] 10. Time Warp
+### [:top:][top] 11. Time Warp
 ------------------------------------------
 
 SCANsat does not interpolate satellite paths during time warp; nevertheless, due to the relatively large field of view
@@ -465,7 +506,7 @@ It starts at **1000x** and then speeds up to **10,000x**:
 
 Notice that the only gaps in coverage are those at the poles (ie, the selected inclination was not high enough to capture the poles).
 
-### [:top:][top] 11. Settings Menu
+### [:top:][top] 12. Settings Menu
 ------------------------------------------
 
 ![][settings-window-v10]
@@ -482,7 +523,7 @@ The settings menu has a various general options
 	* **Sensors:** The total number of SCANsat sensors on all vessels; note that all combination sensors are separated into their invidual components, i.e. the Multi-Spectral scanner consists of two sensors, Biomes and Anomalies.
 	* **Passes:** The number of scanning passes recorded per second, this number can easily be in the tens of thousands at high time warp with multiple vessels and sensors active.
 
-### [:top:][top] 12. Note Concerning Data Sources
+### [:top:][top] 13. Note Concerning Data Sources
 ------------------------------------------
 
 All data this mod shows you is pulled from your game as you play. This
@@ -549,6 +590,9 @@ sneaky then they can of course be sneaky.
 [bigmap-scan-100x]: http://i.imgur.com/bcht47p.gif
 [bigmap-anim]: http://i.imgur.com/kxyl8xR.gif
 [bigmap-anim-v2]: http://i.imgur.com/lwyVBAN.gif
+[bigmap-zoom-open]: http://i.imgur.com/7egRRTU.gifv
+
+[zoommap-in]: http://i.imgur.com/tTCYDfP.gifv
 
 [resource-kethane]: http://i.imgur.com/naJIsvB.gif
 [resource-kethane2]: http://i.imgur.com/AT2b4G7.jpg?1
@@ -566,6 +610,8 @@ sneaky then they can of course be sneaky.
 [color-window]: http://i.imgur.com/XM2ynyZ.png
 [color-palette-switch]: http://i.imgur.com/0XdMGSy.gif
 [color-clamp-terrain]: http://i.imgur.com/8dgFLGj.gif
+[color-biome]: http://i.imgur.com/NdA1DVY.gifv
+[color-resource]: http://i.imgur.com/9NR8gvP.gifv
 
 [instruments-small]: http://i.imgur.com/DwkwCI5.gif
 [instruments-btdt]: http://i.imgur.com/tybbDap.gif
@@ -594,23 +640,27 @@ sneaky then they can of course be sneaky.
 [3b]: #top-3b-mismatched-scanners
 [4]: #top-4-big-map
 [4a]: #top-4a-big-map-options
-[5]: #top-5-parts-and-sensor-types
-[5a]: #top-5a-the-radar-altimetry-sensor
-[5b]: #top-5b-the-sar-altimetry-sensor
-[5c]: #top-5c-the-multispectral-sensor
-[5d]: #top-5d-been-there-done-that
-[5e]: #top-5e-maptraq-deprecated
-[6]: #top-6-career-mode-research-and-development
-[6a]: #top-6a-community-tech-tree-support
-[6b]: #top-6b-minimum-scan-for-science
-[6c]: #top-6c-getting-maximum-science
-[6d]: #top-6d-contract-support
-[7]: #top-7-color-management
-[8]: #top-8-instrument-window
-[9]: #top-9-background-scanning
-[10]: #top-10-time-warp
-[11]: #top-11-settings-menu
-[12]: #top-12-note-concerning-data-sources
+[5]: #top-5-zoom-map
+[6]: #top-6-instrument-window
+[7]: #top-7-parts-and-sensor-types
+[7a]: #top-7a-the-radar-altimetry-sensor
+[7b]: #top-7b-the-sar-altimetry-sensor
+[7c]: #top-7c-the-multispectral-sensor
+[7d]: #top-7d-been-there-done-that
+[7e]: #top-7e-maptraq-deprecated
+[8]: #top-8-career-mode-research-and-development
+[8a]: #top-8a-community-tech-tree-support
+[8b]: #top-8b-minimum-scan-for-science
+[8c]: #top-8c-getting-maximum-science
+[8d]: #top-8d-contract-support
+[9]: #top-9-color-management
+[9a]: #top-9a-terrain-colors-and-options
+[9b]: #top-9b-biome-colors-and-options
+[9c]: #top-9c-resource-colors-and-options
+[10]: #top-10-background-scanning
+[11]: #top-11-time-warp
+[12]: #top-12-settings-menu
+[13]: #top-13-note-concerning-data-sources
 
 [shield:license-bsd]: http://img.shields.io/:license-bsd-blue.svg
 [shield:license-mit]: http://img.shields.io/:license-mit-a31f34.svg
@@ -624,16 +674,16 @@ sneaky then they can of course be sneaky.
 [shield:support-rpm]: http://img.shields.io/badge/works%20with%20RPM-v0.18.3-a31f34.svg
 [shield:support-ket]: http://img.shields.io/badge/works%20with%20Kethane-v0.9.2-brightgreen.svg
 [shield:support-orsx]: http://img.shields.io/badge/works%20with%20ORSX-v0.1.2-000000.svg
-[shield:support-mm]: http://img.shields.io/badge/works%20with%20MM-v2.5.9-40b7c0.svg
+[shield:support-mm]: http://img.shields.io/badge/works%20with%20MM-v2.5.13-40b7c0.svg
 [shield:support-toolbar]: http://img.shields.io/badge/works%20with%20Blizzy's%20Toolbar-1.7.8-7c69c0.svg
 [shield:support-alcor]: http://img.shields.io/badge/works%20with%20ALCOR-0.9-299bc7.svg
 [shield:support-kspi]: http://img.shields.io/badge/works%20with%20Interstellar-0.13-a62374.svg
-[shield:support-usi]:http://img.shields.io/badge/works%20with%20USI-0.22.6-34c566.svg
+[shield:support-usi]:http://img.shields.io/badge/works%20with%20USI-0.22.8-34c566.svg
 [shield:support-karbonite]: http://img.shields.io/badge/works%20with%20Karbonite-0.5.5-ff8c00.svg
 [shield:support-epl]: http://img.shields.io/badge/works%20with%20EPL-4.2.3-ff8c00.svg
 [shield:support-ctt]: http://img.shields.io/badge/works%20with%20CTT-1.1-blue.svg
 [shield:support-tm]: http://img.shields.io/badge/works%20with%20TechManager-1.5-lightgrey.svg
-[shield:support-reg]: https://img.shields.io/badge/works%20with%20Regolith-1.5-000000.svg
+[shield:support-reg]: https://img.shields.io/badge/works%20with%20Regolith-1.7-000000.svg
 [shield:support-ccfg]: https://img.shields.io/badge/works%20with%20Contract%20Configurator-6.0-yellowgreen.svg
 [shield:ckan]: https://img.shields.io/badge/CKAN-Indexed-brightgreen.svg
 
