@@ -33,9 +33,13 @@ namespace SCANsat
 		[Persistent]
 		private bool stockBiomeMap = false;
 		[Persistent]
-		private Color lowSlopeColor = palette.xkcd_PukeGreen;
+		private Color bottomLowSlopeColor = palette.xkcd_PukeGreen;
 		[Persistent]
-		private Color highSlopeColor = palette.xkcd_Lemon;
+		private Color bottemHighSlopeColor = palette.xkcd_Lemon;
+		[Persistent]
+		private Color topLowSlopeColor = palette.xkcd_PukeGreen;
+		[Persistent]
+		private Color topHighSlopeColor = palette.xkcd_Lemon;
 		[Persistent]
 		private List<SCANterrainConfig> SCANsat_Altimetry = new List<SCANterrainConfig>();
 		[Persistent]
@@ -59,8 +63,8 @@ namespace SCANsat
 			SCANUtil.SCANdebugLog("-------->High Biome Color         =>   {0}", highBiomeColor);
 			SCANUtil.SCANdebugLog("-------->Biome Transparency       =>   {0}", biomeTransparency);
 			SCANUtil.SCANdebugLog("-------->Stock Biome              =>   {0}", stockBiomeMap);
-			SCANUtil.SCANdebugLog("-------->Low Slope Color          =>   {0}", lowSlopeColor);
-			SCANUtil.SCANdebugLog("-------->High Slope Color         =>   {0}", highSlopeColor);
+			SCANUtil.SCANdebugLog("-------->Low Slope Color          =>   {0}", bottomLowSlopeColor);
+			SCANUtil.SCANdebugLog("-------->High Slope Color         =>   {0}", bottemHighSlopeColor);
 			SCANcontroller.setMasterTerrainNodes(SCANsat_Altimetry);
 			SCANcontroller.setMasterResourceNodes(SCANsat_Resources);
 		}
@@ -78,8 +82,10 @@ namespace SCANsat
 				lowBiomeColor = SCANcontroller.controller.lowBiomeColor;
 				highBiomeColor = SCANcontroller.controller.highBiomeColor;
 				biomeTransparency = SCANcontroller.controller.biomeTransparency;
-				//lowSlopeColor = SCANcontroller.controller.lowSlopeColor;
-				//highSlopeColor = SCANcontroller.controller.highSlopeColor;
+				bottomLowSlopeColor = SCANcontroller.controller.lowSlopeColorOne;
+				bottemHighSlopeColor = SCANcontroller.controller.highSlopeColorOne;
+				topLowSlopeColor = SCANcontroller.controller.lowSlopeColorTwo;
+				topHighSlopeColor = SCANcontroller.controller.highSlopeColorTwo;
 			}
 		}
 
@@ -128,14 +134,24 @@ namespace SCANsat
 			get { return stockBiomeMap; }
 		}
 
-		public Color LowSlopeColor
+		public Color BottomLowSlopeColor
 		{
-			get { return lowSlopeColor; }
+			get { return bottomLowSlopeColor; }
 		}
 
-		public Color HighSlopeColor
+		public Color BottomHighSlopeColor
 		{
-			get { return highSlopeColor; }
+			get { return bottemHighSlopeColor; }
+		}
+
+		public Color TopLowSlopeColor
+		{
+			get { return topLowSlopeColor; }
+		}
+
+		public Color TopHighSlopeColor
+		{
+			get { return topHighSlopeColor; }
 		}
 	}
 }
