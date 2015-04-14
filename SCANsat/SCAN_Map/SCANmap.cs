@@ -387,7 +387,6 @@ namespace SCANsat.SCAN_Map
 			if (body == b)
 				return;
 			body = b;
-			//SCANcontroller.controller.Resources(b); //Repopulate resource list when changing SOI
 			if (SCANconfigLoader.GlobalResource)
 			{
 				resource = SCANcontroller.getResourceNode(SCANcontroller.controller.resourceSelection);
@@ -395,7 +394,6 @@ namespace SCANsat.SCAN_Map
 					resource = SCANcontroller.GetFirstResource;
 				resource.CurrentBodyConfig(body.name);
 			}
-			resetMap();
 		}
 
 		internal bool isMapComplete()
@@ -612,13 +610,12 @@ namespace SCANsat.SCAN_Map
 							{
 								if (v < 1)
 								{
-									baseColor = palette.lerp(palette.xkcd_PukeGreen, palette.xkcd_Lemon, v);
+									baseColor = palette.lerp(SCANcontroller.controller.lowSlopeColorOne, SCANcontroller.controller.highSlopeColorOne, v);
 								}
 								else
 								{
-									baseColor = palette.lerp(palette.xkcd_Lemon, palette.xkcd_OrangeRed, v - 1);
+									baseColor = palette.lerp(SCANcontroller.controller.lowSlopeColorTwo, SCANcontroller.controller.highSlopeColorTwo, v - 1);
 								}
-								//baseColor = palette.lerp(SCANcontroller.controller.lowSlopeColor, SCANcontroller.controller.highSlopeColor, v / 2f);
 							}
 						}
 						mapline[i] = projVal;
