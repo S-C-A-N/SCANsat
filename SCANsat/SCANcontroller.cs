@@ -114,10 +114,14 @@ namespace SCANsat
 		public Color lowBiomeColor = palette.xkcd_CamoGreen;
 		[KSPField(isPersistant = true)]
 		public Color highBiomeColor = palette.xkcd_Marigold;
-		//[KSPField(isPersistant = true)]
-		//public Color lowSlopeColor = palette.xkcd_PukeGreen;
-		//[KSPField(isPersistant = true)]
-		//public Color highSlopeColor = palette.xkcd_Yellow;
+		[KSPField(isPersistant = true)]
+		public Color lowSlopeColorOne = palette.xkcd_PukeGreen;
+		[KSPField(isPersistant = true)]
+		public Color highSlopeColorOne = palette.xkcd_Yellow;
+		[KSPField(isPersistant = true)]
+		public Color lowSlopeColorTwo = palette.xkcd_PukeGreen;
+		[KSPField(isPersistant = true)]
+		public Color highSlopeColorTwo = palette.xkcd_Yellow;
 
 		/* Available resources for overlays; loaded from SCANsat configs; only loaded once */
 		private static Dictionary<string, SCANresourceGlobal> masterResourceNodes = new Dictionary<string,SCANresourceGlobal>();
@@ -153,6 +157,9 @@ namespace SCANsat
 
 		/* Used in case the loading process is interupted somehow */
 		private bool loaded = false;
+
+		/* Used to make sure all contracts are loaded */
+		private bool contractsLoaded = false;
 
 		private bool unDocked, docked = false;
 		private Vessel PartFromVessel, PartToVessel, NewVessel, OldVessel;
@@ -444,6 +451,11 @@ namespace SCANsat
 			get { return actualPasses; }
 		}
 
+		public bool ContractsLoaded
+		{
+			get { return contractsLoaded; }
+		}
+
 		#endregion
 
 		public override void OnLoad(ConfigNode node)
@@ -671,6 +683,7 @@ namespace SCANsat
 			GameEvents.onVesselSOIChanged.Add(SOIChange);
 			GameEvents.onVesselCreate.Add(newVesselCheck);
 			GameEvents.onPartCouple.Add(dockingCheck);
+			GameEvents.Contract.onContractsLoaded.Add(contractsCheck);
 			if (HighLogic.LoadedScene == GameScenes.FLIGHT)
 			{
 				if (!body_data.ContainsKey(FlightGlobals.currentMainBody.name))
@@ -766,6 +779,7 @@ namespace SCANsat
 			GameEvents.onVesselSOIChanged.Remove(SOIChange);
 			GameEvents.onVesselCreate.Remove(newVesselCheck);
 			GameEvents.onPartCouple.Remove(dockingCheck);
+			GameEvents.Contract.onContractsLoaded.Remove(contractsCheck);
 			if (mainMap != null)
 				Destroy(mainMap);
 			if (settingsWindow != null)
@@ -818,6 +832,11 @@ namespace SCANsat
 
 				unDocked = true;
 			}
+		}
+
+		private void contractsCheck()
+		{
+			contractsLoaded = true;
 		}
 
 		private void SOIChange(GameEvents.HostedFromToAction<Vessel, CelestialBody> VC)
