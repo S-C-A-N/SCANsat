@@ -533,7 +533,7 @@ namespace SCANsat.SCAN_UI
 							{
 								spotMap = gameObject.AddComponent<SCANzoomWindow>();
 							}
-							spotMap.setMapCenter(mlat, mlon, bigmap.MType, bigmap.Projection);
+							spotMap.setMapCenter(mlat, mlon, bigmap);
 						}
 					}
 					Event.current.Use();
@@ -580,16 +580,16 @@ namespace SCANsat.SCAN_UI
 					{
 						bigmap.setProjection((MapProjection)i);
 						bigmap.resetMap();
-						if (spotMap != null)
-						{
-							if ((MapProjection)i == MapProjection.Polar)
-								spotMap.SpotMap.setProjection(MapProjection.Polar);
-							else
-								spotMap.SpotMap.setProjection(MapProjection.Rectangular);
+						//if (spotMap != null)
+						//{
+						//	if ((MapProjection)i == MapProjection.Polar)
+						//		spotMap.SpotMap.setProjection(MapProjection.Polar);
+						//	else
+						//		spotMap.SpotMap.setProjection(MapProjection.Rectangular);
 
-							spotMap.SpotMap.centerAround(spotMap.SpotMap.CenteredLong, spotMap.SpotMap.CenteredLat);
-							spotMap.SpotMap.resetMap();
-						}
+						//	spotMap.SpotMap.centerAround(spotMap.SpotMap.CenteredLong, spotMap.SpotMap.CenteredLat);
+						//	spotMap.SpotMap.resetMap();
+						//}
 						SCANcontroller.controller.projection = i;
 						drawGrid = true;
 						drop_down_open = false;
@@ -607,8 +607,8 @@ namespace SCANsat.SCAN_UI
 					if (GUI.Button(r, SCANmapType.mapTypeNames[i], SCANskins.SCAN_dropDownButton))
 					{
 						bigmap.resetMap((mapType)i, true);
-						if (spotMap != null)
-							spotMap.SpotMap.resetMap((mapType)i, false);
+						//if (spotMap != null)
+						//	spotMap.SpotMap.resetMap((mapType)i, false);
 						drop_down_open = false;
 					}
 				}
@@ -627,11 +627,11 @@ namespace SCANsat.SCAN_UI
 						bigmap.Resource = loadedResources[i];
 						bigmap.Resource.CurrentBodyConfig(bigmap.Body.name);
 
-						if (spotMap != null)
-						{
-							spotMap.SpotMap.Resource = loadedResources[i];
-							spotMap.SpotMap.Resource.CurrentBodyConfig(bigmap.Body.name);
-						}
+						//if (spotMap != null)
+						//{
+						//	spotMap.SpotMap.Resource = loadedResources[i];
+						//	spotMap.SpotMap.Resource.CurrentBodyConfig(bigmap.Body.name);
+						//}
 
 						SCANcontroller.controller.resourceSelection = bigmap.Resource.Name;
 						if (bigmap.Resource.Source == SCANresource_Source.Kethane)
@@ -641,8 +641,8 @@ namespace SCANsat.SCAN_UI
 						if (SCANcontroller.controller.map_ResourceOverlay)
 						{
 							bigmap.resetMap();
-							if (spotMap != null)
-								spotMap.SpotMap.resetMap();
+							//if (spotMap != null)
+							//	spotMap.SpotMap.resetMap();
 						}
 
 						drop_down_open = false;
@@ -669,8 +669,9 @@ namespace SCANsat.SCAN_UI
 							data = dropDownData;
 							b = data.Body;
 							bigmap.setBody(data.Body);
-							if (spotMap != null)
-								spotMap.setBody(data);
+							//if (spotMap != null)
+							//	spotMap.setBody(data);
+							bigmap.resetMap();
 							drop_down_open = false;
 						}
 						j++;
