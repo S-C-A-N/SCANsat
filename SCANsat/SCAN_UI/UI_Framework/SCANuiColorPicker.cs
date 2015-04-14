@@ -53,9 +53,13 @@ namespace SCANsat.SCAN_UI.UI_Framework
 				GUILayout.EndHorizontal();
 			GUILayout.EndVertical();
 
-			GUI.Label(new Rect(275, 70, 60, 30), "Value:", SCANskins.SCAN_headlineSmall);
+			Rect s = new Rect(245, 70, 100, 30);
+			GUI.Label(s, "Value: " + valSlider.ToString("N0") + "%", SCANskins.SCAN_whiteReadoutLabel);
 
-			valSlider = GUI.VerticalSlider(new Rect(300, 100, 30, 200), valSlider, 100, 0, SCANskins.SCAN_vertSlider, SCANskins.SCAN_sliderThumb).Mathf_Round(0);
+			s = new Rect(300, 100, 30, 200);
+			valSlider = GUI.VerticalSlider(s, valSlider, 100, 0, SCANskins.SCAN_vertSlider, SCANskins.SCAN_sliderThumb).Mathf_Round(0);
+
+			SCANuiUtil.drawVerticalSliderLabel(s, "0%", "100%");
 
 			if (GUI.RepeatButton(r, "", SCANskins.SCAN_colorWheelButton))
 			{
