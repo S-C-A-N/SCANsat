@@ -27,12 +27,14 @@ namespace SCANsat.SCAN_UI
 	class SCANzoomWindow : SCAN_MBW
 	{
 		private SCANmap spotmap;
+		private SCANmap bigmap;
 		private CelestialBody b;
 		private SCANdata data;
 		private Vessel v;
-		private bool showOrbit, showAnomaly, showWaypoints;
+		private bool showOrbit, showAnomaly, showWaypoints, showInfo, controlLock;
 		private Vector2 dragStart;
 		private float resizeW, resizeH;
+		private const string lockID = "SCANzoom_LOCK";
 		internal static Rect defaultRect = new Rect(10f, 10f, 340f, 260f);
 
 		protected override void Awake()
@@ -42,6 +44,7 @@ namespace SCANsat.SCAN_UI
 			WindowSize_Max = new Vector2(540, 400);
 			WindowOptions = new GUILayoutOption[2] { GUILayout.Width(340), GUILayout.Height(260) };
 			WindowStyle = SCANskins.SCAN_window;
+			showInfo = true;
 			Visible = false;
 			DragEnabled = true;
 			ClampEnabled = true;
@@ -50,6 +53,8 @@ namespace SCANsat.SCAN_UI
 
 			SCAN_SkinsLibrary.SetCurrent("SCAN_Unity");
 			SCAN_SkinsLibrary.SetCurrentTooltip();
+
+			InputLockManager.RemoveControlLock(lockID);
 
 			Startup();
 		}
@@ -89,24 +94,31 @@ namespace SCANsat.SCAN_UI
 			spotmap.setBody(b);
 		}
 
-		public void setMapCenter(double lat, double lon, mapType t, MapProjection p)
+		protected override void OnDestroy()
+		{
+			InputLockManager.RemoveControlLock(lockID);
+		}
+
+		public void setMapCenter(double lat, double lon, SCANmap big)
 		{
 			Visible = true;
+			bigmap = big;
 			spotmap.MapScale = 10;
-			if (p == MapProjection.Polar)
-				spotmap.setProjection(p);
+			spotmap.setBody(big.Body);
+			if (bigmap.Projection == MapProjection.Polar)
+				spotmap.setProjection(MapProjection.Polar);
 			else
 				spotmap.setProjection(MapProjection.Rectangular);
 			spotmap.centerAround(lon, lat);
-			spotmap.resetMap(t, false);
+			spotmap.resetMap(bigmap.MType, false);
 		}
 
-		public void setBody(SCANdata d)
-		{
-			data = d;
-			b = data.Body;
-			spotmap.setBody(b);
-		}
+		//public void setBody(SCANdata d)
+		//{
+		//	data = d;
+		//	b = data.Body;
+		//	spotmap.setBody(b);
+		//}
 
 		public SCANmap SpotMap
 		{
@@ -154,6 +166,40 @@ namespace SCANsat.SCAN_UI
 				if (Event.current.isMouse)
 					Event.current.Use();
 			}
+
+			//Lock space center click through
+			if (HighLogic.LoadedScene == GameScenes.SPACECENTER)
+			{
+				Vector2 mousePos = Input.mousePosition;
+				mousePos.y = Screen.height - mousePos.y;
+				if (WindowRect.Contains(mousePos) && !controlLock)
+				{
+					InputLockManager.SetControlLock(ControlTypes.CAMERACONTROLS | ControlTypes.KSC_ALL, lockID);
+					controlLock = true;
+				}
+				else if (!WindowRect.Contains(mousePos) && controlLock)
+				{
+					InputLockManager.RemoveControlLock(lockID);
+					controlLock = false;
+				}
+			}
+
+			//Lock tracking scene click through
+			if (HighLogic.LoadedScene == GameScenes.TRACKSTATION)
+			{
+				Vector2 mousePos = Input.mousePosition;
+				mousePos.y = Screen.height - mousePos.y;
+				if (WindowRect.Contains(mousePos) && !controlLock)
+				{
+					InputLockManager.SetControlLock(ControlTypes.TRACKINGSTATION_UI, lockID);
+					controlLock = true;
+				}
+				else if (!WindowRect.Contains(mousePos) && controlLock)
+				{
+					InputLockManager.RemoveControlLock(lockID);
+					controlLock = false;
+				}
+			}
 		}
 
 		protected override void DrawWindow(int id)
@@ -185,9 +231,23 @@ namespace SCANsat.SCAN_UI
 		//Draw the close button in upper right corner
 		private void closeBox(int id)
 		{
-			Rect r = new Rect(WindowRect.width - 20, 1, 18, 18);
+			Rect r = new Rect(WindowRect.width - 40, 0, 18, 18);
+			if (showInfo)
+			{
+				if (GUI.Button(r, "-", SCANskins.SCAN_buttonBorderless))
+					showInfo = !showInfo;
+			}
+			else
+			{
+				if (GUI.Button(r, "+", SCANskins.SCAN_buttonBorderless))
+					showInfo = !showInfo;
+			}
+			r.x += 20;
+			r.y += 1;
 			if (GUI.Button(r, SCANcontroller.controller.closeBox, SCANskins.SCAN_closeButton))
 			{
+				InputLockManager.RemoveControlLock(lockID);
+				controlLock = false;
 				Visible = false;
 			}
 		}
@@ -221,7 +281,34 @@ namespace SCANsat.SCAN_UI
 				spotmap.resetMap();
 			}
 
-			GUILayout.Label(spotmap.MapScale.ToString("N1") + " X", SCANskins.SCAN_whiteLabelCenter, GUILayout.Width(40), GUILayout.Height(24));
+			if (GUILayout.Button(textWithTT(spotmap.MapScale.ToString("N1") + " X", "Sync To Big Map"), SCANskins.SCAN_buttonBorderless, GUILayout.Width(50), GUILayout.Height(24)))
+			{
+				if (bigmap.Projection == MapProjection.Polar)
+					spotmap.setProjection(MapProjection.Polar);
+				else
+					spotmap.setProjection(MapProjection.Rectangular);
+
+				if (bigmap.Body != b)
+				{
+					SCANdata dat = SCANUtil.getData(bigmap.Body);
+					if (dat == null)
+						dat = new SCANdata(bigmap.Body);
+
+					data = dat;
+					b = data.Body;
+					spotmap.setBody(b);
+				}
+
+				if (SCANconfigLoader.GlobalResource)
+				{
+					spotmap.Resource = bigmap.Resource;
+					spotmap.Resource.CurrentBodyConfig(b.name);
+				}
+
+				spotmap.centerAround(spotmap.CenteredLong, spotmap.CenteredLat);
+
+				spotmap.resetMap(bigmap.MType, false);
+			}
 
 			if (GUILayout.Button(iconWithTT(SCANskins.SCAN_ZoomInIcon, "Zoom In"), SCANskins.SCAN_buttonBorderless, GUILayout.Width(26), GUILayout.Height(26)))
 			{
@@ -403,7 +490,8 @@ namespace SCANsat.SCAN_UI
 			}
 
 			//Draw the actual mouse over info label below the map
-			SCANuiUtil.mouseOverInfoSimple(mlon, mlat, spotmap, data, spotmap.Body, in_map);
+			if (showInfo)
+				SCANuiUtil.mouseOverInfoSimple(mlon, mlat, spotmap, data, spotmap.Body, in_map);
 		}
 
 		private void mapLabels(int id)
