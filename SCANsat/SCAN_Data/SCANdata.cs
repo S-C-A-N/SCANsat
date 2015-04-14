@@ -136,7 +136,12 @@ namespace SCANsat.SCAN_Data
 		{
 			get
 			{
-				if (waypoints == null)
+				if (HighLogic.CurrentGame.Mode != Game.Modes.CAREER)
+					return new SCANwaypoint[0];
+
+				if (!SCANcontroller.controller.ContractsLoaded)
+					return new SCANwaypoint[0];
+				else if (waypoints == null)
 				{
 					List<SCANwaypoint> bodyWaypoints = new List<SCANwaypoint>();
 					if (ContractSystem.Instance != null)
@@ -186,25 +191,25 @@ namespace SCANsat.SCAN_Data
 								}
 							}
 						}
+					}
 
-						if (WaypointManager.Instance() != null)
+					if (WaypointManager.Instance() != null)
+					{
+						var remaining = WaypointManager.Instance().AllWaypoints();
+						for (int i = 0; i < remaining.Count; i++)
 						{
-							var remaining = WaypointManager.Instance().AllWaypoints();
-							for (int i = 0; i < remaining.Count; i++)
+							Waypoint p = remaining[i];
+							if (p.isOnSurface && p.isNavigatable)
 							{
-								Waypoint p = remaining[i];
-								if (p.isOnSurface && p.isNavigatable)
+								if (p.celestialName == body.GetName())
 								{
-									if (p.celestialName == body.GetName())
+									if (p.contractReference != null)
 									{
-										if (p.contractReference != null)
+										if (p.contractReference.ContractState == Contract.State.Active)
 										{
-											if (p.contractReference.ContractState == Contract.State.Active)
+											if (!bodyWaypoints.Any(a => a.Way == p))
 											{
-												if (!bodyWaypoints.Any(a => a.Way == p))
-												{
-													bodyWaypoints.Add(new SCANwaypoint(p));
-												}
+												bodyWaypoints.Add(new SCANwaypoint(p));
 											}
 										}
 									}
