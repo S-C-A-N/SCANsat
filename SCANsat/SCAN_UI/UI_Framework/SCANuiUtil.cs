@@ -713,16 +713,16 @@ namespace SCANsat.SCAN_UI.UI_Framework
 
 		internal static void drawVerticalSliderLabel(Rect r, string min, string max)
 		{
-			Rect sr = new Rect(r.x - 10, r.y + 4, 20, 20);
-			drawLabel(sr, "_", true, true);
+			Rect sr = new Rect(r.x - 15, r.y - 4, 20, 20);
+			drawLabel(sr, "_", true, false);
 			sr.y += (r.height - 8);
 			drawLabel(sr, "_", true, false);
 			sr.width = 50;
 			sr.x -= 40;
-			sr.y = r.y + 4;
+			sr.y = r.y + 2;
 			drawLabel(sr, max, true, false);
-			sr.y += (r.height -8);
-			drawLabel(sr, min, true, true);
+			sr.y += (r.height - 8);
+			drawLabel(sr, min, true, false);
 		}
 
 		/* FIXME: This uses assumed, shared, static constants with Legend stuff in other SCANsat files */
