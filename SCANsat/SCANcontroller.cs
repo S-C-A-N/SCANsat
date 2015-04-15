@@ -142,7 +142,11 @@ namespace SCANsat
 		private Dictionary<string, SCANdata> body_data = new Dictionary<string,SCANdata>();
 
 		/* Kethane integration */
-		private bool kethaneRebuild, kethaneReset, kethaneBusy = false;
+		private bool kethaneRebuild, kethaneReset, kethaneBusy;
+
+		private bool mechjebLoaded, mechjebSelecting;
+		private Vector2d mechjebTargetCoords;
+		private SCANwaypoint mechjebTarget;
 
 		/* UI window objects */
 		internal SCANmainMap mainMap;
@@ -454,6 +458,36 @@ namespace SCANsat
 		public bool ContractsLoaded
 		{
 			get { return contractsLoaded; }
+		}
+
+		public bool MechJebLoaded
+		{
+			get { return mechjebLoaded; }
+			set { mechjebLoaded = value; }
+		}
+
+		public bool MechJebSelecting
+		{
+			get { return mechjebSelecting; }
+			internal set
+			{
+				if (mechjebLoaded)
+					mechjebSelecting = value;
+				else
+					mechjebSelecting = false;
+			}
+		}
+
+		public Vector2d MechJebTargetCoords
+		{
+			get { return mechjebTargetCoords; }
+			internal set { mechjebTargetCoords = value; }
+		}
+
+		public SCANwaypoint MechJebTarget
+		{
+			get { return mechjebTarget; }
+			set { mechjebTarget = value; }
 		}
 
 		#endregion

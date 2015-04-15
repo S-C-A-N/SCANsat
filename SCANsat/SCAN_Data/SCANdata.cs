@@ -132,12 +132,32 @@ namespace SCANsat.SCAN_Data
 
 		private List<SCANwaypoint> waypoints;
 
-		public void addToWaypoints(SCANwaypoint w)
+		public void addToWaypoints()
+		{
+			if (SCANcontroller.controller == null)
+				return;
+
+			if (waypoints == null)
+			{
+				waypoints = new List<SCANwaypoint>(1) { SCANcontroller.controller.MechJebTarget };
+				return;
+			}
+
+			if (waypoints.Any(a => a.Mechjeb))
+				waypoints.RemoveAll(a => a.Mechjeb);
+
+			waypoints.Add(SCANcontroller.controller.MechJebTarget);
+		}
+
+		public void removeTargetWaypoint()
 		{
 			if (waypoints == null)
-				waypoints = new List<SCANwaypoint>(1) { w };
-			else
-				waypoints.Add(w);
+				return;
+
+			SCANwaypoint w = waypoints.FirstOrDefault(a => a.Mechjeb);
+
+			if (w != null)
+				waypoints.Remove(w);
 		}
 
 		public List<SCANwaypoint> Waypoints
