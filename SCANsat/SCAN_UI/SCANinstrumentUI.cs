@@ -39,12 +39,13 @@ namespace SCANsat.SCAN_UI
 		private float lastUpdate = 0f;
 		private float updateInterval = 0.2f;
 		private double slopeAVG;
-		internal static Rect defaultRect = new Rect(30, 600, 260, 60);
+		internal readonly static Rect defaultRect = new Rect(30, 600, 260, 60);
+		private static Rect sessionRect = defaultRect;
 
 		protected override void Awake()
 		{
 			WindowCaption = "S.C.A.N. Instruments";
-			WindowRect = defaultRect;
+			WindowRect = sessionRect;
 			WindowStyle = SCANskins.SCAN_window;
 			WindowOptions = new GUILayoutOption[2] { GUILayout.Width(260), GUILayout.Height(60) };
 			Visible = false;
@@ -116,6 +117,11 @@ namespace SCANsat.SCAN_UI
 				//if (parts <= 0) noData(id);		/* nothing to show */
 			}
 			stopS();
+		}
+
+		protected override void DrawWindowPost(int id)
+		{
+			sessionRect = WindowRect;
 		}
 
 		//Draw the version label in the upper left corner

@@ -35,14 +35,15 @@ namespace SCANsat.SCAN_UI
 		private Vector2 dragStart;
 		private float resizeW, resizeH;
 		private const string lockID = "SCANzoom_LOCK";
-		internal static Rect defaultRect = new Rect(10f, 10f, 340f, 260f);
+		internal readonly static Rect defaultRect = new Rect(50f, 50f, 340f, 240f);
+		private static Rect sessionRect = defaultRect;
 
 		protected override void Awake()
 		{
-			WindowRect = defaultRect;
+			WindowRect = sessionRect;
 			WindowSize_Min = new Vector2(310, 180);
 			WindowSize_Max = new Vector2(540, 400);
-			WindowOptions = new GUILayoutOption[2] { GUILayout.Width(340), GUILayout.Height(260) };
+			WindowOptions = new GUILayoutOption[2] { GUILayout.Width(340), GUILayout.Height(240) };
 			WindowStyle = SCANskins.SCAN_window;
 			showInfo = true;
 			Visible = false;
@@ -54,7 +55,7 @@ namespace SCANsat.SCAN_UI
 			SCAN_SkinsLibrary.SetCurrent("SCAN_Unity");
 			SCAN_SkinsLibrary.SetCurrentTooltip();
 
-			InputLockManager.RemoveControlLock(lockID);
+			removeControlLocks();
 
 			Startup();
 		}
@@ -96,7 +97,13 @@ namespace SCANsat.SCAN_UI
 
 		protected override void OnDestroy()
 		{
+			removeControlLocks();
+		}
+
+		internal void removeControlLocks()
+		{
 			InputLockManager.RemoveControlLock(lockID);
+			controlLock = false;
 		}
 
 		public void setMapCenter(double lat, double lon, SCANmap big)
@@ -112,13 +119,6 @@ namespace SCANsat.SCAN_UI
 			spotmap.centerAround(lon, lat);
 			spotmap.resetMap(bigmap.MType, false);
 		}
-
-		//public void setBody(SCANdata d)
-		//{
-		//	data = d;
-		//	b = data.Body;
-		//	spotmap.setBody(b);
-		//}
 
 		public SCANmap SpotMap
 		{
@@ -218,7 +218,7 @@ namespace SCANsat.SCAN_UI
 
 		protected override void DrawWindowPost(int id)
 		{
-			
+			sessionRect = WindowRect;
 		}
 
 		//Draw version label in upper left corner
@@ -246,8 +246,7 @@ namespace SCANsat.SCAN_UI
 			r.y += 1;
 			if (GUI.Button(r, SCANcontroller.controller.closeBox, SCANskins.SCAN_closeButton))
 			{
-				InputLockManager.RemoveControlLock(lockID);
-				controlLock = false;
+				removeControlLocks();
 				Visible = false;
 			}
 		}
@@ -492,6 +491,8 @@ namespace SCANsat.SCAN_UI
 			//Draw the actual mouse over info label below the map
 			if (showInfo)
 				SCANuiUtil.mouseOverInfoSimple(mlon, mlat, spotmap, data, spotmap.Body, in_map);
+			else
+				fillS(10);
 		}
 
 		private void mapLabels(int id)

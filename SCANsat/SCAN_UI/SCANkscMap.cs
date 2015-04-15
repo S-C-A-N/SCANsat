@@ -30,7 +30,7 @@ namespace SCANsat.SCAN_UI
 		private static CelestialBody b;
 		private string mapTypeTitle = "";
 		private SCANdata data;
-		private bool drawGrid, currentGrid, currentColor, lastColor, lastResource, spaceCenterLock, trackingStationLock;
+		private bool drawGrid, currentGrid, currentColor, lastColor, lastResource, controlLock, waypoints;
 		private bool drop_down_open, projection_drop_down, mapType_drop_down, resources_drop_down, planetoid_drop_down;
 		//private Texture2D overlay_static;
 		private List<SCANresourceGlobal> loadedResources = new List<SCANresourceGlobal>();
@@ -40,7 +40,8 @@ namespace SCANsat.SCAN_UI
 		private Vector2 scrollP, scrollR;
 		private Rect pos_spotmap = new Rect(10f, 10f, 10f, 10f);
 		private Rect pos_spotmap_x = new Rect(10f, 10f, 25f, 25f);
-		internal static Rect defaultRect = new Rect(250, 60, 780, 460);
+		internal readonly static Rect defaultRect = new Rect(250, 60, 780, 460);
+		private static Rect sessionRect = defaultRect;
 		private const string lockID = "SCANksc_LOCK";
 
 		internal SCANzoomWindow spotMap;
@@ -48,18 +49,19 @@ namespace SCANsat.SCAN_UI
 		protected override void Awake()
 		{
 			WindowCaption = "Map of ";
-			WindowRect = defaultRect;
+			WindowRect = sessionRect;
 			WindowOptions = new GUILayoutOption[2] { GUILayout.Width(740), GUILayout.Height(420) };
 			WindowStyle = SCANskins.SCAN_window;
 			Visible = false;
 			DragEnabled = true;
 			TooltipMouseOffset = new Vector2d(-10, -25);
 			ClampToScreenOffset = new RectOffset(-600, -600, -400, -400);
+			waypoints = HighLogic.LoadedScene != GameScenes.SPACECENTER;
 
 			SCAN_SkinsLibrary.SetCurrent("SCAN_Unity");
 			SCAN_SkinsLibrary.SetCurrentTooltip();
 
-			InputLockManager.RemoveControlLock(lockID);
+			removeControlLocks();
 		}
 
 		protected override void Start()
@@ -94,9 +96,15 @@ namespace SCANsat.SCAN_UI
 
 		protected override void OnDestroy()
 		{
-			InputLockManager.RemoveControlLock(lockID);
+			removeControlLocks();
 			if (spotMap != null)
 				Destroy(spotMap);
+		}
+
+		internal void removeControlLocks()
+		{
+			InputLockManager.RemoveControlLock(lockID);
+			controlLock = false;
 		}
 
 		//These properties are used by the color selection window to sync color palettes
@@ -138,15 +146,14 @@ namespace SCANsat.SCAN_UI
 			{
 				Vector2 mousePos = Input.mousePosition;
 				mousePos.y = Screen.height - mousePos.y;
-				if (WindowRect.Contains(mousePos) && !spaceCenterLock)
+				if (WindowRect.Contains(mousePos) && !controlLock)
 				{
 					InputLockManager.SetControlLock(ControlTypes.CAMERACONTROLS | ControlTypes.KSC_ALL, lockID);
-					spaceCenterLock = true;
+					controlLock = true;
 				}
-				else if (!WindowRect.Contains(mousePos) && spaceCenterLock)
+				else if (!WindowRect.Contains(mousePos) && controlLock)
 				{
-					InputLockManager.RemoveControlLock(lockID);
-					spaceCenterLock = false;
+					removeControlLocks();
 				}
 			}
 
@@ -155,15 +162,14 @@ namespace SCANsat.SCAN_UI
 			{
 				Vector2 mousePos = Input.mousePosition;
 				mousePos.y = Screen.height - mousePos.y;
-				if (WindowRect.Contains(mousePos) && !trackingStationLock)
+				if (WindowRect.Contains(mousePos) && !controlLock)
 				{
 					InputLockManager.SetControlLock(ControlTypes.TRACKINGSTATION_UI, lockID);
-					trackingStationLock = true;
+					controlLock = true;
 				}
-				else if (!WindowRect.Contains(mousePos) && trackingStationLock)
+				else if (!WindowRect.Contains(mousePos) && controlLock)
 				{
-					InputLockManager.RemoveControlLock(lockID);
-					trackingStationLock = false;
+					removeControlLocks();
 				}
 			}
 		}
@@ -226,6 +232,8 @@ namespace SCANsat.SCAN_UI
 				lastResource = SCANcontroller.controller.map_ResourceOverlay;
 				bigmap.resetMap();
 			}
+
+			sessionRect = WindowRect;
 		}
 
 		//Draw version label in upper left corner
@@ -241,9 +249,7 @@ namespace SCANsat.SCAN_UI
 			Rect r = new Rect(WindowRect.width - 20, 1, 18, 18);
 			if (GUI.Button(r, SCANcontroller.controller.closeBox, SCANskins.SCAN_closeButton))
 			{
-				InputLockManager.RemoveControlLock(lockID);
-				spaceCenterLock = false;
-				trackingStationLock = false;
+				removeControlLocks();
 				Visible = false;
 				SCANcontroller.controller.kscMapVisible = Visible;
 			}
@@ -331,7 +337,7 @@ namespace SCANsat.SCAN_UI
 				SCANcontroller.controller.map_grid = !SCANcontroller.controller.map_grid;
 			}
 
-			if (HighLogic.LoadedScene != GameScenes.SPACECENTER)
+			if (waypoints)
 			{
 				fillS();
 
@@ -433,6 +439,7 @@ namespace SCANsat.SCAN_UI
 			if (GUI.Button(s, iconWithTT(SCANskins.SCAN_SettingsIcon, "Settings Menu"), SCANskins.SCAN_windowButton))
 			{
 				SCANcontroller.controller.settingsWindow.Visible = !SCANcontroller.controller.settingsWindow.Visible;
+				SCANcontroller.controller.settingsWindow.removeControlLocks();
 			}
 
 			s.x += 40;
@@ -440,6 +447,7 @@ namespace SCANsat.SCAN_UI
 			if (GUI.Button(s, iconWithTT(SCANskins.SCAN_ColorIcon, "Color Control"), SCANskins.SCAN_windowButton))
 			{
 				SCANcontroller.controller.colorManager.Visible = !SCANcontroller.controller.colorManager.Visible;
+				SCANcontroller.controller.colorManager.removeControlLocks();
 			}
 
 			s.x = WindowRect.width - 66;
@@ -560,7 +568,7 @@ namespace SCANsat.SCAN_UI
 		private void mapLabels (int id)
 		{
 			bool showWaypoints = false;
-			if (HighLogic.LoadedScene == GameScenes.TRACKSTATION)
+			if (waypoints)
 				showWaypoints = SCANcontroller.controller.map_waypoints;
 
 			SCANuiUtil.drawMapLabels(TextureRect, null, bigmap, data, bigmap.Body, SCANcontroller.controller.map_markers, showWaypoints);
@@ -580,16 +588,6 @@ namespace SCANsat.SCAN_UI
 					{
 						bigmap.setProjection((MapProjection)i);
 						bigmap.resetMap();
-						//if (spotMap != null)
-						//{
-						//	if ((MapProjection)i == MapProjection.Polar)
-						//		spotMap.SpotMap.setProjection(MapProjection.Polar);
-						//	else
-						//		spotMap.SpotMap.setProjection(MapProjection.Rectangular);
-
-						//	spotMap.SpotMap.centerAround(spotMap.SpotMap.CenteredLong, spotMap.SpotMap.CenteredLat);
-						//	spotMap.SpotMap.resetMap();
-						//}
 						SCANcontroller.controller.projection = i;
 						drawGrid = true;
 						drop_down_open = false;
@@ -607,8 +605,6 @@ namespace SCANsat.SCAN_UI
 					if (GUI.Button(r, SCANmapType.mapTypeNames[i], SCANskins.SCAN_dropDownButton))
 					{
 						bigmap.resetMap((mapType)i, true);
-						//if (spotMap != null)
-						//	spotMap.SpotMap.resetMap((mapType)i, false);
 						drop_down_open = false;
 					}
 				}
@@ -627,23 +623,13 @@ namespace SCANsat.SCAN_UI
 						bigmap.Resource = loadedResources[i];
 						bigmap.Resource.CurrentBodyConfig(bigmap.Body.name);
 
-						//if (spotMap != null)
-						//{
-						//	spotMap.SpotMap.Resource = loadedResources[i];
-						//	spotMap.SpotMap.Resource.CurrentBodyConfig(bigmap.Body.name);
-						//}
-
 						SCANcontroller.controller.resourceSelection = bigmap.Resource.Name;
 						if (bigmap.Resource.Source == SCANresource_Source.Kethane)
 							SCANcontroller.controller.resourceOverlayType = 1;
 						else
 							SCANcontroller.controller.resourceOverlayType = 0;
 						if (SCANcontroller.controller.map_ResourceOverlay)
-						{
 							bigmap.resetMap();
-							//if (spotMap != null)
-							//	spotMap.SpotMap.resetMap();
-						}
 
 						drop_down_open = false;
 					}
@@ -669,8 +655,6 @@ namespace SCANsat.SCAN_UI
 							data = dropDownData;
 							b = data.Body;
 							bigmap.setBody(data.Body);
-							//if (spotMap != null)
-							//	spotMap.setBody(data);
 							bigmap.resetMap();
 							drop_down_open = false;
 						}

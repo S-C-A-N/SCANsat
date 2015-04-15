@@ -34,12 +34,12 @@ namespace SCANsat.SCAN_UI
 		/* UI: time warp names and settings */
 		private string[] twnames = { "Off", "Low", "Medium", "High" };
 		private int[] twvals = { 1, 6, 9, 15 };
-		private bool warningBoxOne, warningBoxAll, spaceCenterLock, trackingStationLock;
+		private bool warningBoxOne, warningBoxAll, controlLock;
 		private Rect warningRect;
 		private const string lockID = "settingLockID";
 		private bool oldTooltips, stockToolbar;
 
-		internal static Rect defaultRect = new Rect(Screen.width - (Screen.width / 2) - 180, 100, 360, 300);
+		internal readonly static Rect defaultRect = new Rect(Screen.width - (Screen.width / 2) - 180, 100, 360, 300);
 
 		protected override void Awake()
 		{
@@ -54,12 +54,18 @@ namespace SCANsat.SCAN_UI
 
 			SCAN_SkinsLibrary.SetCurrent("SCAN_Unity");
 
-			InputLockManager.RemoveControlLock(lockID);
+			removeControlLocks();
 		}
 
 		protected override void OnDestroy()
 		{
+			removeControlLocks();
+		}
+
+		internal void removeControlLocks()
+		{
 			InputLockManager.RemoveControlLock(lockID);
+			controlLock = false;
 		}
 
 		protected override void Start()
@@ -75,15 +81,14 @@ namespace SCANsat.SCAN_UI
 			{
 				Vector2 mousePos = Input.mousePosition;
 				mousePos.y = Screen.height - mousePos.y;
-				if (WindowRect.Contains(mousePos) && !spaceCenterLock)
+				if (WindowRect.Contains(mousePos) && !controlLock)
 				{
 					InputLockManager.SetControlLock(ControlTypes.CAMERACONTROLS | ControlTypes.KSC_ALL, lockID);
-					spaceCenterLock = true;
+					controlLock = true;
 				}
-				else if (!WindowRect.Contains(mousePos) && spaceCenterLock)
+				else if (!WindowRect.Contains(mousePos) && controlLock)
 				{
-					InputLockManager.RemoveControlLock(lockID);
-					spaceCenterLock = false;
+					removeControlLocks();
 				}
 			}
 
@@ -92,15 +97,15 @@ namespace SCANsat.SCAN_UI
 			{
 				Vector2 mousePos = Input.mousePosition;
 				mousePos.y = Screen.height - mousePos.y;
-				if (WindowRect.Contains(mousePos) && !trackingStationLock)
+				if (WindowRect.Contains(mousePos) && !controlLock)
 				{
 					InputLockManager.SetControlLock(ControlTypes.TRACKINGSTATION_UI, lockID);
-					trackingStationLock = true;
+					controlLock = true;
 				}
-				else if (!WindowRect.Contains(mousePos) && trackingStationLock)
+				else if (!WindowRect.Contains(mousePos) && controlLock)
 				{
 					InputLockManager.RemoveControlLock(lockID);
-					trackingStationLock = false;
+					controlLock = false;
 				}
 			}
 		}
@@ -176,9 +181,7 @@ namespace SCANsat.SCAN_UI
 			Rect r = new Rect(WindowRect.width - 20, 1, 18, 18);
 			if (GUI.Button(r, SCANcontroller.controller.closeBox, SCANskins.SCAN_closeButton))
 			{
-				InputLockManager.RemoveControlLock(lockID);
-				trackingStationLock = false;
-				spaceCenterLock = false;
+				removeControlLocks();
 				Visible = false;
 			}
 		}

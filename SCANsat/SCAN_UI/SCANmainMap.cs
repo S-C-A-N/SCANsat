@@ -33,12 +33,13 @@ namespace SCANsat.SCAN_UI
 		private bool notMappingToday; //Unused out-of-power bool
 		private Rect mapRect;
 		private static bool showVesselInfo = true;
-		internal static Rect defaultRect = new Rect(10, 55, 380, 230);
+		internal static readonly Rect defaultRect = new Rect(10, 55, 380, 230);
+		private static Rect sessionRect = defaultRect;
 
 		protected override void Awake()
 		{
 			WindowCaption = "S.C.A.N. Planetary Mapping";
-			WindowRect = defaultRect;
+			WindowRect = sessionRect;
 			WindowOptions = new GUILayoutOption[2] { GUILayout.Width(380), GUILayout.Height(230) };
 			WindowStyle = SCANskins.SCAN_window;
 			Visible = false;
@@ -91,6 +92,11 @@ namespace SCANsat.SCAN_UI
 				fillS(-8);
 				vesselInfo(id);				/* Shows info for any SCANsat vessels */
 			stopS();
+		}
+
+		protected override void DrawWindowPost(int id)
+		{
+			sessionRect = WindowRect;
 		}
 
 		//Print the version number
