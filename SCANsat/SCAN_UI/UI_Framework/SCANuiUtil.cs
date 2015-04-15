@@ -190,18 +190,21 @@ namespace SCANsat.SCAN_UI.UI_Framework
 					double range = ContractDefs.Survey.MaximumTriggerRange;
 					foreach (SCANwaypoint p in data.Waypoints)
 					{
-						if (p.Root.ContractState != Contracts.Contract.State.Active)
-							continue;
-						if (p.Param != null)
+						if (!p.Mechjeb)
 						{
-							if (p.Param.State != Contracts.ParameterState.Incomplete)
+							if (p.Root.ContractState != Contracts.Contract.State.Active)
 								continue;
-						}
+							if (p.Param != null)
+							{
+								if (p.Param.State != Contracts.ParameterState.Incomplete)
+									continue;
+							}
 
-						if (WaypointManager.Instance().Distance(lat, lon, p.Way.altitude, p.Latitude, p.Longitude, p.Way.altitude, body) <= range)
-						{
-							info += p.Name + " ";
-							break;
+							if (WaypointManager.Instance().Distance(lat, lon, p.Way.altitude, p.Latitude, p.Longitude, p.Way.altitude, body) <= range)
+							{
+								info += p.Name + " ";
+								break;
+							}
 						}
 					}
 				}
@@ -274,18 +277,21 @@ namespace SCANsat.SCAN_UI.UI_Framework
 					double range = ContractDefs.Survey.MaximumTriggerRange;
 					foreach (SCANwaypoint p in data.Waypoints)
 					{
-						if (p.Root.ContractState != Contracts.Contract.State.Active)
-							continue;
-						if (p.Param != null)
+						if (!p.Mechjeb)
 						{
-							if (p.Param.State != Contracts.ParameterState.Incomplete)
+							if (p.Root.ContractState != Contracts.Contract.State.Active)
 								continue;
-						}
+							if (p.Param != null)
+							{
+								if (p.Param.State != Contracts.ParameterState.Incomplete)
+									continue;
+							}
 
-						if (WaypointManager.Instance().Distance(lat, lon, p.Way.altitude, p.Latitude, p.Longitude, p.Way.altitude, body) <= range)
-						{
-							info += p.Name + " ";
-							break;
+							if (WaypointManager.Instance().Distance(lat, lon, p.Way.altitude, p.Latitude, p.Longitude, p.Way.altitude, body) <= range)
+							{
+								info += p.Name + " ";
+								break;
+							}
 						}
 					}
 				}
@@ -508,12 +514,15 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			{
 				foreach (SCANwaypoint p in data.Waypoints)
 				{
-					if (p.Root.ContractState != Contracts.Contract.State.Active)
-						continue;
-					if (p.Param != null)
+					if (!p.Mechjeb)
 					{
-						if (p.Param.State != Contracts.ParameterState.Incomplete)
+						if (p.Root.ContractState != Contracts.Contract.State.Active)
 							continue;
+						if (p.Param != null)
+						{
+							if (p.Param.State != Contracts.ParameterState.Incomplete)
+								continue;
+						}
 					}
 
 					drawWaypointLabel(maprect, map, p, data);

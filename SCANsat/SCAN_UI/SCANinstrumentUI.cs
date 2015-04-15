@@ -156,25 +156,28 @@ namespace SCANsat.SCAN_UI
 			{
 				foreach (SCANwaypoint p in data.Waypoints)
 				{
-					if (p.Band == FlightBand.NONE)
-						continue;
-
-					if (p.Root.ContractState != Contracts.Contract.State.Active)
-						continue;
-
-					if (p.Param != null)
+					if (!p.Mechjeb)
 					{
-						if (p.Param.State != Contracts.ParameterState.Incomplete)
+						if (p.Band == FlightBand.NONE)
 							continue;
-					}
 
-					double range = waypointRange(p);
+						if (p.Root.ContractState != Contracts.Contract.State.Active)
+							continue;
 
-					if (WaypointManager.Instance().Distance(vlat, vlon, v.altitude, p.Latitude, p.Longitude, v.altitude, data.Body) <= range)
-					{
-						GUILayout.Label(string.Format("Waypoint: {0}", p.Name), SCANskins.SCAN_insColorLabel);
-						fillS(-10);
-						break;
+						if (p.Param != null)
+						{
+							if (p.Param.State != Contracts.ParameterState.Incomplete)
+								continue;
+						}
+
+						double range = waypointRange(p);
+
+						if (WaypointManager.Instance().Distance(vlat, vlon, v.altitude, p.Latitude, p.Longitude, v.altitude, data.Body) <= range)
+						{
+							GUILayout.Label(string.Format("Waypoint: {0}", p.Name), SCANskins.SCAN_insColorLabel);
+							fillS(-10);
+							break;
+						}
 					}
 				}
 			}

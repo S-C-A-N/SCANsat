@@ -106,7 +106,7 @@ namespace SCANsat.SCAN_UI
 		private Vessel targetVessel;
 		private double redrawDeviation;
 		private SCANanomaly[] localAnomalies;
-		private SCANwaypoint[] localWaypoints;
+		private List<SCANwaypoint> localWaypoints;
 		private Material iconMaterial;
 		private SCANsat sat;
 		internal RPMPersistence persist;

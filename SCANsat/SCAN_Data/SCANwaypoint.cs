@@ -19,6 +19,7 @@ namespace SCANsat.SCAN_Data
 				name = way.name;
 				longitude = SCANUtil.fixLonShift(way.longitude);
 				latitude = SCANUtil.fixLatShift(way.latitude);
+				mechjeb = false;
 			}
 		}
 
@@ -33,6 +34,7 @@ namespace SCANsat.SCAN_Data
 				name = way.name;
 				longitude = SCANUtil.fixLonShift(way.longitude);
 				latitude = SCANUtil.fixLatShift(way.latitude);
+				mechjeb = false;
 			}
 		}
 
@@ -41,10 +43,23 @@ namespace SCANsat.SCAN_Data
 			way = p;
 			band = FlightBand.NONE;
 			root = p.contractReference;
-			p = null;
+			param = null;
 			name = way.name;
 			longitude = SCANUtil.fixLonShift(way.longitude);
 			latitude = SCANUtil.fixLatShift(way.latitude);
+			mechjeb = false;
+		}
+
+		public SCANwaypoint(double lat, double lon, string n)
+		{
+			way = null;
+			band = FlightBand.NONE;
+			root = null;
+			param = null;
+			name = n;
+			longitude = SCANUtil.fixLonShift(lon);
+			latitude = SCANUtil.fixLatShift(lat);
+			mechjeb = true;
 		}
 
 		private Waypoint way;
@@ -54,6 +69,7 @@ namespace SCANsat.SCAN_Data
 		private FlightBand band;
 		private Contract root;
 		private ContractParameter param;
+		private bool mechjeb;
 
 		public Waypoint Way
 		{
@@ -88,6 +104,11 @@ namespace SCANsat.SCAN_Data
 		public FlightBand Band
 		{
 			get { return band; }
+		}
+
+		public bool Mechjeb
+		{
+			get { return mechjeb; }
 		}
 
 		private Waypoint reflectWaypoint(SurveyWaypointParameter p)

@@ -130,17 +130,25 @@ namespace SCANsat.SCAN_Data
 
 		#region Waypoints
 
-		private SCANwaypoint[] waypoints;
+		private List<SCANwaypoint> waypoints;
 
-		public SCANwaypoint[] Waypoints
+		public void addToWaypoints(SCANwaypoint w)
+		{
+			if (waypoints == null)
+				waypoints = new List<SCANwaypoint>(1) { w };
+			else
+				waypoints.Add(w);
+		}
+
+		public List<SCANwaypoint> Waypoints
 		{
 			get
 			{
 				if (HighLogic.CurrentGame.Mode != Game.Modes.CAREER)
-					return new SCANwaypoint[0];
+					return new List<SCANwaypoint>();
 
 				if (!SCANcontroller.controller.ContractsLoaded)
-					return new SCANwaypoint[0];
+					return new List<SCANwaypoint>();
 				else if (waypoints == null)
 				{
 					List<SCANwaypoint> bodyWaypoints = new List<SCANwaypoint>();
@@ -217,7 +225,7 @@ namespace SCANsat.SCAN_Data
 							}
 						}
 					}
-					waypoints = bodyWaypoints.ToArray();
+					waypoints = bodyWaypoints;
 				}
 
 				return waypoints;
