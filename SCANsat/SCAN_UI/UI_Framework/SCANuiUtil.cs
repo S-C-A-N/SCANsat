@@ -582,7 +582,10 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			r.x -= 12;
 			r.y -= 24;
 
-			drawMapIcon(r, SCANskins.SCAN_WaypointIcon, true);
+			if (!p.Mechjeb)
+				drawMapIcon(r, SCANskins.SCAN_WaypointIcon, true);
+			else
+				drawMapIcon(r, SCANskins.SCAN_FlagIcon, true);
 		}
 
 		internal static void drawMapIcon(Rect pos, Texture2D tex, bool outline = false, Color c = new Color(), bool flash = false, Rect texPos = new Rect(), bool texCoords = false)
