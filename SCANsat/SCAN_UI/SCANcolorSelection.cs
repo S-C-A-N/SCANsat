@@ -29,7 +29,7 @@ namespace SCANsat.SCAN_UI
 	{
 		private bool dropDown, paletteBox, resourceBox, saveWarning;
 		private bool oldReverseState, oldDiscreteState;
-		private bool spaceCenterLock, trackingStationLock, clampState, oldClampState;
+		private bool controlLock, clampState, oldClampState;
 		private Rect ddRect;
 		private int paletteIndex;
 		private SCANmapLegend currentLegend, previewLegend;
@@ -55,7 +55,8 @@ namespace SCANsat.SCAN_UI
 
 		private Vector2 scrollR;
 		private const string lockID = "colorLockID";
-		internal static Rect defaultRect = new Rect(100, 400, 780, 360);
+		internal readonly static Rect defaultRect = new Rect(100, 400, 780, 360);
+		private static Rect sessionRect = defaultRect;
 
 		//SCAN_MBW objects to sync the color selection fields to the currently displayed map
 		private SCANkscMap kscMapObj;
@@ -67,7 +68,7 @@ namespace SCANsat.SCAN_UI
 		protected override void Awake()
 		{
 			WindowCaption = "S.C.A.N. Color Management";
-			WindowRect = defaultRect;
+			WindowRect = sessionRect;
 			WindowStyle = SCANskins.SCAN_window;
 			WindowOptions = new GUILayoutOption[2] { GUILayout.Width(780), GUILayout.Height(360) };
 			Visible = false;
@@ -76,7 +77,7 @@ namespace SCANsat.SCAN_UI
 
 			SCAN_SkinsLibrary.SetCurrent("SCAN_Unity");
 
-			InputLockManager.RemoveControlLock(lockID);
+			removeControlLocks();
 		}
 
 		protected override void Start()
@@ -151,7 +152,13 @@ namespace SCANsat.SCAN_UI
 
 		protected override void OnDestroy()
 		{
+			removeControlLocks();
+		}
+
+		internal void removeControlLocks()
+		{
 			InputLockManager.RemoveControlLock(lockID);
+			controlLock = false;
 		}
 
 		protected override void DrawWindowPre(int id)
@@ -228,15 +235,14 @@ namespace SCANsat.SCAN_UI
 				}
 				Vector2 mousePos = Input.mousePosition;
 				mousePos.y = Screen.height - mousePos.y;
-				if (WindowRect.Contains(mousePos) && !spaceCenterLock)
+				if (WindowRect.Contains(mousePos) && !controlLock)
 				{
 					InputLockManager.SetControlLock(ControlTypes.CAMERACONTROLS | ControlTypes.KSC_ALL, lockID);
-					spaceCenterLock = true;
+					controlLock = true;
 				}
-				else if (!WindowRect.Contains(mousePos) && spaceCenterLock)
+				else if (!WindowRect.Contains(mousePos) && controlLock)
 				{
-					InputLockManager.RemoveControlLock(lockID);
-					spaceCenterLock = false;
+					removeControlLocks();
 				}
 			}
 
@@ -275,15 +281,14 @@ namespace SCANsat.SCAN_UI
 				}
 				Vector2 mousePos = Input.mousePosition;
 				mousePos.y = Screen.height - mousePos.y;
-				if (WindowRect.Contains(mousePos) && !trackingStationLock)
+				if (WindowRect.Contains(mousePos) && !controlLock)
 				{
 					InputLockManager.SetControlLock(ControlTypes.TRACKINGSTATION_UI, lockID);
-					trackingStationLock = true;
+					controlLock = true;
 				}
-				else if (!WindowRect.Contains(mousePos) && trackingStationLock)
+				else if (!WindowRect.Contains(mousePos) && controlLock)
 				{
-					InputLockManager.RemoveControlLock(lockID);
-					trackingStationLock = false;
+					removeControlLocks();
 				}
 			}
 
@@ -340,8 +345,9 @@ namespace SCANsat.SCAN_UI
 						fillS(40);
 						slopeColorPickerHigh.drawColorSelector(WindowRect);
 					stopE();
-					fillS(40);
+					fillS(100);
 					growE();
+						fillS(140);
 						slopeOptions(id);
 						slopeConfirm(id);
 					stopE();
@@ -419,8 +425,10 @@ namespace SCANsat.SCAN_UI
 			}
 			else if (windowMode == 1)
 			{
-				//slopeColorPicker.colorStateChanged();
-				//slopeColorPicker.brightnessChanged();
+				slopeColorPickerLow.colorStateChanged();
+				slopeColorPickerLow.brightnessChanged();
+				slopeColorPickerHigh.colorStateChanged();
+				slopeColorPickerHigh.brightnessChanged();
 			}
 			else if (windowMode == 2)
 			{
@@ -485,6 +493,8 @@ namespace SCANsat.SCAN_UI
 				resourceColorPicker.colorStateChanged();
 				resourceColorPicker.brightnessChanged();
 			}
+
+			sessionRect = WindowRect;
 		}
 
 		//Draw the version label in the upper left corner
@@ -500,9 +510,7 @@ namespace SCANsat.SCAN_UI
 			Rect r = new Rect(WindowRect.width - 20, 1, 18, 18);
 			if (GUI.Button(r, SCANcontroller.controller.closeBox, SCANskins.SCAN_closeButton))
 			{
-				InputLockManager.RemoveControlLock(lockID);
-				spaceCenterLock = false;
-				trackingStationLock = false;
+				removeControlLocks();
 				Visible = false;
 			}
 		}
@@ -903,16 +911,9 @@ namespace SCANsat.SCAN_UI
 							bigMap.resetMap();
 					}
 				}
-			}
-			else
-			{
-				GUILayout.Label("Apply Values", SCANskins.SCAN_button, GUILayout.Width(110));
-				fillS(8);
-				GUILayout.Label("Default Values", SCANskins.SCAN_button, GUILayout.Width(110));
-			}
-			fillS(8);
-			if (!dropDown)
-			{
+
+				fillS(80);
+
 				if (GUILayout.Button("Save Values To Config", GUILayout.Width(180)))
 				{
 					dropDown = true;
@@ -920,7 +921,13 @@ namespace SCANsat.SCAN_UI
 				}
 			}
 			else
+			{
+				GUILayout.Label("Apply Values", SCANskins.SCAN_button, GUILayout.Width(110));
+				fillS(8);
+				GUILayout.Label("Default Values", SCANskins.SCAN_button, GUILayout.Width(110));
+				fillS(80);
 				GUILayout.Label("Save Values To Config", SCANskins.SCAN_button, GUILayout.Width(180));
+			}
 		}
 
 		private void resourceConfirm(int id)
