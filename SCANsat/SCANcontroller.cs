@@ -145,12 +145,12 @@ namespace SCANsat
 		private bool kethaneRebuild, kethaneReset, kethaneBusy = false;
 
 		/* UI window objects */
-		internal SCAN_MBW mainMap;
-		internal SCAN_MBW settingsWindow;
-		internal SCAN_MBW instrumentsWindow;
+		internal SCANmainMap mainMap;
+		internal SCANsettingsUI settingsWindow;
+		internal SCANinstrumentUI instrumentsWindow;
 		internal SCANBigMap BigMap;
 		internal SCANkscMap kscMap;
-		internal SCAN_MBW colorManager;
+		internal SCANcolorSelection colorManager;
 
 		/* App launcher object */
 		internal SCANappLauncher appLauncher;
