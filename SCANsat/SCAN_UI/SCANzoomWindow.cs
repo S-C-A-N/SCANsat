@@ -121,6 +121,14 @@ namespace SCANsat.SCAN_UI
 			spotmap.resetMap(bigmap.MType, false);
 		}
 
+		private void resetMap()
+		{
+			SCANcontroller.controller.MechJebSelecting = false;
+			SCANcontroller.controller.MechJebSelectingActive = false;
+			spotmap.centerAround(spotmap.CenteredLong, spotmap.CenteredLat);
+			spotmap.resetMap();
+		}
+
 		public SCANmap SpotMap
 		{
 			get { return spotmap; }
@@ -286,13 +294,13 @@ namespace SCANsat.SCAN_UI
 				spotmap.MapScale = spotmap.MapScale / 1.25f;
 				if (spotmap.MapScale < 2)
 					spotmap.MapScale = 2;
-				spotmap.centerAround(spotmap.CenteredLong, spotmap.CenteredLat);
-				spotmap.resetMap();
+				resetMap();
 			}
 
 			if (GUILayout.Button(textWithTT(spotmap.MapScale.ToString("N1") + " X", "Sync To Big Map"), SCANskins.SCAN_buttonBorderless, GUILayout.Width(50), GUILayout.Height(24)))
 			{
 				SCANcontroller.controller.MechJebSelecting = false;
+				SCANcontroller.controller.MechJebSelectingActive = false;
 
 				if (bigmap.Projection == MapProjection.Polar)
 					spotmap.setProjection(MapProjection.Polar);
@@ -324,8 +332,7 @@ namespace SCANsat.SCAN_UI
 			if (GUILayout.Button(iconWithTT(SCANskins.SCAN_ZoomInIcon, "Zoom In"), SCANskins.SCAN_buttonBorderless, GUILayout.Width(26), GUILayout.Height(26)))
 			{
 				spotmap.MapScale = spotmap.MapScale * 1.25f;
-				spotmap.centerAround(spotmap.CenteredLong, spotmap.CenteredLat);
-				spotmap.resetMap();
+				resetMap();
 			}
 
 			fillS();
@@ -454,7 +461,7 @@ namespace SCANsat.SCAN_UI
 				if (Event.current.type == EventType.MouseUp)
 				{
 					//Generate waypoint for MechJeb target
-					if (SCANcontroller.controller.MechJebSelecting && Event.current.button == 0)
+					if (SCANcontroller.controller.MechJebSelecting && SCANcontroller.controller.MechJebSelectingActive && Event.current.button == 0)
 					{
 						SCANwaypoint w = new SCANwaypoint(mlat, mlon, "MechJeb Landing Target");
 						data.addToWaypoints();
@@ -466,8 +473,7 @@ namespace SCANsat.SCAN_UI
 					{
 						if (in_map)
 						{
-							spotmap.centerAround(mlon, mlat);
-							spotmap.resetMap();
+							resetMap();
 						}
 					}
 					//Right click zoom in
@@ -488,8 +494,7 @@ namespace SCANsat.SCAN_UI
 							spotmap.MapScale = spotmap.MapScale / 1.25f;
 							if (spotmap.MapScale < 2)
 								spotmap.MapScale = 2;
-							spotmap.centerAround(mlon, mlat);
-							spotmap.resetMap();
+							resetMap();
 						}
 					}
 					Event.current.Use();
