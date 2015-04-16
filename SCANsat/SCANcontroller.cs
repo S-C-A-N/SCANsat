@@ -146,6 +146,7 @@ namespace SCANsat
 
 		private bool mechjebLoaded, mechjebSelecting, mechjebSelectingActive;
 		private Vector2d mechjebTargetCoords;
+		private CelestialBody mechjebTargetBody;
 		private SCANwaypoint mechjebTarget;
 
 		/* UI window objects */
@@ -493,13 +494,37 @@ namespace SCANsat
 		public Vector2d MechJebTargetCoords
 		{
 			get { return mechjebTargetCoords; }
-			internal set { mechjebTargetCoords = value; }
+			internal set
+			{
+				if (mechjebLoaded)
+					mechjebTargetCoords = value;
+				else
+					mechjebTargetCoords = new Vector2d();
+			}
+		}
+
+		public CelestialBody MechJebTargetBody
+		{
+			get { return mechjebTargetBody; }
+			internal set
+			{
+				if (mechjebLoaded)
+					mechjebTargetBody = value;
+				else
+					mechjebTargetBody = null;
+			}
 		}
 
 		public SCANwaypoint MechJebTarget
 		{
 			get { return mechjebTarget; }
-			set { mechjebTarget = value; }
+			set
+			{
+				if (mechjebLoaded)
+					mechjebTarget = value;
+				else
+					mechjebTarget = null;
+			}
 		}
 
 		#endregion

@@ -275,6 +275,7 @@ namespace SCANsat.SCAN_UI
 				{
 					data.removeTargetWaypoint();
 					SCANcontroller.controller.MechJebSelecting = !SCANcontroller.controller.MechJebSelecting;
+					SCANcontroller.controller.MechJebTargetBody = data.Body;
 				}
 			}
 
@@ -291,6 +292,8 @@ namespace SCANsat.SCAN_UI
 
 			if (GUILayout.Button(textWithTT(spotmap.MapScale.ToString("N1") + " X", "Sync To Big Map"), SCANskins.SCAN_buttonBorderless, GUILayout.Width(50), GUILayout.Height(24)))
 			{
+				SCANcontroller.controller.MechJebSelecting = false;
+
 				if (bigmap.Projection == MapProjection.Polar)
 					spotmap.setProjection(MapProjection.Polar);
 				else
