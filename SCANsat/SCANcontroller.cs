@@ -144,7 +144,7 @@ namespace SCANsat
 		/* Kethane integration */
 		private bool kethaneRebuild, kethaneReset, kethaneBusy;
 
-		private bool mechjebLoaded, mechjebSelecting;
+		private bool mechjebLoaded, mechjebSelecting, mechjebSelectingActive;
 		private Vector2d mechjebTargetCoords;
 		private SCANwaypoint mechjebTarget;
 
@@ -475,6 +475,18 @@ namespace SCANsat
 					mechjebSelecting = value;
 				else
 					mechjebSelecting = false;
+			}
+		}
+
+		public bool MechJebSelectingActive
+		{
+			get { return mechjebSelectingActive; }
+			internal set
+			{
+				if (mechjebLoaded && mechjebSelecting)
+					mechjebSelectingActive = value;
+				else
+					mechjebSelectingActive = false;
 			}
 		}
 
