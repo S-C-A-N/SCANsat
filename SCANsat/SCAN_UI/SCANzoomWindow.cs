@@ -271,7 +271,7 @@ namespace SCANsat.SCAN_UI
 			if (SCANcontroller.controller.MechJebLoaded)
 			{
 				fillS(30);
-				if (GUILayout.Button(iconWithTT(SCANskins.SCAN_WaypointIcon, "Set MechJeb Target"), SCANskins.SCAN_buttonBorderless, GUILayout.Width(24), GUILayout.Height(24)))
+				if (GUILayout.Button(iconWithTT(SCANskins.SCAN_MechJebIcon, "Set MechJeb Target"), SCANskins.SCAN_buttonBorderless, GUILayout.Width(24), GUILayout.Height(24)))
 				{
 					data.removeTargetWaypoint();
 					SCANcontroller.controller.MechJebSelecting = !SCANcontroller.controller.MechJebSelecting;
