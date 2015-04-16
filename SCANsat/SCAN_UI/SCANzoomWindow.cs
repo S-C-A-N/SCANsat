@@ -429,6 +429,8 @@ namespace SCANsat.SCAN_UI
 				if (mlon >= -180 && mlon <= 180 && mlat >= -90 && mlat <= 90)
 				{
 					in_map = true;
+					if (SCANcontroller.controller.MechJebSelecting)
+						SCANcontroller.controller.MechJebSelectingActive = true;
 				}
 
 				if (mlat > 90)
