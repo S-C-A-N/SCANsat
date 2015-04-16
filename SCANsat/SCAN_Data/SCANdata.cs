@@ -156,6 +156,8 @@ namespace SCANsat.SCAN_Data
 
 			SCANwaypoint w = waypoints.FirstOrDefault(a => a.Mechjeb);
 
+			SCANcontroller.controller.MechJebTarget = null;
+
 			if (w != null)
 				waypoints.Remove(w);
 		}
