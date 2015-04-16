@@ -191,6 +191,7 @@ namespace SCANsat
 		internal static Func<double, int> icLAT = (lat) => ((int)(lat + 180 + 90)) % 180;
 		internal static Func<int, int, bool> badLonLat = (lon, lat) => (lon < 0 || lat < 0 || lon >= 360 || lat >= 180);
 		internal static Func<double, double, bool> badDLonLat = (lon, lat) => (lon < 0 || lat <0 || lon >= 360 || lat >= 180);
+		public static Func<double, double, bool> ApproxEq = (a, b) => Math.Abs(a - b) < 0.01;
 
 		internal static double fixLatShift(double lat)
 		{
