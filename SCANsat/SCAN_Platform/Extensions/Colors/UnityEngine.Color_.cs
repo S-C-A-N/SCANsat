@@ -1,6 +1,7 @@
 using System;
 using System.Reflection;
 using System.Collections.Generic;
+using SCANsat;
 
 using SG = System.Globalization;
 using Log = SCANsat.SCAN_Platform.Logging.ConsoleLogger;
@@ -46,7 +47,7 @@ namespace UnityEngine
 			float sum = maxv + minv;
 			
 
-			if (approxEq(minv,maxv))	return 0.0f;
+			if (SCANUtil.ApproxEq(minv,maxv))	return 0.0f;
 			if (sum > 1f)				sum = 2f - sum;
 
 			return (maxv - minv) / sum;
