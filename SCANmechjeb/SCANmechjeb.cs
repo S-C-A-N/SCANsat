@@ -93,7 +93,7 @@ namespace SCANmechjeb
 				selectingTarget = false;
 				way = new SCANwaypoint(SCANcontroller.controller.MechJebTargetCoords.y, SCANcontroller.controller.MechJebTargetCoords.x, siteName);
 				coords = SCANcontroller.controller.MechJebTargetCoords;
-				target.SetPositionTarget(v.mainBody, way.Latitude, way.Longitude);
+				target.SetPositionTarget(SCANcontroller.controller.MechJebTargetBody, way.Latitude, way.Longitude);
 			}
 
 			selectingTarget = false;
@@ -145,6 +145,8 @@ namespace SCANmechjeb
 
 				if (!MapView.MapIsEnabled)
 					return;
+				if (MapView.fetch.scaledVessel.GetOrbit().referenceBody != SCANcontroller.controller.MechJebTargetBody)
+					return;
 				if (!v.isActiveVessel || v.GetMasterMechJeb() != core)
 					return;
 
@@ -153,7 +155,7 @@ namespace SCANmechjeb
 				if (!(target.Target is PositionTarget))
 					return;
 
-				GLUtils.DrawMapViewGroundMarker(v.mainBody, coords.y, coords.x, Color.red);
+				GLUtils.DrawMapViewGroundMarker(SCANcontroller.controller.MechJebTargetBody, coords.y, coords.x, Color.red);
 			}
 		}
 	}
