@@ -139,7 +139,7 @@ namespace SCANsat.SCAN_Data
 
 			if (waypoints == null)
 			{
-				waypoints = new List<SCANwaypoint>(1) { SCANcontroller.controller.MechJebTarget };
+				waypoints = new List<SCANwaypoint>() { SCANcontroller.controller.MechJebTarget };
 				return;
 			}
 
