@@ -164,44 +164,31 @@ namespace SCANmechjeb
 		//Draw the mapview MechJeb target arrows
 		private void drawTarget()
 		{
-			if (selectingInMap)
+			if (!selectingInMap)
+				return;
+
+			target.pickingPositionTarget = false;
+
+			if (!MapView.MapIsEnabled)
+				return;
+			if (MapView.fetch.scaledVessel.GetOrbit().referenceBody != SCANcontroller.controller.MechJebTargetBody)
 			{
-				target.pickingPositionTarget = false;
-
-				if (!MapView.MapIsEnabled)
-				{
-					log.Debug("[Target Drawing] Not in map view");
-					return;
-				}
-				if (MapView.fetch.scaledVessel.GetOrbit().referenceBody != SCANcontroller.controller.MechJebTargetBody)
-				{
-					log.Debug("[Target Drawing] Mapview not centered on correct Celestial Body");
-					return;
-				}
-				if (!v.isActiveVessel || v.GetMasterMechJeb() != core)
-				{
-					log.Debug("[Target Drawing] Vessel or MechJeb Core not activated");
-					return;
-				}
-
-				if (target.Target == null)
-				{
-					log.Debug("[Target Drawing] Target null");
-					return;
-				}
-				if (!(target.Target is PositionTarget))
-				{
-					log.Debug("[Target Drawing] Target is not Position Target Type");
-					return;
-				}
-
-				log.Debug("[Target Drawing] Drawing MechJeb Target");
-				log.Debug("Target Body: ---> Body: {0}", SCANcontroller.controller.MechJebTargetBody.name);
-				log.Debug("Coordinates: ---> Latitude: {0:N3}", coords.y);
-				log.Debug("Coordinates: ---> Longitude: {0:N3}", coords.x);
-
-				GLUtils.DrawMapViewGroundMarker(SCANcontroller.controller.MechJebTargetBody, coords.y, coords.x, new Color(1.0f, 0.56f, 0.0f));
+				log.Debug("[Target Drawing] Mapview not centered on correct Celestial Body");
+				return;
 			}
+			if (!v.isActiveVessel || v.GetMasterMechJeb() != core)
+				return;
+			if (target.Target == null)
+				return;
+			if (!(target.Target is PositionTarget))
+				return;
+
+			log.Debug("[Target Drawing] Drawing MechJeb Target");
+			log.Debug("Target Body: ---> Body: {0}", SCANcontroller.controller.MechJebTargetBody.name);
+			log.Debug("Coordinates: ---> Latitude: {0:N3}", coords.y);
+			log.Debug("Coordinates: ---> Longitude: {0:N3}", coords.x);
+
+			GLUtils.DrawMapViewGroundMarker(SCANcontroller.controller.MechJebTargetBody, coords.y, coords.x, new Color(1.0f, 0.56f, 0.0f));
 		}
 	}
 }
