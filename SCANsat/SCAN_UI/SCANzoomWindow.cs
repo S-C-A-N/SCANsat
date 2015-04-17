@@ -278,12 +278,12 @@ namespace SCANsat.SCAN_UI
 
 			if (SCANcontroller.controller.MechJebLoaded)
 			{
-				fillS(30);
+				fillS(50);
 				if (GUILayout.Button(iconWithTT(SCANskins.SCAN_MechJebIcon, "Set MechJeb Target"), SCANskins.SCAN_buttonBorderless, GUILayout.Width(24), GUILayout.Height(24)))
 				{
-					data.removeTargetWaypoint();
 					SCANcontroller.controller.MechJebSelecting = !SCANcontroller.controller.MechJebSelecting;
 					SCANcontroller.controller.MechJebTargetBody = data.Body;
+					data.removeTargetWaypoint();
 				}
 			}
 
@@ -440,8 +440,15 @@ namespace SCANsat.SCAN_UI
 				{
 					in_map = true;
 					if (SCANcontroller.controller.MechJebSelecting)
+					{
 						SCANcontroller.controller.MechJebSelectingActive = true;
+						mjTarget.x = mlon;
+						mjTarget.y = mlat;
+						SCANcontroller.controller.MechJebTargetCoords = mjTarget;
+					}
 				}
+				else if (SCANcontroller.controller.MechJebSelecting)
+					SCANcontroller.controller.MechJebSelectingActive = false;
 
 				if (mlat > 90)
 				{
@@ -464,15 +471,17 @@ namespace SCANsat.SCAN_UI
 					if (SCANcontroller.controller.MechJebSelecting && SCANcontroller.controller.MechJebSelectingActive && Event.current.button == 0)
 					{
 						SCANwaypoint w = new SCANwaypoint(mlat, mlon, "MechJeb Landing Target");
-						data.addToWaypoints();
 						SCANcontroller.controller.MechJebTarget = w;
+						data.addToWaypoints();
 						SCANcontroller.controller.MechJebSelecting = false;
+						SCANcontroller.controller.MechJebSelectingActive = false;
 					}
 					//Middle click re-center
-					if (Event.current.button == 2 || (Event.current.button == 1 && GameSettings.MODIFIER_KEY.GetKey()))
+					else if (Event.current.button == 2 || (Event.current.button == 1 && GameSettings.MODIFIER_KEY.GetKey()))
 					{
 						if (in_map)
 						{
+							spotmap.centerAround(mlon, mlat);
 							resetMap();
 						}
 					}
@@ -518,9 +527,6 @@ namespace SCANsat.SCAN_UI
 			//Draw the actual mouse over info label below the map
 			if (SCANcontroller.controller.MechJebSelecting)
 			{
-				mjTarget.x = mlon;
-				mjTarget.y = mlat;
-				SCANcontroller.controller.MechJebTargetCoords = mjTarget;
 				SCANuiUtil.readableLabel("MechJeb Landing Guidance Targeting...", false);
 				fillS(-10);
 				SCANuiUtil.mouseOverInfoSimple(mlon, mlat, spotmap, data, spotmap.Body, in_map);
