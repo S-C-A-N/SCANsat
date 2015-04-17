@@ -583,13 +583,13 @@ namespace SCANsat.SCAN_UI.UI_Framework
 
 			if (!p.Mechjeb)
 			{
-				r.y -= 12;
-				drawMapIcon(r, SCANskins.SCAN_MechJebIcon, true);
+				r.y -= 24;
+				drawMapIcon(r, SCANskins.SCAN_WaypointIcon, true);
 			}
 			else
 			{
-				r.y -= 24;
-				drawMapIcon(r, SCANskins.SCAN_FlagIcon, true);
+				r.y -= 12;
+				drawMapIcon(r, SCANskins.SCAN_MechJebIcon, true);
 			}
 		}
 
