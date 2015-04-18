@@ -20,6 +20,7 @@ namespace SCANmechjeb
 		private Vessel v;
 		private MechJebCore core;
 		private MechJebModuleTargetController target;
+		private MechJebModuleLandingGuidance guidanceModule;
 		private SCANwaypoint way;
 		private SCANdata data;
 		private Vector2d coords = new Vector2d();
@@ -62,6 +63,21 @@ namespace SCANmechjeb
 			core = v.GetMasterMechJeb();
 
 			if (core == null)
+			{
+				way = null;
+				return;
+			}
+
+			if (guidanceModule == null)
+				guidanceModule = (MechJebModuleLandingGuidance)core.GetComputerModule("MechJebModuleLandingGuidance");
+
+			if (guidanceModule == null)
+			{
+				way = null;
+				return;
+			}
+
+			if (guidanceModule.unlockChecked)
 			{
 				way = null;
 				return;
