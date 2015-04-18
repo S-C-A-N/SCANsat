@@ -39,12 +39,13 @@ namespace SCANsat.SCAN_UI
 		private float lastUpdate = 0f;
 		private float updateInterval = 0.2f;
 		private double slopeAVG;
-		internal static Rect defaultRect = new Rect(30, 600, 260, 60);
+		internal readonly static Rect defaultRect = new Rect(30, 600, 260, 60);
+		private static Rect sessionRect = defaultRect;
 
 		protected override void Awake()
 		{
 			WindowCaption = "S.C.A.N. Instruments";
-			WindowRect = defaultRect;
+			WindowRect = sessionRect;
 			WindowStyle = SCANskins.SCAN_window;
 			WindowOptions = new GUILayoutOption[2] { GUILayout.Width(260), GUILayout.Height(60) };
 			Visible = false;
@@ -118,6 +119,11 @@ namespace SCANsat.SCAN_UI
 			stopS();
 		}
 
+		protected override void DrawWindowPost(int id)
+		{
+			sessionRect = WindowRect;
+		}
+
 		//Draw the version label in the upper left corner
 		private void versionLabel(int id)
 		{
@@ -150,25 +156,28 @@ namespace SCANsat.SCAN_UI
 			{
 				foreach (SCANwaypoint p in data.Waypoints)
 				{
-					if (p.Band == FlightBand.NONE)
-						continue;
-
-					if (p.Root.ContractState != Contracts.Contract.State.Active)
-						continue;
-
-					if (p.Param != null)
+					if (!p.Mechjeb)
 					{
-						if (p.Param.State != Contracts.ParameterState.Incomplete)
+						if (p.Band == FlightBand.NONE)
 							continue;
-					}
 
-					double range = waypointRange(p);
+						if (p.Root.ContractState != Contracts.Contract.State.Active)
+							continue;
 
-					if (WaypointManager.Instance().Distance(vlat, vlon, v.altitude, p.Latitude, p.Longitude, v.altitude, data.Body) <= range)
-					{
-						GUILayout.Label(string.Format("Waypoint: {0}", p.Name), SCANskins.SCAN_insColorLabel);
-						fillS(-10);
-						break;
+						if (p.Param != null)
+						{
+							if (p.Param.State != Contracts.ParameterState.Incomplete)
+								continue;
+						}
+
+						double range = waypointRange(p);
+
+						if (WaypointManager.Instance().Distance(vlat, vlon, v.altitude, p.Latitude, p.Longitude, v.altitude, data.Body) <= range)
+						{
+							GUILayout.Label(string.Format("Waypoint: {0}", p.Name), SCANskins.SCAN_insColorLabel);
+							fillS(-10);
+							break;
+						}
 					}
 				}
 			}

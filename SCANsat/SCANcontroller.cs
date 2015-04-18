@@ -114,10 +114,14 @@ namespace SCANsat
 		public Color lowBiomeColor = palette.xkcd_CamoGreen;
 		[KSPField(isPersistant = true)]
 		public Color highBiomeColor = palette.xkcd_Marigold;
-		//[KSPField(isPersistant = true)]
-		//public Color lowSlopeColor = palette.xkcd_PukeGreen;
-		//[KSPField(isPersistant = true)]
-		//public Color highSlopeColor = palette.xkcd_Yellow;
+		[KSPField(isPersistant = true)]
+		public Color lowSlopeColorOne = palette.xkcd_PukeGreen;
+		[KSPField(isPersistant = true)]
+		public Color highSlopeColorOne = palette.xkcd_Yellow;
+		[KSPField(isPersistant = true)]
+		public Color lowSlopeColorTwo = palette.xkcd_PukeGreen;
+		[KSPField(isPersistant = true)]
+		public Color highSlopeColorTwo = palette.xkcd_Yellow;
 
 		/* Available resources for overlays; loaded from SCANsat configs; only loaded once */
 		private static Dictionary<string, SCANresourceGlobal> masterResourceNodes = new Dictionary<string,SCANresourceGlobal>();
@@ -138,21 +142,30 @@ namespace SCANsat
 		private Dictionary<string, SCANdata> body_data = new Dictionary<string,SCANdata>();
 
 		/* Kethane integration */
-		private bool kethaneRebuild, kethaneReset, kethaneBusy = false;
+		private bool kethaneRebuild, kethaneReset, kethaneBusy;
+
+		/* MechJeb Landing Target Integration */
+		private bool mechjebLoaded, mechjebSelecting, mechjebSelectingActive;
+		private Vector2d mechjebTargetCoords;
+		private CelestialBody mechjebTargetBody;
+		private SCANwaypoint mechjebTarget;
 
 		/* UI window objects */
-		internal SCAN_MBW mainMap;
-		internal SCAN_MBW settingsWindow;
-		internal SCAN_MBW instrumentsWindow;
+		internal SCANmainMap mainMap;
+		internal SCANsettingsUI settingsWindow;
+		internal SCANinstrumentUI instrumentsWindow;
 		internal SCANBigMap BigMap;
 		internal SCANkscMap kscMap;
-		internal SCAN_MBW colorManager;
+		internal SCANcolorSelection colorManager;
 
 		/* App launcher object */
 		internal SCANappLauncher appLauncher;
 
 		/* Used in case the loading process is interupted somehow */
 		private bool loaded = false;
+
+		/* Used to make sure all contracts are loaded */
+		private bool contractsLoaded = false;
 
 		private bool unDocked, docked = false;
 		private Vessel PartFromVessel, PartToVessel, NewVessel, OldVessel;
@@ -203,7 +216,6 @@ namespace SCANsat
 			{
 				try
 				{
-					SCANUtil.SCANdebugLog("Saving Terrain Nodes");
 					return masterTerrainNodes.Values.ToList();
 				}
 				catch (Exception e)
@@ -272,7 +284,6 @@ namespace SCANsat
 			{
 				try
 				{
-					SCANUtil.SCANdebugLog("Saving Resource Nodes");
 					return masterResourceNodes.Values.ToList();
 				}
 				catch (Exception e)
@@ -442,6 +453,71 @@ namespace SCANsat
 		public int ActualPasses
 		{
 			get { return actualPasses; }
+		}
+
+		public bool ContractsLoaded
+		{
+			get { return contractsLoaded; }
+		}
+
+		public bool MechJebLoaded
+		{
+			get { return mechjebLoaded; }
+			set { mechjebLoaded = value; }
+		}
+
+		public bool MechJebSelecting
+		{
+			get { return mechjebSelecting; }
+			internal set
+			{
+				if (mechjebLoaded)
+					mechjebSelecting = value;
+				else
+					mechjebSelecting = false;
+			}
+		}
+
+		public bool MechJebSelectingActive
+		{
+			get { return mechjebSelectingActive; }
+			internal set
+			{
+				if (mechjebLoaded && mechjebSelecting)
+					mechjebSelectingActive = value;
+				else
+					mechjebSelectingActive = false;
+			}
+		}
+
+		public Vector2d MechJebTargetCoords
+		{
+			get { return mechjebTargetCoords; }
+			internal set
+			{
+				if (mechjebLoaded)
+					mechjebTargetCoords = value;
+				else
+					mechjebTargetCoords = new Vector2d();
+			}
+		}
+
+		public CelestialBody MechJebTargetBody
+		{
+			get { return mechjebTargetBody; }
+			set { mechjebTargetBody = value; }
+		}
+
+		public SCANwaypoint MechJebTarget
+		{
+			get { return mechjebTarget; }
+			set
+			{
+				if (mechjebLoaded)
+					mechjebTarget = value;
+				else
+					mechjebTarget = null;
+			}
 		}
 
 		#endregion
@@ -671,6 +747,7 @@ namespace SCANsat
 			GameEvents.onVesselSOIChanged.Add(SOIChange);
 			GameEvents.onVesselCreate.Add(newVesselCheck);
 			GameEvents.onPartCouple.Add(dockingCheck);
+			GameEvents.Contract.onContractsLoaded.Add(contractsCheck);
 			if (HighLogic.LoadedScene == GameScenes.FLIGHT)
 			{
 				if (!body_data.ContainsKey(FlightGlobals.currentMainBody.name))
@@ -766,6 +843,7 @@ namespace SCANsat
 			GameEvents.onVesselSOIChanged.Remove(SOIChange);
 			GameEvents.onVesselCreate.Remove(newVesselCheck);
 			GameEvents.onPartCouple.Remove(dockingCheck);
+			GameEvents.Contract.onContractsLoaded.Remove(contractsCheck);
 			if (mainMap != null)
 				Destroy(mainMap);
 			if (settingsWindow != null)
@@ -818,6 +896,11 @@ namespace SCANsat
 
 				unDocked = true;
 			}
+		}
+
+		private void contractsCheck()
+		{
+			contractsLoaded = true;
 		}
 
 		private void SOIChange(GameEvents.HostedFromToAction<Vessel, CelestialBody> VC)

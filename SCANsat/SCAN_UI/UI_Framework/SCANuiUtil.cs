@@ -190,18 +190,21 @@ namespace SCANsat.SCAN_UI.UI_Framework
 					double range = ContractDefs.Survey.MaximumTriggerRange;
 					foreach (SCANwaypoint p in data.Waypoints)
 					{
-						if (p.Root.ContractState != Contracts.Contract.State.Active)
-							continue;
-						if (p.Param != null)
+						if (!p.Mechjeb)
 						{
-							if (p.Param.State != Contracts.ParameterState.Incomplete)
+							if (p.Root.ContractState != Contracts.Contract.State.Active)
 								continue;
-						}
+							if (p.Param != null)
+							{
+								if (p.Param.State != Contracts.ParameterState.Incomplete)
+									continue;
+							}
 
-						if (WaypointManager.Instance().Distance(lat, lon, p.Way.altitude, p.Latitude, p.Longitude, p.Way.altitude, body) <= range)
-						{
-							info += p.Name + " ";
-							break;
+							if (WaypointManager.Instance().Distance(lat, lon, p.Way.altitude, p.Latitude, p.Longitude, p.Way.altitude, body) <= range)
+							{
+								info += p.Name + " ";
+								break;
+							}
 						}
 					}
 				}
@@ -274,18 +277,21 @@ namespace SCANsat.SCAN_UI.UI_Framework
 					double range = ContractDefs.Survey.MaximumTriggerRange;
 					foreach (SCANwaypoint p in data.Waypoints)
 					{
-						if (p.Root.ContractState != Contracts.Contract.State.Active)
-							continue;
-						if (p.Param != null)
+						if (!p.Mechjeb)
 						{
-							if (p.Param.State != Contracts.ParameterState.Incomplete)
+							if (p.Root.ContractState != Contracts.Contract.State.Active)
 								continue;
-						}
+							if (p.Param != null)
+							{
+								if (p.Param.State != Contracts.ParameterState.Incomplete)
+									continue;
+							}
 
-						if (WaypointManager.Instance().Distance(lat, lon, p.Way.altitude, p.Latitude, p.Longitude, p.Way.altitude, body) <= range)
-						{
-							info += p.Name + " ";
-							break;
+							if (WaypointManager.Instance().Distance(lat, lon, p.Way.altitude, p.Latitude, p.Longitude, p.Way.altitude, body) <= range)
+							{
+								info += p.Name + " ";
+								break;
+							}
 						}
 					}
 				}
@@ -508,12 +514,15 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			{
 				foreach (SCANwaypoint p in data.Waypoints)
 				{
-					if (p.Root.ContractState != Contracts.Contract.State.Active)
-						continue;
-					if (p.Param != null)
+					if (!p.Mechjeb)
 					{
-						if (p.Param.State != Contracts.ParameterState.Incomplete)
+						if (p.Root.ContractState != Contracts.Contract.State.Active)
 							continue;
+						if (p.Param != null)
+						{
+							if (p.Param.State != Contracts.ParameterState.Incomplete)
+								continue;
+						}
 					}
 
 					drawWaypointLabel(maprect, map, p, data);
@@ -571,16 +580,25 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			Rect r = new Rect(maprect.x + (float)lon, maprect.y + (float)lat, 24, 24);
 
 			r.x -= 12;
-			r.y -= 24;
 
-			drawMapIcon(r, SCANskins.SCAN_WaypointIcon, true);
+			if (!p.Mechjeb)
+			{
+				r.y -= 24;
+				drawMapIcon(r, SCANskins.SCAN_WaypointIcon, true);
+			}
+			else
+			{
+				r.x += 1;
+				r.y -= 13;
+				drawMapIcon(r, SCANskins.SCAN_MechJebIcon, true);
+			}
 		}
 
 		internal static void drawMapIcon(Rect pos, Texture2D tex, bool outline = false, Color c = new Color(), bool flash = false, Rect texPos = new Rect(), bool texCoords = false)
 		{
 			if (texCoords)
 			{
-				var old = GUI.color;
+				Color old = GUI.color;
 				if (outline)
 				{
 					GUI.color = palette.black;
@@ -605,7 +623,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			}
 			else
 			{
-				var old = GUI.color;
+				Color old = GUI.color;
 				if (outline)
 				{
 					GUI.color = palette.black;
@@ -709,6 +727,20 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			drawLabel(sr, min, true, false);
 			sr.x += (r.width + 62);
 			drawLabel(sr, max, true, true);
+		}
+
+		internal static void drawVerticalSliderLabel(Rect r, string min, string max)
+		{
+			Rect sr = new Rect(r.x - 15, r.y - 4, 20, 20);
+			drawLabel(sr, "_", true, false);
+			sr.y += (r.height - 8);
+			drawLabel(sr, "_", true, false);
+			sr.width = 50;
+			sr.x -= 40;
+			sr.y = r.y + 2;
+			drawLabel(sr, max, true, false);
+			sr.y += (r.height - 8);
+			drawLabel(sr, min, true, false);
 		}
 
 		/* FIXME: This uses assumed, shared, static constants with Legend stuff in other SCANsat files */

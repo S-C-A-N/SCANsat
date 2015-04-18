@@ -50,12 +50,19 @@ namespace SCANsat.SCAN_UI.UI_Framework
 					GUILayout.Space(30);
 					GUILayout.Label(SCANskins.SCAN_BigColorWheel);
 					Rect r = GUILayoutUtility.GetLastRect();
-				GUILayout.EndHorizontal();
+					GUILayout.EndHorizontal();
 			GUILayout.EndVertical();
 
-			GUI.Label(new Rect(275, 70, 60, 30), "Value:", SCANskins.SCAN_headlineSmall);
+			Rect s = new Rect(r.x + 170, r.y + 100, 70, 30);
+			GUI.Label(s, "Value: " + valSlider.ToString("N0") + "%", SCANskins.SCAN_whiteReadoutLabel);
 
-			valSlider = GUI.VerticalSlider(new Rect(300, 100, 30, 200), valSlider, 100, 0, SCANskins.SCAN_vertSlider, SCANskins.SCAN_sliderThumb).Mathf_Round(0);
+			s.x += 80;
+			s.y -= 90;
+			s.width = 30;
+			s.height = 200;
+			valSlider = GUI.VerticalSlider(s, valSlider, 100, 0, SCANskins.SCAN_vertSlider, SCANskins.SCAN_sliderThumb).Mathf_Round(0);
+
+			SCANuiUtil.drawVerticalSliderLabel(s, "0%", "100%");
 
 			if (GUI.RepeatButton(r, "", SCANskins.SCAN_colorWheelButton))
 			{

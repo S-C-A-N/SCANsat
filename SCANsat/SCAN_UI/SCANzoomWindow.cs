@@ -20,6 +20,7 @@ using SCANsat;
 using SCANsat.SCAN_UI.UI_Framework;
 using SCANsat.SCAN_Data;
 using SCANsat.SCAN_Map;
+using palette = SCANsat.SCAN_UI.UI_Framework.SCANpalette;
 using UnityEngine;
 
 namespace SCANsat.SCAN_UI
@@ -27,21 +28,26 @@ namespace SCANsat.SCAN_UI
 	class SCANzoomWindow : SCAN_MBW
 	{
 		private SCANmap spotmap;
+		private SCANmap bigmap;
 		private CelestialBody b;
 		private SCANdata data;
 		private Vessel v;
-		private bool showOrbit, showAnomaly, showWaypoints;
+		private bool showOrbit, showAnomaly, showWaypoints, showInfo, controlLock;
 		private Vector2 dragStart;
+		private Vector2d mjTarget = new Vector2d();
 		private float resizeW, resizeH;
-		internal static Rect defaultRect = new Rect(10f, 10f, 340f, 260f);
+		private const string lockID = "SCANzoom_LOCK";
+		internal readonly static Rect defaultRect = new Rect(50f, 50f, 340f, 240f);
+		private static Rect sessionRect = defaultRect;
 
 		protected override void Awake()
 		{
-			WindowRect = defaultRect;
+			WindowRect = sessionRect;
 			WindowSize_Min = new Vector2(310, 180);
 			WindowSize_Max = new Vector2(540, 400);
-			WindowOptions = new GUILayoutOption[2] { GUILayout.Width(340), GUILayout.Height(260) };
+			WindowOptions = new GUILayoutOption[2] { GUILayout.Width(340), GUILayout.Height(240) };
 			WindowStyle = SCANskins.SCAN_window;
+			showInfo = true;
 			Visible = false;
 			DragEnabled = true;
 			ClampEnabled = true;
@@ -50,6 +56,8 @@ namespace SCANsat.SCAN_UI
 
 			SCAN_SkinsLibrary.SetCurrent("SCAN_Unity");
 			SCAN_SkinsLibrary.SetCurrentTooltip();
+
+			removeControlLocks();
 
 			Startup();
 		}
@@ -89,23 +97,47 @@ namespace SCANsat.SCAN_UI
 			spotmap.setBody(b);
 		}
 
-		public void setMapCenter(double lat, double lon, mapType t, MapProjection p)
+		protected override void OnDestroy()
 		{
-			Visible = true;
-			spotmap.MapScale = 10;
-			if (p == MapProjection.Polar)
-				spotmap.setProjection(p);
-			else
-				spotmap.setProjection(MapProjection.Rectangular);
-			spotmap.centerAround(lon, lat);
-			spotmap.resetMap(t, false);
+			removeControlLocks();
 		}
 
-		public void setBody(SCANdata d)
+		internal void removeControlLocks()
 		{
-			data = d;
+			InputLockManager.RemoveControlLock(lockID);
+			controlLock = false;
+		}
+
+		public void setMapCenter(double lat, double lon, SCANmap big)
+		{
+			Visible = true;
+			bigmap = big;
+
+			SCANdata dat = SCANUtil.getData(bigmap.Body);
+			if (dat == null)
+				dat = new SCANdata(bigmap.Body);
+
+			data = dat;
 			b = data.Body;
+
+			spotmap.MapScale = 10;
 			spotmap.setBody(b);
+
+			if (bigmap.Projection == MapProjection.Polar)
+				spotmap.setProjection(MapProjection.Polar);
+			else
+				spotmap.setProjection(MapProjection.Rectangular);
+
+			spotmap.centerAround(lon, lat);
+			spotmap.resetMap(bigmap.MType, false);
+		}
+
+		private void resetMap()
+		{
+			SCANcontroller.controller.MechJebSelecting = false;
+			SCANcontroller.controller.MechJebSelectingActive = false;
+			spotmap.centerAround(spotmap.CenteredLong, spotmap.CenteredLat);
+			spotmap.resetMap();
 		}
 
 		public SCANmap SpotMap
@@ -154,6 +186,40 @@ namespace SCANsat.SCAN_UI
 				if (Event.current.isMouse)
 					Event.current.Use();
 			}
+
+			//Lock space center click through
+			if (HighLogic.LoadedScene == GameScenes.SPACECENTER)
+			{
+				Vector2 mousePos = Input.mousePosition;
+				mousePos.y = Screen.height - mousePos.y;
+				if (WindowRect.Contains(mousePos) && !controlLock)
+				{
+					InputLockManager.SetControlLock(ControlTypes.CAMERACONTROLS | ControlTypes.KSC_ALL, lockID);
+					controlLock = true;
+				}
+				else if (!WindowRect.Contains(mousePos) && controlLock)
+				{
+					InputLockManager.RemoveControlLock(lockID);
+					controlLock = false;
+				}
+			}
+
+			//Lock tracking scene click through
+			if (HighLogic.LoadedScene == GameScenes.TRACKSTATION)
+			{
+				Vector2 mousePos = Input.mousePosition;
+				mousePos.y = Screen.height - mousePos.y;
+				if (WindowRect.Contains(mousePos) && !controlLock)
+				{
+					InputLockManager.SetControlLock(ControlTypes.TRACKINGSTATION_UI, lockID);
+					controlLock = true;
+				}
+				else if (!WindowRect.Contains(mousePos) && controlLock)
+				{
+					InputLockManager.RemoveControlLock(lockID);
+					controlLock = false;
+				}
+			}
 		}
 
 		protected override void DrawWindow(int id)
@@ -172,7 +238,13 @@ namespace SCANsat.SCAN_UI
 
 		protected override void DrawWindowPost(int id)
 		{
-			
+			sessionRect = WindowRect;
+
+			if (SCANcontroller.controller.MechJebSelecting && Event.current.type == EventType.mouseDown && !TextureRect.Contains(Event.current.mousePosition))
+			{
+				SCANcontroller.controller.MechJebSelecting = false;
+				SCANcontroller.controller.MechJebSelectingActive = false;
+			}
 		}
 
 		//Draw version label in upper left corner
@@ -185,9 +257,22 @@ namespace SCANsat.SCAN_UI
 		//Draw the close button in upper right corner
 		private void closeBox(int id)
 		{
-			Rect r = new Rect(WindowRect.width - 20, 1, 18, 18);
+			Rect r = new Rect(WindowRect.width - 40, 0, 18, 18);
+			if (showInfo)
+			{
+				if (GUI.Button(r, "-", SCANskins.SCAN_buttonBorderless))
+					showInfo = !showInfo;
+			}
+			else
+			{
+				if (GUI.Button(r, "+", SCANskins.SCAN_buttonBorderless))
+					showInfo = !showInfo;
+			}
+			r.x += 20;
+			r.y += 1;
 			if (GUI.Button(r, SCANcontroller.controller.closeBox, SCANskins.SCAN_closeButton))
 			{
+				removeControlLocks();
 				Visible = false;
 			}
 		}
@@ -203,34 +288,72 @@ namespace SCANsat.SCAN_UI
 			d.width = 40;
 			d.height = 20;
 
-			GUILayout.Label("", GUILayout.Width(30));
-
 			if (GUI.Button(d, iconWithTT(SCANskins.SCAN_OrbitIcon, "Toggle Orbit"), SCANskins.SCAN_buttonBorderless))
 			{
 				showOrbit = !showOrbit;
 			}
 
-			GUILayout.FlexibleSpace();
+			if (SCANcontroller.controller.MechJebLoaded && SCANcontroller.controller.MechJebTargetBody == b)
+			{
+				fillS(50);
+				if (GUILayout.Button(iconWithTT(SCANskins.SCAN_MechJebIcon, "Set MechJeb Target"), SCANskins.SCAN_buttonBorderless, GUILayout.Width(24), GUILayout.Height(24)))
+				{
+					SCANcontroller.controller.MechJebSelecting = !SCANcontroller.controller.MechJebSelecting;
+				}
+			}
+			else
+				GUILayout.Label("", GUILayout.Width(70));
+
+			fillS();
 
 			if (GUILayout.Button(iconWithTT(SCANskins.SCAN_ZoomOutIcon, "Zoom Out"), SCANskins.SCAN_buttonBorderless, GUILayout.Width(26), GUILayout.Height(26)))
 			{
 				spotmap.MapScale = spotmap.MapScale / 1.25f;
 				if (spotmap.MapScale < 2)
 					spotmap.MapScale = 2;
-				spotmap.centerAround(spotmap.CenteredLong, spotmap.CenteredLat);
-				spotmap.resetMap();
+				resetMap();
 			}
 
-			GUILayout.Label(spotmap.MapScale.ToString("N1") + " X", SCANskins.SCAN_whiteLabelCenter, GUILayout.Width(40), GUILayout.Height(24));
+			if (GUILayout.Button(textWithTT(spotmap.MapScale.ToString("N1") + " X", "Sync To Big Map"), SCANskins.SCAN_buttonBorderless, GUILayout.Width(50), GUILayout.Height(24)))
+			{
+				SCANcontroller.controller.MechJebSelecting = false;
+				SCANcontroller.controller.MechJebSelectingActive = false;
+
+				if (bigmap.Projection == MapProjection.Polar)
+					spotmap.setProjection(MapProjection.Polar);
+				else
+					spotmap.setProjection(MapProjection.Rectangular);
+
+				if (bigmap.Body != b)
+				{
+					SCANdata dat = SCANUtil.getData(bigmap.Body);
+					if (dat == null)
+						dat = new SCANdata(bigmap.Body);
+
+					data = dat;
+					b = data.Body;
+
+					spotmap.setBody(b);
+				}
+
+				if (SCANconfigLoader.GlobalResource)
+				{
+					spotmap.Resource = bigmap.Resource;
+					spotmap.Resource.CurrentBodyConfig(b.name);
+				}
+
+				spotmap.centerAround(spotmap.CenteredLong, spotmap.CenteredLat);
+
+				spotmap.resetMap(bigmap.MType, false);
+			}
 
 			if (GUILayout.Button(iconWithTT(SCANskins.SCAN_ZoomInIcon, "Zoom In"), SCANskins.SCAN_buttonBorderless, GUILayout.Width(26), GUILayout.Height(26)))
 			{
 				spotmap.MapScale = spotmap.MapScale * 1.25f;
-				spotmap.centerAround(spotmap.CenteredLong, spotmap.CenteredLat);
-				spotmap.resetMap();
+				resetMap();
 			}
 
-			GUILayout.FlexibleSpace();
+			fillS();
 
 			if (HighLogic.LoadedScene != GameScenes.SPACECENTER)
 			{
@@ -247,8 +370,10 @@ namespace SCANsat.SCAN_UI
 					showWaypoints = !showWaypoints;
 				}
 
-				GUILayout.Space(16);
+				fillS(16);
 			}
+			else
+				GUILayout.Label("", GUILayout.Width(60));
 
 			showAnomaly = GUILayout.Toggle(showAnomaly, textWithTT("", "Toggle Anomalies"));
 
@@ -263,7 +388,7 @@ namespace SCANsat.SCAN_UI
 				showAnomaly = !showAnomaly;
 			}
 
-			GUILayout.Space(16);
+			fillS(16);
 
 			stopE();
 		}
@@ -334,7 +459,18 @@ namespace SCANsat.SCAN_UI
 				if (mlon >= -180 && mlon <= 180 && mlat >= -90 && mlat <= 90)
 				{
 					in_map = true;
+					if (SCANcontroller.controller.MechJebSelecting)
+					{
+						SCANcontroller.controller.MechJebSelectingActive = true;
+						mjTarget.x = mlon;
+						mjTarget.y = mlat;
+						SCANcontroller.controller.MechJebTargetCoords = mjTarget;
+						Rect r = new Rect(mx + TextureRect.x - 11, my + TextureRect.y - 13, 24, 24);
+						SCANuiUtil.drawMapIcon(r, SCANskins.SCAN_MechJebYellowIcon, true);
+					}
 				}
+				else if (SCANcontroller.controller.MechJebSelecting)
+					SCANcontroller.controller.MechJebSelectingActive = false;
 
 				if (mlat > 90)
 				{
@@ -347,19 +483,30 @@ namespace SCANsat.SCAN_UI
 					mlat = -180 - mlat;
 				}
 			}
+			else if (SCANcontroller.controller.MechJebSelecting)
+				SCANcontroller.controller.MechJebSelectingActive = false;
 
-			//Handles mouse click while inside map; opens zoom map or zooms in further
+			//Handles mouse click while inside map
 			if (Event.current.isMouse)
 			{
 				if (Event.current.type == EventType.MouseUp)
 				{
+					//Generate waypoint for MechJeb target
+					if (SCANcontroller.controller.MechJebSelecting && SCANcontroller.controller.MechJebSelectingActive && Event.current.button == 0 && in_map)
+					{
+						SCANwaypoint w = new SCANwaypoint(mlat, mlon, "MechJeb Landing Target");
+						SCANcontroller.controller.MechJebTarget = w;
+						data.addToWaypoints();
+						SCANcontroller.controller.MechJebSelecting = false;
+						SCANcontroller.controller.MechJebSelectingActive = false;
+					}
 					//Middle click re-center
-					if (Event.current.button == 2 || (Event.current.button == 1 && GameSettings.MODIFIER_KEY.GetKey()))
+					else if (Event.current.button == 2 || (Event.current.button == 1 && GameSettings.MODIFIER_KEY.GetKey()))
 					{
 						if (in_map)
 						{
 							spotmap.centerAround(mlon, mlat);
-							spotmap.resetMap();
+							resetMap();
 						}
 					}
 					//Right click zoom in
@@ -380,8 +527,7 @@ namespace SCANsat.SCAN_UI
 							spotmap.MapScale = spotmap.MapScale / 1.25f;
 							if (spotmap.MapScale < 2)
 								spotmap.MapScale = 2;
-							spotmap.centerAround(mlon, mlat);
-							spotmap.resetMap();
+							resetMap();
 						}
 					}
 					Event.current.Use();
@@ -403,7 +549,16 @@ namespace SCANsat.SCAN_UI
 			}
 
 			//Draw the actual mouse over info label below the map
-			SCANuiUtil.mouseOverInfoSimple(mlon, mlat, spotmap, data, spotmap.Body, in_map);
+			if (SCANcontroller.controller.MechJebSelecting)
+			{
+				SCANuiUtil.readableLabel("MechJeb Landing Guidance Targeting...", false);
+				fillS(-10);
+				SCANuiUtil.mouseOverInfoSimple(mlon, mlat, spotmap, data, spotmap.Body, in_map);
+			}
+			else if (showInfo)
+				SCANuiUtil.mouseOverInfoSimple(mlon, mlat, spotmap, data, spotmap.Body, in_map);
+			else
+				fillS(10);
 		}
 
 		private void mapLabels(int id)

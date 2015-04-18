@@ -130,13 +130,51 @@ namespace SCANsat.SCAN_Data
 
 		#region Waypoints
 
-		private SCANwaypoint[] waypoints;
+		private List<SCANwaypoint> waypoints;
 
-		public SCANwaypoint[] Waypoints
+		public void addToWaypoints()
+		{
+			if (SCANcontroller.controller == null)
+				return;
+
+			if (waypoints == null)
+			{
+				waypoints = new List<SCANwaypoint>() { SCANcontroller.controller.MechJebTarget };
+				return;
+			}
+
+			if (waypoints.Any(a => a.Mechjeb))
+				waypoints.RemoveAll(a => a.Mechjeb);
+
+			waypoints.Add(SCANcontroller.controller.MechJebTarget);
+		}
+
+		public void removeTargetWaypoint()
+		{
+			if (waypoints == null)
+				return;
+
+			SCANwaypoint w = waypoints.FirstOrDefault(a => a.Mechjeb);
+
+			SCANcontroller.controller.MechJebTarget = null;
+
+			if (w != null)
+				waypoints.Remove(w);
+		}
+
+		public List<SCANwaypoint> Waypoints
 		{
 			get
 			{
-				if (waypoints == null)
+				if (HighLogic.CurrentGame.Mode != Game.Modes.CAREER)
+				{
+					if (waypoints == null)
+						waypoints = new List<SCANwaypoint>();
+				}
+
+				if (HighLogic.CurrentGame.Mode == Game.Modes.CAREER && !SCANcontroller.controller.ContractsLoaded)
+					return new List<SCANwaypoint>();
+				else if (waypoints == null)
 				{
 					List<SCANwaypoint> bodyWaypoints = new List<SCANwaypoint>();
 					if (ContractSystem.Instance != null)
@@ -186,25 +224,25 @@ namespace SCANsat.SCAN_Data
 								}
 							}
 						}
+					}
 
-						if (WaypointManager.Instance() != null)
+					if (WaypointManager.Instance() != null)
+					{
+						var remaining = WaypointManager.Instance().AllWaypoints();
+						for (int i = 0; i < remaining.Count; i++)
 						{
-							var remaining = WaypointManager.Instance().AllWaypoints();
-							for (int i = 0; i < remaining.Count; i++)
+							Waypoint p = remaining[i];
+							if (p.isOnSurface && p.isNavigatable)
 							{
-								Waypoint p = remaining[i];
-								if (p.isOnSurface && p.isNavigatable)
+								if (p.celestialName == body.GetName())
 								{
-									if (p.celestialName == body.GetName())
+									if (p.contractReference != null)
 									{
-										if (p.contractReference != null)
+										if (p.contractReference.ContractState == Contract.State.Active)
 										{
-											if (p.contractReference.ContractState == Contract.State.Active)
+											if (!bodyWaypoints.Any(a => a.Way == p))
 											{
-												if (!bodyWaypoints.Any(a => a.Way == p))
-												{
-													bodyWaypoints.Add(new SCANwaypoint(p));
-												}
+												bodyWaypoints.Add(new SCANwaypoint(p));
 											}
 										}
 									}
@@ -212,7 +250,7 @@ namespace SCANsat.SCAN_Data
 							}
 						}
 					}
-					waypoints = bodyWaypoints.ToArray();
+					waypoints = bodyWaypoints;
 				}
 
 				return waypoints;

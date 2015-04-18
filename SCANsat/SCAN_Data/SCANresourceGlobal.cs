@@ -57,7 +57,6 @@ namespace SCANsat.SCAN_Data
 
 		internal SCANresourceGlobal(SCANresourceGlobal copy)
 		{
-			SCANUtil.SCANdebugLog("Preparing New Resource Copy");
 			name = copy.name;
 			resourceTransparency = copy.resourceTransparency;
 			lowResourceColor = copy.lowResourceColor;
@@ -75,11 +74,9 @@ namespace SCANsat.SCAN_Data
 
 		private Dictionary<string, SCANresourceBody> copyBodyConfigs(SCANresourceGlobal c)
 		{
-			SCANUtil.SCANdebugLog("Preparing New Body Config Database");
 			Dictionary<string, SCANresourceBody> newCopy = new Dictionary<string, SCANresourceBody>();
 			foreach (SCANresourceBody r in c.masterBodyConfigs.Values)
 			{
-				SCANUtil.SCANdebugLog("Copying SCAN Body Resource Config: [{0}]", r.BodyName);
 				SCANresourceBody newR = new SCANresourceBody(r);
 				if (!newCopy.ContainsKey(newR.BodyName))
 					newCopy.Add(newR.BodyName, newR);
@@ -95,15 +92,6 @@ namespace SCANsat.SCAN_Data
 			source = (SCANresource_Source)2;
 
 			setDefaultValues();
-
-			SCANUtil.SCANdebugLog("Resource Global Decode");
-			SCANUtil.SCANdebugLog("-------->Resource Name           =>   {0}", name);
-			SCANUtil.SCANdebugLog("-------->Resource Transparency   =>   {0}", resourceTransparency);
-			SCANUtil.SCANdebugLog("-------->Low Resource Color      =>   {0}", lowResourceColor);
-			SCANUtil.SCANdebugLog("-------->High Resource Color     =>   {0}", highResourceColor);
-			SCANUtil.SCANdebugLog("-------->Resource Type           =>   {0}", resourceType.Name);
-			SCANUtil.SCANdebugLog("-------->SCAN Type               =>   {0}", sType);
-			SCANUtil.SCANdebugLog("-------->SCAN Resource Source    =>   {0}", source);
 			try
 			{
 				masterBodyConfigs = Resource_Planetary_Config.ToDictionary(a => a.BodyName, a => a);
@@ -125,7 +113,6 @@ namespace SCANsat.SCAN_Data
 		{
 			try
 			{
-				SCANUtil.SCANdebugLog("Saving Master Resource Node");
 				Resource_Planetary_Config = masterBodyConfigs.Values.ToList();
 			}
 			catch (Exception e)
@@ -150,18 +137,6 @@ namespace SCANsat.SCAN_Data
 				update.MinValue = b.MinValue;
 				update.MaxValue = b.MaxValue;
 			}
-		}
-
-		public void logValues(string s)
-		{
-			SCANUtil.SCANdebugLog("Log SCAN Global Resource Values: {0}", s);
-			SCANUtil.SCANdebugLog("-------->Resource Name           =>   {0}", name);
-			SCANUtil.SCANdebugLog("-------->Resource Transparency   =>   {0}", resourceTransparency);
-			SCANUtil.SCANdebugLog("-------->Low Resource Color      =>   {0}", lowResourceColor);
-			SCANUtil.SCANdebugLog("-------->High Resource Color     =>   {0}", highResourceColor);
-			SCANUtil.SCANdebugLog("-------->Resource Type           =>   {0}", resourceType.Name);
-			SCANUtil.SCANdebugLog("-------->SCAN Type               =>   {0}", sType);
-			SCANUtil.SCANdebugLog("-------->SCAN Resource Source    =>   {0}", source);
 		}
 
 		public string Name
@@ -225,12 +200,12 @@ namespace SCANsat.SCAN_Data
 			get { return masterBodyConfigs.Count; }
 		}
 
-		public SCANresourceBody getBodyConfig (string body)
+		public SCANresourceBody getBodyConfig (string body, bool warn = true)
 		{
 			if (masterBodyConfigs.ContainsKey(body))
 				return masterBodyConfigs[body];
-			else
-				SCANUtil.SCANlog("SCANsat resource celestial body config is empty; something probably went wrong here");
+			else if (warn)
+				SCANUtil.SCANlog("SCANsat resource celestial body config: [{0}] is empty; something probably went wrong here", body);
 
 			return null;
 		}

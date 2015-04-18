@@ -88,7 +88,7 @@ namespace SCANsat
 						{
 							foreach (CelestialBody b in FlightGlobals.Bodies)
 							{
-								SCANresourceBody rBody = resource.getBodyConfig(b.name);
+								SCANresourceBody rBody = resource.getBodyConfig(b.name, false);
 								if (rBody == null)
 								{
 									SCANresourceBody bodyResource = RegolithConfigLoad(b, resource);

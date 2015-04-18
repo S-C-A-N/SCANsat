@@ -29,7 +29,7 @@ namespace SCANsat.SCAN_UI
 	{
 		private bool dropDown, paletteBox, resourceBox, saveWarning;
 		private bool oldReverseState, oldDiscreteState;
-		private bool spaceCenterLock, trackingStationLock, clampState, oldClampState;
+		private bool controlLock, clampState, oldClampState;
 		private Rect ddRect;
 		private int paletteIndex;
 		private SCANmapLegend currentLegend, previewLegend;
@@ -40,7 +40,7 @@ namespace SCANsat.SCAN_UI
 
 		private SCANuiSlider minTerrainSlider, maxTerrainSlider, clampTerrainSlider, paletteSizeSlider, resourceMinSlider, resourceMaxSlider, resourceTransSlider, biomeTransSlider;
 
-		private SCANuiColorPicker slopeColorPicker, biomeColorPicker, resourceColorPicker;
+		private SCANuiColorPicker slopeColorPickerLow, slopeColorPickerHigh, biomeColorPicker, resourceColorPicker;
 		private float bTrans, rTrans;
 
 		private bool stockBiomes = false;
@@ -55,7 +55,8 @@ namespace SCANsat.SCAN_UI
 
 		private Vector2 scrollR;
 		private const string lockID = "colorLockID";
-		internal static Rect defaultRect = new Rect(100, 400, 780, 360);
+		internal readonly static Rect defaultRect = new Rect(100, 400, 780, 360);
+		private static Rect sessionRect = defaultRect;
 
 		//SCAN_MBW objects to sync the color selection fields to the currently displayed map
 		private SCANkscMap kscMapObj;
@@ -67,7 +68,7 @@ namespace SCANsat.SCAN_UI
 		protected override void Awake()
 		{
 			WindowCaption = "S.C.A.N. Color Management";
-			WindowRect = defaultRect;
+			WindowRect = sessionRect;
 			WindowStyle = SCANskins.SCAN_window;
 			WindowOptions = new GUILayoutOption[2] { GUILayout.Width(780), GUILayout.Height(360) };
 			Visible = false;
@@ -76,7 +77,7 @@ namespace SCANsat.SCAN_UI
 
 			SCAN_SkinsLibrary.SetCurrent("SCAN_Unity");
 
-			InputLockManager.RemoveControlLock(lockID);
+			removeControlLocks();
 		}
 
 		protected override void Start()
@@ -117,7 +118,8 @@ namespace SCANsat.SCAN_UI
 			clampTerrainSlider = new SCANuiSlider(data.TerrainConfig.MinTerrain + 10, data.TerrainConfig.MaxTerrain - 10, data.TerrainConfig.ClampTerrain ?? data.TerrainConfig.MinTerrain + 10, "Clamp: ", "m", -1);
 			paletteSizeSlider = new SCANuiSlider(3, 12, data.TerrainConfig.PalSize, "Palette Size: ", "", 0);
 
-			//slopeColorPicker = new SCANuiColorPicker(SCANcontroller.controller.lowSlopeColor, SCANcontroller.controller.highSlopeColor, true);
+			slopeColorPickerLow = new SCANuiColorPicker(SCANcontroller.controller.lowSlopeColorOne, SCANcontroller.controller.highSlopeColorOne, true);
+			slopeColorPickerHigh = new SCANuiColorPicker(SCANcontroller.controller.lowSlopeColorTwo, SCANcontroller.controller.highSlopeColorTwo, true);
 
 			bTrans = SCANcontroller.controller.biomeTransparency;
 			biomeTransSlider = new SCANuiSlider(0, 80, bTrans, "Ter. Trans: ", "%", 0);
@@ -150,7 +152,13 @@ namespace SCANsat.SCAN_UI
 
 		protected override void OnDestroy()
 		{
+			removeControlLocks();
+		}
+
+		internal void removeControlLocks()
+		{
 			InputLockManager.RemoveControlLock(lockID);
+			controlLock = false;
 		}
 
 		protected override void DrawWindowPre(int id)
@@ -227,15 +235,14 @@ namespace SCANsat.SCAN_UI
 				}
 				Vector2 mousePos = Input.mousePosition;
 				mousePos.y = Screen.height - mousePos.y;
-				if (WindowRect.Contains(mousePos) && !spaceCenterLock)
+				if (WindowRect.Contains(mousePos) && !controlLock)
 				{
 					InputLockManager.SetControlLock(ControlTypes.CAMERACONTROLS | ControlTypes.KSC_ALL, lockID);
-					spaceCenterLock = true;
+					controlLock = true;
 				}
-				else if (!WindowRect.Contains(mousePos) && spaceCenterLock)
+				else if (!WindowRect.Contains(mousePos) && controlLock)
 				{
-					InputLockManager.RemoveControlLock(lockID);
-					spaceCenterLock = false;
+					removeControlLocks();
 				}
 			}
 
@@ -274,15 +281,14 @@ namespace SCANsat.SCAN_UI
 				}
 				Vector2 mousePos = Input.mousePosition;
 				mousePos.y = Screen.height - mousePos.y;
-				if (WindowRect.Contains(mousePos) && !trackingStationLock)
+				if (WindowRect.Contains(mousePos) && !controlLock)
 				{
 					InputLockManager.SetControlLock(ControlTypes.TRACKINGSTATION_UI, lockID);
-					trackingStationLock = true;
+					controlLock = true;
 				}
-				else if (!WindowRect.Contains(mousePos) && trackingStationLock)
+				else if (!WindowRect.Contains(mousePos) && controlLock)
 				{
-					InputLockManager.RemoveControlLock(lockID);
-					trackingStationLock = false;
+					removeControlLocks();
 				}
 			}
 
@@ -333,26 +339,29 @@ namespace SCANsat.SCAN_UI
 				}
 				else if (windowMode == 1)
 				{
-					//growE();
-					//	fillS(10);
-					//	slopeColorPicker.drawColorSelector(WindowRect);
-					//	fillS(80);
-					//	growS();
-					//		slopeOptions(id);
-					//		slopeConfirm(id);
-					//	stopS();
-					//stopE();
+					growE();
+						fillS(10);
+						slopeColorPickerLow.drawColorSelector(WindowRect);
+						fillS(40);
+						slopeColorPickerHigh.drawColorSelector(WindowRect);
+					stopE();
+					fillS(100);
+					growE();
+						fillS(140);
+						slopeOptions(id);
+						slopeConfirm(id);
+					stopE();
 				}
 				else if (windowMode == 2)
 				{
 					growE();
-					fillS(10);
-					biomeColorPicker.drawColorSelector(WindowRect);
-					fillS(80);
-					growS();
-					biomeOptions(id);
-					biomeConfirm(id);
-					stopS();
+						fillS(10);
+						biomeColorPicker.drawColorSelector(WindowRect);
+						fillS(80);
+						growS();
+							biomeOptions(id);
+							biomeConfirm(id);
+						stopS();
 					stopE();
 				}
 				else if (windowMode == 3 && SCANconfigLoader.GlobalResource)
@@ -416,8 +425,10 @@ namespace SCANsat.SCAN_UI
 			}
 			else if (windowMode == 1)
 			{
-				//slopeColorPicker.colorStateChanged();
-				//slopeColorPicker.brightnessChanged();
+				slopeColorPickerLow.colorStateChanged();
+				slopeColorPickerLow.brightnessChanged();
+				slopeColorPickerHigh.colorStateChanged();
+				slopeColorPickerHigh.brightnessChanged();
 			}
 			else if (windowMode == 2)
 			{
@@ -482,6 +493,8 @@ namespace SCANsat.SCAN_UI
 				resourceColorPicker.colorStateChanged();
 				resourceColorPicker.brightnessChanged();
 			}
+
+			sessionRect = WindowRect;
 		}
 
 		//Draw the version label in the upper left corner
@@ -497,9 +510,7 @@ namespace SCANsat.SCAN_UI
 			Rect r = new Rect(WindowRect.width - 20, 1, 18, 18);
 			if (GUI.Button(r, SCANcontroller.controller.closeBox, SCANskins.SCAN_closeButton))
 			{
-				InputLockManager.RemoveControlLock(lockID);
-				spaceCenterLock = false;
-				trackingStationLock = false;
+				removeControlLocks();
 				Visible = false;
 			}
 		}
@@ -518,12 +529,12 @@ namespace SCANsat.SCAN_UI
 
 					updateUI();
 				}
-				//if (GUILayout.Button("Slope"))
-				//{
-				//	windowMode = 1;
+				if (GUILayout.Button("Slope"))
+				{
+					windowMode = 1;
 
-				//	slopeColorPicker.updateOldSwatches();
-				//}
+					//slopeColorPicker.updateOldSwatches();
+				}
 				if (GUILayout.Button("Biome"))
 				{
 					windowMode = 2;
@@ -747,10 +758,10 @@ namespace SCANsat.SCAN_UI
 			stopE();
 		}
 
-		//private void slopeOptions(int id)
-		//{
+		private void slopeOptions(int id)
+		{
 
-		//}
+		}
 
 		private void resourceOptions(int id)
 		{
@@ -857,65 +868,67 @@ namespace SCANsat.SCAN_UI
 				GUILayout.Label("Save Values To Config", SCANskins.SCAN_button, GUILayout.Width(180));
 		}
 
-		//private void slopeConfirm(int id)
-		//{
-		//	fillS(10);
+		private void slopeConfirm(int id)
+		{
+			if (!dropDown)
+			{
+				if (GUILayout.Button("Apply Values", GUILayout.Width(110)))
+				{
+					SCANcontroller.controller.lowSlopeColorOne = slopeColorPickerLow.ColorLow;
+					SCANcontroller.controller.highSlopeColorOne = slopeColorPickerLow.ColorHigh;
+					SCANcontroller.controller.lowSlopeColorTwo = slopeColorPickerHigh.ColorLow;
+					SCANcontroller.controller.highSlopeColorTwo = slopeColorPickerHigh.ColorHigh;
 
-		//	growE();
-		//	if (!dropDown)
-		//	{
-		//		if (GUILayout.Button("Apply Values", GUILayout.Width(110)))
-		//		{
-		//			SCANcontroller.controller.lowSlopeColor = slopeColorPicker.ColorLow;
-		//			SCANcontroller.controller.highSlopeColor = slopeColorPicker.ColorHigh;
+					slopeColorPickerLow.updateOldSwatches();
+					slopeColorPickerHigh.updateOldSwatches();
 
-		//			slopeColorPicker.updateOldSwatches();
+					if (bigMap != null)
+					{
+						if (bigMap.MType == mapType.Slope)
+							bigMap.resetMap();
+					}
 
-		//			if (bigMap != null)
-		//			{
-		//				if (bigMap.MType == mapType.Slope)
-		//					bigMap.resetMap();
-		//			}
+				}
 
-		//		}
+				fillS(8);
 
-		//		fillS(8);
+				if (GUILayout.Button("Default Values", GUILayout.Width(110)))
+				{
+					SCANcontroller.controller.lowSlopeColorOne = SCANconfigLoader.SCANNode.BottomLowSlopeColor;
+					SCANcontroller.controller.highSlopeColorOne = SCANconfigLoader.SCANNode.BottomHighSlopeColor;
+					SCANcontroller.controller.lowSlopeColorTwo = SCANconfigLoader.SCANNode.TopLowSlopeColor;
+					SCANcontroller.controller.highSlopeColorTwo = SCANconfigLoader.SCANNode.TopHighSlopeColor;
 
-		//		if (GUILayout.Button("Default Values", GUILayout.Width(110)))
-		//		{
-		//			SCANcontroller.controller.lowSlopeColor = SCANconfigLoader.SCANNode.LowSlopeColor;
-		//			SCANcontroller.controller.highSlopeColor = SCANconfigLoader.SCANNode.HighSlopeColor;
+					slopeColorPickerLow = new SCANuiColorPicker(SCANcontroller.controller.lowSlopeColorOne, SCANcontroller.controller.highSlopeColorOne, slopeColorPickerLow.LowColorChange);
+					slopeColorPickerHigh = new SCANuiColorPicker(SCANcontroller.controller.lowSlopeColorTwo, SCANcontroller.controller.highSlopeColorTwo, slopeColorPickerHigh.LowColorChange);
 
-		//			slopeColorPicker = new SCANuiColorPicker(SCANcontroller.controller.lowSlopeColor, SCANcontroller.controller.highSlopeColor, slopeColorPicker.LowColorChange);
+					slopeColorPickerLow.updateOldSwatches();
+					slopeColorPickerHigh.updateOldSwatches();
 
-		//			slopeColorPicker.updateOldSwatches();
+					if (bigMap != null)
+					{
+						if (bigMap.MType == mapType.Slope)
+							bigMap.resetMap();
+					}
+				}
 
-		//			if (bigMap != null)
-		//			{
-		//				if (bigMap.MType == mapType.Slope)
-		//					bigMap.resetMap();
-		//			}
-		//		}
-		//	}
-		//	else
-		//	{
-		//		GUILayout.Label("Apply Values", SCANskins.SCAN_button, GUILayout.Width(110));
-		//		fillS(8);
-		//		GUILayout.Label("Default Values", SCANskins.SCAN_button, GUILayout.Width(110));
-		//	}
-		//	stopE();
-		//	fillS(8);
-		//	if (!dropDown)
-		//	{
-		//		if (GUILayout.Button("Save Values To Config", GUILayout.Width(180)))
-		//		{
-		//			dropDown = true;
-		//			saveWarning = true;
-		//		}
-		//	}
-		//	else
-		//		GUILayout.Label("Save Values To Config", SCANskins.SCAN_button, GUILayout.Width(180));
-		//}
+				fillS(80);
+
+				if (GUILayout.Button("Save Values To Config", GUILayout.Width(180)))
+				{
+					dropDown = true;
+					saveWarning = true;
+				}
+			}
+			else
+			{
+				GUILayout.Label("Apply Values", SCANskins.SCAN_button, GUILayout.Width(110));
+				fillS(8);
+				GUILayout.Label("Default Values", SCANskins.SCAN_button, GUILayout.Width(110));
+				fillS(80);
+				GUILayout.Label("Save Values To Config", SCANskins.SCAN_button, GUILayout.Width(180));
+			}
+		}
 
 		private void resourceConfirm(int id)
 		{

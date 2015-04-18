@@ -35,6 +35,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 		public static Color cyan		= Color.cyan;
 		public static Color blue		= Color.blue;
 		public static Color green	= Color.green;
+		public static Color mechjebYellow = new Color(1.0f, 0.56f, 0.0f);
 
 		public static Color lerp (Color a, Color b, float t) {
 			return Color.Lerp (a,b,t);
@@ -223,7 +224,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 
 		internal static Color c_good {
 			get {
-				if (SCANcontroller.controller.colours != 1) 	return xkcd_PukeGreen;
+				if (SCANcontroller.controller.colours != 1) 	return cb_bluishGreen;
 				else 								return cb_skyBlue;
 			}
 		}
