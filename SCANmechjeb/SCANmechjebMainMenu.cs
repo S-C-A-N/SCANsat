@@ -19,7 +19,6 @@ namespace SCANmechjeb
 
 		private void Awake()
 		{
-			print("[SCANsatMechJeb] Checking For Assemblies");
 			loaded = checkLoaded();
 		}
 
@@ -43,8 +42,6 @@ namespace SCANmechjeb
 			if (infoV.InformationalVersion != SCANsatVersion)
 				return false;
 
-			print("[SCANsatMechJeb] SCANsat Assembly Loaded");
-
 			var MechJebAssembly = AssemblyLoader.loadedAssemblies.FirstOrDefault(a => a.assembly.GetName().Name == MechJeb);
 
 			if (MechJebAssembly == null)
@@ -56,10 +53,7 @@ namespace SCANmechjeb
 				return false;
 
 			if (fileV.Version == MechJebVersion.ToString())
-			{
-				print("[SCANsatMechJeb] MechJeb Assembly Loaded");
 				return true;
-			}
 
 			return false;
 		}

@@ -11,7 +11,6 @@ namespace SCANmechjeb
 
 		private void Start()
 		{
-			print("[SCANsatMechJeb] Checking MechJeb/SCANsat load status");
 			if (SCANmechjebMainMenu.Loaded)
 				SCANmechjebInt = gameObject.AddComponent<SCANmechjeb>();
 		}
