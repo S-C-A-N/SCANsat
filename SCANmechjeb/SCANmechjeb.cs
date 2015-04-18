@@ -7,6 +7,7 @@ using SCANsat;
 using SCANsat.SCAN_Data;
 using SCANsat.SCAN_Platform;
 using log = SCANsat.SCAN_Platform.Logging.ConsoleLogger;
+using palette = SCANsat.SCAN_UI.UI_Framework.SCANpalette;
 using MuMech;
 
 using UnityEngine;
@@ -23,11 +24,6 @@ namespace SCANmechjeb
 		private SCANdata data;
 		private Vector2d coords = new Vector2d();
 		private bool selectingTarget, selectingInMap;
-
-		protected override void Awake()
-		{
-			log.Debug("SCANsat/MechJeb Interface Waking Up");
-		}
 
 		protected override void LateUpdate()
 		{
@@ -106,13 +102,9 @@ namespace SCANmechjeb
 				selectingTarget = false;
 				if (selectingInMap)
 				{
-					log.Debug("Target selected from SCANsat map");
-
 					selectingInMap = false;
 					coords = SCANcontroller.controller.MechJebTargetCoords;
 					way = new SCANwaypoint(coords.y, coords.x, siteName);
-					log.Debug("Coordinates: ---> Latitude: {0:N3}", coords.y);
-					log.Debug("Coordinates: ---> Longitude: {0:N3}", coords.x);
 					target.SetPositionTarget(SCANcontroller.controller.MechJebTargetBody, way.Latitude, way.Longitude);
 				}
 			}
@@ -146,7 +138,6 @@ namespace SCANmechjeb
 			{
 				if (!SCANUtil.ApproxEq(coords.x, way.Longitude) || !SCANUtil.ApproxEq(coords.y, way.Latitude))
 				{
-					log.Debug("MechJeb Target coordinates changed; generating new target");
 					way = new SCANwaypoint(coords.y, coords.x, siteName);
 					SCANcontroller.controller.MechJebTarget = way;
 					data.addToWaypoints();
@@ -154,7 +145,6 @@ namespace SCANmechjeb
 			}
 			else
 			{
-				log.Debug("Creating new MechJeb Target");
 				way = new SCANwaypoint(coords.y, coords.x, siteName);
 				SCANcontroller.controller.MechJebTarget = way;
 				data.addToWaypoints();
@@ -183,12 +173,7 @@ namespace SCANmechjeb
 			if (!(target.Target is PositionTarget))
 				return;
 
-			log.Debug("[Target Drawing] Drawing MechJeb Target");
-			log.Debug("Target Body: ---> Body: {0}", SCANcontroller.controller.MechJebTargetBody.name);
-			log.Debug("Coordinates: ---> Latitude: {0:N3}", coords.y);
-			log.Debug("Coordinates: ---> Longitude: {0:N3}", coords.x);
-
-			GLUtils.DrawMapViewGroundMarker(SCANcontroller.controller.MechJebTargetBody, coords.y, coords.x, new Color(1.0f, 0.56f, 0.0f));
+			GLUtils.DrawMapViewGroundMarker(SCANcontroller.controller.MechJebTargetBody, coords.y, coords.x, palette.mechjebYellow);
 		}
 	}
 }
