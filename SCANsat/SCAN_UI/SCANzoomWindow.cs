@@ -112,12 +112,22 @@ namespace SCANsat.SCAN_UI
 		{
 			Visible = true;
 			bigmap = big;
+
+			SCANdata dat = SCANUtil.getData(bigmap.Body);
+			if (dat == null)
+				dat = new SCANdata(bigmap.Body);
+
+			data = dat;
+			b = data.Body;
+
 			spotmap.MapScale = 10;
-			spotmap.setBody(big.Body);
+			spotmap.setBody(b);
+
 			if (bigmap.Projection == MapProjection.Polar)
 				spotmap.setProjection(MapProjection.Polar);
 			else
 				spotmap.setProjection(MapProjection.Rectangular);
+
 			spotmap.centerAround(lon, lat);
 			spotmap.resetMap(bigmap.MType, false);
 		}
@@ -283,14 +293,17 @@ namespace SCANsat.SCAN_UI
 				showOrbit = !showOrbit;
 			}
 
-			if (SCANcontroller.controller.MechJebLoaded)
+			if (SCANcontroller.controller.MechJebLoaded && SCANcontroller.controller.MechJebTargetBody == b)
 			{
 				fillS(50);
 				if (GUILayout.Button(iconWithTT(SCANskins.SCAN_MechJebIcon, "Set MechJeb Target"), SCANskins.SCAN_buttonBorderless, GUILayout.Width(24), GUILayout.Height(24)))
 				{
 					SCANcontroller.controller.MechJebSelecting = !SCANcontroller.controller.MechJebSelecting;
-					SCANcontroller.controller.MechJebTargetBody = data.Body;
 				}
+			}
+			else
+			{
+				GUILayout.Label("", GUILayout.Width(70));
 			}
 
 			fillS();
@@ -321,6 +334,7 @@ namespace SCANsat.SCAN_UI
 
 					data = dat;
 					b = data.Body;
+
 					spotmap.setBody(b);
 				}
 
