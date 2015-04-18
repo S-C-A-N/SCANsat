@@ -20,14 +20,17 @@ namespace SCANmechjeb
 		private Vessel v;
 		private MechJebCore core;
 		private MechJebModuleTargetController target;
-		private ComputerModule guidanceModule;
+		private DisplayModule guidanceModule;
 		private SCANwaypoint way;
 		private SCANdata data;
 		private Vector2d coords = new Vector2d();
-		private bool selectingTarget, selectingInMap;
+		private bool selectingTarget, selectingInMap, shutdown;
 
 		protected override void LateUpdate()
 		{
+			if (shutdown)
+				return;
+
 			if (!HighLogic.LoadedSceneIsFlight || !FlightGlobals.ready)
 				return;
 
@@ -75,7 +78,7 @@ namespace SCANmechjeb
 			}
 
 			if (guidanceModule == null)
-				guidanceModule = core.GetComputerModule("MechJebModuleLandingGuidance");
+				guidanceModule = (DisplayModule)core.GetComputerModule("MechJebModuleLandingGuidance");
 
 			if (guidanceModule == null)
 			{
@@ -85,8 +88,12 @@ namespace SCANmechjeb
 			}
 
 			if (!guidanceModule.unlockChecked)
+				return;
+
+			if (guidanceModule.hidden)
 			{
 				SCANcontroller.controller.MechJebLoaded = false;
+				shutdown = true;
 				way = null;
 				return;
 			}
