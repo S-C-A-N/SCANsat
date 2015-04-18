@@ -144,6 +144,7 @@ namespace SCANsat
 		/* Kethane integration */
 		private bool kethaneRebuild, kethaneReset, kethaneBusy;
 
+		/* MechJeb Landing Target Integration */
 		private bool mechjebLoaded, mechjebSelecting, mechjebSelectingActive;
 		private Vector2d mechjebTargetCoords;
 		private CelestialBody mechjebTargetBody;
