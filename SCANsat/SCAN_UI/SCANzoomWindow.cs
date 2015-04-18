@@ -302,9 +302,7 @@ namespace SCANsat.SCAN_UI
 				}
 			}
 			else
-			{
 				GUILayout.Label("", GUILayout.Width(70));
-			}
 
 			fillS();
 
@@ -374,6 +372,8 @@ namespace SCANsat.SCAN_UI
 
 				fillS(16);
 			}
+			else
+				GUILayout.Label("", GUILayout.Width(60));
 
 			showAnomaly = GUILayout.Toggle(showAnomaly, textWithTT("", "Toggle Anomalies"));
 
