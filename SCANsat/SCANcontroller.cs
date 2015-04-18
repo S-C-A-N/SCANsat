@@ -507,13 +507,7 @@ namespace SCANsat
 		public CelestialBody MechJebTargetBody
 		{
 			get { return mechjebTargetBody; }
-			internal set
-			{
-				if (mechjebLoaded)
-					mechjebTargetBody = value;
-				else
-					mechjebTargetBody = null;
-			}
+			set { mechjebTargetBody = value; }
 		}
 
 		public SCANwaypoint MechJebTarget
