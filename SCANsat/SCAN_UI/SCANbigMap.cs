@@ -81,14 +81,9 @@ namespace SCANsat.SCAN_UI
 				bigmap = new SCANmap(b, true);
 				bigmap.setProjection((MapProjection)SCANcontroller.controller.projection);
 				bigmap.setWidth(SCANcontroller.controller.map_width);
-				WindowRect.x = SCANcontroller.controller.map_x;
-				WindowRect.y = SCANcontroller.controller.map_y;
 			}
-			else
-			{
-				SCANcontroller.controller.map_x = (int)WindowRect.x;
-				SCANcontroller.controller.map_y = (int)WindowRect.y;
-			}
+			WindowRect.x = SCANcontroller.controller.map_x;
+			WindowRect.y = SCANcontroller.controller.map_y;
 			if (SCANcontroller.controller.resourceOverlayType == 1)
 				SCANcontroller.controller.map_ResourceOverlay = false;
 			currentColor = SCANcontroller.controller.colours == 0;
@@ -235,6 +230,9 @@ namespace SCANsat.SCAN_UI
 				lastResource = SCANcontroller.controller.map_ResourceOverlay;
 				bigmap.resetMap();
 			}
+
+			SCANcontroller.controller.map_x = (int)WindowRect.x;
+			SCANcontroller.controller.map_y = (int)WindowRect.y;
 		}
 
 		//Draw version label in upper left corner
@@ -421,6 +419,7 @@ namespace SCANsat.SCAN_UI
 				if (SCANconfigLoader.GlobalResource)
 				{
 					fillS();
+
 					SCANcontroller.controller.map_ResourceOverlay = GUILayout.Toggle(SCANcontroller.controller.map_ResourceOverlay, textWithTT("", "Toggle Resources"));
 
 					d = GUILayoutUtility.GetLastRect();
