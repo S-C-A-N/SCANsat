@@ -41,8 +41,9 @@
       <HintPath>..\..\..\MechJeb2\MechJeb2.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="SCANsat">
-      <HintPath>..\..\..\KSP Dev Build\Kerbal Space Program\GameData\SCANsat\Plugins\SCANsat.dll</HintPath>
+    <Reference Include="SCANsat, Version=1.1.3.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\GameData\SCANsat\SCANsat.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="System" />
@@ -53,8 +54,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="SCANmechjeb.cs" />
-    <Compile Include="SCANmechjebAwake.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SCANmechjebMainMenu.cs" />
+    <Compile Include="SCANmechStarter.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
