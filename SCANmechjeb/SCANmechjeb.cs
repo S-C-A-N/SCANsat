@@ -185,27 +185,10 @@ namespace SCANmechjeb
 
 			if (!MapView.MapIsEnabled)
 				return;
-			//if (MapViewTarget(MapView.MapCamera.target)!= SCANcontroller.controller.MechJebTargetBody)
-			//	return;
 			if (!v.isActiveVessel || v.GetMasterMechJeb() != core)
 				return;
 
 			GLUtils.DrawMapViewGroundMarker(SCANcontroller.controller.MechJebTargetBody, coords.y, coords.x, palette.mechjebYellow);
-		}
-
-		private CelestialBody MapViewTarget(MapObject target)
-		{
-			switch(target.type)
-			{
-				case MapObject.MapObjectType.VESSEL:
-					return target.vessel.mainBody;
-				case MapObject.MapObjectType.CELESTIALBODY:
-					return target.celestialBody;
-				case MapObject.MapObjectType.MANEUVERNODE:
-					return target.maneuverNode.patch.referenceBody;
-			}
-
-			return null;
 		}
 	}
 }
