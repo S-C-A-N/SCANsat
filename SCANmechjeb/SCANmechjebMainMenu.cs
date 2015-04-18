@@ -20,6 +20,11 @@ namespace SCANmechjeb
 		private void Awake()
 		{
 			loaded = checkLoaded();
+
+			if (loaded)
+				print("[SCANsatMechJeb] SCANsat and MechJeb Assemblies Detected");
+			else
+				print("[SCANsatMechJeb] SCANsat or MechJeb Assembly Not Detected; Shutting Down...");
 		}
 
 		public static bool Loaded

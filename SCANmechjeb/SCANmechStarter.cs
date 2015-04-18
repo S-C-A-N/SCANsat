@@ -12,7 +12,10 @@ namespace SCANmechjeb
 		private void Start()
 		{
 			if (SCANmechjebMainMenu.Loaded)
+			{
+				print("[SCANsatMechJeb] Starting SCANsat - MechJeb Interface...");
 				SCANmechjebInt = gameObject.AddComponent<SCANmechjeb>();
+			}
 		}
 	}
 }
