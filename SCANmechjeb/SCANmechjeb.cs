@@ -20,7 +20,7 @@ namespace SCANmechjeb
 		private Vessel v;
 		private MechJebCore core;
 		private MechJebModuleTargetController target;
-		private MechJebModuleLandingGuidance guidanceModule;
+		private ComputerModule guidanceModule;
 		private SCANwaypoint way;
 		private SCANdata data;
 		private Vector2d coords = new Vector2d();
@@ -41,21 +41,26 @@ namespace SCANmechjeb
 
 			if (v == null)
 			{
+				SCANcontroller.controller.MechJebLoaded = false;
 				way = null;
 				return;
 			}
+
+			if (v.mainBody != SCANcontroller.controller.MechJebTargetBody)
+				SCANcontroller.controller.MechJebTargetBody = v.mainBody;
 
 			data = SCANUtil.getData(v.mainBody);
 
 			if (data == null)
 			{
-				log.Debug("SCANdata Null");
+				SCANcontroller.controller.MechJebLoaded = false;
 				way = null;
 				return;
 			}
 
 			if (v.FindPartModulesImplementing<MechJebCore>().Count <= 0)
 			{
+				SCANcontroller.controller.MechJebLoaded = false;
 				way = null;
 				return;
 			}
@@ -64,21 +69,24 @@ namespace SCANmechjeb
 
 			if (core == null)
 			{
+				SCANcontroller.controller.MechJebLoaded = false;
 				way = null;
 				return;
 			}
 
 			if (guidanceModule == null)
-				guidanceModule = (MechJebModuleLandingGuidance)core.GetComputerModule("MechJebModuleLandingGuidance");
+				guidanceModule = core.GetComputerModule("MechJebModuleLandingGuidance");
 
 			if (guidanceModule == null)
 			{
+				SCANcontroller.controller.MechJebLoaded = false;
 				way = null;
 				return;
 			}
 
-			if (guidanceModule.unlockChecked)
+			if (!guidanceModule.unlockChecked)
 			{
+				SCANcontroller.controller.MechJebLoaded = false;
 				way = null;
 				return;
 			}
@@ -87,6 +95,7 @@ namespace SCANmechjeb
 
 			if (target == null)
 			{
+				SCANcontroller.controller.MechJebLoaded = false;
 				way = null;
 				return;
 			}
@@ -136,7 +145,6 @@ namespace SCANmechjeb
 
 			if (target.targetBody != v.mainBody)
 			{
-				log.Debug("MechJeb target Celestial Body does not match vessel orbit");
 				way = null;
 				return;
 			}
@@ -177,8 +185,8 @@ namespace SCANmechjeb
 
 			if (!MapView.MapIsEnabled)
 				return;
-			if (MapViewTarget(MapView.MapCamera.target)!= SCANcontroller.controller.MechJebTargetBody)
-				return;
+			//if (MapViewTarget(MapView.MapCamera.target)!= SCANcontroller.controller.MechJebTargetBody)
+			//	return;
 			if (!v.isActiveVessel || v.GetMasterMechJeb() != core)
 				return;
 
