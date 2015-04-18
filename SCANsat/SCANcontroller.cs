@@ -216,7 +216,6 @@ namespace SCANsat
 			{
 				try
 				{
-					SCANUtil.SCANdebugLog("Saving Terrain Nodes");
 					return masterTerrainNodes.Values.ToList();
 				}
 				catch (Exception e)
@@ -285,7 +284,6 @@ namespace SCANsat
 			{
 				try
 				{
-					SCANUtil.SCANdebugLog("Saving Resource Nodes");
 					return masterResourceNodes.Values.ToList();
 				}
 				catch (Exception e)
