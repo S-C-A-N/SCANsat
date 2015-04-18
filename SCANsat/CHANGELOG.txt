@@ -1,3 +1,27 @@
+Version 11.3 - 2014-4-18
+------------------------
+
+- Color management options for slope maps
+		- Two sets of colors are used to define the slope maps, one for low slope levels, another for high levels
+		- Default slope colors tweaked
+		- Minor color management UI tweaks
+		
+- MechJeb landing guidance interface
+		- Landing targets selected through MechJeb will show as special waypoint icons on SCANsat maps of the current planet
+		- Landing targets can be selected through the SCANsat zoom map using the landing target icon
+		- Interface only loads if both SCANsat and MechJeb are present
+		- Landing targets also show on IVA maps through Raster Prop Monitor
+		
+- Fixes bug with waypoints loading when the map is open during scene changes
+- Includes a fixed Active Texture Management config file to prevent SCANsat icons from being altered
+- Window positions made persistent
+		- The big map position is saved and will remain persistent through different game sessions
+		- Other window positions are only persistent during a single game session
+- Tweaks to Zoom Map synchronization
+		- Click the zoom scale indicator to refresh the zoom map and re-sync with the current settings of the big map
+		
+	
+
 Version 11.2 - 2014-4-12
 ------------------------
 
