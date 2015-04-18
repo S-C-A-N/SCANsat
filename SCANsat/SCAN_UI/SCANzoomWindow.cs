@@ -20,6 +20,7 @@ using SCANsat;
 using SCANsat.SCAN_UI.UI_Framework;
 using SCANsat.SCAN_Data;
 using SCANsat.SCAN_Map;
+using palette = SCANsat.SCAN_UI.UI_Framework.SCANpalette;
 using UnityEngine;
 
 namespace SCANsat.SCAN_UI
@@ -228,6 +229,12 @@ namespace SCANsat.SCAN_UI
 		protected override void DrawWindowPost(int id)
 		{
 			sessionRect = WindowRect;
+
+			if (SCANcontroller.controller.MechJebSelecting && Event.current.type == EventType.mouseDown && !TextureRect.Contains(Event.current.mousePosition))
+			{
+				SCANcontroller.controller.MechJebSelecting = false;
+				SCANcontroller.controller.MechJebSelectingActive = false;
+			}
 		}
 
 		//Draw version label in upper left corner
@@ -283,7 +290,6 @@ namespace SCANsat.SCAN_UI
 				{
 					SCANcontroller.controller.MechJebSelecting = !SCANcontroller.controller.MechJebSelecting;
 					SCANcontroller.controller.MechJebTargetBody = data.Body;
-					data.removeTargetWaypoint();
 				}
 			}
 
@@ -445,6 +451,8 @@ namespace SCANsat.SCAN_UI
 						mjTarget.x = mlon;
 						mjTarget.y = mlat;
 						SCANcontroller.controller.MechJebTargetCoords = mjTarget;
+						Rect r = new Rect(mx + TextureRect.x - 11, my + TextureRect.y - 13, 24, 24);
+						SCANuiUtil.drawMapIcon(r, SCANskins.SCAN_MechJebYellowIcon, true);
 					}
 				}
 				else if (SCANcontroller.controller.MechJebSelecting)
@@ -461,6 +469,8 @@ namespace SCANsat.SCAN_UI
 					mlat = -180 - mlat;
 				}
 			}
+			else if (SCANcontroller.controller.MechJebSelecting)
+				SCANcontroller.controller.MechJebSelectingActive = false;
 
 			//Handles mouse click while inside map
 			if (Event.current.isMouse)
@@ -468,7 +478,7 @@ namespace SCANsat.SCAN_UI
 				if (Event.current.type == EventType.MouseUp)
 				{
 					//Generate waypoint for MechJeb target
-					if (SCANcontroller.controller.MechJebSelecting && SCANcontroller.controller.MechJebSelectingActive && Event.current.button == 0)
+					if (SCANcontroller.controller.MechJebSelecting && SCANcontroller.controller.MechJebSelectingActive && Event.current.button == 0 && in_map)
 					{
 						SCANwaypoint w = new SCANwaypoint(mlat, mlon, "MechJeb Landing Target");
 						SCANcontroller.controller.MechJebTarget = w;
