@@ -167,9 +167,12 @@ namespace SCANsat.SCAN_Data
 			get
 			{
 				if (HighLogic.CurrentGame.Mode != Game.Modes.CAREER)
-					return new List<SCANwaypoint>();
+				{
+					if (waypoints == null)
+						waypoints = new List<SCANwaypoint>();
+				}
 
-				if (!SCANcontroller.controller.ContractsLoaded)
+				if (HighLogic.CurrentGame.Mode == Game.Modes.CAREER && !SCANcontroller.controller.ContractsLoaded)
 					return new List<SCANwaypoint>();
 				else if (waypoints == null)
 				{

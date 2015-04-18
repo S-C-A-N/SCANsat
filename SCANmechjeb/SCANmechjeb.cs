@@ -77,25 +77,28 @@ namespace SCANmechjeb
 				return;
 			}
 
-			if (guidanceModule == null)
-				guidanceModule = (DisplayModule)core.GetComputerModule("MechJebModuleLandingGuidance");
-
-			if (guidanceModule == null)
+			if (HighLogic.CurrentGame.Mode != Game.Modes.SANDBOX)
 			{
-				SCANcontroller.controller.MechJebLoaded = false;
-				way = null;
-				return;
-			}
+				if (guidanceModule == null)
+					guidanceModule = (DisplayModule)core.GetComputerModule("MechJebModuleLandingGuidance");
 
-			if (!guidanceModule.unlockChecked)
-				return;
+				if (guidanceModule == null)
+				{
+					SCANcontroller.controller.MechJebLoaded = false;
+					way = null;
+					return;
+				}
 
-			if (guidanceModule.hidden)
-			{
-				SCANcontroller.controller.MechJebLoaded = false;
-				shutdown = true;
-				way = null;
-				return;
+				if (!guidanceModule.unlockChecked)
+					return;
+
+				if (guidanceModule.hidden)
+				{
+					SCANcontroller.controller.MechJebLoaded = false;
+					shutdown = true;
+					way = null;
+					return;
+				}
 			}
 
 			target = core.target;
