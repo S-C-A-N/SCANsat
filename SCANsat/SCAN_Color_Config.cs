@@ -37,9 +37,9 @@ namespace SCANsat
 		[Persistent]
 		private Color bottemHighSlopeColor = palette.xkcd_Lemon;
 		[Persistent]
-		private Color topLowSlopeColor = palette.xkcd_PukeGreen;
+		private Color topLowSlopeColor = palette.xkcd_Lemon;
 		[Persistent]
-		private Color topHighSlopeColor = palette.xkcd_Lemon;
+		private Color topHighSlopeColor = palette.xkcd_OrangeRed;
 		[Persistent]
 		private List<SCANterrainConfig> SCANsat_Altimetry = new List<SCANterrainConfig>();
 		[Persistent]
