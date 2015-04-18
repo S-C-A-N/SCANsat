@@ -588,7 +588,8 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			}
 			else
 			{
-				r.y -= 12;
+				r.x += 1;
+				r.y -= 13;
 				drawMapIcon(r, SCANskins.SCAN_MechJebIcon, true);
 			}
 		}
@@ -597,7 +598,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 		{
 			if (texCoords)
 			{
-				var old = GUI.color;
+				Color old = GUI.color;
 				if (outline)
 				{
 					GUI.color = palette.black;
@@ -622,7 +623,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			}
 			else
 			{
-				var old = GUI.color;
+				Color old = GUI.color;
 				if (outline)
 				{
 					GUI.color = palette.black;
