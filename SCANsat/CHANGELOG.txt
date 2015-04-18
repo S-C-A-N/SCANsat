@@ -18,9 +18,7 @@ Version 11.3 - 2014-4-18
 		- The big map position is saved and will remain persistent through different game sessions
 		- Other window positions are only persistent during a single game session
 - Tweaks to Zoom Map synchronization
-		- Click the zoom scale indicator to refresh the zoom map and re-sync with the current settings of the big map
-		
-	
+		- Click the zoom scale indicator to refresh the zoom map and re-sync with the current settings of the big map	
 
 Version 11.2 - 2014-4-12
 ------------------------
