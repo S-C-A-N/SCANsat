@@ -205,12 +205,15 @@ namespace SCANsat.SCAN_UI
 			}
 			foreach (SCANwaypoint w in localWaypoints)
 			{
-				if (w.Root.ContractState != Contracts.Contract.State.Active)
-					continue;
-				if (w.Param != null)
+				if (!w.Mechjeb)
 				{
-					if (w.Param.State != Contracts.ParameterState.Incomplete)
+					if (w.Root.ContractState != Contracts.Contract.State.Active)
 						continue;
+					if (w.Param != null)
+					{
+						if (w.Param.State != Contracts.ParameterState.Incomplete)
+							continue;
+					}
 				}
 
 				DrawIcon(w, iconColorVisitedAnomalyValue);
@@ -449,10 +452,18 @@ namespace SCANsat.SCAN_UI
 		{
 			Rect pos = new Rect((float)(longitudeToPixels(p.Longitude, p.Latitude)), (float)(latitudeToPixels(p.Longitude, p.Latitude)), 16, 16);
 
-			pos.x -= 8;
-			pos.y -= 16;
-
-			SCANuiUtil.drawMapIconGL(pos, SCANskins.SCAN_WaypointIcon, iconColor, iconMaterial, iconColorShadowValue, true);
+			if (!p.Mechjeb)
+			{
+				pos.x -= 8;
+				pos.y -= 16;
+				SCANuiUtil.drawMapIconGL(pos, SCANskins.SCAN_WaypointIcon, iconColor, iconMaterial, iconColorShadowValue, true);
+			}
+			else
+			{
+				pos.x -= 8;
+				pos.y -= 8;
+				SCANuiUtil.drawMapIconGL(pos, SCANskins.SCAN_MechJebIcon, iconColor, iconMaterial, iconColorShadowValue, true);
+			}
 		}
 
 		private double longitudeToPixels(double longitude, double latitude)
