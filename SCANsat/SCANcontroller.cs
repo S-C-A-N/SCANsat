@@ -110,17 +110,13 @@ namespace SCANsat
 		public bool useStockBiomes = false;
 		[KSPField(isPersistant = true)]
 		public float biomeTransparency = 40;
-		[KSPField(isPersistant = true)]
+
+		/* Biome and slope colors can't be serialized properly as a KSP Field */
 		public Color lowBiomeColor = palette.xkcd_CamoGreen;
-		[KSPField(isPersistant = true)]
 		public Color highBiomeColor = palette.xkcd_Marigold;
-		[KSPField(isPersistant = true)]
 		public Color lowSlopeColorOne = palette.xkcd_PukeGreen;
-		[KSPField(isPersistant = true)]
 		public Color highSlopeColorOne = palette.xkcd_Yellow;
-		[KSPField(isPersistant = true)]
 		public Color lowSlopeColorTwo = palette.xkcd_Yellow;
-		[KSPField(isPersistant = true)]
 		public Color highSlopeColorTwo = palette.xkcd_OrangeRed;
 
 		/* Available resources for overlays; loaded from SCANsat configs; only loaded once */
@@ -524,6 +520,21 @@ namespace SCANsat
 
 		public override void OnLoad(ConfigNode node)
 		{
+			try
+			{
+				lowBiomeColor = ConfigNode.ParseColor(node.GetValue("lowBiomeColor"));
+				highBiomeColor = ConfigNode.ParseColor(node.GetValue("highBiomeColor"));
+				lowSlopeColorOne = ConfigNode.ParseColor(node.GetValue("lowSlopeColorOne"));
+				highSlopeColorOne = ConfigNode.ParseColor(node.GetValue("highSlopeColorOne"));
+				lowSlopeColorTwo = ConfigNode.ParseColor(node.GetValue("lowSlopeColorTwo"));
+				highSlopeColorTwo = ConfigNode.ParseColor(node.GetValue("highSlopeColorTwo"));
+			}
+			catch (Exception e)
+			{
+				SCANUtil.SCANlog("Error While Loading SCANsat Colors: {0}", e);
+			}
+
+
 			ConfigNode node_vessels = node.GetNode("Scanners");
 			if (node_vessels != null)
 			{
@@ -675,70 +686,74 @@ namespace SCANsat
 
 		public override void OnSave(ConfigNode node)
 		{
-			if (HighLogic.LoadedScene != GameScenes.EDITOR)
-			{
-				ConfigNode node_vessels = new ConfigNode("Scanners");
-				foreach (Guid id in knownVessels.Keys)
-				{
-					ConfigNode node_vessel = new ConfigNode("Vessel");
-					node_vessel.AddValue("guid", id.ToString());
-					if (knownVessels[id].vessel != null) node_vessel.AddValue("name", knownVessels[id].vessel.vesselName); // not read
-					foreach (SCANsensor sensor in knownVessels[id].sensors.Values)
-					{
-						ConfigNode node_sensor = new ConfigNode("Sensor");
-						node_sensor.AddValue("type", (int)sensor.sensor);
-						node_sensor.AddValue("fov", sensor.fov);
-						node_sensor.AddValue("min_alt", sensor.min_alt);
-						node_sensor.AddValue("max_alt", sensor.max_alt);
-						node_sensor.AddValue("best_alt", sensor.best_alt);
-						node_vessel.AddNode(node_sensor);
-					}
-					node_vessels.AddNode(node_vessel);
-				}
-				node.AddNode(node_vessels);
-				if (body_data != null)
-				{
-					ConfigNode node_progress = new ConfigNode("Progress");
-					foreach (string body_name in body_data.Keys)
-					{
-						ConfigNode node_body = new ConfigNode("Body");
-						SCANdata body_scan = body_data[body_name];
-						node_body.AddValue("Name", body_name);
-						node_body.AddValue("Disabled", body_scan.Disabled);
-						node_body.AddValue("MinHeightRange", body_scan.TerrainConfig.MinTerrain);
-						node_body.AddValue("MaxHeightRange", body_scan.TerrainConfig.MaxTerrain);
-						if (body_scan.TerrainConfig.ClampTerrain != null)
-							node_body.AddValue("ClampHeight", body_scan.TerrainConfig.ClampTerrain);
-						node_body.AddValue("PaletteName", body_scan.TerrainConfig.ColorPal.name);
-						node_body.AddValue("PaletteSize", body_scan.TerrainConfig.PalSize);
-						node_body.AddValue("PaletteReverse", body_scan.TerrainConfig.PalRev);
-						node_body.AddValue("PaletteDiscrete", body_scan.TerrainConfig.PalDis);
-						node_body.AddValue("Map", body_scan.integerSerialize());
-						node_progress.AddNode(node_body);
-					}
-					node.AddNode(node_progress);
-				}
-				if (resourceTypes.Count > 0 && masterResourceNodes.Count > 0)
-				{
-					ConfigNode node_resources = new ConfigNode("SCANResources");
-					foreach (SCANresourceGlobal r in masterResourceNodes.Values)
-					{
-						if (r != null)
-						{
-							SCANUtil.SCANdebugLog("Saving Resource: {0}", r.Name);
-							ConfigNode node_resource_type = new ConfigNode("ResourceType");
-							node_resource_type.AddValue("Resource", r.Name);
-							node_resource_type.AddValue("MinColor", ConfigNode.WriteColor(r.MinColor));
-							node_resource_type.AddValue("MaxColor", ConfigNode.WriteColor(r.MaxColor));
-							node_resource_type.AddValue("Transparency", r.Transparency);
+			node.AddValue("lowBiomeColor", ConfigNode.WriteColor(lowBiomeColor));
+			node.AddValue("highBiomeColor", ConfigNode.WriteColor(highBiomeColor));
+			node.AddValue("lowSlopeColorOne", ConfigNode.WriteColor(lowSlopeColorOne));
+			node.AddValue("highSlopeColorOne", ConfigNode.WriteColor(highSlopeColorOne));
+			node.AddValue("lowSlopeColorTwo", ConfigNode.WriteColor(lowSlopeColorTwo));
+			node.AddValue("highSlopeColorTwo", ConfigNode.WriteColor(highSlopeColorTwo));
 
-							string rMinMax = saveResources(r);
-							node_resource_type.AddValue("MinMaxValues", rMinMax);
-							node_resources.AddNode(node_resource_type);
-						}
-					}
-					node.AddNode(node_resources);
+			ConfigNode node_vessels = new ConfigNode("Scanners");
+			foreach (Guid id in knownVessels.Keys)
+			{
+				ConfigNode node_vessel = new ConfigNode("Vessel");
+				node_vessel.AddValue("guid", id.ToString());
+				if (knownVessels[id].vessel != null) node_vessel.AddValue("name", knownVessels[id].vessel.vesselName); // not read
+				foreach (SCANsensor sensor in knownVessels[id].sensors.Values)
+				{
+					ConfigNode node_sensor = new ConfigNode("Sensor");
+					node_sensor.AddValue("type", (int)sensor.sensor);
+					node_sensor.AddValue("fov", sensor.fov);
+					node_sensor.AddValue("min_alt", sensor.min_alt);
+					node_sensor.AddValue("max_alt", sensor.max_alt);
+					node_sensor.AddValue("best_alt", sensor.best_alt);
+					node_vessel.AddNode(node_sensor);
 				}
+				node_vessels.AddNode(node_vessel);
+			}
+			node.AddNode(node_vessels);
+			if (body_data != null)
+			{
+				ConfigNode node_progress = new ConfigNode("Progress");
+				foreach (string body_name in body_data.Keys)
+				{
+					ConfigNode node_body = new ConfigNode("Body");
+					SCANdata body_scan = body_data[body_name];
+					node_body.AddValue("Name", body_name);
+					node_body.AddValue("Disabled", body_scan.Disabled);
+					node_body.AddValue("MinHeightRange", body_scan.TerrainConfig.MinTerrain);
+					node_body.AddValue("MaxHeightRange", body_scan.TerrainConfig.MaxTerrain);
+					if (body_scan.TerrainConfig.ClampTerrain != null)
+						node_body.AddValue("ClampHeight", body_scan.TerrainConfig.ClampTerrain);
+					node_body.AddValue("PaletteName", body_scan.TerrainConfig.ColorPal.name);
+					node_body.AddValue("PaletteSize", body_scan.TerrainConfig.PalSize);
+					node_body.AddValue("PaletteReverse", body_scan.TerrainConfig.PalRev);
+					node_body.AddValue("PaletteDiscrete", body_scan.TerrainConfig.PalDis);
+					node_body.AddValue("Map", body_scan.integerSerialize());
+					node_progress.AddNode(node_body);
+				}
+				node.AddNode(node_progress);
+			}
+			if (resourceTypes.Count > 0 && masterResourceNodes.Count > 0)
+			{
+				ConfigNode node_resources = new ConfigNode("SCANResources");
+				foreach (SCANresourceGlobal r in masterResourceNodes.Values)
+				{
+					if (r != null)
+					{
+						SCANUtil.SCANdebugLog("Saving Resource: {0}", r.Name);
+						ConfigNode node_resource_type = new ConfigNode("ResourceType");
+						node_resource_type.AddValue("Resource", r.Name);
+						node_resource_type.AddValue("MinColor", ConfigNode.WriteColor(r.MinColor));
+						node_resource_type.AddValue("MaxColor", ConfigNode.WriteColor(r.MaxColor));
+						node_resource_type.AddValue("Transparency", r.Transparency);
+
+						string rMinMax = saveResources(r);
+						node_resource_type.AddValue("MinMaxValues", rMinMax);
+						node_resources.AddNode(node_resource_type);
+					}
+				}
+				node.AddNode(node_resources);
 			}
 		}
 
