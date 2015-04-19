@@ -113,20 +113,33 @@ namespace SCANsat.SCAN_UI
 			Visible = true;
 			bigmap = big;
 
-			SCANdata dat = SCANUtil.getData(bigmap.Body);
-			if (dat == null)
-				dat = new SCANdata(bigmap.Body);
-
-			data = dat;
-			b = data.Body;
-
-			spotmap.MapScale = 10;
-			spotmap.setBody(b);
+			SCANcontroller.controller.MechJebSelecting = false;
+			SCANcontroller.controller.MechJebSelectingActive = false;
 
 			if (bigmap.Projection == MapProjection.Polar)
 				spotmap.setProjection(MapProjection.Polar);
 			else
 				spotmap.setProjection(MapProjection.Rectangular);
+
+			if (bigmap.Body != b)
+			{
+				SCANdata dat = SCANUtil.getData(bigmap.Body);
+				if (dat == null)
+					dat = new SCANdata(bigmap.Body);
+
+				data = dat;
+				b = data.Body;
+
+				spotmap.setBody(b);
+			}
+
+			if (SCANconfigLoader.GlobalResource)
+			{
+				spotmap.Resource = bigmap.Resource;
+				spotmap.Resource.CurrentBodyConfig(b.name);
+			}
+
+			spotmap.MapScale = 10;
 
 			spotmap.centerAround(lon, lat);
 			spotmap.resetMap(bigmap.MType, false);

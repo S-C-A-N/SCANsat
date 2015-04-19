@@ -121,10 +121,15 @@ namespace SCANsat.SCAN_UI
 			slopeColorPickerLow = new SCANuiColorPicker(SCANcontroller.controller.lowSlopeColorOne, SCANcontroller.controller.highSlopeColorOne, true);
 			slopeColorPickerHigh = new SCANuiColorPicker(SCANcontroller.controller.lowSlopeColorTwo, SCANcontroller.controller.highSlopeColorTwo, true);
 
+			slopeColorPickerLow.updateOldSwatches();
+			slopeColorPickerHigh.updateOldSwatches();
+
 			bTrans = SCANcontroller.controller.biomeTransparency;
 			biomeTransSlider = new SCANuiSlider(0, 80, bTrans, "Ter. Trans: ", "%", 0);
 
 			biomeColorPicker = new SCANuiColorPicker(SCANcontroller.controller.lowBiomeColor, SCANcontroller.controller.highBiomeColor, true);
+
+			biomeColorPicker.updateOldSwatches();
 
 			if (SCANconfigLoader.GlobalResource)
 			{
@@ -532,16 +537,10 @@ namespace SCANsat.SCAN_UI
 				if (GUILayout.Button("Slope"))
 				{
 					windowMode = 1;
-
-					//slopeColorPicker.updateOldSwatches();
 				}
 				if (GUILayout.Button("Biome"))
 				{
 					windowMode = 2;
-
-					fineControlMode = oldFineControl = false;
-
-					biomeColorPicker.updateOldSwatches();
 				}
 				if (SCANconfigLoader.GlobalResource)
 				{
