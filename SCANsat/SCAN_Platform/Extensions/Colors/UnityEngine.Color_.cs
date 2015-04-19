@@ -170,9 +170,9 @@ namespace UnityEngine
 		}
 
 		public static string ToRGBString(this Color c) {
-			return	c.r.ToString("F3")
-				+	c.g.ToString("F3")
-				+	c.b.ToString("F3");
+			return	c.r.ToString("F4") + ","
+				+	c.g.ToString("F4") + ","
+				+	c.b.ToString("F4");
 		}
 
 		public static Color FromHex(this Color c, string s) {
