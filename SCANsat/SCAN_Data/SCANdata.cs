@@ -139,14 +139,14 @@ namespace SCANsat.SCAN_Data
 
 			if (waypoints == null)
 			{
-				waypoints = new List<SCANwaypoint>() { SCANcontroller.controller.MechJebTarget };
+				waypoints = new List<SCANwaypoint>() { SCANcontroller.controller.LandingTarget };
 				return;
 			}
 
-			if (waypoints.Any(a => a.Mechjeb))
-				waypoints.RemoveAll(a => a.Mechjeb);
+			if (waypoints.Any(a => a.LandingTarget))
+				waypoints.RemoveAll(a => a.LandingTarget);
 
-			waypoints.Add(SCANcontroller.controller.MechJebTarget);
+			waypoints.Add(SCANcontroller.controller.LandingTarget);
 		}
 
 		public void removeTargetWaypoint()
@@ -154,9 +154,9 @@ namespace SCANsat.SCAN_Data
 			if (waypoints == null)
 				return;
 
-			SCANwaypoint w = waypoints.FirstOrDefault(a => a.Mechjeb);
+			SCANwaypoint w = waypoints.FirstOrDefault(a => a.LandingTarget);
 
-			SCANcontroller.controller.MechJebTarget = null;
+			SCANcontroller.controller.LandingTarget = null;
 
 			if (w != null)
 				waypoints.Remove(w);
