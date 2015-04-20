@@ -343,21 +343,6 @@ namespace SCANsat.SCAN_UI
 
 				fillS();
 
-				SCANcontroller.controller.map_markers = GUILayout.Toggle(SCANcontroller.controller.map_markers, textWithTT("", "Toggle Anomalies"));
-
-				d = GUILayoutUtility.GetLastRect();
-				d.x += 44;
-				d.y += 2;
-				d.width = 24;
-				d.height = 24;
-
-				if (GUI.Button(d, textWithTT(SCANcontroller.controller.anomalyMarker, "Toggle Anomalies"), SCANskins.SCAN_buttonBorderless))
-				{
-					SCANcontroller.controller.map_markers = !SCANcontroller.controller.map_markers;
-				}
-
-				fillS();
-
 				SCANcontroller.controller.map_waypoints = GUILayout.Toggle(SCANcontroller.controller.map_waypoints, textWithTT("", "Toggle Waypoints"));
 
 				d = GUILayoutUtility.GetLastRect();
@@ -369,6 +354,21 @@ namespace SCANsat.SCAN_UI
 				if (GUI.Button(d, iconWithTT(SCANskins.SCAN_WaypointIcon, "Toggle Waypoints"), SCANskins.SCAN_buttonBorderless))
 				{
 					SCANcontroller.controller.map_waypoints = !SCANcontroller.controller.map_waypoints;
+				}
+
+				fillS();
+
+				SCANcontroller.controller.map_markers = GUILayout.Toggle(SCANcontroller.controller.map_markers, textWithTT("", "Toggle Anomalies"));
+
+				d = GUILayoutUtility.GetLastRect();
+				d.x += 44;
+				d.y += 2;
+				d.width = 24;
+				d.height = 24;
+
+				if (GUI.Button(d, textWithTT(SCANcontroller.controller.anomalyMarker, "Toggle Anomalies"), SCANskins.SCAN_buttonBorderless))
+				{
+					SCANcontroller.controller.map_markers = !SCANcontroller.controller.map_markers;
 				}
 
 				fillS();
