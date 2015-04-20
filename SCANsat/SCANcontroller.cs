@@ -110,6 +110,8 @@ namespace SCANsat
 		public bool useStockBiomes = false;
 		[KSPField(isPersistant = true)]
 		public float biomeTransparency = 40;
+		[KSPField(isPersistant = true)]
+		public bool mechJebTargetSelection = false;
 
 		/* Biome and slope colors can't be serialized properly as a KSP Field */
 		public Color lowBiomeColor = palette.xkcd_CamoGreen;
@@ -141,10 +143,10 @@ namespace SCANsat
 		private bool kethaneRebuild, kethaneReset, kethaneBusy;
 
 		/* MechJeb Landing Target Integration */
-		private bool mechjebLoaded, mechjebSelecting, mechjebSelectingActive;
-		private Vector2d mechjebTargetCoords;
-		private CelestialBody mechjebTargetBody;
-		private SCANwaypoint mechjebTarget;
+		private bool mechjebLoaded, targetSelecting, targetSelectingActive;
+		private Vector2d landingTargetCoords;
+		private CelestialBody landingTargetBody;
+		private SCANwaypoint landingTarget;
 
 		/* UI window objects */
 		internal SCANmainMap mainMap;
@@ -462,58 +464,40 @@ namespace SCANsat
 			set { mechjebLoaded = value; }
 		}
 
-		public bool MechJebSelecting
+		public bool TargetSelecting
 		{
-			get { return mechjebSelecting; }
+			get { return targetSelecting; }
+			internal set { targetSelecting = value; }
+		}
+
+		public bool TargetSelectingActive
+		{
+			get { return targetSelectingActive; }
 			internal set
 			{
-				if (mechjebLoaded)
-					mechjebSelecting = value;
+				if (targetSelecting)
+					targetSelectingActive = value;
 				else
-					mechjebSelecting = false;
+					targetSelectingActive = false;
 			}
 		}
 
-		public bool MechJebSelectingActive
+		public Vector2d LandingTargetCoords
 		{
-			get { return mechjebSelectingActive; }
-			internal set
-			{
-				if (mechjebLoaded && mechjebSelecting)
-					mechjebSelectingActive = value;
-				else
-					mechjebSelectingActive = false;
-			}
+			get { return landingTargetCoords; }
+			internal set { landingTargetCoords = value; }
 		}
 
-		public Vector2d MechJebTargetCoords
+		public CelestialBody LandingTargetBody
 		{
-			get { return mechjebTargetCoords; }
-			internal set
-			{
-				if (mechjebLoaded)
-					mechjebTargetCoords = value;
-				else
-					mechjebTargetCoords = new Vector2d();
-			}
+			get { return landingTargetBody; }
+			set { landingTargetBody = value; }
 		}
 
-		public CelestialBody MechJebTargetBody
+		public SCANwaypoint LandingTarget
 		{
-			get { return mechjebTargetBody; }
-			set { mechjebTargetBody = value; }
-		}
-
-		public SCANwaypoint MechJebTarget
-		{
-			get { return mechjebTarget; }
-			set
-			{
-				if (mechjebLoaded)
-					mechjebTarget = value;
-				else
-					mechjebTarget = null;
-			}
+			get { return landingTarget; }
+			set { landingTarget = value; }
 		}
 
 		#endregion
