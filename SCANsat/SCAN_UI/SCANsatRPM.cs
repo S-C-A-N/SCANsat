@@ -205,7 +205,7 @@ namespace SCANsat.SCAN_UI
 			}
 			foreach (SCANwaypoint w in localWaypoints)
 			{
-				if (!w.Mechjeb)
+				if (!w.LandingTarget)
 				{
 					if (w.Root.ContractState != Contracts.Contract.State.Active)
 						continue;
@@ -452,7 +452,7 @@ namespace SCANsat.SCAN_UI
 		{
 			Rect pos = new Rect((float)(longitudeToPixels(p.Longitude, p.Latitude)), (float)(latitudeToPixels(p.Longitude, p.Latitude)), 16, 16);
 
-			if (!p.Mechjeb)
+			if (!p.LandingTarget)
 			{
 				pos.x -= 8;
 				pos.y -= 16;

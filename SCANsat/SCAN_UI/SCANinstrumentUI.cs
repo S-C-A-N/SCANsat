@@ -156,7 +156,7 @@ namespace SCANsat.SCAN_UI
 			{
 				foreach (SCANwaypoint p in data.Waypoints)
 				{
-					if (!p.Mechjeb)
+					if (!p.LandingTarget)
 					{
 						if (p.Band == FlightBand.NONE)
 							continue;

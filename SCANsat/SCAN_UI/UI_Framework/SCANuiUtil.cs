@@ -190,7 +190,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 					double range = ContractDefs.Survey.MaximumTriggerRange;
 					foreach (SCANwaypoint p in data.Waypoints)
 					{
-						if (!p.Mechjeb)
+						if (!p.LandingTarget)
 						{
 							if (p.Root.ContractState != Contracts.Contract.State.Active)
 								continue;
@@ -277,7 +277,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 					double range = ContractDefs.Survey.MaximumTriggerRange;
 					foreach (SCANwaypoint p in data.Waypoints)
 					{
-						if (!p.Mechjeb)
+						if (!p.LandingTarget)
 						{
 							if (p.Root.ContractState != Contracts.Contract.State.Active)
 								continue;
@@ -514,7 +514,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			{
 				foreach (SCANwaypoint p in data.Waypoints)
 				{
-					if (!p.Mechjeb)
+					if (!p.LandingTarget)
 					{
 						if (p.Root.ContractState != Contracts.Contract.State.Active)
 							continue;
@@ -581,7 +581,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 
 			r.x -= 12;
 
-			if (!p.Mechjeb)
+			if (!p.LandingTarget)
 			{
 				r.y -= 24;
 				drawMapIcon(r, SCANskins.SCAN_WaypointIcon, true);
