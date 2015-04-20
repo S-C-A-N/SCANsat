@@ -28,6 +28,7 @@ namespace SCANsat.SCAN_UI
 	{
 		private static SCANmap bigmap;
 		private static CelestialBody b;
+		private Vessel v;
 		private string mapTypeTitle = "";
 		private SCANdata data;
 		private bool drawGrid, currentGrid, currentColor, lastColor, lastResource, controlLock, waypoints;
@@ -99,6 +100,25 @@ namespace SCANsat.SCAN_UI
 			removeControlLocks();
 			if (spotMap != null)
 				Destroy(spotMap);
+		}
+
+		protected override void Update()
+		{
+			if (HighLogic.LoadedScene != GameScenes.TRACKSTATION)
+			{
+				v = null;
+				return;
+			}
+			
+			MapObject target = PlanetariumCamera.fetch.target;
+
+			if (target.type != MapObject.MapObjectType.VESSEL)
+			{
+				v = null;
+				return;
+			}
+
+			v = target.vessel;
 		}
 
 		internal void removeControlLocks()
@@ -337,10 +357,30 @@ namespace SCANsat.SCAN_UI
 					SCANcontroller.controller.map_grid = !SCANcontroller.controller.map_grid;
 				}
 
-				if (waypoints)
+				if (v != null)
 				{
 					fillS();
 
+					SCANcontroller.controller.map_orbit = GUILayout.Toggle(SCANcontroller.controller.map_orbit, textWithTT("", "Toggle Orbit"));
+
+					d = GUILayoutUtility.GetLastRect();
+					d.x += 34;
+					d.y += 2;
+					d.width = 48;
+					d.height = 24;
+
+					if (GUI.Button(d, iconWithTT(SCANskins.SCAN_OrbitIcon, "Toggle Orbit"), SCANskins.SCAN_buttonBorderless))
+					{
+						SCANcontroller.controller.map_orbit = !SCANcontroller.controller.map_orbit;
+					}
+
+					fillS();
+				}
+				else
+					fillS();
+
+				if (waypoints)
+				{
 					SCANcontroller.controller.map_waypoints = GUILayout.Toggle(SCANcontroller.controller.map_waypoints, textWithTT("", "Toggle Waypoints"));
 
 					d = GUILayoutUtility.GetLastRect();
@@ -353,11 +393,11 @@ namespace SCANsat.SCAN_UI
 					{
 						SCANcontroller.controller.map_waypoints = !SCANcontroller.controller.map_waypoints;
 					}
+
+					fillS();
 				}
 
-				fillS();
-
-				SCANcontroller.controller.map_markers = GUILayout.Toggle(SCANcontroller.controller.map_markers, textWithTT("", "Toggle	Anomalies"));
+				SCANcontroller.controller.map_markers = GUILayout.Toggle(SCANcontroller.controller.map_markers, textWithTT("", "Toggle Anomalies"));
 
 				d = GUILayoutUtility.GetLastRect();
 				d.x += 44;
@@ -572,7 +612,7 @@ namespace SCANsat.SCAN_UI
 			if (waypoints)
 				showWaypoints = SCANcontroller.controller.map_waypoints;
 
-			SCANuiUtil.drawMapLabels(TextureRect, null, bigmap, data, bigmap.Body, SCANcontroller.controller.map_markers, showWaypoints);
+			SCANuiUtil.drawMapLabels(TextureRect, v, bigmap, data, bigmap.Body, SCANcontroller.controller.map_markers, showWaypoints);
 		}
 
 		//Draw the drop down menus if any have been opened
