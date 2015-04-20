@@ -11,7 +11,7 @@ namespace SCANmechjeb
 	[KSPAddon(KSPAddon.Startup.MainMenu, true)]
 	public class SCANmechjebMainMenu : MonoBehaviour
 	{
-		private const string SCANsat = "SCANsat";
+		private const string SCANsatName = "SCANsat";
 		private const string MechJeb = "MechJeb2";
 		private const string SCANsatVersion = "v11rc3";
 		private readonly Version MechJebVersion = new Version(2, 4, 2, 0);
@@ -22,7 +22,10 @@ namespace SCANmechjeb
 			loaded = checkLoaded();
 
 			if (loaded)
+			{
+				SCANsat.SCANmainMenuLoader.MechJebLoaded = true;
 				print("[SCANsatMechJeb] SCANsat and MechJeb Assemblies Detected");
+			}
 			else
 				print("[SCANsatMechJeb] SCANsat or MechJeb Assembly Not Detected; Shutting Down...");
 		}
@@ -34,7 +37,7 @@ namespace SCANmechjeb
 
 		private bool checkLoaded()
 		{
-			var SCANassembly = AssemblyLoader.loadedAssemblies.FirstOrDefault(a => a.assembly.GetName().Name == SCANsat);
+			var SCANassembly = AssemblyLoader.loadedAssemblies.FirstOrDefault(a => a.assembly.GetName().Name == SCANsatName);
 
 			if (SCANassembly == null)
 				return false;

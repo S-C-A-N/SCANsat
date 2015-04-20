@@ -31,6 +31,7 @@ namespace SCANsat
 		internal static bool FinePrintWaypoint = false;
 		internal static bool FinePrintFlightBand = false;
 		internal static bool FinePrintStationaryWaypoint = false;
+		public static bool MechJebLoaded = false;
 
 		private List<AssemblyLog> assemblyList = new List<AssemblyLog>();
 
