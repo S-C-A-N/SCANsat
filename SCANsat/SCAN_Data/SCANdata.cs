@@ -131,22 +131,28 @@ namespace SCANsat.SCAN_Data
 		#region Waypoints
 
 		private List<SCANwaypoint> waypoints;
+		private bool waypointsLoaded;
 
 		public void addToWaypoints()
 		{
 			if (SCANcontroller.controller == null)
 				return;
 
+			addToWaypoints(SCANcontroller.controller.LandingTarget);
+		}
+
+		public void addToWaypoints(SCANwaypoint w)
+		{
 			if (waypoints == null)
 			{
-				waypoints = new List<SCANwaypoint>() { SCANcontroller.controller.LandingTarget };
+				waypoints = new List<SCANwaypoint>() { w };
 				return;
 			}
 
 			if (waypoints.Any(a => a.LandingTarget))
 				waypoints.RemoveAll(a => a.LandingTarget);
 
-			waypoints.Add(SCANcontroller.controller.LandingTarget);
+			waypoints.Add(w);
 		}
 
 		public void removeTargetWaypoint()
@@ -174,8 +180,9 @@ namespace SCANsat.SCAN_Data
 
 				if (HighLogic.CurrentGame.Mode == Game.Modes.CAREER && !SCANcontroller.controller.ContractsLoaded)
 					return new List<SCANwaypoint>();
-				else if (waypoints == null)
+				else if (!waypointsLoaded)
 				{
+					waypointsLoaded = true;
 					List<SCANwaypoint> bodyWaypoints = new List<SCANwaypoint>();
 					if (ContractSystem.Instance != null)
 					{
