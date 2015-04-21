@@ -562,6 +562,7 @@ namespace SCANsat
 					float min, max, clamp;
 					float? clampState = null;
 					Palette dataPalette;
+					SCANwaypoint target = null;
 					string paletteName = "";
 					int pSize;
 					bool pRev, pDis, disabled;
@@ -598,6 +599,8 @@ namespace SCANsat
 						try // Make doubly sure that nothing here can interupt the Scenario Module loading process
 						{
 							//Verify that saved data types can be converted, revert to default values otherwise
+							if (node_body.HasValue("LandingTarget"))
+								target = loadWaypoint(node_body.GetValue("LandingTarget"));
 							if (bool.TryParse(node_body.GetValue("Disabled"), out disabled))
 								data.Disabled = disabled;
 							if (!float.TryParse(node_body.GetValue("MinHeightRange"), out min))
@@ -632,6 +635,9 @@ namespace SCANsat
 								setNewTerrainConfigValues(dataTerrainConfig, min, max, clampState, dataPalette, pSize, pRev, pDis);
 
 							data.TerrainConfig = dataTerrainConfig;
+
+							if (target != null)
+								data.addToWaypoints(target);
 						}
 						catch (Exception e)
 						{
@@ -705,6 +711,9 @@ namespace SCANsat
 					SCANdata body_scan = body_data[body_name];
 					node_body.AddValue("Name", body_name);
 					node_body.AddValue("Disabled", body_scan.Disabled);
+					SCANwaypoint w = body_scan.Waypoints.FirstOrDefault(a => a.LandingTarget);
+					if (w != null)
+						node_body.AddValue("LandingTarget", string.Format("{0:N4},{1:N4}", w.Latitude, w.Longitude));
 					node_body.AddValue("MinHeightRange", body_scan.TerrainConfig.MinTerrain);
 					node_body.AddValue("MaxHeightRange", body_scan.TerrainConfig.MaxTerrain);
 					if (body_scan.TerrainConfig.ClampTerrain != null)
@@ -1013,6 +1022,26 @@ namespace SCANsat
 					}
 				}
 			}
+		}
+
+		private SCANwaypoint loadWaypoint(string s)
+		{
+			SCANwaypoint w = null;
+			string[] a = s.Split(',');
+			double lat = 0;
+			double lon = 0;
+			if (!double.TryParse(a[0], out lat))
+				return w;
+			if (!double.TryParse(a[1], out lon))
+				return w;
+
+			string name = "Landing Target Site";
+			if (mechJebTargetSelection)
+				name = "MechJeb Landing Target";
+
+			w = new SCANwaypoint(lat, lon, name);
+
+			return w;
 		}
 
 		public class SCANsensor
