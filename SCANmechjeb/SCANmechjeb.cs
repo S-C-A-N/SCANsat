@@ -40,6 +40,12 @@ namespace SCANmechjeb
 				return;
 			}
 
+			if (!SCANcontroller.controller.mechJebTargetSelection)
+			{
+				way = null;
+				return;
+			}
+
 			v = FlightGlobals.ActiveVessel;
 
 			if (v == null)
