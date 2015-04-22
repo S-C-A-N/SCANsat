@@ -160,12 +160,10 @@ namespace SCANsat.SCAN_Data
 			if (waypoints == null)
 				return;
 
-			SCANwaypoint w = waypoints.FirstOrDefault(a => a.LandingTarget);
+			if (waypoints.Any(a => a.LandingTarget))
+				waypoints.RemoveAll(a => a.LandingTarget);
 
 			SCANcontroller.controller.LandingTarget = null;
-
-			if (w != null)
-				waypoints.Remove(w);
 		}
 
 		public List<SCANwaypoint> Waypoints
