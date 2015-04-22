@@ -465,7 +465,7 @@ namespace SCANsat.SCAN_UI
 			{
 				pos.x -= 8;
 				pos.y -= 8;
-				SCANuiUtil.drawMapIconGL(pos, SCANskins.SCAN_MechJebIcon, iconColor, iconMaterial, iconColorShadowValue, true);
+				SCANuiUtil.drawMapIconGL(pos, SCANcontroller.controller.mechJebTargetSelection ? SCANskins.SCAN_MechJebIcon : SCANskins.SCAN_TargetIcon, iconColor, iconMaterial, iconColorShadowValue, true);
 			}
 		}
 
