@@ -161,8 +161,11 @@ namespace SCANsat.SCAN_UI
 						if (p.Band == FlightBand.NONE)
 							continue;
 
-						if (p.Root.ContractState != Contracts.Contract.State.Active)
-							continue;
+						if (p.Root != null)
+						{
+							if (p.Root.ContractState != Contracts.Contract.State.Active)
+								continue;
+						}
 
 						if (p.Param != null)
 						{

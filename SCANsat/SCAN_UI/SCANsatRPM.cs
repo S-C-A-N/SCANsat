@@ -207,8 +207,11 @@ namespace SCANsat.SCAN_UI
 			{
 				if (!w.LandingTarget)
 				{
-					if (w.Root.ContractState != Contracts.Contract.State.Active)
-						continue;
+					if (w.Root != null)
+					{
+						if (w.Root.ContractState != Contracts.Contract.State.Active)
+							continue;
+					}
 					if (w.Param != null)
 					{
 						if (w.Param.State != Contracts.ParameterState.Incomplete)

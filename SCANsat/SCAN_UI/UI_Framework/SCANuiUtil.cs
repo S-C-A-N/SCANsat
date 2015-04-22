@@ -192,15 +192,18 @@ namespace SCANsat.SCAN_UI.UI_Framework
 					{
 						if (!p.LandingTarget)
 						{
-							if (p.Root.ContractState != Contracts.Contract.State.Active)
-								continue;
+							if (p.Root != null)
+							{
+								if (p.Root.ContractState != Contracts.Contract.State.Active)
+									continue;
+							}
 							if (p.Param != null)
 							{
 								if (p.Param.State != Contracts.ParameterState.Incomplete)
 									continue;
 							}
 
-							if (WaypointManager.Instance().Distance(lat, lon, p.Way.altitude, p.Latitude, p.Longitude, p.Way.altitude, body) <= range)
+							if (WaypointManager.Instance().Distance(lat, lon, 1000, p.Latitude, p.Longitude, 1000, body) <= range)
 							{
 								info += p.Name + " ";
 								break;
@@ -279,15 +282,18 @@ namespace SCANsat.SCAN_UI.UI_Framework
 					{
 						if (!p.LandingTarget)
 						{
-							if (p.Root.ContractState != Contracts.Contract.State.Active)
-								continue;
+							if (p.Root != null)
+							{
+								if (p.Root.ContractState != Contracts.Contract.State.Active)
+									continue;
+							}
 							if (p.Param != null)
 							{
 								if (p.Param.State != Contracts.ParameterState.Incomplete)
 									continue;
 							}
 
-							if (WaypointManager.Instance().Distance(lat, lon, p.Way.altitude, p.Latitude, p.Longitude, p.Way.altitude, body) <= range)
+							if (WaypointManager.Instance().Distance(lat, lon, 1000, p.Latitude, p.Longitude, 1000, body) <= range)
 							{
 								info += p.Name + " ";
 								break;
@@ -516,8 +522,11 @@ namespace SCANsat.SCAN_UI.UI_Framework
 				{
 					if (!p.LandingTarget)
 					{
-						if (p.Root.ContractState != Contracts.Contract.State.Active)
-							continue;
+						if (p.Root != null)
+						{
+							if (p.Root.ContractState != Contracts.Contract.State.Active)
+								continue;
+						}
 						if (p.Param != null)
 						{
 							if (p.Param.State != Contracts.ParameterState.Incomplete)
@@ -970,6 +979,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 		//Draw the orbit overlay
 		internal static void drawOrbit(Rect maprect, SCANmap map, Vessel vessel, CelestialBody body)
 		{
+			if (vessel == null) return;
 			if (vessel.mainBody != body) return;
 			int eqh = 16;
 
