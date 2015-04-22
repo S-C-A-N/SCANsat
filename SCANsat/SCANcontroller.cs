@@ -1035,9 +1035,7 @@ namespace SCANsat
 			if (!double.TryParse(a[1], out lon))
 				return w;
 
-			string name = "Landing Target Site";
-			if (mechJebTargetSelection)
-				name = "MechJeb Landing Target";
+			string name = mechJebTargetSelection ? "MechJeb Landing Target" : "Landing Target Site";
 
 			w = new SCANwaypoint(lat, lon, name);
 
