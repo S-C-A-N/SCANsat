@@ -17,6 +17,7 @@ using System.Reflection;
 using System.Collections.Generic;
 using UnityEngine;
 using SCANsat.SCAN_UI;
+using SCANsat.SCAN_UI.UI_Framework;
 using SCANsat.SCAN_Data;
 using SCANsat.SCAN_Platform;
 using SCANsat.SCAN_Platform.Palettes;
@@ -756,22 +757,12 @@ namespace SCANsat
 			GameEvents.onVesselCreate.Add(newVesselCheck);
 			GameEvents.onPartCouple.Add(dockingCheck);
 			GameEvents.Contract.onContractsLoaded.Add(contractsCheck);
-			if (HighLogic.LoadedScene == GameScenes.FLIGHT)
+			if (HighLogic.LoadedSceneIsFlight)
 			{
 				if (!body_data.ContainsKey(FlightGlobals.currentMainBody.name))
-				body_data.Add(FlightGlobals.currentMainBody.name, new SCANdata(FlightGlobals.currentMainBody));
-			}
-			else if (HighLogic.LoadedScene == GameScenes.SPACECENTER || HighLogic.LoadedScene == GameScenes.TRACKSTATION)
-			{
-				if (!body_data.ContainsKey(Planetarium.fetch.Home.name))
-					body_data.Add(Planetarium.fetch.Home.name, new SCANdata(Planetarium.fetch.Home));
-			}
-			if (useStockAppLauncher)
-				appLauncher = gameObject.AddComponent<SCANappLauncher>();
-
-			try
-			{
-				if (HighLogic.LoadedScene == GameScenes.FLIGHT)
+					body_data.Add(FlightGlobals.currentMainBody.name, new SCANdata(FlightGlobals.currentMainBody));
+				RenderingManager.AddToPostDrawQueue(5, drawTarget);
+				try
 				{
 					mainMap = gameObject.AddComponent<SCANmainMap>();
 					settingsWindow = gameObject.AddComponent<SCANsettingsUI>();
@@ -779,17 +770,28 @@ namespace SCANsat
 					colorManager = gameObject.AddComponent<SCANcolorSelection>();
 					BigMap = gameObject.AddComponent<SCANBigMap>();
 				}
-				else if (HighLogic.LoadedScene == GameScenes.SPACECENTER || HighLogic.LoadedScene == GameScenes.TRACKSTATION)
+				catch (Exception e)
+				{
+					SCANUtil.SCANlog("Something Went Wrong Initializing UI Objects: {0}", e);
+				}
+			}
+			else if (HighLogic.LoadedSceneHasPlanetarium)
+			{
+				if (!body_data.ContainsKey(Planetarium.fetch.Home.name))
+					body_data.Add(Planetarium.fetch.Home.name, new SCANdata(Planetarium.fetch.Home));
+				try
 				{
 					kscMap = gameObject.AddComponent<SCANkscMap>();
 					settingsWindow = gameObject.AddComponent<SCANsettingsUI>();
 					colorManager = gameObject.AddComponent<SCANcolorSelection>();
 				}
+				catch (Exception e)
+				{
+					SCANUtil.SCANlog("Something Went Wrong Initializing UI Objects: {0}", e);
+				}
 			}
-			catch (Exception e)
-			{
-				SCANUtil.SCANlog("Something Went Wrong Initializing UI Objects: {0}", e);
-			}
+			if (useStockAppLauncher)
+				appLauncher = gameObject.AddComponent<SCANappLauncher>();
 		}
 
 		private void Update()
@@ -864,6 +866,32 @@ namespace SCANsat
 				Destroy(BigMap);
 			if (appLauncher != null)
 				Destroy(appLauncher);
+		}
+
+		private void drawTarget()
+		{
+			if (mechJebTargetSelection)
+				return;
+
+			if (!MapView.MapIsEnabled)
+				return;
+
+			Vessel v = FlightGlobals.ActiveVessel;
+
+			if (v == null)
+				return;
+
+			SCANdata d = getData(v.mainBody.name);
+
+			if (d == null)
+				return;
+
+			SCANwaypoint target = d.Waypoints.FirstOrDefault(a => a.LandingTarget);
+
+			if (target == null)
+				return;
+
+			SCANuiUtil.drawTargetOverlay(v.mainBody, target.Latitude, target.Longitude, XKCDColors.DarkGreen);
 		}
 
 		private void removeVessel(Vessel v)
