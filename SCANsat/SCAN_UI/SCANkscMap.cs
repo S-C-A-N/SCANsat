@@ -216,6 +216,7 @@ namespace SCANsat.SCAN_UI
 				stopE();
 			stopS();
 
+			drawOrbit(id);			/* Draw the vessel's orbit if in the tracking station */
 			mapLabels(id);			/* Draw the vessel/anomaly icons on the map */
 			if (drop_down_open)
 				dropDown(id);		/* Draw the drop down menus if any are open */
@@ -602,6 +603,18 @@ namespace SCANsat.SCAN_UI
 					bigmap.MapLegend = new SCANmapLegend();
 				bigmap.MapLegend.Legend = bigmap.MapLegend.getLegend(data.TerrainConfig.MinTerrain, data.TerrainConfig.MaxTerrain, SCANcontroller.controller.colours, data);
 				SCANuiUtil.drawLegend(data, bigmap.MapLegend);
+			}
+		}
+
+		//Draw the orbit overlays
+		private void drawOrbit(int id)
+		{
+			if (HighLogic.LoadedScene == GameScenes.TRACKSTATION)
+			{
+				if (SCANcontroller.controller.map_orbit && v != null)
+				{
+					SCANuiUtil.drawOrbit(TextureRect, bigmap, v, bigmap.Body);
+				}
 			}
 		}
 
