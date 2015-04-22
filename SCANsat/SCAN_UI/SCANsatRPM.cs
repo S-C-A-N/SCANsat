@@ -205,10 +205,13 @@ namespace SCANsat.SCAN_UI
 			}
 			foreach (SCANwaypoint w in localWaypoints)
 			{
-				if (!w.Mechjeb)
+				if (!w.LandingTarget)
 				{
-					if (w.Root.ContractState != Contracts.Contract.State.Active)
-						continue;
+					if (w.Root != null)
+					{
+						if (w.Root.ContractState != Contracts.Contract.State.Active)
+							continue;
+					}
 					if (w.Param != null)
 					{
 						if (w.Param.State != Contracts.ParameterState.Incomplete)
@@ -452,7 +455,7 @@ namespace SCANsat.SCAN_UI
 		{
 			Rect pos = new Rect((float)(longitudeToPixels(p.Longitude, p.Latitude)), (float)(latitudeToPixels(p.Longitude, p.Latitude)), 16, 16);
 
-			if (!p.Mechjeb)
+			if (!p.LandingTarget)
 			{
 				pos.x -= 8;
 				pos.y -= 16;
@@ -462,7 +465,7 @@ namespace SCANsat.SCAN_UI
 			{
 				pos.x -= 8;
 				pos.y -= 8;
-				SCANuiUtil.drawMapIconGL(pos, SCANskins.SCAN_MechJebIcon, iconColor, iconMaterial, iconColorShadowValue, true);
+				SCANuiUtil.drawMapIconGL(pos, SCANcontroller.controller.mechJebTargetSelection ? SCANskins.SCAN_MechJebIcon : SCANskins.SCAN_TargetIcon, iconColor, iconMaterial, iconColorShadowValue, true);
 			}
 		}
 

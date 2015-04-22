@@ -190,17 +190,20 @@ namespace SCANsat.SCAN_UI.UI_Framework
 					double range = ContractDefs.Survey.MaximumTriggerRange;
 					foreach (SCANwaypoint p in data.Waypoints)
 					{
-						if (!p.Mechjeb)
+						if (!p.LandingTarget)
 						{
-							if (p.Root.ContractState != Contracts.Contract.State.Active)
-								continue;
+							if (p.Root != null)
+							{
+								if (p.Root.ContractState != Contracts.Contract.State.Active)
+									continue;
+							}
 							if (p.Param != null)
 							{
 								if (p.Param.State != Contracts.ParameterState.Incomplete)
 									continue;
 							}
 
-							if (WaypointManager.Instance().Distance(lat, lon, p.Way.altitude, p.Latitude, p.Longitude, p.Way.altitude, body) <= range)
+							if (WaypointManager.Instance().Distance(lat, lon, 1000, p.Latitude, p.Longitude, 1000, body) <= range)
 							{
 								info += p.Name + " ";
 								break;
@@ -277,17 +280,20 @@ namespace SCANsat.SCAN_UI.UI_Framework
 					double range = ContractDefs.Survey.MaximumTriggerRange;
 					foreach (SCANwaypoint p in data.Waypoints)
 					{
-						if (!p.Mechjeb)
+						if (!p.LandingTarget)
 						{
-							if (p.Root.ContractState != Contracts.Contract.State.Active)
-								continue;
+							if (p.Root != null)
+							{
+								if (p.Root.ContractState != Contracts.Contract.State.Active)
+									continue;
+							}
 							if (p.Param != null)
 							{
 								if (p.Param.State != Contracts.ParameterState.Incomplete)
 									continue;
 							}
 
-							if (WaypointManager.Instance().Distance(lat, lon, p.Way.altitude, p.Latitude, p.Longitude, p.Way.altitude, body) <= range)
+							if (WaypointManager.Instance().Distance(lat, lon, 1000, p.Latitude, p.Longitude, 1000, body) <= range)
 							{
 								info += p.Name + " ";
 								break;
@@ -514,10 +520,13 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			{
 				foreach (SCANwaypoint p in data.Waypoints)
 				{
-					if (!p.Mechjeb)
+					if (!p.LandingTarget)
 					{
-						if (p.Root.ContractState != Contracts.Contract.State.Active)
-							continue;
+						if (p.Root != null)
+						{
+							if (p.Root.ContractState != Contracts.Contract.State.Active)
+								continue;
+						}
 						if (p.Param != null)
 						{
 							if (p.Param.State != Contracts.ParameterState.Incomplete)
@@ -581,7 +590,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 
 			r.x -= 12;
 
-			if (!p.Mechjeb)
+			if (!p.LandingTarget)
 			{
 				r.y -= 24;
 				drawMapIcon(r, SCANskins.SCAN_WaypointIcon, true);
@@ -590,7 +599,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			{
 				r.x += 1;
 				r.y -= 13;
-				drawMapIcon(r, SCANskins.SCAN_MechJebIcon, true);
+				drawMapIcon(r, SCANcontroller.controller.mechJebTargetSelection ? SCANskins.SCAN_MechJebIcon : SCANskins.SCAN_TargetIcon, true);
 			}
 		}
 
@@ -970,6 +979,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 		//Draw the orbit overlay
 		internal static void drawOrbit(Rect maprect, SCANmap map, Vessel vessel, CelestialBody body)
 		{
+			if (vessel == null) return;
 			if (vessel.mainBody != body) return;
 			int eqh = 16;
 
@@ -1281,6 +1291,81 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			double MA = EA - e * Math.Sin(EA);
 			// the mean anomaly isn't really an angle, but I'm a simple person
 			return MA * Mathf.Rad2Deg;
+		}
+
+		#endregion
+
+		#region MechJeb Target Overlay
+
+		/*These methods borrowed from MechJeb GLUtils: 
+		 * https://github.com/MuMech/MechJeb2/blob/master/MechJeb2/GLUtils.cs
+		 * 
+		*/
+		internal static void drawTargetOverlay(CelestialBody body, double latitude, double longitude, Color c)
+		{
+			double rotation = 0;
+			double radius = 0;
+			Vector3d up = body.GetSurfaceNVector(latitude, longitude);
+			var height = SCANUtil.getElevation(body, longitude, latitude);
+			if (height < body.Radius)
+				height = body.Radius;
+			Vector3d center = body.position + height * up;
+
+			if (occluded(center, body))
+				return;
+
+			Vector3d north = Vector3d.Exclude(up, body.transform.up).normalized;
+
+			if (radius <= 0)
+				radius = body.Radius / 15;
+
+			GLTriangleMap(new Vector3d[] { center, center + radius * (QuaternionD.AngleAxis(rotation - 55, up) * north), center + radius * (QuaternionD.AngleAxis(rotation -35, up) * north) }, c);
+
+			GLTriangleMap(new Vector3d[] { center, center + radius * (QuaternionD.AngleAxis(rotation + 55, up) * north), center + radius * (QuaternionD.AngleAxis(rotation + 35, up) * north) }, c);
+
+			GLTriangleMap(new Vector3d[] { center, center + radius * (QuaternionD.AngleAxis(rotation - 145, up) * north), center + radius * (QuaternionD.AngleAxis(rotation - 125, up) * north) }, c);
+
+			GLTriangleMap(new Vector3d[] { center, center + radius * (QuaternionD.AngleAxis(rotation + 145, up) * north), center + radius * (QuaternionD.AngleAxis(rotation + 125, up) * north) }, c);
+		}
+
+		private static bool occluded(Vector3d pos, CelestialBody body)
+		{
+			if (Vector3d.Distance(pos, body.position) < body.Radius - 100)
+				return true;
+
+			Vector3d camPos = ScaledSpace.ScaledToLocalSpace(PlanetariumCamera.Camera.transform.position);
+
+			if (Vector3d.Angle(camPos - pos, body.position - pos) > 90)
+				return false;
+
+			double bodyDistance = Vector3d.Distance(camPos, body.position);
+			double separationAngle = Vector3d.Angle(pos - camPos, body.position - camPos);
+			double altitude = bodyDistance * Math.Sin(Math.PI / 180 * separationAngle);
+			return (altitude < body.Radius);
+		}
+
+		private static Material mat;
+
+		private static void GLTriangleMap(Vector3d[] vert, Color c)
+		{
+			GL.PushMatrix();
+			if (mat == null)
+				mat = new Material(Shader.Find("Particles/Additive"));
+			mat.SetPass(0);
+			GL.LoadOrtho();
+			GL.Begin(GL.TRIANGLES);
+			GL.Color(c);
+			GLVertexMap(vert[0]);
+			GLVertexMap(vert[1]);
+			GLVertexMap(vert[2]);
+			GL.End();
+			GL.PopMatrix();
+		}
+
+		private static void GLVertexMap(Vector3d pos)
+		{
+			Vector3 screenPoint = PlanetariumCamera.Camera.WorldToScreenPoint(ScaledSpace.LocalToScaledSpace(pos));
+			GL.Vertex3(screenPoint.x / Camera.main.pixelWidth, screenPoint.y / Camera.main.pixelHeight, 0);
 		}
 
 		#endregion

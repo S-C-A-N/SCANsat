@@ -156,13 +156,16 @@ namespace SCANsat.SCAN_UI
 			{
 				foreach (SCANwaypoint p in data.Waypoints)
 				{
-					if (!p.Mechjeb)
+					if (!p.LandingTarget)
 					{
 						if (p.Band == FlightBand.NONE)
 							continue;
 
-						if (p.Root.ContractState != Contracts.Contract.State.Active)
-							continue;
+						if (p.Root != null)
+						{
+							if (p.Root.ContractState != Contracts.Contract.State.Active)
+								continue;
+						}
 
 						if (p.Param != null)
 						{

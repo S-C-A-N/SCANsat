@@ -40,6 +40,12 @@ namespace SCANmechjeb
 				return;
 			}
 
+			if (!SCANcontroller.controller.mechJebTargetSelection)
+			{
+				way = null;
+				return;
+			}
+
 			v = FlightGlobals.ActiveVessel;
 
 			if (v == null)
@@ -49,8 +55,8 @@ namespace SCANmechjeb
 				return;
 			}
 
-			if (v.mainBody != SCANcontroller.controller.MechJebTargetBody)
-				SCANcontroller.controller.MechJebTargetBody = v.mainBody;
+			if (v.mainBody != SCANcontroller.controller.LandingTargetBody)
+				SCANcontroller.controller.LandingTargetBody = v.mainBody;
 
 			data = SCANUtil.getData(v.mainBody);
 
@@ -116,20 +122,20 @@ namespace SCANmechjeb
 				RenderingManager.AddToPostDrawQueue(1, drawTarget);
 			}
 
-			if (SCANcontroller.controller.MechJebTarget != null)
+			if (SCANcontroller.controller.LandingTarget != null)
 			{
-				way = SCANcontroller.controller.MechJebTarget;
+				way = SCANcontroller.controller.LandingTarget;
 			}
 
-			if (SCANcontroller.controller.MechJebSelecting)
+			if (SCANcontroller.controller.TargetSelecting)
 			{
 				way = null;
 				selectingTarget = true;
-				if (SCANcontroller.controller.MechJebSelectingActive)
+				if (SCANcontroller.controller.TargetSelectingActive)
 					selectingInMap = true;
 				else
 					selectingInMap = false;
-				coords = SCANcontroller.controller.MechJebTargetCoords;
+				coords = SCANcontroller.controller.LandingTargetCoords;
 				return;
 			}
 			else if (selectingTarget)
@@ -138,9 +144,9 @@ namespace SCANmechjeb
 				if (selectingInMap)
 				{
 					selectingInMap = false;
-					coords = SCANcontroller.controller.MechJebTargetCoords;
+					coords = SCANcontroller.controller.LandingTargetCoords;
 					way = new SCANwaypoint(coords.y, coords.x, siteName);
-					target.SetPositionTarget(SCANcontroller.controller.MechJebTargetBody, way.Latitude, way.Longitude);
+					target.SetPositionTarget(SCANcontroller.controller.LandingTargetBody, way.Latitude, way.Longitude);
 				}
 			}
 
@@ -173,14 +179,14 @@ namespace SCANmechjeb
 				if (!SCANUtil.ApproxEq(coords.x, way.Longitude) || !SCANUtil.ApproxEq(coords.y, way.Latitude))
 				{
 					way = new SCANwaypoint(coords.y, coords.x, siteName);
-					SCANcontroller.controller.MechJebTarget = way;
+					SCANcontroller.controller.LandingTarget = way;
 					data.addToWaypoints();
 				}
 			}
 			else
 			{
 				way = new SCANwaypoint(coords.y, coords.x, siteName);
-				SCANcontroller.controller.MechJebTarget = way;
+				SCANcontroller.controller.LandingTarget = way;
 				data.addToWaypoints();
 			}
 		}
@@ -198,7 +204,7 @@ namespace SCANmechjeb
 			if (!v.isActiveVessel || v.GetMasterMechJeb() != core)
 				return;
 
-			GLUtils.DrawMapViewGroundMarker(SCANcontroller.controller.MechJebTargetBody, coords.y, coords.x, palette.mechjebYellow);
+			GLUtils.DrawMapViewGroundMarker(SCANcontroller.controller.LandingTargetBody, coords.y, coords.x, palette.mechjebYellow);
 		}
 	}
 }

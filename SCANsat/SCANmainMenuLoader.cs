@@ -23,7 +23,7 @@ namespace SCANsat
 	public class SCANmainMenuLoader : MonoBehaviour
 	{
 		private const string kVersion = "0.9.2";
-		private string[] Assemblies = new string[11] { "SCANsatRPM", "SCANsatKethane", "Kethane", "GeodesicGrid", "RasterPropMonitor", "MechJebRPM", "MechJeb2", "ORSX", "Regolith", "ContractConfigurator", "CC_SCANsat" };
+		private string[] Assemblies = new string[12] { "SCANsatRPM", "SCANsatKethane", "Kethane", "GeodesicGrid", "RasterPropMonitor", "MechJebRPM", "MechJeb2", "ORSX", "Regolith", "ContractConfigurator", "CC_SCANsat", "SCANmechjeb" };
 
 		internal static string SCANsatVersion = "";
 		public static bool kethaneLoaded = false;
@@ -31,6 +31,7 @@ namespace SCANsat
 		internal static bool FinePrintWaypoint = false;
 		internal static bool FinePrintFlightBand = false;
 		internal static bool FinePrintStationaryWaypoint = false;
+		public static bool MechJebLoaded = false;
 
 		private List<AssemblyLog> assemblyList = new List<AssemblyLog>();
 

@@ -340,9 +340,16 @@ namespace SCANsat.SCAN_UI
 				SCANcontroller.controller.useStockAppLauncher = GUILayout.Toggle(SCANcontroller.controller.useStockAppLauncher, "Stock Toolbar", SCANskins.SCAN_settingsToggle);
 
 				SCANcontroller.controller.toolTips = GUILayout.Toggle(SCANcontroller.controller.toolTips, "Tooltips", SCANskins.SCAN_settingsToggle);
+			stopE();
+			fillS(6);
+			growE();
 				if (SCANconfigLoader.GlobalResource && SCANmainMenuLoader.RegolithFound)
 				{
 					SCANcontroller.controller.regolithBiomeLock = GUILayout.Toggle(SCANcontroller.controller.regolithBiomeLock, "Regolith Biome Lock", SCANskins.SCAN_settingsToggle);
+				}
+				if (SCANmainMenuLoader.MechJebLoaded)
+				{
+					SCANcontroller.controller.mechJebTargetSelection = GUILayout.Toggle(SCANcontroller.controller.mechJebTargetSelection, "MechJeb Target Selection", SCANskins.SCAN_settingsToggle);
 				}
 			stopE();
 			fillS(8);
