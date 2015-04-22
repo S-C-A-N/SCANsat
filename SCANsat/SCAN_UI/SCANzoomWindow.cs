@@ -319,7 +319,7 @@ namespace SCANsat.SCAN_UI
 				else
 					GUILayout.Label("", GUILayout.Width(70));
 			}
-			else
+			else if (HighLogic.LoadedScene != GameScenes.SPACECENTER)
 			{
 				fillS(50);
 				if (GUILayout.Button(iconWithTT(SCANskins.SCAN_MechJebIcon, "Set Landing Target"), SCANskins.SCAN_buttonBorderless, GUILayout.Width(24), GUILayout.Height(24)))
@@ -327,6 +327,8 @@ namespace SCANsat.SCAN_UI
 					SCANcontroller.controller.TargetSelecting = !SCANcontroller.controller.TargetSelecting;
 				}
 			}
+			else
+				GUILayout.Label("", GUILayout.Width(70));
 
 			fillS();
 
@@ -518,9 +520,7 @@ namespace SCANsat.SCAN_UI
 					//Generate waypoint for MechJeb target
 					if (SCANcontroller.controller.TargetSelecting && SCANcontroller.controller.TargetSelectingActive && Event.current.button == 0 && in_map)
 					{
-						string s = "Landing Target Site";
-						if (SCANcontroller.controller.mechJebTargetSelection)
-							s = "MechJeb Landing Target";
+						string s = SCANcontroller.controller.mechJebTargetSelection ? "MechJeb Landing Target" : "Landing Target Site";
 						SCANwaypoint w = new SCANwaypoint(mlat, mlon, s);
 						SCANcontroller.controller.LandingTarget = w;
 						data.addToWaypoints();
@@ -578,7 +578,7 @@ namespace SCANsat.SCAN_UI
 			//Draw the actual mouse over info label below the map
 			if (SCANcontroller.controller.TargetSelecting)
 			{
-				SCANuiUtil.readableLabel("MechJeb Landing Guidance Targeting...", false);
+				SCANuiUtil.readableLabel(SCANcontroller.controller.mechJebTargetSelection ? "MechJeb Landing Guidance Targeting..." : "Landing Sit Targeting...", false);
 				fillS(-10);
 				SCANuiUtil.mouseOverInfoSimple(mlon, mlat, spotmap, data, spotmap.Body, in_map);
 			}
