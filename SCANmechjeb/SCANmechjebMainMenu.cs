@@ -13,7 +13,6 @@ namespace SCANmechjeb
 	{
 		private const string SCANsatName = "SCANsat";
 		private const string MechJeb = "MechJeb2";
-		private const string SCANsatVersion = "v11rc3";
 		private readonly Version MechJebVersion = new Version(2, 4, 2, 0);
 		private static bool loaded = false;
 
@@ -21,13 +20,7 @@ namespace SCANmechjeb
 		{
 			loaded = checkLoaded();
 
-			if (loaded)
-			{
-				SCANsat.SCANmainMenuLoader.MechJebLoaded = true;
-				print("[SCANsatMechJeb] SCANsat and MechJeb Assemblies Detected");
-			}
-			else
-				print("[SCANsatMechJeb] SCANsat or MechJeb Assembly Not Detected; Shutting Down...");
+			print(loaded ? "[SCANsatMechJeb] SCANsat and MechJeb Assemblies Detected" : "[SCANsatMechJeb] SCANsat or MechJeb Assembly Not Detected; Shutting Down...");
 		}
 
 		public static bool Loaded
@@ -47,7 +40,17 @@ namespace SCANmechjeb
 			if (infoV == null)
 				return false;
 
-			if (infoV.InformationalVersion != SCANsatVersion)
+			var SCANmechjebAssembly = Assembly.GetExecutingAssembly();
+
+			if (SCANmechjebAssembly == null)
+				return false;
+
+			var SMinfoV = Attribute.GetCustomAttribute(SCANmechjebAssembly, typeof(AssemblyInformationalVersionAttribute)) as AssemblyInformationalVersionAttribute;
+
+			if (SMinfoV == null)
+				return false;
+
+			if (infoV.InformationalVersion != SMinfoV.InformationalVersion)
 				return false;
 
 			var MechJebAssembly = AssemblyLoader.loadedAssemblies.FirstOrDefault(a => a.assembly.GetName().Name == MechJeb);
@@ -61,7 +64,10 @@ namespace SCANmechjeb
 				return false;
 
 			if (fileV.Version == MechJebVersion.ToString())
+			{
+				SCANsat.SCANmainMenuLoader.MechJebLoaded = true;
 				return true;
+			}
 
 			return false;
 		}
