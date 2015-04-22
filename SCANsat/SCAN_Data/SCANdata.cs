@@ -183,7 +183,8 @@ namespace SCANsat.SCAN_Data
 				else if (!waypointsLoaded)
 				{
 					waypointsLoaded = true;
-					List<SCANwaypoint> bodyWaypoints = new List<SCANwaypoint>();
+					if (waypoints == null)
+						waypoints = new List<SCANwaypoint>();
 					if (ContractSystem.Instance != null)
 					{
 						var surveys = ContractSystem.Instance.GetCurrentActiveContracts<SurveyContract>();
@@ -200,7 +201,7 @@ namespace SCANsat.SCAN_Data
 										{
 											SCANwaypoint p = new SCANwaypoint(s);
 											if (p.Way != null)
-												bodyWaypoints.Add(p);
+												waypoints.Add(p);
 										}
 									}
 								}
@@ -225,7 +226,7 @@ namespace SCANsat.SCAN_Data
 										{
 											SCANwaypoint p = new SCANwaypoint(s);
 											if (p.Way != null)
-												bodyWaypoints.Add(p);
+												waypoints.Add(p);
 										}
 									}
 								}
@@ -247,17 +248,20 @@ namespace SCANsat.SCAN_Data
 									{
 										if (p.contractReference.ContractState == Contract.State.Active)
 										{
-											if (!bodyWaypoints.Any(a => a.Way == p))
+											if (!waypoints.Any(a => a.Way == p))
 											{
-												bodyWaypoints.Add(new SCANwaypoint(p));
+												waypoints.Add(new SCANwaypoint(p));
 											}
 										}
+									}
+									else if (!waypoints.Any(a => a.Way == p))
+									{
+										waypoints.Add(new SCANwaypoint(p));
 									}
 								}
 							}
 						}
 					}
-					waypoints = bodyWaypoints;
 				}
 
 				return waypoints;
