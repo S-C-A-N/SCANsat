@@ -1,7 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
+﻿#region license
+/* 
+ * [Scientific Committee on Advanced Navigation]
+ * 			S.C.A.N. Satellite
+ *
+ * SCANvresourceBody - Serializable object for storing information about resource density on a given Celestial Body
+ * 
+ * Copyright (c)2014 David Grandy <david.grandy@gmail.com>;
+ * Copyright (c)2014 technogeeky <technogeeky@gmail.com>;
+ * Copyright (c)2014 (Your Name Here) <your email here>; see LICENSE.txt for licensing details.
+ */
+#endregion
+
 using System.Linq;
-using System.Text;
 
 using SCANsat.SCAN_Platform;
 
@@ -55,15 +65,6 @@ namespace SCANsat.SCAN_Data
 
 			defaultMinValue = lowResourceCutoff;
 			defaultMaxValue = highResourceCutoff;
-
-			SCANUtil.SCANdebugLog("Resource Body Decode");
-			SCANUtil.SCANdebugLog("-------->Resource Name               =>   {0}", resourceName);
-			SCANUtil.SCANdebugLog("-------->Body Name                   =>   {0}", bodyName);
-			SCANUtil.SCANdebugLog("-------->Body Index                  =>   {0}", index);
-			SCANUtil.SCANdebugLog("-------->Low Resource Cutoff         =>   {0}", lowResourceCutoff);
-			SCANUtil.SCANdebugLog("-------->High Resource Cutoff        =>   {0}", highResourceCutoff);
-			SCANUtil.SCANdebugLog("-------->Default Low Resource Cutoff =>   {0}", defaultMinValue);
-			SCANUtil.SCANdebugLog("-------->Default Max Resource Cutoff =>   {0}", defaultMaxValue);
 		}
 
 		public string BodyName
@@ -109,11 +110,21 @@ namespace SCANsat.SCAN_Data
 		public float DefaultMinValue
 		{
 			get { return defaultMinValue; }
+			internal set
+			{
+				if (value >= 0 && value < defaultMaxValue && value <= 100)
+					defaultMinValue = value;
+			}
 		}
 
 		public float DefaultMaxValue
 		{
 			get { return defaultMaxValue; }
+			internal set
+			{
+				if (value >= 0 && value > defaultMinValue && value <= 100)
+					defaultMaxValue = value;
+			}
 		}
 	}
 }

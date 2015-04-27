@@ -1,4 +1,17 @@
-﻿using System;
+﻿#region license
+/* 
+ * [Scientific Committee on Advanced Navigation]
+ * 			S.C.A.N. Satellite
+ *
+ * SCANresourceGlobal - Serializable object for storing information about a resource
+ * 
+ * Copyright (c)2014 David Grandy <david.grandy@gmail.com>;
+ * Copyright (c)2014 technogeeky <technogeeky@gmail.com>;
+ * Copyright (c)2014 (Your Name Here) <your email here>; see LICENSE.txt for licensing details.
+ */
+#endregion
+
+using System;
 using System.Linq;
 using System.Collections.Generic;
 using UnityEngine;
@@ -28,7 +41,6 @@ namespace SCANsat.SCAN_Data
 
 		private SCANtype sType;
 		private SCANresourceType resourceType;
-		private SCANresource_Source source;
 
 		private Color defaultLowColor;
 		private Color defaultHighColor;
@@ -36,7 +48,7 @@ namespace SCANsat.SCAN_Data
 
 		private SCANresourceBody currentBody;
 
-		internal SCANresourceGlobal(string resource, float trans, float defMin, float defMax, Color minC, Color maxC, SCANresourceType t, int S)
+		internal SCANresourceGlobal(string resource, float trans, float defMin, float defMax, Color minC, Color maxC, SCANresourceType t)
 		{
 			name = resource;
 			resourceTransparency = trans;
@@ -46,7 +58,6 @@ namespace SCANsat.SCAN_Data
 			defaultMaxValue = defMax;
 			resourceType = t;
 			sType = resourceType.Type;
-			source = (SCANresource_Source)S;
 
 			setDefaultValues();
 		}
@@ -63,7 +74,6 @@ namespace SCANsat.SCAN_Data
 			highResourceColor = copy.highResourceColor;
 			sType = copy.sType;
 			resourceType = copy.resourceType;
-			source = copy.source;
 			masterBodyConfigs = copyBodyConfigs(copy);
 			defaultLowColor = copy.defaultLowColor;
 			defaultHighColor = copy.defaultHighColor;
@@ -89,7 +99,6 @@ namespace SCANsat.SCAN_Data
 		{
 			resourceType = SCANcontroller.getResourceType(name);
 			sType = resourceType.Type;
-			source = (SCANresource_Source)2;
 
 			setDefaultValues();
 			try
@@ -173,11 +182,21 @@ namespace SCANsat.SCAN_Data
 		public float DefaultMinValue
 		{
 			get { return defaultMinValue; }
+			internal set
+			{
+				if (value >= 0 && value < defaultMaxValue && value <= 100)
+					defaultMinValue = value;
+			}
 		}
 
 		public float DefaultMaxValue
 		{
 			get { return defaultMaxValue; }
+			internal set
+			{
+				if (value >= 0 && value > defaultMinValue && value <= 100)
+					defaultMaxValue = value;
+			}
 		}
 
 		public SCANtype SType
@@ -188,11 +207,6 @@ namespace SCANsat.SCAN_Data
 		public SCANresourceType ResourceType
 		{
 			get { return resourceType; }
-		}
-
-		public SCANresource_Source Source
-		{
-			get { return source; }
 		}
 
 		public int getBodyCount
