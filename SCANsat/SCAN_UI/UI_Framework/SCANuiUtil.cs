@@ -12,9 +12,9 @@
  *
  */
 #endregion
+
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text.RegularExpressions;
 using FinePrint;
 using SCANsat.SCAN_Platform;
@@ -157,31 +157,19 @@ namespace SCANsat.SCAN_UI.UI_Framework
 
 				if (SCANcontroller.controller.map_ResourceOverlay && SCANconfigLoader.GlobalResource) //Adds selected resource amount to big map legend
 				{
-					if (SCANcontroller.controller.resourceOverlayType == 0 && SCANmainMenuLoader.RegolithFound)
+					if (SCANUtil.isCovered(lon, lat, data, mapObj.Resource.SType))
 					{
-						if (SCANUtil.isCovered(lon, lat, data, mapObj.Resource.SType))
+						double amount = SCANUtil.ResourceOverlay(lat, lon, mapObj.Resource.Name, mapObj.Body);
+						string label;
+						if (amount < 0)
+							label = "Unknown";
+						else
 						{
-							double amount = SCANUtil.RegolithOverlay(lat, lon, mapObj.Resource.Name, mapObj.Body.flightGlobalsIndex);
-							string label;
-							if (amount < 0)
-								label = "Unknown";
-							else
-							{
-								if (amount > 1)
-									amount = 1;
-								label = amount.ToString("P2");
-							}
-							info += palette.colored(mapObj.Resource.MaxColor, mapObj.Resource.Name + ": " + label + " ");
+							if (amount > 1)
+								amount = 1;
+							label = amount.ToString("P2");
 						}
-					}
-					else if (SCANcontroller.controller.resourceOverlayType == 1)
-					{
-						if (SCANUtil.isCovered(lon, lat, data, mapObj.Resource.SType))
-						{
-							double amount = data.KethaneValueMap[SCANUtil.icLON(lon), SCANUtil.icLAT(lat)];
-							if (amount < 0) amount = 0d;
-							info += palette.colored(mapObj.Resource.MaxColor, mapObj.Resource.Name + ": " + amount.ToString("N1") + " ");
-						}
+						info += palette.colored(mapObj.Resource.MaxColor, mapObj.Resource.Name + ": " + label + " ");
 					}
 				}
 
@@ -247,31 +235,19 @@ namespace SCANsat.SCAN_UI.UI_Framework
 
 				if (SCANcontroller.controller.map_ResourceOverlay && SCANconfigLoader.GlobalResource) //Adds selected resource amount to big map legend
 				{
-					if (SCANcontroller.controller.resourceOverlayType == 0 && SCANmainMenuLoader.RegolithFound)
+					if (SCANUtil.isCovered(lon, lat, data, mapObj.Resource.SType))
 					{
-						if (SCANUtil.isCovered(lon, lat, data, mapObj.Resource.SType))
+						double amount = SCANUtil.ResourceOverlay(lat, lon, mapObj.Resource.Name, mapObj.Body);
+						string label;
+						if (amount < 0)
+							label = "Unknown";
+						else
 						{
-							double amount = SCANUtil.RegolithOverlay(lat, lon, mapObj.Resource.Name, mapObj.Body.flightGlobalsIndex);
-							string label;
-							if (amount < 0)
-								label = "Unknown";
-							else
-							{
-								if (amount > 1)
-									amount = 1;
-								label = amount.ToString("P2");
-							}
-							info += palette.colored(mapObj.Resource.MaxColor, mapObj.Resource.Name + ": " + label + " ");
+							if (amount > 1)
+								amount = 1;
+							label = amount.ToString("P2");
 						}
-					}
-					else if (SCANcontroller.controller.resourceOverlayType == 1)
-					{
-						if (SCANUtil.isCovered(lon, lat, data, mapObj.Resource.SType))
-						{
-							double amount = data.KethaneValueMap[SCANUtil.icLON(lon), SCANUtil.icLAT(lat)];
-							if (amount < 0) amount = 0d;
-							info += palette.colored(mapObj.Resource.MaxColor, mapObj.Resource.Name + ": " + amount.ToString("N1") + " ");
-						}
+						info += palette.colored(mapObj.Resource.MaxColor, mapObj.Resource.Name + ": " + label + " ");
 					}
 				}
 
@@ -993,7 +969,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			bool ath = false;
 			if (vessel.mainBody.atmosphere)
 			{
-				if (vessel.mainBody.maxAtmosphereAltitude >= vessel.altitude)
+				if (vessel.mainBody.atmosphereDepth >= vessel.altitude)
 				{
 					ath = true;
 				}
@@ -1052,7 +1028,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 				{
 					if (vessel.mainBody.atmosphere)
 					{
-						if (vessel.mainBody.maxAtmosphereAltitude >= alt)
+						if (vessel.mainBody.atmosphereDepth >= alt)
 						{
 							if (!ath)
 							{
