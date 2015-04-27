@@ -10,6 +10,7 @@
  * Copyright (c)2014 (Your Name Here) <your email here>; see LICENSE.txt for licensing details.
  */
 #endregion
+
 using System;
 using System.Collections.Generic;
 using System.Reflection;
@@ -22,12 +23,9 @@ namespace SCANsat
 	[KSPAddon(KSPAddon.Startup.MainMenu, true)]
 	public class SCANmainMenuLoader : MonoBehaviour
 	{
-		private const string kVersion = "0.9.2";
-		private string[] Assemblies = new string[12] { "SCANsatRPM", "SCANsatKethane", "Kethane", "GeodesicGrid", "RasterPropMonitor", "MechJebRPM", "MechJeb2", "ORSX", "Regolith", "ContractConfigurator", "CC_SCANsat", "SCANmechjeb" };
+		private string[] Assemblies = new string[7] { "SCANsatKethane", "RasterPropMonitor", "MechJebRPM", "MechJeb2", "ContractConfigurator", "CC_SCANsat", "SCANmechjeb" };
 
 		internal static string SCANsatVersion = "";
-		public static bool kethaneLoaded = false;
-		internal static bool RegolithFound = false;
 		internal static bool FinePrintWaypoint = false;
 		internal static bool FinePrintFlightBand = false;
 		internal static bool FinePrintStationaryWaypoint = false;
@@ -56,19 +54,6 @@ namespace SCANsat
 			if (assemblyList.Count > 0)
 			{
 				SCANsatVersion = assemblyList[0].infoVersion;
-				var kAssembly = assemblyList.FirstOrDefault(a => a.name == "Kethane");
-				var scankAssembly = assemblyList.FirstOrDefault(a => a.name == "SCANsatKethane");
-				if (kAssembly != null && scankAssembly != null)
-				{
-					if (kAssembly.infoVersion == kVersion)
-						kethaneLoaded = true;
-				}
-				var RegolithAssembly = assemblyList.FirstOrDefault(a => a.name == "Regolith");
-				if (RegolithAssembly != null)
-				{
-					RegolithFound = SCANreflection.RegolithReflectionMethod(RegolithAssembly.assemblyLoaded);
-				}
-
 				debugWriter();
 			}
 		}
