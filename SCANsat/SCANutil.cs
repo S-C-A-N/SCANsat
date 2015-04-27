@@ -13,6 +13,7 @@
  * Copyright (c)2014 (Your Name Here) <your email here>; see LICENSE.txt for licensing details.
  */
 #endregion
+
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -242,10 +243,23 @@ namespace SCANsat
 			return ret;
 		}
 
-		internal static float RegolithOverlay(double lat, double lon, string name, int body)
+		internal static float ResourceOverlay(double lat, double lon, string name, CelestialBody body)
 		{
 			float amount = 0f;
-			amount = SCANreflection.RegolithAbundanceValue(lat, lon, name, body, 0, 0, SCANcontroller.controller.regolithBiomeLock);
+			var aRequest = new AbundanceRequest
+			{
+				Latitude = lat,
+				Longitude = lon,
+				BodyId = body.flightGlobalsIndex,
+				ResourceName = name,
+				ResourceType = HarvestTypes.Planetary,
+				Altitude = 0,
+				CheckForLock = SCANcontroller.controller.resourceBiomeLock,
+				BiomeName = getBiomeName(body, lon, lat),
+				ExcludeVariance = false,
+			};
+
+			amount = ResourceMap.Instance.GetAbundance(aRequest);
 			return amount;
 		}
 
