@@ -1,6 +1,17 @@
-﻿using System;
+﻿#region license
+/* 
+ * [Scientific Committee on Advanced Navigation]
+ * 			S.C.A.N. Satellite
+ *
+ * SCAN_Color_Config - serializable object that stores settings in an external file
+ * 
+ * Copyright (c)2014 David Grandy <david.grandy@gmail.com>;
+ * Copyright (c)2014 technogeeky <technogeeky@gmail.com>;
+ * Copyright (c)2014 (Your Name Here) <your email here>; see LICENSE.txt for licensing details.
+ */
+#endregion
+
 using System.Collections.Generic;
-using System.Linq;
 using SCANsat.SCAN_Data;
 using SCANsat.SCAN_Platform;
 using SCANsat.SCAN_Platform.Palettes;

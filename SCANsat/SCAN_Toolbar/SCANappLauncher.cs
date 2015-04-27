@@ -11,7 +11,6 @@
 */
 #endregion
 
-using System;
 using System.Collections;
 using SCANsat.SCAN_Platform;
 using SCANsat.SCAN_UI;

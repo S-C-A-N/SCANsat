@@ -3,9 +3,6 @@ namespace UnityEngine
 {
 	public static class Mathf_
 	{
-		//public Mathf_ ()
-		//{
-		//}
 
 		public static float Mathf_Round(this float f, int precision)
 		{

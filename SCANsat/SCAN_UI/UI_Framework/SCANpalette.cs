@@ -9,9 +9,8 @@
  * Copyright (c)2014 (Your Name Here) <your email here>; see LICENSE.txt for licensing details.
 */
 #endregion
+
 using System;
-//using System.Collections.Generic;
-//using System.Text.RegularExpressions;
 using UnityEngine;
 using SCANsat.SCAN_Data;
 using SCANsat.SCAN_Platform.Palettes;

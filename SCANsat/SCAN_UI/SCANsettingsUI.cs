@@ -12,9 +12,7 @@
  *
  */
 #endregion
-using System;
-using System.Collections.Generic;
-using System.Linq;
+
 using SCANsat.SCAN_Toolbar;
 using SCANsat.SCAN_Data;
 using SCANsat.SCAN_UI.UI_Framework;
@@ -118,7 +116,6 @@ namespace SCANsat.SCAN_UI
 			growS();
 				gui_settings_xmarks(id); 				/* X marker selection */
 				gui_settings_toggle_body_scanning(id);	/* background and body scanning toggles */
-				gui_settings_rebuild_kethane(id);		/* rebuild Kethane database with SCANsat info */
 				gui_settings_timewarp(id);				/* time warp resolution settings */
 				gui_settings_numbers(id);				/* sensor/scanning		statistics */
 				gui_settings_window_resets_tooltips(id);/* reset windows and positions and toggle tooltips*/
@@ -234,17 +231,6 @@ namespace SCANsat.SCAN_UI
 			stopE();
 		}
 
-		//Update the Kethane database to reset the map grid
-		private void gui_settings_rebuild_kethane(int id)
-		{
-			if (SCANcontroller.controller.resourceOverlayType == 1 && SCANconfigLoader.GlobalResource)
-			{ //Rebuild the Kethane database
-				if (GUILayout.Button("Rebuild Kethane Grid Database"))
-					SCANcontroller.controller.KethaneRebuild = !SCANcontroller.controller.KethaneRebuild;
-			}
-			fillS(16);
-		}
-
 		//Control scanning resolution
 		private void gui_settings_timewarp(int id)
 		{
@@ -343,10 +329,7 @@ namespace SCANsat.SCAN_UI
 			stopE();
 			fillS(6);
 			growE();
-				if (SCANconfigLoader.GlobalResource && SCANmainMenuLoader.RegolithFound)
-				{
-					SCANcontroller.controller.regolithBiomeLock = GUILayout.Toggle(SCANcontroller.controller.regolithBiomeLock, "Regolith Biome Lock", SCANskins.SCAN_settingsToggle);
-				}
+				SCANcontroller.controller.resourceBiomeLock = GUILayout.Toggle(SCANcontroller.controller.resourceBiomeLock, "Resource Biome Lock", SCANskins.SCAN_settingsToggle);
 				if (SCANmainMenuLoader.MechJebLoaded)
 				{
 					SCANcontroller.controller.mechJebTargetSelection = GUILayout.Toggle(SCANcontroller.controller.mechJebTargetSelection, "MechJeb Target Selection", SCANskins.SCAN_settingsToggle);

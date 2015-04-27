@@ -1,4 +1,16 @@
-﻿using System;
+﻿#region license
+/* 
+ * [Scientific Committee on Advanced Navigation]
+ * 			S.C.A.N. Satellite
+ *
+ * SCAN Palettes - class to hold a group of color palettes and information about them
+ * 
+ * Copyright (c)2014 David Grandy <david.grandy@gmail.com>;
+ * Copyright (c)2014 technogeeky <technogeeky@gmail.com>;
+ * Copyright (c)2014 (Your Name Here) <your email here>; see LICENSE.txt for licensing details.
+ */
+#endregion
+
 using UnityEngine;
 
 namespace SCANsat.SCAN_Platform.Palettes
@@ -14,7 +26,6 @@ namespace SCANsat.SCAN_Platform.Palettes
 		{
 			availablePalettes = p;
 			int j = 0;
-			//foreach (Palette pa in availablePalettes)
 			for (int d = 0; i < availablePalettes.Length; i++ )
 			{
 				availablePalettes[d].index = j;
@@ -51,7 +62,6 @@ namespace SCANsat.SCAN_Platform.Palettes
 					t.SetPixels(pix);
 					t.Apply();
 					paletteSwatch[i] = t;
-					//availablePalettes[i].swatch = t;
 				}
 				return paletteSwatch;
 			}
