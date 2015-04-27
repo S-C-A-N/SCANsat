@@ -26,8 +26,8 @@ namespace SCANsat.SCAN_Data
 		Anomaly = 1 << 4,		    // anomalies (position of anomaly)
 		AnomalyDetail = 1 << 5,	// anomaly detail (name of anomaly, etc.)
 		Kethane = 1 << 6,         // Kethane - K-type - Kethane
-		Ore = 1 << 7,             // Ore - Regolith & K-type - EPL & MKS
-		Kethane_3 = 1 << 8,       // Reserved - K-type
+		MetallicOre = 1 << 7,             // CRP Ore - Regolith
+		Ore = 1 << 8,				//Stock Ore
 		Kethane_4 = 1 << 9,       // Reserved - K-type
 		Uraninite = 1 << 10,        // Uranium - Regolith - KSPI
 		Thorium = 1 << 11,        // Thorium - Regolith - KSPI
