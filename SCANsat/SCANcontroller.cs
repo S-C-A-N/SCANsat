@@ -11,9 +11,9 @@
  * Copyright (c)2014 (Your Name Here) <your email here>; see LICENSE.txt for licensing details.
  */
 #endregion
+
 using System;
 using System.Linq;
-using System.Reflection;
 using System.Collections.Generic;
 using UnityEngine;
 using SCANsat.SCAN_UI;
@@ -92,8 +92,6 @@ namespace SCANsat
 		[KSPField(isPersistant = true)]
 		public string resourceSelection;
 		[KSPField(isPersistant = true)]
-		public int resourceOverlayType = 0; //0 for ORS, 1 for Kethane
-		[KSPField(isPersistant = true)]
 		public bool dataRebuild = true;
 		[KSPField(isPersistant = true)]
 		public bool mainMapVisible = false;
@@ -106,7 +104,7 @@ namespace SCANsat
 		[KSPField(isPersistant = true)]
 		public bool useStockAppLauncher = true;
 		[KSPField(isPersistant = true)]
-		public bool regolithBiomeLock = false;
+		public bool resourceBiomeLock = false;
 		[KSPField(isPersistant = true)]
 		public bool useStockBiomes = false;
 		[KSPField(isPersistant = true)]
@@ -139,9 +137,6 @@ namespace SCANsat
 
 		/* Primary SCANdata dictionary; loaded every time*/
 		private Dictionary<string, SCANdata> body_data = new Dictionary<string,SCANdata>();
-
-		/* Kethane integration */
-		private bool kethaneRebuild, kethaneReset, kethaneBusy;
 
 		/* MechJeb Landing Target Integration */
 		private bool mechjebLoaded, targetSelecting, targetSelectingActive;
@@ -419,24 +414,6 @@ namespace SCANsat
 		public List<SCANvessel> Known_Vessels
 		{
 			get { return knownVessels.Values.ToList(); }
-		}
-
-		public bool KethaneBusy
-		{
-			get { return kethaneBusy; }
-			set { kethaneBusy = value; }
-		}
-
-		public bool KethaneReset
-		{
-			get { return kethaneReset; }
-			internal set { kethaneReset = value; }
-		}
-
-		public bool KethaneRebuild
-		{
-			get { return kethaneRebuild; }
-			internal set { kethaneRebuild = value; }
 		}
 
 		public int ActiveSensors
