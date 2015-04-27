@@ -12,9 +12,8 @@
  *
  */
 #endregion
-using System;
+
 using System.Collections.Generic;
-using System.Linq;
 using SCANsat.SCAN_Platform;
 using SCANsat;
 using SCANsat.SCAN_UI.UI_Framework;
@@ -84,8 +83,6 @@ namespace SCANsat.SCAN_UI
 			}
 			WindowRect.x = SCANcontroller.controller.map_x;
 			WindowRect.y = SCANcontroller.controller.map_y;
-			if (SCANcontroller.controller.resourceOverlayType == 1)
-				SCANcontroller.controller.map_ResourceOverlay = false;
 			currentColor = SCANcontroller.controller.colours == 0;
 			lastColor = currentColor;
 			WindowCaption = string.Format("Map of {0}", b.theName);
@@ -643,16 +640,6 @@ namespace SCANsat.SCAN_UI
 					{
 						bigmap.setProjection((MapProjection)i);
 						bigmap.resetMap();
-						//if (spotMap != null)
-						//{
-						//	if ((MapProjection)i == MapProjection.Polar)
-						//		spotMap.SpotMap.setProjection(MapProjection.Polar);
-						//	else
-						//		spotMap.SpotMap.setProjection(MapProjection.Rectangular);
-
-						//	spotMap.SpotMap.centerAround(spotMap.SpotMap.CenteredLong, spotMap.SpotMap.CenteredLat);
-						//	spotMap.SpotMap.resetMap();
-						//}
 						SCANcontroller.controller.projection = i;
 						drawGrid = true;
 						drop_down_open = false;
@@ -670,8 +657,6 @@ namespace SCANsat.SCAN_UI
 					if (GUI.Button(r, SCANmapType.mapTypeNames[i], SCANskins.SCAN_dropDownButton))
 					{
 						bigmap.resetMap((mapType)i, true);
-						//if (spotMap != null)
-						//	spotMap.SpotMap.resetMap((mapType)i, false);
 						drop_down_open = false;
 					}
 				}
@@ -690,22 +675,11 @@ namespace SCANsat.SCAN_UI
 						bigmap.Resource = loadedResources[i];
 						bigmap.Resource.CurrentBodyConfig(bigmap.Body.name);
 
-						//if (spotMap != null)
-						//{
-						//	spotMap.SpotMap.Resource = loadedResources[i];
-						//	spotMap.SpotMap.Resource.CurrentBodyConfig(bigmap.Body.name);
-						//}
-
 						SCANcontroller.controller.resourceSelection = bigmap.Resource.Name;
-						if (bigmap.Resource.Source == SCANresource_Source.Kethane)
-							SCANcontroller.controller.resourceOverlayType = 1;
-						else
-							SCANcontroller.controller.resourceOverlayType = 0;
+
 						if (SCANcontroller.controller.map_ResourceOverlay)
 						{
 							bigmap.resetMap();
-							//if (spotMap != null)
-							//	spotMap.SpotMap.resetMap();
 						}
 
 						drop_down_open = false;
@@ -732,8 +706,6 @@ namespace SCANsat.SCAN_UI
 							data = dropDownData;
 							b = data.Body;
 							bigmap.setBody(data.Body);
-							//if (spotMap != null)
-							//	spotMap.setBody(data);
 							bigmap.resetMap();
 							drop_down_open = false;
 						}
