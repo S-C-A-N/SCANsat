@@ -24,7 +24,7 @@ namespace SCANmechjeb
 	{
 		private const string SCANsatName = "SCANsat";
 		private const string MechJeb = "MechJeb2";
-		private readonly Version MechJebVersion = new Version(2, 4, 2, 0);
+		private readonly Version MechJebVersion = new Version(2, 5, 0, 0);
 		private static bool loaded = false;
 
 		private void Awake()
