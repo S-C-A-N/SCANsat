@@ -11,6 +11,7 @@
  */
 #endregion
 
+using System.Linq;
 using SCANsat.SCAN_Data;
 using SCANsat.SCAN_Platform;
 using SCANsat.SCAN_Platform.Palettes;
@@ -75,6 +76,9 @@ namespace SCANsat
 		{
 			foreach (var rs in ResourceCache.Instance.GlobalResources)
 			{
+				if ((HarvestTypes)rs.ResourceType != HarvestTypes.Planetary)
+					continue;
+
 				SCANresourceType t = OverlayResourceType(rs.ResourceName);
 
 				if (t == null)
@@ -99,6 +103,9 @@ namespace SCANsat
 
 			foreach (var rsBody in ResourceCache.Instance.PlanetaryResources)
 			{
+				if ((HarvestTypes)rsBody.ResourceType != HarvestTypes.Planetary)
+					continue;
+
 				SCANresourceGlobal currentGlobal = SCANcontroller.getResourceNode(rsBody.ResourceName);
 
 				if (currentGlobal == null)
@@ -108,7 +115,11 @@ namespace SCANsat
 
 				if (currentBody == null)
 				{
-					currentGlobal.addToBodyConfigs(rsBody.PlanetName, new SCANresourceBody(rsBody.ResourceName, null, rsBody.Distribution.MinAbundance, rsBody.Distribution.MaxAbundance), false);
+					CelestialBody body = FlightGlobals.Bodies.FirstOrDefault(a => a.name == rsBody.PlanetName);
+					if (body == null)
+						continue;
+
+					currentGlobal.addToBodyConfigs(rsBody.PlanetName, new SCANresourceBody(rsBody.ResourceName, body, rsBody.Distribution.MinAbundance, rsBody.Distribution.MaxAbundance), false);
 					currentBody = currentGlobal.getBodyConfig(rsBody.PlanetName, false);
 				}
 
