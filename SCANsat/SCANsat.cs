@@ -402,7 +402,7 @@ namespace SCANsat
 				SCANcontroller.controller.registerSensor(vessel, (SCANtype)sensorType, fov, min_alt, max_alt, best_alt);
 		}
 
-		private void unregisterScanner()
+		protected void unregisterScanner()
 		{
 			scanning = false;
 			if (sensorType > 0 && SCANcontroller.controller != null)
