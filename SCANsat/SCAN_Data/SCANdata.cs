@@ -435,6 +435,17 @@ namespace SCANsat.SCAN_Data
 			}
 		}
 
+		internal void fillResourceMap()
+		{
+			for (int i = 0; i < 360; i++)
+			{
+				for (int j = 0; j < 180; j++)
+				{
+					coverage[i, j] |= (Int32)SCANtype.AllResources;
+				}
+			}
+		}
+
 		/* DATA: reset the map */
 		internal void reset()
 		{
