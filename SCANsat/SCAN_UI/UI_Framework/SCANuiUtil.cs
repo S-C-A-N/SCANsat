@@ -1346,5 +1346,71 @@ namespace SCANsat.SCAN_UI.UI_Framework
 
 		#endregion
 
+		#region Planet Overlay Textures
+
+		internal static void drawResourceTexture(int height,ref int step, ref Texture2D map, SCANdata data, SCANresourceGlobal resource)
+		{
+			Color[] pix;
+			float scale = height / 180f;
+
+			if (map == null)
+			{
+				map = new Texture2D(height * 2, height, TextureFormat.ARGB32, true);
+				pix = map.GetPixels();
+				for (int i = 0; i < pix.Length; i++)
+					pix[i] = palette.clear;
+				map.SetPixels(pix);
+			}
+
+			pix = map.GetPixels(0, step, map.width, 1);
+
+			for (int i = 0; i < pix.Length; i++)
+			{
+				double lon = i / scale;
+				double lat = step / scale;
+
+				pix[i] = resourceToColor(lon, lat, data, palette.clear, resource, 0.01f);
+			}
+
+			map.SetPixels(0, step, map.width, 1, pix);
+			step++;
+			if (step % 10 == 0 || step >= height)
+				map.Apply();
+		}
+
+		private static double resourceMapValue(double Lon, double Lat, SCANdata Data, SCANresourceGlobal resource)
+		{
+			double amount = 0;
+			if (SCANUtil.isCovered(Lon, Lat, Data, resource.SType)) //check our new resource coverage map
+			{
+				amount = SCANUtil.ResourceOverlay(Lat, Lon, resource.Name, Data.Body); //grab the resource amount for the current pixel
+				amount *= 100;
+				if (amount >= resource.CurrentBody.MinValue)
+				{
+					if (amount > resource.CurrentBody.MaxValue)
+						amount = resource.CurrentBody.MaxValue;
+				}
+				else
+					amount = 0;
+			}
+			else
+				amount = -1;
+			return amount;
+		}
+
+		/* Converts resource amount to pixel color */
+		internal static Color resourceToColor(double Lon, double Lat, SCANdata Data, Color BaseColor, SCANresourceGlobal Resource, float Transparency = 0.4f)
+		{
+			double amount = resourceMapValue(Lon, Lat, Data, Resource);
+			if (amount < 0)
+				return BaseColor;
+			else if (amount == 0)
+				return palette.lerp(BaseColor, palette.grey, Transparency);
+			else
+				return palette.lerp(palette.lerp(Resource.MinColor, Resource.MaxColor, (float)amount / (Resource.CurrentBody.MaxValue - Resource.CurrentBody.MinValue)), BaseColor, Resource.Transparency / 100f);
+		}
+
+		#endregion
+
 	}
 }
