@@ -12,7 +12,6 @@
 #endregion
 
 using System.Linq;
-
 using SCANsat.SCAN_Platform;
 
 namespace SCANsat.SCAN_Data
