@@ -45,6 +45,7 @@ namespace SCANsat.SCAN_Data
 		private Color defaultLowColor;
 		private Color defaultHighColor;
 		private float defaultTrans;
+		private Texture2D mapOverlay;
 
 		private SCANresourceBody currentBody;
 
@@ -260,6 +261,12 @@ namespace SCANsat.SCAN_Data
 		public float DefaultTrans
 		{
 			get { return defaultTrans; }
+		}
+
+		public Texture2D MapOverlay
+		{
+			get { return mapOverlay; }
+			set { mapOverlay = value; }
 		}
 	}
 }
