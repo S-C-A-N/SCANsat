@@ -42,6 +42,7 @@ namespace SCANsat.SCAN_Data
 		Regolith_11 = 1<< 20,		// Reserved - Regolith
 
 		Everything_SCAN = (1 << 6) - 1,	// All default SCANsat scanners
+		AllResources = 2147483584,		// All resource types
 		Everything = Int32.MaxValue      // All scanner types
 	}
 }
