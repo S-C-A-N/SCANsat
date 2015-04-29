@@ -111,6 +111,8 @@ namespace SCANsat
 		public float biomeTransparency = 40;
 		[KSPField(isPersistant = true)]
 		public bool mechJebTargetSelection = false;
+		[KSPField(isPersistant = true)]
+		public bool easyModeScanning = true;
 
 		/* Biome and slope colors can't be serialized properly as a KSP Field */
 		public Color lowBiomeColor = palette.xkcd_CamoGreen;
@@ -164,6 +166,9 @@ namespace SCANsat
 		private bool unDocked, docked = false;
 		private Vessel PartFromVessel, PartToVessel, NewVessel, OldVessel;
 		private int timer = 0;
+		private CelestialBody body = null;
+		private bool bodyScanned = false;
+		private bool bodyCoverage = false;
 
 		#region Public Accessors
 
@@ -823,6 +828,61 @@ namespace SCANsat
 					timer = 0;
 				}
 			}
+
+			if (!easyModeScanning)
+				return;
+
+			if (body == null)
+			{
+				if (HighLogic.LoadedSceneIsFlight)
+				{
+					body = FlightGlobals.ActiveVessel.mainBody;
+					bodyScanned = false;
+					bodyCoverage = false;
+				}
+				else if (HighLogic.LoadedScene == GameScenes.TRACKSTATION)
+				{
+					MapObject target = PlanetariumCamera.fetch.target;
+
+					if (target.type != MapObject.MapObjectType.CELESTIALBODY)
+					{
+						body = null;
+						return;
+					}
+
+					body = target.celestialBody;
+					bodyScanned = false;
+					bodyCoverage = false;
+				}
+			}
+
+			if (bodyScanned)
+				return;
+
+			if (!bodyCoverage)
+			{
+				if (SCANUtil.GetCoverage((int)SCANtype.AllResources, body) >= 100)
+				{
+					bodyScanned = true;
+					return;
+				}
+				bodyCoverage = true;
+			}
+
+			if (ResourceMap.Instance == null)
+				return;
+
+			if (ResourceMap.Instance.IsPlanetScanned(body.flightGlobalsIndex))
+			{
+				SCANdata data = SCANUtil.getData(body);
+				if (data == null)
+				{
+					data = new SCANdata(body);
+					addToBodyData(body, data);
+				}
+				data.fillResourceMap();
+				bodyScanned = true;
+			}
 		}
 
 		private void OnDestroy()
@@ -920,6 +980,9 @@ namespace SCANsat
 		{
 			if (!body_data.ContainsKey(VC.to.name))
 				body_data.Add(VC.to.name, new SCANdata(VC.to));
+			body = VC.to;
+			bodyScanned = false;
+			bodyCoverage = false;
 		}
 
 		private void setNewTerrainConfigValues(SCANterrainConfig terrain, float min, float max, float? clamp, Palette c, int size, bool reverse, bool discrete)
