@@ -119,6 +119,7 @@ namespace SCANsat.SCAN_UI
 				gui_settings_timewarp(id);				/* time warp resolution settings */
 				gui_settings_numbers(id);				/* sensor/scanning		statistics */
 				gui_settings_window_resets_tooltips(id);/* reset windows and positions and toggle tooltips*/
+				gui_settings_resources(id);				/* resource scanning options */
 				gui_settings_data_resets(id);			/* reset data and/or reset resources */
 				# if DEBUG
 					gui_settings_window_mapFill(id);	/* debug option to fill in maps */
@@ -326,10 +327,6 @@ namespace SCANsat.SCAN_UI
 				SCANcontroller.controller.useStockAppLauncher = GUILayout.Toggle(SCANcontroller.controller.useStockAppLauncher, "Stock Toolbar", SCANskins.SCAN_settingsToggle);
 
 				SCANcontroller.controller.toolTips = GUILayout.Toggle(SCANcontroller.controller.toolTips, "Tooltips", SCANskins.SCAN_settingsToggle);
-			stopE();
-			fillS(6);
-			growE();
-				SCANcontroller.controller.resourceBiomeLock = GUILayout.Toggle(SCANcontroller.controller.resourceBiomeLock, "Resource Biome Lock", SCANskins.SCAN_settingsToggle);
 				if (SCANmainMenuLoader.MechJebLoaded)
 				{
 					SCANcontroller.controller.mechJebTargetSelection = GUILayout.Toggle(SCANcontroller.controller.mechJebTargetSelection, "MechJeb Target Selection", SCANskins.SCAN_settingsToggle);
@@ -354,6 +351,14 @@ namespace SCANsat.SCAN_UI
 				}
 			}
 			fillS(8);
+		}
+
+		private void gui_settings_resources(int id)
+		{
+			growE();
+				SCANcontroller.controller.resourceBiomeLock = GUILayout.Toggle(SCANcontroller.controller.resourceBiomeLock, "Resource Biome Lock", SCANskins.SCAN_settingsToggle);
+				SCANcontroller.controller.easyModeScanning = GUILayout.Toggle(SCANcontroller.controller.easyModeScanning, "Instant Resource Scan", SCANskins.SCAN_settingsToggle);
+			stopE();
 		}
 
 		//Debugging option to fill in SCAN maps
