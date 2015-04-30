@@ -558,7 +558,7 @@ namespace SCANsat.SCAN_Map
 					}
 					mapline[i] = projVal;
 
-					if (SCANcontroller.controller.map_ResourceOverlay && SCANconfigLoader.GlobalResource)
+					if (SCANcontroller.controller.map_ResourceOverlay && SCANconfigLoader.GlobalResource && resource != null)
 					{
 						pix[i] = SCANuiUtil.resourceToColor(lon, lat, data, baseColor, resource);
 					}
@@ -619,7 +619,7 @@ namespace SCANsat.SCAN_Map
 						}
 						mapline[i] = projVal;
 					}
-					if (SCANcontroller.controller.map_ResourceOverlay && SCANconfigLoader.GlobalResource)
+					if (SCANcontroller.controller.map_ResourceOverlay && SCANconfigLoader.GlobalResource && resource != null)
 					{
 						pix[i] = SCANuiUtil.resourceToColor(lon, lat, data, baseColor, resource);
 					}
@@ -689,7 +689,7 @@ namespace SCANsat.SCAN_Map
 						baseColor = biome;
 						mapline[i] = bio;
 					}
-					if (SCANcontroller.controller.map_ResourceOverlay && SCANconfigLoader.GlobalResource)
+					if (SCANcontroller.controller.map_ResourceOverlay && SCANconfigLoader.GlobalResource && resource != null)
 					{
 						pix[i] = SCANuiUtil.resourceToColor(lon, lat, data, baseColor, resource);
 					}
