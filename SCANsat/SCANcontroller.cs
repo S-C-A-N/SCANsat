@@ -829,6 +829,9 @@ namespace SCANsat
 				}
 			}
 
+			if (!HighLogic.LoadedSceneIsFlight && HighLogic.LoadedScene != GameScenes.TRACKSTATION)
+				return;
+
 			if (!easyModeScanning)
 				return;
 
@@ -868,9 +871,6 @@ namespace SCANsat
 				}
 				bodyCoverage = true;
 			}
-
-			if (ResourceMap.Instance == null)
-				return;
 
 			if (ResourceMap.Instance.IsPlanetScanned(body.flightGlobalsIndex))
 			{
