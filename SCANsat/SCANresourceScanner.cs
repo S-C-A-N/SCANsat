@@ -9,7 +9,7 @@ namespace SCANsat
 	public class ModuleSCANresourceScanner : SCANsat, IAnimatedModule
 	{
 		[KSPField]
-		public bool scanner = false;
+		public bool activeModule = false;
 
 		private ModuleOrbitalSurveyor mSurvey;
 		private ModuleResourceScanner mScanner;
@@ -25,7 +25,8 @@ namespace SCANsat
 		public override string GetInfo()
 		{
 			string info = base.GetInfo();
-			info += "Resource Scan: " + ((SCANtype)sensorType).ToString() + "\n";
+			info += "Resource Scan: " + (SCANtype)sensorType + "\n";
+			info += "Active Scanner: " + activeModule + "\n";
 
 			return info;
 		}
@@ -56,7 +57,7 @@ namespace SCANsat
 			if (SCANcontroller.controller == null)
 				return;
 
-			if (!SCANcontroller.controller.easyModeScanning)
+			if (!SCANcontroller.controller.easyModeScanning && activeModule)
 				updateEvents();
 			else
 			{
