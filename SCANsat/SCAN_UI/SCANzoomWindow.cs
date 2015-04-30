@@ -13,6 +13,7 @@
  */
 #endregion
 
+using System.Linq;
 using SCANsat.SCAN_Platform;
 using SCANsat;
 using SCANsat.SCAN_UI.UI_Framework;
@@ -31,7 +32,6 @@ namespace SCANsat.SCAN_UI
 		private SCANdata data;
 		private Vessel v;
 		private bool showOrbit, showAnomaly, showWaypoints, showInfo, controlLock;
-		private bool narrowBand;
 		private Vector2 dragStart;
 		private Vector2d mjTarget = new Vector2d();
 		private float resizeW, resizeH;
@@ -57,6 +57,8 @@ namespace SCANsat.SCAN_UI
 			SCAN_SkinsLibrary.SetCurrentTooltip();
 
 			removeControlLocks();
+
+			GameEvents.onVesselChange.Add(trackVessel);
 
 			Startup();
 		}
@@ -94,11 +96,14 @@ namespace SCANsat.SCAN_UI
 			TooltipsEnabled = SCANcontroller.controller.toolTips;
 
 			spotmap.setBody(b);
+
+			trackVessel(v);
 		}
 
 		protected override void OnDestroy()
 		{
 			removeControlLocks();
+			GameEvents.onVesselChange.Remove(trackVessel);
 		}
 
 		internal void removeControlLocks()
@@ -144,6 +149,50 @@ namespace SCANsat.SCAN_UI
 			spotmap.resetMap(bigmap.MType, false);
 		}
 
+		private void trackVessel(Vessel vessel)
+		{
+			v = vessel;
+
+			if (!SCANcontroller.controller.needsNarrowBand)
+				return;
+
+			if (!HighLogic.LoadedSceneIsFlight)
+				return;
+
+			if (v.mainBody != b)
+			{
+				spotmap.Resource = null;
+				return;
+			}
+
+			var scanners = v.FindPartModulesImplementing<ModuleResourceScanner>();
+
+			if (scanners.Count() == 0)
+			{
+				spotmap.Resource = null;
+				return;
+			}
+
+			foreach (var m in scanners)
+			{
+				if (m == null)
+					continue;
+
+				if (m.ResourceName == bigmap.Resource.Name && m.ScannerType == 0)
+				{
+					if (spotmap.Resource != bigmap.Resource)
+					{
+						spotmap.Resource = bigmap.Resource;
+						spotmap.Resource.CurrentBodyConfig(b.name);
+						spotmap.resetMap();
+					}
+					return;
+				}
+			}
+
+			spotmap.Resource = null;
+		}
+
 		private void resetMap()
 		{
 			SCANcontroller.controller.TargetSelecting = false;
@@ -159,43 +208,59 @@ namespace SCANsat.SCAN_UI
 
 		protected override void Update()
 		{
-			if (HighLogic.LoadedScene == GameScenes.TRACKSTATION)
-			{
-				MapObject target = PlanetariumCamera.fetch.target;
+			if (HighLogic.LoadedScene != GameScenes.TRACKSTATION)
+				return;
 
-				if (target.type == MapObject.MapObjectType.VESSEL)
-					v = target.vessel;
-				else
-					v = null;
-			}
+			MapObject target = PlanetariumCamera.fetch.target;
+
+			if (target.type == MapObject.MapObjectType.VESSEL)
+				v = target.vessel;
+			else
+				v = null;
 
 			if (!SCANcontroller.controller.needsNarrowBand)
-			{
-				narrowBand = true;
 				return;
-			}
 
 			if (v == null)
 			{
-				narrowBand = false;
 				spotmap.Resource = null;
 				return;
 			}
 
-			if (v.mainBody == b && v.FindPartModulesImplementing<ModuleHighDefCamera>().Count > 0)
+			if (v.mainBody != b)
 			{
-				if (!narrowBand)
+				spotmap.Resource = null;
+				return;
+			}
+
+			var scanners = v.protoVessel.protoPartSnapshots.SelectMany(a => a.modules.Where(t => t.moduleRef.GetType() == typeof(ModuleResourceScanner)));
+
+			if (scanners.Count() == 0)
+			{
+				spotmap.Resource = null;
+				return;
+			}
+
+			foreach (var m in scanners)
+			{
+				ModuleResourceScanner s = (ModuleResourceScanner)m.moduleRef;
+
+				if (s == null)
+					continue;
+
+				if (s.ResourceName == bigmap.Resource.Name && s.ScannerType == 0)
 				{
-					narrowBand = true;
-					spotmap.Resource = bigmap.Resource;
-					spotmap.Resource.CurrentBodyConfig(b.name);
+					if (spotmap.Resource != bigmap.Resource)
+					{
+						spotmap.Resource = bigmap.Resource;
+						spotmap.Resource.CurrentBodyConfig(b.name);
+						spotmap.resetMap();
+					}
+					return;
 				}
 			}
-			else
-			{
-				narrowBand = false;
-				spotmap.Resource = null;
-			}
+
+			spotmap.Resource = null;
 		}
 
 		protected override void DrawWindowPre(int id)
