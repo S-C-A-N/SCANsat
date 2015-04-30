@@ -1348,34 +1348,46 @@ namespace SCANsat.SCAN_UI.UI_Framework
 
 		#region Planet Overlay Textures
 
-		internal static void drawResourceTexture(int height,ref int step, ref Texture2D map, SCANdata data, SCANresourceGlobal resource)
+		internal static void drawResourceTexture(int height, ref int step, SCANdata data, SCANresourceGlobal resource)
 		{
 			Color[] pix;
 			float scale = height / 180f;
 
-			if (map == null)
+			if (resource.MapOverlay == null)
 			{
-				map = new Texture2D(height * 2, height, TextureFormat.ARGB32, true);
-				pix = map.GetPixels();
+				resource.MapOverlay = new Texture2D(height * 2, height, TextureFormat.ARGB32, true);
+				pix = resource.MapOverlay.GetPixels();
 				for (int i = 0; i < pix.Length; i++)
 					pix[i] = palette.clear;
-				map.SetPixels(pix);
+				resource.MapOverlay.SetPixels(pix);
+			}
+			else if (step >= resource.MapOverlay.height)
+			{
+				return;
 			}
 
-			pix = map.GetPixels(0, step, map.width, 1);
+			pix = resource.MapOverlay.GetPixels(0, step, resource.MapOverlay.width, 1);
 
 			for (int i = 0; i < pix.Length; i++)
 			{
-				double lon = i / scale;
-				double lat = step / scale;
+				double lon = (i / scale);
+				double lat = (step / scale) - 90;
 
-				pix[i] = resourceToColor(lon, lat, data, palette.clear, resource, 0.01f);
+				if (lon <= 180)
+					lon = 180 - lon;
+				else
+					lon = (lon - 180) * -1;
+				lon -= 90;
+				if (lon < -180)
+					lon += 360;
+
+				pix[i] = resourceToColor(lon, lat, data, palette.clear, resource, 0.05f);
 			}
 
-			map.SetPixels(0, step, map.width, 1, pix);
+			resource.MapOverlay.SetPixels(0, step, resource.MapOverlay.width, 1, pix);
 			step++;
 			if (step % 10 == 0 || step >= height)
-				map.Apply();
+				resource.MapOverlay.Apply();
 		}
 
 		private static double resourceMapValue(double Lon, double Lat, SCANdata Data, SCANresourceGlobal resource)
