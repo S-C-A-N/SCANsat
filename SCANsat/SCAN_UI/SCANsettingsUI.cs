@@ -374,6 +374,11 @@ namespace SCANsat.SCAN_UI
 				SCANcontroller.controller.resourceBiomeLock = GUILayout.Toggle(SCANcontroller.controller.resourceBiomeLock, "Resource Biome Lock", SCANskins.SCAN_settingsToggle);
 				SCANcontroller.controller.easyModeScanning = GUILayout.Toggle(SCANcontroller.controller.easyModeScanning, "Instant Resource Scan", SCANskins.SCAN_settingsToggle);
 			stopE();
+			growE();
+				fillS();
+				SCANcontroller.controller.needsNarrowBand = GUILayout.Toggle(SCANcontroller.controller.needsNarrowBand,		"Zoom Requires Narrow Band Scanner", SCANskins.SCAN_settingsToggle);
+				fillS();
+			stopE();
 			if (popup)
 			{
 				GUILayout.Label("Reset Resource Coverage", SCANskins.SCAN_button);
