@@ -13,8 +13,6 @@ namespace SCANsat
 
 		private ModuleOrbitalSurveyor mSurvey;
 		private ModuleResourceScanner mScanner;
-		private bool bodyScanned = false;
-		private bool bodyCoverage = false;
 
 		public override void OnStart(PartModule.StartState state)
 		{
@@ -22,6 +20,14 @@ namespace SCANsat
 
 			mSurvey = findSurvey();
 			mScanner = findScanner();
+		}
+
+		public override string GetInfo()
+		{
+			string info = base.GetInfo();
+			info += "Resource Scan: " + ((SCANtype)sensorType).ToString() + "\n";
+
+			return info;
 		}
 
 		private ModuleResourceScanner findScanner()
