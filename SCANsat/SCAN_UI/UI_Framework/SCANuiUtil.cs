@@ -155,7 +155,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 					info += SCANUtil.getBiomeName(body, lon, lat) + " ";
 				}
 
-				if (SCANcontroller.controller.map_ResourceOverlay && SCANconfigLoader.GlobalResource) //Adds selected resource amount to big map legend
+				if (SCANcontroller.controller.map_ResourceOverlay && SCANconfigLoader.GlobalResource && mapObj.Resource != null) //Adds selected resource amount to big map legend
 				{
 					if (SCANUtil.isCovered(lon, lat, data, mapObj.Resource.SType))
 					{
@@ -233,7 +233,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 					info += SCANUtil.getBiomeName(body, lon, lat) + " ";
 				}
 
-				if (SCANcontroller.controller.map_ResourceOverlay && SCANconfigLoader.GlobalResource) //Adds selected resource amount to big map legend
+				if (SCANcontroller.controller.map_ResourceOverlay && SCANconfigLoader.GlobalResource && mapObj.Resource != null) //Adds selected resource amount to big map legend
 				{
 					if (SCANUtil.isCovered(lon, lat, data, mapObj.Resource.SType))
 					{
@@ -575,7 +575,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			{
 				r.x += 1;
 				r.y -= 13;
-				drawMapIcon(r, SCANcontroller.controller.mechJebTargetSelection ? SCANskins.SCAN_MechJebIcon : SCANskins.SCAN_TargetIcon, true);
+				drawMapIcon(r, SCANcontroller.controller.mechJebTargetSelection ? SCANskins.SCAN_MechJebIcon : SCANskins.SCAN_TargetIcon, true, SCANcontroller.controller.mechJebTargetSelection ? palette.red : palette.xkcd_PukeGreen, true);
 			}
 		}
 
@@ -1393,9 +1393,9 @@ namespace SCANsat.SCAN_UI.UI_Framework
 		private static double resourceMapValue(double Lon, double Lat, SCANdata Data, SCANresourceGlobal resource)
 		{
 			double amount = 0;
-			if (SCANUtil.isCovered(Lon, Lat, Data, resource.SType)) //check our new resource coverage map
+			if (SCANUtil.isCovered(Lon, Lat, Data, resource.SType))
 			{
-				amount = SCANUtil.ResourceOverlay(Lat, Lon, resource.Name, Data.Body); //grab the resource amount for the current pixel
+				amount = SCANUtil.ResourceOverlay(Lat, Lon, resource.Name, Data.Body);
 				amount *= 100;
 				if (amount >= resource.CurrentBody.MinValue)
 				{
