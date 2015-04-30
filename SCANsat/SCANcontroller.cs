@@ -113,6 +113,8 @@ namespace SCANsat
 		public bool mechJebTargetSelection = false;
 		[KSPField(isPersistant = true)]
 		public bool easyModeScanning = true;
+		[KSPField(isPersistant = true)]
+		public bool needsNarrowBand = true;
 
 		/* Biome and slope colors can't be serialized properly as a KSP Field */
 		public Color lowBiomeColor = palette.xkcd_CamoGreen;
