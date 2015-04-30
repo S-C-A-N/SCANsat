@@ -58,6 +58,13 @@ namespace SCANsat
 
 			if (!SCANcontroller.controller.easyModeScanning)
 				updateEvents();
+			else
+			{
+				base.Events["startScan"].active = false;
+				base.Events["stopScan"].active = false;
+				if (scanning)
+					unregisterScanner();
+			}
 		}
 
 		public void DisableModule()
