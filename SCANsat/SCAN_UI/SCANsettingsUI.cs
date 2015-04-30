@@ -32,7 +32,7 @@ namespace SCANsat.SCAN_UI
 		/* UI: time warp names and settings */
 		private string[] twnames = { "Off", "Low", "Medium", "High" };
 		private int[] twvals = { 1, 6, 9, 15 };
-		private bool warningBoxOne, warningBoxAll, controlLock;
+		private bool popup, warningResource, warningBoxOne, warningBoxAll, controlLock;
 		private Rect warningRect;
 		private const string lockID = "settingLockID";
 		private bool oldTooltips, stockToolbar;
@@ -106,6 +106,13 @@ namespace SCANsat.SCAN_UI
 					controlLock = false;
 				}
 			}
+
+			if (!popup)
+			{
+				warningBoxOne = false;
+				warningBoxAll = false;
+				warningResource = false;
+			}
 		}
 
 		protected override void DrawWindow(int id)
@@ -118,8 +125,8 @@ namespace SCANsat.SCAN_UI
 				gui_settings_toggle_body_scanning(id);	/* background and body scanning toggles */
 				gui_settings_timewarp(id);				/* time warp resolution settings */
 				gui_settings_numbers(id);				/* sensor/scanning		statistics */
-				gui_settings_window_resets_tooltips(id);/* reset windows and positions and toggle tooltips*/
 				gui_settings_resources(id);				/* resource scanning options */
+				gui_settings_window_resets_tooltips(id);/* reset windows and positions and toggle tooltips*/
 				gui_settings_data_resets(id);			/* reset data and/or reset resources */
 				# if DEBUG
 					gui_settings_window_mapFill(id);	/* debug option to fill in maps */
@@ -131,10 +138,9 @@ namespace SCANsat.SCAN_UI
 
 		protected override void DrawWindowPost(int id)
 		{
-			if ((warningBoxOne || warningBoxAll) && Event.current.type == EventType.mouseDown && !warningRect.Contains(Event.current.mousePosition))
+			if (popup && Event.current.type == EventType.mouseDown && !warningRect.Contains(Event.current.mousePosition))
 			{
-				warningBoxOne = false;
-				warningBoxAll = false;
+				popup = false;
 			}
 
 			if (oldTooltips != SCANcontroller.controller.toolTips)
@@ -281,7 +287,7 @@ namespace SCANsat.SCAN_UI
 
 			GUILayout.Label("Data Management", SCANskins.SCAN_headline);
 			growE();
-			if (warningBoxOne || warningBoxAll)
+			if (popup)
 			{
 				GUILayout.Label("Reset map of " + thisBody.theName, SCANskins.SCAN_button);
 				GUILayout.Label("Reset <b>all</b> data", SCANskins.SCAN_button);
@@ -290,11 +296,13 @@ namespace SCANsat.SCAN_UI
 			{
 				if (GUILayout.Button("Reset map of " + thisBody.theName))
 				{
-					warningBoxOne = true;
+					popup = !popup;
+					warningBoxOne = !warningBoxOne;
 				}
 				if (GUILayout.Button("Reset <b>all</b> data"))
 				{
-					warningBoxAll = true;
+					popup = !popup;
+					warningBoxAll = !warningBoxAll;
 				}
 			}
 			stopE();
@@ -327,27 +335,33 @@ namespace SCANsat.SCAN_UI
 				SCANcontroller.controller.useStockAppLauncher = GUILayout.Toggle(SCANcontroller.controller.useStockAppLauncher, "Stock Toolbar", SCANskins.SCAN_settingsToggle);
 
 				SCANcontroller.controller.toolTips = GUILayout.Toggle(SCANcontroller.controller.toolTips, "Tooltips", SCANskins.SCAN_settingsToggle);
+
 				if (SCANmainMenuLoader.MechJebLoaded)
-				{
 					SCANcontroller.controller.mechJebTargetSelection = GUILayout.Toggle(SCANcontroller.controller.mechJebTargetSelection, "MechJeb Target Selection", SCANskins.SCAN_settingsToggle);
-				}
 			stopE();
 			fillS(8);
-			if (GUILayout.Button("Reset window positions"))
+			if (popup)
 			{
-				if (HighLogic.LoadedSceneIsFlight)
+				GUILayout.Label("Reset window positions", SCANskins.SCAN_button);
+			}
+			else
+			{
+				if (GUILayout.Button("Reset window positions"))
 				{
-					SCANuiUtil.resetMainMapPos();
-					SCANuiUtil.resetBigMapPos();
-					SCANuiUtil.resetInstUIPos();
-					SCANuiUtil.resetSettingsUIPos();
-					SCANuiUtil.resetColorMapPos();
-				}
-				else
-				{
-					SCANuiUtil.resetKSCMapPos();
-					SCANuiUtil.resetColorMapPos();
-					SCANuiUtil.resetSettingsUIPos();
+					if (HighLogic.LoadedSceneIsFlight)
+					{
+						SCANuiUtil.resetMainMapPos();
+						SCANuiUtil.resetBigMapPos();
+						SCANuiUtil.resetInstUIPos();
+						SCANuiUtil.resetSettingsUIPos();
+						SCANuiUtil.resetColorMapPos();
+					}
+					else
+					{
+						SCANuiUtil.resetKSCMapPos();
+						SCANuiUtil.resetColorMapPos();
+						SCANuiUtil.resetSettingsUIPos();
+					}
 				}
 			}
 			fillS(8);
@@ -355,10 +369,23 @@ namespace SCANsat.SCAN_UI
 
 		private void gui_settings_resources(int id)
 		{
+			GUILayout.Label("Resource Settings", SCANskins.SCAN_headline);
 			growE();
 				SCANcontroller.controller.resourceBiomeLock = GUILayout.Toggle(SCANcontroller.controller.resourceBiomeLock, "Resource Biome Lock", SCANskins.SCAN_settingsToggle);
 				SCANcontroller.controller.easyModeScanning = GUILayout.Toggle(SCANcontroller.controller.easyModeScanning, "Instant Resource Scan", SCANskins.SCAN_settingsToggle);
 			stopE();
+			if (popup)
+			{
+				GUILayout.Label("Reset Resource Coverage", SCANskins.SCAN_button);
+			}
+			else
+			{
+				if (GUILayout.Button("Reset Resource Coverage"))
+				{
+					popup = !popup;
+					warningResource = !warningResource;
+				}
+			}
 		}
 
 		//Debugging option to fill in SCAN maps
@@ -404,43 +431,70 @@ namespace SCANsat.SCAN_UI
 		//Confirmation boxes for map resets
 		private void warningBox(int id)
 		{
-			if (warningBoxOne)
+			if (popup)
 			{
-				CelestialBody thisBody = FlightGlobals.currentMainBody;
-				warningRect = new Rect(WindowRect.width - (WindowRect.width / 2)- 150, WindowRect.height - 125, 300, 90);
-				GUI.Box(warningRect, "");
-				Rect r = new Rect(warningRect.x + 10, warningRect.y + 5, 280, 40);
-				GUI.Label(r, "Erase all data for " + thisBody.theName + "?", SCANskins.SCAN_headlineSmall);
-				r.x += 90;
-				r.y += 45;
-				r.width = 80;
-				r.height = 30;
-				if (GUI.Button(r, "Confirm", SCANskins.SCAN_buttonWarning))
+				if (warningBoxOne)
 				{
-					warningBoxOne = false;
-					SCANdata data = SCANUtil.getData(thisBody);
-					if (data != null)
-						data.reset();
-				}
-			}
-			else if (warningBoxAll)
-			{
-				warningRect = new Rect(WindowRect.width - (WindowRect.width / 2) - 120, WindowRect.height - 160, 240, 90);
-				GUI.Box(warningRect, "");
-				Rect r = new Rect(warningRect.x + 10, warningRect.y + 5, 220, 40);
-				GUI.Label(r, "Erase <b>all</b> data ?", SCANskins.SCAN_headlineSmall);
-				r.x += 70;
-				r.y += 45;
-				r.width = 80;
-				r.height = 30;
-				if (GUI.Button(r, "Confirm", SCANskins.SCAN_buttonWarning))
-				{
-					warningBoxAll = false;
-					foreach (SCANdata data in SCANcontroller.controller.GetAllData)
+					CelestialBody thisBody = FlightGlobals.currentMainBody;
+					warningRect = new Rect(WindowRect.width - (WindowRect.width / 2) - 150, WindowRect.height - 125, 300, 90);
+					GUI.Box(warningRect, "");
+					Rect r = new Rect(warningRect.x + 10, warningRect.y + 5, 280, 40);
+					GUI.Label(r, "Erase all data for " + thisBody.theName + "?", SCANskins.SCAN_headlineSmall);
+					r.x += 90;
+					r.y += 45;
+					r.width = 80;
+					r.height = 30;
+					if (GUI.Button(r, "Confirm", SCANskins.SCAN_buttonWarning))
 					{
-						data.reset();
+						popup = false;
+						warningBoxOne = false;
+						SCANdata data = SCANUtil.getData(thisBody);
+						if (data != null)
+							data.reset();
 					}
 				}
+				else if (warningBoxAll)
+				{
+					warningRect = new Rect(WindowRect.width - (WindowRect.width / 2) - 120, WindowRect.height - 160, 240, 90);
+					GUI.Box(warningRect, "");
+					Rect r = new Rect(warningRect.x + 10, warningRect.y + 5, 220, 40);
+					GUI.Label(r, "Erase <b>all</b> data ?", SCANskins.SCAN_headlineSmall);
+					r.x += 70;
+					r.y += 45;
+					r.width = 80;
+					r.height = 30;
+					if (GUI.Button(r, "Confirm", SCANskins.SCAN_buttonWarning))
+					{
+						popup = false;
+						warningBoxAll = false;
+						foreach (SCANdata data in SCANcontroller.controller.GetAllData)
+						{
+							data.reset();
+						}
+					}
+				}
+				else if (warningResource)
+				{
+					CelestialBody thisBody = FlightGlobals.currentMainBody;
+					warningRect = new Rect(WindowRect.width - (WindowRect.width / 2) - 150, WindowRect.height - 125, 300, 90);
+					GUI.Box(warningRect, "");
+					Rect r = new Rect(warningRect.x + 10, warningRect.y + 5, 280, 40);
+					GUI.Label(r, "Erase resource data for " + thisBody.theName + "?", SCANskins.SCAN_headlineSmall);
+					r.x += 90;
+					r.y += 45;
+					r.width = 80;
+					r.height = 30;
+					if (GUI.Button(r, "Confirm", SCANskins.SCAN_buttonWarning))
+					{
+						popup = false;
+						warningResource = false;
+						SCANdata data = SCANUtil.getData(thisBody);
+						if (data != null)
+							data.resetResources();
+					}
+				}
+				else
+					popup = false;
 			}
 		}
 

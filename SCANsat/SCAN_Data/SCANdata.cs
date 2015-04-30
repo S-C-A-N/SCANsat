@@ -472,6 +472,16 @@ namespace SCANsat.SCAN_Data
 			}
 			map_small.Apply();
 		}
+		internal void resetResources()
+		{
+			for (int x = 0; x < 360; x++)
+			{
+				for (int y = 0; y < 180; y++)
+				{
+					coverage[x, y] &= (int)SCANtype.Everything_SCAN;
+				}
+			}
+		}
 		#endregion
 
 		#region Data Serialize/Deserialize
