@@ -159,6 +159,14 @@ namespace SCANsat.SCAN_UI
 			get { return spotmap; }
 		}
 
+		private double inc(double d)
+		{
+			if (d > 90)
+				d = 180 - d;
+
+			return d;
+		}
+
 		private void checkForScanners()
 		{
 			DateTime duration = DateTime.Now;
@@ -172,7 +180,7 @@ namespace SCANsat.SCAN_UI
 				if (vessel.situation != Vessel.Situations.ORBITING)
 					continue;
 
-				if (vessel.orbit.inclination < 10)
+				if (inc(vessel.orbit.inclination) < Math.Abs(spotmap.CenteredLat) - 10)
 					continue;
 
 				var scanners = from pref in vessel.protoVessel.protoPartSnapshots
