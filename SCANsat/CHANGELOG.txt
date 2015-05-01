@@ -1,7 +1,7 @@
 Version 11.6 - 2015-5-1
 ------------------------
 
-- Update for KSP 1.0
+- Update for KSP 1.0.1
 
 - Update for MechJeb 2.5
 
