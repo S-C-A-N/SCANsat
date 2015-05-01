@@ -89,6 +89,7 @@ namespace SCANsat.SCAN_UI
 			WindowRect.y = SCANcontroller.controller.map_y;
 			currentColor = SCANcontroller.controller.colours == 0;
 			lastColor = currentColor;
+			lastResource = SCANcontroller.controller.map_ResourceOverlay;
 			WindowCaption = string.Format("Map of {0}", b.theName);
 			data = SCANUtil.getData(b);
 			if (data == null)
