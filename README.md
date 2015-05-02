@@ -226,6 +226,12 @@ Resource scanning proceeds the same way as standard SCANsat scanning instruments
 The resource system can be enabled through the **SCANsat** Big Map:
 > ![][resource-walkthrough]
 
+Zoom map resource overlays require that a vessel with a narrow-band scanner be present in orbit and at an inclination high enough to cover the area in the zoom map.
+> ![][resource-zoom-map-covered]
+
+If a vessel with a narrow-band scanner is not present, or its inclination is not high enough, the zoom map will not display the resource overlay.
+> ![][resource-zoom-map-uncovered]
+
 Resource overlays will work in IVA, too:
 > ![][resource-iva]
 
@@ -614,6 +620,8 @@ sneaky then they can of course be sneaky.
 [resource-scanner]: http://i.imgur.com/mY0fFjr.gif
 [resource-bigmap]: http://i.imgur.com/JYKG6f5.gif
 [resource-settings]: http://i.imgur.com/sgMklCu.png
+[resource-zoom-map-covered]: http://i.imgur.com/7YuYMGW.png
+[resource-zoom-map-uncovered]: http://i.imgur.com/cJ9JtdW.png
 
 [color-window]: http://i.imgur.com/RQVjq6g.png
 [color-palette-switch]: http://i.imgur.com/0XdMGSy.gif
