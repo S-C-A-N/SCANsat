@@ -63,7 +63,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 					GUILayout.EndHorizontal();
 			GUILayout.EndVertical();
 
-			Rect s = new Rect(r.x + 170, r.y + 100, 70, 30);
+			Rect s = new Rect(r.x + 170, r.y + 100, 80, 30);
 			GUI.Label(s, "Value: " + valSlider.ToString("N0") + "%", SCANskins.SCAN_whiteReadoutLabel);
 
 			s.x += 80;
