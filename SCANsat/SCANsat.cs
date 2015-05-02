@@ -9,6 +9,7 @@
  * Copyright (c)2014 (Your Name Here) <your email here>; see LICENSE.txt for licensing details.
  */
 #endregion
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -401,7 +402,7 @@ namespace SCANsat
 				SCANcontroller.controller.registerSensor(vessel, (SCANtype)sensorType, fov, min_alt, max_alt, best_alt);
 		}
 
-		private void unregisterScanner()
+		protected void unregisterScanner()
 		{
 			scanning = false;
 			if (sensorType > 0 && SCANcontroller.controller != null)

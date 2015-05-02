@@ -12,8 +12,8 @@
  *
  */
 #endregion
+
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using SCANsat.SCAN_Platform;
 using SCANsat;
@@ -33,6 +33,7 @@ namespace SCANsat.SCAN_UI
 		private SCANdata data;
 		private Vessel v;
 		private bool showOrbit, showAnomaly, showWaypoints, showInfo, controlLock;
+		private bool narrowBand;
 		private Vector2 dragStart;
 		private Vector2d mjTarget = new Vector2d();
 		private float resizeW, resizeH;
@@ -158,6 +159,112 @@ namespace SCANsat.SCAN_UI
 			get { return spotmap; }
 		}
 
+		private double inc(double d)
+		{
+			if (d > 90)
+				d = 180 - d;
+
+			return d;
+		}
+
+		private void checkForScanners()
+		{
+			//DateTime duration = DateTime.Now;
+
+			narrowBand = false;
+			foreach (Vessel vessel in FlightGlobals.Vessels)
+			{
+				if (vessel.protoVessel.protoPartSnapshots.Count <= 1)
+					continue;
+
+				if (vessel.vesselType == VesselType.Debris || vessel.vesselType == VesselType.Unknown || vessel.vesselType == VesselType.EVA || vessel.vesselType == VesselType.Flag)
+					continue;
+
+				if (vessel.mainBody != b)
+					continue;
+
+				if (vessel.situation != Vessel.Situations.ORBITING)
+					continue;
+
+				if (inc(vessel.orbit.inclination) < Math.Abs(spotmap.CenteredLat) - 10)
+					continue;
+
+				var scanners = from pref in vessel.protoVessel.protoPartSnapshots
+							   where pref.modules.Any(a => a.moduleName == "ModuleResourceScanner")
+							   select pref;
+
+				if (scanners.Count() == 0)
+					continue;
+
+				foreach (var p in scanners)
+				{
+					if (p.partInfo == null)
+						continue;
+
+					ConfigNode node = p.partInfo.partConfig;
+
+					if (node == null)
+						continue;
+
+					ConfigNode moduleNode = node.GetNodes("MODULE").FirstOrDefault(a => a.GetValue("name") == "ModuleResourceScanner");
+
+					if (moduleNode == null)
+						continue;
+
+					string alt = moduleNode.GetValue("MaxAbundanceAltitude");
+					float f = 0;
+					if (!float.TryParse(alt, out f))
+						continue;
+
+					if (f < 10000)
+						continue;
+
+					if (moduleNode.GetValue("ScannerType") != "0")
+						continue;
+
+					if (moduleNode.GetValue("ResourceName") != bigmap.Resource.Name)
+						continue;
+
+					if (spotmap.Resource != bigmap.Resource)
+					{
+						spotmap.Resource = bigmap.Resource;
+						spotmap.Resource.CurrentBodyConfig(b.name);
+						if (SCANcontroller.controller.map_ResourceOverlay)
+							spotmap.resetMap();
+					}
+
+					if (spotmap.Resource != null)
+					{
+						narrowBand = true;
+						break;
+					}
+				}
+
+				if (narrowBand)
+					break;
+			}
+
+			if (!narrowBand)
+				spotmap.Resource = null;
+
+			//SCANUtil.SCANdebugLog("Loop Time: {0}", duration - DateTime.Now);
+		}
+
+		protected override void Update()
+		{
+			if (HighLogic.LoadedSceneIsFlight)
+				v = FlightGlobals.ActiveVessel;
+			else if (HighLogic.LoadedScene != GameScenes.TRACKSTATION)
+				return;
+
+			MapObject target = PlanetariumCamera.fetch.target;
+
+			if (target.type == MapObject.MapObjectType.VESSEL)
+				v = target.vessel;
+			else
+				v = null;
+		}
+
 		protected override void DrawWindowPre(int id)
 		{
 			WindowCaption = SCANuiUtil.toDMS(spotmap.CenteredLat, spotmap.CenteredLong);
@@ -233,6 +340,9 @@ namespace SCANsat.SCAN_UI
 					controlLock = false;
 				}
 			}
+
+			if (SCANcontroller.controller.needsNarrowBand)
+				checkForScanners();
 		}
 
 		protected override void DrawWindow(int id)
@@ -294,42 +404,62 @@ namespace SCANsat.SCAN_UI
 		private void topBar(int id)
 		{
 			growE();
-			showOrbit = GUILayout.Toggle(showOrbit, textWithTT("", "Toggle Orbit"));
-
-			Rect d = GUILayoutUtility.GetLastRect();
-			d.x += 30;
-			d.y += 2;
-			d.width = 40;
-			d.height = 20;
-
-			if (GUI.Button(d, iconWithTT(SCANskins.SCAN_OrbitIcon, "Toggle Orbit"), SCANskins.SCAN_buttonBorderless))
+			if (HighLogic.LoadedScene == GameScenes.SPACECENTER)
 			{
-				showOrbit = !showOrbit;
+				GUILayout.Label("", GUILayout.Width(70));
 			}
-
-			if (SCANcontroller.controller.mechJebTargetSelection)
+			else
 			{
-				if (SCANcontroller.controller.MechJebLoaded && SCANcontroller.controller.LandingTargetBody == b)
+				if (v != null)
 				{
-					fillS(50);
-					if (GUILayout.Button(iconWithTT(SCANskins.SCAN_MechJebIcon, "Set MechJeb Target"), SCANskins.SCAN_buttonBorderless, GUILayout.Width(24), GUILayout.Height(24)))
+					showOrbit = GUILayout.Toggle(showOrbit, textWithTT("", "Toggle Orbit"));
+
+					Rect d = GUILayoutUtility.GetLastRect();
+					d.x += 30;
+					d.y += 2;
+					d.width = 40;
+					d.height = 20;
+
+					if (GUI.Button(d, iconWithTT(SCANskins.SCAN_OrbitIcon, "Toggle Orbit"), SCANskins.SCAN_buttonBorderless))
 					{
-						SCANcontroller.controller.TargetSelecting = !SCANcontroller.controller.TargetSelecting;
+						showOrbit = !showOrbit;
 					}
 				}
 				else
-					GUILayout.Label("", GUILayout.Width(70));
-			}
-			else if (HighLogic.LoadedScene != GameScenes.SPACECENTER)
-			{
-				fillS(50);
-				if (GUILayout.Button(iconWithTT(SCANskins.SCAN_TargetIcon, "Set Landing Target"), SCANskins.SCAN_buttonBorderless, GUILayout.Width(24), GUILayout.Height(24)))
+					GUILayout.Label("", GUILayout.Width(10));
+
+				if (SCANcontroller.controller.mechJebTargetSelection)
 				{
-					SCANcontroller.controller.TargetSelecting = !SCANcontroller.controller.TargetSelecting;
+					if (SCANcontroller.controller.MechJebLoaded && SCANcontroller.controller.LandingTargetBody == b)
+					{
+						fillS(50);
+						if (GUILayout.Button(textWithTT("", "Set MechJeb Target"), SCANskins.SCAN_buttonBorderless, GUILayout.Width(24), GUILayout.Height(24)))
+						{
+							SCANcontroller.controller.TargetSelecting = !SCANcontroller.controller.TargetSelecting;
+						}
+						Rect r = GUILayoutUtility.GetLastRect();
+						Color old = GUI.color;
+						GUI.color = palette.red;
+						GUI.DrawTexture(r, SCANskins.SCAN_MechJebIcon);
+						GUI.color = old;
+					}
+					else
+						GUILayout.Label("", GUILayout.Width(70));
+				}
+				else
+				{
+					fillS(50);
+					if (GUILayout.Button(textWithTT("", "Set Landing Target"), SCANskins.SCAN_buttonBorderless, GUILayout.Width(24), GUILayout.Height(24)))
+					{
+						SCANcontroller.controller.TargetSelecting = !SCANcontroller.controller.TargetSelecting;
+					}
+					Rect r = GUILayoutUtility.GetLastRect();
+					Color old = GUI.color;
+					GUI.color = palette.xkcd_PukeGreen;
+					GUI.DrawTexture(r, SCANskins.SCAN_TargetIcon);
+					GUI.color = old;
 				}
 			}
-			else
-				GUILayout.Label("", GUILayout.Width(70));
 
 			fillS();
 
@@ -386,13 +516,13 @@ namespace SCANsat.SCAN_UI
 			{
 				showWaypoints = GUILayout.Toggle(showWaypoints, textWithTT("", "Toggle Waypoints"));
 
-				d = GUILayoutUtility.GetLastRect();
-				d.x += 28;
-				d.y += 2;
-				d.width = 20;
-				d.height = 20;
+				Rect w = GUILayoutUtility.GetLastRect();
+				w.x += 28;
+				w.y += 2;
+				w.width = 20;
+				w.height = 20;
 
-				if (GUI.Button(d, iconWithTT(SCANskins.SCAN_WaypointIcon, "Toggle Waypoints"), SCANskins.SCAN_buttonBorderless))
+				if (GUI.Button(w, iconWithTT(SCANskins.SCAN_WaypointIcon, "Toggle Waypoints"), SCANskins.SCAN_buttonBorderless))
 				{
 					showWaypoints = !showWaypoints;
 				}
@@ -400,17 +530,17 @@ namespace SCANsat.SCAN_UI
 				fillS(16);
 			}
 			else
-				GUILayout.Label("", GUILayout.Width(60));
+				GUILayout.Label("", GUILayout.Width(40));
 
 			showAnomaly = GUILayout.Toggle(showAnomaly, textWithTT("", "Toggle Anomalies"));
 
-			d = GUILayoutUtility.GetLastRect();
-			d.x += 26;
-			d.y += 2;
-			d.width = 20;
-			d.height = 20;
+			Rect a = GUILayoutUtility.GetLastRect();
+			a.x += 26;
+			a.y += 2;
+			a.width = 20;
+			a.height = 20;
 
-			if (GUI.Button(d, textWithTT(SCANcontroller.controller.anomalyMarker, "Toggle Anomalies"), SCANskins.SCAN_buttonBorderless))
+			if (GUI.Button(a, textWithTT(SCANcontroller.controller.anomalyMarker, "Toggle Anomalies"), SCANskins.SCAN_buttonBorderless))
 			{
 				showAnomaly = !showAnomaly;
 			}
@@ -493,7 +623,7 @@ namespace SCANsat.SCAN_UI
 						mjTarget.y = mlat;
 						SCANcontroller.controller.LandingTargetCoords = mjTarget;
 						Rect r = new Rect(mx + TextureRect.x - 11, my + TextureRect.y - 13, 24, 24);
-						SCANuiUtil.drawMapIcon(r, SCANcontroller.controller.mechJebTargetSelection ? SCANskins.SCAN_MechJebYellowIcon : SCANskins.SCAN_TargetYellowIcon, true);
+						SCANuiUtil.drawMapIcon(r, SCANcontroller.controller.mechJebTargetSelection ? SCANskins.SCAN_MechJebIcon : SCANskins.SCAN_TargetIcon, true, palette.yellow, true);
 					}
 				}
 				else if (SCANcontroller.controller.TargetSelecting)
@@ -592,7 +722,7 @@ namespace SCANsat.SCAN_UI
 		private void mapLabels(int id)
 		{
 			//Draw the orbit overlays
-			if (showOrbit && HighLogic.LoadedSceneIsFlight)
+			if (showOrbit && v != null)
 			{
 				SCANuiUtil.drawOrbit(TextureRect, spotmap, v, spotmap.Body);
 			}

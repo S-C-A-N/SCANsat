@@ -3,7 +3,7 @@
  * [Scientific Committee on Advanced Navigation]
  * 			S.C.A.N. Satellite
  * 
- * SCANresource - Stores info on resources pulled from their respective addons and SCANsat configs
+ * SCANresource - Stores a SCANsat sensor type for each resource
  *
  * Copyright (c)2013 damny;
  * Copyright (c)2014 technogeeky <technogeeky@gmail.com>;
@@ -11,18 +11,11 @@
 */
 #endregion
 
-using System;
 using palette = SCANsat.SCAN_UI.UI_Framework.SCANpalette;
 using UnityEngine;
 
 namespace SCANsat.SCAN_Data
 {
-	public enum SCANresource_Source
-	{
-		Kethane = 1,
-		Regolith = 2,
-	}
-
 	public class SCANresourceType
 	{
 		private string name;

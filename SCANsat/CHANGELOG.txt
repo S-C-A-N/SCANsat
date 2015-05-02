@@ -1,3 +1,35 @@
+Version 11.6 - 2015-5-1
+------------------------
+
+- Update for KSP 1.0.2
+
+- Update for MechJeb 2.5
+
+- All textures converted to DDS
+- Significant reduction in part texture size
+	- Saving of about 20MB
+- RADAR scanner moved to the Basic Science tech tree node
+- Initial part balancing, temperature settings, etc...
+
+- Integration with stock resource system
+	- By default stock resource scans are all scanned by the Survey Scanner
+	- Zoom map resource overlays require that a vessel in orbit of the planet have a narrow-band scanner
+	- Map overlays work the same as before for the big map
+	
+- Resource system options
+	- Disable stock instant scan
+		- All SCANsat map overlays will require manual scanning of the planet
+		- SCANsat sensor modules added to stock resource scanners using Module Manager
+	- Option to disable the biome lock
+		- Gives fully accurate abundance levels without using the Surface Scanner
+	- Disable narrow-band scanner requirement
+		- With this disabled the zoom map will show resource overlays without restrictions
+	- A resource scanning coverage reset button is available
+		- This will erase all resource scanning data; will not affect regular SCANsat data
+		- A confirmation box popup prevents accidental button presses
+
+- Fixed a bug with data resets in the tracking center
+
 Version 11.5 - 2015-4-22
 ------------------------
 

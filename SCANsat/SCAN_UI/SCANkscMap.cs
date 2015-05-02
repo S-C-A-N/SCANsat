@@ -12,9 +12,8 @@
  *
  */
 #endregion
-using System;
+
 using System.Collections.Generic;
-using System.Linq;
 using SCANsat.SCAN_Platform;
 using SCANsat;
 using SCANsat.SCAN_UI.UI_Framework;
@@ -76,10 +75,9 @@ namespace SCANsat.SCAN_UI
 				bigmap.setProjection((MapProjection)SCANcontroller.controller.projection);
 				bigmap.setWidth(720);
 			}
-			if (SCANcontroller.controller.resourceOverlayType == 1)
-				SCANcontroller.controller.map_ResourceOverlay = false;
 			currentColor = SCANcontroller.controller.colours == 0;
 			lastColor = currentColor;
+			lastResource = SCANcontroller.controller.map_ResourceOverlay;
 			WindowCaption = string.Format("Map of {0}", b.theName);
 			data = SCANUtil.getData(b);
 			if (data == null)
@@ -678,10 +676,7 @@ namespace SCANsat.SCAN_UI
 						bigmap.Resource.CurrentBodyConfig(bigmap.Body.name);
 
 						SCANcontroller.controller.resourceSelection = bigmap.Resource.Name;
-						if (bigmap.Resource.Source == SCANresource_Source.Kethane)
-							SCANcontroller.controller.resourceOverlayType = 1;
-						else
-							SCANcontroller.controller.resourceOverlayType = 0;
+
 						if (SCANcontroller.controller.map_ResourceOverlay)
 							bigmap.resetMap();
 

@@ -10,6 +10,7 @@
  * Copyright (c)2014 (Your Name Here) <your email here>; see LICENSE.txt for licensing details.
  */
 #endregion
+
 using System;
 using System.Linq;
 using System.Collections.Generic;
@@ -303,9 +304,9 @@ namespace SCANsat.SCAN_Data
 				uncov += coverage_count[5];
 			if ((type & SCANtype.Kethane) != SCANtype.Nothing)
 				uncov += coverage_count[6];
-			if ((type & SCANtype.Ore) != SCANtype.Nothing)
+			if ((type & SCANtype.MetallicOre) != SCANtype.Nothing)
 				uncov += coverage_count[7];
-			if ((type & SCANtype.Kethane_3) != SCANtype.Nothing)
+			if ((type & SCANtype.Ore) != SCANtype.Nothing)
 				uncov += coverage_count[8];
 			if ((type & SCANtype.Kethane_4) != SCANtype.Nothing)
 				uncov += coverage_count[9];
@@ -434,6 +435,17 @@ namespace SCANsat.SCAN_Data
 			}
 		}
 
+		internal void fillResourceMap()
+		{
+			for (int i = 0; i < 360; i++)
+			{
+				for (int j = 0; j < 180; j++)
+				{
+					coverage[i, j] |= (Int32)SCANtype.AllResources;
+				}
+			}
+		}
+
 		/* DATA: reset the map */
 		internal void reset()
 		{
@@ -459,6 +471,16 @@ namespace SCANsat.SCAN_Data
 				}
 			}
 			map_small.Apply();
+		}
+		internal void resetResources()
+		{
+			for (int x = 0; x < 360; x++)
+			{
+				for (int y = 0; y < 180; y++)
+				{
+					coverage[x, y] &= (int)SCANtype.Everything_SCAN;
+				}
+			}
 		}
 		#endregion
 

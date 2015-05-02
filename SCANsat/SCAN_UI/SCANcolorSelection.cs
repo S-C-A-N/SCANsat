@@ -12,9 +12,8 @@
  *
  */
 #endregion
-using System;
+
 using System.Collections.Generic;
-using System.Linq;
 using SCANsat.SCAN_Data;
 using SCANsat.SCAN_Map;
 using SCANsat.SCAN_UI.UI_Framework;

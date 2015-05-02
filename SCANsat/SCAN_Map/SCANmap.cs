@@ -17,6 +17,7 @@ using UnityEngine;
 using SCANsat.SCAN_Platform.Palettes;
 using SCANsat.SCAN_Platform.Logging;
 using SCANsat.SCAN_Data;
+using SCANsat.SCAN_UI.UI_Framework;
 using palette = SCANsat.SCAN_UI.UI_Framework.SCANpalette;
 
 namespace SCANsat.SCAN_Map
@@ -415,8 +416,6 @@ namespace SCANsat.SCAN_Map
 						resource = SCANcontroller.GetFirstResource;
 					resource.CurrentBodyConfig(body.name);
 				}
-				if (SCANcontroller.controller.resourceOverlayType == 1)
-					SCANcontroller.controller.KethaneReset = !SCANcontroller.controller.KethaneReset;
 			}
 		}
 
@@ -559,9 +558,9 @@ namespace SCANsat.SCAN_Map
 					}
 					mapline[i] = projVal;
 
-					if (SCANcontroller.controller.map_ResourceOverlay && SCANconfigLoader.GlobalResource)
+					if (SCANcontroller.controller.map_ResourceOverlay && SCANconfigLoader.GlobalResource && resource != null)
 					{
-						pix[i] = resourceToColor(lon, lat, data, baseColor);
+						pix[i] = SCANuiUtil.resourceToColor(lon, lat, data, baseColor, resource);
 					}
 					else pix[i] = baseColor;
 
@@ -620,9 +619,9 @@ namespace SCANsat.SCAN_Map
 						}
 						mapline[i] = projVal;
 					}
-					if (SCANcontroller.controller.map_ResourceOverlay && SCANconfigLoader.GlobalResource)
+					if (SCANcontroller.controller.map_ResourceOverlay && SCANconfigLoader.GlobalResource && resource != null)
 					{
-						pix[i] = resourceToColor(lon, lat, data, baseColor);
+						pix[i] = SCANuiUtil.resourceToColor(lon, lat, data, baseColor, resource);
 					}
 					else pix[i] = baseColor;
 				}
@@ -690,9 +689,9 @@ namespace SCANsat.SCAN_Map
 						baseColor = biome;
 						mapline[i] = bio;
 					}
-					if (SCANcontroller.controller.map_ResourceOverlay && SCANconfigLoader.GlobalResource)
+					if (SCANcontroller.controller.map_ResourceOverlay && SCANconfigLoader.GlobalResource && resource != null)
 					{
-						pix[i] = resourceToColor(lon, lat, data, baseColor);
+						pix[i] = SCANuiUtil.resourceToColor(lon, lat, data, baseColor, resource);
 					}
 					else pix[i] = baseColor;
 				}
@@ -738,57 +737,6 @@ namespace SCANsat.SCAN_Map
 			}
 
 			return elevation;
-		}
-
-		/* Calculates resource value for a given pixel using Regolith or Kethane data */
-		private double resourceMapValue(double Lon, double Lat, SCANdata Data)
-		{
-			double amount = 0;
-			if (SCANcontroller.controller.resourceOverlayType == 0 && SCANmainMenuLoader.RegolithFound && resource != null)
-			{
-				if (SCANUtil.isCovered(Lon, Lat, Data, resource.SType)) //check our new resource coverage map
-				{
-					amount = SCANUtil.RegolithOverlay(Lat, Lon, resource.Name, body.flightGlobalsIndex); //grab the resource amount for the current pixel
-					amount *= 100;
-					if (amount >= resource.CurrentBody.MinValue)
-					{
-						if (amount > resource.CurrentBody.MaxValue)
-							amount = resource.CurrentBody.MaxValue;
-					}
-					else
-						amount = 0;
-				}
-				else
-					amount = -1;
-			}
-			else if (SCANcontroller.controller.resourceOverlayType == 1 && resource != null)
-			{
-				if (SCANUtil.isCovered(Lon, Lat, Data, resource.SType))
-				{
-					int ilon = SCANUtil.icLON(Lon);
-					int ilat = SCANUtil.icLAT(Lat);
-					amount = Data.KethaneValueMap[ilon, ilat];
-				}
-				else
-					amount = -1;
-			}
-			return amount;
-		}
-
-		/* Converts resource amount to pixel color */
-		private Color resourceToColor (double Lon, double Lat, SCANdata Data, Color BaseColor)
-		{
-			double amount = resourceMapValue(Lon, Lat, Data);
-			if (amount < 0)
-				return BaseColor;
-			else if (amount == 0)
-				return palette.lerp(BaseColor, palette.grey, 0.4f);
-			else if (SCANcontroller.controller.resourceOverlayType == 0 && SCANmainMenuLoader.RegolithFound)
-				return palette.lerp(palette.lerp(resource.MinColor, resource.MaxColor, (float)amount / (resource.CurrentBody.MaxValue - resource.CurrentBody.MinValue)), BaseColor, resource.Transparency / 100f);
-			else if (SCANcontroller.controller.resourceOverlayType == 1 && SCANmainMenuLoader.kethaneLoaded)
-				return palette.lerp(palette.lerp(resource.MinColor, resource.MaxColor, (float)amount / resource.CurrentBody.MaxValue), BaseColor, 0.3f);
-
-			return BaseColor;
 		}
 
 		#endregion

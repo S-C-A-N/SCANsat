@@ -11,9 +11,9 @@
  * Copyright (c)2014 (Your Name Here) <your email here>; see LICENSE.txt for licensing details.
  */
 #endregion
+
 using System;
 using System.Linq;
-using System.Reflection;
 using System.Collections.Generic;
 using UnityEngine;
 using SCANsat.SCAN_UI;
@@ -92,8 +92,6 @@ namespace SCANsat
 		[KSPField(isPersistant = true)]
 		public string resourceSelection;
 		[KSPField(isPersistant = true)]
-		public int resourceOverlayType = 0; //0 for ORS, 1 for Kethane
-		[KSPField(isPersistant = true)]
 		public bool dataRebuild = true;
 		[KSPField(isPersistant = true)]
 		public bool mainMapVisible = false;
@@ -106,21 +104,25 @@ namespace SCANsat
 		[KSPField(isPersistant = true)]
 		public bool useStockAppLauncher = true;
 		[KSPField(isPersistant = true)]
-		public bool regolithBiomeLock = false;
+		public bool resourceBiomeLock = true;
 		[KSPField(isPersistant = true)]
 		public bool useStockBiomes = false;
 		[KSPField(isPersistant = true)]
 		public float biomeTransparency = 40;
 		[KSPField(isPersistant = true)]
 		public bool mechJebTargetSelection = false;
+		[KSPField(isPersistant = true)]
+		public bool easyModeScanning = true;
+		[KSPField(isPersistant = true)]
+		public bool needsNarrowBand = true;
 
 		/* Biome and slope colors can't be serialized properly as a KSP Field */
-		public Color lowBiomeColor = palette.xkcd_CamoGreen;
-		public Color highBiomeColor = palette.xkcd_Marigold;
-		public Color lowSlopeColorOne = palette.xkcd_PukeGreen;
-		public Color highSlopeColorOne = palette.xkcd_Yellow;
-		public Color lowSlopeColorTwo = palette.xkcd_Yellow;
-		public Color highSlopeColorTwo = palette.xkcd_OrangeRed;
+		public Color lowBiomeColor = new Color(0, 0.46f, 0.02345098f, 1);
+		public Color highBiomeColor = new Color(0.7f, 0.2388235f, 0, 1);
+		public Color lowSlopeColorOne = new Color(0.004705883f, 0.6f, 0.3788235f, 1);
+		public Color highSlopeColorOne = new Color(0.9764706f, 1, 0.4627451f, 1);
+		public Color lowSlopeColorTwo = new Color(0.9764706f, 1, 0.4627451f, 1);
+		public Color highSlopeColorTwo = new Color(0.94f, 0.2727843f, 0.007372549f, 1);
 
 		/* Available resources for overlays; loaded from SCANsat configs; only loaded once */
 		private static Dictionary<string, SCANresourceGlobal> masterResourceNodes = new Dictionary<string,SCANresourceGlobal>();
@@ -139,9 +141,6 @@ namespace SCANsat
 
 		/* Primary SCANdata dictionary; loaded every time*/
 		private Dictionary<string, SCANdata> body_data = new Dictionary<string,SCANdata>();
-
-		/* Kethane integration */
-		private bool kethaneRebuild, kethaneReset, kethaneBusy;
 
 		/* MechJeb Landing Target Integration */
 		private bool mechjebLoaded, targetSelecting, targetSelectingActive;
@@ -169,6 +168,9 @@ namespace SCANsat
 		private bool unDocked, docked = false;
 		private Vessel PartFromVessel, PartToVessel, NewVessel, OldVessel;
 		private int timer = 0;
+		private CelestialBody body = null;
+		private bool bodyScanned = false;
+		private bool bodyCoverage = false;
 
 		#region Public Accessors
 
@@ -406,12 +408,21 @@ namespace SCANsat
 		public static List<SCANresourceGlobal> setLoadedResourceList()
 		{
 			List<SCANresourceGlobal> rList = new List<SCANresourceGlobal>();
+			SCANresourceGlobal ore = null;
 
 			foreach (string r in loadedResources)
 			{
 				if (masterResourceNodes.ContainsKey(r))
-					rList.Add(masterResourceNodes[r]);
+				{
+					if (r != "Ore")
+						rList.Add(masterResourceNodes[r]);
+					else
+						ore = masterResourceNodes[r];
+				}
 			}
+
+			if (ore != null)
+				rList.Insert(0, ore);
 
 			return rList;
 		}
@@ -419,24 +430,6 @@ namespace SCANsat
 		public List<SCANvessel> Known_Vessels
 		{
 			get { return knownVessels.Values.ToList(); }
-		}
-
-		public bool KethaneBusy
-		{
-			get { return kethaneBusy; }
-			set { kethaneBusy = value; }
-		}
-
-		public bool KethaneReset
-		{
-			get { return kethaneReset; }
-			internal set { kethaneReset = value; }
-		}
-
-		public bool KethaneRebuild
-		{
-			get { return kethaneRebuild; }
-			internal set { kethaneRebuild = value; }
 		}
 
 		public int ActiveSensors
@@ -846,6 +839,61 @@ namespace SCANsat
 					timer = 0;
 				}
 			}
+
+			if (!HighLogic.LoadedSceneIsFlight && HighLogic.LoadedScene != GameScenes.TRACKSTATION)
+				return;
+
+			if (!easyModeScanning)
+				return;
+
+			if (body == null)
+			{
+				if (HighLogic.LoadedSceneIsFlight)
+				{
+					body = FlightGlobals.ActiveVessel.mainBody;
+					bodyScanned = false;
+					bodyCoverage = false;
+				}
+				else if (HighLogic.LoadedScene == GameScenes.TRACKSTATION)
+				{
+					MapObject target = PlanetariumCamera.fetch.target;
+
+					if (target.type != MapObject.MapObjectType.CELESTIALBODY)
+					{
+						body = null;
+						return;
+					}
+
+					body = target.celestialBody;
+					bodyScanned = false;
+					bodyCoverage = false;
+				}
+			}
+
+			if (bodyScanned)
+				return;
+
+			if (!bodyCoverage)
+			{
+				if (SCANUtil.GetCoverage((int)SCANtype.AllResources, body) >= 100)
+				{
+					bodyScanned = true;
+					return;
+				}
+				bodyCoverage = true;
+			}
+
+			if (ResourceMap.Instance.IsPlanetScanned(body.flightGlobalsIndex))
+			{
+				SCANdata data = SCANUtil.getData(body);
+				if (data == null)
+				{
+					data = new SCANdata(body);
+					addToBodyData(body, data);
+				}
+				data.fillResourceMap();
+				bodyScanned = true;
+			}
 		}
 
 		private void OnDestroy()
@@ -943,6 +991,9 @@ namespace SCANsat
 		{
 			if (!body_data.ContainsKey(VC.to.name))
 				body_data.Add(VC.to.name, new SCANdata(VC.to));
+			body = VC.to;
+			bodyScanned = false;
+			bodyCoverage = false;
 		}
 
 		private void setNewTerrainConfigValues(SCANterrainConfig terrain, float min, float max, float? clamp, Palette c, int size, bool reverse, bool discrete)

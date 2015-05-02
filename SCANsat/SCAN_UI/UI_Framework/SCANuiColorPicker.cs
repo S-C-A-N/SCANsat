@@ -1,6 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿#region license
+/* 
+ * [Scientific Committee on Advanced Navigation]
+ * 			S.C.A.N. Satellite
+ *
+ * SCANuiColorPicker - object to handle color selection from an HSV color picker
+ * 
+ * Copyright (c)2014 David Grandy <david.grandy@gmail.com>;
+ * Copyright (c)2014 technogeeky <technogeeky@gmail.com>;
+ * Copyright (c)2014 (Your Name Here) <your email here>; see LICENSE.txt for licensing details.
+ */
+#endregion
+
 using UnityEngine;
 
 namespace SCANsat.SCAN_UI.UI_Framework
@@ -53,7 +63,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 					GUILayout.EndHorizontal();
 			GUILayout.EndVertical();
 
-			Rect s = new Rect(r.x + 170, r.y + 100, 70, 30);
+			Rect s = new Rect(r.x + 170, r.y + 100, 80, 30);
 			GUI.Label(s, "Value: " + valSlider.ToString("N0") + "%", SCANskins.SCAN_whiteReadoutLabel);
 
 			s.x += 80;

@@ -1,8 +1,18 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿#region license
+/* 
+ * [Scientific Committee on Advanced Navigation]
+ * 			S.C.A.N. Satellite
+ *
+ * SCAN Palette - object to hold information about a color palette
+ * 
+ * Copyright (c)2014 David Grandy <david.grandy@gmail.com>;
+ * Copyright (c)2014 technogeeky <technogeeky@gmail.com>;
+ * Copyright (c)2014 (Your Name Here) <your email here>; see LICENSE.txt for licensing details.
+ */
+#endregion
 
+using System;
+using UnityEngine;
 
 namespace SCANsat.SCAN_Platform.Palettes
 {
@@ -12,17 +22,11 @@ namespace SCANsat.SCAN_Platform.Palettes
 		public string name;
 		public Kind kind;
 		public int size;
-		//public Texture2D swatch;
 		public int index;
 		public string hash;
 
-		//public Swatches Swatches { get; private set; }
-
 		public Color32[] colors;
 		public Color32[] colorsReverse;
-
-		//public List<Color> colors4;
-		//public List<uint32> _hexCodes = new List<uint32>();
 
 		public enum Kind {
 			Diverging,
@@ -53,37 +57,6 @@ namespace SCANsat.SCAN_Platform.Palettes
 		public Is xerox;
 		public Is panel;
 
-		//public List<Color> colors;
-		//public List<uint32> _hexCodes = new List<uint32>();
-
-		//public Palette () {
-		//	this.kind 	= Kind.Unknown;
-		//	this.blind	= Is.Unknown;
-		//	this.print	= Is.Unknown;
-		//	this.xerox	= Is.Unknown;
-		//	this.panel	= Is.Unknown;
-		//	this.name	= "";
-		//}
-
-		//public Palette(string name) : this(name,null) {}
-		//public Palette(string name, IEnumerable<Swatch> cs) {
-		//	this.name = name;
-		//	this.Swatches = new Swatches();
-
-		//	if (colors != null)	this.Swatches.AddRange(cs);
-		//}
-		//public Palette(Color32[] cs, Kind k, Is blindSafe, Is printSafe, Is xeroxSafe, Is panelSafe) {
-		//	this.colors = cs;
-		//	this.colorsReverse = new Color32[cs.Length];
-		//	this.colors.CopyTo(this.colorsReverse, 0);
-		//	Array.Reverse(this.colorsReverse);
-		//	this.kind = k;
-		//	this.blind = blindSafe;
-		//	this.print = printSafe;
-		//	this.xerox = xeroxSafe;
-		//	this.panel = panelSafe;
-		//	this.size = cs.Length;
-		//}
 		public Palette(Color32[] cs, string name, Kind k, Is blindSafe, Is printSafe, Is xeroxSafe, Is panelSafe) {
 			this.colors = cs;
 			this.colorsReverse = new Color32[cs.Length];

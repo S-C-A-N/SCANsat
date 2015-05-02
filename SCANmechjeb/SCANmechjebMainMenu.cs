@@ -1,4 +1,15 @@
-﻿
+﻿#region license
+/* 
+ * [Scientific Committee on Advanced Navigation]
+ * 			S.C.A.N. Satellite
+ *
+ * SCANmechjebMainMenu - A monobehaviour that checks the status of SCANsat and MechJeb at startup
+ * 
+ * Copyright (c)2014 David Grandy <david.grandy@gmail.com>;
+ * Copyright (c)2014 technogeeky <technogeeky@gmail.com>;
+ * Copyright (c)2014 (Your Name Here) <your email here>; see LICENSE.txt for licensing details.
+ */
+#endregion
 
 using System;
 using System.Linq;
@@ -13,7 +24,7 @@ namespace SCANmechjeb
 	{
 		private const string SCANsatName = "SCANsat";
 		private const string MechJeb = "MechJeb2";
-		private readonly Version MechJebVersion = new Version(2, 4, 2, 0);
+		private readonly Version MechJebVersion = new Version(2, 5, 0, 0);
 		private static bool loaded = false;
 
 		private void Awake()
