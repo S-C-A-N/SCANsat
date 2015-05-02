@@ -124,7 +124,7 @@ For licensing information, please see the [included LICENSE.txt][SCANsat:rel-lic
   * [Career Mode] Does SCANsat give us science points?
     * **Yes!** For each type of map, if you scan at least 30% of the surface, you can yse Data for partial science points; up until the maximum value at 95% map coverage.
   * [Career Mode] Is it integrated into the tech tree?
-    * **Yes!** [**This link**][6a] tells you which nodes unlock which parts in the tech tree.
+    * **Yes!** **[This link][6a]** tells you which nodes unlock which parts in the tech tree.
   * [Contracts] Does SCANsat offer contracts to complete?
     * **Yes/No.** Contracts are currently only supported through [**third-party addons**][6d].
   * Can you add <some feature or change> to SCANsat?
@@ -156,7 +156,7 @@ S.C.A.N. is proud to collaborate with other KSP mods and modding teams. Followin
 
 **Built Using** | **Supported By**
 :---: | :---:
-[**MechJeb][mechjeb:release] | [![Support for MKS][usi:logo]][usi:release]
+[**MechJeb**][mechjeb:release] | [![Support for MKS][usi:logo]][usi:release]
 [**Blizzy78's Toolbar**][toolbar:release] | [![Support for Karbonite][karbonite:logo]][karbonite:release]
 [**ModuleManager**][mm:release]  | [![Support for Community Tech Tree][ctt:logo]][ctt:release]
 [**RasterPropMonitor**][rpm:release]  | [![Support for ALCOR][alcor:logo]][alcor:release]
@@ -217,13 +217,13 @@ Anomaly | **Been There, Done That(tm)** | **BTDT**
 
 **SCANsat** will scan celestial bodies for resources using the new stock resource system.
 
-Resource scans are initiated in the same way as any other scan. In this case they must use custom scanner parts included with the resource addon.
+Resource scans are initiated in the same way as any other scan. In this case they use the stock **Orbital Survey Scanner**.
 > ![][resource-scanner]
 
 Resource scanning proceeds the same way as standard SCANsat scanning instruments do. The grey scale color option generally works best when viewing resource overlays.
 > ![][resource-bigmap]
 
-Each of the two resource systems can be enabled through the **SCANsat** Big Map:
+The resource system can be enabled through the **SCANsat** Big Map:
 > ![][resource-walkthrough]
 
 Resource overlays will work in IVA, too:
@@ -464,6 +464,7 @@ There are several terrain height options available as well.
 * The **Clamp** option can be used to set a cutoff below which only the first two colors in the selected
 palette will be used for the terrain height-to-color algorithm. This is especially useful on planets where there is an ocean, as it makes the transition
 from ocean to solid terrain more pronounced.
+
 > ![][color-clamp-terrain]
 
 All stock KSP planets have default color palette and terrain height values appropriate for the planet's terrain. Standard default values are used
@@ -474,6 +475,7 @@ Biome map colors and options can be controlled in the **Biome** tab of the windo
 * The end-point colors can be selected using the HSV color-picker; the value slider controls the brightness of the color.
 * Terrain transparency is controlled with a slider.
 * Stock style biome maps can be used in place of SCANsat's custom colors
+
 > ![][color-biome]
 
 ##### [:top:][top] 9c. Resource Colors and Options
@@ -482,6 +484,7 @@ Resource overlays can also be adjusted, using the **Resource** tab.
 * Upper and lower resource cutoff values can be adjusted with the sliders; use fine control mode for small adjustments.
 * Each resource can be adjusted separately and the values can be applied to the current planet or all planets.
 * Most planets share the same resource value settings; it is easiest to set values for all planets then set the values individually where needed (ie water has a higher value on Kerbin than elsewhere).
+
 > ![][color-resource]
 
 ### [:top:][top] 10. Background Scanning
