@@ -49,22 +49,32 @@ namespace SCANsat
 			base.Events["stopScan"].active = scanning && isEnabled;
 		}
 
-		private void Update()
+		public override void OnUpdate()
 		{
-			if (!HighLogic.LoadedSceneIsFlight)
-				return;
+			if (activeModule)
+			{
+				base.OnUpdate();
 
-			if (SCANcontroller.controller == null)
-				return;
+				if (!HighLogic.LoadedSceneIsFlight)
+					return;
 
-			if (!SCANcontroller.controller.easyModeScanning && activeModule)
-				updateEvents();
+				if (SCANcontroller.controller == null)
+					return;
+
+				if (!SCANcontroller.controller.easyModeScanning)
+					updateEvents();
+				else
+				{
+					base.Events["startScan"].active = false;
+					base.Events["stopScan"].active = false;
+					if (scanning)
+						unregisterScanner();
+				}
+			}
 			else
 			{
 				base.Events["startScan"].active = false;
 				base.Events["stopScan"].active = false;
-				if (scanning)
-					unregisterScanner();
 			}
 		}
 
