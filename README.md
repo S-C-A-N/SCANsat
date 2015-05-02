@@ -405,9 +405,9 @@ The instruments window provides a readout of several types of data based on curr
 ### [:top:][top] 8. (Career Mode) Research and Development
 ------------------------------------------
 
-The **RADAR Altimetry** sensor can be unlocked in **Science Tech**.
+The **RADAR Altimetry** sensor can be unlocked in **Basic Science**.
 
-The **SAR Altimetry** sensor can be unlocked in **Experimental Science**.
+The **SAR Altimetry** sensor can be unlocked in **Advanced Science Tech**.
 
 The **Multispectral** sensor can be unlocked in **Advanced Exploration**.
 
@@ -477,6 +477,10 @@ Biome map colors and options can be controlled in the **Biome** tab of the windo
 * Stock style biome maps can be used in place of SCANsat's custom colors
 
 > ![][color-biome]
+
+Biomes can also be displayed using the stock color maps.
+
+> ![][color-biome-stock]
 
 ##### [:top:][top] 9c. Resource Colors and Options
 Resource overlays can also be adjusted, using the **Resource** tab.
@@ -611,11 +615,12 @@ sneaky then they can of course be sneaky.
 [resource-bigmap]: http://i.imgur.com/JYKG6f5.gif
 [resource-settings]: http://i.imgur.com/sgMklCu.png
 
-[color-window]: http://i.imgur.com/XM2ynyZ.png
+[color-window]: http://i.imgur.com/RQVjq6g.png
 [color-palette-switch]: http://i.imgur.com/0XdMGSy.gif
 [color-clamp-terrain]: http://i.imgur.com/8dgFLGj.gif
 [color-biome]: http://i.imgur.com/NdA1DVY.gif
 [color-resource]: http://i.imgur.com/9NR8gvP.gif
+[color-biome-stock]: http://i.imgur.com/T14sFzl.png
 
 [instruments-small]: http://i.imgur.com/DwkwCI5.gif
 [instruments-btdt]: http://i.imgur.com/tybbDap.gif
