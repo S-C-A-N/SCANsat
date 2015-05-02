@@ -37,14 +37,11 @@ namespace SCANsat.SCAN_Toolbar
 
 		private void setupToolbar()
 		{
-			SCANUtil.SCANdebugLog("Starting App Launcher Manager");
 			StartCoroutine(addButton());
 		}
 
 		IEnumerator addButton()
 		{
-			SCANUtil.SCANdebugLog("Waiting For Application Launcher...");
-
 			while (!ApplicationLauncher.Ready)
 				yield return null;
 
@@ -66,7 +63,6 @@ namespace SCANsat.SCAN_Toolbar
 			{
 				ApplicationLauncher.Instance.RemoveModApplication(SCANappLauncherButton);
 				SCANappLauncherButton = null;
-				SCANUtil.SCANdebugLog("App Launcher Button Removed");
 			}
 		}
 
