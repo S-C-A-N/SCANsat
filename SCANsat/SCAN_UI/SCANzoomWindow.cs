@@ -270,15 +270,15 @@ namespace SCANsat.SCAN_UI
 
 				if (HighLogic.LoadedSceneIsFlight)
 					v = FlightGlobals.ActiveVessel;
-				else if (HighLogic.LoadedScene != GameScenes.TRACKSTATION)
-					return;
+				else if (HighLogic.LoadedScene == GameScenes.TRACKSTATION)
+				{
+					MapObject target = PlanetariumCamera.fetch.target;
 
-				MapObject target = PlanetariumCamera.fetch.target;
-
-				if (target.type == MapObject.MapObjectType.VESSEL)
-					v = target.vessel;
-				else
-					v = null;
+					if (target.type == MapObject.MapObjectType.VESSEL)
+						v = target.vessel;
+					else
+						v = null;
+				}
 			}
 		}
 
