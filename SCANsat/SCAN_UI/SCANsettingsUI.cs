@@ -440,7 +440,15 @@ namespace SCANsat.SCAN_UI
 			{
 				if (warningBoxOne)
 				{
-					CelestialBody thisBody = FlightGlobals.currentMainBody;
+					CelestialBody thisBody = null;
+					if (HighLogic.LoadedSceneIsFlight)
+						thisBody = FlightGlobals.currentMainBody;
+					else if (HighLogic.LoadedScene == GameScenes.SPACECENTER)
+						thisBody = Planetarium.fetch.Home;
+					else if (HighLogic.LoadedScene == GameScenes.TRACKSTATION)
+						thisBody = getTargetBody(MapView.MapCamera.target);
+					if (thisBody == null)
+						return;
 					warningRect = new Rect(WindowRect.width - (WindowRect.width / 2) - 150, WindowRect.height - 125, 300, 90);
 					GUI.Box(warningRect, "");
 					Rect r = new Rect(warningRect.x + 10, warningRect.y + 5, 280, 40);
@@ -480,7 +488,15 @@ namespace SCANsat.SCAN_UI
 				}
 				else if (warningResource)
 				{
-					CelestialBody thisBody = FlightGlobals.currentMainBody;
+					CelestialBody thisBody = null;
+					if (HighLogic.LoadedSceneIsFlight)
+						thisBody = FlightGlobals.currentMainBody;
+					else if (HighLogic.LoadedScene == GameScenes.SPACECENTER)
+						thisBody = Planetarium.fetch.Home;
+					else if (HighLogic.LoadedScene == GameScenes.TRACKSTATION)
+						thisBody = getTargetBody(MapView.MapCamera.target);
+					if (thisBody == null)
+						return;
 					warningRect = new Rect(WindowRect.width - (WindowRect.width / 2) - 150, WindowRect.height - 125, 300, 90);
 					GUI.Box(warningRect, "");
 					Rect r = new Rect(warningRect.x + 10, warningRect.y + 5, 280, 40);
