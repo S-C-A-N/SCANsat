@@ -134,7 +134,7 @@ namespace SCANsat.SCAN_UI
 				spotmap.setBody(b);
 			}
 
-			if (SCANconfigLoader.GlobalResource)
+			if (SCANconfigLoader.GlobalResource && narrowBand)
 			{
 				spotmap.Resource = bigmap.Resource;
 				spotmap.Resource.CurrentBodyConfig(b.name);
@@ -143,7 +143,7 @@ namespace SCANsat.SCAN_UI
 			spotmap.MapScale = 10;
 
 			spotmap.centerAround(lon, lat);
-			spotmap.resetMap(bigmap.MType, false);
+			spotmap.resetMap(bigmap.MType, false, narrowBand);
 		}
 
 		private void resetMap()
@@ -151,7 +151,7 @@ namespace SCANsat.SCAN_UI
 			SCANcontroller.controller.TargetSelecting = false;
 			SCANcontroller.controller.TargetSelectingActive = false;
 			spotmap.centerAround(spotmap.CenteredLong, spotmap.CenteredLat);
-			spotmap.resetMap();
+			spotmap.resetMap(narrowBand);
 		}
 
 		public SCANmap SpotMap
@@ -169,7 +169,7 @@ namespace SCANsat.SCAN_UI
 
 		private void checkForScanners()
 		{
-			//DateTime duration = DateTime.Now;
+			DateTime duration = DateTime.Now;
 
 			narrowBand = false;
 			foreach (Vessel vessel in FlightGlobals.Vessels)
@@ -230,7 +230,7 @@ namespace SCANsat.SCAN_UI
 						spotmap.Resource = bigmap.Resource;
 						spotmap.Resource.CurrentBodyConfig(b.name);
 						if (SCANcontroller.controller.map_ResourceOverlay)
-							spotmap.resetMap();
+							spotmap.resetMap(true);
 					}
 
 					if (spotmap.Resource != null)
@@ -247,22 +247,39 @@ namespace SCANsat.SCAN_UI
 			if (!narrowBand)
 				spotmap.Resource = null;
 
-			//SCANUtil.SCANdebugLog("Loop Time: {0}", duration - DateTime.Now);
+			SCANUtil.SCANdebugLog("Loop Time: {0}", duration - DateTime.Now);
 		}
+
+		private int timer;
 
 		protected override void Update()
 		{
-			if (HighLogic.LoadedSceneIsFlight)
-				v = FlightGlobals.ActiveVessel;
-			else if (HighLogic.LoadedScene != GameScenes.TRACKSTATION)
-				return;
+			if (Visible)
+			{
+				if (SCANcontroller.controller.needsNarrowBand)
+				{
+					if (SCANcontroller.controller.map_ResourceOverlay && timer >= 10)
+						checkForScanners();
+				}
+				else
+					narrowBand = true;
 
-			MapObject target = PlanetariumCamera.fetch.target;
+				timer++;
+				if (timer > 10)
+					timer = 0;
 
-			if (target.type == MapObject.MapObjectType.VESSEL)
-				v = target.vessel;
-			else
-				v = null;
+				if (HighLogic.LoadedSceneIsFlight)
+					v = FlightGlobals.ActiveVessel;
+				else if (HighLogic.LoadedScene != GameScenes.TRACKSTATION)
+					return;
+
+				MapObject target = PlanetariumCamera.fetch.target;
+
+				if (target.type == MapObject.MapObjectType.VESSEL)
+					v = target.vessel;
+				else
+					v = null;
+			}
 		}
 
 		protected override void DrawWindowPre(int id)
@@ -340,9 +357,6 @@ namespace SCANsat.SCAN_UI
 					controlLock = false;
 				}
 			}
-
-			if (SCANcontroller.controller.needsNarrowBand)
-				checkForScanners();
 		}
 
 		protected override void DrawWindow(int id)
@@ -493,7 +507,7 @@ namespace SCANsat.SCAN_UI
 					spotmap.setBody(b);
 				}
 
-				if (SCANconfigLoader.GlobalResource)
+				if (SCANconfigLoader.GlobalResource && narrowBand)
 				{
 					spotmap.Resource = bigmap.Resource;
 					spotmap.Resource.CurrentBodyConfig(b.name);
@@ -501,7 +515,7 @@ namespace SCANsat.SCAN_UI
 
 				spotmap.centerAround(spotmap.CenteredLong, spotmap.CenteredLat);
 
-				spotmap.resetMap(bigmap.MType, false);
+				spotmap.resetMap(bigmap.MType, false, narrowBand);
 			}
 
 			if (GUILayout.Button(iconWithTT(SCANskins.SCAN_ZoomInIcon, "Zoom In"), SCANskins.SCAN_buttonBorderless, GUILayout.Width(26), GUILayout.Height(26)))
@@ -674,7 +688,7 @@ namespace SCANsat.SCAN_UI
 						{
 							spotmap.MapScale = spotmap.MapScale * 1.25f;
 							spotmap.centerAround(mlon, mlat);
-							spotmap.resetMap();
+							resetMap();
 						}
 					}
 					//Left click zoom out
@@ -685,6 +699,7 @@ namespace SCANsat.SCAN_UI
 							spotmap.MapScale = spotmap.MapScale / 1.25f;
 							if (spotmap.MapScale < 2)
 								spotmap.MapScale = 2;
+							spotmap.centerAround(mlon, mlat);
 							resetMap();
 						}
 					}
