@@ -105,6 +105,8 @@ Bug Fixes and Miscellaneous Updates:
 
 - Various UI tweaks and fixes
 
+- Remove Community Tech Tree support
+
 Updates From Version 11.6:
 - Updates to Zoom Map resource overlay restriction
 	- Less frequent checks for suitable vessels in orbit
