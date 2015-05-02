@@ -43,8 +43,8 @@ namespace SCANsat.SCAN_UI
 		private Rect pos_spotmap_x = new Rect(10f, 10f, 25f, 25f);
 		internal static Rect defaultRect = new Rect(250, 60, 780, 460);
 
-		private bool overlay = false;
-		private int step = 0;
+		//private bool overlay = false;
+		//private int step = 0;
 
 		internal SCANzoomWindow spotMap;
 
@@ -284,27 +284,27 @@ namespace SCANsat.SCAN_UI
 						resources_drop_down = !resources_drop_down;
 						drop_down_open = !drop_down_open;
 					}
-					fillS(5);
-					if (GUILayout.Button("R", GUILayout.Width(20)))
-						step = 0;
-					if (GUILayout.Button("Map", GUILayout.Width(60)))
-					{
-						overlay = !overlay;
-						if (bigmap.Resource.MapOverlay == null)
-						{
-							bigmap.Resource.MapOverlay = new Texture2D(512, 256, TextureFormat.ARGB32, true);
-							Color[] pix = bigmap.Resource.MapOverlay.GetPixels();
-							for (int i = 0; i < pix.Length; i++)
-								pix[i] = palette.clear;
-							bigmap.Resource.MapOverlay.SetPixels(pix);
-						}
-						if (overlay)
-							Body.SetResourceMap(bigmap.Resource.MapOverlay);
-						else
-							Body.SetResourceMap(null);
-					}
-					if (overlay)
-						SCANuiUtil.drawResourceTexture(256, ref step, data, bigmap.Resource);
+					fillS(40);
+					//if (GUILayout.Button("R", GUILayout.Width(20)))
+					//	step = 0;
+					//if (GUILayout.Button("Map", GUILayout.Width(60)))
+					//{
+					//	overlay = !overlay;
+					//	if (bigmap.Resource.MapOverlay == null)
+					//	{
+					//		bigmap.Resource.MapOverlay = new Texture2D(512, 256, TextureFormat.ARGB32, true);
+					//		Color[] pix = bigmap.Resource.MapOverlay.GetPixels();
+					//		for (int i = 0; i < pix.Length; i++)
+					//			pix[i] = palette.clear;
+					//		bigmap.Resource.MapOverlay.SetPixels(pix);
+					//	}
+					//	if (overlay)
+					//		Body.SetResourceMap(bigmap.Resource.MapOverlay);
+					//	else
+					//		Body.SetResourceMap(null);
+					//}
+					//if (overlay)
+					//	SCANuiUtil.drawResourceTexture(256, ref step, data, bigmap.Resource);
 				}
 				if (GUILayout.Button("Celestial Body", GUILayout.MaxWidth(110)))
 				{
