@@ -169,7 +169,7 @@ namespace SCANsat.SCAN_UI
 
 		private void checkForScanners()
 		{
-			DateTime duration = DateTime.Now;
+			//DateTime duration = DateTime.Now;
 
 			narrowBand = false;
 			foreach (Vessel vessel in FlightGlobals.Vessels)
@@ -247,7 +247,7 @@ namespace SCANsat.SCAN_UI
 			if (!narrowBand)
 				spotmap.Resource = null;
 
-			SCANUtil.SCANdebugLog("Loop Time: {0}", duration - DateTime.Now);
+			//SCANUtil.SCANdebugLog("Loop Time: {0}", duration - DateTime.Now);
 		}
 
 		private int timer;
