@@ -104,7 +104,7 @@ namespace SCANsat
 		[KSPField(isPersistant = true)]
 		public bool useStockAppLauncher = true;
 		[KSPField(isPersistant = true)]
-		public bool resourceBiomeLock = false;
+		public bool resourceBiomeLock = true;
 		[KSPField(isPersistant = true)]
 		public bool useStockBiomes = false;
 		[KSPField(isPersistant = true)]
@@ -117,12 +117,12 @@ namespace SCANsat
 		public bool needsNarrowBand = true;
 
 		/* Biome and slope colors can't be serialized properly as a KSP Field */
-		public Color lowBiomeColor = palette.xkcd_CamoGreen;
-		public Color highBiomeColor = palette.xkcd_Marigold;
-		public Color lowSlopeColorOne = palette.xkcd_PukeGreen;
-		public Color highSlopeColorOne = palette.xkcd_Yellow;
-		public Color lowSlopeColorTwo = palette.xkcd_Yellow;
-		public Color highSlopeColorTwo = palette.xkcd_OrangeRed;
+		public Color lowBiomeColor = new Color(0, 0.46f, 0.02345098f, 1);
+		public Color highBiomeColor = new Color(0.7f, 0.2388235f, 0, 1);
+		public Color lowSlopeColorOne = new Color(0.004705883f, 0.6f, 0.3788235f, 1);
+		public Color highSlopeColorOne = new Color(0.9764706f, 1, 0.4627451f, 1);
+		public Color lowSlopeColorTwo = new Color(0.9764706f, 1, 0.4627451f, 1);
+		public Color highSlopeColorTwo = new Color(0.94f, 0.2727843f, 0.007372549f, 1);
 
 		/* Available resources for overlays; loaded from SCANsat configs; only loaded once */
 		private static Dictionary<string, SCANresourceGlobal> masterResourceNodes = new Dictionary<string,SCANresourceGlobal>();
@@ -408,12 +408,21 @@ namespace SCANsat
 		public static List<SCANresourceGlobal> setLoadedResourceList()
 		{
 			List<SCANresourceGlobal> rList = new List<SCANresourceGlobal>();
+			SCANresourceGlobal ore = null;
 
 			foreach (string r in loadedResources)
 			{
 				if (masterResourceNodes.ContainsKey(r))
-					rList.Add(masterResourceNodes[r]);
+				{
+					if (r != "Ore")
+						rList.Add(masterResourceNodes[r]);
+					else
+						ore = masterResourceNodes[r];
+				}
 			}
+
+			if (ore != null)
+				rList.Insert(0, ore);
 
 			return rList;
 		}
