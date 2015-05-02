@@ -98,6 +98,14 @@ namespace SCANsat
 				if (rs.Distribution.MaxAbundance > currentGlobal.DefaultMaxValue)
 					currentGlobal.DefaultMaxValue = rs.Distribution.MaxAbundance;
 
+				foreach (CelestialBody body in FlightGlobals.Bodies)
+				{
+					SCANresourceBody newBody = currentGlobal.getBodyConfig(body.name, false);
+
+					if (newBody == null)
+						currentGlobal.addToBodyConfigs(body.name, new SCANresourceBody(rs.ResourceName, body, currentGlobal.DefaultMinValue, currentGlobal.DefaultMaxValue), false);
+				}
+
 				SCANcontroller.addToLoadedResourceNames(rs.ResourceName);
 			}
 
