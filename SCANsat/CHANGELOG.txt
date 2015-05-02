@@ -1,7 +1,7 @@
 Version 11.6 - 2015-5-1
 ------------------------
 
-- Update for KSP 1.0.1
+- Update for KSP 1.0.2
 
 - Update for MechJeb 2.5
 
@@ -9,11 +9,11 @@ Version 11.6 - 2015-5-1
 - Significant reduction in part texture size
 	- Saving of about 20MB
 - RADAR scanner moved to the Basic Science tech tree node
-- Initial part balancing
+- Initial part balancing, temperature settings, etc...
 
 - Integration with stock resource system
 	- By default stock resource scans are all scanned by the Survey Scanner
-	- Zoom map resource overlays require that your current vessel have a narrow-band scanner
+	- Zoom map resource overlays require that a vessel in orbit of the planet have a narrow-band scanner
 	- Map overlays work the same as before for the big map
 	
 - Resource system options
@@ -27,6 +27,8 @@ Version 11.6 - 2015-5-1
 	- A resource scanning coverage reset button is available
 		- This will erase all resource scanning data; will not affect regular SCANsat data
 		- A confirmation box popup prevents accidental button presses
+
+- Fixed a bug with data resets in the tracking center
 
 Version 11.5 - 2015-4-22
 ------------------------
