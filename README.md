@@ -250,7 +250,7 @@ A number of options are available in the **Settings Menu** for SCANsat resource 
 * **Zoom Requires Narrow Band Scanner**
    * With this active the zoom map will only display resource overlays when a suitable **Narrow-Band Scanner** is in orbit around the planet, and its orbit covers the region showed in the zoom map.
    * When disabled the zoom map will display resource overlays regardless of **Narrow-Band Scanner** coverage.
-* **Resource Coverage Reset**
+* **Reset Resource Coverage**
    * This button will erase all resource scanning data for the current planet.
    * Regular SCANsat data will not be affected.
    * A confirmation window will appear upon clicking the button.
@@ -634,7 +634,7 @@ sneaky then they can of course be sneaky.
 [color-resource]: http://i.imgur.com/9NR8gvP.gif
 [color-biome-stock]: http://i.imgur.com/T14sFzl.png
 
-[instruments-small]: http://i.imgur.com/DwkwCI5.gif
+[instruments-small]: http://i.imgur.com/sZ2MXiK.gif
 [instruments-btdt]: http://i.imgur.com/tybbDap.gif
 
 [settings-window]: http://i.imgur.com/MYIfE05.png
