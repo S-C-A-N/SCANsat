@@ -156,31 +156,31 @@ namespace SCANsat.SCAN_UI
 			{
 				foreach (SCANwaypoint p in data.Waypoints)
 				{
-					if (!p.LandingTarget)
+					if (p.LandingTarget)
+						continue;
+
+					if (p.Band == FlightBand.NONE)
+						continue;
+
+					if (p.Root != null)
 					{
-						if (p.Band == FlightBand.NONE)
+						if (p.Root.ContractState != Contracts.Contract.State.Active)
 							continue;
+					}
 
-						if (p.Root != null)
-						{
-							if (p.Root.ContractState != Contracts.Contract.State.Active)
-								continue;
-						}
+					if (p.Param != null)
+					{
+						if (p.Param.State != Contracts.ParameterState.Incomplete)
+							continue;
+					}
 
-						if (p.Param != null)
-						{
-							if (p.Param.State != Contracts.ParameterState.Incomplete)
-								continue;
-						}
+					double range = waypointRange(p);
 
-						double range = waypointRange(p);
-
-						if (WaypointManager.Instance().Distance(vlat, vlon, v.altitude, p.Latitude, p.Longitude, v.altitude, data.Body) <= range)
-						{
-							GUILayout.Label(string.Format("Waypoint: {0}", p.Name), SCANskins.SCAN_insColorLabel);
-							fillS(-10);
-							break;
-						}
+					if (WaypointManager.Instance().Distance(vlat, vlon, v.altitude, p.Latitude, p.Longitude, v.altitude, data.Body) <= range)
+					{
+						GUILayout.Label(string.Format("Waypoint: {0}", p.Name), SCANskins.SCAN_insColorLabel);
+						fillS(-10);
+						break;
 					}
 				}
 			}
@@ -238,12 +238,12 @@ namespace SCANsat.SCAN_UI
 						e[0] = pqs;
 						e[1] = SCANUtil.getElevation(v.mainBody, vlon + latOffset, vlat);
 						e[2] = SCANUtil.getElevation(v.mainBody, vlon - latOffset, vlat);
-						e[3] = SCANUtil.getElevation(v.mainBody, vlon, vlat + latOffset);
-						e[4] = SCANUtil.getElevation(v.mainBody, vlon, vlat - latOffset);
-						e[5] = SCANUtil.getElevation(v.mainBody, vlon + latOffset, vlat + latOffset);
-						e[6] = SCANUtil.getElevation(v.mainBody, vlon + latOffset, vlat - latOffset);
-						e[7] = SCANUtil.getElevation(v.mainBody, vlon - latOffset, vlat + latOffset);
-						e[8] = SCANUtil.getElevation(v.mainBody, vlon - latOffset, vlat - latOffset);
+						e[3] = SCANUtil.getElevation(v.mainBody, vlon, vlat + degreeOffset);
+						e[4] = SCANUtil.getElevation(v.mainBody, vlon, vlat - degreeOffset);
+						e[5] = SCANUtil.getElevation(v.mainBody, vlon + latOffset, vlat + degreeOffset);
+						e[6] = SCANUtil.getElevation(v.mainBody, vlon + latOffset, vlat - degreeOffset);
+						e[7] = SCANUtil.getElevation(v.mainBody, vlon - latOffset, vlat + degreeOffset);
+						e[8] = SCANUtil.getElevation(v.mainBody, vlon - latOffset, vlat - degreeOffset);
 
 						/* Calculate rise for each point on the grid
 						 * The distance is 5m for adjacent points and 7.071m for the points on the corners
