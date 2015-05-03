@@ -103,6 +103,8 @@ Bug Fixes and Miscellaneous Updates:
 
 - Fixed a bug with data resets in the tracking center
 
+- Fixed Instruments Window slope calculation at high latitudes
+
 - Various UI tweaks and fixes
 
 - Remove Community Tech Tree support
