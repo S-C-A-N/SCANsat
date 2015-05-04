@@ -143,6 +143,8 @@ namespace SCANsat.SCAN_UI
 			spotmap.MapScale = 10;
 
 			spotmap.centerAround(lon, lat);
+			if (SCANcontroller.controller.needsNarrowBand && SCANcontroller.controller.map_ResourceOverlay)
+				checkForScanners();
 			spotmap.resetMap(bigmap.MType, false, narrowBand);
 		}
 
@@ -151,6 +153,8 @@ namespace SCANsat.SCAN_UI
 			SCANcontroller.controller.TargetSelecting = false;
 			SCANcontroller.controller.TargetSelectingActive = false;
 			spotmap.centerAround(spotmap.CenteredLong, spotmap.CenteredLat);
+			if (SCANcontroller.controller.needsNarrowBand && SCANcontroller.controller.map_ResourceOverlay)
+				checkForScanners();
 			spotmap.resetMap(narrowBand);
 		}
 
@@ -206,38 +210,49 @@ namespace SCANsat.SCAN_UI
 					if (node == null)
 						continue;
 
-					ConfigNode moduleNode = node.GetNodes("MODULE").FirstOrDefault(a => a.GetValue("name") == "ModuleResourceScanner");
+					var moduleNodes = from nodes in node.GetNodes("MODULE")
+									  where nodes.GetValue("name") == "ModuleResourceScanner"
+									  select nodes;
 
-					if (moduleNode == null)
-						continue;
-
-					string alt = moduleNode.GetValue("MaxAbundanceAltitude");
-					float f = 0;
-					if (!float.TryParse(alt, out f))
-						continue;
-
-					if (f < 10000)
-						continue;
-
-					if (moduleNode.GetValue("ScannerType") != "0")
-						continue;
-
-					if (moduleNode.GetValue("ResourceName") != bigmap.Resource.Name)
-						continue;
-
-					if (spotmap.Resource != bigmap.Resource)
+					foreach (ConfigNode moduleNode in moduleNodes)
 					{
-						spotmap.Resource = bigmap.Resource;
-						spotmap.Resource.CurrentBodyConfig(b.name);
-						if (SCANcontroller.controller.map_ResourceOverlay)
-							spotmap.resetMap(true);
+						if (moduleNode == null)
+							continue;
+
+						if (moduleNode.HasValue("MaxAbundanceAltitude"))
+						{
+							string alt = moduleNode.GetValue("MaxAbundanceAltitude");
+							float f = 0;
+							if (!float.TryParse(alt, out f))
+								continue;
+
+							if (f < 10000)
+								continue;
+						}
+
+						if (moduleNode.GetValue("ScannerType") != "0")
+							continue;
+
+						if (moduleNode.GetValue("ResourceName") != bigmap.Resource.Name)
+							continue;
+
+						if (spotmap.Resource != bigmap.Resource)
+						{
+							spotmap.Resource = bigmap.Resource;
+							spotmap.Resource.CurrentBodyConfig(b.name);
+							if (SCANcontroller.controller.map_ResourceOverlay)
+								spotmap.resetMap(true);
+						}
+
+						if (spotmap.Resource != null)
+						{
+							narrowBand = true;
+							break;
+						}
 					}
 
-					if (spotmap.Resource != null)
-					{
-						narrowBand = true;
+					if (narrowBand)
 						break;
-					}
 				}
 
 				if (narrowBand)
@@ -256,16 +271,16 @@ namespace SCANsat.SCAN_UI
 		{
 			if (Visible)
 			{
-				if (SCANcontroller.controller.needsNarrowBand)
+				if (SCANcontroller.controller.needsNarrowBand && SCANconfigLoader.GlobalResource)
 				{
-					if (SCANcontroller.controller.map_ResourceOverlay && timer >= 10)
+					if (SCANcontroller.controller.map_ResourceOverlay && timer >= 60)
 						checkForScanners();
 				}
 				else
 					narrowBand = true;
 
 				timer++;
-				if (timer > 10)
+				if (timer > 60)
 					timer = 0;
 
 				if (HighLogic.LoadedSceneIsFlight)
@@ -514,7 +529,8 @@ namespace SCANsat.SCAN_UI
 				}
 
 				spotmap.centerAround(spotmap.CenteredLong, spotmap.CenteredLat);
-
+				if (SCANcontroller.controller.needsNarrowBand && SCANcontroller.controller.map_ResourceOverlay)
+					checkForScanners();
 				spotmap.resetMap(bigmap.MType, false, narrowBand);
 			}
 
