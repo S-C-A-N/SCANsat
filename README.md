@@ -381,7 +381,7 @@ The instruments window provides a readout of several types of data based on curr
 
 * **Location** Shows the vessel's current coordinates; not dependent on scanning coverage
 * **Waypoint** Shows if the vessel is inside of a current FinePrint waypoint; not dependent on scanning coverage
-* **Altitude** Shows the vessel's current altitude above the terrain
+* **Altitude** Shows the vessel's current altitude above the terrain; shows the current terrain altitude when landed
 * **Slope** Shows a highly localized slope based on a 3X3 grid centered 5m around the vessel
 * **Biome** Shows the biome that the current vessel is in or over
 * **Anomaly** Shows the nearest anomaly and its distance from the vessel
