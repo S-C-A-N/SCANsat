@@ -113,6 +113,7 @@ Bug Fixes and Miscellaneous Updates:
 Updates From Version 11.6:
 - Updates to Zoom Map resource overlay restriction
 	- Less frequent checks for suitable vessels in orbit
+	- Fix bug when checking parts with multiple narrow-band scanner modules
 	
 - Fix MechJeb integration
 
