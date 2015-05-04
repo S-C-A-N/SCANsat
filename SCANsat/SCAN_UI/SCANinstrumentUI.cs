@@ -212,7 +212,10 @@ namespace SCANsat.SCAN_UI
 				if (h < 0)
 					h = v.altitude;
 
-				GUILayout.Label(string.Format("Altitude: {0}", SCANuiUtil.distanceString(h, 100000)), SCANskins.SCAN_insColorLabel);
+				if (v.situation == Vessel.Situations.LANDED || v.situation == Vessel.Situations.SPLASHED || v.situation == Vessel.Situations.PRELAUNCH)
+					GUILayout.Label(string.Format("Terrain: {0:N1}m", pqs), SCANskins.SCAN_insColorLabel);
+				else
+					GUILayout.Label(string.Format("Altitude: {0}", SCANuiUtil.distanceString(h, 100000)), SCANskins.SCAN_insColorLabel);
 				fillS(-10);
 
 				//Calculate slope less frequently; the rapidly changing value makes it difficult to read otherwise
