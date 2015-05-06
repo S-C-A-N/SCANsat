@@ -1,6 +1,17 @@
-﻿using System;
+﻿#region license
+/* 
+ * [Scientific Committee on Advanced Navigation]
+ * 			S.C.A.N. Satellite
+ *
+ * SCAN PaletteLoader - class for loading in color palette groups
+ * 
+ * Copyright (c)2014 David Grandy <david.grandy@gmail.com>;
+ * Copyright (c)2014 technogeeky <technogeeky@gmail.com>;
+ * Copyright (c)2014 (Your Name Here) <your email here>; see LICENSE.txt for licensing details.
+ */
+#endregion
+
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 using palette = SCANsat.SCAN_UI.UI_Framework.SCANpalette;
 

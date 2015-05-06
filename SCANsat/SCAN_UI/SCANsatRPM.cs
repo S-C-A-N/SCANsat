@@ -14,6 +14,7 @@
  * Copyright (c)2014 (Your Name Here) <your email here>; see LICENSE.txt for licensing details.
  */
 #endregion
+
 using UnityEngine;
 using System;
 using System.Linq;
@@ -106,6 +107,7 @@ namespace SCANsat.SCAN_UI
 		private Vessel targetVessel;
 		private double redrawDeviation;
 		private SCANanomaly[] localAnomalies;
+		private List<SCANwaypoint> localWaypoints;
 		private Material iconMaterial;
 		private SCANsat sat;
 		internal RPMPersistence persist;
@@ -201,6 +203,24 @@ namespace SCANsat.SCAN_UI
 				if (anomaly.Known)
 					DrawIcon(anomaly.Longitude, anomaly.Latitude, SCANicon.orbitIconForVesselType(anomaly.Detail ? (VesselType)int.MaxValue : VesselType.Unknown),
 						anomaly.Detail ? iconColorVisitedAnomalyValue : iconColorUnvisitedAnomalyValue);
+			}
+			foreach (SCANwaypoint w in localWaypoints)
+			{
+				if (!w.LandingTarget)
+				{
+					if (w.Root != null)
+					{
+						if (w.Root.ContractState != Contracts.Contract.State.Active)
+							continue;
+					}
+					if (w.Param != null)
+					{
+						if (w.Param.State != Contracts.ParameterState.Incomplete)
+							continue;
+					}
+				}
+
+				DrawIcon(w, iconColorVisitedAnomalyValue);
 			}
 			// Target orbit and targets go above anomalies
 			if (targetVessel != null && targetVessel.mainBody == orbitingBody) {
@@ -427,21 +447,27 @@ namespace SCANsat.SCAN_UI
 
 		private void DrawIcon(double longitude, double latitude, SCANicon.OrbitIcon icon, Color iconColor)
 		{
-			var position = new Rect((float)(longitudeToPixels(longitude, latitude)),
-				               (float)(latitudeToPixels(longitude, latitude)),
-				               iconPixelSize, iconPixelSize);
+			Vector2 pos = new Vector2((float)(longitudeToPixels(longitude, latitude)),(float)(latitudeToPixels(longitude, latitude)));
 
-			Rect shadow = position;
-			shadow.x += iconShadowShift.x;
-			shadow.y += iconShadowShift.y;
+			SCANicon.drawOrbitIconGL((int)pos.x, (int)pos.y, icon, iconColor, iconColorShadowValue, iconMaterial, 16, true);
+		}
 
-			SCANicon.drawOrbitIconGL((int)position.x, (int)position.y, icon, iconColor, iconColorShadowValue, iconMaterial, 16, true);
+		private void DrawIcon(SCANwaypoint p, Color iconColor)
+		{
+			Rect pos = new Rect((float)(longitudeToPixels(p.Longitude, p.Latitude)), (float)(latitudeToPixels(p.Longitude, p.Latitude)), 16, 16);
 
-			//iconMaterial.color = iconColorShadowValue;
-			//Graphics.DrawTexture(shadow, MapView.OrbitIconsMap, MapIcons.VesselTypeIcon(vt, icon), 0, 0, 0, 0, iconMaterial);
-
-			//iconMaterial.color = iconColor;
-			//Graphics.DrawTexture(position, MapView.OrbitIconsMap, MapIcons.VesselTypeIcon(vt, icon), 0, 0, 0, 0, iconMaterial);
+			if (!p.LandingTarget)
+			{
+				pos.x -= 8;
+				pos.y -= 16;
+				SCANuiUtil.drawMapIconGL(pos, SCANskins.SCAN_WaypointIcon, iconColor, iconMaterial, iconColorShadowValue, true);
+			}
+			else
+			{
+				pos.x -= 8;
+				pos.y -= 8;
+				SCANuiUtil.drawMapIconGL(pos, SCANcontroller.controller.mechJebTargetSelection ? SCANskins.SCAN_MechJebIcon : SCANskins.SCAN_TargetIcon, iconColor, iconMaterial, iconColorShadowValue, true);
+			}
 		}
 
 		private double longitudeToPixels(double longitude, double latitude)
@@ -597,7 +623,10 @@ namespace SCANsat.SCAN_UI
 			try {
 				SCANdata data = SCANUtil.getData(vessel.mainBody);
 				if (data != null)
+				{
 					localAnomalies = data.Anomalies;
+					localWaypoints = data.Waypoints;
+				}
 			} catch {
 				Debug.Log("JSISCANsatRPM: Could not get a list of anomalies, what happened?");
 			}

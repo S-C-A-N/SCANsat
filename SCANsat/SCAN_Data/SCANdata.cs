@@ -10,10 +10,15 @@
  * Copyright (c)2014 (Your Name Here) <your email here>; see LICENSE.txt for licensing details.
  */
 #endregion
+
 using System;
 using System.Linq;
 using System.Collections.Generic;
 using UnityEngine;
+using Contracts;
+using FinePrint;
+using FinePrint.Contracts;
+using FinePrint.Contracts.Parameters;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
 using SCANsat.SCAN_Platform;
@@ -31,60 +36,25 @@ namespace SCANsat.SCAN_Data
 		private float[,] kethaneValueMap = new float[360, 180]; //Store kethane cell data in here
 		private CelestialBody body;
 		private Texture2D map_small = new Texture2D(360, 180, TextureFormat.RGB24, false);
+		private SCANterrainConfig terrainConfig;
 
 		/* MAP: options */
-		private float minHeight, maxHeight;
-		private float? clampHeight;
-		private string paletteName;
-		private int paletteSize;
-		private bool paletteReverse, paletteDiscrete, disabled;
-		private Palette colorPalette;
-
-		/* MAP: default values */
-		private static float?[,] bodyHeightRange = new float?[17, 3]
-		{
-			{ 0, 1000, null }, { -1500, 6500, 0 }, { -500, 7000, null }, { -500, 5500, null },
-			{ 0, 6500, null }, { -2000, 7000, 0 }, { 0, 7500, null }, { 0, 12000, null }, { 0, 1000, null },
-			{ -3000, 6000, 0 }, { -500, 7500, null }, { 2000, 21500, null }, { -500, 11000, null },
-			{ 1500, 6000, null }, { 500, 5500, null }, { 0, 5500, null }, { -500, 3500, null }
-		};
-		private static Palette[] paletteDefaults = { PaletteLoader.defaultPalette, PaletteLoader.defaultPalette,
-			BrewerPalettes.RdGy(11), BrewerPalettes.Paired(9), BrewerPalettes.PuBuGn(6), BrewerPalettes.BuPu(7),
-			BrewerPalettes.BuGn(9), BrewerPalettes.BrBG(8), PaletteLoader.defaultPalette, BrewerPalettes.YlGnBu(8),
-			BrewerPalettes.Set1(9), BrewerPalettes.PuOr(7), BrewerPalettes.Set3(8), BrewerPalettes.Accent(7),
-			BrewerPalettes.Spectral(8), BrewerPalettes.Pastel1(9), BrewerPalettes.RdYlGn(10) };
-		private static bool[] paletteReverseDefaults = { false, false, true, false, false, true, false, false,
-			false, true, false, false, false, false, true, false, false };
-		private const float defaultMinHeight = -1000f;
-		private const float defaultMaxHeight = 8000f;
-		private float? defaultClampHeight = null;
-		private Palette defaultPalette = PaletteLoader.defaultPalette;
+		private bool disabled;
 
 		/* MAP: constructor */
 		internal SCANdata(CelestialBody b)
 		{
 			body = b;
-			if (b.flightGlobalsIndex <= 16)
+			float? clamp = null;
+			if (b.ocean)
+				clamp = 0;
+
+			terrainConfig = SCANcontroller.getTerrainNode(b.name);
+
+			if (terrainConfig == null)
 			{
-				minHeight = (float)bodyHeightRange[b.flightGlobalsIndex, 0];
-				maxHeight = (float)bodyHeightRange[b.flightGlobalsIndex, 1];
-				clampHeight = bodyHeightRange[b.flightGlobalsIndex, 2];
-				colorPalette = paletteDefaults[b.flightGlobalsIndex];
-				paletteName = colorPalette.name;
-				paletteSize = colorPalette.size;
-				paletteReverse = paletteReverseDefaults[b.flightGlobalsIndex];
-			}
-			else
-			{
-				colorPalette = defaultPalette;
-				paletteName = colorPalette.name;
-				paletteSize = colorPalette.size;
-				minHeight = defaultMinHeight;
-				maxHeight = defaultMaxHeight;
-				if (b.ocean)
-					clampHeight = 0;
-				else
-					clampHeight = defaultClampHeight;
+				terrainConfig = new SCANterrainConfig(SCANconfigLoader.SCANNode.DefaultMinHeightRange, SCANconfigLoader.SCANNode.DefaultMaxHeightRange, clamp, SCANUtil.paletteLoader(SCANconfigLoader.SCANNode.DefaultPalette, 7), 7, false, false, body);
+				SCANcontroller.addToTerrainConfigData(body.name, terrainConfig);
 			}
 		}
 
@@ -118,125 +88,10 @@ namespace SCANsat.SCAN_Data
 			set { kethaneValueMap = value; }
 		}
 
-		public float MinHeight
+		public SCANterrainConfig TerrainConfig
 		{
-			get { return minHeight; }
-			internal set
-			{
-				if (value < maxHeight)
-					minHeight = value;
-			}
-		}
-
-		public float MaxHeight
-		{
-			get { return maxHeight; }
-			internal set
-			{
-				if (value > minHeight)
-					maxHeight = value;
-			}
-		}
-
-		public float DefaultMinHeight
-		{
-			get
-			{
-				if (body.flightGlobalsIndex < 17)
-					return (float)bodyHeightRange[body.flightGlobalsIndex, 0];
-				else
-					return -1000f;
-			}
-		}
-
-		public float DefaultMaxHeight
-		{
-			get
-			{
-				if (body.flightGlobalsIndex < 17)
-					return (float)bodyHeightRange[body.flightGlobalsIndex, 1];
-				else
-					return 8000f;
-			}
-		}
-
-		public float? ClampHeight
-		{
-			get { return clampHeight; }
-			internal set
-			{
-				if (value == null)
-					clampHeight = null;
-				else if (value > minHeight && value < maxHeight)
-					clampHeight = value;
-			}
-		}
-
-		public float? DefaultClampHeight
-		{
-			get
-			{
-				if (body.flightGlobalsIndex < 17)
-					return bodyHeightRange[body.flightGlobalsIndex, 2];
-				else
-					return defaultClampHeight;
-			}
-		}
-
-		public bool PaletteReverse
-		{
-			get { return paletteReverse; }
-			internal set { paletteReverse = value; }
-		}
-
-		public bool PaletteDiscrete
-		{
-			get { return paletteDiscrete; }
-			internal set { paletteDiscrete = value; }
-		}
-
-		public string PaletteName
-		{
-			get { return paletteName; }
-			internal set { paletteName = value; }
-		}
-
-		public Palette ColorPalette
-		{
-			get { return colorPalette; }
-			internal set { colorPalette = value; }
-		}
-
-		public Palette DefaultColorPalette
-		{
-			get
-			{
-				if (body.flightGlobalsIndex < 17)
-					return paletteDefaults[body.flightGlobalsIndex];
-				else
-					return paletteDefaults[0];
-			}
-		}
-
-		public bool DefaultReversePalette
-		{
-			get
-			{
-				if (body.flightGlobalsIndex < 17)
-					return paletteReverseDefaults[body.flightGlobalsIndex];
-				else
-					return false;
-			}
-		}
-
-		public int PaletteSize
-		{
-			get { return paletteSize; }
-			internal set
-			{
-				if (value >= 3)
-					paletteSize = value;
-			}
+			get { return terrainConfig; }
+			internal set { terrainConfig = value; }
 		}
 
 		public bool Disabled
@@ -269,6 +124,146 @@ namespace SCANsat.SCAN_Data
 					anomalies[i].Detail = SCANUtil.isCovered(anomalies[i].Longitude, anomalies[i].Latitude, this, SCANtype.AnomalyDetail);
 				}
 				return anomalies;
+			}
+		}
+
+		#endregion
+
+		#region Waypoints
+
+		private List<SCANwaypoint> waypoints;
+		private bool waypointsLoaded;
+
+		public void addToWaypoints()
+		{
+			if (SCANcontroller.controller == null)
+				return;
+
+			addToWaypoints(SCANcontroller.controller.LandingTarget);
+		}
+
+		public void addToWaypoints(SCANwaypoint w)
+		{
+			if (waypoints == null)
+			{
+				waypoints = new List<SCANwaypoint>() { w };
+				return;
+			}
+
+			if (waypoints.Any(a => a.LandingTarget))
+				waypoints.RemoveAll(a => a.LandingTarget);
+
+			waypoints.Add(w);
+		}
+
+		public void removeTargetWaypoint()
+		{
+			if (waypoints == null)
+				return;
+
+			if (waypoints.Any(a => a.LandingTarget))
+				waypoints.RemoveAll(a => a.LandingTarget);
+
+			SCANcontroller.controller.LandingTarget = null;
+		}
+
+		public List<SCANwaypoint> Waypoints
+		{
+			get
+			{
+				if (HighLogic.CurrentGame.Mode != Game.Modes.CAREER)
+				{
+					if (waypoints == null)
+						waypoints = new List<SCANwaypoint>();
+				}
+
+				if (HighLogic.CurrentGame.Mode == Game.Modes.CAREER && !SCANcontroller.controller.ContractsLoaded)
+					return new List<SCANwaypoint>();
+				else if (!waypointsLoaded)
+				{
+					waypointsLoaded = true;
+					if (waypoints == null)
+						waypoints = new List<SCANwaypoint>();
+					if (ContractSystem.Instance != null)
+					{
+						var surveys = ContractSystem.Instance.GetCurrentActiveContracts<SurveyContract>();
+						for (int i = 0; i < surveys.Length; i++)
+						{
+							if (surveys[i].targetBody == body)
+							{
+								for (int j = 0; j < surveys[i].AllParameters.Count(); j++)
+								{
+									if (surveys[i].AllParameters.ElementAt(j).GetType() == typeof(SurveyWaypointParameter))
+									{
+										SurveyWaypointParameter s = (SurveyWaypointParameter)surveys[i].AllParameters.ElementAt(j);
+										if (s.State == ParameterState.Incomplete)
+										{
+											SCANwaypoint p = new SCANwaypoint(s);
+											if (p.Way != null)
+												waypoints.Add(p);
+										}
+									}
+								}
+							}
+						}
+
+						var stationary = ContractSystem.Instance.GetCurrentActiveContracts<SatelliteContract>();
+						for (int i = 0; i < stationary.Length; i++)
+						{
+							SpecificOrbitParameter orbit = stationary[i].GetParameter<SpecificOrbitParameter>();
+							if (orbit == null)
+								continue;
+
+							if (orbit.targetBody == body)
+							{
+								for (int j = 0; j < stationary[i].AllParameters.Count(); j++)
+								{
+									if (stationary[i].AllParameters.ElementAt(j).GetType() == typeof(StationaryPointParameter))
+									{
+										StationaryPointParameter s = (StationaryPointParameter)stationary[i].AllParameters.ElementAt(j);
+										if (s.State == ParameterState.Incomplete)
+										{
+											SCANwaypoint p = new SCANwaypoint(s);
+											if (p.Way != null)
+												waypoints.Add(p);
+										}
+									}
+								}
+							}
+						}
+					}
+
+					if (WaypointManager.Instance() != null)
+					{
+						var remaining = WaypointManager.Instance().AllWaypoints();
+						for (int i = 0; i < remaining.Count; i++)
+						{
+							Waypoint p = remaining[i];
+							if (p.isOnSurface && p.isNavigatable)
+							{
+								if (p.celestialName == body.GetName())
+								{
+									if (p.contractReference != null)
+									{
+										if (p.contractReference.ContractState == Contract.State.Active)
+										{
+											if (!waypoints.Any(a => a.Way == p))
+											{
+												waypoints.Add(new SCANwaypoint(p));
+											}
+										}
+									}
+									else if (!waypoints.Any(a => a.Way == p))
+									{
+										waypoints.Add(new SCANwaypoint(p));
+									}
+								}
+							}
+						}
+					}
+				}
+
+				return waypoints;
 			}
 		}
 
@@ -309,9 +304,9 @@ namespace SCANsat.SCAN_Data
 				uncov += coverage_count[5];
 			if ((type & SCANtype.Kethane) != SCANtype.Nothing)
 				uncov += coverage_count[6];
-			if ((type & SCANtype.Ore) != SCANtype.Nothing)
+			if ((type & SCANtype.MetallicOre) != SCANtype.Nothing)
 				uncov += coverage_count[7];
-			if ((type & SCANtype.Kethane_3) != SCANtype.Nothing)
+			if ((type & SCANtype.Ore) != SCANtype.Nothing)
 				uncov += coverage_count[8];
 			if ((type & SCANtype.Kethane_4) != SCANtype.Nothing)
 				uncov += coverage_count[9];
@@ -440,6 +435,17 @@ namespace SCANsat.SCAN_Data
 			}
 		}
 
+		internal void fillResourceMap()
+		{
+			for (int i = 0; i < 360; i++)
+			{
+				for (int j = 0; j < 180; j++)
+				{
+					coverage[i, j] |= (Int32)SCANtype.AllResources;
+				}
+			}
+		}
+
 		/* DATA: reset the map */
 		internal void reset()
 		{
@@ -465,6 +471,16 @@ namespace SCANsat.SCAN_Data
 				}
 			}
 			map_small.Apply();
+		}
+		internal void resetResources()
+		{
+			for (int x = 0; x < 360; x++)
+			{
+				for (int y = 0; y < 180; y++)
+				{
+					coverage[x, y] &= (int)SCANtype.Everything_SCAN;
+				}
+			}
 		}
 		#endregion
 

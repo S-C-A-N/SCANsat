@@ -12,9 +12,8 @@
  *
  */
 #endregion
-using System;
+
 using System.Collections.Generic;
-using System.Linq;
 using SCANsat.SCAN_Data;
 using SCANsat.SCAN_Map;
 using SCANsat.SCAN_UI.UI_Framework;
@@ -27,19 +26,36 @@ namespace SCANsat.SCAN_UI
 {
 	class SCANcolorSelection: SCAN_MBW
 	{
-		private bool paletteBox, reversePalette, oldReverseState, discretePalette, oldDiscreteState;
-		private bool spaceCenterLock, trackingStationLock, clampState, oldClampState;
-		private Rect paletteRect;
-		private Palette dataPalette;
-		private int paletteSizeInt, oldPaletteSizeInt = 6;
+		private bool dropDown, paletteBox, resourceBox, saveWarning;
+		private bool oldReverseState, oldDiscreteState;
+		private bool controlLock, clampState, oldClampState;
+		private Rect ddRect;
 		private int paletteIndex;
 		private SCANmapLegend currentLegend, previewLegend;
-		private float sizeSlider, sizeSliderMin, sizeSliderMax, terrainSliderMinMin, terrainSliderMinMax, terrainSliderMaxMin, terrainSliderMaxMax, clampSliderMin, clampSliderMax;
-		private float minHeightF, oldMinHeightF = -500;
-		private float maxHeightF, oldMaxHeightF = 8000;
-		private float clampHeightF = 0;
+		private int windowMode = 0;
+
+		private SCANterrainConfig currentTerrain;
+		private float minT, maxT, clampT, pSize;
+
+		private SCANuiSlider minTerrainSlider, maxTerrainSlider, clampTerrainSlider, paletteSizeSlider, resourceMinSlider, resourceMaxSlider, resourceTransSlider, biomeTransSlider;
+
+		private SCANuiColorPicker slopeColorPickerLow, slopeColorPickerHigh, biomeColorPicker, resourceColorPicker;
+		private float bTrans, rTrans;
+
+		private bool stockBiomes = false;
+
+		private SCANresourceGlobal currentResource;
+		private float lowRCutoff, highRCutoff;
+
+		private List<SCANresourceGlobal> loadedResources;
+
+		private bool fineControlMode, oldFineControl;
+		private int bodyIndex;
+
+		private Vector2 scrollR;
 		private const string lockID = "colorLockID";
-		internal static Rect defaultRect = new Rect(100, 400, 650, 330);
+		internal readonly static Rect defaultRect = new Rect(100, 400, 780, 360);
+		private static Rect sessionRect = defaultRect;
 
 		//SCAN_MBW objects to sync the color selection fields to the currently displayed map
 		private SCANkscMap kscMapObj;
@@ -51,23 +67,20 @@ namespace SCANsat.SCAN_UI
 		protected override void Awake()
 		{
 			WindowCaption = "S.C.A.N. Color Management";
-			WindowRect = defaultRect;
+			WindowRect = sessionRect;
 			WindowStyle = SCANskins.SCAN_window;
-			WindowOptions = new GUILayoutOption[2] { GUILayout.Width(650), GUILayout.Height(300) };
+			WindowOptions = new GUILayoutOption[2] { GUILayout.Width(780), GUILayout.Height(360) };
 			Visible = false;
 			DragEnabled = true;
 			ClampToScreenOffset = new RectOffset(-450, -450, -250, -250);
 
 			SCAN_SkinsLibrary.SetCurrent("SCAN_Unity");
 
-			InputLockManager.RemoveControlLock(lockID);
+			removeControlLocks();
 		}
 
-		internal override void Start()
+		protected override void Start()
 		{
-			paletteSizeInt = palette.CurrentPalettes.size;
-			setSizeSlider(palette.CurrentPalette.kind);
-
 			if (HighLogic.LoadedScene == GameScenes.SPACECENTER || HighLogic.LoadedScene == GameScenes.TRACKSTATION)
 			{
 				kscMapObj = (SCANkscMap)SCANcontroller.controller.kscMap;
@@ -84,11 +97,72 @@ namespace SCANsat.SCAN_UI
 				if (bigMapObj.Data != null)
 					data = bigMapObj.Data;
 			}
+
+			if (data == null)
+			{
+				data = SCANUtil.getData(Planetarium.fetch.Home);
+				if (data == null)
+				{
+					data = new SCANdata(Planetarium.fetch.Home);
+					SCANcontroller.controller.addToBodyData(Planetarium.fetch.Home, data);
+				}
+			}
+
+			currentTerrain = new SCANterrainConfig(data.TerrainConfig);
+
+			stockBiomes = SCANcontroller.controller.useStockBiomes;
+
+			minTerrainSlider = new SCANuiSlider(data.TerrainConfig.DefaultMinHeight - SCANconfigLoader.SCANNode.RangeBelowMinHeight, data.TerrainConfig.MaxTerrain - 100, data.TerrainConfig.MinTerrain, "Min: ", "m", -2);
+			maxTerrainSlider = new SCANuiSlider(data.TerrainConfig.MinTerrain + 100, data.TerrainConfig.DefaultMaxHeight + SCANconfigLoader.SCANNode.RangeAboveMaxHeight, data.TerrainConfig.MaxTerrain, "Max: ", "m", -2);
+			clampTerrainSlider = new SCANuiSlider(data.TerrainConfig.MinTerrain + 10, data.TerrainConfig.MaxTerrain - 10, data.TerrainConfig.ClampTerrain ?? data.TerrainConfig.MinTerrain + 10, "Clamp: ", "m", -1);
+			paletteSizeSlider = new SCANuiSlider(3, 12, data.TerrainConfig.PalSize, "Palette Size: ", "", 0);
+
+			slopeColorPickerLow = new SCANuiColorPicker(SCANcontroller.controller.lowSlopeColorOne, SCANcontroller.controller.highSlopeColorOne, true);
+			slopeColorPickerHigh = new SCANuiColorPicker(SCANcontroller.controller.lowSlopeColorTwo, SCANcontroller.controller.highSlopeColorTwo, true);
+
+			slopeColorPickerLow.updateOldSwatches();
+			slopeColorPickerHigh.updateOldSwatches();
+
+			bTrans = SCANcontroller.controller.biomeTransparency;
+			biomeTransSlider = new SCANuiSlider(0, 80, bTrans, "Ter. Trans: ", "%", 0);
+
+			biomeColorPicker = new SCANuiColorPicker(SCANcontroller.controller.lowBiomeColor, SCANcontroller.controller.highBiomeColor, true);
+
+			biomeColorPicker.updateOldSwatches();
+
+			if (SCANconfigLoader.GlobalResource)
+			{
+				loadedResources = SCANcontroller.setLoadedResourceList();
+				currentResource = new SCANresourceGlobal(loadedResources[0]);
+				currentResource.CurrentBodyConfig(data.Body.name);
+
+				if (currentResource != null)
+				{
+					resourceMinSlider = new SCANuiSlider(0, currentResource.CurrentBody.MinValue - 0.1f, currentResource.CurrentBody.MinValue, "Min: ", "%", 1);
+					resourceMaxSlider = new SCANuiSlider(currentResource.CurrentBody.MinValue + 0.1f, 100, currentResource.CurrentBody.MaxValue, "Max: ", "%", 1);
+					resourceTransSlider = new SCANuiSlider(0, 80, currentResource.Transparency, "Trans: ", "%", 0);
+
+					resourceColorPicker = new SCANuiColorPicker(currentResource.MinColor, currentResource.MaxColor, true);
+				}
+			}
+
+			bodyIndex = data.Body.flightGlobalsIndex;
+
+			if (windowMode > 3 || (windowMode > 2 && !SCANconfigLoader.GlobalResource))
+				windowMode = 0;
+
+			setSizeSlider(currentTerrain.ColorPal.kind);
 		}
 
-		internal override void OnDestroy()
+		protected override void OnDestroy()
+		{
+			removeControlLocks();
+		}
+
+		internal void removeControlLocks()
 		{
 			InputLockManager.RemoveControlLock(lockID);
+			controlLock = false;
 		}
 
 		protected override void DrawWindowPre(int id)
@@ -105,6 +179,7 @@ namespace SCANsat.SCAN_UI
 						SCANcontroller.controller.addToBodyData(FlightGlobals.currentMainBody, data);
 					}
 				}
+
 				if (bigMapObj.Visible && SCANBigMap.BigMap != null)
 				{
 					data = bigMapObj.Data;
@@ -119,6 +194,7 @@ namespace SCANsat.SCAN_UI
 						SCANcontroller.controller.addToBodyData(FlightGlobals.currentMainBody, data);
 					}
 				}
+
 				if (bigMap == null)
 				{
 					if (SCANBigMap.BigMap != null)
@@ -163,15 +239,14 @@ namespace SCANsat.SCAN_UI
 				}
 				Vector2 mousePos = Input.mousePosition;
 				mousePos.y = Screen.height - mousePos.y;
-				if (WindowRect.Contains(mousePos) && !spaceCenterLock)
+				if (WindowRect.Contains(mousePos) && !controlLock)
 				{
 					InputLockManager.SetControlLock(ControlTypes.CAMERACONTROLS | ControlTypes.KSC_ALL, lockID);
-					spaceCenterLock = true;
+					controlLock = true;
 				}
-				else if (!WindowRect.Contains(mousePos) && spaceCenterLock)
+				else if (!WindowRect.Contains(mousePos) && controlLock)
 				{
-					InputLockManager.RemoveControlLock(lockID);
-					spaceCenterLock = false;
+					removeControlLocks();
 				}
 			}
 
@@ -210,45 +285,40 @@ namespace SCANsat.SCAN_UI
 				}
 				Vector2 mousePos = Input.mousePosition;
 				mousePos.y = Screen.height - mousePos.y;
-				if (WindowRect.Contains(mousePos) && !trackingStationLock)
+				if (WindowRect.Contains(mousePos) && !controlLock)
 				{
 					InputLockManager.SetControlLock(ControlTypes.TRACKINGSTATION_UI, lockID);
-					trackingStationLock = true;
+					controlLock = true;
 				}
-				else if (!WindowRect.Contains(mousePos) && trackingStationLock)
+				else if (!WindowRect.Contains(mousePos) && controlLock)
 				{
-					InputLockManager.RemoveControlLock(lockID);
-					trackingStationLock = false;
+					removeControlLocks();
 				}
 			}
 
-			//This updates all of the fields whenever the palette selection is changed; very ugly...
-			if (currentLegend == null || data.ColorPalette != dataPalette)
+			//This updates all of the fields whenever the palette selection is changed
+			if (windowMode == 0 && (currentLegend == null || bodyIndex != data.Body.flightGlobalsIndex))
 			{
-				dataPalette = data.ColorPalette;
-				minHeightF = data.MinHeight;
-				oldMinHeightF = minHeightF;
-				maxHeightF = data.MaxHeight;
-				oldMaxHeightF = maxHeightF;
-				setTerrainSliders();
-				oldPaletteSizeInt = paletteSizeInt = data.PaletteSize;
-				setSizeSlider(dataPalette.kind);
-				sizeSlider = (float)paletteSizeInt;
-				oldReverseState = reversePalette = data.PaletteReverse;
-				oldDiscreteState = discretePalette = data.PaletteDiscrete;
-				oldClampState = clampState = data.ClampHeight != null;
-				if (clampState)
-				{
-					clampHeightF = (float)data.ClampHeight;
-				}
-				palette.CurrentPalettes = palette.setCurrentPalettesType(dataPalette.kind);
-				palette.CurrentPalette = palette.CurrentPalettes.availablePalettes[0];
-				regenPaletteSets();
-				drawCurrentLegend();
+				currentTerrain = new SCANterrainConfig(data.TerrainConfig);
+
+				SCANUtil.SCANdebugLog("Trigger Body Change");
+				bodyIndex = data.Body.flightGlobalsIndex;
+
+				currentTerrain = new SCANterrainConfig(data.TerrainConfig);
+
+				updateUI();
 			}
-			if (previewLegend == null)
+
+			if (windowMode == 0 && previewLegend == null)
 			{
 				drawPreviewLegend();
+			}
+
+			if (!dropDown)
+			{
+				paletteBox = false;
+				resourceBox = false;
+				saveWarning = false;
 			}
 		}
 
@@ -258,83 +328,235 @@ namespace SCANsat.SCAN_UI
 			closeBox(id);
 
 			growS();
-				growE();
+				windowTabs(id);					/* Draws the window selection tabs across the top */
+				if (windowMode == 0)
+				{
+					growE();
 					paletteTextures(id);		/* Draws the palette selection button and preview swatches */
 					paletteOptions(id);			/* All of the terrain and palette options */
-				stopE();
-				fillS(8);
-				growE();
+					stopE();
+					fillS(8);
+					growE();
 					palettePreview(id);			/* Draws the two preview palette legends */
-					fillS(10);
 					paletteConfirmation(id);	/* The buttons for default, apply, and cancel */
-				stopE();
+					stopE();
+				}
+				else if (windowMode == 1)
+				{
+					growE();
+						fillS(10);
+						slopeColorPickerLow.drawColorSelector(WindowRect);
+						fillS(40);
+						slopeColorPickerHigh.drawColorSelector(WindowRect);
+					stopE();
+					fillS(100);
+					growE();
+						fillS(140);
+						slopeOptions(id);
+						slopeConfirm(id);
+					stopE();
+				}
+				else if (windowMode == 2)
+				{
+					growE();
+						fillS(10);
+						biomeColorPicker.drawColorSelector(WindowRect);
+						fillS(80);
+						growS();
+							biomeOptions(id);
+							biomeConfirm(id);
+						stopS();
+					stopE();
+				}
+				else if (windowMode == 3 && SCANconfigLoader.GlobalResource)
+				{
+					growE();
+						fillS(10);
+						resourceColorPicker.drawColorSelector(WindowRect);
+						fillS(90);
+						growS();
+							resourceOptions(id);
+							resourceConfirm(id);
+						stopS();
+					stopE();
+				}
+				else
+					windowMode = 0;
 			stopS();
 
-			paletteSelectionBox(id);			/* Draw the drop down menu for the palette selection box */
+			dropDownBox(id);				/* Draw the drop down menu for the palette selection box */
 		}
 
 		protected override void DrawWindowPost(int id)
 		{
-			if (paletteBox && Event.current.type == EventType.mouseDown && !paletteRect.Contains(Event.current.mousePosition))
-				paletteBox = false;
+			if (dropDown && Event.current.type == EventType.mouseDown && !ddRect.Contains(Event.current.mousePosition))
+			{
+				dropDown = false;
+			}
 
 			//These methods update all of the UI elements whenever any of the options are changed
-			if (reversePalette != oldReverseState)
+			if (windowMode == 0)
 			{
-				oldReverseState = reversePalette;
-				drawPreviewLegend();
-			}
-
-			if (oldMinHeightF != minHeightF || oldMaxHeightF != maxHeightF)
-			{
-				oldMinHeightF = minHeightF;
-				oldMaxHeightF = maxHeightF;
-				setTerrainSliders();
-			}
-
-			if (discretePalette != oldDiscreteState)
-			{
-				oldDiscreteState = discretePalette;
-				drawPreviewLegend();
-			}
-
-			if (clampState != oldClampState)
-			{
-				oldClampState = clampState;
-				drawPreviewLegend();
-			}
-
-			if (paletteSizeInt != oldPaletteSizeInt)
-			{
-				if (paletteSizeInt > 2)
+				if (currentTerrain.PalRev != oldReverseState)
 				{
-					oldPaletteSizeInt = paletteSizeInt;
-					sizeSlider = paletteSizeInt;
+					oldReverseState = currentTerrain.PalRev;
+					drawPreviewLegend();
+				}
+
+				if (minTerrainSlider.valueChanged() || maxTerrainSlider.valueChanged())
+				{
+					setTerrainSliders();
+				}
+
+				if (currentTerrain.PalDis != oldDiscreteState)
+				{
+					oldDiscreteState = currentTerrain.PalDis;
+					drawPreviewLegend();
+				}
+
+				if (clampState != oldClampState)
+				{
+					oldClampState = clampState;
+					drawPreviewLegend();
+				}
+
+				if (paletteSizeSlider.valueChanged())
+				{
 					regenPaletteSets();
-					palette.CurrentPalette = palette.CurrentPalettes.availablePalettes[paletteIndex];
+					currentTerrain.ColorPal = palette.CurrentPalettes.availablePalettes[paletteIndex];
 					drawPreviewLegend();
 				}
 			}
+			else if (windowMode == 1)
+			{
+				slopeColorPickerLow.colorStateChanged();
+				slopeColorPickerLow.brightnessChanged();
+				slopeColorPickerHigh.colorStateChanged();
+				slopeColorPickerHigh.brightnessChanged();
+			}
+			else if (windowMode == 2)
+			{
+				biomeColorPicker.colorStateChanged();
+				biomeColorPicker.brightnessChanged();
+			}
+			else if (windowMode == 3)
+			{
+				if (resourceMinSlider.valueChanged() || resourceMaxSlider.valueChanged())
+				{
+					setResourceSliders();
+				}
+
+				if (bodyIndex != data.Body.flightGlobalsIndex)
+				{
+					SCANUtil.SCANdebugLog("Trigger Body Change");
+					bodyIndex = data.Body.flightGlobalsIndex;
+
+					currentResource.CurrentBodyConfig(data.Body.name);
+
+					lowRCutoff = currentResource.CurrentBody.MinValue;
+					highRCutoff = currentResource.CurrentBody.MaxValue;
+
+					oldFineControl = fineControlMode = false;
+
+					setResourceSliders();
+				}
+
+				if (oldFineControl != fineControlMode)
+				{
+					oldFineControl = fineControlMode;
+					if (fineControlMode)
+					{
+						if (lowRCutoff < 5f)
+							resourceMinSlider.MinValue = 0f;
+						else
+							resourceMinSlider.MinValue = lowRCutoff - 5;
+
+						if (lowRCutoff > 95f)
+							resourceMinSlider.MaxValue = 100f;
+						else if (highRCutoff < lowRCutoff + 5f)
+							resourceMinSlider.MaxValue = highRCutoff - 0.1f;
+						else
+							resourceMinSlider.MaxValue = lowRCutoff + 5f;
+
+						if (highRCutoff < 5f)
+							resourceMaxSlider.MinValue = 0f;
+						else if (lowRCutoff > highRCutoff - 5f)
+							resourceMaxSlider.MinValue = lowRCutoff + 0.1f;
+						else
+							resourceMaxSlider.MinValue = highRCutoff - 5f;
+
+						if (highRCutoff > 95f)
+							resourceMaxSlider.MaxValue = 100f;
+						else
+							resourceMaxSlider.MaxValue = highRCutoff + 5f;
+					}
+					else
+						setResourceSliders();
+				}
+
+				resourceColorPicker.colorStateChanged();
+				resourceColorPicker.brightnessChanged();
+			}
+
+			sessionRect = WindowRect;
 		}
 
 		//Draw the version label in the upper left corner
 		private void versionLabel(int id)
 		{
 			Rect r = new Rect(6, 0, 50, 18);
-			GUI.Label(r, SCANversions.SCANsatVersion, SCANskins.SCAN_whiteReadoutLabel);
+			GUI.Label(r, SCANmainMenuLoader.SCANsatVersion, SCANskins.SCAN_whiteReadoutLabel);
 		}
 
 		//Draw the close button in the upper right corner
 		private void closeBox(int id)
 		{
-			Rect r = new Rect(WindowRect.width - 20, 0, 18, 18);
+			Rect r = new Rect(WindowRect.width - 20, 1, 18, 18);
 			if (GUI.Button(r, SCANcontroller.controller.closeBox, SCANskins.SCAN_closeButton))
 			{
-				InputLockManager.RemoveControlLock(lockID);
-				spaceCenterLock = false;
-				trackingStationLock = false;
+				removeControlLocks();
 				Visible = false;
 			}
+		}
+
+		//Draw the window tab options
+		private void windowTabs(int id)
+		{
+			growE();
+				if (GUILayout.Button("Altimetry"))
+				{
+					windowMode = 0;
+
+					currentTerrain = new SCANterrainConfig(data.TerrainConfig);
+
+					bodyIndex = data.Body.flightGlobalsIndex;
+
+					updateUI();
+				}
+				if (GUILayout.Button("Slope"))
+				{
+					windowMode = 1;
+				}
+				if (GUILayout.Button("Biome"))
+				{
+					windowMode = 2;
+				}
+				if (SCANconfigLoader.GlobalResource)
+				{
+					if (GUILayout.Button("Resources"))
+					{
+						windowMode = 3;
+
+						fineControlMode = oldFineControl = false;
+
+						currentResource.CurrentBodyConfig(data.Body.name);
+
+						bodyIndex = data.Body.flightGlobalsIndex;
+
+						updateUI();
+					}
+				}
+			stopE();
 		}
 
 		//Draw the palette selection field
@@ -344,8 +566,9 @@ namespace SCANsat.SCAN_UI
 				GUILayout.Label("Palette Selection", SCANskins.SCAN_headline);
 				fillS(12);
 				growE();
-					if (GUILayout.Button("Palette Style:", SCANskins.SCAN_buttonFixed, GUILayout.MaxWidth(120)))
+					if (GUILayout.Button("Palette Style:", GUILayout.MaxWidth(120)))
 					{
+						dropDown = !dropDown;
 						paletteBox = !paletteBox;
 					}
 					fillS(10);
@@ -377,8 +600,9 @@ namespace SCANsat.SCAN_UI
 						{
 							if (GUILayout.Button("", SCANskins.SCAN_texButton, GUILayout.Width(110), GUILayout.Height(25)))
 							{
-								palette.CurrentPalette = palette.CurrentPalettes.availablePalettes[i];
-								paletteIndex = palette.CurrentPalette.index;
+								currentTerrain.ColorPal = palette.CurrentPalettes.availablePalettes[i];
+								paletteIndex = currentTerrain.ColorPal.index;
+								updateUI();
 								drawPreviewLegend();
 							}
 						}
@@ -399,28 +623,12 @@ namespace SCANsat.SCAN_UI
 
 				growE();
 					fillS(10);
-					GUILayout.Label("Min: " + minHeightF + "m", SCANskins.SCAN_whiteReadoutLabel);
-
-					Rect r = GUILayoutUtility.GetLastRect();
-					r.x += 110;
-					r.width = 130;
-					
-					minHeightF = GUI.HorizontalSlider(r, minHeightF, terrainSliderMinMin, terrainSliderMinMax).Mathf_Round(-2);
-
-					SCANuiUtil.drawSliderLabel(r, terrainSliderMinMin + "m", terrainSliderMinMax + "m");
+					currentTerrain.MinTerrain = minTerrainSlider.drawSlider(false, ref minT);
 				stopE();
 				fillS(8);
 				growE();
 					fillS(10);
-					GUILayout.Label("Max: " + maxHeightF + "m", SCANskins.SCAN_whiteReadoutLabel);
-
-					r = GUILayoutUtility.GetLastRect();
-					r.x += 110;
-					r.width = 130;
-
-					maxHeightF =GUI.HorizontalSlider(r, maxHeightF, terrainSliderMaxMin, terrainSliderMaxMax).Mathf_Round(-2);
-
-					SCANuiUtil.drawSliderLabel(r, terrainSliderMaxMin + "m", terrainSliderMaxMax + "m");
+					currentTerrain.MaxTerrain = maxTerrainSlider.drawSlider(false, ref maxT);
 				stopE();
 				fillS(6);
 				growE();
@@ -432,15 +640,7 @@ namespace SCANsat.SCAN_UI
 					{
 						growE();
 							fillS(10);
-							GUILayout.Label("Clamp: " + clampHeightF + "m", SCANskins.SCAN_whiteReadoutLabel);
-
-							r = GUILayoutUtility.GetLastRect();
-							r.x += 110;
-							r.width = 130;
-
-							clampHeightF = GUI.HorizontalSlider(r, clampHeightF, clampSliderMin, clampSliderMax).Mathf_Round(-1);
-
-							SCANuiUtil.drawSliderLabel(r, clampSliderMin + "m", clampSliderMax +  "m");
+							currentTerrain.ClampTerrain = clampTerrainSlider.drawSlider(false, ref clampT);
 						stopE();
 					}
 				fillS(6);
@@ -449,22 +649,14 @@ namespace SCANsat.SCAN_UI
 				{
 					growE();
 						fillS(10);
-						GUILayout.Label("Palette Size: " + paletteSizeInt, SCANskins.SCAN_whiteReadoutLabel);
-
-						r = GUILayoutUtility.GetLastRect();
-						r.x += 110;
-						r.width = 130;
-
-						paletteSizeInt = Mathf.RoundToInt(GUI.HorizontalSlider(r, sizeSlider, sizeSliderMin, sizeSliderMax));
-
-						SCANuiUtil.drawSliderLabel(r, sizeSliderMin + "  ", " " + sizeSliderMax);
+						currentTerrain.PalSize = (int)paletteSizeSlider.drawSlider(false, ref pSize);
 					stopE();
 				}
 
 				growE();
-					reversePalette = GUILayout.Toggle(reversePalette, "Reverse Order", SCANskins.SCAN_settingsToggle);
+					currentTerrain.PalRev = GUILayout.Toggle(currentTerrain.PalRev, " Reverse Order", SCANskins.SCAN_boldToggle, GUILayout.Width(120));
 					fillS(10);
-					discretePalette = GUILayout.Toggle(discretePalette, "Discrete Gradient", SCANskins.SCAN_settingsToggle);
+					currentTerrain.PalDis = GUILayout.Toggle(currentTerrain.PalDis, " Discrete Gradient", SCANskins.SCAN_boldToggle, GUILayout.Width(140));
 				stopE();
 
 			stopS();
@@ -475,7 +667,6 @@ namespace SCANsat.SCAN_UI
 		{
 			growS();
 				GUILayout.Label("Current Palette", SCANskins.SCAN_headlineSmall);
-				fillS(8);
 				GUILayout.Label("", SCANskins.SCAN_legendTex, GUILayout.Width(180), GUILayout.Height(25));
 				Rect r = GUILayoutUtility.GetLastRect();
 				GUI.DrawTexture(r, currentLegend.Legend);
@@ -483,7 +674,6 @@ namespace SCANsat.SCAN_UI
 			fillS(8);
 			growS();
 				GUILayout.Label("New Palette", SCANskins.SCAN_headlineSmall);
-				fillS(8);
 				GUILayout.Label("", SCANskins.SCAN_legendTex, GUILayout.Width(180), GUILayout.Height(25));
 				r = GUILayoutUtility.GetLastRect();
 				GUI.DrawTexture(r, previewLegend.Legend);
@@ -495,85 +685,467 @@ namespace SCANsat.SCAN_UI
 		{
 			growS();
 				fillS(6);
-				if (GUILayout.Button("Default Settings", GUILayout.Width(135)))
-				{
-					//Lots of fields to update for switching palettes; again, very clumsy
-					data.MinHeight = data.DefaultMinHeight;
-					data.MaxHeight = data.DefaultMaxHeight;
-					data.ClampHeight = data.DefaultClampHeight;
-					minHeightF = data.MinHeight;
-					maxHeightF = data.MaxHeight;
-					clampState = data.ClampHeight != null;
-					if (clampState)
-						clampHeightF = (float)data.ClampHeight;
-					else
-						clampHeightF = 0;
-					dataPalette = palette.CurrentPalette = data.ColorPalette = data.DefaultColorPalette;
-					palette.CurrentPalettes = palette.setCurrentPalettesType(dataPalette.kind);
-					paletteSizeInt = data.PaletteSize = dataPalette.size;
-					reversePalette = data.PaletteReverse = data.DefaultReversePalette;
-					discretePalette = data.PaletteDiscrete = false;
-					setSizeSlider(dataPalette.kind);
-					setTerrainSliders();
-					drawCurrentLegend();
-				}
-				fillS(6);
-				growE();
-					if (GUILayout.Button("Apply", GUILayout.Width(60)))
-					{
-						if (minHeightF < maxHeightF)
+					growE();
+						if (!dropDown)
 						{
-							data.MinHeight = minHeightF;
-							data.MaxHeight = maxHeightF;
-						}
-						if (clampState)
-						{
-							if (clampHeightF > minHeightF && clampHeightF < maxHeightF)
-								data.ClampHeight = (float?)clampHeightF;
+							if (GUILayout.Button("Apply Values", GUILayout.Width(110)))
+							{
+								SCANcontroller.updateTerrainConfig(currentTerrain);
+
+								updateUI();
+
+								if (bigMap != null)
+								{
+									if (bigMap.MType == mapType.Altimetry && SCANcontroller.controller.colours == 0)
+										bigMap.resetMap();
+								}
+							}
+
+							fillS(6);
+
+							if (GUILayout.Button("Default Values", GUILayout.Width(110)))
+							{
+								currentTerrain.MinTerrain = data.TerrainConfig.DefaultMinHeight;
+								currentTerrain.MaxTerrain = data.TerrainConfig.DefaultMaxHeight;
+								currentTerrain.ClampTerrain = data.TerrainConfig.DefaultClampHeight;
+								currentTerrain.ColorPal = data.TerrainConfig.DefaultPalette;
+								currentTerrain.PalRev = data.TerrainConfig.DefaultReverse;
+								currentTerrain.PalDis = data.TerrainConfig.DefaultDiscrete;
+								currentTerrain.PalSize = data.TerrainConfig.DefaultPaletteSize;
+
+								updateUI();
+
+								if (bigMap != null)
+								{
+									if (bigMap.MType == mapType.Altimetry && SCANcontroller.controller.colours == 0)
+										bigMap.resetMap();
+								}
+							}
 						}
 						else
-							data.ClampHeight = null;
-
-						data.ColorPalette = palette.CurrentPalette;
-						data.PaletteName = palette.CurrentPalette.name;
-						data.PaletteSize = palette.CurrentPalette.size;
-						data.PaletteDiscrete = discretePalette;
-						data.PaletteReverse = reversePalette;
-						dataPalette = data.ColorPalette;
-						drawCurrentLegend();
-						if (bigMap != null)
-							bigMap.resetMap();
-					}
-					fillS(10);
-					if (GUILayout.Button("Cancel", GUILayout.Width(60)))
-					{
-						palette.CurrentPalette = data.ColorPalette;
-						InputLockManager.RemoveControlLock(lockID);
-						spaceCenterLock = false;
-						trackingStationLock = false;
-						Visible = false;
-					}
+						{
+							GUILayout.Label("Apply Values", SCANskins.SCAN_button, GUILayout.Width(110));
+							fillS(6);
+							GUILayout.Label("Default Values", SCANskins.SCAN_button, GUILayout.Width(110));
+						}
 				stopE();
+				fillS(8);
+				if (!dropDown)
+				{
+					if (GUILayout.Button("Save Values To Config", GUILayout.Width(180)))
+					{
+						dropDown = true;
+						saveWarning = true;
+					}
+				}
+				else
+					GUILayout.Label("Save Values To Config", SCANskins.SCAN_button, GUILayout.Width(180));
 			stopS();
 		}
 
-		//Drop down menu for palette selection
-		private void paletteSelectionBox(int id)
+		private void biomeOptions(int id)
 		{
-			if (paletteBox)
-			{
-				paletteRect = new Rect(40, 90, 100, 100);
-				GUI.Box(paletteRect, "", SCANskins.SCAN_dropDownBox);
-				for (int i = 0; i < Palette.kindNames.Length; i++)
+			GUILayout.Label("Biome Options", SCANskins.SCAN_headline, GUILayout.Width(300));
+
+			fillS(20);
+			stockBiomes = GUILayout.Toggle(stockBiomes, "Use Stock Biome Maps", SCANskins.SCAN_toggle);
+			fillS(8);
+			growE();
+				fillS(10);
+				biomeTransSlider.drawSlider(false, ref bTrans);
+			stopE();
+		}
+
+		private void slopeOptions(int id)
+		{
+
+		}
+
+		private void resourceOptions(int id)
+		{
+			GUILayout.Label("Resource Options: " + data.Body.name, SCANskins.SCAN_headline, GUILayout.Width(300));
+
+			fillS(10);
+			growE();
+				if (GUILayout.Button("Resource Selection:"))
 				{
-					Rect r = new Rect(paletteRect.x + 10, paletteRect.y + 5 + (i * 23), 80, 22);
-					if (GUI.Button(r, Palette.kindNames[i], SCANskins.SCAN_dropDownButton))
+					dropDown = !dropDown;
+					resourceBox = !resourceBox;
+				}
+				fillS(10);
+				GUILayout.Label(currentResource.Name, SCANskins.SCAN_whiteReadoutLabel);
+			stopE();
+			fillS(20);
+			growE();
+				fillS(110);
+				if (dropDown)
+					GUILayout.Toggle(fineControlMode, " Fine Control Mode", SCANskins.SCAN_boldToggle, GUILayout.Width(140));
+				else
+					fineControlMode = GUILayout.Toggle(fineControlMode, " Fine Control Mode", SCANskins.SCAN_boldToggle, GUILayout.Width(140));
+			stopE();
+			growE();
+				fillS(10);
+				currentResource.CurrentBody.MinValue = resourceMinSlider.drawSlider(dropDown, ref lowRCutoff);
+			stopE();
+			fillS(8);
+			growE();
+				fillS(10);
+				currentResource.CurrentBody.MaxValue = resourceMaxSlider.drawSlider(dropDown, ref highRCutoff);
+			stopE();
+			fillS(8);
+			growE();
+				fillS(10);
+				currentResource.Transparency = resourceTransSlider.drawSlider(dropDown, ref rTrans);
+			stopE();
+		}
+
+		private void biomeConfirm(int id)
+		{
+			fillS(10);
+
+			growE();
+				if (!dropDown)
+				{
+					if (GUILayout.Button("Apply Values", GUILayout.Width(110)))
 					{
-						paletteBox = false;
-						palette.CurrentPalettes = palette.setCurrentPalettesType((Palette.Kind)i);
-						setSizeSlider((Palette.Kind)i);
+						SCANcontroller.controller.lowBiomeColor = biomeColorPicker.ColorLow;
+						SCANcontroller.controller.highBiomeColor = biomeColorPicker.ColorHigh;
+						SCANcontroller.controller.useStockBiomes = stockBiomes;
+						SCANcontroller.controller.biomeTransparency = bTrans;
+
+						biomeColorPicker.updateOldSwatches();
+
+						if (bigMap != null)
+						{
+							if (bigMap.MType == mapType.Biome)
+								bigMap.resetMap();
+						}
+					}
+
+					fillS(8);
+
+					if (GUILayout.Button("Default Values", GUILayout.Width(110)))
+					{
+						SCANcontroller.controller.lowBiomeColor = SCANconfigLoader.SCANNode.LowBiomeColor;
+						SCANcontroller.controller.highBiomeColor = SCANconfigLoader.SCANNode.HighBiomeColor;
+						SCANcontroller.controller.useStockBiomes = SCANconfigLoader.SCANNode.StockBiomeMap;
+						SCANcontroller.controller.biomeTransparency = SCANconfigLoader.SCANNode.BiomeTransparency;
+
+						stockBiomes = false;
+
+						biomeColorPicker = new SCANuiColorPicker(SCANcontroller.controller.lowBiomeColor, SCANcontroller.controller.highBiomeColor, biomeColorPicker.LowColorChange);
+
+						biomeColorPicker.updateOldSwatches();
+
+						bTrans = SCANcontroller.controller.biomeTransparency;
+
+						if (bigMap != null)
+						{
+							if (bigMap.MType == mapType.Biome)
+								bigMap.resetMap();
+						}
 					}
 				}
+				else
+				{
+					GUILayout.Label("Apply Values", SCANskins.SCAN_button, GUILayout.Width(110));
+					fillS(8);
+					GUILayout.Label("Default Values", SCANskins.SCAN_button, GUILayout.Width(110));
+				}
+			stopE();
+			fillS(8);
+			if (!dropDown)
+			{
+				if (GUILayout.Button("Save Values To Config", GUILayout.Width(180)))
+				{
+					dropDown = true;
+					saveWarning = true;
+				}
+			}
+			else
+				GUILayout.Label("Save Values To Config", SCANskins.SCAN_button, GUILayout.Width(180));
+		}
+
+		private void slopeConfirm(int id)
+		{
+			if (!dropDown)
+			{
+				if (GUILayout.Button("Apply Values", GUILayout.Width(110)))
+				{
+					SCANcontroller.controller.lowSlopeColorOne = slopeColorPickerLow.ColorLow;
+					SCANcontroller.controller.highSlopeColorOne = slopeColorPickerLow.ColorHigh;
+					SCANcontroller.controller.lowSlopeColorTwo = slopeColorPickerHigh.ColorLow;
+					SCANcontroller.controller.highSlopeColorTwo = slopeColorPickerHigh.ColorHigh;
+
+					slopeColorPickerLow.updateOldSwatches();
+					slopeColorPickerHigh.updateOldSwatches();
+
+					if (bigMap != null)
+					{
+						if (bigMap.MType == mapType.Slope)
+							bigMap.resetMap();
+					}
+
+				}
+
+				fillS(8);
+
+				if (GUILayout.Button("Default Values", GUILayout.Width(110)))
+				{
+					SCANcontroller.controller.lowSlopeColorOne = SCANconfigLoader.SCANNode.BottomLowSlopeColor;
+					SCANcontroller.controller.highSlopeColorOne = SCANconfigLoader.SCANNode.BottomHighSlopeColor;
+					SCANcontroller.controller.lowSlopeColorTwo = SCANconfigLoader.SCANNode.TopLowSlopeColor;
+					SCANcontroller.controller.highSlopeColorTwo = SCANconfigLoader.SCANNode.TopHighSlopeColor;
+
+					slopeColorPickerLow = new SCANuiColorPicker(SCANcontroller.controller.lowSlopeColorOne, SCANcontroller.controller.highSlopeColorOne, slopeColorPickerLow.LowColorChange);
+					slopeColorPickerHigh = new SCANuiColorPicker(SCANcontroller.controller.lowSlopeColorTwo, SCANcontroller.controller.highSlopeColorTwo, slopeColorPickerHigh.LowColorChange);
+
+					slopeColorPickerLow.updateOldSwatches();
+					slopeColorPickerHigh.updateOldSwatches();
+
+					if (bigMap != null)
+					{
+						if (bigMap.MType == mapType.Slope)
+							bigMap.resetMap();
+					}
+				}
+
+				fillS(80);
+
+				if (GUILayout.Button("Save Values To Config", GUILayout.Width(180)))
+				{
+					dropDown = true;
+					saveWarning = true;
+				}
+			}
+			else
+			{
+				GUILayout.Label("Apply Values", SCANskins.SCAN_button, GUILayout.Width(110));
+				fillS(8);
+				GUILayout.Label("Default Values", SCANskins.SCAN_button, GUILayout.Width(110));
+				fillS(80);
+				GUILayout.Label("Save Values To Config", SCANskins.SCAN_button, GUILayout.Width(180));
+			}
+		}
+
+		private void resourceConfirm(int id)
+		{
+			fillS(10);
+			growE();
+				if (!dropDown)
+				{
+					if (GUILayout.Button("Apply Values", GUILayout.Width(110)))
+					{
+						currentResource.MinColor = resourceColorPicker.ColorLow;
+						currentResource.MaxColor = resourceColorPicker.ColorHigh;
+
+						SCANcontroller.updateSCANresource(currentResource, false);
+
+						updateUI();
+
+						if (bigMap != null && SCANcontroller.controller.map_ResourceOverlay)
+							bigMap.resetMap();
+					}
+
+					fillS(6);
+
+					if (GUILayout.Button("Apply To All Planets", GUILayout.Width(200)))
+					{
+						for (int i = 0; i < currentResource.getBodyCount; i++)
+						{
+							SCANresourceBody r = currentResource.getBodyConfig(i);
+							if (r != null)
+							{
+								r.MinValue = lowRCutoff;
+								r.MaxValue = highRCutoff;
+							}
+						}
+
+						currentResource.MinColor = resourceColorPicker.ColorLow;
+						currentResource.MaxColor = resourceColorPicker.ColorHigh;
+
+						SCANcontroller.updateSCANresource(currentResource, true);
+
+						updateUI();
+
+						if (bigMap != null && SCANcontroller.controller.map_ResourceOverlay)
+							bigMap.resetMap();
+					}
+				}
+				else
+				{
+					GUILayout.Label("Apply Values", SCANskins.SCAN_button, GUILayout.Width(110));
+					fillS(6);
+					GUILayout.Label("Apply To All Planets", SCANskins.SCAN_button, GUILayout.Width(200));
+				}
+			stopE();
+			fillS(8);
+			growE();
+				if (!dropDown)
+				{
+					if (GUILayout.Button("Default Values", GUILayout.Width(110)))
+					{
+						currentResource.CurrentBody.MinValue = currentResource.CurrentBody.DefaultMinValue;
+						currentResource.CurrentBody.MaxValue = currentResource.CurrentBody.DefaultMaxValue;
+						currentResource.MinColor = currentResource.DefaultLowColor;
+						currentResource.MaxColor = currentResource.DefaultHighColor;
+						currentResource.Transparency = currentResource.DefaultTrans;
+
+						SCANcontroller.updateSCANresource(currentResource, false);
+
+						updateUI();
+
+						if (bigMap != null && SCANcontroller.controller.map_ResourceOverlay)
+							bigMap.resetMap();
+					}
+
+					fillS(6);
+
+					if (GUILayout.Button("Default Values For All Planets", GUILayout.Width(200)))
+					{
+						currentResource.MinColor = currentResource.DefaultLowColor;
+						currentResource.MaxColor = currentResource.DefaultHighColor;
+						currentResource.Transparency = currentResource.DefaultTrans;
+
+						for (int i = 0; i < currentResource.getBodyCount; i++)
+						{
+							SCANresourceBody r = currentResource.getBodyConfig(i);
+							if (r != null)
+							{
+								r.MinValue = r.DefaultMinValue;
+								r.MaxValue = r.DefaultMaxValue;
+							}
+						}
+
+						SCANcontroller.updateSCANresource(currentResource, true);
+
+						updateUI();
+
+						if (bigMap != null && SCANcontroller.controller.map_ResourceOverlay)
+							bigMap.resetMap();
+					}
+				}
+				else
+				{
+					GUILayout.Label("Default Values", SCANskins.SCAN_button, GUILayout.Width(110));
+					fillS(6);
+					GUILayout.Label("Default Values For All Planets", SCANskins.SCAN_button, GUILayout.Width(200));
+				}
+			stopE();
+			fillS(8);
+			if (!dropDown)
+			{
+				if (GUILayout.Button("Save Values To Config", GUILayout.Width(180)))
+				{
+					dropDown = true;
+					saveWarning = true;
+				}
+			}
+			else
+				GUILayout.Label("Save Values To Config", SCANskins.SCAN_button, GUILayout.Width(180));
+		}
+
+		//Drop down menu for palette selection
+		private void dropDownBox(int id)
+		{
+			if (dropDown)
+			{
+				if (paletteBox && windowMode == 0)
+				{
+					ddRect = new Rect(40, 120, 100, 100);
+					GUI.Box(ddRect, "");
+					for (int i = 0; i < Palette.kindNames.Length; i++)
+					{
+						Rect r = new Rect(ddRect.x + 10, ddRect.y + 5 + (i * 23), 80, 22);
+						if (GUI.Button(r, Palette.kindNames[i], SCANskins.SCAN_dropDownButton))
+						{
+							paletteBox = false;
+							palette.CurrentPalettes = palette.setCurrentPalettesType((Palette.Kind)i, (int)pSize);
+							setSizeSlider((Palette.Kind)i);
+						}
+					}
+				}
+				else if (resourceBox && windowMode == 3)
+				{
+					ddRect = new Rect(WindowRect.width - 440, 115, 160, 140);
+					GUI.Box(ddRect, "");
+					for (int i = 0; i < loadedResources.Count; i ++)
+					{
+						scrollR = GUI.BeginScrollView(ddRect, scrollR, new Rect(0, 0, 140, 23 * loadedResources.Count));
+						Rect r = new Rect(2, i * 23, 136, 22);
+						if (GUI.Button(r, loadedResources[i].Name, SCANskins.SCAN_dropDownButton))
+						{
+							currentResource = new SCANresourceGlobal(loadedResources[i]);
+							currentResource.CurrentBodyConfig(data.Body.name);
+
+							fineControlMode = oldFineControl = false;
+
+							updateUI();
+
+							dropDown = false;
+							resourceBox = false;
+						}
+						GUI.EndScrollView();
+					}
+				}
+				else if (saveWarning)
+				{
+					ddRect = new Rect(WindowRect.width - 182, WindowRect.height - 92, 180, 90);
+					GUI.Box(ddRect, "");
+					Rect r = new Rect(ddRect.x + 10, ddRect.y, 160, 60);
+					GUI.Label(r, "Overwrite Existing Config File?", SCANskins.SCAN_headlineSmall);
+
+					r.x += 40;
+					r.y += 55;
+					r.width = 80;
+					r.height = 30;
+
+					if (GUI.Button(r, "Confirm", SCANskins.SCAN_buttonWarning))
+					{
+						dropDown = false;
+						saveWarning = false;
+						SCANconfigLoader.SCANNode.Save();
+					}
+				}
+				else
+					dropDown = false;
+			}
+		}
+
+		private void updateUI()
+		{
+			if (windowMode == 0)
+			{
+				minT = currentTerrain.MinTerrain;
+				maxT = currentTerrain.MaxTerrain;
+				clampT = currentTerrain.ClampTerrain ?? currentTerrain.MinTerrain + 10f;
+				pSize = currentTerrain.PalSize;
+				oldReverseState = currentTerrain.PalRev;
+				oldDiscreteState = currentTerrain.PalDis;
+				oldClampState = clampState = currentTerrain.ClampTerrain != null;
+				palette.CurrentPalettes = palette.setCurrentPalettesType(currentTerrain.ColorPal.kind, (int)pSize);
+				minTerrainSlider.valueChanged();
+				maxTerrainSlider.valueChanged();
+				clampTerrainSlider.valueChanged();
+				paletteSizeSlider.valueChanged();
+				paletteIndex = currentTerrain.ColorPal.index;
+
+				regenPaletteSets();
+				setSizeSlider(currentTerrain.ColorPal.kind);
+				setTerrainSliders();
+				drawCurrentLegend();
+			}
+			else if (windowMode == 3)
+			{
+				lowRCutoff = currentResource.CurrentBody.MinValue;
+				highRCutoff = currentResource.CurrentBody.MaxValue;
+				rTrans = currentResource.Transparency;
+
+				resourceColorPicker = new SCANuiColorPicker(currentResource.MinColor, currentResource.MaxColor, resourceColorPicker.LowColorChange);
+
+				resourceColorPicker.updateOldSwatches();
+
+				setResourceSliders();
 			}
 		}
 
@@ -582,60 +1154,46 @@ namespace SCANsat.SCAN_UI
 		{
 			currentLegend = new SCANmapLegend();
 			currentLegend.Legend = currentLegend.getLegend(0, data);
-			//currentLegend = SCANmapLegend.getLegend(0, data);
 		}
 
 		//Draws the palette swatch for the newly adjusted palette
 		private void drawPreviewLegend()
 		{
 			float? clamp = null;
-			Color32[] c = palette.CurrentPalette.colors;
+			Color32[] c = currentTerrain.ColorPal.colors;
 			if (clampState)
-				clamp = (float?)clampHeightF;
-			if (reversePalette)
-				c = palette.CurrentPalette.colorsReverse;
+				clamp = clampT;
+			if (currentTerrain.PalRev)
+				c = currentTerrain.ColorPal.colorsReverse;
 			previewLegend = new SCANmapLegend();
-			previewLegend.Legend = previewLegend.getLegend(maxHeightF, minHeightF, clamp, discretePalette, c);
-			//previewLegend = SCANmapLegend.getLegend(maxHeightF, minHeightF, clamp, discretePalette, c);
+			previewLegend.Legend = previewLegend.getLegend(maxT, minT, clamp, currentTerrain.PalDis, c);
 		}
 
 		//Resets the palettes whenever the size slider is adjusted
 		private void regenPaletteSets()
 		{
-			palette.DivPaletteSet = palette.generatePaletteSet(paletteSizeInt, Palette.Kind.Diverging);
-			palette.QualPaletteSet = palette.generatePaletteSet(paletteSizeInt, Palette.Kind.Qualitative);
-			palette.SeqPaletteSet = palette.generatePaletteSet(paletteSizeInt, Palette.Kind.Sequential);
-			palette.FixedPaletteSet = palette.generatePaletteSet(0, Palette.Kind.Fixed);
-			palette.CurrentPalettes = palette.setCurrentPalettesType(palette.getPaletteType);
+			palette.CurrentPalettes = palette.setCurrentPalettesType(palette.CurrentPalettes.paletteType, (int)pSize);
 		}
 
 		//Change the max range on the palette size slider based on palette type
 		private void setSizeSlider(Palette.Kind k)
 		{
+			int max = 11;
 			switch (k)
 			{
 				case Palette.Kind.Diverging:
 					{
-						sizeSliderMin = 3f;
-						sizeSliderMax = 11f;
-						if (paletteSizeInt > sizeSliderMax)
-							paletteSizeInt = (int)sizeSliderMax;
+						max = 11;
 						break;
 					}
 				case Palette.Kind.Qualitative:
 					{
-						sizeSliderMin = 3f;
-						sizeSliderMax = 12f;
-						if (paletteSizeInt > sizeSliderMax)
-							paletteSizeInt = (int)sizeSliderMax;
+						max = 12;
 						break;
 					}
 				case Palette.Kind.Sequential:
 					{
-						sizeSliderMin = 3f;
-						sizeSliderMax = 9f;
-						if (paletteSizeInt > sizeSliderMax)
-							paletteSizeInt = (int)sizeSliderMax;
+						max = 9;
 						break;
 					}
 				case Palette.Kind.Fixed:
@@ -643,22 +1201,45 @@ namespace SCANsat.SCAN_UI
 						break;
 					}
 			}
+
+			paletteSizeSlider.MaxValue = max;
+			if (pSize > paletteSizeSlider.MaxValue)
+				pSize = paletteSizeSlider.MaxValue;
 			
 		}
 
 		//Dynamically adjust the min and max values on all of the terrain height sliders; avoids impossible values
 		private void setTerrainSliders()
 		{
-			terrainSliderMinMin = data.DefaultMinHeight - 10000f;
-			terrainSliderMaxMax = data.DefaultMaxHeight + 10000f;
-			terrainSliderMinMax = maxHeightF - 100f;
-			terrainSliderMaxMin = minHeightF + 100f;
-			clampSliderMin = minHeightF + 10f;
-			clampSliderMax = maxHeightF - 10f;
-			if (clampHeightF < minHeightF + 10f)
-				clampHeightF = minHeightF + 10f;
-			else if (clampHeightF > maxHeightF - 10f)
-				clampHeightF = maxHeightF - 10f;
+			minTerrainSlider.MinValue = data.TerrainConfig.DefaultMinHeight - SCANconfigLoader.SCANNode.RangeBelowMinHeight;
+			maxTerrainSlider.MaxValue = data.TerrainConfig.DefaultMaxHeight + SCANconfigLoader.SCANNode.RangeAboveMaxHeight;
+			minTerrainSlider.MaxValue = maxT - 100f;
+			maxTerrainSlider.MinValue = minT + 100f;
+			clampTerrainSlider.MinValue = minT + 10f;
+			clampTerrainSlider.MaxValue = maxT - 10f;
+			if (clampT < minT + 10f)
+				clampT = minT + 10f;
+			else if (clampT > maxT - 10f)
+				clampT = maxT - 10f;
+		}
+
+		private void setResourceSliders()
+		{
+			if (fineControlMode)
+			{
+				if (highRCutoff < lowRCutoff + 5f)
+					resourceMinSlider.MaxValue = highRCutoff - 0.1f;
+
+				if (lowRCutoff > highRCutoff - 5f)
+					resourceMaxSlider.MinValue = lowRCutoff + 0.1f;
+			}
+			else
+			{
+				resourceMinSlider.MinValue = 0f;
+				resourceMinSlider.MaxValue = highRCutoff - 0.1f;
+				resourceMaxSlider.MinValue = lowRCutoff + 0.1f;
+				resourceMaxSlider.MaxValue = 100f;
+			}
 		}
 
 	}

@@ -13,11 +13,15 @@
  * Copyright (c)2014 (Your Name Here) <your email here>; see LICENSE.txt for licensing details.
  */
 #endregion
+
 using System;
 using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
 using SCANsat.SCAN_Platform;
+using SCANsat.SCAN_Platform.Palettes;
+using SCANsat.SCAN_Platform.Palettes.ColorBrewer;
+using SCANsat.SCAN_Platform.Palettes.FixedColors;
 using SCANsat.SCAN_Data;
 using palette = SCANsat.SCAN_UI.UI_Framework.SCANpalette;
 
@@ -126,18 +130,16 @@ namespace SCANsat
 		}
 
 		/// <summary>
-		/// For a given Celestial Body name this returns the SCANdata instance if it exists in the SCANcontroller master dictionary; return is null if the SCANdata does not exist for that body (ie it has never been visited while SCANsat has been active)
+		/// For a given Celestial Body name this returns the SCANdata instance if it exists in the SCANcontroller master dictionary; return is null if the SCANdata does not exist for that body (ie it has never been visited while SCANsat has been active), or if the SCANcontroller Scenario Module has not been loaded.
 		/// </summary>
 		/// <param name="BodyName">Name of celestial body (do not use TheName string)</param>
 		/// <returns>SCANdata instance for the given Celestial Body; null if none exists</returns>
 		public static SCANdata getData(string BodyName)
 		{
-			if (!SCANcontroller.Body_Data.ContainsKey(BodyName))
-			{
+			if (SCANcontroller.controller == null)
 				return null;
-			}
-			SCANdata data = SCANcontroller.Body_Data[BodyName];
-			return data;
+
+			return SCANcontroller.controller.getData(BodyName);
 		}
 
 		#endregion
@@ -190,6 +192,7 @@ namespace SCANsat
 		internal static Func<double, int> icLAT = (lat) => ((int)(lat + 180 + 90)) % 180;
 		internal static Func<int, int, bool> badLonLat = (lon, lat) => (lon < 0 || lat < 0 || lon >= 360 || lat >= 180);
 		internal static Func<double, double, bool> badDLonLat = (lon, lat) => (lon < 0 || lat <0 || lon >= 360 || lat >= 180);
+		public static Func<double, double, bool> ApproxEq = (a, b) => Math.Abs(a - b) < 0.01;
 
 		internal static double fixLatShift(double lat)
 		{
@@ -240,79 +243,24 @@ namespace SCANsat
 			return ret;
 		}
 
-		internal static float RegolithOverlay(double lat, double lon, string name, int body)
+		internal static float ResourceOverlay(double lat, double lon, string name, CelestialBody body)
 		{
 			float amount = 0f;
-			amount = SCANreflection.RegolithAbundanceValue(lat, lon, name, body, 0, 0, SCANcontroller.controller.regolithBiomeLock);
+			var aRequest = new AbundanceRequest
+			{
+				Latitude = lat,
+				Longitude = lon,
+				BodyId = body.flightGlobalsIndex,
+				ResourceName = name,
+				ResourceType = HarvestTypes.Planetary,
+				Altitude = 0,
+				CheckForLock = SCANcontroller.controller.resourceBiomeLock,
+				BiomeName = getBiomeName(body, lon, lat),
+				ExcludeVariance = false,
+			};
+
+			amount = ResourceMap.Instance.GetAbundance(aRequest);
 			return amount;
-		}
-
-		internal static SCANresource RegolithConfigLoad(ConfigNode node)
-		{
-			float min = .001f;
-			float max = 10f;
-			string name = "";
-			string body = "";
-			int resourceType = 0;
-			if (node.HasValue("ResourceName"))
-				name = node.GetValue("ResourceName");
-			else
-				return null;
-			SCANresourceType type = OverlayResourceType(name);
-			if (type == null)
-				return null;
-			if (type.Type == SCANtype.Nothing)
-				return null;
-			if (node.HasValue("PlanetName"))
-				body = node.GetValue("PlanetName");
-			if (!int.TryParse(node.GetValue("ResourceType"), out resourceType))
-				return null;
-			if (resourceType != 0)
-				return null;
-			ConfigNode distNode = node.GetNode("Distribution");
-			if (distNode != null)
-			{
-				if (distNode.HasValue("MinAbundance"))
-					float.TryParse(distNode.GetValue("MinAbundance"), out min);
-				if (distNode.HasValue("MaxAbundance"))
-					float.TryParse(distNode.GetValue("MaxAbundance"), out max);
-			}
-			if (min == max)
-				max += 0.001f;
-			SCANresource SCANres = new SCANresource(name, body, type.ColorFull, type.ColorEmpty, min, max, type, SCANresource_Source.Regolith);
-			if (SCANres != null)
-				return SCANres;
-
-			return null;
-		}
-
-		internal static void loadSCANtypes()
-		{
-			SCANcontroller.ResourceTypes = new Dictionary<string, SCANresourceType>();
-			foreach (ConfigNode node in GameDatabase.Instance.GetConfigNodes("SCANSAT_SENSOR"))
-			{
-				string name = "";
-				int i = 0;
-				string colorFull = "";
-				string colorEmpty = "";
-				if (node.HasValue("name"))
-					name = node.GetValue("name");
-				if (node.HasValue("SCANtype"))
-					if (!int.TryParse(node.GetValue("SCANtype"), out i))
-						continue;
-				if (node.HasValue("ColorFull"))
-					colorFull = node.GetValue("ColorFull");
-				if (node.HasValue("ColorEmpty"))
-					colorEmpty = node.GetValue("ColorEmpty");
-				if (!SCANcontroller.ResourceTypes.ContainsKey(name) && !string.IsNullOrEmpty(name))
-					SCANcontroller.ResourceTypes.Add(name, new SCANresourceType(name, i, colorFull, colorEmpty));
-			}
-		}
-
-		internal static SCANresourceType OverlayResourceType(string s)
-		{
-			var resourceType = SCANcontroller.ResourceTypes.FirstOrDefault(r => r.Value.Name == s).Value;
-			return resourceType;
 		}
 
 		internal static int getBiomeIndex(CelestialBody body, double lon , double lat)
@@ -358,6 +306,39 @@ namespace SCANsat
 			int count;
 			for(count=0; i!=0; ++count) i &= (i - 1);
 			return count;
+		}
+
+		internal static Palette paletteLoader(string name, int size)
+		{
+			if (name == "Default" || string.IsNullOrEmpty(name))
+				return PaletteLoader.defaultPalette;
+			else
+			{
+				try
+				{
+					if (name == "blackForest" || name == "departure" || name == "northRhine" || name == "mars" || name == "wiki2" || name == "plumbago" || name == "cw1_013" || name == "arctic")
+					{
+						//Load the fixed size color palette by name through reflection
+						var fixedPallete = typeof(FixedColorPalettes);
+						var fPaletteMethod = fixedPallete.GetMethod(name);
+						var fColorP = fPaletteMethod.Invoke(null, null);
+						return (Palette)fColorP;
+					}
+					else
+					{
+						//Load the ColorBrewer method by name through reflection
+						var brewer = typeof(BrewerPalettes);
+						var bPaletteMethod = brewer.GetMethod(name);
+						var bColorP = bPaletteMethod.Invoke(null, new object[] { size });
+						return (Palette)bColorP;
+					}
+				}
+				catch (Exception e)
+				{
+					SCANUtil.SCANlog("Error Loading Color Palette; Revert To Default: {0}", e);
+					return PaletteLoader.defaultPalette;
+				}
+			}
 		}
 
 		internal static void SCANlog(string log, params object[] stringObjects)
