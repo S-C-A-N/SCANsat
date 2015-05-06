@@ -13,6 +13,7 @@
  */
 #endregion
 
+using SCANsat.Hooks;
 using SCANsat.SCAN_Toolbar;
 using SCANsat.SCAN_Data;
 using SCANsat.SCAN_UI.UI_Framework;
@@ -339,6 +340,14 @@ namespace SCANsat.SCAN_UI
 				if (SCANmainMenuLoader.MechJebLoaded)
 					SCANcontroller.controller.mechJebTargetSelection = GUILayout.Toggle(SCANcontroller.controller.mechJebTargetSelection, "MechJeb Target Selection", SCANskins.SCAN_settingsToggle);
 			stopE();
+
+		    if (RT2Hook.Instance != null)
+		    {
+                growE();
+                SCANcontroller.controller.rt2Integration = GUILayout.Toggle(SCANcontroller.controller.rt2Integration, "RemoteTech 2 integration (Experimental)", SCANskins.SCAN_settingsToggle);
+                stopE();
+		    }
+
 			fillS(8);
 			if (popup)
 			{
