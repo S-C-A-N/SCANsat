@@ -404,10 +404,10 @@ namespace SCANsat.SCAN_Map
 			return mapstep >= map.height;
 		}
 
-		public void resetMap()
+		public void resetMap(bool setRes = true)
 		{
 			mapstep = 0;
-			if (SCANconfigLoader.GlobalResource)
+			if (SCANconfigLoader.GlobalResource && setRes)
 			{ //Make sure that a resource is initialized if necessary
 				if (resource == null && body != null)
 				{
@@ -419,11 +419,11 @@ namespace SCANsat.SCAN_Map
 			}
 		}
 
-		public void resetMap(mapType mode, bool Cache)
+		public void resetMap(mapType mode, bool Cache, bool setRes = true)
 		{
 			mType = mode;
 			cache = Cache;
-			resetMap();
+			resetMap(setRes);
 		}
 
 		/* MAP: export: PNG file */

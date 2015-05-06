@@ -974,7 +974,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 					ath = true;
 				}
 			}
-			Rect r = new Rect(0, 0, 50f, 50f);
+			Rect r = new Rect(0, 0, 70f, 50f);
 			Color col;
 			// project the last and the current orbital period onto the map
 			for (int i = -steps; i < steps; ++i)
@@ -1049,7 +1049,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 				r.x += 24;
 				r.y -= 12;
 				if (!lite)
-					drawLabel(r, o.ApA.ToString("N1"), true, true, true);
+					drawLabel(r, o.ApA.ToString("N0"), true, true, true);
 			}
 			if (o.PeA > 0 && mapPosAtT(maprect, map, ref r, vessel, o, o.timeToPe, startUT))
 			{
@@ -1057,7 +1057,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 				r.x += 24;
 				r.y -= 12;
 				if (!lite)
-					drawLabel(r, o.PeA.ToString("N1"), true, true, true);
+					drawLabel(r, o.PeA.ToString("N0"), true, true, true);
 			}
 
 			if (lite)

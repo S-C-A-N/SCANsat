@@ -37,8 +37,9 @@
       <HintPath>..\..\..\KSP Dev Build\Kerbal Space Program\KSP_Data\Managed\Assembly-CSharp.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="MechJeb2">
-      <HintPath>..\..\..\MechJeb2\MechJeb2.dll</HintPath>
+    <Reference Include="MechJeb2, Version=2.5.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\GameData\SCANsat\MechJeb2.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="SCANsat, Version=1.1.3.0, Culture=neutral, processorArchitecture=MSIL">

@@ -134,7 +134,7 @@ namespace SCANsat.SCAN_UI
 				spotmap.setBody(b);
 			}
 
-			if (SCANconfigLoader.GlobalResource)
+			if (SCANconfigLoader.GlobalResource && narrowBand)
 			{
 				spotmap.Resource = bigmap.Resource;
 				spotmap.Resource.CurrentBodyConfig(b.name);
@@ -143,7 +143,9 @@ namespace SCANsat.SCAN_UI
 			spotmap.MapScale = 10;
 
 			spotmap.centerAround(lon, lat);
-			spotmap.resetMap(bigmap.MType, false);
+			if (SCANcontroller.controller.needsNarrowBand && SCANcontroller.controller.map_ResourceOverlay)
+				checkForScanners();
+			spotmap.resetMap(bigmap.MType, false, narrowBand);
 		}
 
 		private void resetMap()
@@ -151,7 +153,9 @@ namespace SCANsat.SCAN_UI
 			SCANcontroller.controller.TargetSelecting = false;
 			SCANcontroller.controller.TargetSelectingActive = false;
 			spotmap.centerAround(spotmap.CenteredLong, spotmap.CenteredLat);
-			spotmap.resetMap();
+			if (SCANcontroller.controller.needsNarrowBand && SCANcontroller.controller.map_ResourceOverlay)
+				checkForScanners();
+			spotmap.resetMap(narrowBand);
 		}
 
 		public SCANmap SpotMap
@@ -206,38 +210,49 @@ namespace SCANsat.SCAN_UI
 					if (node == null)
 						continue;
 
-					ConfigNode moduleNode = node.GetNodes("MODULE").FirstOrDefault(a => a.GetValue("name") == "ModuleResourceScanner");
+					var moduleNodes = from nodes in node.GetNodes("MODULE")
+									  where nodes.GetValue("name") == "ModuleResourceScanner"
+									  select nodes;
 
-					if (moduleNode == null)
-						continue;
-
-					string alt = moduleNode.GetValue("MaxAbundanceAltitude");
-					float f = 0;
-					if (!float.TryParse(alt, out f))
-						continue;
-
-					if (f < 10000)
-						continue;
-
-					if (moduleNode.GetValue("ScannerType") != "0")
-						continue;
-
-					if (moduleNode.GetValue("ResourceName") != bigmap.Resource.Name)
-						continue;
-
-					if (spotmap.Resource != bigmap.Resource)
+					foreach (ConfigNode moduleNode in moduleNodes)
 					{
-						spotmap.Resource = bigmap.Resource;
-						spotmap.Resource.CurrentBodyConfig(b.name);
-						if (SCANcontroller.controller.map_ResourceOverlay)
-							spotmap.resetMap();
+						if (moduleNode == null)
+							continue;
+
+						if (moduleNode.HasValue("MaxAbundanceAltitude"))
+						{
+							string alt = moduleNode.GetValue("MaxAbundanceAltitude");
+							float f = 0;
+							if (!float.TryParse(alt, out f))
+								continue;
+
+							if (f < 10000)
+								continue;
+						}
+
+						if (moduleNode.GetValue("ScannerType") != "0")
+							continue;
+
+						if (moduleNode.GetValue("ResourceName") != bigmap.Resource.Name)
+							continue;
+
+						if (spotmap.Resource != bigmap.Resource)
+						{
+							spotmap.Resource = bigmap.Resource;
+							spotmap.Resource.CurrentBodyConfig(b.name);
+							if (SCANcontroller.controller.map_ResourceOverlay)
+								spotmap.resetMap(true);
+						}
+
+						if (spotmap.Resource != null)
+						{
+							narrowBand = true;
+							break;
+						}
 					}
 
-					if (spotmap.Resource != null)
-					{
-						narrowBand = true;
+					if (narrowBand)
 						break;
-					}
 				}
 
 				if (narrowBand)
@@ -250,19 +265,36 @@ namespace SCANsat.SCAN_UI
 			//SCANUtil.SCANdebugLog("Loop Time: {0}", duration - DateTime.Now);
 		}
 
+		private int timer;
+
 		protected override void Update()
 		{
-			if (HighLogic.LoadedSceneIsFlight)
-				v = FlightGlobals.ActiveVessel;
-			else if (HighLogic.LoadedScene != GameScenes.TRACKSTATION)
-				return;
+			if (Visible)
+			{
+				if (SCANcontroller.controller.needsNarrowBand && SCANconfigLoader.GlobalResource)
+				{
+					if (SCANcontroller.controller.map_ResourceOverlay && timer >= 60)
+						checkForScanners();
+				}
+				else
+					narrowBand = true;
 
-			MapObject target = PlanetariumCamera.fetch.target;
+				timer++;
+				if (timer > 60)
+					timer = 0;
 
-			if (target.type == MapObject.MapObjectType.VESSEL)
-				v = target.vessel;
-			else
-				v = null;
+				if (HighLogic.LoadedSceneIsFlight)
+					v = FlightGlobals.ActiveVessel;
+				else if (HighLogic.LoadedScene == GameScenes.TRACKSTATION)
+				{
+					MapObject target = PlanetariumCamera.fetch.target;
+
+					if (target.type == MapObject.MapObjectType.VESSEL)
+						v = target.vessel;
+					else
+						v = null;
+				}
+			}
 		}
 
 		protected override void DrawWindowPre(int id)
@@ -340,9 +372,6 @@ namespace SCANsat.SCAN_UI
 					controlLock = false;
 				}
 			}
-
-			if (SCANcontroller.controller.needsNarrowBand)
-				checkForScanners();
 		}
 
 		protected override void DrawWindow(int id)
@@ -493,15 +522,16 @@ namespace SCANsat.SCAN_UI
 					spotmap.setBody(b);
 				}
 
-				if (SCANconfigLoader.GlobalResource)
+				if (SCANconfigLoader.GlobalResource && narrowBand)
 				{
 					spotmap.Resource = bigmap.Resource;
 					spotmap.Resource.CurrentBodyConfig(b.name);
 				}
 
 				spotmap.centerAround(spotmap.CenteredLong, spotmap.CenteredLat);
-
-				spotmap.resetMap(bigmap.MType, false);
+				if (SCANcontroller.controller.needsNarrowBand && SCANcontroller.controller.map_ResourceOverlay)
+					checkForScanners();
+				spotmap.resetMap(bigmap.MType, false, narrowBand);
 			}
 
 			if (GUILayout.Button(iconWithTT(SCANskins.SCAN_ZoomInIcon, "Zoom In"), SCANskins.SCAN_buttonBorderless, GUILayout.Width(26), GUILayout.Height(26)))
@@ -674,7 +704,7 @@ namespace SCANsat.SCAN_UI
 						{
 							spotmap.MapScale = spotmap.MapScale * 1.25f;
 							spotmap.centerAround(mlon, mlat);
-							spotmap.resetMap();
+							resetMap();
 						}
 					}
 					//Left click zoom out
@@ -685,6 +715,7 @@ namespace SCANsat.SCAN_UI
 							spotmap.MapScale = spotmap.MapScale / 1.25f;
 							if (spotmap.MapScale < 2)
 								spotmap.MapScale = 2;
+							spotmap.centerAround(mlon, mlat);
 							resetMap();
 						}
 					}

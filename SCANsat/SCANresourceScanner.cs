@@ -10,6 +10,8 @@ namespace SCANsat
 	{
 		[KSPField]
 		public bool activeModule = false;
+		[KSPField]
+		public bool forceActive = false;
 
 		private ModuleOrbitalSurveyor mSurvey;
 		private ModuleResourceScanner mScanner;
@@ -20,6 +22,11 @@ namespace SCANsat
 
 			mSurvey = findSurvey();
 			mScanner = findScanner();
+
+			if (!forceActive)
+				this.isEnabled = false;
+			else
+				this.isEnabled = true;
 		}
 
 		public override string GetInfo()
@@ -45,8 +52,8 @@ namespace SCANsat
 
 		private void updateEvents()
 		{
-			base.Events["startScan"].active = !scanning && isEnabled;
-			base.Events["stopScan"].active = scanning && isEnabled;
+			base.Events["startScan"].active = !scanning;
+			base.Events["stopScan"].active = scanning;
 		}
 
 		public override void OnUpdate()
@@ -80,13 +87,17 @@ namespace SCANsat
 
 		public void DisableModule()
 		{
-			this.isEnabled = false;
-			unregisterScanner();
+			if (!forceActive)
+			{
+				this.isEnabled = false;
+				unregisterScanner();
+			}
 		}
 
 		public void EnableModule()
 		{
-			this.isEnabled = true;
+			if (!forceActive)
+				this.isEnabled = true;
 		}
 
 		public bool IsSituationValid()
