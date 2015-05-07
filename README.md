@@ -47,10 +47,9 @@
   * [d. BTDT][7d]
   * [e. MapTraq (deprecated)][7e]
 * [8. (Career Mode) Research and Development][8]
-  * [a. Community Tech Tree Support][8a]
-  * [b. Minimum Scan for Science (30%)][8b]
-  * [c. Getting Maximum Science][8c]
-  * [d. Contracts][8d]
+  * [a. Minimum Scan for Science (30%)][8a]
+  * [b. Getting Maximum Science][8b]
+  * [c. Contracts][8c]
 * [9. Color Management][9]
   * [a. Terrain Colors and Options][9a]
   * [b. Biome Colors and Options][9b]
@@ -423,29 +422,18 @@ The **Multispectral** sensor can be unlocked in **Advanced Exploration**.
 
 The **BTDT** sensor can be unlocked in **Field Science**.
 
-##### [:top:][top] 8a. Community Tech Tree Support
-When the [Community Tech Tree][ctt:release] addon is installed SCANsat parts will default to different tech tree nodes.
-
-The **RADAR Altimetry** sensor can be unlocked in **Orbital Surveys**.
-
-The **SAR Altimetry** sensor can be unlocked in **Specialized Science Tech**.
-
-The **Multispectral** sensor can be unlocked in **Advanced Surveys**.
-
-The **BTDT** sensor can be unlocked in **Field Science**.
-
-##### [:top:][top] 8b. Minimum Scan for Science
+##### [:top:][top] 8a. Minimum Scan for Science
 Once you scan at least 30% of a particular map, you can use **Analyze Data** to get delicious science:
 
 > ![30% is your minimum][science-min]
 
-##### [:top:][top] 8c. Getting Maximum Science
+##### [:top:][top] 8b. Getting Maximum Science
 Between 30% and 100%, you will get a number of science points proportional to the percentage. Really,
 the upper cutoff is 95% in case you didn't scan the whole map.
 
 > ![Scan 95% to get all science][science-max]
 
-##### [:top:][top] 8d. Contract Support
+##### [:top:][top] 8c. Contract Support
 Career mode contracts are supported through third party addons.
 
 * [Contract Configurator Forum Thread][cconfig:release]
@@ -670,10 +658,9 @@ sneaky then they can of course be sneaky.
 [7d]: #top-7d-been-there-done-that
 [7e]: #top-7e-maptraq-deprecated
 [8]: #top-8-career-mode-research-and-development
-[8a]: #top-8a-community-tech-tree-support
-[8b]: #top-8b-minimum-scan-for-science
-[8c]: #top-8c-getting-maximum-science
-[8d]: #top-8d-contract-support
+[8a]: #top-8a-minimum-scan-for-science
+[8b]: #top-8b-getting-maximum-science
+[8c]: #top-8c-contract-support
 [9]: #top-9-color-management
 [9a]: #top-9a-terrain-colors-and-options
 [9b]: #top-9b-biome-colors-and-options
