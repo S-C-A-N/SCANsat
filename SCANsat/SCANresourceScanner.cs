@@ -1,8 +1,19 @@
-﻿using System;
+﻿#region license
+/*  [Scientific Committee on Advanced Navigation]
+ * 			S.C.A.N. Satellite
+ *
+ * SCANresourceScanner - Resource scanner part module
+ * 
+ * Copyright (c)2013 damny;
+ * Copyright (c)2014 technogeeky <technogeeky@gmail.com>;
+ * Copyright (c)2014 DMagic
+ * Copyright (c)2014 (Your Name Here) <your email here>; see LICENSE.txt for licensing details.
+ */
+#endregion
+
 using System.Collections.Generic;
 using System.Linq;
 using SCANsat.SCAN_Data;
-
 
 namespace SCANsat
 {
@@ -10,11 +21,10 @@ namespace SCANsat
 	{
 		[KSPField]
 		public bool activeModule = false;
-		[KSPField]
-		public bool forceActive = false;
 
-		private ModuleOrbitalSurveyor mSurvey;
-		private ModuleResourceScanner mScanner;
+		private List<ModuleOrbitalSurveyor> mSurvey;
+		private List<ModuleResourceScanner> mScanner;
+		private ModuleAnimationGroup animGroup;
 
 		public override void OnStart(PartModule.StartState state)
 		{
@@ -22,10 +32,9 @@ namespace SCANsat
 
 			mSurvey = findSurvey();
 			mScanner = findScanner();
+			animGroup = findAnimator();
 
-			if (!forceActive)
-				this.isEnabled = false;
-			else
+			if (animGroup == null)
 				this.isEnabled = true;
 		}
 
@@ -33,21 +42,24 @@ namespace SCANsat
 		{
 			string info = base.GetInfo();
 			info += "Resource Scan: " + (SCANtype)sensorType + "\n";
-			info += "Active Scanner: " + activeModule + "\n";
+			info += "Active Scanner: " + RUIutils.GetYesNoUIString(activeModule) + "\n";
 
 			return info;
 		}
 
-		private ModuleResourceScanner findScanner()
+		private List<ModuleResourceScanner> findScanner()
 		{
-			ModuleResourceScanner r = vessel.FindPartModulesImplementing<ModuleResourceScanner>().FirstOrDefault();
-			return r;
+			return part.Modules.GetModules<ModuleResourceScanner>();
 		}
 
-		private ModuleOrbitalSurveyor findSurvey()
+		private List<ModuleOrbitalSurveyor> findSurvey()
 		{
-			ModuleOrbitalSurveyor s = vessel.FindPartModulesImplementing<ModuleOrbitalSurveyor>().FirstOrDefault();
-			return s;
+			return part.Modules.GetModules<ModuleOrbitalSurveyor>();
+		}
+
+		private ModuleAnimationGroup findAnimator()
+		{
+			return part.Modules.GetModules<ModuleAnimationGroup>().FirstOrDefault();
 		}
 
 		private void updateEvents()
@@ -85,19 +97,29 @@ namespace SCANsat
 			}
 		}
 
+		public override void startScanAction(KSPActionParam param)
+		{
+			if (animGroup != null && !scanning && !animGroup.isDeployed)
+				animGroup.DeployModule();
+			base.startScanAction(param);
+		}
+
+		public override void toggleScanAction(KSPActionParam param)
+		{
+			if (animGroup != null && !scanning && !animGroup.isDeployed)
+				animGroup.DeployModule();
+			base.toggleScanAction(param);
+		}
+
 		public void DisableModule()
 		{
-			if (!forceActive)
-			{
-				this.isEnabled = false;
-				unregisterScanner();
-			}
+			this.isEnabled = false;
+			unregisterScanner();
 		}
 
 		public void EnableModule()
 		{
-			if (!forceActive)
-				this.isEnabled = true;
+			this.isEnabled = true;
 		}
 
 		public bool IsSituationValid()
