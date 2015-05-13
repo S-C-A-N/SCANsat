@@ -351,19 +351,19 @@ namespace SCANsat
 
 		/* SCAN: actions for ... something ... */
 		[KSPAction("Start Scan")]
-		public void startScanAction(KSPActionParam param)
+		public virtual void startScanAction(KSPActionParam param)
 		{
 			startScan();
 		}
 
 		[KSPAction("Stop Scan")]
-		public void stopScanAction(KSPActionParam param)
+		public virtual void stopScanAction(KSPActionParam param)
 		{
 			stopScan();
 		}
 
 		[KSPAction("Toggle Scan")]
-		public void toggleScanAction(KSPActionParam param)
+		public virtual void toggleScanAction(KSPActionParam param)
 		{
 			if (scanning)
 				stopScan();
