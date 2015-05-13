@@ -216,6 +216,9 @@ Anomaly | **Been There, Done That(tm)** | **BTDT**
 
 **SCANsat** will scan celestial bodies for resources using the new stock resource system.
 
+With default resource scanning options enabled the SCANsat resource map will automatically update as soon as a **stock resource scan** is completed.
+> ![][resource-instant]
+
 Resource scans are initiated in the same way as any other scan. In this case they use the stock **Orbital Survey Scanner**.
 > ![][resource-scanner]
 
@@ -353,10 +356,13 @@ Different map types, resource overlays and polar projections are all applied to 
 #### [:top:][top] 5a. Target Selection
 > ![][zoommap-scansat-landing]
 
-The **zoom map** features an option to select and display a target site for each planet. Toggle selection mode by clicking on the target icon in the upper left, then select a sight 
+The **zoom map** features an option to select and display a target site for each planet. Toggle **Target Selection Mode** by clicking on the target icon in the upper left, then select a sight 
 in the zoom map window. The icon will be displayed, along with standard, FinePrint waypoints, in the zoom window and the big map. 
 
 While in map view the target site will be overlayed on the planet's surface; shown as a matching, four-arrow green icon.
+
+To clear an existing target, activate **Target Selection Mode** by clicking the target icon, then click somewhere inside of the zoom map window, but outside of the map itself.
+> ![][zoommap-clear-target]
 
 #### [:top:][top] 5b. MechJeb Landing Guidance
 > ![][zoommap-mechjeb-settings]
@@ -606,6 +612,7 @@ sneaky then they can of course be sneaky.
 [zoommap-scansat-landing]: http://i.imgur.com/ILqRfne.gif
 [zoommap-mechjeb-landing]: http://i.imgur.com/nE0BlA8.gif
 [zoommap-mechjeb-settings]: http://i.imgur.com/xOQ7ooj.png
+[zoommap-clear-target]: http://i.imgur.com/YffxdNs.gif
 
 [resource-iva]: http://i.imgur.com/iRo4kSA.png
 [resource-walkthrough]: http://i.imgur.com/KS4FTh0.gif
@@ -614,6 +621,7 @@ sneaky then they can of course be sneaky.
 [resource-settings]: http://i.imgur.com/sgMklCu.png
 [resource-zoom-map-covered]: http://i.imgur.com/7YuYMGW.png
 [resource-zoom-map-uncovered]: http://i.imgur.com/cJ9JtdW.png
+[resource-instant]: http://i.imgur.com/mfIMBEP.gif
 
 [color-window]: http://i.imgur.com/RQVjq6g.png
 [color-palette-switch]: http://i.imgur.com/0XdMGSy.gif
