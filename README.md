@@ -121,7 +121,7 @@ For licensing information, please see the [included LICENSE.txt][SCANsat:rel-lic
   * Do I need to attach a part to my vessel to use SCANsat?
     * **No, but...**. You can view existing maps from any vessel, but you need to attach a scanner to add new data to the maps.
   * [Career Mode] Does SCANsat give us science points?
-    * **Yes!** For each type of map, if you scan at least 30% of the surface, you can yse Data for partial science points; up until the maximum value at 95% map coverage.
+    * **Yes!** For each type of map, if you scan at least 30% of the surface, you can transmit that data for partial science points; up until the maximum value at 95% map coverage.
   * [Career Mode] Is it integrated into the tech tree?
     * **Yes!** **[This link][8]** tells you which nodes unlock which parts in the tech tree.
   * [Contracts] Does SCANsat offer contracts to complete?
