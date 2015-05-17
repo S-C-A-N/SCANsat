@@ -120,6 +120,10 @@ For licensing information, please see the [included LICENSE.txt][SCANsat:rel-lic
     * **No!** This version is completely backwards compatible, and you current scanning state (which is stored in persistent.sfs) will be safe and sound. Nevertheless, you should make a backup copy of your game before upgading any mod.
   * Do I need to attach a part to my vessel to use SCANsat?
     * **No, but...**. You can view existing maps from any vessel, but you need to attach a scanner to add new data to the maps.
+  * What does the "field of view" mean?
+    * When a sensor is at or above its "best" altitude (but below its maximum altitude) the field of view is half of the width of the swath mapped by the instrument, if it were in orbit around Kerbin. In other words, a field of view of 5° would map swathes which are 1/36th (10°) of the planetary surface wide. The field of view is scaled for smaller bodies so that more of the surface is covered.
+  * What does the "best" altitude mean?
+    * At or above the best altitude, the sensor will operate with its listed field of view. Below this altitude the sensor suffers a linear penalty. A 10° FOV instrument with a best altitude of 500km would only have a 5° FOV at 250km.
   * [Career Mode] Does SCANsat give us science points?
     * **Yes!** For each type of map, if you scan at least 30% of the surface, you can transmit that Data for partial science points; up until the maximum value at 95% map coverage.
   * [Career Mode] Is it integrated into the tech tree?
