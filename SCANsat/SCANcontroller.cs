@@ -115,6 +115,10 @@ namespace SCANsat
 		public bool easyModeScanning = true;
 		[KSPField(isPersistant = true)]
 		public bool needsNarrowBand = true;
+		[KSPField(isPersistant = true)]
+		public bool biomeBorder = true;
+		[KSPField(isPersistant = true)]
+		public bool disableStockResource = false;
 
 		/* Biome and slope colors can't be serialized properly as a KSP Field */
 		public Color lowBiomeColor = new Color(0, 0.46f, 0.02345098f, 1);
@@ -843,7 +847,7 @@ namespace SCANsat
 			if (!HighLogic.LoadedSceneIsFlight && HighLogic.LoadedScene != GameScenes.TRACKSTATION)
 				return;
 
-			if (!easyModeScanning)
+			if (!easyModeScanning || disableStockResource)
 				return;
 
 			if (body == null)
@@ -1394,7 +1398,7 @@ namespace SCANsat
 				if (alt < ba) fov = (alt / ba) * fov;
 				else sensor.bestRange = true;
 
-				double surfscale = 600000d / v.mainBody.Radius;
+				double surfscale = Planetarium.fetch.Home.Radius / v.mainBody.Radius;
 				if (surfscale < 1) surfscale = 1;
 				surfscale = Math.Sqrt(surfscale);
 				fov *= surfscale;
