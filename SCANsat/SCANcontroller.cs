@@ -159,6 +159,7 @@ namespace SCANsat
 		internal SCANBigMap BigMap;
 		internal SCANkscMap kscMap;
 		internal SCANcolorSelection colorManager;
+		internal SCANresourceController resourceOverlay;
 
 		/* App launcher object */
 		internal SCANappLauncher appLauncher;
@@ -766,6 +767,7 @@ namespace SCANsat
 					instrumentsWindow = gameObject.AddComponent<SCANinstrumentUI>();
 					colorManager = gameObject.AddComponent<SCANcolorSelection>();
 					BigMap = gameObject.AddComponent<SCANBigMap>();
+					resourceOverlay = gameObject.AddComponent<SCANresourceController>();
 				}
 				catch (Exception e)
 				{
@@ -781,6 +783,8 @@ namespace SCANsat
 					kscMap = gameObject.AddComponent<SCANkscMap>();
 					settingsWindow = gameObject.AddComponent<SCANsettingsUI>();
 					colorManager = gameObject.AddComponent<SCANcolorSelection>();
+					if (HighLogic.LoadedScene == GameScenes.TRACKSTATION)
+						resourceOverlay = gameObject.AddComponent<SCANresourceController>();
 				}
 				catch (Exception e)
 				{
@@ -916,6 +920,8 @@ namespace SCANsat
 				Destroy(kscMap);
 			if (BigMap != null)
 				Destroy(BigMap);
+			if (resourceOverlay != null)
+				Destroy(resourceOverlay);
 			if (appLauncher != null)
 				Destroy(appLauncher);
 		}

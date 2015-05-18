@@ -389,7 +389,6 @@ namespace SCANsat.SCAN_UI
 			if (popup)
 			{
 				GUILayout.Label("Reset Resource Coverage", SCANskins.SCAN_button);
-				GUILayout.Label("Open Resource Overlay Window", SCANskins.SCAN_button);
 			}
 			else
 			{
@@ -397,15 +396,6 @@ namespace SCANsat.SCAN_UI
 				{
 					popup = !popup;
 					warningResource = !warningResource;
-				}
-
-				if (GUILayout.Button("Open Resource Overlay Window"))
-				{
-					if (resourceWindow == null)
-					{
-						resourceWindow = gameObject.AddComponent<SCANresourceController>();
-					}
-					resourceWindow.Visible = !resourceWindow.Visible;
 				}
 			}
 		}
