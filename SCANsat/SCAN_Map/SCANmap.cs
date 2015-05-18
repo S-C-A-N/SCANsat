@@ -284,6 +284,9 @@ namespace SCANsat.SCAN_Map
 		private double mapscale, lon_offset, lat_offset;
 		private int mapwidth, mapheight;
 		private Color[] pix;
+		private double[] resourceCache;
+		private double[] biomeIndex;
+		private Color[] stockBiomeColor;
 
 		internal void setSize(int w, int h)
 		{
@@ -293,6 +296,9 @@ namespace SCANsat.SCAN_Map
 				w = 360 * 4;
 			mapwidth = w;
 			pix = new Color[w];
+			biomeIndex = new double[w];
+			stockBiomeColor = new Color[w];
+			resourceCache = new double[w * 3];
 			mapscale = mapwidth / 360f;
 			if (h <= 0)
 				h = (int)(180 * mapscale);
@@ -318,6 +324,9 @@ namespace SCANsat.SCAN_Map
 				return;
 			mapwidth = w;
 			pix = new Color[w];
+			biomeIndex = new double[w];
+			stockBiomeColor = new Color[w];
+			resourceCache = new double[w * 3];
 			mapscale = mapwidth / 360f;
 			mapheight = (int)(w / 2);
 			/* big map caching */
@@ -514,11 +523,6 @@ namespace SCANsat.SCAN_Map
 					palette.redline[i] = palette.red;
 			}
 
-			if (mapstep <= -1)
-			{
-				mapstep = -1;
-				mapline = new double[map.width];
-			}
 
 			for (int i = 0; i < map.width; i++)
 			{
@@ -539,14 +543,50 @@ namespace SCANsat.SCAN_Map
 					}
 				}
 
-				if (mapstep < 0)
-					continue;
+				double lat = (mapstep * 1.0f / mapscale) - 90f + lat_offset;
+				double lon = (i * 1.0f / mapscale) - 180f + lon_offset;
+				double la = lat, lo = lon;
+				lat = unprojectLatitude(lo, la);
+				lon = unprojectLongitude(lo, la);
 
+				if (double.IsNaN(lat) || double.IsNaN(lon) || lat < -90 || lat > 90 || lon < -180 || lon > 180)
+				{
+					continue;
+				}
+
+				if (SCANcontroller.controller.map_ResourceOverlay && SCANconfigLoader.GlobalResource && resource != null)
+				{
+					resourceCache[i] = SCANuiUtil.resourceMapValue(lon, lat, data, resource);
+				}
+
+				if (mType == mapType.Biome && biomeMap)
+				{
+					if (SCANcontroller.controller.useStockBiomes && SCANcontroller.controller.colours == 0)
+					{
+						stockBiomeColor[i] = SCANUtil.getBiome(body, lon, lat).mapColor;
+						if (SCANcontroller.controller.biomeBorder)
+							biomeIndex[i] = SCANUtil.getBiomeIndexFraction(body, lon, lat);
+					}
+					else
+						biomeIndex[i] = SCANUtil.getBiomeIndexFraction(body, lon, lat);
+				}
+			}
+
+			if (mapstep <= -1)
+			{
+				mapstep = -1;
+				mapline = new double[map.width];
+				mapstep++;
+				return map;
+			}
+
+			for (int i = 0; i < map.width; i++)
+			{
 				Color baseColor = palette.grey;
-				Color stockBiome = palette.grey;
-				double resourceAbundance = 0;
-				bool resources = false;
-				double bioIndex = 0;
+				//Color stockBiome = palette.grey;
+				//double resourceAbundance = 0;
+				//bool resources = false;
+				//double bioIndex = 0;
 				pix[i] = baseColor;
 				int scheme = SCANcontroller.controller.colours;
 				float projVal = 0f;
@@ -562,24 +602,24 @@ namespace SCANsat.SCAN_Map
 					continue;
 				}
 
-				if (SCANcontroller.controller.map_ResourceOverlay && SCANconfigLoader.GlobalResource && resource != null)
-				{
-					resourceAbundance = SCANuiUtil.resourceMapValue(lon, lat, data, resource);
-					if (resourceAbundance >= 0)
-						resources = true;
-				}
+				//if (SCANcontroller.controller.map_ResourceOverlay && SCANconfigLoader.GlobalResource && resource != null)
+				//{
+				//	resourceAbundance = SCANuiUtil.resourceMapValue(lon, lat, data, resource);
+				//	if (resourceAbundance >= 0)
+				//		resources = true;
+				//}
 
-				if (mType == mapType.Biome && biomeMap)
-				{
-					if (SCANcontroller.controller.useStockBiomes && SCANcontroller.controller.colours == 0)
-					{
-						stockBiome = SCANUtil.getBiome(body, lon, lat).mapColor;
-						if (SCANcontroller.controller.biomeBorder)
-							bioIndex = SCANUtil.getBiomeIndexFraction(body, lon, lat);
-					}
-					else
-						bioIndex = SCANUtil.getBiomeIndexFraction(body, lon, lat);
-				}
+				//if (mType == mapType.Biome && biomeMap)
+				//{
+				//	if (SCANcontroller.controller.useStockBiomes && SCANcontroller.controller.colours == 0)
+				//	{
+				//		stockBiome = SCANUtil.getBiome(body, lon, lat).mapColor;
+				//		if (SCANcontroller.controller.biomeBorder)
+				//			bioIndex = SCANUtil.getBiomeIndexFraction(body, lon, lat);
+				//	}
+				//	else
+				//		bioIndex = SCANUtil.getBiomeIndexFraction(body, lon, lat);
+				//}
 
 				switch (mType)
 				{
@@ -647,13 +687,13 @@ namespace SCANsat.SCAN_Map
 								Color biome = palette.grey;
 								if (SCANcontroller.controller.colours == 1)
 								{
-									if ((i > 0 && mapline[i - 1] != bioIndex) || (mapstep > 0 && mapline[i] != bioIndex))
+									if ((i > 0 && mapline[i - 1] != biomeIndex[i]) || (mapstep > 0 && mapline[i] != biomeIndex[i]))
 									{
 										biome = palette.white;
 									}
 									else
 									{
-										biome = palette.lerp(palette.black, palette.white, (float)bioIndex);
+										biome = palette.lerp(palette.black, palette.white, (float)biomeIndex[i]);
 									}
 								}
 								else
@@ -672,29 +712,29 @@ namespace SCANsat.SCAN_Map
 										}
 									}
 
-									if (SCANcontroller.controller.biomeBorder && ((i > 0 && mapline[i - 1] != bioIndex) || (mapstep > 0 && mapline[i] != bioIndex)))
+									if (SCANcontroller.controller.biomeBorder && ((i > 0 && mapline[i - 1] != biomeIndex[i]) || (mapstep > 0 && mapline[i] != biomeIndex[i])))
 									{
 										biome = palette.white;
 									}
 									else if (SCANcontroller.controller.useStockBiomes)
 									{
-										biome = palette.lerp(stockBiome, elevation, SCANcontroller.controller.biomeTransparency / 100f);
+										biome = palette.lerp(stockBiomeColor[i], elevation, SCANcontroller.controller.biomeTransparency / 100f);
 									}
 									else
 									{
-										biome = palette.lerp(palette.lerp(SCANcontroller.controller.lowBiomeColor, SCANcontroller.controller.highBiomeColor, (float)bioIndex), elevation, SCANcontroller.controller.biomeTransparency / 100f);
+										biome = palette.lerp(palette.lerp(SCANcontroller.controller.lowBiomeColor, SCANcontroller.controller.highBiomeColor, (float)biomeIndex[i]), elevation, SCANcontroller.controller.biomeTransparency / 100f);
 									}
 								}
 
 								baseColor = biome;
-								mapline[i] = bioIndex;
+								mapline[i] = biomeIndex[i];
 							}
 							break;
 						}
 				}
 
-				if (resources)
-					pix[i] = SCANuiUtil.resourceToColor(baseColor, resource, resourceAbundance);
+				if (resourceCache[i] >= 0)
+					pix[i] = SCANuiUtil.resourceToColor(baseColor, resource, resourceCache[i]);
 				else
 					pix[i] = baseColor;
 			}
