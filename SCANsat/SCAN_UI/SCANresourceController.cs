@@ -11,7 +11,7 @@ namespace SCANsat.SCAN_UI
 {
 	class SCANresourceController : SCAN_MBW
 	{
-		internal readonly static Rect defaultRect = new Rect(Screen.width - 400, 200, 250, 300);
+		internal readonly static Rect defaultRect = new Rect(Screen.width - 280, 200, 200, 300);
 		private static Rect sessionRect = defaultRect;
 		private CelestialBody body;
 		private SCANdata data;
@@ -30,7 +30,7 @@ namespace SCANsat.SCAN_UI
 			WindowCaption = "S.C.A.N. Resources";
 			WindowRect = sessionRect;
 			WindowStyle = SCANskins.SCAN_window;
-			WindowOptions = new GUILayoutOption[2] { GUILayout.Width(280), GUILayout.Height(300) };
+			WindowOptions = new GUILayoutOption[2] { GUILayout.Width(200), GUILayout.Height(300) };
 			Visible = false;
 			DragEnabled = true;
 			ClampToScreenOffset = new RectOffset(-200, -200, -40, -40);
@@ -100,7 +100,7 @@ namespace SCANsat.SCAN_UI
 
 			drawResourceList(id);
 			overlayToggle(id);
-			drawOverlay(id);
+			overlayOptions(id);
 		}
 
 		protected override void DrawWindowPost(int id)
@@ -109,10 +109,12 @@ namespace SCANsat.SCAN_UI
 			{
 				oldOverlay = drawResourceOverlay;
 				if (oldOverlay)
-					body.SetResourceMap(SCANuiUtil.drawResourceTexture(mapHeight, data, currentResource, interpolationScale, transparency));
+					refreshMap();
 				else
 					OverlayGenerator.Instance.ClearDisplay();
 			}
+
+			sessionRect = WindowRect;
 		}
 
 		//Draw the version label in the upper left corner
@@ -150,7 +152,7 @@ namespace SCANsat.SCAN_UI
 						currentResource.CurrentBodyConfig(body.name);
 
 						OverlayGenerator.Instance.ClearDisplay();
-						body.SetResourceMap(SCANuiUtil.drawResourceTexture(mapHeight, data, currentResource, interpolationScale, transparency));
+						refreshMap();
 						oldOverlay = drawResourceOverlay = true;
 					}
 				}
@@ -169,13 +171,66 @@ namespace SCANsat.SCAN_UI
 			drawResourceOverlay = GUILayout.Toggle(drawResourceOverlay, "Draw Overlay", SCANskins.SCAN_settingsToggle);
 		}
 
-		private void drawOverlay(int id)
+		private void overlayOptions(int id)
 		{
 			if (drawResourceOverlay)
 			{
+				growE();
+				GUILayout.Label("Coverage Transparency:", SCANskins.SCAN_labelSmallLeft);
+
+				if (GUILayout.Button("-", SCANskins.SCAN_labelSmall))
+				{
+					transparency = Mathf.Max(0f, transparency - 0.1f);
+					refreshMap();
+				}
+				GUILayout.Label(transparency.ToString("P0"), SCANskins.SCAN_labelSmall);
+				if (GUILayout.Button("+", SCANskins.SCAN_labelSmall))
+				{
+					transparency = Mathf.Min(1f, transparency + 0.1f);
+					refreshMap();
+				}
+				stopE();
+
+				growE();
+				GUILayout.Label("Interpolation:", SCANskins.SCAN_labelSmallLeft);
+
+				if (GUILayout.Button("-", SCANskins.SCAN_labelSmall))
+				{
+					interpolationScale = Math.Max(2, interpolationScale / 2);
+					refreshMap();
+				}
+				GUILayout.Label(interpolationScale.ToString(), SCANskins.SCAN_labelSmall);
+				if (GUILayout.Button("+", SCANskins.SCAN_labelSmall))
+				{
+					interpolationScale = Math.Min(32, interpolationScale * 2);
+					refreshMap();
+				}
+				stopE();
+
+				growE();
+				GUILayout.Label("Map Height:", SCANskins.SCAN_labelSmallLeft);
+
+				if (GUILayout.Button("-", SCANskins.SCAN_labelSmall))
+				{
+					mapHeight = Math.Max(64, mapHeight / 2);
+					refreshMap();
+				}
+				GUILayout.Label(mapHeight.ToString(), SCANskins.SCAN_labelSmall);
+				if (GUILayout.Button("+", SCANskins.SCAN_labelSmall))
+				{
+					mapHeight = Math.Min(1024, mapHeight * 2);
+					refreshMap();
+				}
+				stopE();
+
 				if (GUILayout.Button("Refresh"))
-					body.SetResourceMap(SCANuiUtil.drawResourceTexture(mapHeight, data, currentResource, interpolationScale, transparency));
+					refreshMap();
 			}
+		}
+
+		private void refreshMap()
+		{
+			body.SetResourceMap(SCANuiUtil.drawResourceTexture(mapHeight, data, currentResource, interpolationScale, transparency));
 		}
 
 		private void setBody(CelestialBody B)
