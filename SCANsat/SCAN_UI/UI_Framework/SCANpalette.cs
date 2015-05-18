@@ -116,15 +116,14 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			if (data.TerrainConfig.PalRev)
 				c = data.TerrainConfig.ColorPal.colorsReverse;
 			if (scheme == 0)
-				return heightToColor(val, data.TerrainConfig.MaxTerrain, data.TerrainConfig.MinTerrain, data.TerrainConfig.ClampTerrain, data.TerrainConfig.PalDis, c);
+				return heightToColor(val, data.TerrainConfig.MaxTerrain, data.TerrainConfig.MinTerrain, data.TerrainConfig.TerrainRange, data.TerrainConfig.ClampTerrain, data.TerrainConfig.PalDis, c);
 			else
-				return heightToColor(val, data.TerrainConfig.MaxTerrain, data.TerrainConfig.MinTerrain, data.TerrainConfig.PalDis);
+				return heightToColor(val, data.TerrainConfig.MaxTerrain, data.TerrainConfig.MinTerrain, data.TerrainConfig.TerrainRange, data.TerrainConfig.PalDis);
 		}
 
-		private static Color heightToColor(float val, float max, float min, bool discrete)
+		private static Color heightToColor(float val, float max, float min, float range, bool discrete)
 		{
 			Color c = black;
-			float range = max - min;
 			val -= min;
 			if (discrete)
 			{
@@ -143,7 +142,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			return c;
 		}
 
-		internal static Color heightToColor(float val, float max, float min, float? clamp, bool discrete, Color32[] p)
+		internal static Color heightToColor(float val, float max, float min, float range, float? clamp, bool discrete, Color32[] p)
 		{
 			Color c = black;
 			if (clamp != null)
@@ -183,7 +182,6 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			}
 			else
 			{
-				float range = max - min;
 				val -= min;
 				if (discrete)
 				{
