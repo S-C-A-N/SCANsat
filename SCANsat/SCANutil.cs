@@ -263,7 +263,7 @@ namespace SCANsat
 			return amount;
 		}
 
-		internal static int getBiomeIndex(CelestialBody body, double lon , double lat)
+		private static int getBiomeIndex(CelestialBody body, double lon , double lat)
 		{
 			if (body.BiomeMap == null)		return -1;
 			double u = fixLon(lon);
@@ -290,6 +290,8 @@ namespace SCANsat
 		{
 			if (body.BiomeMap == null) return null;
 			int i = getBiomeIndex(body, lon , lat);
+			if (i == -1)
+				return null;
 			return body.BiomeMap.Attributes [i];
 		}
 
