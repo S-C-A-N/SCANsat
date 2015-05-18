@@ -308,7 +308,7 @@ namespace SCANsat.SCAN_Data
 				uncov += coverage_count[7];
 			if ((type & SCANtype.Ore) != SCANtype.Nothing)
 				uncov += coverage_count[8];
-			if ((type & SCANtype.Kethane_4) != SCANtype.Nothing)
+			if ((type & SCANtype.Helium3) != SCANtype.Nothing)
 				uncov += coverage_count[9];
 			if ((type & SCANtype.Uraninite) != SCANtype.Nothing)
 				uncov += coverage_count[10];
@@ -328,7 +328,7 @@ namespace SCANsat.SCAN_Data
 				uncov += coverage_count[17];
 			if ((type & SCANtype.Karbonite) != SCANtype.Nothing)
 				uncov += coverage_count[18];
-			if ((type & SCANtype.Regolith_10) != SCANtype.Nothing)
+			if ((type & SCANtype.FuzzyResources) != SCANtype.Nothing)
 				uncov += coverage_count[19];
 			if ((type & SCANtype.Regolith_11) != SCANtype.Nothing)
 				uncov += coverage_count[20];
