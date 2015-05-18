@@ -43,6 +43,7 @@ namespace SCANsat.SCAN_UI
 		private float bTrans, rTrans;
 
 		private bool stockBiomes = false;
+		private bool biomeBorders = true;
 
 		private SCANresourceGlobal currentResource;
 		private float lowRCutoff, highRCutoff;
@@ -111,6 +112,7 @@ namespace SCANsat.SCAN_UI
 			currentTerrain = new SCANterrainConfig(data.TerrainConfig);
 
 			stockBiomes = SCANcontroller.controller.useStockBiomes;
+			biomeBorders = SCANcontroller.controller.biomeBorder;
 
 			minTerrainSlider = new SCANuiSlider(data.TerrainConfig.DefaultMinHeight - SCANconfigLoader.SCANNode.RangeBelowMinHeight, data.TerrainConfig.MaxTerrain - 100, data.TerrainConfig.MinTerrain, "Min: ", "m", -2);
 			maxTerrainSlider = new SCANuiSlider(data.TerrainConfig.MinTerrain + 100, data.TerrainConfig.DefaultMaxHeight + SCANconfigLoader.SCANNode.RangeAboveMaxHeight, data.TerrainConfig.MaxTerrain, "Max: ", "m", -2);
@@ -750,6 +752,8 @@ namespace SCANsat.SCAN_UI
 			fillS(20);
 			stockBiomes = GUILayout.Toggle(stockBiomes, "Use Stock Biome Maps", SCANskins.SCAN_toggle);
 			fillS(8);
+			biomeBorders = GUILayout.Toggle(biomeBorders, "White Biome Borders", SCANskins.SCAN_toggle);
+			fillS(8);
 			growE();
 				fillS(10);
 				biomeTransSlider.drawSlider(false, ref bTrans);
@@ -811,6 +815,7 @@ namespace SCANsat.SCAN_UI
 						SCANcontroller.controller.lowBiomeColor = biomeColorPicker.ColorLow;
 						SCANcontroller.controller.highBiomeColor = biomeColorPicker.ColorHigh;
 						SCANcontroller.controller.useStockBiomes = stockBiomes;
+						SCANcontroller.controller.biomeBorder = biomeBorders;
 						SCANcontroller.controller.biomeTransparency = bTrans;
 
 						biomeColorPicker.updateOldSwatches();
@@ -829,9 +834,11 @@ namespace SCANsat.SCAN_UI
 						SCANcontroller.controller.lowBiomeColor = SCANconfigLoader.SCANNode.LowBiomeColor;
 						SCANcontroller.controller.highBiomeColor = SCANconfigLoader.SCANNode.HighBiomeColor;
 						SCANcontroller.controller.useStockBiomes = SCANconfigLoader.SCANNode.StockBiomeMap;
+						SCANcontroller.controller.biomeBorder = SCANconfigLoader.SCANNode.BiomeBorder;
 						SCANcontroller.controller.biomeTransparency = SCANconfigLoader.SCANNode.BiomeTransparency;
 
-						stockBiomes = false;
+						stockBiomes = SCANcontroller.controller.useStockBiomes;
+						biomeBorders = SCANcontroller.controller.biomeBorder;
 
 						biomeColorPicker = new SCANuiColorPicker(SCANcontroller.controller.lowBiomeColor, SCANcontroller.controller.highBiomeColor, biomeColorPicker.LowColorChange);
 
@@ -1166,7 +1173,7 @@ namespace SCANsat.SCAN_UI
 			if (currentTerrain.PalRev)
 				c = currentTerrain.ColorPal.colorsReverse;
 			previewLegend = new SCANmapLegend();
-			previewLegend.Legend = previewLegend.getLegend(maxT, minT, clamp, currentTerrain.PalDis, c);
+			previewLegend.Legend = previewLegend.getLegend(maxT, minT, maxT - minT, clamp, currentTerrain.PalDis, c);
 		}
 
 		//Resets the palettes whenever the size slider is adjusted
