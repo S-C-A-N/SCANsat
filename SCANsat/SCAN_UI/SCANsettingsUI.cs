@@ -39,6 +39,8 @@ namespace SCANsat.SCAN_UI
 
 		internal readonly static Rect defaultRect = new Rect(Screen.width - (Screen.width / 2) - 180, 100, 360, 300);
 
+		private SCANresourceController resourceWindow;
+
 		protected override void Awake()
 		{
 			WindowCaption = "S.C.A.N. Settings";
@@ -379,9 +381,15 @@ namespace SCANsat.SCAN_UI
 				SCANcontroller.controller.needsNarrowBand = GUILayout.Toggle(SCANcontroller.controller.needsNarrowBand,		"Zoom Requires Narrow Band Scanner", SCANskins.SCAN_settingsToggle);
 				fillS();
 			stopE();
+			growE();
+				fillS();
+				SCANcontroller.controller.disableStockResource = GUILayout.Toggle(SCANcontroller.controller.disableStockResource, "Disable Stock Scanning", SCANskins.SCAN_settingsToggle);
+				fillS();
+			stopE();
 			if (popup)
 			{
 				GUILayout.Label("Reset Resource Coverage", SCANskins.SCAN_button);
+				GUILayout.Label("Open Resource Overlay Window", SCANskins.SCAN_button);
 			}
 			else
 			{
@@ -389,6 +397,15 @@ namespace SCANsat.SCAN_UI
 				{
 					popup = !popup;
 					warningResource = !warningResource;
+				}
+
+				if (GUILayout.Button("Open Resource Overlay Window"))
+				{
+					if (resourceWindow == null)
+					{
+						resourceWindow = gameObject.AddComponent<SCANresourceController>();
+					}
+					resourceWindow.Visible = !resourceWindow.Visible;
 				}
 			}
 		}
