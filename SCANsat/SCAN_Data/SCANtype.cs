@@ -43,7 +43,7 @@ namespace SCANsat.SCAN_Data
 
 		Everything_SCAN = (1 << 6) - 1,	// All default SCANsat scanners
 		AllResources = 2147483584,		// All resource types
-		DefinedResources = 392576,		// All defined resource types
+		DefinedResources = 393088,		// All defined resource types
 		Everything = Int32.MaxValue      // All scanner types
 	}
 }
