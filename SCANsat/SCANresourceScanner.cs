@@ -80,7 +80,7 @@ namespace SCANsat
 				if (SCANcontroller.controller == null)
 					return;
 
-				if (!SCANcontroller.controller.easyModeScanning)
+				if (!SCANcontroller.controller.easyModeScanning || SCANcontroller.controller.disableStockResource)
 					updateEvents();
 				else
 				{
@@ -115,11 +115,25 @@ namespace SCANsat
 		{
 			this.isEnabled = false;
 			unregisterScanner();
+			if (mSurvey != null && SCANcontroller.controller.disableStockResource)
+			{
+				foreach (ModuleOrbitalSurveyor m in mSurvey)
+				{
+					m.DisableModule();
+				}
+			}
 		}
 
 		public void EnableModule()
 		{
 			this.isEnabled = true;
+			if (mSurvey != null && SCANcontroller.controller.disableStockResource)
+			{
+				foreach (ModuleOrbitalSurveyor m in mSurvey)
+				{
+					m.DisableModule();
+				}
+			}
 		}
 
 		public bool IsSituationValid()
