@@ -1349,33 +1349,23 @@ namespace SCANsat.SCAN_UI.UI_Framework
 
 		#region Planet Overlay Textures
 
-		internal static void drawResourceTexture(int height, ref int step, SCANdata data, SCANresourceGlobal resource)
+		internal static Texture2D drawResourceTexture(int height, SCANdata data, SCANresourceGlobal resource, int stepScale = 8, float transparency = 0f)
 		{
-			int stepScale = height / 16;
 			int width = height * 2;
-			Color[] pix = new Color[width * stepScale];
+			Color32[] pix = new Color32[width * height];
 			float scale = height / 180f;
-
 
 			if (resource.MapOverlay == null)
 			{
 				resource.MapOverlay = new Texture2D(width, height, TextureFormat.ARGB32, true);
-				Color[] c = resource.MapOverlay.GetPixels();
-				for (int i = 0; i < pix.Length; i++)
-					c[i] = palette.clear;
-				resource.MapOverlay.SetPixels(c);
-			}
-			else if (step >= resource.MapOverlay.height)
-			{
-				return;
 			}
 
-			for (int j = 0; j < stepScale; j++)
+			for (int j = 0; j < height;  j += stepScale)
 			{
-				for (int i = 0; i < width; i++)
+				for (int i = 0; i < width; i += stepScale)
 				{
 					double lon = (i / scale);
-					double lat = ((step + j) / scale) - 90;
+					double lat = (j / scale) - 90;
 
 					if (lon <= 180)
 						lon = 180 - lon;
@@ -1385,14 +1375,62 @@ namespace SCANsat.SCAN_UI.UI_Framework
 					if (lon < -180)
 						lon += 360;
 
-					pix[j * width + i] = resourceToColor(palette.clear, resource, resourceMapValue(lon, lat, data, resource), 0.05f);
+					pix[j * width + i] = resourceToColor(palette.Clear, resource, resourceMapValue(lon, lat, data, resource), transparency);
 				}
 			}
 
-			resource.MapOverlay.SetPixels(0, step, resource.MapOverlay.width, stepScale, pix);
-			step += stepScale;
-			if (step % stepScale == 0 || step >= height)
-				resource.MapOverlay.Apply();
+			for (int i = stepScale / 2; i >= 1; i /= 2)
+			{
+				interpolate(pix, height, i, i, i);
+				interpolate(pix, height, 0, i, i);
+				interpolate(pix, height, i, 0, i);
+			}
+
+			resource.MapOverlay.SetPixels32(pix);
+			resource.MapOverlay.Apply();
+
+			return resource.MapOverlay;
+		}
+
+		private static void interpolate(Color32[] c, int height, int x, int y, int step)
+		{
+			int width = height * 2;
+			for (int i = y; i < height + y; i += 2 * step)
+			{
+				for (int j = x; j < width + x; j += 2 * step)
+				{
+					int xpos1 = j - step;
+					if (xpos1 < 0)
+						xpos1 += width;
+					int xpos2 = j + step;
+					if (xpos2 >= width)
+						xpos2 -= width;
+
+					int ypos1 = i - step;
+					if (ypos1 < 0)
+						ypos1 = 0;
+					int ypos2 = i + step;
+					if (ypos2 >= height)
+						ypos2 = height - 1;
+
+					Color32 xInt;
+					Color32 yInt;
+					if (x == y)
+					{
+						yInt = palette.lerp(c[(ypos1 * width) + xpos1], c[(ypos2 * width) + xpos2], 0.5f);
+						xInt = palette.lerp(c[(ypos2 * width) + xpos1], c[(ypos1 * width) + xpos2], 0.5f);
+					}
+					else
+					{
+						yInt = palette.lerp(c[(i * width) + xpos1], c[(i * width) + xpos2], 0.5f);
+						xInt = palette.lerp(c[(ypos1 * width) + j], c[(ypos2 * width) + j], 0.5f);
+					}
+
+					Color32 final = palette.lerp(xInt, yInt, 0.5f);
+
+					c[i * width + j] = final;
+				}
+			}
 		}
 
 		internal static double resourceMapValue(double Lon, double Lat, SCANdata Data, SCANresourceGlobal resource)
@@ -1428,14 +1466,24 @@ namespace SCANsat.SCAN_UI.UI_Framework
 		}
 
 		/* Converts resource amount to pixel color */
-		internal static Color resourceToColor(Color BaseColor, SCANresourceGlobal Resource, double Abundance, float Transparency = 0.4f)
+		internal static Color resourceToColor(Color BaseColor, SCANresourceGlobal Resource, double Abundance)
 		{
 			if (Abundance < 0)
 				return BaseColor;
 			else if (Abundance == 0)
-				return palette.lerp(BaseColor, palette.grey, Transparency);
+				return palette.lerp(BaseColor, palette.grey, 0.3f);
 			else
 				return palette.lerp(palette.lerp(Resource.MinColor, Resource.MaxColor, (float)Abundance / (Resource.CurrentBody.MaxValue - Resource.CurrentBody.MinValue)), BaseColor, Resource.Transparency / 100f);
+		}
+
+		private static Color32 resourceToColor(Color32 BaseColor, SCANresourceGlobal Resource, double Abundance, float Transparency = 0.3f)
+		{
+			if (Abundance < 0)
+				return BaseColor;
+			else if (Abundance == 0)
+				return palette.lerp(BaseColor, palette.Grey, Transparency);
+			else
+				return palette.lerp(palette.lerp(Resource.MinColor32, Resource.MaxColor32, (float)Abundance / (Resource.CurrentBody.MaxValue - Resource.CurrentBody.MinValue)), BaseColor, Resource.Transparency / 100f);
 		}
 
 		#endregion
