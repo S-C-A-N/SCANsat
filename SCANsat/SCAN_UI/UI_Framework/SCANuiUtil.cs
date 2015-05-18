@@ -16,6 +16,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
+using System.Linq;
 using FinePrint;
 using SCANsat.SCAN_Platform;
 using SCANsat.SCAN_Data;
@@ -1350,52 +1351,68 @@ namespace SCANsat.SCAN_UI.UI_Framework
 
 		internal static void drawResourceTexture(int height, ref int step, SCANdata data, SCANresourceGlobal resource)
 		{
-			Color[] pix;
+			int stepScale = height / 16;
+			int width = height * 2;
+			Color[] pix = new Color[width * stepScale];
 			float scale = height / 180f;
+
 
 			if (resource.MapOverlay == null)
 			{
-				resource.MapOverlay = new Texture2D(height * 2, height, TextureFormat.ARGB32, true);
-				pix = resource.MapOverlay.GetPixels();
+				resource.MapOverlay = new Texture2D(width, height, TextureFormat.ARGB32, true);
+				Color[] c = resource.MapOverlay.GetPixels();
 				for (int i = 0; i < pix.Length; i++)
-					pix[i] = palette.clear;
-				resource.MapOverlay.SetPixels(pix);
+					c[i] = palette.clear;
+				resource.MapOverlay.SetPixels(c);
 			}
 			else if (step >= resource.MapOverlay.height)
 			{
 				return;
 			}
 
-			pix = resource.MapOverlay.GetPixels(0, step, resource.MapOverlay.width, 1);
-
-			for (int i = 0; i < pix.Length; i++)
+			for (int j = 0; j < stepScale; j++)
 			{
-				double lon = (i / scale);
-				double lat = (step / scale) - 90;
+				for (int i = 0; i < width; i++)
+				{
+					double lon = (i / scale);
+					double lat = ((step + j) / scale) - 90;
 
-				if (lon <= 180)
-					lon = 180 - lon;
-				else
-					lon = (lon - 180) * -1;
-				lon -= 90;
-				if (lon < -180)
-					lon += 360;
+					if (lon <= 180)
+						lon = 180 - lon;
+					else
+						lon = (lon - 180) * -1;
+					lon -= 90;
+					if (lon < -180)
+						lon += 360;
 
-				pix[i] = resourceToColor(lon, lat, data, palette.clear, resource, 0.05f);
+					pix[j * width + i] = resourceToColor(palette.clear, resource, resourceMapValue(lon, lat, data, resource), 0.05f);
+				}
 			}
 
-			resource.MapOverlay.SetPixels(0, step, resource.MapOverlay.width, 1, pix);
-			step++;
-			if (step % 10 == 0 || step >= height)
+			resource.MapOverlay.SetPixels(0, step, resource.MapOverlay.width, stepScale, pix);
+			step += stepScale;
+			if (step % stepScale == 0 || step >= height)
 				resource.MapOverlay.Apply();
 		}
 
-		private static double resourceMapValue(double Lon, double Lat, SCANdata Data, SCANresourceGlobal resource)
+		internal static double resourceMapValue(double Lon, double Lat, SCANdata Data, SCANresourceGlobal resource)
 		{
 			double amount = 0;
 			if (SCANUtil.isCovered(Lon, Lat, Data, resource.SType))
 			{
 				amount = SCANUtil.ResourceOverlay(Lat, Lon, resource.Name, Data.Body);
+				amount *= 100;
+				if (amount >= resource.CurrentBody.MinValue)
+				{
+					if (amount > resource.CurrentBody.MaxValue)
+						amount = resource.CurrentBody.MaxValue;
+				}
+				else
+					amount = 0;
+			}
+			else if (SCANUtil.isCovered(Lon, Lat, Data, SCANtype.FuzzyResources))
+			{
+				amount = SCANUtil.ResourceOverlay(((int)(Lat * 5)) / 5, ((int)(Lon * 5)) / 5, resource.Name, Data.Body);
 				amount *= 100;
 				if (amount >= resource.CurrentBody.MinValue)
 				{
@@ -1411,15 +1428,14 @@ namespace SCANsat.SCAN_UI.UI_Framework
 		}
 
 		/* Converts resource amount to pixel color */
-		internal static Color resourceToColor(double Lon, double Lat, SCANdata Data, Color BaseColor, SCANresourceGlobal Resource, float Transparency = 0.4f)
+		internal static Color resourceToColor(Color BaseColor, SCANresourceGlobal Resource, double Abundance, float Transparency = 0.4f)
 		{
-			double amount = resourceMapValue(Lon, Lat, Data, Resource);
-			if (amount < 0)
+			if (Abundance < 0)
 				return BaseColor;
-			else if (amount == 0)
+			else if (Abundance == 0)
 				return palette.lerp(BaseColor, palette.grey, Transparency);
 			else
-				return palette.lerp(palette.lerp(Resource.MinColor, Resource.MaxColor, (float)amount / (Resource.CurrentBody.MaxValue - Resource.CurrentBody.MinValue)), BaseColor, Resource.Transparency / 100f);
+				return palette.lerp(palette.lerp(Resource.MinColor, Resource.MaxColor, (float)Abundance / (Resource.CurrentBody.MaxValue - Resource.CurrentBody.MinValue)), BaseColor, Resource.Transparency / 100f);
 		}
 
 		#endregion
