@@ -52,6 +52,10 @@ namespace SCANsat.SCAN_UI.UI_Framework
 		internal static GUIStyle SCAN_insWhiteLabel;
 		internal static GUIStyle SCAN_anomalyOverlay;
 
+		//Resource controller styles
+		internal static GUIStyle SCAN_labelLeft;
+		internal static GUIStyle SCAN_labelRight;
+
 		//Settings menu styles
 		internal static GUIStyle SCAN_headline;
 		internal static GUIStyle SCAN_headlineSmall;
@@ -291,6 +295,12 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			SCAN_labelSmallRight = new GUIStyle(SCAN_labelSmallLeft);
 			SCAN_labelSmallRight.name = "SCAN_LabelSmallRight";
 			SCAN_labelSmallRight.alignment = TextAnchor.MiddleRight;
+
+			SCAN_labelLeft = new GUIStyle(SCAN_labelSmallLeft);
+			SCAN_labelLeft.fontSize = 12;
+
+			SCAN_labelRight = new GUIStyle(SCAN_labelSmallRight);
+			SCAN_labelRight.fontSize = 12;
 
 			SCAN_buttonWarning = new GUIStyle(SCAN_button);
 			SCAN_buttonWarning.name = "SCAN_ButtonWarning";
