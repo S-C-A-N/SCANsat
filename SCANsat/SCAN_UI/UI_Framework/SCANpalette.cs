@@ -28,7 +28,9 @@ namespace SCANsat.SCAN_UI.UI_Framework
 		public static Color white 	= Color.white;
 		public static Color red		= Color.red;
 		public static Color grey		= Color.grey;
+		public static Color32 Grey = (Color32)grey;
 		public static Color clear	= Color.clear;
+		public static Color32 Clear = new Color32(0, 0, 0, 0);
 		public static Color magenta	= Color.magenta;
 		public static Color yellow	= Color.yellow;
 		public static Color cyan		= Color.cyan;
@@ -38,6 +40,11 @@ namespace SCANsat.SCAN_UI.UI_Framework
 
 		public static Color lerp (Color a, Color b, float t) {
 			return Color.Lerp (a,b,t);
+		}
+
+		public static Color32 lerp(Color32 a, Color32 b, float t)
+		{
+			return Color32.Lerp(a, b, t);
 		}
 
 		// XKCD Colors
