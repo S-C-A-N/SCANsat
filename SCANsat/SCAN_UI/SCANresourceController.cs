@@ -11,7 +11,7 @@ namespace SCANsat.SCAN_UI
 {
 	class SCANresourceController : SCAN_MBW
 	{
-		internal readonly static Rect defaultRect = new Rect(Screen.width - 200, 200, 250, 300);
+		internal readonly static Rect defaultRect = new Rect(Screen.width - 400, 200, 250, 300);
 		private static Rect sessionRect = defaultRect;
 		private CelestialBody body;
 		private SCANdata data;
@@ -21,7 +21,9 @@ namespace SCANsat.SCAN_UI
 		private bool drawResourceOverlay = false;
 		private bool oldOverlay = false;
 
-		private int step;
+		private int mapHeight = 256;
+		private float transparency = 0f;
+		private int interpolationScale = 8;
 
 		protected override void Awake()
 		{
@@ -107,9 +109,9 @@ namespace SCANsat.SCAN_UI
 			{
 				oldOverlay = drawResourceOverlay;
 				if (oldOverlay)
-					body.SetResourceMap(currentResource.MapOverlay);
+					body.SetResourceMap(SCANuiUtil.drawResourceTexture(mapHeight, data, currentResource, interpolationScale, transparency));
 				else
-					body.SetResourceMap(null);
+					OverlayGenerator.Instance.ClearDisplay();
 			}
 		}
 
@@ -137,9 +139,20 @@ namespace SCANsat.SCAN_UI
 				growE();
 				if (GUILayout.Button(r.Name, SCANskins.SCAN_labelLeft))
 				{
-					currentResource = r;
-					currentResource.CurrentBodyConfig(body.name);
-					oldOverlay = drawResourceOverlay = false;
+					if (currentResource == r)
+					{
+						OverlayGenerator.Instance.ClearDisplay();
+						oldOverlay = drawResourceOverlay = false;
+					}
+					else
+					{
+						currentResource = r;
+						currentResource.CurrentBodyConfig(body.name);
+
+						OverlayGenerator.Instance.ClearDisplay();
+						body.SetResourceMap(SCANuiUtil.drawResourceTexture(mapHeight, data, currentResource, interpolationScale, transparency));
+						oldOverlay = drawResourceOverlay = true;
+					}
 				}
 
 				//if (GUILayout.Button(r.CurrentBody.Fraction.ToString("P1"), SCANskins.SCAN_labelRight))
@@ -159,7 +172,10 @@ namespace SCANsat.SCAN_UI
 		private void drawOverlay(int id)
 		{
 			if (drawResourceOverlay)
-				SCANuiUtil.drawResourceTexture(512, ref step, data, currentResource);
+			{
+				if (GUILayout.Button("Refresh"))
+					body.SetResourceMap(SCANuiUtil.drawResourceTexture(mapHeight, data, currentResource, interpolationScale, transparency));
+			}
 		}
 
 		private void setBody(CelestialBody B)
@@ -171,20 +187,20 @@ namespace SCANsat.SCAN_UI
 				data = new SCANdata(body);
 				SCANcontroller.controller.addToBodyData(body, data);
 			}
-			resourceFractions = ResourceMap.Instance.GetResourceItemList(HarvestTypes.Planetary, body);
+			//resourceFractions = ResourceMap.Instance.GetResourceItemList(HarvestTypes.Planetary, body);
 			if (resources.Count > 0)
 			{
 				currentResource = resources[0];
 				currentResource.CurrentBodyConfig(body.name);
 
-				foreach (SCANresourceGlobal r in resources)
-				{
-					SCANresourceBody b = r.getBodyConfig(body.name, false);
-					if (b != null)
-					{
-						b.Fraction = resourceFractions.FirstOrDefault(a => a.resourceName == r.Name).fraction;
-					}
-				}
+				//foreach (SCANresourceGlobal r in resources)
+				//{
+				//	SCANresourceBody b = r.getBodyConfig(body.name, false);
+				//	if (b != null)
+				//	{
+				//		b.Fraction = resourceFractions.FirstOrDefault(a => a.resourceName == r.Name).fraction;
+				//	}
+				//}
 			}
 
 			oldOverlay = drawResourceOverlay = false;
