@@ -285,6 +285,8 @@ namespace SCANsat.SCAN_Map
 		private int mapwidth, mapheight;
 		private Color[] pix;
 		private double[] resourceCache;
+		private int resourceStep;
+		private int resourceMapSize;
 		private double[] biomeIndex;
 		private Color[] stockBiomeColor;
 
@@ -326,7 +328,12 @@ namespace SCANsat.SCAN_Map
 			pix = new Color[w];
 			biomeIndex = new double[w];
 			stockBiomeColor = new Color[w];
-			resourceCache = new double[w * 3];
+			if (w < 1024)
+				resourceMapSize = 64;
+			else
+				resourceMapSize = 128;
+			resourceCache = new double[resourceMapSize * (resourceMapSize / 2)];
+			resourceStep = 8;
 			mapscale = mapwidth / 360f;
 			mapheight = (int)(w / 2);
 			/* big map caching */
@@ -489,6 +496,8 @@ namespace SCANsat.SCAN_Map
 			if (data == null)
 				return new Texture2D(1, 1);
 
+			bool resourceOn = false;
+
 			/* init cache if necessary */
 			if (cache)
 			{
@@ -543,24 +552,27 @@ namespace SCANsat.SCAN_Map
 					}
 				}
 
-				double lat = (mapstep * 1.0f / mapscale) - 90f + lat_offset;
-				double lon = (i * 1.0f / mapscale) - 180f + lon_offset;
-				double la = lat, lo = lon;
-				lat = unprojectLatitude(lo, la);
-				lon = unprojectLongitude(lo, la);
-
-				if (double.IsNaN(lat) || double.IsNaN(lon) || lat < -90 || lat > 90 || lon < -180 || lon > 180)
-				{
-					continue;
-				}
-
-				if (SCANcontroller.controller.map_ResourceOverlay && SCANconfigLoader.GlobalResource && resource != null)
-				{
-					resourceCache[i] = SCANuiUtil.resourceMapValue(lon, lat, data, resource);
-				}
-
 				if (mType == mapType.Biome && biomeMap)
 				{
+
+					double lat = (mapstep * 1.0f / mapscale) - 90f + lat_offset;
+					double lon = (i * 1.0f / mapscale) - 180f + lon_offset;
+					double la = lat, lo = lon;
+					lat = unprojectLatitude(lo, la);
+					lon = unprojectLongitude(lo, la);
+
+					if (double.IsNaN(lat) || double.IsNaN(lon) || lat < -90 || lat > 90 || lon < -180 || lon > 180)
+					{
+						continue;
+					}
+
+					//if (SCANcontroller.controller.map_ResourceOverlay && SCANconfigLoader.GlobalResource && resource != null)
+					//{
+					//	resourceCache[i] = SCANuiUtil.resourceMapValue(lon, lat, data, resource);
+					//}
+
+					//if (mType == mapType.Biome && biomeMap)
+					//{
 					if (SCANcontroller.controller.useStockBiomes && SCANcontroller.controller.colours == 0)
 					{
 						stockBiomeColor[i] = SCANUtil.getBiome(body, lon, lat).mapColor;
@@ -578,6 +590,24 @@ namespace SCANsat.SCAN_Map
 				mapline = new double[map.width];
 				mapstep++;
 				return map;
+			}
+
+			if (SCANcontroller.controller.map_ResourceOverlay && SCANconfigLoader.GlobalResource && resource != null)
+			{
+				resourceOn = true;
+				if (mapstep < resourceMapSize / 8)
+				{
+					for (int i = 0; i < resourceMapSize; i++) 
+					{
+						double resourceLon = ((i * 8) * 1.0f / mapscale) - 180f + lon_offset;
+						for (int j = 0; j < 4; j++)
+						{
+							double resourceLat = ((((mapstep * 4) + j) * 8) * 1.0f / mapscale) - 90f + lat_offset;
+
+							resourceCache[(((mapstep * 4) + j) * resourceMapSize) + i] = SCANuiUtil.resourceMapValue(resourceLon, resourceLat, data, resource);
+						}
+					}
+				}
 			}
 
 			for (int i = 0; i < map.width; i++)
@@ -733,8 +763,41 @@ namespace SCANsat.SCAN_Map
 						}
 				}
 
-				if (resourceCache[i] >= 0)
+				if (resourceOn)
+				{
+					switch (projection)
+					{
+						case MapProjection.Polar:
+							{
+								if (lat <= 6 || lat >= -6)
+								{
+
+								}
+								//else if (lat >= 87 || lat <= -87)
+								//{
+
+								//}
+								else
+								{
+
+								}
+								break;
+							}
+						default:
+							{
+								if (lat <= -85 || lat >= 85)
+								{
+
+								}
+								else
+								{
+
+								}
+								break;
+							}
+					}
 					pix[i] = SCANuiUtil.resourceToColor(baseColor, resource, resourceCache[i]);
+				}
 				else
 					pix[i] = baseColor;
 			}
