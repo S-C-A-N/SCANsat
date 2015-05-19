@@ -343,6 +343,24 @@ namespace SCANsat
 			}
 		}
 
+		internal static CelestialBody getTargetBody(MapObject target)
+		{
+			if (target.type == MapObject.MapObjectType.CELESTIALBODY)
+			{
+				return target.celestialBody;
+			}
+			else if (target.type == MapObject.MapObjectType.MANEUVERNODE)
+			{
+				return target.maneuverNode.patch.referenceBody;
+			}
+			else if (target.type == MapObject.MapObjectType.VESSEL)
+			{
+				return target.vessel.mainBody;
+			}
+
+			return null;
+		}
+
 		internal static void SCANlog(string log, params object[] stringObjects)
 		{
 			log = string.Format(log, stringObjects);

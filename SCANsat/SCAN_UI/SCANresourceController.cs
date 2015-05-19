@@ -21,6 +21,7 @@ namespace SCANsat.SCAN_UI
 		private bool drawResourceOverlay = false;
 		private bool oldOverlay = false;
 
+		private Texture2D mapOverlay;
 		private int mapHeight = 256;
 		private float transparency = 0f;
 		private int interpolationScale = 8;
@@ -42,23 +43,22 @@ namespace SCANsat.SCAN_UI
 		{
 			resources = SCANcontroller.setLoadedResourceList();
 
-			setBody(FlightGlobals.currentMainBody);
+			setBody(HighLogic.LoadedSceneIsFlight ? FlightGlobals.currentMainBody : Planetarium.fetch.Home);
 		}
 
 		protected override void Update()
 		{
-			if (MapView.MapIsEnabled)
+			if ((MapView.MapIsEnabled && HighLogic.LoadedSceneIsFlight) || HighLogic.LoadedScene == GameScenes.TRACKSTATION)
 			{
-				MapObject target = PlanetariumCamera.fetch.target;
+				CelestialBody mapBody = SCANUtil.getTargetBody(MapView.MapCamera.target);
 
-				CelestialBody mapBody = getTargetBody(target);
 				if (mapBody == null)
 					return;
 
 				if (mapBody != body)
 					setBody(mapBody);
 			}
-			else
+			else if (HighLogic.LoadedSceneIsFlight)
 			{
 				if (body != FlightGlobals.currentMainBody)
 					setBody(FlightGlobals.currentMainBody);
@@ -68,24 +68,6 @@ namespace SCANsat.SCAN_UI
 		protected override void OnDestroy()
 		{
 
-		}
-
-		private CelestialBody getTargetBody(MapObject target)
-		{
-			if (target.type == MapObject.MapObjectType.CELESTIALBODY)
-			{
-				return target.celestialBody;
-			}
-			else if (target.type == MapObject.MapObjectType.MANEUVERNODE)
-			{
-				return target.maneuverNode.patch.referenceBody;
-			}
-			else if (target.type == MapObject.MapObjectType.VESSEL)
-			{
-				return target.vessel.mainBody;
-			}
-
-			return null;
 		}
 
 		protected override void DrawWindowPre(int id)
@@ -230,7 +212,7 @@ namespace SCANsat.SCAN_UI
 
 		private void refreshMap()
 		{
-			body.SetResourceMap(SCANuiUtil.drawResourceTexture(mapHeight, data, currentResource, interpolationScale, transparency));
+			body.SetResourceMap(SCANuiUtil.drawResourceTexture(mapOverlay, mapHeight, data, currentResource, interpolationScale, transparency));
 		}
 
 		private void setBody(CelestialBody B)
@@ -242,23 +224,39 @@ namespace SCANsat.SCAN_UI
 				data = new SCANdata(body);
 				SCANcontroller.controller.addToBodyData(body, data);
 			}
-			//resourceFractions = ResourceMap.Instance.GetResourceItemList(HarvestTypes.Planetary, body);
-			if (resources.Count > 0)
-			{
-				currentResource = resources[0];
-				currentResource.CurrentBodyConfig(body.name);
 
-				//foreach (SCANresourceGlobal r in resources)
-				//{
-				//	SCANresourceBody b = r.getBodyConfig(body.name, false);
-				//	if (b != null)
-				//	{
-				//		b.Fraction = resourceFractions.FirstOrDefault(a => a.resourceName == r.Name).fraction;
-				//	}
-				//}
+			if (currentResource == null)
+			{
+				if (resources.Count > 0)
+				{
+					currentResource = resources[0];
+					currentResource.CurrentBodyConfig(body.name);
+				}
+			}
+			else
+			{
+				currentResource.CurrentBodyConfig(body.name);
 			}
 
-			oldOverlay = drawResourceOverlay = false;
+			if (drawResourceOverlay)
+				refreshMap();
+
+
+			//resourceFractions = ResourceMap.Instance.GetResourceItemList(HarvestTypes.Planetary, body);
+			//if (resources.Count > 0)
+			//{
+			//	currentResource = resources[0];
+			//	currentResource.CurrentBodyConfig(body.name);
+
+			//	//foreach (SCANresourceGlobal r in resources)
+			//	//{
+			//	//	SCANresourceBody b = r.getBodyConfig(body.name, false);
+			//	//	if (b != null)
+			//	//	{
+			//	//		b.Fraction = resourceFractions.FirstOrDefault(a => a.resourceName == r.Name).fraction;
+			//	//	}
+			//	//}
+			//}
 		}
 	}
 }

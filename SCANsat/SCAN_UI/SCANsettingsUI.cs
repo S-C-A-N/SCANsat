@@ -278,12 +278,22 @@ namespace SCANsat.SCAN_UI
 		private void gui_settings_data_resets(int id)
 		{
 			CelestialBody thisBody = null;
-			if (HighLogic.LoadedSceneIsFlight)
-				thisBody = FlightGlobals.currentMainBody;
-			else if (HighLogic.LoadedScene == GameScenes.SPACECENTER)
-				thisBody = Planetarium.fetch.Home;
-			else if (HighLogic.LoadedScene == GameScenes.TRACKSTATION)
-				thisBody = getTargetBody(MapView.MapCamera.target);
+			switch (HighLogic.LoadedScene)
+			{
+				case GameScenes.FLIGHT:
+					thisBody = FlightGlobals.currentMainBody;
+					break;
+				case GameScenes.SPACECENTER:
+					thisBody = Planetarium.fetch.Home;
+					break;
+				case GameScenes.TRACKSTATION:
+					thisBody = SCANUtil.getTargetBody(MapView.MapCamera.target);
+					break;
+				default:
+					thisBody = null;
+					break;
+			}
+
 			if (thisBody == null)
 				return;
 
@@ -309,24 +319,6 @@ namespace SCANsat.SCAN_UI
 			}
 			stopE();
 			fillS(8);
-		}
-
-		private CelestialBody getTargetBody(MapObject target)
-		{
-			if (target.type == MapObject.MapObjectType.CELESTIALBODY)
-			{
-				return target.celestialBody;
-			}
-			else if (target.type == MapObject.MapObjectType.MANEUVERNODE)
-			{
-				return target.maneuverNode.patch.referenceBody;
-			}
-			else if (target.type == MapObject.MapObjectType.VESSEL)
-			{
-				return target.vessel.mainBody;
-			}
-
-			return null;
 		}
 
 		//Resets all window positions, tooltip toggle
@@ -405,12 +397,22 @@ namespace SCANsat.SCAN_UI
 		{
 			growE();
 			CelestialBody thisBody = null;
-			if (HighLogic.LoadedSceneIsFlight)
-				thisBody = FlightGlobals.currentMainBody;
-			else if (HighLogic.LoadedScene == GameScenes.SPACECENTER)
-				thisBody = Planetarium.fetch.Home;
-			else if (HighLogic.LoadedScene == GameScenes.TRACKSTATION)
-				thisBody = getTargetBody(MapView.MapCamera.target);
+			switch (HighLogic.LoadedScene)
+			{
+				case GameScenes.FLIGHT:
+					thisBody = FlightGlobals.currentMainBody;
+					break;
+				case GameScenes.SPACECENTER:
+					thisBody = Planetarium.fetch.Home;
+					break;
+				case GameScenes.TRACKSTATION:
+					thisBody = SCANUtil.getTargetBody(MapView.MapCamera.target);
+					break;
+				default:
+					thisBody = null;
+					break;
+			}
+
 			if (thisBody == null)
 				return;
 			if (GUILayout.Button("Fill SCAN map of " + thisBody.theName))
@@ -448,12 +450,22 @@ namespace SCANsat.SCAN_UI
 				if (warningBoxOne)
 				{
 					CelestialBody thisBody = null;
-					if (HighLogic.LoadedSceneIsFlight)
-						thisBody = FlightGlobals.currentMainBody;
-					else if (HighLogic.LoadedScene == GameScenes.SPACECENTER)
-						thisBody = Planetarium.fetch.Home;
-					else if (HighLogic.LoadedScene == GameScenes.TRACKSTATION)
-						thisBody = getTargetBody(MapView.MapCamera.target);
+					switch (HighLogic.LoadedScene)
+					{
+						case GameScenes.FLIGHT:
+							thisBody = FlightGlobals.currentMainBody;
+							break;
+						case GameScenes.SPACECENTER:
+							thisBody = Planetarium.fetch.Home;
+							break;
+						case GameScenes.TRACKSTATION:
+							thisBody = SCANUtil.getTargetBody(MapView.MapCamera.target);
+							break;
+						default:
+							thisBody = null;
+							break;
+					}
+
 					if (thisBody == null)
 						return;
 					warningRect = new Rect(WindowRect.width - (WindowRect.width / 2) - 150, WindowRect.height - 125, 300, 90);
@@ -496,12 +508,22 @@ namespace SCANsat.SCAN_UI
 				else if (warningResource)
 				{
 					CelestialBody thisBody = null;
-					if (HighLogic.LoadedSceneIsFlight)
-						thisBody = FlightGlobals.currentMainBody;
-					else if (HighLogic.LoadedScene == GameScenes.SPACECENTER)
-						thisBody = Planetarium.fetch.Home;
-					else if (HighLogic.LoadedScene == GameScenes.TRACKSTATION)
-						thisBody = getTargetBody(MapView.MapCamera.target);
+					switch (HighLogic.LoadedScene)
+					{
+						case GameScenes.FLIGHT:
+							thisBody = FlightGlobals.currentMainBody;
+							break;
+						case GameScenes.SPACECENTER:
+							thisBody = Planetarium.fetch.Home;
+							break;
+						case GameScenes.TRACKSTATION:
+							thisBody = SCANUtil.getTargetBody(MapView.MapCamera.target);
+							break;
+						default:
+							thisBody = null;
+							break;
+					}
+
 					if (thisBody == null)
 						return;
 					warningRect = new Rect(WindowRect.width - (WindowRect.width / 2) - 150, WindowRect.height - 125, 300, 90);
