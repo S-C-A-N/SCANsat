@@ -1349,15 +1349,15 @@ namespace SCANsat.SCAN_UI.UI_Framework
 
 		#region Planet Overlay Textures
 
-		internal static Texture2D drawResourceTexture(int height, SCANdata data, SCANresourceGlobal resource, int stepScale = 8, float transparency = 0f)
+		internal static Texture2D drawResourceTexture(Texture2D map, int height, SCANdata data, SCANresourceGlobal resource, int stepScale = 8, float transparency = 0f)
 		{
 			int width = height * 2;
 			Color32[] pix = new Color32[width * height];
 			float scale = height / 180f;
 
-			if (resource.MapOverlay == null)
+			if (map == null || map.height != height)
 			{
-				resource.MapOverlay = new Texture2D(width, height, TextureFormat.ARGB32, true);
+				map = new Texture2D(width, height, TextureFormat.ARGB32, true);
 			}
 
 			for (int j = 0; j < height;  j += stepScale)
@@ -1386,10 +1386,10 @@ namespace SCANsat.SCAN_UI.UI_Framework
 				interpolate(pix, height, i, 0, i);
 			}
 
-			resource.MapOverlay.SetPixels32(pix);
-			resource.MapOverlay.Apply();
+			map.SetPixels32(pix);
+			map.Apply();
 
-			return resource.MapOverlay;
+			return map;
 		}
 
 		private static void interpolate(Color32[] c, int height, int x, int y, int step)
@@ -1431,6 +1431,12 @@ namespace SCANsat.SCAN_UI.UI_Framework
 					c[i * width + j] = final;
 				}
 			}
+		}
+
+		internal static Color interpolate(Color baseColor, double[] v, int x, int y, int step)
+		{
+
+			return baseColor;
 		}
 
 		internal static double resourceMapValue(double Lon, double Lat, SCANdata Data, SCANresourceGlobal resource)
