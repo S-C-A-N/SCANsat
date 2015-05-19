@@ -279,7 +279,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			//Resource Control settings
 			SCAN_labelLeft = new GUIStyle(SCAN_SkinsLibrary.DefUnitySkin.label);
 			SCAN_labelLeft.fontSize = 12;
-			SCAN_labelLeft.hover.textColor = palette.c_good;
+			SCAN_labelLeft.hover.textColor = palette.cb_bluishGreen;
 			SCAN_labelLeft.alignment = TextAnchor.MiddleLeft;
 
 			SCAN_labelRight = new GUIStyle(SCAN_labelLeft);
