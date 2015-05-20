@@ -284,9 +284,11 @@ namespace SCANsat.SCAN_Map
 		private double mapscale, lon_offset, lat_offset;
 		private int mapwidth, mapheight;
 		private Color[] pix;
-		private double[] resourceCache;
+		private float[,] resourceCache;
+		private int resourceInterpolation;
 		private int resourceStep;
 		private int resourceMapSize;
+		private double resourceMapScale;
 		private double[] biomeIndex;
 		private Color[] stockBiomeColor;
 
@@ -300,7 +302,7 @@ namespace SCANsat.SCAN_Map
 			pix = new Color[w];
 			biomeIndex = new double[w];
 			stockBiomeColor = new Color[w];
-			resourceCache = new double[w * 3];
+			resourceCache = new float[1,1];
 			mapscale = mapwidth / 360f;
 			if (h <= 0)
 				h = (int)(180 * mapscale);
@@ -329,11 +331,13 @@ namespace SCANsat.SCAN_Map
 			biomeIndex = new double[w];
 			stockBiomeColor = new Color[w];
 			if (w < 1024)
-				resourceMapSize = 64;
+				resourceMapSize = 512;
 			else
-				resourceMapSize = 128;
-			resourceCache = new double[resourceMapSize * (resourceMapSize / 2)];
-			resourceStep = 8;
+				resourceMapSize = 1024;
+			resourceCache = new float[resourceMapSize, (resourceMapSize / 2)];
+			resourceInterpolation = 8;
+			resourceMapScale = resourceMapSize / 360f;
+			resourceStep = 0;
 			mapscale = mapwidth / 360f;
 			mapheight = (int)(w / 2);
 			/* big map caching */
@@ -383,6 +387,14 @@ namespace SCANsat.SCAN_Map
 			return lat;
 		}
 
+		private double unScaleLatitude(double lat, double scale)
+		{
+			lat -= lat_offset;
+			lat += 90;
+			lat *= scale;
+			return lat;
+		}
+
 		private double unScaleLongitude(double lon)
 		{
 			lon -= lon_offset;
@@ -391,11 +403,19 @@ namespace SCANsat.SCAN_Map
 			return lon;
 		}
 
+		private double unScaleLongitude(double lon, double scale)
+		{
+			lon -= lon_offset;
+			lon += 180;
+			lon *= scale;
+			return lon;
+		}
+
 		private double fixUnscale(double value, int size)
 		{
 			if (value < 0)
 				value = 0;
-			else if (value >= size - 0.5)
+			else if (value >= (size - 0.5f))
 				value = size - 1;
 			return value;
 		}
@@ -595,28 +615,48 @@ namespace SCANsat.SCAN_Map
 			if (SCANcontroller.controller.map_ResourceOverlay && SCANconfigLoader.GlobalResource && resource != null)
 			{
 				resourceOn = true;
-				if (mapstep < resourceMapSize / 8)
+				if (mapstep < resourceMapSize / (resourceInterpolation * 8))
 				{
 					for (int i = 0; i < resourceMapSize; i++) 
 					{
-						double resourceLon = ((i * 8) * 1.0f / mapscale) - 180f + lon_offset;
-						for (int j = 0; j < 4; j++)
+						if (i % resourceInterpolation == 0)
 						{
-							double resourceLat = ((((mapstep * 4) + j) * 8) * 1.0f / mapscale) - 90f + lat_offset;
+							double resourceLon = (i * 1.0f / resourceMapScale) - 180f + lon_offset;
+							for (int j = 0; j <= 3 * resourceInterpolation; j++)
+							{
+								if (j % resourceInterpolation == 0)
+								{
+									double resourceLat = (((mapstep * resourceInterpolation * 4) + j) * 1.0f / resourceMapScale) - 90f + lat_offset;
 
-							resourceCache[(((mapstep * 4) + j) * resourceMapSize) + i] = SCANuiUtil.resourceMapValue(resourceLon, resourceLat, data, resource);
+									resourceCache[i, j] = SCANuiUtil.resourceMapValue(resourceLon, resourceLat, data, resource);
+								}
+							}
 						}
 					}
 				}
 			}
 
+			if (resourceOn && resourceStep <= (resourceMapSize / 2))
+			{
+				for (int i = resourceInterpolation / 2; i >= 1; i /= 2)
+				{
+					if (resourceStep < resourceInterpolation / 2 || resourceStep >= ((resourceMapSize / 2) - (resourceInterpolation / 2)))
+					{
+						SCANuiUtil.interpolate(resourceCache, resourceStep, resourceMapSize, i, i);
+					}
+					else
+					{
+						SCANuiUtil.interpolate(resourceCache, resourceStep, 4, resourceMapSize, i, i, i);
+						SCANuiUtil.interpolate(resourceCache, resourceStep, 4, resourceMapSize, 0, i, i);
+						SCANuiUtil.interpolate(resourceCache, resourceStep, 4, resourceMapSize, i, 0, i);
+					}
+				}
+				resourceStep++;
+			}
+
 			for (int i = 0; i < map.width; i++)
 			{
 				Color baseColor = palette.grey;
-				//Color stockBiome = palette.grey;
-				//double resourceAbundance = 0;
-				//bool resources = false;
-				//double bioIndex = 0;
 				pix[i] = baseColor;
 				int scheme = SCANcontroller.controller.colours;
 				float projVal = 0f;
@@ -765,6 +805,9 @@ namespace SCANsat.SCAN_Map
 
 				if (resourceOn)
 				{
+					float abundance = 0;
+					double resourceLat = fixUnscale(unScaleLatitude(lat, resourceMapScale), resourceMapSize / 2);
+					double resourceLon = fixUnscale(unScaleLongitude(lon, resourceMapScale), resourceMapSize);
 					switch (projection)
 					{
 						case MapProjection.Polar:
@@ -779,7 +822,7 @@ namespace SCANsat.SCAN_Map
 								//}
 								else
 								{
-
+									abundance = resourceCache[Mathf.RoundToInt((float)resourceLon), Mathf.RoundToInt((float)resourceLat)];
 								}
 								break;
 							}
@@ -791,12 +834,12 @@ namespace SCANsat.SCAN_Map
 								}
 								else
 								{
-
+									abundance = resourceCache[Mathf.RoundToInt((float)resourceLon), Mathf.RoundToInt((float)resourceLat)];
 								}
 								break;
 							}
 					}
-					pix[i] = SCANuiUtil.resourceToColor(baseColor, resource, resourceCache[i]);
+					pix[i] = SCANuiUtil.resourceToColor(baseColor, resource, abundance);
 				}
 				else
 					pix[i] = baseColor;
