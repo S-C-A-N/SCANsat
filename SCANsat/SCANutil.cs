@@ -142,6 +142,54 @@ namespace SCANsat
 			return SCANcontroller.controller.getData(BodyName);
 		}
 
+		/// <summary>
+		/// Do SCANsat maps automatically update with the stock, instant-scan orbital surveys?
+		/// </summary>
+		/// <returns>Returns true if instant scan is enabled</returns>
+		public static bool instantResourceScanEnabled()
+		{
+			if (SCANcontroller.controller == null)
+				return true;
+
+			return SCANcontroller.controller.easyModeScanning;
+		}
+
+		/// <summary>
+		/// Are the stock resource scanner functions disabled; prevents orbital resource surveys?
+		/// </summary>
+		/// <returns>Returns true if stock resource scanning is available</returns>
+		public static bool stockResourceScanEnabled()
+		{
+			if (SCANcontroller.controller == null)
+				return true;
+
+			return !SCANcontroller.controller.disableStockResource;
+		}
+
+		/// <summary>
+		/// Is the stock resource biome lock enabled; reduced resource abundace accuracy if enabled?
+		/// </summary>
+		/// <returns>Returns true if the biome lock is enabled</returns>
+		public static bool resourceBiomeLockEnabled()
+		{
+			if (SCANcontroller.controller == null)
+				return true;
+
+			return SCANcontroller.controller.resourceBiomeLock;
+		}
+
+		/// <summary>
+		/// Does the zoom map resource overlay require a narrow-band scanner in orbit?
+		/// </summary>
+		/// <returns>Returns true if a narrow-band scanner is required</returns>
+		public static bool zoomWindowResourceRestrictionEnabled()
+		{
+			if (SCANcontroller.controller == null)
+				return true;
+
+			return SCANcontroller.controller.needsNarrowBand;
+		}
+
 		#endregion
 
 		#region Internal Utilities
