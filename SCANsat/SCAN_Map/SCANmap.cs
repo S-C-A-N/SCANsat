@@ -622,11 +622,12 @@ namespace SCANsat.SCAN_Map
 						if (i % resourceInterpolation == 0)
 						{
 							double resourceLon = (i * 1.0f / resourceMapScale) - 180f + lon_offset;
-							for (int j = 0; j <= 3 * resourceInterpolation; j++)
+							int ystep = mapstep * resourceInterpolation * 4;
+							for (int j = ystep; j <= (3 * resourceInterpolation) + ystep; j++)
 							{
 								if (j % resourceInterpolation == 0)
 								{
-									double resourceLat = (((mapstep * resourceInterpolation * 4) + j) * 1.0f / resourceMapScale) - 90f + lat_offset;
+									double resourceLat = (j * 1.0f / resourceMapScale) - 90f + lat_offset;
 
 									resourceCache[i, j] = SCANuiUtil.resourceMapValue(resourceLon, resourceLat, data, resource);
 								}
@@ -636,8 +637,9 @@ namespace SCANsat.SCAN_Map
 				}
 			}
 
-			if (resourceOn && resourceStep <= (resourceMapSize / 2))
+			if (resourceOn && resourceStep < (resourceMapSize / 2))
 			{
+				bool skip = false;
 				for (int i = resourceInterpolation / 2; i >= 1; i /= 2)
 				{
 					if (resourceStep < resourceInterpolation / 2 || resourceStep >= ((resourceMapSize / 2) - (resourceInterpolation / 2)))
@@ -649,9 +651,15 @@ namespace SCANsat.SCAN_Map
 						SCANuiUtil.interpolate(resourceCache, resourceStep, 4, resourceMapSize, i, i, i);
 						SCANuiUtil.interpolate(resourceCache, resourceStep, 4, resourceMapSize, 0, i, i);
 						SCANuiUtil.interpolate(resourceCache, resourceStep, 4, resourceMapSize, i, 0, i);
+						skip = true;
 					}
 				}
-				resourceStep++;
+				if (skip)
+					resourceStep += 4;
+				else
+					resourceStep++;
+
+				SCANUtil.SCANlog("Resource Map Step: {0}", resourceStep);
 			}
 
 			for (int i = 0; i < map.width; i++)
@@ -812,7 +820,7 @@ namespace SCANsat.SCAN_Map
 					{
 						case MapProjection.Polar:
 							{
-								if (lat <= 6 || lat >= -6)
+								if ((lat <= 6 && lat >= 0) || (lat >= -6 && lat <=0))
 								{
 
 								}
