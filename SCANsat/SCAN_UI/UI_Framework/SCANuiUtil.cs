@@ -1352,6 +1352,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 		internal static Texture2D drawResourceTexture(Texture2D map, int height, SCANdata data, SCANresourceGlobal resource, int stepScale = 8, float transparency = 0f)
 		{
 			int width = height * 2;
+			float[,] abundanceValues = new float[width, height];
 			Color32[] pix = new Color32[width * height];
 			float scale = height / 180f;
 
@@ -1375,15 +1376,17 @@ namespace SCANsat.SCAN_UI.UI_Framework
 					if (lon < -180)
 						lon += 360;
 
-					pix[j * width + i] = resourceToColor(palette.Clear, resource, resourceMapValue(lon, lat, data, resource), transparency);
+					abundanceValues[i, j] = SCANUtil.ResourceOverlay(lat, lon, resource.Name, data.Body) * 100;
+
+					pix[j * width + i] = resourceToColor(palette.Clear, resource, abundanceValues[i, j], data, lon, lat, transparency);
 				}
 			}
 
 			for (int i = stepScale / 2; i >= 1; i /= 2)
 			{
-				interpolate(pix, height, i, i, i);
-				interpolate(pix, height, 0, i, i);
-				interpolate(pix, height, i, 0, i);
+				interpolate(pix, abundanceValues, height, i, i, i, resource, transparency, data);
+				interpolate(pix, abundanceValues, height, 0, i, i, resource, transparency, data);
+				interpolate(pix, abundanceValues, height, i, 0, i, resource, transparency, data);
 			}
 
 			map.SetPixels32(pix);
@@ -1392,69 +1395,83 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			return map;
 		}
 
-		private static void interpolate(Color32[] c, int height, int x, int y, int step)
+		private static void interpolate(Color32[] c, float[,] v, int height, int x, int y, int step, SCANresourceGlobal r, float t, SCANdata d)
 		{
 			int width = height * 2;
-			for (int i = y; i < height + y; i += 2 * step)
+			float scale = width / 360f;
+			for (int j = y; j < height + y; j += 2 * step)
 			{
-				for (int j = x; j < width + x; j += 2 * step)
+				for (int i = x; i < width + x; i += 2 * step)
 				{
-					int xpos1 = j - step;
+					double lon = (i / scale);
+					double lat = (j / scale) - 90;
+
+					if (lon <= 180)
+						lon = 180 - lon;
+					else
+						lon = (lon - 180) * -1;
+					lon -= 90;
+					if (lon < -180)
+						lon += 360;
+
+					int xpos1 = i - step;
 					if (xpos1 < 0)
 						xpos1 += width;
-					int xpos2 = j + step;
+					int xpos2 = i + step;
 					if (xpos2 >= width)
 						xpos2 -= width;
 
-					int ypos1 = i - step;
+					int ypos1 = j - step;
 					if (ypos1 < 0)
 						ypos1 = 0;
-					int ypos2 = i + step;
+					int ypos2 = j + step;
 					if (ypos2 >= height)
 						ypos2 = height - 1;
 
-					Color32 xInt;
-					Color32 yInt;
+					float avgX = 0;
+					float avgY = 0;
+
 					if (x == y)
 					{
-						yInt = palette.lerp(c[(ypos1 * width) + xpos1], c[(ypos2 * width) + xpos2], 0.5f);
-						xInt = palette.lerp(c[(ypos2 * width) + xpos1], c[(ypos1 * width) + xpos2], 0.5f);
+						avgX = Mathf.Lerp(v[xpos1, ypos1], v[xpos2, ypos2], 0.5f);
+						avgY = Mathf.Lerp(v[xpos1, ypos2], v[xpos2, ypos1], 0.5f);
 					}
 					else
 					{
-						yInt = palette.lerp(c[(i * width) + xpos1], c[(i * width) + xpos2], 0.5f);
-						xInt = palette.lerp(c[(ypos1 * width) + j], c[(ypos2 * width) + j], 0.5f);
+						avgX = Mathf.Lerp(v[xpos1, j], v[xpos2, j], 0.5f);
+						avgY = Mathf.Lerp(v[i, ypos2], v[i, ypos1], 0.5f);
 					}
 
-					Color32 final = palette.lerp(xInt, yInt, 0.5f);
+					float avgFinal = Mathf.Lerp(avgX, avgY, 0.5f);
 
-					c[i * width + j] = final;
+					v[i, j] = avgFinal;
+
+					c[j * width + i] = resourceToColor(palette.Clear, r, v[i, j], d, lon, lat, t);
 				}
 			}
 		}
 
 		internal static void interpolate(float[,] V, int Y, int Height, int Width, int XStep, int YStep, int Step)
 		{
-			if (Y >= Height)
-				return;
+			int mapHeight = Width / 2;
 
-			for (int i = Y + YStep; i < Height + YStep + Y; i += 2 * Step)
+			for (int j = Y + YStep; j < Height + YStep + Y; j += 2 * Step)
 			{
-				for (int j = XStep; j < Width + XStep; j += 2 * Step)
+				for (int i = XStep; i < Width + XStep; i += 2 * Step)
 				{
-					int xpos1 = j - Step;
+					int xpos1 = i - Step;
 					if (xpos1 < 0)
 						xpos1 = 0;
-					int xpos2 = j + Step;
+					int xpos2 = i + Step;
 					if (xpos2 >= Width)
 						xpos2 = Width - 1;
 
-					int ypos1 = i - Step;
+					int ypos1 = j - Step;
 					if (ypos1 < 0)
 						ypos1 = 0;
-					int ypos2 = i + Step;
-					if (ypos2 >= Height)
-						ypos2 = Height - 1;
+					int ypos2 = j + Step;
+					if (ypos2 >= mapHeight)
+						ypos2 = mapHeight - 1;
 
 					float avgX = 0;
 					float avgY = 0;
@@ -1466,13 +1483,13 @@ namespace SCANsat.SCAN_UI.UI_Framework
 					}
 					else
 					{
-						avgX = Mathf.Lerp(V[xpos1, i], V[xpos2, i], 0.5f);
-						avgY = Mathf.Lerp(V[j, ypos2], V[j, ypos1], 0.5f);
+						avgX = Mathf.Lerp(V[xpos1, j], V[xpos2, j], 0.5f);
+						avgY = Mathf.Lerp(V[i, ypos2], V[i, ypos1], 0.5f);
 					}
 
 					float avgFinal = Mathf.Lerp(avgX, avgY, 0.5f);
 
-					V[j, i] = avgFinal;
+					V[i, j] = avgFinal;
 				}
 			}
 		}
@@ -1494,41 +1511,33 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			}
 		}
 
-		internal static float resourceMapValue(double Lon, double Lat, SCANdata Data, SCANresourceGlobal resource)
+		/* Converts resource amount to pixel color */
+		internal static Color resourceToColor(Color BaseColor, SCANresourceGlobal Resource, float Abundance, SCANdata Data, double Lon, double Lat)
 		{
-			float amount = 0;
-			if (SCANUtil.isCovered(Lon, Lat, Data, resource.SType))
+			if (SCANUtil.isCovered(Lon, Lat, Data, Resource.SType))
 			{
-				amount = SCANUtil.ResourceOverlay(Lat, Lon, resource.Name, Data.Body);
-				amount *= 100;
-				if (amount >= resource.CurrentBody.MinValue)
+				if (Abundance >= Resource.CurrentBody.MinValue)
 				{
-					if (amount > resource.CurrentBody.MaxValue)
-						amount = resource.CurrentBody.MaxValue;
+					if (Abundance > Resource.CurrentBody.MaxValue)
+						Abundance = Resource.CurrentBody.MaxValue;
 				}
 				else
-					amount = 0;
+					Abundance = 0;
 			}
 			else if (SCANUtil.isCovered(Lon, Lat, Data, SCANtype.FuzzyResources))
 			{
-				amount = SCANUtil.ResourceOverlay(((int)(Lat * 5)) / 5, ((int)(Lon * 5)) / 5, resource.Name, Data.Body);
-				amount *= 100;
-				if (amount >= resource.CurrentBody.MinValue)
+				Abundance = Mathf.RoundToInt(Abundance);
+				if (Abundance >= Resource.CurrentBody.MinValue)
 				{
-					if (amount > resource.CurrentBody.MaxValue)
-						amount = resource.CurrentBody.MaxValue;
+					if (Abundance > Resource.CurrentBody.MaxValue)
+						Abundance = Resource.CurrentBody.MaxValue;
 				}
 				else
-					amount = 0;
+					Abundance = 0;
 			}
 			else
-				amount = -1;
-			return amount;
-		}
+				Abundance = -1;
 
-		/* Converts resource amount to pixel color */
-		internal static Color resourceToColor(Color BaseColor, SCANresourceGlobal Resource, float Abundance)
-		{
 			if (Abundance < 0)
 				return BaseColor;
 			else if (Abundance == 0)
@@ -1537,8 +1546,32 @@ namespace SCANsat.SCAN_UI.UI_Framework
 				return palette.lerp(palette.lerp(Resource.MinColor, Resource.MaxColor, Abundance / (Resource.CurrentBody.MaxValue - Resource.CurrentBody.MinValue)), BaseColor, Resource.Transparency / 100f);
 		}
 
-		private static Color32 resourceToColor(Color32 BaseColor, SCANresourceGlobal Resource, float Abundance, float Transparency = 0.3f)
+		private static Color32 resourceToColor(Color32 BaseColor, SCANresourceGlobal Resource, float Abundance, SCANdata Data, double Lon, double Lat, float Transparency = 0.3f)
 		{
+			if (SCANUtil.isCovered(Lon, Lat, Data, Resource.SType))
+			{
+				if (Abundance >= Resource.CurrentBody.MinValue)
+				{
+					if (Abundance > Resource.CurrentBody.MaxValue)
+						Abundance = Resource.CurrentBody.MaxValue;
+				}
+				else
+					Abundance = 0;
+			}
+			else if (SCANUtil.isCovered(Lon, Lat, Data, SCANtype.FuzzyResources))
+			{
+				Abundance = Mathf.RoundToInt(Abundance);
+				if (Abundance >= Resource.CurrentBody.MinValue)
+				{
+					if (Abundance > Resource.CurrentBody.MaxValue)
+						Abundance = Resource.CurrentBody.MaxValue;
+				}
+				else
+					Abundance = 0;
+			}
+			else
+				Abundance = -1;
+
 			if (Abundance < 0)
 				return BaseColor;
 			else if (Abundance == 0)
