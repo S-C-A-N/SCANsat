@@ -103,58 +103,58 @@ namespace SCANsat
 
 		public override void OnUpdate()
 		{
-			if (sensorType != 0)
+			if (sensorType == 0)
+				return;
+
+			Events["reviewEvent"].active = storedData.Count > 0;
+			Events["EVACollect"].active = storedData.Count > 0;
+			Events["startScan"].active = !scanning;
+			Events["stopScan"].active = scanning;
+			if (sensorType != 32)
+				Fields["alt_indicator"].guiActive = scanning;
+			if (scanning)
 			{
-				Events["reviewEvent"].active = storedData.Count > 0;
-				Events["EVACollect"].active = storedData.Count > 0;
-				Events["startScan"].active = !scanning;
-				Events["stopScan"].active = scanning;
-				if (sensorType != 32)
-					Fields["alt_indicator"].guiActive = scanning;
-				if (scanning)
+				if (SCANcontroller.controller == null)
 				{
-					if (SCANcontroller.controller == null)
+					scanning = false;
+					Debug.LogError("[SCANsat] Warning: SCANsat scenario module not initialized; Shutting down");
+				}
+				else
+				{
+					if (sensorType != 0 || SCANcontroller.controller.isVesselKnown(vessel.id, (SCANtype)sensorType))
 					{
-						scanning = false;
-						Debug.LogError("[SCANsat] Warning: SCANsat scenario module not initialized; Shutting down");
-					}
-					else
-					{
-						if (sensorType != 0 || SCANcontroller.controller.isVesselKnown(vessel.id, (SCANtype)sensorType))
+						if (TimeWarp.CurrentRate < 1500)
 						{
-							if (TimeWarp.CurrentRate < 1500)
+							float p = power * TimeWarp.deltaTime;
+							float e = part.RequestResource("ElectricCharge", p);
+							if (e < p)
 							{
-								float p = power * TimeWarp.deltaTime;
-								float e = part.RequestResource("ElectricCharge", p);
-								if (e < p)
-								{
-									unregisterScanner();
-									powerIsProblem = true;
-								}
-								else
-								{
-									registerScanner();
-									powerIsProblem = false;
-								}
+								unregisterScanner();
+								powerIsProblem = true;
 							}
-							else if (powerIsProblem)
+							else
 							{
 								registerScanner();
 								powerIsProblem = false;
 							}
 						}
-						else
-							unregisterScanner();
-						alt_indicator = scanAlt();
+						else if (powerIsProblem)
+						{
+							registerScanner();
+							powerIsProblem = false;
+						}
 					}
+					else
+						unregisterScanner();
+					alt_indicator = scanAlt();
 				}
-				if (vessel == FlightGlobals.ActiveVessel)
+			}
+			if (vessel == FlightGlobals.ActiveVessel)
+			{
+				if (powerIsProblem)
 				{
-					if (powerIsProblem)
-					{
-						addStatic();
-						registerScanner();
-					}
+					addStatic();
+					registerScanner();
 				}
 			}
 		}
@@ -211,6 +211,9 @@ namespace SCANsat
 
 		public override string GetInfo()
 		{
+			if (sensorType == 0)
+				return "";
+
 			string str = base.GetInfo();
 			if (min_alt != 0)
 			{
@@ -351,19 +354,19 @@ namespace SCANsat
 
 		/* SCAN: actions for ... something ... */
 		[KSPAction("Start Scan")]
-		public virtual void startScanAction(KSPActionParam param)
+		public void startScanAction(KSPActionParam param)
 		{
 			startScan();
 		}
 
 		[KSPAction("Stop Scan")]
-		public virtual void stopScanAction(KSPActionParam param)
+		public void stopScanAction(KSPActionParam param)
 		{
 			stopScan();
 		}
 
 		[KSPAction("Toggle Scan")]
-		public virtual void toggleScanAction(KSPActionParam param)
+		public void toggleScanAction(KSPActionParam param)
 		{
 			if (scanning)
 				stopScan();
