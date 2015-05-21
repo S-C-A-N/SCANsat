@@ -48,7 +48,7 @@ namespace SCANsat.SCAN_UI
 
 		protected override void Update()
 		{
-			if ((MapView.MapIsEnabled && HighLogic.LoadedSceneIsFlight) || HighLogic.LoadedScene == GameScenes.TRACKSTATION)
+			if ((MapView.MapIsEnabled && HighLogic.LoadedSceneIsFlight && FlightGlobals.ready) || HighLogic.LoadedScene == GameScenes.TRACKSTATION)
 			{
 				CelestialBody mapBody = SCANUtil.getTargetBody(MapView.MapCamera.target);
 
@@ -58,7 +58,7 @@ namespace SCANsat.SCAN_UI
 				if (mapBody != body)
 					setBody(mapBody);
 			}
-			else if (HighLogic.LoadedSceneIsFlight)
+			else if (HighLogic.LoadedSceneIsFlight && FlightGlobals.ready)
 			{
 				if (body != FlightGlobals.currentMainBody)
 					setBody(FlightGlobals.currentMainBody);
