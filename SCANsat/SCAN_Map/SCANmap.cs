@@ -572,36 +572,30 @@ namespace SCANsat.SCAN_Map
 					}
 				}
 
-				if (mType == mapType.Biome && biomeMap)
+				if (mType != mapType.Biome && biomeMap)
+					continue;
+
+				double lat = (mapstep * 1.0f / mapscale) - 90f + lat_offset;
+				double lon = (i * 1.0f / mapscale) - 180f + lon_offset;
+				double la = lat, lo = lon;
+				lat = unprojectLatitude(lo, la);
+				lon = unprojectLongitude(lo, la);
+
+				if (double.IsNaN(lat) || double.IsNaN(lon) || lat < -90 || lat > 90 || lon < -180 || lon > 180)
 				{
+					stockBiomeColor[i] = palette.clear;
+					biomeIndex[i] = 0;
+					continue;
+				}
 
-					double lat = (mapstep * 1.0f / mapscale) - 90f + lat_offset;
-					double lon = (i * 1.0f / mapscale) - 180f + lon_offset;
-					double la = lat, lo = lon;
-					lat = unprojectLatitude(lo, la);
-					lon = unprojectLongitude(lo, la);
-
-					if (double.IsNaN(lat) || double.IsNaN(lon) || lat < -90 || lat > 90 || lon < -180 || lon > 180)
-					{
-						continue;
-					}
-
-					//if (SCANcontroller.controller.map_ResourceOverlay && SCANconfigLoader.GlobalResource && resource != null)
-					//{
-					//	resourceCache[i] = SCANuiUtil.resourceMapValue(lon, lat, data, resource);
-					//}
-
-					//if (mType == mapType.Biome && biomeMap)
-					//{
-					if (SCANcontroller.controller.useStockBiomes && SCANcontroller.controller.colours == 0)
-					{
-						stockBiomeColor[i] = SCANUtil.getBiome(body, lon, lat).mapColor;
-						if (SCANcontroller.controller.biomeBorder)
-							biomeIndex[i] = SCANUtil.getBiomeIndexFraction(body, lon, lat);
-					}
-					else
+				if (SCANcontroller.controller.useStockBiomes && SCANcontroller.controller.colours == 0)
+				{
+					stockBiomeColor[i] = SCANUtil.getBiome(body, lon, lat).mapColor;
+					if (SCANcontroller.controller.biomeBorder)
 						biomeIndex[i] = SCANUtil.getBiomeIndexFraction(body, lon, lat);
 				}
+				else
+					biomeIndex[i] = SCANUtil.getBiomeIndexFraction(body, lon, lat);
 			}
 
 			if (mapstep <= -1)
@@ -617,21 +611,22 @@ namespace SCANsat.SCAN_Map
 				resourceOn = true;
 				if (mapstep < resourceMapSize / (resourceInterpolation * 8))
 				{
-					for (int i = 0; i < resourceMapSize; i++) 
+					for (int i = 0; i < resourceMapSize; i++)
 					{
-						if (i % resourceInterpolation == 0)
-						{
-							double resourceLon = (i * 1.0f / resourceMapScale) - 180f + lon_offset;
-							int ystep = mapstep * resourceInterpolation * 4;
-							for (int j = ystep; j <= (3 * resourceInterpolation) + ystep; j++)
-							{
-								if (j % resourceInterpolation == 0)
-								{
-									double resourceLat = (j * 1.0f / resourceMapScale) - 90f + lat_offset;
+						if (i % resourceInterpolation != 0)
+							continue;
 
-									resourceCache[i, j] = SCANuiUtil.resourceMapValue(resourceLon, resourceLat, data, resource);
-								}
-							}
+						double resourceLon = (i * 1.0f / resourceMapScale) - 180f + lon_offset;
+						int ystep = mapstep * resourceInterpolation * 4;
+
+						for (int j = ystep; j <= (3 * resourceInterpolation) + ystep; j++)
+						{
+							if (j % resourceInterpolation != 0)
+								continue;
+
+							double resourceLat = (j * 1.0f / resourceMapScale) - 90f + lat_offset;
+
+							resourceCache[i, j] = SCANUtil.ResourceOverlay(resourceLat, resourceLon, resource.Name, body) * 100;
 						}
 					}
 				}
@@ -847,7 +842,7 @@ namespace SCANsat.SCAN_Map
 								break;
 							}
 					}
-					pix[i] = SCANuiUtil.resourceToColor(baseColor, resource, abundance);
+					pix[i] = SCANuiUtil.resourceToColor(baseColor, resource, abundance, data, lon, lat);
 				}
 				else
 					pix[i] = baseColor;
