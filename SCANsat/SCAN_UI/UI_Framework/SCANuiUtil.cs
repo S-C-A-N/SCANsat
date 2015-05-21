@@ -1435,6 +1435,9 @@ namespace SCANsat.SCAN_UI.UI_Framework
 
 		internal static void interpolate(float[,] V, int Y, int Height, int Width, int XStep, int YStep, int Step)
 		{
+			if (Y >= Height)
+				return;
+
 			for (int i = Y + YStep; i < Height + YStep + Y; i += 2 * Step)
 			{
 				for (int j = XStep; j < Width + XStep; j += 2 * Step)
