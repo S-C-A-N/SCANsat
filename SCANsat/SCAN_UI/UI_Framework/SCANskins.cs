@@ -56,6 +56,8 @@ namespace SCANsat.SCAN_UI.UI_Framework
 		internal static GUIStyle SCAN_labelLeft;
 		internal static GUIStyle SCAN_labelRight;
 		internal static GUIStyle SCAN_labelSmall;
+		internal static GUIStyle SCAN_labelLeftActive;
+		internal static GUIStyle SCAN_buttonSmall;
 
 		//Settings menu styles
 		internal static GUIStyle SCAN_headline;
@@ -277,10 +279,13 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			SCAN_anomalyOverlay.normal.textColor = palette.cb_skyBlue;
 
 			//Resource Control settings
-			SCAN_labelLeft = new GUIStyle(SCAN_SkinsLibrary.DefUnitySkin.label);
+			SCAN_labelLeft = new GUIStyle(SCAN_texButton);
 			SCAN_labelLeft.fontSize = 12;
 			SCAN_labelLeft.hover.textColor = palette.cb_bluishGreen;
 			SCAN_labelLeft.alignment = TextAnchor.MiddleLeft;
+
+			SCAN_labelLeftActive = new GUIStyle(SCAN_labelLeft);
+			SCAN_labelLeftActive.normal.textColor = palette.cb_bluishGreen;
 
 			SCAN_labelRight = new GUIStyle(SCAN_labelLeft);
 			SCAN_labelRight.alignment = TextAnchor.MiddleRight;
@@ -289,6 +294,11 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			SCAN_labelSmall.fontSize = 10;
 			SCAN_labelSmall.alignment = TextAnchor.MiddleCenter;
 			SCAN_labelSmall.fontStyle = FontStyle.Bold;
+
+			SCAN_buttonSmall = new GUIStyle(SCAN_SkinsLibrary.DefUnitySkin.button);
+			SCAN_buttonSmall.fontSize = 10;
+			SCAN_buttonSmall.alignment = TextAnchor.MiddleCenter;
+			SCAN_buttonSmall.fontStyle = FontStyle.Bold;
 
 			//Initialize settings menu styles
 			SCAN_headline = new GUIStyle(SCAN_SkinsLibrary.DefUnitySkin.label);

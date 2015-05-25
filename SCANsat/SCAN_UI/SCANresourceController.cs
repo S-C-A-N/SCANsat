@@ -121,7 +121,7 @@ namespace SCANsat.SCAN_UI
 			foreach (SCANresourceGlobal r in resources)
 			{
 				growE();
-				if (GUILayout.Button(r.Name, SCANskins.SCAN_labelLeft))
+				if (GUILayout.Button(r.Name, r == currentResource ? SCANskins.SCAN_labelLeftActive : SCANskins.SCAN_labelLeft))
 				{
 					if (currentResource == r)
 					{
@@ -160,13 +160,13 @@ namespace SCANsat.SCAN_UI
 				growE();
 				GUILayout.Label("Coverage Transparency:", SCANskins.SCAN_labelSmallLeft);
 
-				if (GUILayout.Button("-", SCANskins.SCAN_labelSmall))
+				if (GUILayout.Button("-", SCANskins.SCAN_buttonSmall, GUILayout.Width(15)))
 				{
 					transparency = Mathf.Max(0f, transparency - 0.1f);
 					refreshMap();
 				}
 				GUILayout.Label(transparency.ToString("P0"), SCANskins.SCAN_labelSmall);
-				if (GUILayout.Button("+", SCANskins.SCAN_labelSmall))
+				if (GUILayout.Button("+", SCANskins.SCAN_buttonSmall, GUILayout.Width(15)))
 				{
 					transparency = Mathf.Min(1f, transparency + 0.1f);
 					refreshMap();
@@ -176,13 +176,13 @@ namespace SCANsat.SCAN_UI
 				growE();
 				GUILayout.Label("Interpolation:", SCANskins.SCAN_labelSmallLeft);
 
-				if (GUILayout.Button("-", SCANskins.SCAN_labelSmall))
+				if (GUILayout.Button("-", SCANskins.SCAN_buttonSmall, GUILayout.Width(15)))
 				{
 					interpolationScale = Math.Max(2, interpolationScale / 2);
 					refreshMap();
 				}
 				GUILayout.Label(interpolationScale.ToString(), SCANskins.SCAN_labelSmall);
-				if (GUILayout.Button("+", SCANskins.SCAN_labelSmall))
+				if (GUILayout.Button("+", SCANskins.SCAN_buttonSmall, GUILayout.Width(15)))
 				{
 					interpolationScale = Math.Min(32, interpolationScale * 2);
 					refreshMap();
@@ -192,13 +192,13 @@ namespace SCANsat.SCAN_UI
 				growE();
 				GUILayout.Label("Map Height:", SCANskins.SCAN_labelSmallLeft);
 
-				if (GUILayout.Button("-", SCANskins.SCAN_labelSmall))
+				if (GUILayout.Button("-", SCANskins.SCAN_buttonSmall, GUILayout.Width(15)))
 				{
 					mapHeight = Math.Max(64, mapHeight / 2);
 					refreshMap();
 				}
 				GUILayout.Label(mapHeight.ToString(), SCANskins.SCAN_labelSmall);
-				if (GUILayout.Button("+", SCANskins.SCAN_labelSmall))
+				if (GUILayout.Button("+", SCANskins.SCAN_buttonSmall, GUILayout.Width(15)))
 				{
 					mapHeight = Math.Min(1024, mapHeight * 2);
 					refreshMap();
