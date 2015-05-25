@@ -1349,6 +1349,19 @@ namespace SCANsat.SCAN_UI.UI_Framework
 
 		#region Planet Overlay Textures
 
+		private static double fixLon(double Lon)
+		{
+			if (Lon <= 180)
+				Lon = 180 - Lon;
+			else
+				Lon = (Lon - 180) * -1;
+			Lon -= 90;
+			if (Lon < -180)
+				Lon += 360;
+
+			return Lon;
+		}
+
 		internal static Texture2D drawResourceTexture(Texture2D map, int height, SCANdata data, SCANresourceGlobal resource, int stepScale = 8, float transparency = 0f)
 		{
 			int width = height * 2;
@@ -1361,20 +1374,14 @@ namespace SCANsat.SCAN_UI.UI_Framework
 				map = new Texture2D(width, height, TextureFormat.ARGB32, true);
 			}
 
+			System.Random r = new System.Random(ResourceScenario.Instance.gameSettings.Seed);
+
 			for (int j = 0; j < height;  j += stepScale)
 			{
 				for (int i = 0; i < width; i += stepScale)
 				{
-					double lon = (i / scale);
+					double lon = fixLon(i / scale);
 					double lat = (j / scale) - 90;
-
-					if (lon <= 180)
-						lon = 180 - lon;
-					else
-						lon = (lon - 180) * -1;
-					lon -= 90;
-					if (lon < -180)
-						lon += 360;
 
 					abundanceValues[i, j] = SCANUtil.ResourceOverlay(lat, lon, resource.Name, data.Body) * 100;
 
@@ -1384,9 +1391,9 @@ namespace SCANsat.SCAN_UI.UI_Framework
 
 			for (int i = stepScale / 2; i >= 1; i /= 2)
 			{
-				interpolate(pix, abundanceValues, height, i, i, i, resource, transparency, data);
-				interpolate(pix, abundanceValues, height, 0, i, i, resource, transparency, data);
-				interpolate(pix, abundanceValues, height, i, 0, i, resource, transparency, data);
+				interpolate(pix, abundanceValues, height, i, i, i, resource, transparency, data, r);
+				interpolate(pix, abundanceValues, height, 0, i, i, resource, transparency, data, r);
+				interpolate(pix, abundanceValues, height, i, 0, i, resource, transparency, data, r);
 			}
 
 			map.SetPixels32(pix);
@@ -1395,7 +1402,15 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			return map;
 		}
 
-		private static void interpolate(Color32[] c, float[,] v, int height, int x, int y, int step, SCANresourceGlobal r, float t, SCANdata d)
+		private static float getLerp(System.Random rand, int l)
+		{
+			if (l == 0)
+				return 0.5f;
+			
+			return (float)l / 100f + (float)rand.Next(100 - (l / 2)) / 100f;
+		}
+
+		private static void interpolate(Color32[] c, float[,] v, int height, int x, int y, int step, SCANresourceGlobal r, float t, SCANdata d, System.Random rand)
 		{
 			int width = height * 2;
 			float scale = width / 360f;
@@ -1403,16 +1418,8 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			{
 				for (int i = x; i < width + x; i += 2 * step)
 				{
-					double lon = (i / scale);
+					double lon = fixLon(i / scale);
 					double lat = (j / scale) - 90;
-
-					if (lon <= 180)
-						lon = 180 - lon;
-					else
-						lon = (lon - 180) * -1;
-					lon -= 90;
-					if (lon < -180)
-						lon += 360;
 
 					int xpos1 = i - step;
 					if (xpos1 < 0)
@@ -1431,18 +1438,20 @@ namespace SCANsat.SCAN_UI.UI_Framework
 					float avgX = 0;
 					float avgY = 0;
 
+					float lerp = getLerp(rand, step * 2);
+
 					if (x == y)
 					{
-						avgX = Mathf.Lerp(v[xpos1, ypos1], v[xpos2, ypos2], 0.5f);
-						avgY = Mathf.Lerp(v[xpos1, ypos2], v[xpos2, ypos1], 0.5f);
+						avgX = Mathf.Lerp(v[xpos1, ypos1], v[xpos2, ypos2], lerp);
+						avgY = Mathf.Lerp(v[xpos1, ypos2], v[xpos2, ypos1], lerp);
 					}
 					else
 					{
-						avgX = Mathf.Lerp(v[xpos1, j], v[xpos2, j], 0.5f);
-						avgY = Mathf.Lerp(v[i, ypos2], v[i, ypos1], 0.5f);
+						avgX = Mathf.Lerp(v[xpos1, j], v[xpos2, j], lerp);
+						avgY = Mathf.Lerp(v[i, ypos2], v[i, ypos1], lerp);
 					}
 
-					float avgFinal = Mathf.Lerp(avgX, avgY, 0.5f);
+					float avgFinal = Mathf.Lerp(avgX, avgY, lerp);
 
 					v[i, j] = avgFinal;
 
@@ -1451,63 +1460,68 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			}
 		}
 
-		internal static void interpolate(float[,] V, int Y, int Height, int Width, int XStep, int YStep, int Step)
+		internal static void interpolate(float[,] v, int yStart, int height, int width, int x, int y, int step, System.Random r)
 		{
-			int mapHeight = Width / 2;
+			int mapHeight = width / 2;
 
-			for (int j = Y + YStep; j < Height + YStep + Y; j += 2 * Step)
+			for (int j = yStart + y; j < height + y + yStart; j += 2 * step)
 			{
-				for (int i = XStep; i < Width + XStep; i += 2 * Step)
+				for (int i = x; i < width + x; i += 2 * step)
 				{
-					int xpos1 = i - Step;
+					int xpos1 = i - step;
 					if (xpos1 < 0)
-						xpos1 = 0;
-					int xpos2 = i + Step;
-					if (xpos2 >= Width)
-						xpos2 = Width - 1;
+						xpos1 += width;
+					int xpos2 = i + step;
+					if (xpos2 >= width)
+						xpos2 -= width;
 
-					int ypos1 = j - Step;
+					int ypos1 = j - step;
 					if (ypos1 < 0)
 						ypos1 = 0;
-					int ypos2 = j + Step;
+					int ypos2 = j + step;
 					if (ypos2 >= mapHeight)
 						ypos2 = mapHeight - 1;
 
 					float avgX = 0;
 					float avgY = 0;
 
-					if (XStep == YStep)
+					float lerp = getLerp(r, step * 2);
+
+					if (x == y)
 					{
-						avgX = Mathf.Lerp(V[xpos1, ypos1], V[xpos2, ypos2], 0.5f);
-						avgY = Mathf.Lerp(V[xpos1, ypos2], V[xpos2, ypos1], 0.5f);
+						avgX = Mathf.Lerp(v[xpos1, ypos1], v[xpos2, ypos2], lerp);
+						avgY = Mathf.Lerp(v[xpos1, ypos2], v[xpos2, ypos1], lerp);
 					}
 					else
 					{
-						avgX = Mathf.Lerp(V[xpos1, j], V[xpos2, j], 0.5f);
-						avgY = Mathf.Lerp(V[i, ypos2], V[i, ypos1], 0.5f);
+						avgX = Mathf.Lerp(v[xpos1, j], v[xpos2, j], lerp);
+						avgY = Mathf.Lerp(v[i, ypos2], v[i, ypos1], lerp);
 					}
 
-					float avgFinal = Mathf.Lerp(avgX, avgY, 0.5f);
+					float avgFinal = Mathf.Lerp(avgX, avgY, lerp);
 
-					V[i, j] = avgFinal;
+					v[i, j] = avgFinal;
 				}
 			}
 		}
 
-		internal static void interpolate(float[,] V, int Y, int Width, int XStep, int Step)
+		internal static void interpolate(float[,] v, int yStart, int width, int x, int step, System.Random r)
 		{
-			for (int i = XStep; i < Width + XStep; i += 2 * Step)
+
+			for (int i = x; i < width + x; i += 2 * step)
 			{
-				int xpos1 = i - Step;
+				int xpos1 = i - step;
 				if (xpos1 < 0)
-					xpos1 = 0;
-				int xpos2 = i + Step;
-				if (xpos2 >= Width)
-					xpos2 = Width - 1;
+					xpos1 += width;
+				int xpos2 = i + step;
+				if (xpos2 >= width)
+					xpos2 -= width;
 
-				float avgX = Mathf.Lerp(V[xpos1, Y], V[xpos2, Y], 0.5f);
+				float lerp = getLerp(r, step * 2);
 
-				V[i, Y] = avgX;
+				float avgX = Mathf.Lerp(v[xpos1, yStart], v[xpos2, yStart], lerp);
+
+				v[i, yStart] = avgX;
 			}
 		}
 
