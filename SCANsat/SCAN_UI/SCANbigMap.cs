@@ -83,6 +83,9 @@ namespace SCANsat.SCAN_UI
 			{
 				bigmap = new SCANmap(b, true);
 				bigmap.setProjection((MapProjection)SCANcontroller.controller.projection);
+				int i = SCANcontroller.controller.map_width % 8;
+				if (i != 0)
+					SCANcontroller.controller.map_width -= i;
 				bigmap.setWidth(SCANcontroller.controller.map_width);
 			}
 			WindowRect.x = SCANcontroller.controller.map_x;
@@ -150,6 +153,9 @@ namespace SCANsat.SCAN_UI
 					IsResizing = false;
 					if (resizeW < WindowSize_Min.x)
 						resizeW = WindowSize_Min.x;
+					int i = (int)resizeW % 8;
+					if (i != 0)
+						resizeW -= i;
 					bigmap.setWidth((int)resizeW);
 					drawGrid = true;
 					SCANcontroller.controller.map_width = bigmap.MapWidth;
