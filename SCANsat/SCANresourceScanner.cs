@@ -22,6 +22,7 @@ namespace SCANsat
 		private List<ModuleOrbitalSurveyor> mSurvey;
 		private List<ModuleResourceScanner> mScanner;
 		private ModuleAnimationGroup animGroup;
+		private bool activated = false;
 
 		public override void OnStart(PartModule.StartState state)
 		{
@@ -32,14 +33,19 @@ namespace SCANsat
 			animGroup = findAnimator();
 
 			if (animGroup == null)
+			{
+				SCANUtil.SCANlog("No Anim Group Found");
 				this.isEnabled = true;
+			}
+			else
+				SCANUtil.SCANlog("Anim Group Found");
 
 			Actions["startScanAction"].active = false;
 			Actions["stopScanAction"].active = false;
 			Actions["toggleScanAction"].active = false;
-			Actions["startResourceScanAction"].guiName = "Start " + scanName;
-			Actions["stopResourceScanAction"].guiName = "Stop " + scanName;
-			Actions["toggleResourceScanAction"].guiName = "Toggle " + scanName;
+			Actions["startResourceScanAction"].guiName = "Start Action " + scanName;
+			Actions["stopResourceScanAction"].guiName = "Stop Action" + scanName;
+			Actions["toggleResourceScanAction"].guiName = "Toggle Action" + scanName;
 		}
 
 		public override string GetInfo()
@@ -71,8 +77,11 @@ namespace SCANsat
 			base.Events["stopScan"].active = scanning;
 		}
 
-		public override void OnUpdate()
+		public void Update()
 		{
+			if (!activated)
+				return;
+
 			base.OnUpdate();
 
 			if (!HighLogic.LoadedSceneIsFlight)
@@ -98,6 +107,7 @@ namespace SCANsat
 		[KSPAction("Start Resource Scan")]
 		public void startResourceScanAction(KSPActionParam param)
 		{
+			SCANUtil.SCANlog("Start Scan");
 			if (animGroup != null && !scanning && !animGroup.isDeployed)
 				animGroup.DeployModule();
 			startScan();
@@ -106,12 +116,14 @@ namespace SCANsat
 		[KSPAction("Stop Resource Scan")]
 		public void stopResourceScanAction(KSPActionParam param)
 		{
+			SCANUtil.SCANlog("Stop Scan");
 			stopScan();
 		}
 
 		[KSPAction("Toggle Resource Scan")]
 		public void toggleResourceScanAction(KSPActionParam param)
 		{
+			SCANUtil.SCANlog("Toggle Scan");
 			if (scanning)
 				stopScan();
 			else
@@ -124,7 +136,9 @@ namespace SCANsat
 
 		public void DisableModule()
 		{
-			this.isEnabled = false;
+			activated = false;
+			base.Events["startScan"].active = false;
+			base.Events["stopScan"].active = false;
 			unregisterScanner();
 			if (mSurvey != null && SCANcontroller.controller.disableStockResource)
 			{
@@ -137,7 +151,7 @@ namespace SCANsat
 
 		public void EnableModule()
 		{
-			this.isEnabled = true;
+			activated = true;
 			if (mSurvey != null && SCANcontroller.controller.disableStockResource)
 			{
 				foreach (ModuleOrbitalSurveyor m in mSurvey)
