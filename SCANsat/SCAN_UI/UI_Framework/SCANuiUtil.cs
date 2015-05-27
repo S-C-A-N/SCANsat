@@ -1402,6 +1402,91 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			return map;
 		}
 
+		internal static Texture2D drawBiomeMap(Texture2D map, SCANdata data, float transparency, bool useStock = false, bool whiteBorder = false, int height = 256)
+		{
+			if (!useStock && !whiteBorder)
+				return drawBiomeMap(map, data, transparency);
+
+			int width = height * 2;
+			float scale = (width * 1f) / 360f;
+			double[] mapline = new double[width];
+			Color32[] pix = new Color32[height * width];
+
+			if (map == null || map.height != height)
+			{
+				map = new Texture2D(width, height, TextureFormat.ARGB32, true);
+			}
+
+			for (int j = 0; j < height; j++)
+			{
+				for (int i = 0; i < width; i++)
+				{
+					double lon = fixLon(i / scale);
+					double lat = (j / scale) - 90;
+
+					if (!SCANUtil.isCovered(lon, lat, data, SCANtype.Biome))
+					{
+						pix[j * width + i] = palette.lerp(palette.Clear, palette.Grey, transparency);
+						continue;
+					}
+
+					float biomeIndex = (float)SCANUtil.getBiomeIndexFraction(data.Body, lon, lat);
+
+					if (whiteBorder && ((i > 0 && mapline[i - 1] != biomeIndex) || (j > 0 && mapline[i] != biomeIndex)))
+					{
+						pix[j * width + i] = palette.White;
+					}
+					else if (useStock)
+					{
+						pix[j * width + i] = palette.lerp((Color32)SCANUtil.getBiome(data.Body, lon, lat).mapColor, palette.Clear, SCANcontroller.controller.biomeTransparency / 100f);
+					}
+					else
+					{
+						pix[j * width + i] = palette.lerp(palette.lerp((Color32)SCANcontroller.controller.lowBiomeColor, (Color32)SCANcontroller.controller.highBiomeColor, biomeIndex), palette.Clear, SCANcontroller.controller.biomeTransparency / 100f);
+					}
+				}
+			}
+
+			map.SetPixels32(pix);
+			map.Apply();
+
+			return map;
+		}
+
+		private static Texture2D drawBiomeMap(Texture2D m, SCANdata d, float t)
+		{
+			if (d.Body.BiomeMap == null)
+				return null;
+
+			if (m == null)
+			{
+				m = d.Body.BiomeMap.CompileRGBA();
+			}
+
+			Color32[] pix = m.GetPixels32();
+			float scale = m.width / 360f;
+
+			for (int j = 0; j < m.height; j++)
+			{
+				for (int i = 0; i < m.width; i++)
+				{
+					double lon = fixLon(i / scale);
+					double lat = (j / scale) - 90;
+
+					if (!SCANUtil.isCovered(lon, lat, d, SCANtype.Biome))
+					{
+						pix[j * m.width + i] = palette.lerp(palette.Clear, palette.Grey, t);
+						continue;
+					}
+				}
+			}
+
+			m.SetPixels32(pix);
+			m.Apply();
+
+			return m;
+		}
+
 		private static float getLerp(System.Random rand, int l)
 		{
 			if (l == 0)
