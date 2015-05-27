@@ -121,7 +121,7 @@ namespace SCANsat.SCAN_Toolbar
 			IButton bigMap = list.AddOption("Big Map");
 			IButton settings = list.AddOption("Settings");
 			IButton color = list.AddOption("Color Options");
-			IButton resource = list.AddOption("Resource Overlay");
+			IButton resource = list.AddOption("Planetary Overlay");
 
 			smallMap.OnClick += (e2) =>
 				{
