@@ -39,8 +39,6 @@ namespace SCANsat.SCAN_UI
 
 		internal readonly static Rect defaultRect = new Rect(Screen.width - (Screen.width / 2) - 180, 100, 360, 300);
 
-		private SCANresourceController resourceWindow;
-
 		protected override void Awake()
 		{
 			WindowCaption = "S.C.A.N. Settings";
@@ -123,11 +121,11 @@ namespace SCANsat.SCAN_UI
 			closeBox(id);
 
 			growS();
+				gui_settings_resources(id);				/* resource scanning options */
 				gui_settings_xmarks(id); 				/* X marker selection */
 				gui_settings_toggle_body_scanning(id);	/* background and body scanning toggles */
 				gui_settings_timewarp(id);				/* time warp resolution settings */
 				gui_settings_numbers(id);				/* sensor/scanning		statistics */
-				gui_settings_resources(id);				/* resource scanning options */
 				gui_settings_window_resets_tooltips(id);/* reset windows and positions and toggle tooltips*/
 				gui_settings_data_resets(id);			/* reset data and/or reset resources */
 				# if DEBUG
@@ -363,32 +361,12 @@ namespace SCANsat.SCAN_UI
 
 		private void gui_settings_resources(int id)
 		{
-			GUILayout.Label("Resource Settings", SCANskins.SCAN_headline);
-			growE();
-				SCANcontroller.controller.resourceBiomeLock = GUILayout.Toggle(SCANcontroller.controller.resourceBiomeLock, "Resource Biome Lock", SCANskins.SCAN_settingsToggle);
-				SCANcontroller.controller.easyModeScanning = GUILayout.Toggle(SCANcontroller.controller.easyModeScanning, "Instant Resource Scan", SCANskins.SCAN_settingsToggle);
-			stopE();
-			growE();
-				fillS();
-				SCANcontroller.controller.needsNarrowBand = GUILayout.Toggle(SCANcontroller.controller.needsNarrowBand,		"Zoom Requires Narrow Band Scanner", SCANskins.SCAN_settingsToggle);
-				fillS();
-			stopE();
-			growE();
-				fillS();
-				SCANcontroller.controller.disableStockResource = GUILayout.Toggle(SCANcontroller.controller.disableStockResource, "Disable Stock Scanning", SCANskins.SCAN_settingsToggle);
-				fillS();
-			stopE();
-			if (popup)
+			if (SCANcontroller.controller.resourceSettings == null)
+				return;
+
+			if (GUILayout.Button("Resource Settings Window"))
 			{
-				GUILayout.Label("Reset Resource Coverage", SCANskins.SCAN_button);
-			}
-			else
-			{
-				if (GUILayout.Button("Reset Resource Coverage"))
-				{
-					popup = !popup;
-					warningResource = !warningResource;
-				}
+				SCANcontroller.controller.resourceSettings.Visible = !SCANcontroller.controller.resourceSettings.Visible;
 			}
 		}
 
@@ -503,44 +481,6 @@ namespace SCANsat.SCAN_UI
 						{
 							data.reset();
 						}
-					}
-				}
-				else if (warningResource)
-				{
-					CelestialBody thisBody = null;
-					switch (HighLogic.LoadedScene)
-					{
-						case GameScenes.FLIGHT:
-							thisBody = FlightGlobals.currentMainBody;
-							break;
-						case GameScenes.SPACECENTER:
-							thisBody = Planetarium.fetch.Home;
-							break;
-						case GameScenes.TRACKSTATION:
-							thisBody = SCANUtil.getTargetBody(MapView.MapCamera.target);
-							break;
-						default:
-							thisBody = null;
-							break;
-					}
-
-					if (thisBody == null)
-						return;
-					warningRect = new Rect(WindowRect.width - (WindowRect.width / 2) - 150, WindowRect.height - 125, 300, 90);
-					GUI.Box(warningRect, "");
-					Rect r = new Rect(warningRect.x + 10, warningRect.y + 5, 280, 40);
-					GUI.Label(r, "Erase resource data for " + thisBody.theName + "?", SCANskins.SCAN_headlineSmall);
-					r.x += 90;
-					r.y += 45;
-					r.width = 80;
-					r.height = 30;
-					if (GUI.Button(r, "Confirm", SCANskins.SCAN_buttonWarning))
-					{
-						popup = false;
-						warningResource = false;
-						SCANdata data = SCANUtil.getData(thisBody);
-						if (data != null)
-							data.resetResources();
 					}
 				}
 				else
