@@ -26,6 +26,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 		//		SCANsat)
 		public static Color black 	= Color.black;
 		public static Color white 	= Color.white;
+		public static Color32 White = (Color32)white;
 		public static Color red		= Color.red;
 		public static Color grey		= Color.grey;
 		public static Color32 Grey = (Color32)grey;
