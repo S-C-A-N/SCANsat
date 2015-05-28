@@ -1385,7 +1385,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 
 					abundanceValues[i, j] = SCANUtil.ResourceOverlay(lat, lon, resource.Name, data.Body) * 100;
 
-					pix[j * width + i] = resourceToColor(palette.Clear, resource, abundanceValues[i, j], data, lon, lat, transparency);
+					pix[j * width + i] = resourceToColor32(palette.Clear, resource, abundanceValues[i, j], data, lon, lat, transparency);
 				}
 			}
 
@@ -1402,10 +1402,10 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			return map;
 		}
 
-		internal static Texture2D drawBiomeMap(Texture2D map, SCANdata data, float transparency, bool useStock = false, bool whiteBorder = false, int height = 256)
+		internal static Texture2D drawBiomeMap(Texture2D map, SCANdata data, float transparency, int height = 256, bool useStock = false, bool whiteBorder = false)
 		{
 			if (!useStock && !whiteBorder)
-				return drawBiomeMap(map, data, transparency);
+				return drawBiomeMap(map, data, transparency, height);
 
 			int width = height * 2;
 			float scale = (width * 1f) / 360f;
@@ -1453,15 +1453,14 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			return map;
 		}
 
-		private static Texture2D drawBiomeMap(Texture2D m, SCANdata d, float t)
+		private static Texture2D drawBiomeMap(Texture2D m, SCANdata d, float t, int h)
 		{
 			if (d.Body.BiomeMap == null)
 				return null;
 
 			if (m == null)
 			{
-				m = new Texture2D(1024, 512, TextureFormat.RGBA32, true);
-				SCANUtil.SCANlog("Map Width: {0}; Size: {1}; BPP: {2}; Depth: {3}; Map Name: {4}", d.Body.BiomeMap.Width, d.Body.BiomeMap.SizeString, d.Body.BiomeMap.BitsPerPixel, d.Body.BiomeMap.Depth, d.Body.BiomeMap.MapName);
+				m = new Texture2D(h * 2, h, TextureFormat.RGBA32, true);
 			}
 
 			Color32[] pix = new Color32[m.width * m.height];
@@ -1542,7 +1541,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 
 					v[i, j] = avgFinal;
 
-					c[j * width + i] = resourceToColor(palette.Clear, r, v[i, j], d, lon, lat, t);
+					c[j * width + i] = resourceToColor32(palette.Clear, r, v[i, j], d, lon, lat, t);
 				}
 			}
 		}
@@ -1647,7 +1646,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 				return palette.lerp(palette.lerp(Resource.MinColor, Resource.MaxColor, Abundance / (Resource.CurrentBody.MaxValue - Resource.CurrentBody.MinValue)), BaseColor, Resource.Transparency / 100f);
 		}
 
-		private static Color32 resourceToColor(Color32 BaseColor, SCANresourceGlobal Resource, float Abundance, SCANdata Data, double Lon, double Lat, float Transparency = 0.3f)
+		private static Color32 resourceToColor32(Color32 BaseColor, SCANresourceGlobal Resource, float Abundance, SCANdata Data, double Lon, double Lat, float Transparency = 0.3f)
 		{
 			if (SCANUtil.isCovered(Lon, Lat, Data, Resource.SType))
 			{
