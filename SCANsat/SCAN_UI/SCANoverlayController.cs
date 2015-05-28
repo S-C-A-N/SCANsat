@@ -11,16 +11,17 @@ namespace SCANsat.SCAN_UI
 {
 	class SCANoverlayController : SCAN_MBW
 	{
-		internal readonly static Rect defaultRect = new Rect(Screen.width - 280, 200, 200, 300);
+		internal readonly static Rect defaultRect = new Rect(Screen.width - 280, 200, 200, 260);
 		private static Rect sessionRect = defaultRect;
 		private CelestialBody body;
 		private SCANdata data;
 		private SCANresourceGlobal currentResource;
 		private List<SCANresourceGlobal> resources;
 		private List<PResource.Resource> resourceFractions;
-		private bool resourceMode = false;
+		private bool biomeMode = false;
 		private bool drawOverlay = false;
 		private bool oldOverlay = false;
+		private int selection;
 
 		private Texture2D mapOverlay;
 		private Texture2D biomeOverlay;
@@ -30,13 +31,13 @@ namespace SCANsat.SCAN_UI
 
 		protected override void Awake()
 		{
-			WindowCaption = "S.C.A.N. Planet Overlay";
+			WindowCaption = "S.C.A.N. Overlay";
 			WindowRect = sessionRect;
 			WindowStyle = SCANskins.SCAN_window;
-			WindowOptions = new GUILayoutOption[2] { GUILayout.Width(200), GUILayout.Height(300) };
+			WindowOptions = new GUILayoutOption[2] { GUILayout.Width(200), GUILayout.Height(260) };
 			Visible = false;
 			DragEnabled = true;
-			ClampToScreenOffset = new RectOffset(-200, -200, -40, -40);
+			ClampToScreenOffset = new RectOffset(-140, -140, -200, -200);
 
 			SCAN_SkinsLibrary.SetCurrent("SCAN_Unity");
 		}
@@ -74,7 +75,7 @@ namespace SCANsat.SCAN_UI
 
 		public bool DrawOverlay
 		{
-			get { return resourceMode; }
+			get { return drawOverlay; }
 		}
 
 		protected override void DrawWindowPre(int id)
@@ -125,41 +126,40 @@ namespace SCANsat.SCAN_UI
 
 		private void drawResourceList(int id)
 		{
-			foreach (SCANresourceGlobal r in resources)
+			for (int i = 0; i < resources.Count; i++)
 			{
-				growE();
-				if (GUILayout.Button(r.Name, (r == currentResource && resourceMode) ? SCANskins.SCAN_labelLeftActive : SCANskins.SCAN_labelLeft))
+				SCANresourceGlobal r = resources[i];
+
+				if (r == null)
+					continue;
+
+				if (GUILayout.Button(r.Name, selection == i ? SCANskins.SCAN_labelLeftActive : SCANskins.SCAN_labelLeft))
 				{
-					resourceMode = true;
-					if (currentResource == r)
+					biomeMode = false;
+					oldOverlay = drawOverlay = !drawOverlay;
+					OverlayGenerator.Instance.ClearDisplay();
+					if (selection != i)
 					{
-						OverlayGenerator.Instance.ClearDisplay();
-						oldOverlay = drawOverlay = false;
-					}
-					else
-					{
+						selection = i;
 						currentResource = r;
 						currentResource.CurrentBodyConfig(body.name);
 
 						OverlayGenerator.Instance.ClearDisplay();
-						oldOverlay = drawOverlay = true;
 						refreshMap();
 					}
 				}
-
-				//if (GUILayout.Button(r.CurrentBody.Fraction.ToString("P1"), SCANskins.SCAN_labelRight))
-				//{
-				//	currentResource = r;
-				//	currentResource.CurrentBodyConfig(body.name);
-				//}
-				stopE();
 			}
 
-			if (GUILayout.Button("Biome Map", (!resourceMode && drawOverlay) ? SCANskins.SCAN_labelLeftActive : SCANskins.SCAN_labelLeft))
+			if (GUILayout.Button("Biome Map", selection == (resources.Count) ? SCANskins.SCAN_labelLeftActive : SCANskins.SCAN_labelLeft))
 			{
-				resourceMode = false;
-				oldOverlay = drawOverlay = true;
-				refreshMap();
+				biomeMode = true;
+				oldOverlay = drawOverlay = !drawOverlay;
+				OverlayGenerator.Instance.ClearDisplay();
+				if (selection != resources.Count)
+				{
+					selection = resources.Count;
+					refreshMap();
+				}
 			}
 		}
 
@@ -170,7 +170,13 @@ namespace SCANsat.SCAN_UI
 
 		private void overlayOptions(int id)
 		{
-			if (resourceMode)
+			if (!drawOverlay)
+				return;
+
+			if (GUILayout.Button("Refresh"))
+				refreshMap();
+
+			if (!biomeMode)
 			{
 				growE();
 				GUILayout.Label("Coverage Transparency:", SCANskins.SCAN_labelSmallLeft);
@@ -187,9 +193,6 @@ namespace SCANsat.SCAN_UI
 					refreshMap();
 				}
 				stopE();
-
-				if (GUILayout.Button("Refresh"))
-					refreshMap();
 			}
 		}
 
@@ -204,8 +207,8 @@ namespace SCANsat.SCAN_UI
 
 		private void refreshMap()
 		{
-			if (!resourceMode)
-				body.SetResourceMap(SCANuiUtil.drawBiomeMap(biomeOverlay, data, transparency));
+			if (biomeMode)
+				body.SetResourceMap(SCANuiUtil.drawBiomeMap(biomeOverlay, data, transparency, mapHeight * 2));
 			else
 				body.SetResourceMap(SCANuiUtil.drawResourceTexture(mapOverlay, mapHeight, data, currentResource, interpolationScale, transparency));
 		}
