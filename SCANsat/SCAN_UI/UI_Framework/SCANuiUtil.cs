@@ -1460,10 +1460,11 @@ namespace SCANsat.SCAN_UI.UI_Framework
 
 			if (m == null)
 			{
-				m = d.Body.BiomeMap.CompileRGBA();
+				m = new Texture2D(1024, 512, TextureFormat.RGBA32, true);
+				SCANUtil.SCANlog("Map Width: {0}; Size: {1}; BPP: {2}; Depth: {3}; Map Name: {4}", d.Body.BiomeMap.Width, d.Body.BiomeMap.SizeString, d.Body.BiomeMap.BitsPerPixel, d.Body.BiomeMap.Depth, d.Body.BiomeMap.MapName);
 			}
 
-			Color32[] pix = m.GetPixels32();
+			Color32[] pix = new Color32[m.width * m.height];
 			float scale = m.width / 360f;
 
 			for (int j = 0; j < m.height; j++)
@@ -1473,11 +1474,12 @@ namespace SCANsat.SCAN_UI.UI_Framework
 					double lon = fixLon(i / scale);
 					double lat = (j / scale) - 90;
 
-					if (!SCANUtil.isCovered(lon, lat, d, SCANtype.Biome))
-					{
-						pix[j * m.width + i] = palette.lerp(palette.Clear, palette.Grey, t);
-						continue;
-					}
+					Color32 c = palette.Clear;
+
+					if (SCANUtil.isCovered(lon, lat, d, SCANtype.Biome))
+						c = (Color32)SCANUtil.getBiome(d.Body, lon, lat).mapColor;//, palette.clear, SCANcontroller.controller.biomeTransparency / 100);
+
+					pix[j *m.width + i] = c;
 				}
 			}
 
