@@ -16,7 +16,8 @@ namespace SCANsat.SCAN_UI
 		private int mapHeight = 256;
 		private float transparency = 0f;
 		private int interpolationScale = 8;
-		private bool popup, warningResource;
+		private bool popup, warningResource, warningStockResource, controlLock;
+		private const string lockID = "resourceSettingLockID";
 		private Rect warningRect;
 
 		protected override void Awake()
@@ -30,6 +31,54 @@ namespace SCANsat.SCAN_UI
 			ClampToScreenOffset = new RectOffset(-200, -200, -200, -200);
 
 			SCAN_SkinsLibrary.SetCurrent("SCAN_Unity");
+		}
+
+		internal void removeControlLocks()
+		{
+			InputLockManager.RemoveControlLock(lockID);
+			controlLock = false;
+		}
+
+		protected override void DrawWindowPre(int id)
+		{
+			//Lock space center click through
+			if (HighLogic.LoadedScene == GameScenes.SPACECENTER)
+			{
+				Vector2 mousePos = Input.mousePosition;
+				mousePos.y = Screen.height - mousePos.y;
+				if (WindowRect.Contains(mousePos) && !controlLock)
+				{
+					InputLockManager.SetControlLock(ControlTypes.CAMERACONTROLS | ControlTypes.KSC_ALL, lockID);
+					controlLock = true;
+				}
+				else if (!WindowRect.Contains(mousePos) && controlLock)
+				{
+					removeControlLocks();
+				}
+			}
+
+			//Lock tracking scene click through
+			if (HighLogic.LoadedScene == GameScenes.TRACKSTATION)
+			{
+				Vector2 mousePos = Input.mousePosition;
+				mousePos.y = Screen.height - mousePos.y;
+				if (WindowRect.Contains(mousePos) && !controlLock)
+				{
+					InputLockManager.SetControlLock(ControlTypes.TRACKINGSTATION_UI, lockID);
+					controlLock = true;
+				}
+				else if (!WindowRect.Contains(mousePos) && controlLock)
+				{
+					InputLockManager.RemoveControlLock(lockID);
+					controlLock = false;
+				}
+			}
+
+			if (!popup)
+			{
+				warningResource = false;
+				warningStockResource = false;
+			}
 		}
 
 		protected override void DrawWindow(int id)
@@ -102,6 +151,11 @@ namespace SCANsat.SCAN_UI
 			if (popup)
 			{
 				GUILayout.Label("Reset Resource Coverage", SCANskins.SCAN_button);
+				if (SCANcontroller.controller.disableStockResource)
+				{
+					fillS(8);
+					GUILayout.Label("Reset Stock Resource Scanning", SCANskins.SCAN_button);
+				}
 			}
 			else
 			{
@@ -109,6 +163,15 @@ namespace SCANsat.SCAN_UI
 				{
 					popup = !popup;
 					warningResource = !warningResource;
+				}
+				if (SCANcontroller.controller.disableStockResource)
+				{
+					fillS(8);
+					if (GUILayout.Button("Reset Stock Resource Scanning"))
+					{
+						popup = !popup;
+						warningStockResource = !warningStockResource;
+					}
 				}
 			}
 		}
@@ -158,22 +221,7 @@ namespace SCANsat.SCAN_UI
 			{
 				if (warningResource)
 				{
-					CelestialBody thisBody = null;
-					switch (HighLogic.LoadedScene)
-					{
-						case GameScenes.FLIGHT:
-							thisBody = FlightGlobals.currentMainBody;
-							break;
-						case GameScenes.SPACECENTER:
-							thisBody = Planetarium.fetch.Home;
-							break;
-						case GameScenes.TRACKSTATION:
-							thisBody = SCANUtil.getTargetBody(MapView.MapCamera.target);
-							break;
-						default:
-							thisBody = null;
-							break;
-					}
+					CelestialBody thisBody = getTargetBody();
 
 					if (thisBody == null)
 					{
@@ -197,6 +245,32 @@ namespace SCANsat.SCAN_UI
 							data.resetResources();
 					}
 				}
+				else if (warningStockResource)
+				{
+					CelestialBody thisBody = getTargetBody();
+
+					if (thisBody == null)
+					{
+						popup = false;
+						return;
+					}
+
+					warningRect = new Rect(WindowRect.width - (WindowRect.width / 2) - 150, WindowRect.height - 125, 300, 90);
+					GUI.Box(warningRect, "");
+					Rect r = new Rect(warningRect.x + 10, warningRect.y + 5, 280, 40);
+					GUI.Label(r, "Erase stock resource data for " + thisBody.theName + "?", SCANskins.SCAN_headlineSmall);
+					r.x += 90;
+					r.y += 45;
+					r.width = 80;
+					r.height = 30;
+					if (GUI.Button(r, "Confirm", SCANskins.SCAN_buttonWarning))
+					{
+						popup = false;
+						warningStockResource = false;
+						var resources = ResourceScenario.Instance.gameSettings.GetPlanetScanInfo();
+						resources.RemoveAll(a => a.PlanetId == thisBody.flightGlobalsIndex);
+					}
+				}
 				else
 					popup = false;
 			}
@@ -208,6 +282,21 @@ namespace SCANsat.SCAN_UI
 				return;
 
 			SCANcontroller.controller.resourceOverlay.refreshMap(transparency, mapHeight, interpolationScale);
+		}
+
+		private CelestialBody getTargetBody()
+		{
+			switch (HighLogic.LoadedScene)
+			{
+				case GameScenes.FLIGHT:
+					return FlightGlobals.currentMainBody;
+				case GameScenes.SPACECENTER:
+					return Planetarium.fetch.Home;
+				case GameScenes.TRACKSTATION:
+					return SCANUtil.getTargetBody(MapView.MapCamera.target);
+				default:
+					return null;
+			}
 		}
 
 
