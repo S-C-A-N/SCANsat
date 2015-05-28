@@ -92,7 +92,8 @@
     <Compile Include="SCAN_Toolbar\SCANtoolbarwrapper.cs" />
     <Compile Include="SCAN_UI\SCANcolorSelection.cs" />
     <Compile Include="SCAN_UI\SCANBigMap.cs" />
-    <Compile Include="SCAN_UI\SCANresourceController.cs" />
+    <Compile Include="SCAN_UI\SCANoverlayController.cs" />
+    <Compile Include="SCAN_UI\SCANresourceSettings.cs" />
     <Compile Include="SCAN_UI\SCANzoomWindow.cs" />
     <Compile Include="SCAN_UI\UI_Framework\SCANremoteView.cs" />
     <Compile Include="SCANcontroller.cs" />
