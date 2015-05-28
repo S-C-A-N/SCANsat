@@ -32,7 +32,7 @@ namespace SCANsat.SCAN_UI
 		/* UI: time warp names and settings */
 		private string[] twnames = { "Off", "Low", "Medium", "High" };
 		private int[] twvals = { 1, 6, 9, 15 };
-		private bool popup, warningResource, warningBoxOne, warningBoxAll, controlLock;
+		private bool popup, warningBoxOne, warningBoxAll, controlLock;
 		private Rect warningRect;
 		private const string lockID = "settingLockID";
 		private bool oldTooltips, stockToolbar;
@@ -111,7 +111,6 @@ namespace SCANsat.SCAN_UI
 			{
 				warningBoxOne = false;
 				warningBoxAll = false;
-				warningResource = false;
 			}
 		}
 
@@ -275,22 +274,7 @@ namespace SCANsat.SCAN_UI
 		//Reset databases
 		private void gui_settings_data_resets(int id)
 		{
-			CelestialBody thisBody = null;
-			switch (HighLogic.LoadedScene)
-			{
-				case GameScenes.FLIGHT:
-					thisBody = FlightGlobals.currentMainBody;
-					break;
-				case GameScenes.SPACECENTER:
-					thisBody = Planetarium.fetch.Home;
-					break;
-				case GameScenes.TRACKSTATION:
-					thisBody = SCANUtil.getTargetBody(MapView.MapCamera.target);
-					break;
-				default:
-					thisBody = null;
-					break;
-			}
+			CelestialBody thisBody = getTargetBody();
 
 			if (thisBody == null)
 				return;
@@ -374,22 +358,7 @@ namespace SCANsat.SCAN_UI
 		private void gui_settings_window_mapFill(int id)
 		{
 			growE();
-			CelestialBody thisBody = null;
-			switch (HighLogic.LoadedScene)
-			{
-				case GameScenes.FLIGHT:
-					thisBody = FlightGlobals.currentMainBody;
-					break;
-				case GameScenes.SPACECENTER:
-					thisBody = Planetarium.fetch.Home;
-					break;
-				case GameScenes.TRACKSTATION:
-					thisBody = SCANUtil.getTargetBody(MapView.MapCamera.target);
-					break;
-				default:
-					thisBody = null;
-					break;
-			}
+			CelestialBody thisBody = getTargetBody();
 
 			if (thisBody == null)
 				return;
@@ -427,25 +396,14 @@ namespace SCANsat.SCAN_UI
 			{
 				if (warningBoxOne)
 				{
-					CelestialBody thisBody = null;
-					switch (HighLogic.LoadedScene)
-					{
-						case GameScenes.FLIGHT:
-							thisBody = FlightGlobals.currentMainBody;
-							break;
-						case GameScenes.SPACECENTER:
-							thisBody = Planetarium.fetch.Home;
-							break;
-						case GameScenes.TRACKSTATION:
-							thisBody = SCANUtil.getTargetBody(MapView.MapCamera.target);
-							break;
-						default:
-							thisBody = null;
-							break;
-					}
+					CelestialBody thisBody = getTargetBody();
 
 					if (thisBody == null)
+					{
+						popup = false;
 						return;
+					}
+
 					warningRect = new Rect(WindowRect.width - (WindowRect.width / 2) - 150, WindowRect.height - 125, 300, 90);
 					GUI.Box(warningRect, "");
 					Rect r = new Rect(warningRect.x + 10, warningRect.y + 5, 280, 40);
@@ -485,6 +443,21 @@ namespace SCANsat.SCAN_UI
 				}
 				else
 					popup = false;
+			}
+		}
+
+		private CelestialBody getTargetBody()
+		{
+			switch (HighLogic.LoadedScene)
+			{
+				case GameScenes.FLIGHT:
+					return FlightGlobals.currentMainBody;
+				case GameScenes.SPACECENTER:
+					return Planetarium.fetch.Home;
+				case GameScenes.TRACKSTATION:
+					return SCANUtil.getTargetBody(MapView.MapCamera.target);
+				default:
+					return null;
 			}
 		}
 
