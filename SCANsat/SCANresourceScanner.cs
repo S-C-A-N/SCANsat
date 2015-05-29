@@ -73,16 +73,14 @@ namespace SCANsat
 
 		private void updateEvents()
 		{
-			base.Events["startScan"].active = !scanning;
-			base.Events["stopScan"].active = scanning;
+			base.Events["startScan"].active = !scanning && activated;
+			base.Events["stopScan"].active = scanning && activated;
 		}
 
 		public void Update()
 		{
-			if (!activated)
-				return;
-
-			base.OnUpdate();
+			if (activated)
+				base.OnUpdate();
 
 			if (!HighLogic.LoadedSceneIsFlight)
 				return;
