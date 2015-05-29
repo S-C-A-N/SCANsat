@@ -136,28 +136,53 @@ namespace SCANsat.SCAN_UI
 				if (GUILayout.Button(r.Name, selection == i ? SCANskins.SCAN_labelLeftActive : SCANskins.SCAN_labelLeft))
 				{
 					biomeMode = false;
-					oldOverlay = drawOverlay = !drawOverlay;
 					OverlayGenerator.Instance.ClearDisplay();
+
 					if (selection != i)
 					{
 						selection = i;
 						currentResource = r;
 						currentResource.CurrentBodyConfig(body.name);
+						oldOverlay = drawOverlay = true;
+						refreshMap();
+						return;
+					}
 
-						OverlayGenerator.Instance.ClearDisplay();
+					if (drawOverlay)
+					{
+						oldOverlay = drawOverlay = false;
+					}
+					else
+					{
+						oldOverlay = drawOverlay = true;
 						refreshMap();
 					}
+
+
 				}
 			}
 
 			if (GUILayout.Button("Biome Map", selection == (resources.Count) ? SCANskins.SCAN_labelLeftActive : SCANskins.SCAN_labelLeft))
 			{
 				biomeMode = true;
-				oldOverlay = drawOverlay = !drawOverlay;
+
 				OverlayGenerator.Instance.ClearDisplay();
+
 				if (selection != resources.Count)
 				{
 					selection = resources.Count;
+					oldOverlay = drawOverlay = true;
+					refreshMap();
+					return;
+				}
+
+				if (drawOverlay)
+				{
+					oldOverlay = drawOverlay = false;
+				}
+				else
+				{
+					oldOverlay = drawOverlay = true;
 					refreshMap();
 				}
 			}
