@@ -209,9 +209,6 @@ namespace SCANsat.SCAN_UI
 				refreshMap();
 			}
 			stopE();
-
-			if (GUILayout.Button("Refresh"))
-				refreshMap();
 		}
 
 		//Confirmation boxes for map resets
@@ -255,12 +252,12 @@ namespace SCANsat.SCAN_UI
 						return;
 					}
 
-					warningRect = new Rect(WindowRect.width - (WindowRect.width / 2) - 150, WindowRect.height - 125, 300, 90);
+					warningRect = new Rect(WindowRect.width - (WindowRect.width / 2) - 150, WindowRect.height - 125, 300, 110);
 					GUI.Box(warningRect, "");
-					Rect r = new Rect(warningRect.x + 10, warningRect.y + 5, 280, 40);
+					Rect r = new Rect(warningRect.x + 10, warningRect.y + 5, 280, 60);
 					GUI.Label(r, "Erase stock resource data for " + thisBody.theName + "?", SCANskins.SCAN_headlineSmall);
 					r.x += 90;
-					r.y += 45;
+					r.y += 65;
 					r.width = 80;
 					r.height = 30;
 					if (GUI.Button(r, "Confirm", SCANskins.SCAN_buttonWarning))
@@ -268,7 +265,13 @@ namespace SCANsat.SCAN_UI
 						popup = false;
 						warningStockResource = false;
 						var resources = ResourceScenario.Instance.gameSettings.GetPlanetScanInfo();
+						for (int i = 0; i < resources.Count; i++)
+						{
+							if (resources[i].PlanetId == thisBody.flightGlobalsIndex)
+								SCANUtil.SCANlog("Removing Stock Resource Value");
+						}
 						resources.RemoveAll(a => a.PlanetId == thisBody.flightGlobalsIndex);
+
 					}
 				}
 				else
