@@ -118,7 +118,6 @@ namespace SCANsat.SCAN_Map
 
 		/* MAP: Big Map height map caching */
 		private float[,] big_heightmap;
-		private CelestialBody big_heightmap_body;
 		private bool cache;
 		private double centeredLong, centeredLat;
 
@@ -335,7 +334,6 @@ namespace SCANsat.SCAN_Map
 			mapheight = (int)(w / 2);
 			/* big map caching */
 			big_heightmap = new float[mapwidth, mapheight];
-			big_heightmap_body = body;
 			map = null;
 			resetMap();
 		}
@@ -428,12 +426,21 @@ namespace SCANsat.SCAN_Map
 		/* MAP: nearly trivial functions */
 		public void setBody(CelestialBody b)
 		{
-			if (body == b)
-				return;
 			body = b;
 			pqs = body.pqsController != null;
 			biomeMap = body.BiomeMap != null;
 			data = SCANUtil.getData(body);
+
+			/* init cache if necessary */
+			if (cache)
+			{
+				for (int x = 0; x < mapwidth; x++)
+				{
+					for (int y = 0; y < mapwidth / 2; y++)
+						big_heightmap[x, y] = 0f;
+				}
+			}
+
 			if (SCANconfigLoader.GlobalResource)
 			{
 				resource = SCANcontroller.getResourceNode(SCANcontroller.controller.resourceSelection);
@@ -519,20 +526,6 @@ namespace SCANsat.SCAN_Map
 			System.Random r = new System.Random(ResourceScenario.Instance.gameSettings.Seed);
 
 			bool resourceOn = false;
-
-			/* init cache if necessary */
-			if (cache)
-			{
-				if (body != big_heightmap_body)
-				{
-					for (int x = 0; x < mapwidth; x++)
-					{
-						for (int y = 0; y < mapwidth / 2; y++)
-							big_heightmap[x, y] = 0f;
-					}
-					big_heightmap_body = body;
-				}
-			}
 
 			if (map == null)
 			{
