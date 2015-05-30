@@ -8,13 +8,10 @@ namespace SCANsat
 {
 	public class ModuleSCANresourceScanner : SCANsat, IAnimatedModule
 	{
-		[KSPField]
-		public bool activeModule = false;
-		[KSPField]
-		public bool forceActive = false;
-
-		private ModuleOrbitalSurveyor mSurvey;
-		private ModuleResourceScanner mScanner;
+		private List<ModuleOrbitalSurveyor> mSurvey;
+		private List<ModuleResourceScanner> mScanner;
+		private ModuleAnimationGroup animGroup;
+		private bool activated = false;
 
 		public override void OnStart(PartModule.StartState state)
 		{
@@ -22,32 +19,45 @@ namespace SCANsat
 
 			mSurvey = findSurvey();
 			mScanner = findScanner();
+			animGroup = findAnimator();
 
-			if (!forceActive)
-				this.isEnabled = false;
-			else
+			if (animGroup == null)
+			{
+				SCANUtil.SCANlog("No Anim Group Found");
 				this.isEnabled = true;
+			}
+			else
+				SCANUtil.SCANlog("Anim Group Found");
+
+			Actions["startScanAction"].active = false;
+			Actions["stopScanAction"].active = false;
+			Actions["toggleScanAction"].active = false;
+			Actions["startResourceScanAction"].guiName = "Start Action " + scanName;
+			Actions["stopResourceScanAction"].guiName = "Stop Action" + scanName;
+			Actions["toggleResourceScanAction"].guiName = "Toggle Action" + scanName;
 		}
 
 		public override string GetInfo()
 		{
 			string info = base.GetInfo();
 			info += "Resource Scan: " + (SCANtype)sensorType + "\n";
-			info += "Active Scanner: " + activeModule + "\n";
 
 			return info;
 		}
 
-		private ModuleResourceScanner findScanner()
+		private List<ModuleResourceScanner> findScanner()
 		{
-			ModuleResourceScanner r = vessel.FindPartModulesImplementing<ModuleResourceScanner>().FirstOrDefault();
-			return r;
+			return part.FindModulesImplementing<ModuleResourceScanner>();
 		}
 
-		private ModuleOrbitalSurveyor findSurvey()
+		private List<ModuleOrbitalSurveyor> findSurvey()
 		{
-			ModuleOrbitalSurveyor s = vessel.FindPartModulesImplementing<ModuleOrbitalSurveyor>().FirstOrDefault();
-			return s;
+			return part.FindModulesImplementing<ModuleOrbitalSurveyor>();
+		}
+
+		private ModuleAnimationGroup findAnimator()
+		{
+			return part.FindModulesImplementing<ModuleAnimationGroup>().FirstOrDefault();
 		}
 
 		private void updateEvents()
@@ -58,46 +68,66 @@ namespace SCANsat
 
 		public override void OnUpdate()
 		{
-			if (activeModule)
-			{
-				base.OnUpdate();
+			base.OnUpdate();
 
-				if (!HighLogic.LoadedSceneIsFlight)
-					return;
+			if (!HighLogic.LoadedSceneIsFlight)
+				return;
 
-				if (SCANcontroller.controller == null)
-					return;
+			if (SCANcontroller.controller == null)
+				return;
 
-				if (!SCANcontroller.controller.easyModeScanning)
-					updateEvents();
-				else
-				{
-					base.Events["startScan"].active = false;
-					base.Events["stopScan"].active = false;
-					if (scanning)
-						unregisterScanner();
-				}
-			}
+			if (!SCANcontroller.controller.easyModeScanning)
+				updateEvents();
 			else
 			{
 				base.Events["startScan"].active = false;
 				base.Events["stopScan"].active = false;
+				if (scanning)
+					unregisterScanner();
+			}
+		}
+
+		[KSPAction("Start Resource Scan")]
+		public void startResourceScanAction(KSPActionParam param)
+		{
+			SCANUtil.SCANlog("Start Scan");
+			if (animGroup != null && !scanning && !animGroup.isDeployed)
+				animGroup.DeployModule();
+			startScan();
+		}
+
+		[KSPAction("Stop Resource Scan")]
+		public void stopResourceScanAction(KSPActionParam param)
+		{
+			SCANUtil.SCANlog("Stop Scan");
+			stopScan();
+		}
+
+		[KSPAction("Toggle Resource Scan")]
+		public void toggleResourceScanAction(KSPActionParam param)
+		{
+			SCANUtil.SCANlog("Toggle Scan");
+			if (scanning)
+				stopScan();
+			else
+			{
+				if (animGroup != null && !animGroup.isDeployed)
+					animGroup.DeployModule();
+				startScan();
 			}
 		}
 
 		public void DisableModule()
 		{
-			if (!forceActive)
-			{
-				this.isEnabled = false;
-				unregisterScanner();
-			}
+			this.isEnabled = false;
+			base.Events["startScan"].active = false;
+			base.Events["stopScan"].active = false;
+			unregisterScanner();
 		}
 
 		public void EnableModule()
 		{
-			if (!forceActive)
-				this.isEnabled = true;
+			this.isEnabled = true;
 		}
 
 		public bool IsSituationValid()
