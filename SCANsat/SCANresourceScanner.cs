@@ -90,23 +90,18 @@ namespace SCANsat
 		[KSPAction("Start Resource Scan")]
 		public void startResourceScanAction(KSPActionParam param)
 		{
-			SCANUtil.SCANlog("Start Scan");
-			if (animGroup != null && !scanning && !animGroup.isDeployed)
-				animGroup.DeployModule();
 			startScan();
 		}
 
 		[KSPAction("Stop Resource Scan")]
 		public void stopResourceScanAction(KSPActionParam param)
 		{
-			SCANUtil.SCANlog("Stop Scan");
 			stopScan();
 		}
 
 		[KSPAction("Toggle Resource Scan")]
 		public void toggleResourceScanAction(KSPActionParam param)
 		{
-			SCANUtil.SCANlog("Toggle Scan");
 			if (scanning)
 				stopScan();
 			else
