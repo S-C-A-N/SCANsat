@@ -28,7 +28,7 @@ namespace SCANsat.SCAN_Data
 		Kethane = 1 << 6,         // Kethane - K-type - Kethane
 		MetallicOre = 1 << 7,             // CRP Ore - Regolith
 		Ore = 1 << 8,				//Stock Ore
-		Kethane_4 = 1 << 9,       // Reserved - K-type
+		He3 = 1 << 9,				// Helium 3
 		Uraninite = 1 << 10,        // Uranium - Regolith - KSPI
 		Thorium = 1 << 11,        // Thorium - Regolith - KSPI
 		Alumina = 1 << 12,        // Alumina - Regolith - KSPI
@@ -43,7 +43,7 @@ namespace SCANsat.SCAN_Data
 
 		Everything_SCAN = (1 << 6) - 1,	// All default SCANsat scanners
 		AllResources = 2147483584,		// All resource types
-		DefinedResources = 392576,		// All defined resource types
+		DefinedResources = 393088,		// All defined resource types
 		Everything = Int32.MaxValue      // All scanner types
 	}
 }

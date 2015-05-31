@@ -308,7 +308,7 @@ namespace SCANsat.SCAN_Data
 				uncov += coverage_count[7];
 			if ((type & SCANtype.Ore) != SCANtype.Nothing)
 				uncov += coverage_count[8];
-			if ((type & SCANtype.Kethane_4) != SCANtype.Nothing)
+			if ((type & SCANtype.He3) != SCANtype.Nothing)
 				uncov += coverage_count[9];
 			if ((type & SCANtype.Uraninite) != SCANtype.Nothing)
 				uncov += coverage_count[10];

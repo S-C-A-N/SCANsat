@@ -211,6 +211,8 @@ namespace SCANsat
 
 		public override string GetInfo()
 		{
+			if (sensorType == 0)
+				return "";
 			string str = base.GetInfo();
 			if (min_alt != 0)
 			{
