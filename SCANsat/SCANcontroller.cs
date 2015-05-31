@@ -1391,7 +1391,7 @@ namespace SCANsat
 				if (alt < ba) fov = (alt / ba) * fov;
 				else sensor.bestRange = true;
 
-				double surfscale = 600000d / v.mainBody.Radius;
+				double surfscale = Planetarium.fetch.Home.Radius / v.mainBody.Radius;
 				if (surfscale < 1) surfscale = 1;
 				surfscale = Math.Sqrt(surfscale);
 				fov *= surfscale;
