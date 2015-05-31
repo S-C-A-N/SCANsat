@@ -12,6 +12,8 @@ Version 12.1 - 2015-5-30
 	 
 - Fix MapTraq texture location
 
+- Baseline radius for FOV calculations no longer hard-coded to Kerbin radius
+
 
 Version 12 - 2015-5-3
 ------------------------

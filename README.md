@@ -13,7 +13,6 @@
 [![][shield:support-karbonite]][karbonite:release]&nbsp;
 [![][shield:support-usi]][usi:release]&nbsp;
 [![][shield:support-epl]][epl:release]&nbsp;
-[![][shield:support-ctt]][ctt:release]&nbsp;
 [![][shield:support-ccfg]][cconfig:release]&nbsp;
 [![][shield:support-mechjeb]][mechjeb:release]&nbsp;
 
@@ -121,7 +120,7 @@ For licensing information, please see the [included LICENSE.txt][SCANsat:rel-lic
   * Do I need to attach a part to my vessel to use SCANsat?
     * **No, but...**. You can view existing maps from any vessel, but you need to attach a scanner to add new data to the maps.
   * What does the "field of view" mean?
-    * When a sensor is at or above its "best" altitude (but below its maximum altitude) the field of view is the width of the swath mapped by the instrument, if it were in orbit around Kerbin. In other words, a field of view of 10° would map swathes which are 1/36th of the planetary surface wide. Larger and smaller bodies would take longer or shorter times to map, respectively.
+    * When a sensor is at or above its "best" altitude (but below its maximum altitude) the field of view is half of the width of the swath mapped by the instrument, if it were in orbit around Kerbin. In other words, a field of view of 5° would map swathes which are 1/36th (10°) of the planetary surface wide. The field of view is scaled for smaller bodies so that more of the surface is covered.
   * What does the "best" altitude mean?
     * At or above the best altitude, the sensor will operate with its listed field of view. Below this altitude the sensor suffers a linear penalty. A 10° FOV instrument with a best altitude of 500km would only have a 5° FOV at 250km.
   * [Career Mode] Does SCANsat give us science points?
@@ -689,18 +688,17 @@ sneaky then they can of course be sneaky.
 [shield:jenkins-dev]: http://img.shields.io/jenkins/s/https/ksp.sarbian.com/jenkins/SCANsat-dev.svg
 [shield:jenkins-rel]: http://img.shields.io/jenkins/s/https/ksp.sarbian.com/jenkins/SCANsat-release.svg
 [shield:support-ksp]: http://img.shields.io/badge/for%20KSP-v1.0.2-bad455.svg
-[shield:support-rpm]: http://img.shields.io/badge/works%20with%20RPM-v0.18.3-a31f34.svg
-[shield:support-mm]: http://img.shields.io/badge/works%20with%20MM-v2.6.2-40b7c0.svg
-[shield:support-toolbar]: http://img.shields.io/badge/works%20with%20Blizzy's%20Toolbar-1.7.9-7c69c0.svg
-[shield:support-alcor]: http://img.shields.io/badge/works%20with%20ALCOR-0.9-299bc7.svg
+[shield:support-rpm]: http://img.shields.io/badge/works%20with%20RPM-v0.19.x-a31f34.svg
+[shield:support-mm]: http://img.shields.io/badge/works%20with%20MM-v2.x-40b7c0.svg
+[shield:support-toolbar]: http://img.shields.io/badge/works%20with%20Blizzy's%20Toolbar-1.x-7c69c0.svg
+[shield:support-alcor]: http://img.shields.io/badge/works%20with%20ALCOR-0.9.x-299bc7.svg
 [shield:support-kspi]: http://img.shields.io/badge/works%20with%20Interstellar-0.13-a62374.svg
-[shield:support-usi]:http://img.shields.io/badge/works%20with%20USI-0.30-34c566.svg
-[shield:support-karbonite]: http://img.shields.io/badge/works%20with%20Karbonite-0.6-ff8c00.svg
+[shield:support-usi]:http://img.shields.io/badge/works%20with%20USI-0.30.x-34c566.svg
+[shield:support-karbonite]: http://img.shields.io/badge/works%20with%20Karbonite-0.6.x-ff8c00.svg
 [shield:support-epl]: http://img.shields.io/badge/works%20with%20EPL-4.2.3-ff8c00.svg
-[shield:support-ctt]: http://img.shields.io/badge/works%20with%20CTT-1.1-blue.svg
-[shield:support-ccfg]: https://img.shields.io/badge/works%20with%20Contract%20Configurator-1.0.2-yellowgreen.svg
+[shield:support-ccfg]: https://img.shields.io/badge/works%20with%20Contract%20Configurator-1.x-yellowgreen.svg
 [shield:ckan]: https://img.shields.io/badge/CKAN-Indexed-brightgreen.svg
-[shield:support-mechjeb]: http://img.shields.io/badge/works%20with%20MechJeb-2.5-lightgrey.svg
+[shield:support-mechjeb]: http://img.shields.io/badge/works%20with%20MechJeb-2.5.1-lightgrey.svg
 
 [shield:gittip-tg-img]: http://img.shields.io/gittip/technogeeky.png
 [shield:gittip-tg]: https://www.gittip.com/technogeeky/
