@@ -8,33 +8,27 @@ namespace SCANsat
 {
 	public class ModuleSCANresourceScanner : SCANsat, IAnimatedModule
 	{
-		private List<ModuleOrbitalSurveyor> mSurvey;
-		private List<ModuleResourceScanner> mScanner;
+		//private List<ModuleOrbitalSurveyor> mSurvey;
+		//private List<ModuleResourceScanner> mScanner;
 		private ModuleAnimationGroup animGroup;
-		private bool activated = false;
 
 		public override void OnStart(PartModule.StartState state)
 		{
 			base.OnStart(state);
 
-			mSurvey = findSurvey();
-			mScanner = findScanner();
+			//mSurvey = findSurvey();
+			//mScanner = findScanner();
 			animGroup = findAnimator();
 
 			if (animGroup == null)
-			{
-				SCANUtil.SCANlog("No Anim Group Found");
 				this.isEnabled = true;
-			}
-			else
-				SCANUtil.SCANlog("Anim Group Found");
 
 			Actions["startScanAction"].active = false;
 			Actions["stopScanAction"].active = false;
 			Actions["toggleScanAction"].active = false;
-			Actions["startResourceScanAction"].guiName = "Start Action " + scanName;
-			Actions["stopResourceScanAction"].guiName = "Stop Action" + scanName;
-			Actions["toggleResourceScanAction"].guiName = "Toggle Action" + scanName;
+			Actions["startResourceScanAction"].guiName = "Start " + scanName;
+			Actions["stopResourceScanAction"].guiName = "Stop " + scanName;
+			Actions["toggleResourceScanAction"].guiName = "Toggle " + scanName;
 		}
 
 		public override string GetInfo()
@@ -64,6 +58,9 @@ namespace SCANsat
 		{
 			base.Events["startScan"].active = !scanning;
 			base.Events["stopScan"].active = scanning;
+			Actions["startResourceScanAction"].active = true;
+			Actions["stopResourceScanAction"].active = true;
+			Actions["toggleResourceScanAction"].active = true;
 		}
 
 		public override void OnUpdate()
@@ -82,6 +79,9 @@ namespace SCANsat
 			{
 				base.Events["startScan"].active = false;
 				base.Events["stopScan"].active = false;
+				Actions["startResourceScanAction"].active = false;
+				Actions["stopResourceScanAction"].active = false;
+				Actions["toggleResourceScanAction"].active = false;
 				if (scanning)
 					unregisterScanner();
 			}
@@ -110,11 +110,7 @@ namespace SCANsat
 			if (scanning)
 				stopScan();
 			else
-			{
-				if (animGroup != null && !animGroup.isDeployed)
-					animGroup.DeployModule();
 				startScan();
-			}
 		}
 
 		public void DisableModule()
