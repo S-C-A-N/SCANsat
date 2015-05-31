@@ -1219,10 +1219,7 @@ namespace SCANsat
 				sv.sensors.Remove(sensor);
 			}
 			if (sv.sensors.Count == 0)
-			{
 				knownVessels.Remove(v.id);
-				SCANUtil.SCANdebugLog("Unregister Vessel");
-			}
 		}
 
 		internal bool isVesselKnown(Guid id, SCANtype sensor)
