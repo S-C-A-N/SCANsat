@@ -4,7 +4,7 @@ Version 12.1 - 2015-5-30
 - Updated for MechJeb 2.5.1
 
 - Added SCANsat sensor type and color configs for He-3
-     - SCANtype = 512
+     - SCANsat sensortype = 512
 
 - Fix a bug while adding resource scanners in the editor
 - Add resource scanner action groups
