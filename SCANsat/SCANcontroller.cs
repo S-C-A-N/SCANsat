@@ -941,12 +941,12 @@ namespace SCANsat
 			if (!MapView.MapIsEnabled)
 				return;
 
-			Vessel v = FlightGlobals.ActiveVessel;
+			CelestialBody b = SCANUtil.getTargetBody(MapView.MapCamera.target);
 
-			if (v == null)
+			if (b == null)
 				return;
 
-			SCANdata d = getData(v.mainBody.name);
+			SCANdata d = getData(b.name);
 
 			if (d == null)
 				return;
@@ -956,7 +956,7 @@ namespace SCANsat
 			if (target == null)
 				return;
 
-			SCANuiUtil.drawTargetOverlay(v.mainBody, target.Latitude, target.Longitude, XKCDColors.DarkGreen);
+			SCANuiUtil.drawTargetOverlay(b, target.Latitude, target.Longitude, XKCDColors.DarkGreen);
 		}
 
 		private void removeVessel(Vessel v)
