@@ -107,6 +107,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 		internal static Texture2D SCAN_InstrumentIcon;
 		internal static Texture2D SCAN_SmallMapIcon;
 		internal static Texture2D SCAN_BigMapIcon;
+		internal static Texture2D SCAN_OverlayIcon;
 
 		//Zoom Window Textures
 		internal static Texture2D SCAN_ZoomOutIcon;
@@ -156,6 +157,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			SCAN_WaypointIcon = GameDatabase.Instance.GetTexture("SCANsat/Icons/SCAN_WayPointIcon", false);
 			SCAN_MechJebIcon = GameDatabase.Instance.GetTexture("SCANsat/Icons/SCAN_MechJebIcon", false);
 			SCAN_TargetIcon = GameDatabase.Instance.GetTexture("SCANsat/Icons/SCAN_TargetIcon", false);
+			SCAN_OverlayIcon = GameDatabase.Instance.GetTexture("SCANsat/Icons/SCAN_Overlay_Icon", false);
 		}
 
 		private static void initializeColors()
