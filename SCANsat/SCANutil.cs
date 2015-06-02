@@ -262,23 +262,31 @@ namespace SCANsat
 			return (lon + 360 + 180) % 360;
 		}
 
-		internal static double fixWaypointLatShift(double lat)
+		internal static Vector2d fixRetardCoordinates(Vector2d coords)
 		{
-			if (lat < -90)
+			if (coords.y < -90)
 			{
-				while (lat < -90)
-					lat += 90;
-				return -90 + Math.Abs(lat);
+				while (coords.y < -90)
+					coords.y += 90;
+				coords.y = -90 + Math.Abs(coords.y);
+				coords.x = fixLonShift(coords.x + 180);
+
+				return coords;
 			}
 
-			if (lat > 90)
+			if (coords.y > 90)
 			{
-				while (lat > 90)
-					lat -= 90;
-				return 90 - Math.Abs(lat);
+				while (coords.y > 90)
+					coords.y -= 90;
+				coords.y = 90 - Math.Abs(coords.y);
+				coords.x = fixLonShift(coords.x - 180);
+
+				return coords;
 			}
 
-			return lat;
+			coords.x = fixLonShift(coords.x);
+
+			return coords;
 		}
 
 		internal static double getElevation(CelestialBody body, double lon, double lat)
