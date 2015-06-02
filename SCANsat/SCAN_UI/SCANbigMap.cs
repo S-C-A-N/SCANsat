@@ -194,7 +194,7 @@ namespace SCANsat.SCAN_UI
 					mapDraw(id);	/* Draw the main map texture */
 				stopE();
 				growE();
-					fillS(160);
+					fillS(180);
 					growS();
 						mouseOver(id);		/* Handle all mouse-over info and zoom-map code */
 						legendBar(id);		/* Draw the mouseover info and legend bar along the bottom */
@@ -471,25 +471,32 @@ namespace SCANsat.SCAN_UI
 				SCANcontroller.controller.mainMap.Visible = !SCANcontroller.controller.mainMap.Visible;
 			}
 
-			s.x += 40;
+			s.x += 36;
 
 			if (GUI.Button(s, iconWithTT(SCANskins.SCAN_InstrumentIcon, "Instrument Window"), SCANskins.SCAN_windowButton))
 			{
 				SCANcontroller.controller.instrumentsWindow.Visible = !SCANcontroller.controller.instrumentsWindow.Visible;
 			}
 
-			s.x += 40;
+			s.x += 36;
 
 			if (GUI.Button(s, iconWithTT(SCANskins.SCAN_SettingsIcon, "Settings Menu"), SCANskins.SCAN_windowButton))
 			{
 				SCANcontroller.controller.settingsWindow.Visible = !SCANcontroller.controller.settingsWindow.Visible;
 			}
 
-			s.x += 40;
+			s.x += 36;
 
 			if (GUI.Button(s, iconWithTT(SCANskins.SCAN_ColorIcon, "Color Control"), SCANskins.SCAN_windowButton))
 			{
 				SCANcontroller.controller.colorManager.Visible = !SCANcontroller.controller.colorManager.Visible;
+			}
+
+			s.x += 36;
+
+			if (GUI.Button(s, iconWithTT(SCANskins.SCAN_OverlayIcon, "Overlay Control"), SCANskins.SCAN_windowButton))
+			{
+				SCANcontroller.controller.resourceOverlay.Visible = !SCANcontroller.controller.resourceOverlay.Visible;
 			}
 
 			s.x = WindowRect.width - 66;

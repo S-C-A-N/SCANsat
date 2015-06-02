@@ -165,6 +165,10 @@ namespace SCANsat.SCAN_UI
 			{
 				SCANcontroller.controller.colorManager.Visible = !SCANcontroller.controller.colorManager.Visible;
 			}
+			if (GUILayout.Button(iconWithTT(SCANskins.SCAN_OverlayIcon, "Overlay Contral"), SCANskins.SCAN_windowButton, GUILayout.Height(32), GUILayout.Width(32)))
+			{
+				SCANcontroller.controller.resourceOverlay.Visible = !SCANcontroller.controller.resourceOverlay.Visible;
+			}
 		}
 
 		//Draw the vessel location and alt info
