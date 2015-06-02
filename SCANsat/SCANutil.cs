@@ -262,6 +262,25 @@ namespace SCANsat
 			return (lon + 360 + 180) % 360;
 		}
 
+		internal static double fixWaypointLatShift(double lat)
+		{
+			if (lat < -90)
+			{
+				while (lat < -90)
+					lat += 90;
+				return -90 + Math.Abs(lat);
+			}
+
+			if (lat > 90)
+			{
+				while (lat > 90)
+					lat -= 90;
+				return 90 - Math.Abs(lat);
+			}
+
+			return lat;
+		}
+
 		internal static double getElevation(CelestialBody body, double lon, double lat)
 		{
 			if (body.pqsController == null) return 0;

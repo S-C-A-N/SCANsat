@@ -30,7 +30,7 @@ namespace SCANsat.SCAN_Data
 				param = p;
 				name = way.name;
 				longitude = SCANUtil.fixLonShift(way.longitude);
-				latitude = SCANUtil.fixLatShift(way.latitude);
+				latitude = SCANUtil.fixWaypointLatShift(way.latitude);
 				landingTarget = false;
 			}
 		}
@@ -45,7 +45,7 @@ namespace SCANsat.SCAN_Data
 				param = p;
 				name = way.name;
 				longitude = SCANUtil.fixLonShift(way.longitude);
-				latitude = SCANUtil.fixLatShift(way.latitude);
+				latitude = SCANUtil.fixWaypointLatShift(way.latitude);
 				landingTarget = false;
 			}
 		}
@@ -58,7 +58,7 @@ namespace SCANsat.SCAN_Data
 			param = null;
 			name = way.name;
 			longitude = SCANUtil.fixLonShift(way.longitude);
-			latitude = SCANUtil.fixLatShift(way.latitude);
+			latitude = SCANUtil.fixWaypointLatShift(way.latitude);
 			landingTarget = false;
 		}
 
