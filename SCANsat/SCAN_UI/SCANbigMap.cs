@@ -75,10 +75,28 @@ namespace SCANsat.SCAN_UI
 		{
 			//Initialize the map object
 			Visible = SCANcontroller.controller.bigMapVisible;
-			if (v == null)
-				v = FlightGlobals.ActiveVessel;
+			WindowRect.x = SCANcontroller.controller.map_x;
+			WindowRect.y = SCANcontroller.controller.map_y;
+			lastColor = currentColor = SCANcontroller.controller.colours == 0;
+			lastResource = SCANcontroller.controller.map_ResourceOverlay;
+			if (SCANconfigLoader.GlobalResource)
+				loadedResources = SCANcontroller.setLoadedResourceList();
+			TooltipsEnabled = SCANcontroller.controller.toolTips;
+
+			initializeMap();
+		}
+
+		private void initializeMap()
+		{
+			v = FlightGlobals.ActiveVessel;
 			if (b == null)
-				b = v.mainBody;
+			{
+				if (v == null)
+					b = FlightGlobals.Bodies[1];
+				else
+					b = v.mainBody;
+			}
+
 			if (bigmap == null)
 			{
 				bigmap = new SCANmap(b, true);
@@ -87,12 +105,7 @@ namespace SCANsat.SCAN_UI
 					SCANcontroller.controller.map_width += 1;
 				bigmap.setWidth(SCANcontroller.controller.map_width);
 			}
-			WindowRect.x = SCANcontroller.controller.map_x;
-			WindowRect.y = SCANcontroller.controller.map_y;
-			currentColor = SCANcontroller.controller.colours == 0;
-			lastColor = currentColor;
-			lastResource = SCANcontroller.controller.map_ResourceOverlay;
-			WindowCaption = string.Format("Map of {0}", b.theName);
+
 			data = SCANUtil.getData(b);
 			if (data == null)
 			{
@@ -100,17 +113,20 @@ namespace SCANsat.SCAN_UI
 				SCANcontroller.controller.addToBodyData(b, data);
 			}
 			bigmap.setBody(b);
-			if (SCANconfigLoader.GlobalResource)
-			{
-				loadedResources = SCANcontroller.setLoadedResourceList();
-			}
-			TooltipsEnabled = SCANcontroller.controller.toolTips;
+
+			WindowCaption = string.Format("Map of {0}", b.theName);
 		}
 
 		protected override void OnDestroy()
 		{
 			if (spotMap != null)
 				Destroy(spotMap);
+		}
+
+		protected override void Update()
+		{
+			if (FlightGlobals.ready)
+				v = FlightGlobals.ActiveVessel;
 		}
 
 		//Properties used to sync with color selection window
