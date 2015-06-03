@@ -1558,7 +1558,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			}
 		}
 
-		internal static void interpolate(float[,] v, int yStart, int height, int width, int x, int y, int step, System.Random r)
+		internal static void interpolate(float[,] v, int yStart, int height, int width, int x, int y, int step, System.Random r, bool edges)
 		{
 			for (int j = yStart + y; j < height + y + yStart; j += 2 * step)
 			{
@@ -1581,7 +1581,9 @@ namespace SCANsat.SCAN_UI.UI_Framework
 					float avgX = 0;
 					float avgY = 0;
 
-					float lerp = getLerp(r, step * 2);
+					float lerp = 0.5f;
+					if (!edges)
+						lerp = getLerp(r, step * 2);
 
 					if (x == y)
 					{
@@ -1646,11 +1648,9 @@ namespace SCANsat.SCAN_UI.UI_Framework
 					Abundance = 0;
 			}
 			else
-				Abundance = -1;
-
-			if (Abundance < 0)
 				return BaseColor;
-			else if (Abundance == 0)
+
+			if (Abundance == 0)
 				return palette.lerp(BaseColor, palette.grey, 0.3f);
 			else
 				return palette.lerp(palette.lerp(Resource.MinColor, Resource.MaxColor, Abundance / (Resource.CurrentBody.MaxValue - Resource.CurrentBody.MinValue)), BaseColor, Resource.Transparency / 100f);
@@ -1680,11 +1680,9 @@ namespace SCANsat.SCAN_UI.UI_Framework
 					Abundance = 0;
 			}
 			else
-				Abundance = -1;
-
-			if (Abundance < 0)
 				return BaseColor;
-			else if (Abundance == 0)
+
+			if (Abundance == 0)
 				return palette.lerp(BaseColor, palette.Grey, Transparency);
 			else
 				return palette.lerp(palette.lerp(Resource.MinColor32, Resource.MaxColor32, Abundance / (Resource.CurrentBody.MaxValue - Resource.CurrentBody.MinValue)), BaseColor, Resource.Transparency / 100f);
