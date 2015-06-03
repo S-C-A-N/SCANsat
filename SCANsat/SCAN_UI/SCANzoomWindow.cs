@@ -173,8 +173,6 @@ namespace SCANsat.SCAN_UI
 
 		private void checkForScanners()
 		{
-			//DateTime duration = DateTime.Now;
-
 			narrowBand = false;
 			foreach (Vessel vessel in FlightGlobals.Vessels)
 			{
@@ -261,29 +259,16 @@ namespace SCANsat.SCAN_UI
 
 			if (!narrowBand)
 				spotmap.Resource = null;
-
-			//SCANUtil.SCANdebugLog("Loop Time: {0}", duration - DateTime.Now);
 		}
-
-		private int timer;
 
 		protected override void Update()
 		{
 			if (Visible)
 			{
-				if (SCANcontroller.controller.needsNarrowBand && SCANconfigLoader.GlobalResource)
-				{
-					if (SCANcontroller.controller.map_ResourceOverlay && timer >= 60)
-						checkForScanners();
-				}
-				else
+				if (!SCANcontroller.controller.needsNarrowBand && SCANconfigLoader.GlobalResource)
 					narrowBand = true;
 
-				timer++;
-				if (timer > 60)
-					timer = 0;
-
-				if (HighLogic.LoadedSceneIsFlight)
+				if (HighLogic.LoadedSceneIsFlight && FlightGlobals.ready)
 					v = FlightGlobals.ActiveVessel;
 				else if (HighLogic.LoadedScene == GameScenes.TRACKSTATION)
 				{
