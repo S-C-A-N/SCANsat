@@ -158,10 +158,16 @@ namespace SCANsat.SCAN_UI.UI_Framework
 
 				if (SCANcontroller.controller.map_ResourceOverlay && SCANconfigLoader.GlobalResource && mapObj.Resource != null) //Adds selected resource amount to big map legend
 				{
-					if (SCANUtil.isCovered(lon, lat, data, mapObj.Resource.SType))
+					string label = "";
+					if (SCANUtil.isCovered(lon, lat, data, SCANtype.FuzzyResources))
+					{
+						int amount = Mathf.RoundToInt(((float)SCANUtil.ResourceOverlay(lat, lon, mapObj.Resource.Name, mapObj.Body)) * 100f);
+						label = amount.ToString() + "%";
+						info += palette.colored(mapObj.Resource.MaxColor, mapObj.Resource.Name + ": " + label + " ");
+					}
+					else if (SCANUtil.isCovered(lon, lat, data, mapObj.Resource.SType))
 					{
 						double amount = SCANUtil.ResourceOverlay(lat, lon, mapObj.Resource.Name, mapObj.Body);
-						string label;
 						if (amount < 0)
 							label = "Unknown";
 						else
@@ -236,10 +242,16 @@ namespace SCANsat.SCAN_UI.UI_Framework
 
 				if (SCANcontroller.controller.map_ResourceOverlay && SCANconfigLoader.GlobalResource && mapObj.Resource != null) //Adds selected resource amount to big map legend
 				{
-					if (SCANUtil.isCovered(lon, lat, data, mapObj.Resource.SType))
+					string label = "";
+					if (SCANUtil.isCovered(lon, lat, data, SCANtype.FuzzyResources))
+					{
+						int amount = Mathf.RoundToInt(((float)SCANUtil.ResourceOverlay(lat, lon, mapObj.Resource.Name, mapObj.Body)) * 100f);
+						label = amount.ToString() + "%";
+						info += palette.colored(mapObj.Resource.MaxColor, mapObj.Resource.Name + ": " + label + " ");
+					}
+					else if (SCANUtil.isCovered(lon, lat, data, mapObj.Resource.SType))
 					{
 						double amount = SCANUtil.ResourceOverlay(lat, lon, mapObj.Resource.Name, mapObj.Body);
-						string label;
 						if (amount < 0)
 							label = "Unknown";
 						else
@@ -1548,8 +1560,6 @@ namespace SCANsat.SCAN_UI.UI_Framework
 
 		internal static void interpolate(float[,] v, int yStart, int height, int width, int x, int y, int step, System.Random r)
 		{
-			int mapHeight = width / 2;
-
 			for (int j = yStart + y; j < height + y + yStart; j += 2 * step)
 			{
 				for (int i = x; i < width + x; i += 2 * step)
@@ -1565,8 +1575,8 @@ namespace SCANsat.SCAN_UI.UI_Framework
 					if (ypos1 < 0)
 						ypos1 = 0;
 					int ypos2 = j + step;
-					if (ypos2 >= mapHeight)
-						ypos2 = mapHeight - 1;
+					if (ypos2 >= height)
+						ypos2 = height - 1;
 
 					float avgX = 0;
 					float avgY = 0;
