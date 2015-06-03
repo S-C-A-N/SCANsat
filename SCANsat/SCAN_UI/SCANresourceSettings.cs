@@ -150,7 +150,7 @@ namespace SCANsat.SCAN_UI
 			stopE();
 			if (popup)
 			{
-				GUILayout.Label("Reset Resource Coverage", SCANskins.SCAN_button);
+				GUILayout.Label("Reset SCANsat Resource Coverage", SCANskins.SCAN_button);
 				if (SCANcontroller.controller.disableStockResource)
 				{
 					fillS(8);
@@ -159,7 +159,7 @@ namespace SCANsat.SCAN_UI
 			}
 			else
 			{
-				if (GUILayout.Button("Reset Resource Coverage"))
+				if (GUILayout.Button("Reset SCANsat Resource Coverage"))
 				{
 					popup = !popup;
 					warningResource = !warningResource;
@@ -228,7 +228,7 @@ namespace SCANsat.SCAN_UI
 					warningRect = new Rect(WindowRect.width - (WindowRect.width / 2) - 150, WindowRect.height - 125, 300, 90);
 					GUI.Box(warningRect, "");
 					Rect r = new Rect(warningRect.x + 10, warningRect.y + 5, 280, 40);
-					GUI.Label(r, "Erase resource data for " + thisBody.theName + "?", SCANskins.SCAN_headlineSmall);
+					GUI.Label(r, "Erase SCANsat resource data for " + thisBody.theName + "?", SCANskins.SCAN_headlineSmall);
 					r.x += 90;
 					r.y += 45;
 					r.width = 80;
@@ -265,13 +265,7 @@ namespace SCANsat.SCAN_UI
 						popup = false;
 						warningStockResource = false;
 						var resources = ResourceScenario.Instance.gameSettings.GetPlanetScanInfo();
-						for (int i = 0; i < resources.Count; i++)
-						{
-							if (resources[i].PlanetId == thisBody.flightGlobalsIndex)
-								SCANUtil.SCANlog("Removing Stock Resource Value");
-						}
 						resources.RemoveAll(a => a.PlanetId == thisBody.flightGlobalsIndex);
-
 					}
 				}
 				else
