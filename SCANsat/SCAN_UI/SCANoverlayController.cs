@@ -91,6 +91,7 @@ namespace SCANsat.SCAN_UI
 			drawResourceList(id);
 			overlayToggle(id);
 			overlayOptions(id);
+			resourceSettings(id);
 		}
 
 		protected override void DrawWindowPost(int id)
@@ -157,8 +158,6 @@ namespace SCANsat.SCAN_UI
 						oldOverlay = drawOverlay = true;
 						refreshMap();
 					}
-
-
 				}
 			}
 
@@ -218,6 +217,15 @@ namespace SCANsat.SCAN_UI
 					refreshMap();
 				}
 				stopE();
+			}
+		}
+
+		private void resourceSettings(int id)
+		{
+			fillS();
+			if (GUILayout.Button("Resource Settings"))
+			{
+				SCANcontroller.controller.resourceSettings.Visible = !SCANcontroller.controller.resourceSettings.Visible;
 			}
 		}
 
