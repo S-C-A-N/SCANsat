@@ -292,6 +292,7 @@ namespace SCANsat.SCAN_Map
 		private int resourceMapWidth;
 		private int resourceMapHeight;
 		private double resourceMapScale;
+		private bool randomEdges = true;
 		private double[] biomeIndex;
 		private Color[] stockBiomeColor;
 
@@ -302,18 +303,19 @@ namespace SCANsat.SCAN_Map
 			if (w > 360 * 4)
 				w = 360 * 4;
 			mapwidth = w;
-			pix = new Color[w];
-			biomeIndex = new double[w];
-			stockBiomeColor = new Color[w];
-			resourceMapWidth = w;
-			resourceMapHeight = h;
-			resourceCache = new float[w, h];
-			resourceInterpolation = 2;
-			resourceMapScale = resourceMapWidth / 360;
+			pix = new Color[mapwidth];
+			biomeIndex = new double[mapwidth];
+			stockBiomeColor = new Color[mapwidth];
 			mapscale = mapwidth / 360f;
 			if (h <= 0)
 				h = (int)(180 * mapscale);
 			mapheight = h;
+			resourceMapWidth = mapwidth;
+			resourceMapHeight = mapheight;
+			resourceCache = new float[resourceMapWidth, resourceMapHeight];
+			resourceInterpolation = 2;
+			resourceMapScale = resourceMapWidth / 360;
+			randomEdges = false;
 			if (map != null)
 			{
 				if (mapwidth != map.width || mapheight != map.height)
@@ -341,6 +343,8 @@ namespace SCANsat.SCAN_Map
 			resourceMapHeight = resourceMapWidth / 2;
 			resourceInterpolation = 8;
 			resourceMapScale = resourceMapWidth / 360f;
+			resourceCache = new float[resourceMapWidth, resourceMapHeight];
+			randomEdges = true;
 			mapscale = mapwidth / 360f;
 			mapheight = (int)(w / 2);
 			/* big map caching */
@@ -493,7 +497,13 @@ namespace SCANsat.SCAN_Map
 
 		public void resetResourceMap()
 		{
-			resourceCache = new float[resourceMapWidth, resourceMapHeight];
+			for (int i = 0; i < resourceMapWidth; i++ )
+			{
+				for (int j = 0; j < resourceMapHeight; j++)
+				{
+					resourceCache[i, j] = 0;
+				}
+			}
 		}
 
 		/* MAP: export: PNG file */
@@ -605,7 +615,7 @@ namespace SCANsat.SCAN_Map
 				if (mapstep < 0)
 					continue;
 
-				if (mType != mapType.Biome && biomeMap)
+				if (mType != mapType.Biome || !biomeMap)
 					continue;
 
 				double lat = (mapstep * 1.0f / mapscale) - 90f + lat_offset;
@@ -636,9 +646,9 @@ namespace SCANsat.SCAN_Map
 				{
 					for (int i = resourceInterpolation / 2; i >= 1; i /= 2)
 					{
-						SCANuiUtil.interpolate(resourceCache, 0, resourceMapHeight, resourceMapWidth, i, i, i, r);
-						SCANuiUtil.interpolate(resourceCache, 0, resourceMapHeight, resourceMapWidth, 0, i, i, r);
-						SCANuiUtil.interpolate(resourceCache, 0, resourceMapHeight, resourceMapWidth, i, 0, i, r);
+						SCANuiUtil.interpolate(resourceCache, 0, resourceMapHeight, resourceMapWidth, i, i, i, r, randomEdges);
+						SCANuiUtil.interpolate(resourceCache, 0, resourceMapHeight, resourceMapWidth, 0, i, i, r, randomEdges);
+						SCANuiUtil.interpolate(resourceCache, 0, resourceMapHeight, resourceMapWidth, i, 0, i, r, randomEdges);
 					}
 				}
 
@@ -647,55 +657,6 @@ namespace SCANsat.SCAN_Map
 				mapstep++;
 				return map;
 			}
-
-			//if (SCANcontroller.controller.map_ResourceOverlay && SCANconfigLoader.GlobalResource && resource != null)
-			//{
-			//	resourceOn = true;
-			//	if (mapstep < resourceMapSize / (resourceInterpolation * 8))
-			//	{
-			//		for (int i = 0; i < resourceMapSize; i++)
-			//		{
-			//			if (i % resourceInterpolation != 0)
-			//				continue;
-
-			//			double resourceLon = (i * 1.0f / mapscale) - 180f + lon_offset;
-			//			int ystep = mapstep * resourceInterpolation * 4;
-
-			//			for (int j = ystep; j < (4 * resourceInterpolation) + ystep; j++)
-			//			{
-			//				if (j % resourceInterpolation != 0)
-			//					continue;
-
-			//				double resourceLat = (j * 1.0f / mapscale) - 90f + lat_offset;
-
-			//				resourceCache[i, j] = SCANUtil.ResourceOverlay(resourceLat, resourceLon, resource.Name, body) * 100;
-			//			}
-			//		}
-			//	}
-
-			//	if (resourceStep < (resourceMapSize / 2))
-			//	{
-			//		bool skip = false;
-			//		for (int i = resourceInterpolation / 2; i >= 1; i /= 2)
-			//		{
-			//			if (resourceStep < resourceInterpolation / 2 || resourceStep >= ((resourceMapSize / 2) - (resourceInterpolation / 2)))
-			//			{
-			//				SCANuiUtil.interpolate(resourceCache, resourceStep, resourceMapSize, i, i, r);
-			//			}
-			//			else
-			//			{
-			//				SCANuiUtil.interpolate(resourceCache, resourceStep, 4, resourceMapSize, i, i, i, r);
-			//				SCANuiUtil.interpolate(resourceCache, resourceStep, 4, resourceMapSize, 0, i, i, r);
-			//				SCANuiUtil.interpolate(resourceCache, resourceStep, 4, resourceMapSize, i, 0, i, r);
-			//				skip = true;
-			//			}
-			//		}
-			//		if (skip)
-			//			resourceStep += 4;
-			//		else
-			//			resourceStep++;
-			//	}
-			//}
 
 			for (int i = 0; i < map.width; i++)
 			{
