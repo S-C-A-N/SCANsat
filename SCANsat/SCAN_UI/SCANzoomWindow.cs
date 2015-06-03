@@ -316,6 +316,11 @@ namespace SCANsat.SCAN_UI
 					else if (resizeH > WindowSize_Max.y)
 						resizeH = WindowSize_Max.y;
 
+					if ((int)resizeW % 2 != 0)
+						resizeW += 1;
+					if ((int)resizeH % 2 != 0)
+						resizeH += 1;
+
 					spotmap.setSize((int)resizeW, (int)resizeH);
 					spotmap.MapScale = scale;
 					spotmap.centerAround(spotmap.CenteredLong, spotmap.CenteredLat);
