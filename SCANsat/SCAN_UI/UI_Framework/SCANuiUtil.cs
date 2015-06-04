@@ -161,13 +161,13 @@ namespace SCANsat.SCAN_UI.UI_Framework
 					string label = "";
 					if (SCANUtil.isCovered(lon, lat, data, SCANtype.FuzzyResources))
 					{
-						int amount = Mathf.RoundToInt(((float)SCANUtil.ResourceOverlay(lat, lon, mapObj.Resource.Name, mapObj.Body)) * 100f);
+						int amount = Mathf.RoundToInt(((float)SCANUtil.ResourceOverlay(lat, lon, mapObj.Resource.Name, mapObj.Body, SCANcontroller.controller.resourceBiomeLock)) * 100f);
 						label = amount.ToString() + "%";
 						info += palette.colored(mapObj.Resource.MaxColor, mapObj.Resource.Name + ": " + label + " ");
 					}
 					else if (SCANUtil.isCovered(lon, lat, data, mapObj.Resource.SType))
 					{
-						double amount = SCANUtil.ResourceOverlay(lat, lon, mapObj.Resource.Name, mapObj.Body);
+						double amount = SCANUtil.ResourceOverlay(lat, lon, mapObj.Resource.Name, mapObj.Body, SCANcontroller.controller.resourceBiomeLock);
 						if (amount < 0)
 							label = "Unknown";
 						else
@@ -245,13 +245,13 @@ namespace SCANsat.SCAN_UI.UI_Framework
 					string label = "";
 					if (SCANUtil.isCovered(lon, lat, data, SCANtype.FuzzyResources))
 					{
-						int amount = Mathf.RoundToInt(((float)SCANUtil.ResourceOverlay(lat, lon, mapObj.Resource.Name, mapObj.Body)) * 100f);
+						int amount = Mathf.RoundToInt(((float)SCANUtil.ResourceOverlay(lat, lon, mapObj.Resource.Name, mapObj.Body, SCANcontroller.controller.resourceBiomeLock)) * 100f);
 						label = amount.ToString() + "%";
 						info += palette.colored(mapObj.Resource.MaxColor, mapObj.Resource.Name + ": " + label + " ");
 					}
 					else if (SCANUtil.isCovered(lon, lat, data, mapObj.Resource.SType))
 					{
-						double amount = SCANUtil.ResourceOverlay(lat, lon, mapObj.Resource.Name, mapObj.Body);
+						double amount = SCANUtil.ResourceOverlay(lat, lon, mapObj.Resource.Name, mapObj.Body, SCANcontroller.controller.resourceBiomeLock);
 						if (amount < 0)
 							label = "Unknown";
 						else
@@ -1395,7 +1395,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 					double lon = fixLon(i / scale);
 					double lat = (j / scale) - 90;
 
-					abundanceValues[i, j] = SCANUtil.ResourceOverlay(lat, lon, resource.Name, data.Body) * 100;
+					abundanceValues[i, j] = SCANUtil.ResourceOverlay(lat, lon, resource.Name, data.Body, SCANcontroller.controller.resourceBiomeLock) * 100;
 
 					pix[j * width + i] = resourceToColor32(palette.Clear, resource, abundanceValues[i, j], data, lon, lat, transparency);
 				}

@@ -585,7 +585,7 @@ namespace SCANsat.SCAN_Map
 							double rLon = (i * 1.0f / resourceMapScale) - 180f + lon_offset;
 							double rLat = (j * 1.0f / resourceMapScale) - 90f + lat_offset;
 
-							resourceCache[i, j] = SCANUtil.ResourceOverlay(rLat, rLon, resource.Name, body) * 100f;
+							resourceCache[i, j] = SCANUtil.ResourceOverlay(rLat, rLon, resource.Name, body, SCANcontroller.controller.resourceBiomeLock) * 100f;
 						}
 					}
 					mapstep++;

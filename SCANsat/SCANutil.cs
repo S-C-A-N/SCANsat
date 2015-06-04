@@ -318,7 +318,7 @@ namespace SCANsat
 			return ret;
 		}
 
-		internal static float ResourceOverlay(double lat, double lon, string name, CelestialBody body)
+		internal static float ResourceOverlay(double lat, double lon, string name, CelestialBody body, bool biomeLock)
 		{
 			float amount = 0f;
 			var aRequest = new AbundanceRequest
@@ -329,7 +329,7 @@ namespace SCANsat
 				ResourceName = name,
 				ResourceType = HarvestTypes.Planetary,
 				Altitude = 0,
-				CheckForLock = SCANcontroller.controller.resourceBiomeLock,
+				CheckForLock = biomeLock,
 				BiomeName = getBiomeName(body, lon, lat),
 				ExcludeVariance = false,
 			};
