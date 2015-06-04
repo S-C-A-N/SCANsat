@@ -970,7 +970,7 @@ namespace SCANsat
 
 		private void addVessel(Vessel v)
 		{
-			foreach (SCANsat s in v.FindPartModulesImplementing<SCANsat>())
+			foreach (SCANsat.SCAN_PartModules.SCANsat s in v.FindPartModulesImplementing<SCANsat.SCAN_PartModules.SCANsat>())
 			{
 				if (s.scanningNow())
 					registerSensor(v.id, (SCANtype)s.sensorType, s.fov, s.min_alt, s.max_alt, s.best_alt);
