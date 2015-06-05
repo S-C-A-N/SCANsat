@@ -181,12 +181,14 @@ namespace SCANsat.SCAN_UI
 			growE();
 			GUILayout.Label("Interpolation:", SCANskins.SCAN_labelSmallLeft);
 
+			fillS();
+
 			if (GUILayout.Button("-", SCANskins.SCAN_buttonSmall, GUILayout.Width(15)))
 			{
 				interpolationScale = Math.Max(2, interpolationScale / 2);
 				refreshMap();
 			}
-			GUILayout.Label(interpolationScale.ToString(), SCANskins.SCAN_labelSmall);
+			GUILayout.Label(interpolationScale.ToString(), SCANskins.SCAN_labelSmall, GUILayout.Width(20));
 			if (GUILayout.Button("+", SCANskins.SCAN_buttonSmall, GUILayout.Width(15)))
 			{
 				interpolationScale = Math.Min(32, interpolationScale * 2);
@@ -197,12 +199,14 @@ namespace SCANsat.SCAN_UI
 			growE();
 			GUILayout.Label("Map Height:", SCANskins.SCAN_labelSmallLeft);
 
+			fillS();
+
 			if (GUILayout.Button("-", SCANskins.SCAN_buttonSmall, GUILayout.Width(15)))
 			{
 				mapHeight = Math.Max(64, mapHeight / 2);
 				refreshMap();
 			}
-			GUILayout.Label(mapHeight.ToString(), SCANskins.SCAN_labelSmall);
+			GUILayout.Label(mapHeight.ToString(), SCANskins.SCAN_labelSmall, GUILayout.Width(40));
 			if (GUILayout.Button("+", SCANskins.SCAN_buttonSmall, GUILayout.Width(15)))
 			{
 				mapHeight = Math.Min(1024, mapHeight * 2);

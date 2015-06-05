@@ -205,13 +205,13 @@ namespace SCANsat.SCAN_UI
 				growE();
 				GUILayout.Label("Coverage Transparency:", SCANskins.SCAN_labelSmallLeft);
 
-				if (GUILayout.Button("-", SCANskins.SCAN_buttonSmall, GUILayout.Width(15)))
+				if (GUILayout.Button("-", SCANskins.SCAN_buttonSmall, GUILayout.Width(10)))
 				{
 					transparency = Mathf.Max(0f, transparency - 0.1f);
 					refreshMap();
 				}
-				GUILayout.Label(transparency.ToString("P0"), SCANskins.SCAN_labelSmall);
-				if (GUILayout.Button("+", SCANskins.SCAN_buttonSmall, GUILayout.Width(15)))
+				GUILayout.Label(transparency.ToString("P0"), SCANskins.SCAN_labelSmall, GUILayout.Width(30));
+				if (GUILayout.Button("+", SCANskins.SCAN_buttonSmall, GUILayout.Width(10)))
 				{
 					transparency = Mathf.Min(1f, transparency + 0.1f);
 					refreshMap();
