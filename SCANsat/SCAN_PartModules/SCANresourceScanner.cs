@@ -23,6 +23,7 @@ namespace SCANsat.SCAN_PartModules
 		private List<ModuleOrbitalScanner> mScanner;
 		private ModuleAnimationGroup animGroup;
 		private bool activated;
+		private bool forceStart;
 
 		public override void OnStart(PartModule.StartState state)
 		{
@@ -45,20 +46,9 @@ namespace SCANsat.SCAN_PartModules
 			if (animGroup == null)
 				activated = true;
 
-			if (SCANcontroller.controller.disableStockResource)
-			{
-				if (mSurvey != null)
-				{
-					foreach (ModuleOrbitalSurveyor m in mSurvey)
-						m.DisableModule();
-				}
+			forceStart = true;
 
-				if (mScanner != null)
-				{
-					foreach (ModuleOrbitalScanner m in mScanner)
-						m.DisableModule();
-				}
-			}
+			SCANUtil.SCANlog("Starting resource scanner");
 		}
 
 		public override string GetInfo()
@@ -108,6 +98,25 @@ namespace SCANsat.SCAN_PartModules
 
 			if (!FlightGlobals.ready)
 				return;
+
+			if (forceStart && SCANcontroller.controller != null)
+			{
+				if (SCANcontroller.controller.disableStockResource)
+				{
+					if (mSurvey != null)
+					{
+						foreach (ModuleOrbitalSurveyor m in mSurvey)
+							m.DisableModule();
+					}
+
+					if (mScanner != null)
+					{
+						foreach (ModuleOrbitalScanner m in mScanner)
+							m.DisableModule();
+					}
+				}
+				forceStart = false;
+			}
 
 			if (SCANcontroller.controller == null)
 				return;
@@ -164,7 +173,7 @@ namespace SCANsat.SCAN_PartModules
 			if (scanning)
 				unregisterScanner();
 
-			if (SCANcontroller.controller.disableStockResource)
+			if (SCANcontroller.controller != null && SCANcontroller.controller.disableStockResource)
 			{
 				if (mSurvey != null)
 				{
@@ -183,7 +192,7 @@ namespace SCANsat.SCAN_PartModules
 		public void EnableModule()
 		{
 			activated = true;
-			if (SCANcontroller.controller.disableStockResource)
+			if (SCANcontroller.controller != null && SCANcontroller.controller.disableStockResource)
 			{
 				if (mSurvey != null)
 				{
