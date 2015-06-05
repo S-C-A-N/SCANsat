@@ -68,13 +68,13 @@ namespace SCANsat.SCAN_PartModules
 			Fields["abundanceDisplay"].guiActive = true;
 
 			if (tooHigh)
-				abundanceDisplay = string.Format("{0}: Too High", ResourceName);
+				abundanceDisplay = string.Format("{0}[Surf]: Too High", ResourceName);
 			else if (abundanceValue < 0)
-				abundanceDisplay = string.Format("{0}: No Data", ResourceName);
+				abundanceDisplay = string.Format("{0}[Surf]: No Data", ResourceName);
 			else if (fuzzy)
-				abundanceDisplay = string.Format("{0}: {1:P0}", ResourceName, abundanceValue);
+				abundanceDisplay = string.Format("{0}[Surf]: {1:P0}", ResourceName, abundanceValue);
 			else
-				abundanceDisplay = string.Format("{0}: {1:P2}", ResourceName, abundanceValue);
+				abundanceDisplay = string.Format("{0}[Surf]: {1:P2}", ResourceName, abundanceValue);
 		}
 
 		public override void OnFixedUpdate()
