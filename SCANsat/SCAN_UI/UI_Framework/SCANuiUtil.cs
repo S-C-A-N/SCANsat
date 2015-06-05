@@ -159,13 +159,8 @@ namespace SCANsat.SCAN_UI.UI_Framework
 				if (SCANcontroller.controller.map_ResourceOverlay && SCANconfigLoader.GlobalResource && mapObj.Resource != null) //Adds selected resource amount to big map legend
 				{
 					string label = "";
-					if (SCANUtil.isCovered(lon, lat, data, SCANtype.FuzzyResources))
-					{
-						int amount = Mathf.RoundToInt(((float)SCANUtil.ResourceOverlay(lat, lon, mapObj.Resource.Name, mapObj.Body, SCANcontroller.controller.resourceBiomeLock)) * 100f);
-						label = amount.ToString() + "%";
-						info += palette.colored(mapObj.Resource.MaxColor, mapObj.Resource.Name + ": " + label + " ");
-					}
-					else if (SCANUtil.isCovered(lon, lat, data, mapObj.Resource.SType))
+
+					if (SCANUtil.isCovered(lon, lat, data, mapObj.Resource.SType))
 					{
 						double amount = SCANUtil.ResourceOverlay(lat, lon, mapObj.Resource.Name, mapObj.Body, SCANcontroller.controller.resourceBiomeLock);
 						if (amount < 0)
@@ -176,6 +171,12 @@ namespace SCANsat.SCAN_UI.UI_Framework
 								amount = 1;
 							label = amount.ToString("P2");
 						}
+						info += palette.colored(mapObj.Resource.MaxColor, mapObj.Resource.Name + ": " + label + " ");
+					}
+					else if (SCANUtil.isCovered(lon, lat, data, SCANtype.FuzzyResources))
+					{
+						int amount = Mathf.RoundToInt(((float)SCANUtil.ResourceOverlay(lat, lon, mapObj.Resource.Name, mapObj.Body, SCANcontroller.controller.resourceBiomeLock)) * 100f);
+						label = amount.ToString() + "%";
 						info += palette.colored(mapObj.Resource.MaxColor, mapObj.Resource.Name + ": " + label + " ");
 					}
 				}
@@ -243,13 +244,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 				if (SCANcontroller.controller.map_ResourceOverlay && SCANconfigLoader.GlobalResource && mapObj.Resource != null) //Adds selected resource amount to big map legend
 				{
 					string label = "";
-					if (SCANUtil.isCovered(lon, lat, data, SCANtype.FuzzyResources))
-					{
-						int amount = Mathf.RoundToInt(((float)SCANUtil.ResourceOverlay(lat, lon, mapObj.Resource.Name, mapObj.Body, SCANcontroller.controller.resourceBiomeLock)) * 100f);
-						label = amount.ToString() + "%";
-						info += palette.colored(mapObj.Resource.MaxColor, mapObj.Resource.Name + ": " + label + " ");
-					}
-					else if (SCANUtil.isCovered(lon, lat, data, mapObj.Resource.SType))
+					if (SCANUtil.isCovered(lon, lat, data, mapObj.Resource.SType))
 					{
 						double amount = SCANUtil.ResourceOverlay(lat, lon, mapObj.Resource.Name, mapObj.Body, SCANcontroller.controller.resourceBiomeLock);
 						if (amount < 0)
@@ -260,6 +255,12 @@ namespace SCANsat.SCAN_UI.UI_Framework
 								amount = 1;
 							label = amount.ToString("P2");
 						}
+						info += palette.colored(mapObj.Resource.MaxColor, mapObj.Resource.Name + ": " + label + " ");
+					}
+					else if (SCANUtil.isCovered(lon, lat, data, SCANtype.FuzzyResources))
+					{
+						int amount = Mathf.RoundToInt(((float)SCANUtil.ResourceOverlay(lat, lon, mapObj.Resource.Name, mapObj.Body, SCANcontroller.controller.resourceBiomeLock)) * 100f);
+						label = amount.ToString() + "%";
 						info += palette.colored(mapObj.Resource.MaxColor, mapObj.Resource.Name + ": " + label + " ");
 					}
 				}
