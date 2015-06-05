@@ -16,6 +16,7 @@ namespace SCANsat.SCAN_PartModules
 		private CelestialBody body;
 		private bool tooHigh;
 		private bool fuzzy;
+		private bool forceStart;
 
 		public override void OnStart(PartModule.StartState state)
 		{
@@ -25,18 +26,13 @@ namespace SCANsat.SCAN_PartModules
 			GameEvents.onVesselSOIChanged.Add(onSOIChange);
 
 			this.enabled = true;
+			forceStart = true;
+
+			SCANUtil.SCANlog("Resource Display Module [{0}] Starting...", ResourceName);
 
 			stockScanners = findScanners();
 
 			setupFields(stockScanners.FirstOrDefault());
-
-			if (stockScanners != null && SCANcontroller.controller.disableStockResource)
-			{
-				foreach (ModuleResourceScanner m in stockScanners)
-				{
-					m.DisableModule();
-				}
-			}
 
 			body = FlightGlobals.currentMainBody;
 			refreshAbundance(body.flightGlobalsIndex);
@@ -51,6 +47,7 @@ namespace SCANsat.SCAN_PartModules
 		{
 			if (m != null)
 			{
+				SCANUtil.SCANlog("Resource Display Module set to Max Alt: {0} ; Unlock: {1}", m.MaxAbundanceAltitude, m.RequiresUnlock);
 				MaxAbundanceAltitude = m.MaxAbundanceAltitude;
 				RequiresUnlock = m.RequiresUnlock;
 			}
@@ -59,6 +56,8 @@ namespace SCANsat.SCAN_PartModules
 				MaxAbundanceAltitude = 250000;
 				RequiresUnlock = true;
 			}
+
+			Fields["abundanceDisplay"].guiName = string.Format("{0}[Surf]: ", ResourceName);
 		}
 
 		private void OnDestroy()
@@ -68,25 +67,37 @@ namespace SCANsat.SCAN_PartModules
 
 		public override void OnUpdate()
 		{
+			SCANUtil.SCANlog("Updating Resource Module...");
 			if (!HighLogic.LoadedSceneIsFlight || !FlightGlobals.ready)
 				return;
-
+			SCANUtil.SCANlog("Scene Ready...");
+			if (forceStart && SCANcontroller.controller != null)
+			{
+				if (stockScanners != null && SCANcontroller.controller.disableStockResource)
+				{
+					foreach (ModuleResourceScanner m in stockScanners)
+					{
+						m.DisableModule();
+					}
+				}
+			}
+			SCANUtil.SCANlog("Checking for stock resource options...");
 			if (!SCANcontroller.controller.disableStockResource)
 			{
 				Fields["abundanceDisplay"].guiActive = false;
 				return;
 			}
-
+			SCANUtil.SCANlog("Setting SCAN Resource Display Active");
 			Fields["abundanceDisplay"].guiActive = true;
 
 			if (tooHigh)
 			{
-				abundanceDisplay = string.Format("{0}[Surf]: Too High", ResourceName);
+				abundanceDisplay = "Too High";
 				return;
 			}
 			else if (abundanceValue < 0)
 			{
-				abundanceDisplay = string.Format("{0}[Surf]: No Data", ResourceName);
+				abundanceDisplay = "No Data";
 				return;
 			}
 
@@ -98,17 +109,17 @@ namespace SCANsat.SCAN_PartModules
 			if (checkBiome(biome) || !SCANcontroller.controller.resourceBiomeLock)
 			{
 				if (fuzzy)
-					abundanceDisplay = string.Format("{0}[Surf]: {1:P0}", ResourceName, abundanceValue);
+					abundanceDisplay = abundanceValue.ToString("P0");
 				else
-					abundanceDisplay = string.Format("{0}[Surf]: {1:P2}", ResourceName, abundanceValue);
+					abundanceDisplay = abundanceValue.ToString("P2");
 			}
 			else
 			{
 				float biomeAbundance = abundanceSummary.ContainsKey(biome) ? abundanceSummary[biome].Abundance : 0f;
 				if (fuzzy)
-					abundanceDisplay = string.Format("{0}[Surf]: {1:P0}", ResourceName, biomeAbundance);
+					abundanceDisplay = biomeAbundance.ToString("P0");
 				else
-					abundanceDisplay = string.Format("{0}[Surf]: {1:P2}", ResourceName, biomeAbundance);
+					abundanceDisplay = biomeAbundance.ToString("P2");
 			}
 		}
 
@@ -162,7 +173,8 @@ namespace SCANsat.SCAN_PartModules
 		void IAnimatedModule.EnableModule()
 		{
 			this.enabled = true;
-			if (stockScanners != null && SCANcontroller.controller.disableStockResource)
+			SCANUtil.SCANlog("Enabling Resource Module");
+			if (stockScanners != null && SCANcontroller.controller != null && SCANcontroller.controller.disableStockResource)
 			{
 				foreach (ModuleResourceScanner m in stockScanners)
 				{
@@ -174,7 +186,8 @@ namespace SCANsat.SCAN_PartModules
 		void IAnimatedModule.DisableModule()
 		{
 			this.enabled = false;
-			if (stockScanners != null && SCANcontroller.controller.disableStockResource)
+			SCANUtil.SCANlog("Disabling Resource Module");
+			if (stockScanners != null && SCANcontroller.controller != null && SCANcontroller.controller.disableStockResource)
 			{
 				foreach (ModuleResourceScanner m in stockScanners)
 				{
