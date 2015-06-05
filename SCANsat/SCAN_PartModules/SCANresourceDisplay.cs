@@ -12,6 +12,8 @@ namespace SCANsat.SCAN_PartModules
 		public int sensorType;
 
 		private List<ModuleResourceScanner> stockScanners;
+		private Dictionary<string, ResourceCache.AbundanceSummary> abundanceSummary;
+		private CelestialBody body;
 		private bool tooHigh;
 		private bool fuzzy;
 
@@ -19,6 +21,8 @@ namespace SCANsat.SCAN_PartModules
 		{
 			if (state == StartState.Editor)
 				return;
+
+			GameEvents.onVesselSOIChanged.Add(onSOIChange);
 
 			this.enabled = true;
 
@@ -33,6 +37,9 @@ namespace SCANsat.SCAN_PartModules
 					m.DisableModule();
 				}
 			}
+
+			body = FlightGlobals.currentMainBody;
+			refreshAbundance(body.flightGlobalsIndex);
 		}
 
 		private List<ModuleResourceScanner> findScanners()
@@ -54,6 +61,11 @@ namespace SCANsat.SCAN_PartModules
 			}
 		}
 
+		private void OnDestroy()
+		{
+			GameEvents.onVesselSOIChanged.Remove(onSOIChange);
+		}
+
 		public override void OnUpdate()
 		{
 			if (!HighLogic.LoadedSceneIsFlight || !FlightGlobals.ready)
@@ -68,13 +80,41 @@ namespace SCANsat.SCAN_PartModules
 			Fields["abundanceDisplay"].guiActive = true;
 
 			if (tooHigh)
+			{
 				abundanceDisplay = string.Format("{0}[Surf]: Too High", ResourceName);
+				return;
+			}
 			else if (abundanceValue < 0)
+			{
 				abundanceDisplay = string.Format("{0}[Surf]: No Data", ResourceName);
-			else if (fuzzy)
-				abundanceDisplay = string.Format("{0}[Surf]: {1:P0}", ResourceName, abundanceValue);
+				return;
+			}
+
+			string biome = "Landed";
+
+			if (body.BiomeMap != null)
+				biome = SCANUtil.getBiomeName(body, SCANUtil.fixLonShift(vessel.longitude), SCANUtil.fixLatShift(vessel.latitude));
+
+			if (checkBiome(biome))
+			{
+				if (fuzzy)
+					abundanceDisplay = string.Format("{0}[Surf]: {1:P0}", ResourceName, abundanceValue);
+				else
+					abundanceDisplay = string.Format("{0}[Surf]: {1:P2}", ResourceName, abundanceValue);
+			}
 			else
-				abundanceDisplay = string.Format("{0}[Surf]: {1:P2}", ResourceName, abundanceValue);
+			{
+				float biomeAbundance = abundanceSummary.ContainsKey(biome) ? abundanceSummary[biome].Abundance : 0f;
+				if (fuzzy)
+					abundanceDisplay = string.Format("{0}[Surf]: {1:P0}", ResourceName, biomeAbundance);
+				else
+					abundanceDisplay = string.Format("{0}[Surf]: {1:P2}", ResourceName, biomeAbundance);
+			}
+		}
+
+		private bool checkBiome (string b)
+		{
+			return ResourceMap.Instance.IsBiomeUnlocked(body.flightGlobalsIndex, b);
 		}
 
 		public override void OnFixedUpdate()
@@ -102,6 +142,21 @@ namespace SCANsat.SCAN_PartModules
 			{
 				abundanceValue = -1;
 			}
+		}
+
+		private void onSOIChange(GameEvents.HostedFromToAction<Vessel, CelestialBody> VB)
+		{
+			body = VB.to;
+			refreshAbundance(body.flightGlobalsIndex);
+		}
+
+		private void refreshAbundance(int bodyID)
+		{
+			abundanceSummary = new Dictionary<string, ResourceCache.AbundanceSummary>();
+
+			abundanceSummary = ResourceCache.Instance.AbundanceCache.
+				Where(a => a.ResourceName == ResourceName && a.HarvestType == HarvestTypes.Planetary && a.BodyId == bodyID).
+				ToDictionary(a => a.BiomeName, a => a);
 		}
 
 		void IAnimatedModule.EnableModule()
