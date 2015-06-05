@@ -95,7 +95,7 @@ namespace SCANsat.SCAN_PartModules
 			if (body.BiomeMap != null)
 				biome = SCANUtil.getBiomeName(body, SCANUtil.fixLonShift(vessel.longitude), SCANUtil.fixLatShift(vessel.latitude));
 
-			if (checkBiome(biome))
+			if (checkBiome(biome) || !SCANcontroller.controller.resourceBiomeLock)
 			{
 				if (fuzzy)
 					abundanceDisplay = string.Format("{0}[Surf]: {1:P0}", ResourceName, abundanceValue);
