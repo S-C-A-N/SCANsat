@@ -50,7 +50,7 @@ namespace SCANsat.SCAN_Map
 			internal set
 			{
 				mapscale = value;
-				resourceMapScale = (resourceMapWidth / 360f) * mapscale;
+				resourceMapScale = (mapwidth / resourceMapWidth) * mapscale;
 			}
 		}
 
