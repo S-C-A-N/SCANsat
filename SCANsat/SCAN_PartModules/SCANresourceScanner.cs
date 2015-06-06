@@ -47,8 +47,6 @@ namespace SCANsat.SCAN_PartModules
 				activated = true;
 
 			forceStart = true;
-
-			SCANUtil.SCANlog("Starting resource scanner");
 		}
 
 		public override string GetInfo()
