@@ -361,10 +361,10 @@ The re-size icon in the lower-right corner can be dragged to re-size the map.
 > ![][resource-planet-hires-full-biome]
 
 A separate window is used to control resource and biome planetary overlay maps. These maps are drawn directly over the surface of the current planet; they use the same system as the stock resource overlays and will replace those maps if both are opened at the same time. Map coverage is dependent upon SCANsat data; only scanned areas will be displayed on the map.
-> ![][biome-planet-in-progress]
+> ![][resource-planet-in-progress]
 
 SCANsat biome coverage can also be displayed using the overlay window.
-> ![][resource-planet-in-progress]
+> ![][biome-planet-overlay]
 
 #### [:top:][top] 5a. Overlay Control Window
 > ![][resource-overlay-window]
@@ -708,8 +708,8 @@ sneaky then they can of course be sneaky.
 [3b]: #top-3b-mismatched-scanners
 [4]: #top-4-big-map
 [4a]: #top-4a-big-map-options
-[5]: #top-planetary-overlay
-[5a]: #top-overlay-control-window
+[5]: #top-5-planetary-overlay
+[5a]: #top-5a-overlay-control-window
 [6]: #top-6-zoom-map
 [6a]: #top-6a-target-selection
 [6b]: #top-6b-mechJeb-landing-guidance
