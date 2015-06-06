@@ -210,7 +210,7 @@ namespace SCANsat.SCAN_UI
 					transparency = Mathf.Max(0f, transparency - 0.1f);
 					refreshMap();
 				}
-				GUILayout.Label(transparency.ToString("P0"), SCANskins.SCAN_labelSmall, GUILayout.Width(30));
+				GUILayout.Label(transparency.ToString("P0"), SCANskins.SCAN_labelSmall);
 				if (GUILayout.Button("+", SCANskins.SCAN_buttonSmall, GUILayout.Width(18)))
 				{
 					transparency = Mathf.Min(1f, transparency + 0.1f);
@@ -227,6 +227,17 @@ namespace SCANsat.SCAN_UI
 			{
 				SCANcontroller.controller.resourceSettings.Visible = !SCANcontroller.controller.resourceSettings.Visible;
 			}
+
+			//if (GUILayout.Button("Biome Summary"))
+			//{
+			//	foreach (ResourceCache.AbundanceSummary a in ResourceCache.Instance.AbundanceCache)
+			//	{
+			//		if (a.ResourceName == "Ore" && a.HarvestType == HarvestTypes.Planetary)
+			//			SCANUtil.SCANlog("{0}: For {1} on Body {2} of scanner type {3}: Abundance = {4:P3}", a.ResourceName, a.BiomeName, a.BodyId, a.HarvestType, a.Abundance);
+			//	}
+
+				
+			//}
 		}
 
 		public void refreshMap(float t, int height, int interp)
