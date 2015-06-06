@@ -272,9 +272,8 @@ A number of options are available in the **Resource Settings Menu** for SCANsat 
    * Regular SCANsat data will not be affected.
    * A confirmation window will appear upon clicking the button.
 * **Reset Stock Resource Scanning**
-   * Stock resource scanning data can be erased for each planet (does not affect resource biome scanning data)
-   
-* **SCAN Planet Overlay** Quality Settings
+   * Stock resource scanning data can be erased for each planet (does not affect resource biome scanning data)   
+* **SCAN Planet Overlay Quality Settings**
    * Interpolation settings can be increased or decreased to increase the accuracy of overlays
    * Overlay map size can be adjusted for higher quality, but slower maps
    
