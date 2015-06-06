@@ -299,7 +299,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 
 			SCAN_buttonSmall = new GUIStyle(SCAN_SkinsLibrary.DefUnitySkin.button);
 			SCAN_buttonSmall.fontSize = 10;
-			SCAN_buttonSmall.alignment = TextAnchor.MiddleCenter;
+			SCAN_buttonSmall.alignment = TextAnchor.MiddleLeft;
 			SCAN_buttonSmall.fontStyle = FontStyle.Bold;
 
 			//Initialize settings menu styles
