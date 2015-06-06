@@ -75,22 +75,37 @@ namespace SCANsat.SCAN_UI
 		{
 			//Initialize the map object
 			Visible = SCANcontroller.controller.bigMapVisible;
-			if (v == null)
-				v = FlightGlobals.ActiveVessel;
+			WindowRect.x = SCANcontroller.controller.map_x;
+			WindowRect.y = SCANcontroller.controller.map_y;
+			lastColor = currentColor = SCANcontroller.controller.colours == 0;
+			lastResource = SCANcontroller.controller.map_ResourceOverlay;
+			if (SCANconfigLoader.GlobalResource)
+				loadedResources = SCANcontroller.setLoadedResourceList();
+			TooltipsEnabled = SCANcontroller.controller.toolTips;
+
+			initializeMap();
+		}
+
+		private void initializeMap()
+		{
+			v = FlightGlobals.ActiveVessel;
 			if (b == null)
-				b = v.mainBody;
+			{
+				if (v == null)
+					b = FlightGlobals.Bodies[1];
+				else
+					b = v.mainBody;
+			}
+
 			if (bigmap == null)
 			{
 				bigmap = new SCANmap(b, true);
 				bigmap.setProjection((MapProjection)SCANcontroller.controller.projection);
+				if (SCANcontroller.controller.map_width % 2 != 0)
+					SCANcontroller.controller.map_width += 1;
 				bigmap.setWidth(SCANcontroller.controller.map_width);
 			}
-			WindowRect.x = SCANcontroller.controller.map_x;
-			WindowRect.y = SCANcontroller.controller.map_y;
-			currentColor = SCANcontroller.controller.colours == 0;
-			lastColor = currentColor;
-			lastResource = SCANcontroller.controller.map_ResourceOverlay;
-			WindowCaption = string.Format("Map of {0}", b.theName);
+
 			data = SCANUtil.getData(b);
 			if (data == null)
 			{
@@ -98,17 +113,20 @@ namespace SCANsat.SCAN_UI
 				SCANcontroller.controller.addToBodyData(b, data);
 			}
 			bigmap.setBody(b);
-			if (SCANconfigLoader.GlobalResource)
-			{
-				loadedResources = SCANcontroller.setLoadedResourceList();
-			}
-			TooltipsEnabled = SCANcontroller.controller.toolTips;
+
+			WindowCaption = string.Format("Map of {0}", b.theName);
 		}
 
 		protected override void OnDestroy()
 		{
 			if (spotMap != null)
 				Destroy(spotMap);
+		}
+
+		protected override void Update()
+		{
+			if (FlightGlobals.ready)
+				v = FlightGlobals.ActiveVessel;
 		}
 
 		//Properties used to sync with color selection window
@@ -150,6 +168,8 @@ namespace SCANsat.SCAN_UI
 					IsResizing = false;
 					if (resizeW < WindowSize_Min.x)
 						resizeW = WindowSize_Min.x;
+					if ((int)resizeW % 2 != 0)
+						resizeW += 1;
 					bigmap.setWidth((int)resizeW);
 					drawGrid = true;
 					SCANcontroller.controller.map_width = bigmap.MapWidth;
@@ -188,7 +208,7 @@ namespace SCANsat.SCAN_UI
 					mapDraw(id);	/* Draw the main map texture */
 				stopE();
 				growE();
-					fillS(160);
+					fillS(180);
 					growS();
 						mouseOver(id);		/* Handle all mouse-over info and zoom-map code */
 						legendBar(id);		/* Draw the mouseover info and legend bar along the bottom */
@@ -465,25 +485,32 @@ namespace SCANsat.SCAN_UI
 				SCANcontroller.controller.mainMap.Visible = !SCANcontroller.controller.mainMap.Visible;
 			}
 
-			s.x += 40;
+			s.x += 36;
 
 			if (GUI.Button(s, iconWithTT(SCANskins.SCAN_InstrumentIcon, "Instrument Window"), SCANskins.SCAN_windowButton))
 			{
 				SCANcontroller.controller.instrumentsWindow.Visible = !SCANcontroller.controller.instrumentsWindow.Visible;
 			}
 
-			s.x += 40;
+			s.x += 36;
 
 			if (GUI.Button(s, iconWithTT(SCANskins.SCAN_SettingsIcon, "Settings Menu"), SCANskins.SCAN_windowButton))
 			{
 				SCANcontroller.controller.settingsWindow.Visible = !SCANcontroller.controller.settingsWindow.Visible;
 			}
 
-			s.x += 40;
+			s.x += 36;
 
 			if (GUI.Button(s, iconWithTT(SCANskins.SCAN_ColorIcon, "Color Control"), SCANskins.SCAN_windowButton))
 			{
 				SCANcontroller.controller.colorManager.Visible = !SCANcontroller.controller.colorManager.Visible;
+			}
+
+			s.x += 36;
+
+			if (GUI.Button(s, iconWithTT(SCANskins.SCAN_OverlayIcon, "Overlay Control"), SCANskins.SCAN_windowButton))
+			{
+				SCANcontroller.controller.resourceOverlay.Visible = !SCANcontroller.controller.resourceOverlay.Visible;
 			}
 
 			s.x = WindowRect.width - 66;

@@ -24,7 +24,7 @@ namespace SCANmechjeb
 	{
 		private const string SCANsatName = "SCANsat";
 		private const string MechJeb = "MechJeb2";
-		private readonly Version MechJebVersion = new Version(2, 5, 0, 0);
+		private readonly Version MechJebVersion = new Version(2, 5, 1, 0);
 		private static bool loaded = false;
 
 		private void Awake()
@@ -69,12 +69,7 @@ namespace SCANmechjeb
 			if (MechJebAssembly == null)
 				return false;
 
-			var fileV = Attribute.GetCustomAttribute(MechJebAssembly.assembly, typeof(AssemblyFileVersionAttribute)) as AssemblyFileVersionAttribute;
-
-			if (fileV == null)
-				return false;
-
-			if (fileV.Version == MechJebVersion.ToString())
+			if (MechJebAssembly.assembly.GetName().Version == MechJebVersion)
 			{
 				SCANsat.SCANmainMenuLoader.MechJebLoaded = true;
 				return true;

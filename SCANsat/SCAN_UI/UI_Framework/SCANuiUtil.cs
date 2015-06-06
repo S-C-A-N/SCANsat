@@ -16,6 +16,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
+using System.Linq;
 using FinePrint;
 using SCANsat.SCAN_Platform;
 using SCANsat.SCAN_Data;
@@ -157,10 +158,11 @@ namespace SCANsat.SCAN_UI.UI_Framework
 
 				if (SCANcontroller.controller.map_ResourceOverlay && SCANconfigLoader.GlobalResource && mapObj.Resource != null) //Adds selected resource amount to big map legend
 				{
+					string label = "";
+
 					if (SCANUtil.isCovered(lon, lat, data, mapObj.Resource.SType))
 					{
-						double amount = SCANUtil.ResourceOverlay(lat, lon, mapObj.Resource.Name, mapObj.Body);
-						string label;
+						double amount = SCANUtil.ResourceOverlay(lat, lon, mapObj.Resource.Name, mapObj.Body, SCANcontroller.controller.resourceBiomeLock);
 						if (amount < 0)
 							label = "Unknown";
 						else
@@ -169,6 +171,12 @@ namespace SCANsat.SCAN_UI.UI_Framework
 								amount = 1;
 							label = amount.ToString("P2");
 						}
+						info += palette.colored(mapObj.Resource.MaxColor, mapObj.Resource.Name + ": " + label + " ");
+					}
+					else if (SCANUtil.isCovered(lon, lat, data, SCANtype.FuzzyResources))
+					{
+						int amount = Mathf.RoundToInt(((float)SCANUtil.ResourceOverlay(lat, lon, mapObj.Resource.Name, mapObj.Body, SCANcontroller.controller.resourceBiomeLock)) * 100f);
+						label = amount.ToString() + "%";
 						info += palette.colored(mapObj.Resource.MaxColor, mapObj.Resource.Name + ": " + label + " ");
 					}
 				}
@@ -235,10 +243,10 @@ namespace SCANsat.SCAN_UI.UI_Framework
 
 				if (SCANcontroller.controller.map_ResourceOverlay && SCANconfigLoader.GlobalResource && mapObj.Resource != null) //Adds selected resource amount to big map legend
 				{
+					string label = "";
 					if (SCANUtil.isCovered(lon, lat, data, mapObj.Resource.SType))
 					{
-						double amount = SCANUtil.ResourceOverlay(lat, lon, mapObj.Resource.Name, mapObj.Body);
-						string label;
+						double amount = SCANUtil.ResourceOverlay(lat, lon, mapObj.Resource.Name, mapObj.Body, SCANcontroller.controller.resourceBiomeLock);
 						if (amount < 0)
 							label = "Unknown";
 						else
@@ -247,6 +255,12 @@ namespace SCANsat.SCAN_UI.UI_Framework
 								amount = 1;
 							label = amount.ToString("P2");
 						}
+						info += palette.colored(mapObj.Resource.MaxColor, mapObj.Resource.Name + ": " + label + " ");
+					}
+					else if (SCANUtil.isCovered(lon, lat, data, SCANtype.FuzzyResources))
+					{
+						int amount = Mathf.RoundToInt(((float)SCANUtil.ResourceOverlay(lat, lon, mapObj.Resource.Name, mapObj.Body, SCANcontroller.controller.resourceBiomeLock)) * 100f);
+						label = amount.ToString() + "%";
 						info += palette.colored(mapObj.Resource.MaxColor, mapObj.Resource.Name + ": " + label + " ");
 					}
 				}
@@ -1348,78 +1362,331 @@ namespace SCANsat.SCAN_UI.UI_Framework
 
 		#region Planet Overlay Textures
 
-		internal static void drawResourceTexture(int height, ref int step, SCANdata data, SCANresourceGlobal resource)
+		private static double fixLon(double Lon)
 		{
-			Color[] pix;
-			float scale = height / 180f;
+			if (Lon <= 180)
+				Lon = 180 - Lon;
+			else
+				Lon = (Lon - 180) * -1;
+			Lon -= 90;
+			if (Lon < -180)
+				Lon += 360;
 
-			if (resource.MapOverlay == null)
-			{
-				resource.MapOverlay = new Texture2D(height * 2, height, TextureFormat.ARGB32, true);
-				pix = resource.MapOverlay.GetPixels();
-				for (int i = 0; i < pix.Length; i++)
-					pix[i] = palette.clear;
-				resource.MapOverlay.SetPixels(pix);
-			}
-			else if (step >= resource.MapOverlay.height)
-			{
-				return;
-			}
-
-			pix = resource.MapOverlay.GetPixels(0, step, resource.MapOverlay.width, 1);
-
-			for (int i = 0; i < pix.Length; i++)
-			{
-				double lon = (i / scale);
-				double lat = (step / scale) - 90;
-
-				if (lon <= 180)
-					lon = 180 - lon;
-				else
-					lon = (lon - 180) * -1;
-				lon -= 90;
-				if (lon < -180)
-					lon += 360;
-
-				pix[i] = resourceToColor(lon, lat, data, palette.clear, resource, 0.05f);
-			}
-
-			resource.MapOverlay.SetPixels(0, step, resource.MapOverlay.width, 1, pix);
-			step++;
-			if (step % 10 == 0 || step >= height)
-				resource.MapOverlay.Apply();
+			return Lon;
 		}
 
-		private static double resourceMapValue(double Lon, double Lat, SCANdata Data, SCANresourceGlobal resource)
+		internal static Texture2D drawResourceTexture(Texture2D map, int height, SCANdata data, SCANresourceGlobal resource, int stepScale = 8, float transparency = 0f)
 		{
-			double amount = 0;
-			if (SCANUtil.isCovered(Lon, Lat, Data, resource.SType))
+			int width = height * 2;
+			float[,] abundanceValues = new float[width, height];
+			Color32[] pix = new Color32[width * height];
+			float scale = height / 180f;
+
+			if (map == null || map.height != height)
 			{
-				amount = SCANUtil.ResourceOverlay(Lat, Lon, resource.Name, Data.Body);
-				amount *= 100;
-				if (amount >= resource.CurrentBody.MinValue)
-				{
-					if (amount > resource.CurrentBody.MaxValue)
-						amount = resource.CurrentBody.MaxValue;
-				}
-				else
-					amount = 0;
+				map = new Texture2D(width, height, TextureFormat.ARGB32, true);
 			}
-			else
-				amount = -1;
-			return amount;
+
+			System.Random r = new System.Random(ResourceScenario.Instance.gameSettings.Seed);
+
+			for (int j = 0; j < height;  j += stepScale)
+			{
+				for (int i = 0; i < width; i += stepScale)
+				{
+					double lon = fixLon(i / scale);
+					double lat = (j / scale) - 90;
+
+					abundanceValues[i, j] = SCANUtil.ResourceOverlay(lat, lon, resource.Name, data.Body, SCANcontroller.controller.resourceBiomeLock) * 100;
+
+					pix[j * width + i] = resourceToColor32(palette.Clear, resource, abundanceValues[i, j], data, lon, lat, transparency);
+				}
+			}
+
+			for (int i = stepScale / 2; i >= 1; i /= 2)
+			{
+				interpolate(pix, abundanceValues, height, i, i, i, resource, transparency, data, r);
+				interpolate(pix, abundanceValues, height, 0, i, i, resource, transparency, data, r);
+				interpolate(pix, abundanceValues, height, i, 0, i, resource, transparency, data, r);
+			}
+
+			map.SetPixels32(pix);
+			map.Apply();
+
+			return map;
+		}
+
+		internal static Texture2D drawBiomeMap(Texture2D map, SCANdata data, float transparency, int height = 256, bool useStock = false, bool whiteBorder = false)
+		{
+			if (!useStock && !whiteBorder)
+				return drawBiomeMap(map, data, transparency, height);
+
+			int width = height * 2;
+			float scale = (width * 1f) / 360f;
+			double[] mapline = new double[width];
+			Color32[] pix = new Color32[height * width];
+
+			if (map == null || map.height != height)
+			{
+				map = new Texture2D(width, height, TextureFormat.ARGB32, true);
+			}
+
+			for (int j = 0; j < height; j++)
+			{
+				for (int i = 0; i < width; i++)
+				{
+					double lon = fixLon(i / scale);
+					double lat = (j / scale) - 90;
+
+					if (!SCANUtil.isCovered(lon, lat, data, SCANtype.Biome))
+					{
+						pix[j * width + i] = palette.lerp(palette.Clear, palette.Grey, transparency);
+						continue;
+					}
+
+					float biomeIndex = (float)SCANUtil.getBiomeIndexFraction(data.Body, lon, lat);
+
+					if (whiteBorder && ((i > 0 && mapline[i - 1] != biomeIndex) || (j > 0 && mapline[i] != biomeIndex)))
+					{
+						pix[j * width + i] = palette.White;
+					}
+					else if (useStock)
+					{
+						pix[j * width + i] = palette.lerp((Color32)SCANUtil.getBiome(data.Body, lon, lat).mapColor, palette.Clear, SCANcontroller.controller.biomeTransparency / 100f);
+					}
+					else
+					{
+						pix[j * width + i] = palette.lerp(palette.lerp((Color32)SCANcontroller.controller.lowBiomeColor, (Color32)SCANcontroller.controller.highBiomeColor, biomeIndex), palette.Clear, SCANcontroller.controller.biomeTransparency / 100f);
+					}
+				}
+			}
+
+			map.SetPixels32(pix);
+			map.Apply();
+
+			return map;
+		}
+
+		private static Texture2D drawBiomeMap(Texture2D m, SCANdata d, float t, int h)
+		{
+			if (d.Body.BiomeMap == null)
+				return null;
+
+			if (m == null)
+			{
+				m = new Texture2D(h * 2, h, TextureFormat.RGBA32, true);
+			}
+
+			Color32[] pix = new Color32[m.width * m.height];
+			float scale = m.width / 360f;
+
+			for (int j = 0; j < m.height; j++)
+			{
+				for (int i = 0; i < m.width; i++)
+				{
+					double lon = fixLon(i / scale);
+					double lat = (j / scale) - 90;
+
+					Color32 c = palette.Clear;
+
+					if (SCANUtil.isCovered(lon, lat, d, SCANtype.Biome))
+						c = (Color32)SCANUtil.getBiome(d.Body, lon, lat).mapColor;//, palette.clear, SCANcontroller.controller.biomeTransparency / 100);
+
+					pix[j *m.width + i] = c;
+				}
+			}
+
+			m.SetPixels32(pix);
+			m.Apply();
+
+			return m;
+		}
+
+		private static float getLerp(System.Random rand, int l)
+		{
+			if (l == 0)
+				return 0.5f;
+			
+			return (float)l / 100f + (float)rand.Next(100 - (l / 2)) / 100f;
+		}
+
+		private static void interpolate(Color32[] c, float[,] v, int height, int x, int y, int step, SCANresourceGlobal r, float t, SCANdata d, System.Random rand)
+		{
+			int width = height * 2;
+			float scale = width / 360f;
+			for (int j = y; j < height + y; j += 2 * step)
+			{
+				for (int i = x; i < width + x; i += 2 * step)
+				{
+					double lon = fixLon(i / scale);
+					double lat = (j / scale) - 90;
+
+					int xpos1 = i - step;
+					if (xpos1 < 0)
+						xpos1 += width;
+					int xpos2 = i + step;
+					if (xpos2 >= width)
+						xpos2 -= width;
+
+					int ypos1 = j - step;
+					if (ypos1 < 0)
+						ypos1 = 0;
+					int ypos2 = j + step;
+					if (ypos2 >= height)
+						ypos2 = height - 1;
+
+					float avgX = 0;
+					float avgY = 0;
+
+					float lerp = getLerp(rand, step * 2);
+
+					if (x == y)
+					{
+						avgX = Mathf.Lerp(v[xpos1, ypos1], v[xpos2, ypos2], lerp);
+						avgY = Mathf.Lerp(v[xpos1, ypos2], v[xpos2, ypos1], lerp);
+					}
+					else
+					{
+						avgX = Mathf.Lerp(v[xpos1, j], v[xpos2, j], lerp);
+						avgY = Mathf.Lerp(v[i, ypos2], v[i, ypos1], lerp);
+					}
+
+					float avgFinal = Mathf.Lerp(avgX, avgY, lerp);
+
+					v[i, j] = avgFinal;
+
+					c[j * width + i] = resourceToColor32(palette.Clear, r, v[i, j], d, lon, lat, t);
+				}
+			}
+		}
+
+		internal static void interpolate(float[,] v, int yStart, int height, int width, int x, int y, int step, System.Random r, bool edges)
+		{
+			for (int j = yStart + y; j < height + y + yStart; j += 2 * step)
+			{
+				for (int i = x; i < width + x; i += 2 * step)
+				{
+					int xpos1 = i - step;
+					if (xpos1 < 0)
+						xpos1 += width;
+					int xpos2 = i + step;
+					if (xpos2 >= width)
+						xpos2 -= width;
+
+					int ypos1 = j - step;
+					if (ypos1 < 0)
+						ypos1 = 0;
+					int ypos2 = j + step;
+					if (ypos2 >= height)
+						ypos2 = height - 1;
+
+					float avgX = 0;
+					float avgY = 0;
+
+					float lerp = 0.5f;
+					if (!edges)
+						lerp = getLerp(r, step * 2);
+
+					if (x == y)
+					{
+						avgX = Mathf.Lerp(v[xpos1, ypos1], v[xpos2, ypos2], lerp);
+						avgY = Mathf.Lerp(v[xpos1, ypos2], v[xpos2, ypos1], lerp);
+					}
+					else
+					{
+						avgX = Mathf.Lerp(v[xpos1, j], v[xpos2, j], lerp);
+						avgY = Mathf.Lerp(v[i, ypos2], v[i, ypos1], lerp);
+					}
+
+					float avgFinal = Mathf.Lerp(avgX, avgY, lerp);
+
+					v[i, j] = avgFinal;
+				}
+			}
+		}
+
+		internal static void interpolate(float[,] v, int yStart, int width, int x, int step, System.Random r)
+		{
+
+			for (int i = x; i < width + x; i += 2 * step)
+			{
+				int xpos1 = i - step;
+				if (xpos1 < 0)
+					xpos1 += width;
+				int xpos2 = i + step;
+				if (xpos2 >= width)
+					xpos2 -= width;
+
+				float lerp = getLerp(r, step * 2);
+
+				float avgX = Mathf.Lerp(v[xpos1, yStart], v[xpos2, yStart], lerp);
+
+				v[i, yStart] = avgX;
+			}
 		}
 
 		/* Converts resource amount to pixel color */
-		internal static Color resourceToColor(double Lon, double Lat, SCANdata Data, Color BaseColor, SCANresourceGlobal Resource, float Transparency = 0.4f)
+		internal static Color resourceToColor(Color BaseColor, SCANresourceGlobal Resource, float Abundance, SCANdata Data, double Lon, double Lat)
 		{
-			double amount = resourceMapValue(Lon, Lat, Data, Resource);
-			if (amount < 0)
-				return BaseColor;
-			else if (amount == 0)
-				return palette.lerp(BaseColor, palette.grey, Transparency);
+			if (SCANUtil.isCovered(Lon, Lat, Data, Resource.SType))
+			{
+				if (Abundance >= Resource.CurrentBody.MinValue)
+				{
+					if (Abundance > Resource.CurrentBody.MaxValue)
+						Abundance = Resource.CurrentBody.MaxValue;
+				}
+				else
+					Abundance = 0;
+			}
+			else if (SCANUtil.isCovered(Lon, Lat, Data, SCANtype.FuzzyResources))
+			{
+				Abundance = Mathf.RoundToInt(Abundance);
+				if (Abundance >= Resource.CurrentBody.MinValue)
+				{
+					if (Abundance > Resource.CurrentBody.MaxValue)
+						Abundance = Resource.CurrentBody.MaxValue;
+				}
+				else
+					Abundance = 0;
+			}
 			else
-				return palette.lerp(palette.lerp(Resource.MinColor, Resource.MaxColor, (float)amount / (Resource.CurrentBody.MaxValue - Resource.CurrentBody.MinValue)), BaseColor, Resource.Transparency / 100f);
+				return BaseColor;
+
+			if (Abundance == 0)
+				return palette.lerp(BaseColor, palette.grey, 0.3f);
+			else
+				return palette.lerp(palette.lerp(Resource.MinColor, Resource.MaxColor, Abundance / (Resource.CurrentBody.MaxValue - Resource.CurrentBody.MinValue)), BaseColor, Resource.Transparency / 100f);
+		}
+
+		private static Color32 resourceToColor32(Color32 BaseColor, SCANresourceGlobal Resource, float Abundance, SCANdata Data, double Lon, double Lat, float Transparency = 0.3f)
+		{
+			if (SCANUtil.isCovered(Lon, Lat, Data, Resource.SType))
+			{
+				if (Abundance >= Resource.CurrentBody.MinValue)
+				{
+					if (Abundance > Resource.CurrentBody.MaxValue)
+						Abundance = Resource.CurrentBody.MaxValue;
+				}
+				else
+					Abundance = 0;
+			}
+			else if (SCANUtil.isCovered(Lon, Lat, Data, SCANtype.FuzzyResources))
+			{
+				Abundance = Mathf.RoundToInt(Abundance);
+				if (Abundance >= Resource.CurrentBody.MinValue)
+				{
+					if (Abundance > Resource.CurrentBody.MaxValue)
+						Abundance = Resource.CurrentBody.MaxValue;
+				}
+				else
+					Abundance = 0;
+			}
+			else
+				return BaseColor;
+
+			if (Abundance == 0)
+				return palette.lerp(BaseColor, palette.Grey, Transparency);
+			else
+				return palette.lerp(palette.lerp(Resource.MinColor32, Resource.MaxColor32, Abundance / (Resource.CurrentBody.MaxValue - Resource.CurrentBody.MinValue)), BaseColor, Resource.Transparency / 100f);
 		}
 
 		#endregion

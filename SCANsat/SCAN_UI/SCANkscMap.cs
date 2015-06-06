@@ -482,12 +482,22 @@ namespace SCANsat.SCAN_UI
 				SCANcontroller.controller.settingsWindow.removeControlLocks();
 			}
 
-			s.x += 40;
+			s.x += 36;
 
 			if (GUI.Button(s, iconWithTT(SCANskins.SCAN_ColorIcon, "Color Control"), SCANskins.SCAN_windowButton))
 			{
 				SCANcontroller.controller.colorManager.Visible = !SCANcontroller.controller.colorManager.Visible;
 				SCANcontroller.controller.colorManager.removeControlLocks();
+			}
+
+			if (HighLogic.LoadedScene == GameScenes.TRACKSTATION)
+			{
+				s.x += 36;
+
+				if (GUI.Button(s, iconWithTT(SCANskins.SCAN_OverlayIcon, "Overlay Control"), SCANskins.SCAN_windowButton))
+				{
+					SCANcontroller.controller.resourceOverlay.Visible = !SCANcontroller.controller.resourceOverlay.Visible;
+				}
 			}
 
 			s.x = WindowRect.width - 66;

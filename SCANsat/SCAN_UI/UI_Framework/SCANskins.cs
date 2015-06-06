@@ -52,6 +52,13 @@ namespace SCANsat.SCAN_UI.UI_Framework
 		internal static GUIStyle SCAN_insWhiteLabel;
 		internal static GUIStyle SCAN_anomalyOverlay;
 
+		//Resource controller styles
+		internal static GUIStyle SCAN_labelLeft;
+		internal static GUIStyle SCAN_labelRight;
+		internal static GUIStyle SCAN_labelSmall;
+		internal static GUIStyle SCAN_labelLeftActive;
+		internal static GUIStyle SCAN_buttonSmall;
+
 		//Settings menu styles
 		internal static GUIStyle SCAN_headline;
 		internal static GUIStyle SCAN_headlineSmall;
@@ -100,6 +107,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 		internal static Texture2D SCAN_InstrumentIcon;
 		internal static Texture2D SCAN_SmallMapIcon;
 		internal static Texture2D SCAN_BigMapIcon;
+		internal static Texture2D SCAN_OverlayIcon;
 
 		//Zoom Window Textures
 		internal static Texture2D SCAN_ZoomOutIcon;
@@ -149,6 +157,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			SCAN_WaypointIcon = GameDatabase.Instance.GetTexture("SCANsat/Icons/SCAN_WayPointIcon", false);
 			SCAN_MechJebIcon = GameDatabase.Instance.GetTexture("SCANsat/Icons/SCAN_MechJebIcon", false);
 			SCAN_TargetIcon = GameDatabase.Instance.GetTexture("SCANsat/Icons/SCAN_TargetIcon", false);
+			SCAN_OverlayIcon = GameDatabase.Instance.GetTexture("SCANsat/Icons/SCAN_Overlay_Icon", false);
 		}
 
 		private static void initializeColors()
@@ -270,6 +279,28 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			SCAN_anomalyOverlay.fontSize = 32;
 			SCAN_anomalyOverlay.fontStyle = FontStyle.Bold;
 			SCAN_anomalyOverlay.normal.textColor = palette.cb_skyBlue;
+
+			//Resource Control settings
+			SCAN_labelLeft = new GUIStyle(SCAN_texButton);
+			SCAN_labelLeft.fontSize = 12;
+			SCAN_labelLeft.hover.textColor = palette.cb_bluishGreen;
+			SCAN_labelLeft.alignment = TextAnchor.MiddleLeft;
+
+			SCAN_labelLeftActive = new GUIStyle(SCAN_labelLeft);
+			SCAN_labelLeftActive.normal.textColor = palette.cb_bluishGreen;
+
+			SCAN_labelRight = new GUIStyle(SCAN_labelLeft);
+			SCAN_labelRight.alignment = TextAnchor.MiddleRight;
+
+			SCAN_labelSmall = new GUIStyle(SCAN_whiteReadoutLabel);
+			SCAN_labelSmall.fontSize = 10;
+			SCAN_labelSmall.alignment = TextAnchor.MiddleCenter;
+			SCAN_labelSmall.fontStyle = FontStyle.Bold;
+
+			SCAN_buttonSmall = new GUIStyle(SCAN_SkinsLibrary.DefUnitySkin.button);
+			SCAN_buttonSmall.fontSize = 10;
+			SCAN_buttonSmall.alignment = TextAnchor.MiddleLeft;
+			SCAN_buttonSmall.fontStyle = FontStyle.Bold;
 
 			//Initialize settings menu styles
 			SCAN_headline = new GUIStyle(SCAN_SkinsLibrary.DefUnitySkin.label);

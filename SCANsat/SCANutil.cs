@@ -142,6 +142,54 @@ namespace SCANsat
 			return SCANcontroller.controller.getData(BodyName);
 		}
 
+		/// <summary>
+		/// Do SCANsat maps automatically update with the stock, instant-scan orbital surveys?
+		/// </summary>
+		/// <returns>Returns true if instant scan is enabled</returns>
+		public static bool instantResourceScanEnabled()
+		{
+			if (SCANcontroller.controller == null)
+				return true;
+
+			return SCANcontroller.controller.easyModeScanning;
+		}
+
+		/// <summary>
+		/// Are the stock resource scanner functions disabled; prevents orbital resource surveys?
+		/// </summary>
+		/// <returns>Returns true if stock resource scanning is available</returns>
+		public static bool stockResourceScanEnabled()
+		{
+			if (SCANcontroller.controller == null)
+				return true;
+
+			return !SCANcontroller.controller.disableStockResource;
+		}
+
+		/// <summary>
+		/// Is the stock resource biome lock enabled; reduced resource abundace accuracy if enabled?
+		/// </summary>
+		/// <returns>Returns true if the biome lock is enabled</returns>
+		public static bool resourceBiomeLockEnabled()
+		{
+			if (SCANcontroller.controller == null)
+				return true;
+
+			return SCANcontroller.controller.resourceBiomeLock;
+		}
+
+		/// <summary>
+		/// Does the zoom map resource overlay require a narrow-band scanner in orbit?
+		/// </summary>
+		/// <returns>Returns true if a narrow-band scanner is required</returns>
+		public static bool zoomWindowResourceRestrictionEnabled()
+		{
+			if (SCANcontroller.controller == null)
+				return true;
+
+			return SCANcontroller.controller.needsNarrowBand;
+		}
+
 		#endregion
 
 		#region Internal Utilities
@@ -214,6 +262,33 @@ namespace SCANsat
 			return (lon + 360 + 180) % 360;
 		}
 
+		internal static Vector2d fixRetardCoordinates(Vector2d coords)
+		{
+			if (coords.y < -90)
+			{
+				while (coords.y < -90)
+					coords.y += 90;
+				coords.y = -90 + Math.Abs(coords.y);
+				coords.x = fixLonShift(coords.x + 180);
+
+				return coords;
+			}
+
+			if (coords.y > 90)
+			{
+				while (coords.y > 90)
+					coords.y -= 90;
+				coords.y = 90 - Math.Abs(coords.y);
+				coords.x = fixLonShift(coords.x - 180);
+
+				return coords;
+			}
+
+			coords.x = fixLonShift(coords.x);
+
+			return coords;
+		}
+
 		internal static double getElevation(CelestialBody body, double lon, double lat)
 		{
 			if (body.pqsController == null) return 0;
@@ -243,7 +318,7 @@ namespace SCANsat
 			return ret;
 		}
 
-		internal static float ResourceOverlay(double lat, double lon, string name, CelestialBody body)
+		internal static float ResourceOverlay(double lat, double lon, string name, CelestialBody body, bool biomeLock)
 		{
 			float amount = 0f;
 			var aRequest = new AbundanceRequest
@@ -254,7 +329,7 @@ namespace SCANsat
 				ResourceName = name,
 				ResourceType = HarvestTypes.Planetary,
 				Altitude = 0,
-				CheckForLock = SCANcontroller.controller.resourceBiomeLock,
+				CheckForLock = biomeLock,
 				BiomeName = getBiomeName(body, lon, lat),
 				ExcludeVariance = false,
 			};
@@ -263,7 +338,7 @@ namespace SCANsat
 			return amount;
 		}
 
-		internal static int getBiomeIndex(CelestialBody body, double lon , double lat)
+		private static int getBiomeIndex(CelestialBody body, double lon , double lat)
 		{
 			if (body.BiomeMap == null)		return -1;
 			double u = fixLon(lon);
@@ -290,6 +365,8 @@ namespace SCANsat
 		{
 			if (body.BiomeMap == null) return null;
 			int i = getBiomeIndex(body, lon , lat);
+			if (i == -1)
+				return null;
 			return body.BiomeMap.Attributes [i];
 		}
 
@@ -339,6 +416,24 @@ namespace SCANsat
 					return PaletteLoader.defaultPalette;
 				}
 			}
+		}
+
+		internal static CelestialBody getTargetBody(MapObject target)
+		{
+			if (target.type == MapObject.MapObjectType.CELESTIALBODY)
+			{
+				return target.celestialBody;
+			}
+			else if (target.type == MapObject.MapObjectType.MANEUVERNODE)
+			{
+				return target.maneuverNode.patch.referenceBody;
+			}
+			else if (target.type == MapObject.MapObjectType.VESSEL)
+			{
+				return target.vessel.mainBody;
+			}
+
+			return null;
 		}
 
 		internal static void SCANlog(string log, params object[] stringObjects)

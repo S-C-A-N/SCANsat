@@ -115,6 +115,10 @@ namespace SCANsat
 		public bool easyModeScanning = true;
 		[KSPField(isPersistant = true)]
 		public bool needsNarrowBand = true;
+		[KSPField(isPersistant = true)]
+		public bool biomeBorder = true;
+		[KSPField(isPersistant = true)]
+		public bool disableStockResource = false;
 
 		/* Biome and slope colors can't be serialized properly as a KSP Field */
 		public Color lowBiomeColor = new Color(0, 0.46f, 0.02345098f, 1);
@@ -155,6 +159,8 @@ namespace SCANsat
 		internal SCANBigMap BigMap;
 		internal SCANkscMap kscMap;
 		internal SCANcolorSelection colorManager;
+		internal SCANoverlayController resourceOverlay;
+		internal SCANresourceSettings resourceSettings;
 
 		/* App launcher object */
 		internal SCANappLauncher appLauncher;
@@ -762,6 +768,8 @@ namespace SCANsat
 					instrumentsWindow = gameObject.AddComponent<SCANinstrumentUI>();
 					colorManager = gameObject.AddComponent<SCANcolorSelection>();
 					BigMap = gameObject.AddComponent<SCANBigMap>();
+					resourceOverlay = gameObject.AddComponent<SCANoverlayController>();
+					resourceSettings = gameObject.AddComponent<SCANresourceSettings>();
 				}
 				catch (Exception e)
 				{
@@ -777,6 +785,11 @@ namespace SCANsat
 					kscMap = gameObject.AddComponent<SCANkscMap>();
 					settingsWindow = gameObject.AddComponent<SCANsettingsUI>();
 					colorManager = gameObject.AddComponent<SCANcolorSelection>();
+					if (HighLogic.LoadedScene == GameScenes.TRACKSTATION)
+					{
+						resourceOverlay = gameObject.AddComponent<SCANoverlayController>();
+						resourceSettings = gameObject.AddComponent<SCANresourceSettings>();
+					}
 				}
 				catch (Exception e)
 				{
@@ -843,7 +856,7 @@ namespace SCANsat
 			if (!HighLogic.LoadedSceneIsFlight && HighLogic.LoadedScene != GameScenes.TRACKSTATION)
 				return;
 
-			if (!easyModeScanning)
+			if (!easyModeScanning || disableStockResource)
 				return;
 
 			if (body == null)
@@ -912,6 +925,10 @@ namespace SCANsat
 				Destroy(kscMap);
 			if (BigMap != null)
 				Destroy(BigMap);
+			if (resourceOverlay != null)
+				Destroy(resourceOverlay);
+			if (resourceSettings != null)
+				Destroy(resourceSettings);
 			if (appLauncher != null)
 				Destroy(appLauncher);
 		}
@@ -924,12 +941,12 @@ namespace SCANsat
 			if (!MapView.MapIsEnabled)
 				return;
 
-			Vessel v = FlightGlobals.ActiveVessel;
+			CelestialBody b = SCANUtil.getTargetBody(MapView.MapCamera.target);
 
-			if (v == null)
+			if (b == null)
 				return;
 
-			SCANdata d = getData(v.mainBody.name);
+			SCANdata d = getData(b.name);
 
 			if (d == null)
 				return;
@@ -939,7 +956,7 @@ namespace SCANsat
 			if (target == null)
 				return;
 
-			SCANuiUtil.drawTargetOverlay(v.mainBody, target.Latitude, target.Longitude, XKCDColors.DarkGreen);
+			SCANuiUtil.drawTargetOverlay(b, target.Latitude, target.Longitude, XKCDColors.DarkGreen);
 		}
 
 		private void removeVessel(Vessel v)
@@ -953,7 +970,7 @@ namespace SCANsat
 
 		private void addVessel(Vessel v)
 		{
-			foreach (SCANsat s in v.FindPartModulesImplementing<SCANsat>())
+			foreach (SCANsat.SCAN_PartModules.SCANsat s in v.FindPartModulesImplementing<SCANsat.SCAN_PartModules.SCANsat>())
 			{
 				if (s.scanningNow())
 					registerSensor(v.id, (SCANtype)s.sensorType, s.fov, s.min_alt, s.max_alt, s.best_alt);
@@ -1394,7 +1411,7 @@ namespace SCANsat
 				if (alt < ba) fov = (alt / ba) * fov;
 				else sensor.bestRange = true;
 
-				double surfscale = 600000d / v.mainBody.Radius;
+				double surfscale = Planetarium.fetch.Home.Radius / v.mainBody.Radius;
 				if (surfscale < 1) surfscale = 1;
 				surfscale = Math.Sqrt(surfscale);
 				fov *= surfscale;

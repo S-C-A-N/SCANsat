@@ -5,13 +5,13 @@
      "GITHUB":{
          "USERNAME":"S-C-A-N",
          "REPOSITORY":"SCANsat",
-         "ALLOW_PRE_RELEASE":false
+         "ALLOW_PRE_RELEASE":true
      },
      "VERSION":{
          "MAJOR":1,
          "MINOR":1,
-         "PATCH":2,
-         "BUILD":0
+         "PATCH":3,
+         "BUILD":1
      },
      "KSP_VERSION":{
          "MAJOR":1,
