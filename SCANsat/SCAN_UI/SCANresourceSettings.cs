@@ -11,7 +11,7 @@ namespace SCANsat.SCAN_UI
 {
 	class SCANresourceSettings : SCAN_MBW
 	{
-		internal readonly static Rect defaultRect = new Rect(300, 200, 400, 300);
+		internal readonly static Rect defaultRect = new Rect(300, 200, 300, 300);
 		private static Rect sessionRect = defaultRect;
 		private int mapHeight = 256;
 		private float transparency = 0f;
@@ -25,7 +25,7 @@ namespace SCANsat.SCAN_UI
 			WindowCaption = "S.C.A.N. Resources Settings";
 			WindowRect = sessionRect;
 			WindowStyle = SCANskins.SCAN_window;
-			WindowOptions = new GUILayoutOption[2] { GUILayout.Width(400), GUILayout.Height(300) };
+			WindowOptions = new GUILayoutOption[2] { GUILayout.Width(350), GUILayout.Height(300) };
 			Visible = false;
 			DragEnabled = true;
 			ClampToScreenOffset = new RectOffset(-200, -200, -200, -200);
@@ -136,7 +136,10 @@ namespace SCANsat.SCAN_UI
 			GUILayout.Label("Resource Settings", SCANskins.SCAN_headline);
 			growE();
 			SCANcontroller.controller.resourceBiomeLock = GUILayout.Toggle(SCANcontroller.controller.resourceBiomeLock, "Resource Biome Lock", SCANskins.SCAN_settingsToggle);
-			SCANcontroller.controller.easyModeScanning = GUILayout.Toggle(SCANcontroller.controller.easyModeScanning, "Instant Resource Scan", SCANskins.SCAN_settingsToggle);
+			if (SCANcontroller.controller.disableStockResource)
+				GUILayout.Toggle(false, "Instant Resource Scan", SCANskins.SCAN_settingsToggle);
+			else
+				SCANcontroller.controller.easyModeScanning = GUILayout.Toggle(SCANcontroller.controller.easyModeScanning, "Instant Resource Scan", SCANskins.SCAN_settingsToggle);
 			stopE();
 			growE();
 			fillS();
@@ -183,13 +186,13 @@ namespace SCANsat.SCAN_UI
 
 			fillS();
 
-			if (GUILayout.Button("-", SCANskins.SCAN_buttonSmall, GUILayout.Width(15)))
+			if (GUILayout.Button("-", SCANskins.SCAN_buttonSmall, GUILayout.Width(18)))
 			{
 				interpolationScale = Math.Max(2, interpolationScale / 2);
 				refreshMap();
 			}
-			GUILayout.Label(interpolationScale.ToString(), SCANskins.SCAN_labelSmall, GUILayout.Width(20));
-			if (GUILayout.Button("+", SCANskins.SCAN_buttonSmall, GUILayout.Width(15)))
+			GUILayout.Label(interpolationScale.ToString(), SCANskins.SCAN_labelSmall, GUILayout.Width(36));
+			if (GUILayout.Button("+", SCANskins.SCAN_buttonSmall, GUILayout.Width(18)))
 			{
 				interpolationScale = Math.Min(32, interpolationScale * 2);
 				refreshMap();
@@ -201,13 +204,13 @@ namespace SCANsat.SCAN_UI
 
 			fillS();
 
-			if (GUILayout.Button("-", SCANskins.SCAN_buttonSmall, GUILayout.Width(15)))
+			if (GUILayout.Button("-", SCANskins.SCAN_buttonSmall, GUILayout.Width(18)))
 			{
 				mapHeight = Math.Max(64, mapHeight / 2);
 				refreshMap();
 			}
-			GUILayout.Label(mapHeight.ToString(), SCANskins.SCAN_labelSmall, GUILayout.Width(40));
-			if (GUILayout.Button("+", SCANskins.SCAN_buttonSmall, GUILayout.Width(15)))
+			GUILayout.Label(mapHeight.ToString(), SCANskins.SCAN_labelSmall, GUILayout.Width(36));
+			if (GUILayout.Button("+", SCANskins.SCAN_buttonSmall, GUILayout.Width(18)))
 			{
 				mapHeight = Math.Min(1024, mapHeight * 2);
 				refreshMap();
