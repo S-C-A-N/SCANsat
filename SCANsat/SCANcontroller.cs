@@ -785,10 +785,10 @@ namespace SCANsat
 					kscMap = gameObject.AddComponent<SCANkscMap>();
 					settingsWindow = gameObject.AddComponent<SCANsettingsUI>();
 					colorManager = gameObject.AddComponent<SCANcolorSelection>();
+					resourceSettings = gameObject.AddComponent<SCANresourceSettings>();
 					if (HighLogic.LoadedScene == GameScenes.TRACKSTATION)
 					{
 						resourceOverlay = gameObject.AddComponent<SCANoverlayController>();
-						resourceSettings = gameObject.AddComponent<SCANresourceSettings>();
 					}
 				}
 				catch (Exception e)
