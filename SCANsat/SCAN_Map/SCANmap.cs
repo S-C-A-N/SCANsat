@@ -17,6 +17,7 @@ using UnityEngine;
 using SCANsat.SCAN_Platform.Palettes;
 using SCANsat.SCAN_Platform.Logging;
 using SCANsat.SCAN_Data;
+using SCANsat.SCAN_UI.UI_Framework;
 using palette = SCANsat.SCAN_UI.UI_Framework.SCANpalette;
 
 namespace SCANsat.SCAN_Map
@@ -51,6 +52,16 @@ namespace SCANsat.SCAN_Map
 			get { return lat_offset; }
 		}
 
+		public double CenteredLong
+		{
+			get { return centeredLong; }
+		}
+
+		public double CenteredLat
+		{
+			get { return centeredLat; }
+		}
+
 		public int MapWidth
 		{
 			get { return mapwidth; }
@@ -76,7 +87,7 @@ namespace SCANsat.SCAN_Map
 			get { return body; }
 		}
 
-		public SCANresource Resource
+		public SCANresourceGlobal Resource
 		{
 			get { return resource; }
 			internal set { resource = value; }
@@ -101,6 +112,7 @@ namespace SCANsat.SCAN_Map
 		private float[,] big_heightmap;
 		private CelestialBody big_heightmap_body;
 		private bool cache;
+		private double centeredLong, centeredLat;
 
 		private void terrainHeightToArray(double lon, double lat, int ilon, int ilat)
 		{
@@ -119,7 +131,6 @@ namespace SCANsat.SCAN_Map
 			if (projection == p)
 				return;
 			projection = p;
-			resetMap();
 		}
 
 		internal double projectLongitude(double lon, double lat)
@@ -307,8 +318,20 @@ namespace SCANsat.SCAN_Map
 
 		internal void centerAround(double lon, double lat)
 		{
-			lon_offset = 180 + lon - (mapwidth / mapscale) / 2;
-			lat_offset = 90 + lat - (mapheight / mapscale) / 2;
+			if (projection == MapProjection.Polar)
+			{
+				double lo = projectLongitude(lon, lat);
+				double la = projectLatitude(lon, lat);
+				lon_offset = 180 + lo - (mapwidth / mapscale) / 2;
+				lat_offset = 90 + la - (mapheight / mapscale) / 2;
+			}
+			else
+			{
+				lon_offset = 180 + lon - (mapwidth / mapscale) / 2;
+				lat_offset = 90 + lat - (mapheight / mapscale) / 2;
+			}
+			centeredLong = lon;
+			centeredLat = lat;
 		}
 
 		internal double scaleLatitude(double lat)
@@ -354,7 +377,7 @@ namespace SCANsat.SCAN_Map
 		private mapType mType;
 		private Texture2D map; // refs above: 214,215,216,232, below, and JSISCANsatRPM.
 		private CelestialBody body; // all refs are below
-		private SCANresource resource;
+		private SCANresourceGlobal resource;
 		private SCANmapLegend mapLegend;
 		private int mapstep; // all refs are below
 		private double[] mapline; // all refs are below
@@ -365,10 +388,13 @@ namespace SCANsat.SCAN_Map
 			if (body == b)
 				return;
 			body = b;
-			//SCANcontroller.controller.Resources(b); //Repopulate resource list when changing SOI
-			if (SCANcontroller.controller.GlobalResourceOverlay)
-				resource = SCANcontroller.controller.ResourceList[SCANcontroller.controller.resourceSelection][b.name];
-			resetMap();
+			if (SCANconfigLoader.GlobalResource)
+			{
+				resource = SCANcontroller.getResourceNode(SCANcontroller.controller.resourceSelection);
+				if (resource == null)
+					resource = SCANcontroller.GetFirstResource;
+				resource.CurrentBodyConfig(body.name);
+			}
 		}
 
 		internal bool isMapComplete()
@@ -378,22 +404,26 @@ namespace SCANsat.SCAN_Map
 			return mapstep >= map.height;
 		}
 
-		public void resetMap()
+		public void resetMap(bool setRes = true)
 		{
 			mapstep = 0;
-			if (SCANcontroller.controller.GlobalResourceOverlay)
+			if (SCANconfigLoader.GlobalResource && setRes)
 			{ //Make sure that a resource is initialized if necessary
-				if (resource == null && body != null) resource = SCANcontroller.controller.ResourceList[SCANcontroller.controller.resourceSelection][body.name];
-				if (SCANcontroller.controller.resourceOverlayType == 1)
-					SCANcontroller.controller.KethaneReset = !SCANcontroller.controller.KethaneReset;
+				if (resource == null && body != null)
+				{
+					resource = SCANcontroller.getResourceNode(SCANcontroller.controller.resourceSelection);
+					if (resource == null)
+						resource = SCANcontroller.GetFirstResource;
+					resource.CurrentBodyConfig(body.name);
+				}
 			}
 		}
 
-		public void resetMap(mapType mode, bool Cache)
+		public void resetMap(mapType mode, bool Cache, bool setRes = true)
 		{
 			mType = mode;
 			cache = Cache;
-			resetMap();
+			resetMap(setRes);
 		}
 
 		/* MAP: export: PNG file */
@@ -408,7 +438,7 @@ namespace SCANsat.SCAN_Map
 				case mapType.Slope: mode = "slope"; break;
 				case mapType.Biome: mode = "biome"; break;
 			}
-			if (SCANcontroller.controller.map_ResourceOverlay && SCANcontroller.controller.GlobalResourceOverlay && !string.IsNullOrEmpty(SCANcontroller.controller.resourceSelection))
+			if (SCANcontroller.controller.map_ResourceOverlay && SCANconfigLoader.GlobalResource && !string.IsNullOrEmpty(SCANcontroller.controller.resourceSelection))
 				mode += "-" + SCANcontroller.controller.resourceSelection;
 			if (SCANcontroller.controller.colours == 1)
 				mode += "-grey";
@@ -528,9 +558,9 @@ namespace SCANsat.SCAN_Map
 					}
 					mapline[i] = projVal;
 
-					if (SCANcontroller.controller.map_ResourceOverlay && SCANcontroller.controller.GlobalResourceOverlay)
+					if (SCANcontroller.controller.map_ResourceOverlay && SCANconfigLoader.GlobalResource && resource != null)
 					{
-						pix[i] = resourceToColor(lon, lat, data, baseColor);
+						pix[i] = SCANuiUtil.resourceToColor(lon, lat, data, baseColor, resource);
 					}
 					else pix[i] = baseColor;
 
@@ -579,19 +609,19 @@ namespace SCANsat.SCAN_Map
 							{
 								if (v < 1)
 								{
-									baseColor = palette.lerp(palette.xkcd_PukeGreen, palette.xkcd_Lemon, v);
+									baseColor = palette.lerp(SCANcontroller.controller.lowSlopeColorOne, SCANcontroller.controller.highSlopeColorOne, v);
 								}
 								else
 								{
-									baseColor = palette.lerp(palette.xkcd_Lemon, palette.xkcd_OrangeRed, v - 1);
+									baseColor = palette.lerp(SCANcontroller.controller.lowSlopeColorTwo, SCANcontroller.controller.highSlopeColorTwo, v - 1);
 								}
 							}
 						}
 						mapline[i] = projVal;
 					}
-					if (SCANcontroller.controller.map_ResourceOverlay && SCANcontroller.controller.GlobalResourceOverlay)
+					if (SCANcontroller.controller.map_ResourceOverlay && SCANconfigLoader.GlobalResource && resource != null)
 					{
-						pix[i] = resourceToColor(lon, lat, data, baseColor);
+						pix[i] = SCANuiUtil.resourceToColor(lon, lat, data, baseColor, resource);
 					}
 					else pix[i] = baseColor;
 				}
@@ -628,34 +658,40 @@ namespace SCANsat.SCAN_Map
 						else
 						{
 							Color elevation = palette.grey;
-							if (body.pqsController == null)
+							if (SCANcontroller.controller.biomeTransparency > 0)
 							{
-								baseColor = palette.lerp(palette.black, palette.white, UnityEngine.Random.value);
+								if (body.pqsController == null)
+								{
+									elevation = palette.grey;
+								}
+								else if (SCANUtil.isCovered(lon, lat, data, SCANtype.Altimetry))
+								{
+									projVal = terrainElevation(lon, lat, data, out scheme);
+									elevation = palette.lerp(palette.black, palette.white, Mathf.Clamp(projVal + 1500f, 0, 9000) / 9000f);
+								}
 							}
-							else if (SCANUtil.isCovered(lon, lat, data, SCANtype.Altimetry))
-							{
-								projVal = terrainElevation(lon, lat, data, out scheme);
-								elevation = palette.lerp(palette.black, palette.white, Mathf.Clamp(projVal + 1500f, 0, 9000) / 9000f);
-							}
-							Color bio1 = palette.xkcd_CamoGreen;
-							Color bio2 = palette.xkcd_Marigold;
+
 							if ((i > 0 && mapline[i - 1] != bio) || (mapstep > 0 && mapline[i] != bio))
 							{
-								//biome = palette.lerp(palette.xkcd_Puce, elevation, 0.5f);
 								biome = palette.white;
+							}
+							else if (SCANcontroller.controller.useStockBiomes)
+							{
+								Color c = SCANUtil.getBiome(body, lon, lat).mapColor;
+								biome = palette.lerp(c, elevation, SCANcontroller.controller.biomeTransparency / 100f);
 							}
 							else
 							{
-								biome = palette.lerp(palette.lerp(bio1, bio2, (float)bio), elevation, 0.5f);
+								biome = palette.lerp(palette.lerp(SCANcontroller.controller.lowBiomeColor, SCANcontroller.controller.highBiomeColor, (float)bio), elevation, SCANcontroller.controller.biomeTransparency / 100f);
 							}
 						}
 
 						baseColor = biome;
 						mapline[i] = bio;
 					}
-					if (SCANcontroller.controller.map_ResourceOverlay && SCANcontroller.controller.GlobalResourceOverlay)
+					if (SCANcontroller.controller.map_ResourceOverlay && SCANconfigLoader.GlobalResource && resource != null)
 					{
-						pix[i] = resourceToColor(lon, lat, data, baseColor);
+						pix[i] = SCANuiUtil.resourceToColor(lon, lat, data, baseColor, resource);
 					}
 					else pix[i] = baseColor;
 				}
@@ -701,57 +737,6 @@ namespace SCANsat.SCAN_Map
 			}
 
 			return elevation;
-		}
-
-		/* Calculates resource value for a given pixel using Regolith or Kethane data */
-		private double resourceMapValue(double Lon, double Lat, SCANdata Data)
-		{
-			double amount = 0;
-			if (SCANcontroller.controller.resourceOverlayType == 0 && SCANversions.RegolithFound)
-			{
-				if (SCANUtil.isCovered(Lon, Lat, Data, resource.Type)) //check our new resource coverage map
-				{
-					amount = SCANUtil.RegolithOverlay(Lat, Lon, resource.Name, body.flightGlobalsIndex); //grab the resource amount for the current pixel
-					amount *= 100;
-					if (amount >= resource.MinValue)
-					{
-						if (amount > resource.MaxValue)
-							amount = resource.MaxValue;
-					}
-					else
-						amount = 0;
-				}
-				else
-					amount = -1;
-			}
-			else if (SCANcontroller.controller.resourceOverlayType == 1)
-			{
-				if (SCANUtil.isCovered(Lon, Lat, Data, resource.Type))
-				{
-					int ilon = SCANUtil.icLON(Lon);
-					int ilat = SCANUtil.icLAT(Lat);
-					amount = Data.KethaneValueMap[ilon, ilat];
-				}
-				else
-					amount = -1;
-			}
-			return amount;
-		}
-
-		/* Converts resource amount to pixel color */
-		private Color resourceToColor (double Lon, double Lat, SCANdata Data, Color BaseColor)
-		{
-			double amount = resourceMapValue(Lon, Lat, Data);
-			if (amount < 0)
-				return BaseColor;
-			else if (amount == 0)
-				return palette.lerp(BaseColor, palette.grey, 0.4f);
-			else if (SCANcontroller.controller.resourceOverlayType == 0 && SCANversions.RegolithFound)
-				return palette.lerp(BaseColor, palette.lerp(resource.EmptyColor, resource.FullColor, (float)amount / (resource.MaxValue - resource.MinValue)), 0.3f);
-			else if (SCANcontroller.controller.resourceOverlayType == 1 && SCANversions.kethaneLoaded)
-				return palette.lerp(BaseColor, palette.lerp(resource.EmptyColor, resource.FullColor, (float)amount / resource.MaxValue), 0.8f);
-
-			return BaseColor;
 		}
 
 		#endregion

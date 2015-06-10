@@ -12,10 +12,11 @@
  *
  */
 #endregion
+
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text.RegularExpressions;
+using FinePrint;
 using SCANsat.SCAN_Platform;
 using SCANsat.SCAN_Data;
 using SCANsat.SCAN_Map;
@@ -154,32 +155,47 @@ namespace SCANsat.SCAN_UI.UI_Framework
 					info += SCANUtil.getBiomeName(body, lon, lat) + " ";
 				}
 
-				if (SCANcontroller.controller.map_ResourceOverlay && SCANcontroller.controller.GlobalResourceOverlay) //Adds selected resource amount to big map legend
+				if (SCANcontroller.controller.map_ResourceOverlay && SCANconfigLoader.GlobalResource && mapObj.Resource != null) //Adds selected resource amount to big map legend
 				{
-					if (SCANcontroller.controller.resourceOverlayType == 0 && SCANversions.RegolithFound)
+					if (SCANUtil.isCovered(lon, lat, data, mapObj.Resource.SType))
 					{
-						if (SCANUtil.isCovered(lon, lat, data, mapObj.Resource.Type))
+						double amount = SCANUtil.ResourceOverlay(lat, lon, mapObj.Resource.Name, mapObj.Body);
+						string label;
+						if (amount < 0)
+							label = "Unknown";
+						else
 						{
-							double amount = SCANUtil.RegolithOverlay(lat, lon, mapObj.Resource.Name, mapObj.Body.flightGlobalsIndex);
-							string label;
-							if (amount < 0)
-								label = "Unknown";
-							else
-							{
-								if (amount > 1)
-									amount = 1;
-								label = amount.ToString("P2");
-							}
-							info += palette.colored(mapObj.Resource.FullColor, mapObj.Resource.Name + ": " + label);
+							if (amount > 1)
+								amount = 1;
+							label = amount.ToString("P2");
 						}
+						info += palette.colored(mapObj.Resource.MaxColor, mapObj.Resource.Name + ": " + label + " ");
 					}
-					else if (SCANcontroller.controller.resourceOverlayType == 1)
+				}
+
+				if (SCANcontroller.controller.map_waypoints && WaypointManager.Instance() != null)
+				{
+					double range = ContractDefs.Survey.MaximumTriggerRange;
+					foreach (SCANwaypoint p in data.Waypoints)
 					{
-						if (SCANUtil.isCovered(lon, lat, data, mapObj.Resource.Type))
+						if (!p.LandingTarget)
 						{
-							double amount = data.KethaneValueMap[SCANUtil.icLON(lon), SCANUtil.icLAT(lat)];
-							if (amount < 0) amount = 0d;
-							info += palette.colored(mapObj.Resource.FullColor, mapObj.Resource.Name + ": " + amount.ToString("N1"));
+							if (p.Root != null)
+							{
+								if (p.Root.ContractState != Contracts.Contract.State.Active)
+									continue;
+							}
+							if (p.Param != null)
+							{
+								if (p.Param.State != Contracts.ParameterState.Incomplete)
+									continue;
+							}
+
+							if (WaypointManager.Instance().Distance(lat, lon, 1000, p.Latitude, p.Longitude, 1000, body) <= range)
+							{
+								info += p.Name + " ";
+								break;
+							}
 						}
 					}
 				}
@@ -190,6 +206,80 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			//{
 			//	info += " " + mlat.ToString("F") + " " + mlon.ToString("F"); // uncomment for debugging projections
 			//}
+
+			//Draw the readout info labels
+			readableLabel(info, false);
+			SCAN_MBW.fillS(-10);
+			readableLabel(posInfo, false);
+		}
+
+		internal static void mouseOverInfoSimple(double lon, double lat, SCANmap mapObj, SCANdata data, CelestialBody body, bool b)
+		{
+			string info = "";
+			string posInfo = "";
+
+			if (b)
+			{
+				if (SCANUtil.isCovered(lon, lat, data, SCANtype.AltimetryHiRes))
+				{
+					info += SCANUtil.getElevation(body, lon, lat).ToString("N0") + "m ";
+				}
+				else if (SCANUtil.isCovered(lon, lat, data, SCANtype.AltimetryLoRes))
+				{
+					info += (((int)SCANUtil.getElevation(body, lon, lat) / 500) * 500).ToString() + "m ";
+				}
+				if (SCANUtil.isCovered(lon, lat, data, SCANtype.Biome))
+				{
+					info += SCANUtil.getBiomeName(body, lon, lat) + " ";
+				}
+
+				if (SCANcontroller.controller.map_ResourceOverlay && SCANconfigLoader.GlobalResource && mapObj.Resource != null) //Adds selected resource amount to big map legend
+				{
+					if (SCANUtil.isCovered(lon, lat, data, mapObj.Resource.SType))
+					{
+						double amount = SCANUtil.ResourceOverlay(lat, lon, mapObj.Resource.Name, mapObj.Body);
+						string label;
+						if (amount < 0)
+							label = "Unknown";
+						else
+						{
+							if (amount > 1)
+								amount = 1;
+							label = amount.ToString("P2");
+						}
+						info += palette.colored(mapObj.Resource.MaxColor, mapObj.Resource.Name + ": " + label + " ");
+					}
+				}
+
+				if (SCANcontroller.controller.map_waypoints && WaypointManager.Instance() != null)
+				{
+					double range = ContractDefs.Survey.MaximumTriggerRange;
+					foreach (SCANwaypoint p in data.Waypoints)
+					{
+						if (!p.LandingTarget)
+						{
+							if (p.Root != null)
+							{
+								if (p.Root.ContractState != Contracts.Contract.State.Active)
+									continue;
+							}
+							if (p.Param != null)
+							{
+								if (p.Param.State != Contracts.ParameterState.Incomplete)
+									continue;
+							}
+
+							if (WaypointManager.Instance().Distance(lat, lon, 1000, p.Latitude, p.Longitude, 1000, body) <= range)
+							{
+								info += p.Name + " ";
+								break;
+							}
+						}
+					}
+				}
+
+				posInfo += string.Format("{0} ({1:F2}°,{2:F2}°)", toDMS(lat, lon), lat, lon);
+			}
 
 			//Draw the readout info labels
 			readableLabel(info, false);
@@ -262,7 +352,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 
 		/* UI: conversions to and from DMS */
 		/* FIXME: These do not belong here. And they are only used once! */
-		internal static string toDMS(double thing, string neg, string pos)
+		private static string toDMS(double thing, string neg, string pos)
 		{
 			string dms = "";
 			if (thing >= 0)
@@ -340,8 +430,8 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			double lat = SCANUtil.fixLat(vessel.latitude);
 			if (map != null)
 			{
-				lat = (map.projectLatitude(vessel.longitude, vessel.latitude) + 90) % 180;
-				lon = (map.projectLongitude(vessel.longitude, vessel.latitude) + 180) % 360;
+				lat = SCANUtil.fixLat(map.projectLatitude(vessel.longitude, vessel.latitude));
+				lon = SCANUtil.fixLon(map.projectLongitude(vessel.longitude, vessel.latitude));
 				lat = map.scaleLatitude(lat);
 				lon = map.scaleLongitude(lon);
 				if (lat < 0 || lon < 0 || lat > 180 || lon > 360)
@@ -374,7 +464,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 		}
 
 		//Handles various map labels; probably should be split up into multiple methods
-		internal static void drawMapLabels(Rect maprect, Vessel vessel, SCANmap map, SCANdata data, CelestialBody body)
+		internal static void drawMapLabels(Rect maprect, Vessel vessel, SCANmap map, SCANdata data, CelestialBody body, bool showAnom, bool showWaypoints)
 		{
 			//This section handles flag and asteroid labels
 			foreach (Vessel v in FlightGlobals.Vessels)
@@ -395,11 +485,32 @@ namespace SCANsat.SCAN_UI.UI_Framework
 				}
 			}
 			//This section handles anomaly labels
-			if (SCANcontroller.controller.map_markers)
+			if (showAnom)
 			{
 				foreach (SCANanomaly anomaly in data.Anomalies)
 				{
 					drawAnomalyLabel(maprect, map, anomaly);
+				}
+			}
+			if (showWaypoints)
+			{
+				foreach (SCANwaypoint p in data.Waypoints)
+				{
+					if (!p.LandingTarget)
+					{
+						if (p.Root != null)
+						{
+							if (p.Root.ContractState != Contracts.Contract.State.Active)
+								continue;
+						}
+						if (p.Param != null)
+						{
+							if (p.Param.State != Contracts.ParameterState.Incomplete)
+								continue;
+						}
+					}
+
+					drawWaypointLabel(maprect, map, p, data);
 				}
 			}
 			if (vessel != null)
@@ -410,16 +521,16 @@ namespace SCANsat.SCAN_UI.UI_Framework
 		}
 
 		//Method to draw anomaly labels on the map
-		internal static void drawAnomalyLabel(Rect maprect, SCANmap map, SCANanomaly anomaly)
+		private static void drawAnomalyLabel(Rect maprect, SCANmap map, SCANanomaly anomaly)
 		{
 			if (!anomaly.Known)
 				return;
-			double lon = (anomaly.Longitude + 360 + 180) % 360;
-			double lat = (anomaly.Latitude + 180 + 90) % 180;
+			double lon = SCANUtil.fixLon(anomaly.Longitude);
+			double lat = SCANUtil.fixLat(anomaly.Latitude);
 			if (map != null)
 			{
-				lat = (map.projectLatitude(anomaly.Longitude, anomaly.Latitude) + 90) % 180;
-				lon = (map.projectLongitude(anomaly.Longitude, anomaly.Latitude) + 180) % 360;
+				lat = SCANUtil.fixLat(map.projectLatitude(anomaly.Longitude, anomaly.Latitude));
+				lon = SCANUtil.fixLon(map.projectLongitude(anomaly.Longitude, anomaly.Latitude));
 				lat = map.scaleLatitude(lat);
 				lon = map.scaleLongitude(lon);
 				if (lat < 0 || lon < 0 || lat > 180 || lon > 360)
@@ -434,8 +545,141 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			drawLabel(r, txt, true, true, true);
 		}
 
+		private static void drawWaypointLabel(Rect maprect, SCANmap map, SCANwaypoint p, SCANdata data)
+		{
+			double lon = SCANUtil.fixLon(p.Longitude);
+			double lat = SCANUtil.fixLat(p.Latitude);
+
+			if (map != null)
+			{
+				lat = SCANUtil.fixLat(map.projectLatitude(p.Longitude, p.Latitude));
+				lon = SCANUtil.fixLon(map.projectLongitude(p.Longitude, p.Latitude));
+				lat = map.scaleLatitude(lat);
+				lon = map.scaleLongitude(lon);
+				if (lat < 0 || lon < 0 || lat > 180 || lon > 360)
+					return;
+			}
+			lon = lon * maprect.width / 360f;
+			lat = maprect.height - lat * maprect.height / 180f;
+
+			Rect r = new Rect(maprect.x + (float)lon, maprect.y + (float)lat, 24, 24);
+
+			r.x -= 12;
+
+			if (!p.LandingTarget)
+			{
+				r.y -= 24;
+				drawMapIcon(r, SCANskins.SCAN_WaypointIcon, true);
+			}
+			else
+			{
+				r.x += 1;
+				r.y -= 13;
+				drawMapIcon(r, SCANcontroller.controller.mechJebTargetSelection ? SCANskins.SCAN_MechJebIcon : SCANskins.SCAN_TargetIcon, true, SCANcontroller.controller.mechJebTargetSelection ? palette.red : palette.xkcd_PukeGreen, true);
+			}
+		}
+
+		internal static void drawMapIcon(Rect pos, Texture2D tex, bool outline = false, Color c = new Color(), bool flash = false, Rect texPos = new Rect(), bool texCoords = false)
+		{
+			if (texCoords)
+			{
+				Color old = GUI.color;
+				if (outline)
+				{
+					GUI.color = palette.black;
+					pos.x -= 1;
+					GUI.DrawTextureWithTexCoords(pos, tex, texPos);
+					pos.x += 2;
+					GUI.DrawTextureWithTexCoords(pos, tex, texPos);
+					pos.x -= 1;
+					pos.y -= 1;
+					GUI.DrawTextureWithTexCoords(pos, tex, texPos);
+					pos.y += 2;
+					GUI.DrawTextureWithTexCoords(pos, tex, texPos);
+					pos.y -= 1;
+				}
+				if (flash)
+					GUI.color = c;
+				else
+					GUI.color = old;
+
+				GUI.DrawTextureWithTexCoords(pos, tex, texPos);
+				GUI.color = old;
+			}
+			else
+			{
+				Color old = GUI.color;
+				if (outline)
+				{
+					GUI.color = palette.black;
+					pos.x -= 1;
+					GUI.DrawTexture(pos, tex);
+					pos.x += 2;
+					GUI.DrawTexture(pos, tex);
+					pos.x -= 1;
+					pos.y -= 1;
+					GUI.DrawTexture(pos, tex);
+					pos.y += 2;
+					GUI.DrawTexture(pos, tex);
+					pos.y -= 1;
+				}
+				if (flash)
+					GUI.color = c;
+				else
+					GUI.color = old;
+
+				GUI.DrawTexture(pos, tex);
+				GUI.color = old;
+			}
+		}
+
+		internal static void drawMapIconGL(Rect pos, Texture2D tex, Color c, Material iconMat, Color shadow = new Color(), bool outline = false, Rect texPos = new Rect(), bool texCoords = false)
+		{
+			if (texCoords)
+			{
+				if (outline)
+				{
+					iconMat.color = shadow;
+					pos.x -= 1;
+					Graphics.DrawTexture(pos, tex, texPos, 0, 0, 0, 0, iconMat);
+					pos.x += 2;
+					Graphics.DrawTexture(pos, tex, texPos, 0, 0, 0, 0, iconMat);
+					pos.x -= 1;
+					pos.y -= 1;
+					Graphics.DrawTexture(pos, tex, texPos, 0, 0, 0, 0, iconMat);
+					pos.y += 2;
+					Graphics.DrawTexture(pos, tex, texPos, 0, 0, 0, 0, iconMat);
+					pos.y -= 1;
+				}
+				iconMat.color = c;
+
+				Graphics.DrawTexture(pos, tex, texPos, 0, 0, 0, 0, iconMat);
+			}
+			else
+			{
+				if (outline)
+				{
+					iconMat.color = shadow;
+					pos.x -= 1;
+					Graphics.DrawTexture(pos, tex, 0, 0, 0, 0, iconMat);
+					pos.x += 2;
+					Graphics.DrawTexture(pos, tex, 0, 0, 0, 0, iconMat);
+					pos.x -= 1;
+					pos.y -= 1;
+					Graphics.DrawTexture(pos, tex, 0, 0, 0, 0, iconMat);
+					pos.y += 2;
+					Graphics.DrawTexture(pos, tex, 0, 0, 0, 0, iconMat);
+					pos.y -= 1;
+				}
+				iconMat.color = c;
+
+				Graphics.DrawTexture(pos, tex);
+			}
+
+		}
+
 		/* FIXME: This may use assumed, shared, static constants with Legend stuff in other SCANsat files */
-		internal static void drawLegendLabel(Rect r, float val, float min, float max)
+		private static void drawLegendLabel(Rect r, float val, float min, float max)
 		{
 			if (val < min || val > max)
 				return;
@@ -470,6 +714,20 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			drawLabel(sr, max, true, true);
 		}
 
+		internal static void drawVerticalSliderLabel(Rect r, string min, string max)
+		{
+			Rect sr = new Rect(r.x - 15, r.y - 4, 20, 20);
+			drawLabel(sr, "_", true, false);
+			sr.y += (r.height - 8);
+			drawLabel(sr, "_", true, false);
+			sr.width = 50;
+			sr.x -= 40;
+			sr.y = r.y + 2;
+			drawLabel(sr, max, true, false);
+			sr.y += (r.height - 8);
+			drawLabel(sr, min, true, false);
+		}
+
 		/* FIXME: This uses assumed, shared, static constants with Legend stuff in other SCANsat files */
 		internal static void drawLegend(SCANdata data, SCANmapLegend legend)
 		{
@@ -477,13 +735,13 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			Rect r = GUILayoutUtility.GetLastRect();
 			r.width -= 64;
 			GUI.DrawTexture(r, legend.Legend); //SCANmapLegend.getLegend(data.MinHeight, data.MaxHeight, SCANcontroller.controller.colours, data));
-			float minLabel = data.MinHeight;
-			float maxLabel = data.MaxHeight;
-			if (data.MinHeight % 1000 != 0)
+			float minLabel = data.TerrainConfig.MinTerrain;
+			float maxLabel = data.TerrainConfig.MaxTerrain;
+			if (data.TerrainConfig.MinTerrain % 1000 != 0)
 				minLabel += 500;
-			if (data.MaxHeight % 1000 != 0)
+			if (data.TerrainConfig.MaxTerrain % 1000 != 0)
 				maxLabel -= 500;
-			float range = data.MaxHeight - data.MinHeight;
+			float range = data.TerrainConfig.MaxTerrain - data.TerrainConfig.MinTerrain;
 			float step = 1000f;
 			if (range > 10000)
 				step = 2000;
@@ -491,7 +749,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 				step = 500;
 			for (float val = minLabel; val < maxLabel; val += step)
 			{
-				drawLegendLabel(r, val, data.MinHeight, data.MaxHeight);
+				drawLegendLabel(r, val, data.TerrainConfig.MinTerrain, data.TerrainConfig.MaxTerrain);
 			}
 		}
 
@@ -697,6 +955,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 		//Draw the orbit overlay
 		internal static void drawOrbit(Rect maprect, SCANmap map, Vessel vessel, CelestialBody body)
 		{
+			if (vessel == null) return;
 			if (vessel.mainBody != body) return;
 			int eqh = 16;
 
@@ -710,12 +969,12 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			bool ath = false;
 			if (vessel.mainBody.atmosphere)
 			{
-				if (vessel.mainBody.maxAtmosphereAltitude >= vessel.altitude)
+				if (vessel.mainBody.atmosphereDepth >= vessel.altitude)
 				{
 					ath = true;
 				}
 			}
-			Rect r = new Rect(0, 0, 50f, 50f);
+			Rect r = new Rect(0, 0, 70f, 50f);
 			Color col;
 			// project the last and the current orbital period onto the map
 			for (int i = -steps; i < steps; ++i)
@@ -769,7 +1028,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 				{
 					if (vessel.mainBody.atmosphere)
 					{
-						if (vessel.mainBody.maxAtmosphereAltitude >= alt)
+						if (vessel.mainBody.atmosphereDepth >= alt)
 						{
 							if (!ath)
 							{
@@ -790,7 +1049,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 				r.x += 24;
 				r.y -= 12;
 				if (!lite)
-					drawLabel(r, o.ApA.ToString("N1"), true, true, true);
+					drawLabel(r, o.ApA.ToString("N0"), true, true, true);
 			}
 			if (o.PeA > 0 && mapPosAtT(maprect, map, ref r, vessel, o, o.timeToPe, startUT))
 			{
@@ -798,7 +1057,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 				r.x += 24;
 				r.y -= 12;
 				if (!lite)
-					drawLabel(r, o.PeA.ToString("N1"), true, true, true);
+					drawLabel(r, o.PeA.ToString("N0"), true, true, true);
 			}
 
 			if (lite)
@@ -1008,6 +1267,159 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			double MA = EA - e * Math.Sin(EA);
 			// the mean anomaly isn't really an angle, but I'm a simple person
 			return MA * Mathf.Rad2Deg;
+		}
+
+		#endregion
+
+		#region MechJeb Target Overlay
+
+		/*These methods borrowed from MechJeb GLUtils: 
+		 * https://github.com/MuMech/MechJeb2/blob/master/MechJeb2/GLUtils.cs
+		 * 
+		*/
+		internal static void drawTargetOverlay(CelestialBody body, double latitude, double longitude, Color c)
+		{
+			double rotation = 0;
+			double radius = 0;
+			Vector3d up = body.GetSurfaceNVector(latitude, longitude);
+			var height = SCANUtil.getElevation(body, longitude, latitude);
+			if (height < body.Radius)
+				height = body.Radius;
+			Vector3d center = body.position + height * up;
+
+			if (occluded(center, body))
+				return;
+
+			Vector3d north = Vector3d.Exclude(up, body.transform.up).normalized;
+
+			if (radius <= 0)
+				radius = body.Radius / 15;
+
+			GLTriangleMap(new Vector3d[] { center, center + radius * (QuaternionD.AngleAxis(rotation - 55, up) * north), center + radius * (QuaternionD.AngleAxis(rotation -35, up) * north) }, c);
+
+			GLTriangleMap(new Vector3d[] { center, center + radius * (QuaternionD.AngleAxis(rotation + 55, up) * north), center + radius * (QuaternionD.AngleAxis(rotation + 35, up) * north) }, c);
+
+			GLTriangleMap(new Vector3d[] { center, center + radius * (QuaternionD.AngleAxis(rotation - 145, up) * north), center + radius * (QuaternionD.AngleAxis(rotation - 125, up) * north) }, c);
+
+			GLTriangleMap(new Vector3d[] { center, center + radius * (QuaternionD.AngleAxis(rotation + 145, up) * north), center + radius * (QuaternionD.AngleAxis(rotation + 125, up) * north) }, c);
+		}
+
+		private static bool occluded(Vector3d pos, CelestialBody body)
+		{
+			if (Vector3d.Distance(pos, body.position) < body.Radius - 100)
+				return true;
+
+			Vector3d camPos = ScaledSpace.ScaledToLocalSpace(PlanetariumCamera.Camera.transform.position);
+
+			if (Vector3d.Angle(camPos - pos, body.position - pos) > 90)
+				return false;
+
+			double bodyDistance = Vector3d.Distance(camPos, body.position);
+			double separationAngle = Vector3d.Angle(pos - camPos, body.position - camPos);
+			double altitude = bodyDistance * Math.Sin(Math.PI / 180 * separationAngle);
+			return (altitude < body.Radius);
+		}
+
+		private static Material mat;
+
+		private static void GLTriangleMap(Vector3d[] vert, Color c)
+		{
+			GL.PushMatrix();
+			if (mat == null)
+				mat = new Material(Shader.Find("Particles/Additive"));
+			mat.SetPass(0);
+			GL.LoadOrtho();
+			GL.Begin(GL.TRIANGLES);
+			GL.Color(c);
+			GLVertexMap(vert[0]);
+			GLVertexMap(vert[1]);
+			GLVertexMap(vert[2]);
+			GL.End();
+			GL.PopMatrix();
+		}
+
+		private static void GLVertexMap(Vector3d pos)
+		{
+			Vector3 screenPoint = PlanetariumCamera.Camera.WorldToScreenPoint(ScaledSpace.LocalToScaledSpace(pos));
+			GL.Vertex3(screenPoint.x / Camera.main.pixelWidth, screenPoint.y / Camera.main.pixelHeight, 0);
+		}
+
+		#endregion
+
+		#region Planet Overlay Textures
+
+		internal static void drawResourceTexture(int height, ref int step, SCANdata data, SCANresourceGlobal resource)
+		{
+			Color[] pix;
+			float scale = height / 180f;
+
+			if (resource.MapOverlay == null)
+			{
+				resource.MapOverlay = new Texture2D(height * 2, height, TextureFormat.ARGB32, true);
+				pix = resource.MapOverlay.GetPixels();
+				for (int i = 0; i < pix.Length; i++)
+					pix[i] = palette.clear;
+				resource.MapOverlay.SetPixels(pix);
+			}
+			else if (step >= resource.MapOverlay.height)
+			{
+				return;
+			}
+
+			pix = resource.MapOverlay.GetPixels(0, step, resource.MapOverlay.width, 1);
+
+			for (int i = 0; i < pix.Length; i++)
+			{
+				double lon = (i / scale);
+				double lat = (step / scale) - 90;
+
+				if (lon <= 180)
+					lon = 180 - lon;
+				else
+					lon = (lon - 180) * -1;
+				lon -= 90;
+				if (lon < -180)
+					lon += 360;
+
+				pix[i] = resourceToColor(lon, lat, data, palette.clear, resource, 0.05f);
+			}
+
+			resource.MapOverlay.SetPixels(0, step, resource.MapOverlay.width, 1, pix);
+			step++;
+			if (step % 10 == 0 || step >= height)
+				resource.MapOverlay.Apply();
+		}
+
+		private static double resourceMapValue(double Lon, double Lat, SCANdata Data, SCANresourceGlobal resource)
+		{
+			double amount = 0;
+			if (SCANUtil.isCovered(Lon, Lat, Data, resource.SType))
+			{
+				amount = SCANUtil.ResourceOverlay(Lat, Lon, resource.Name, Data.Body);
+				amount *= 100;
+				if (amount >= resource.CurrentBody.MinValue)
+				{
+					if (amount > resource.CurrentBody.MaxValue)
+						amount = resource.CurrentBody.MaxValue;
+				}
+				else
+					amount = 0;
+			}
+			else
+				amount = -1;
+			return amount;
+		}
+
+		/* Converts resource amount to pixel color */
+		internal static Color resourceToColor(double Lon, double Lat, SCANdata Data, Color BaseColor, SCANresourceGlobal Resource, float Transparency = 0.4f)
+		{
+			double amount = resourceMapValue(Lon, Lat, Data, Resource);
+			if (amount < 0)
+				return BaseColor;
+			else if (amount == 0)
+				return palette.lerp(BaseColor, palette.grey, Transparency);
+			else
+				return palette.lerp(palette.lerp(Resource.MinColor, Resource.MaxColor, (float)amount / (Resource.CurrentBody.MaxValue - Resource.CurrentBody.MinValue)), BaseColor, Resource.Transparency / 100f);
 		}
 
 		#endregion

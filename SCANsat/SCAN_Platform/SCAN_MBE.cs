@@ -127,18 +127,18 @@ namespace SCANsat.SCAN_Platform
 		//  http://docs.unity3d.com/Documentation/Manual/ExecutionOrder.html
 		protected virtual void Awake() { Log.Debug("MBE Awakened"); }		// 1.
 		//internal virtual void OnEnable()		{ }								// 2.
-		internal virtual void Start() { Log.Debug("MBE Started"); }		// 3.
-		internal virtual void FixedUpdate() { }								// 4a. called (>1) per frame
-		internal virtual void Update() { }								// 4b.   ""   (=1) per frame
+		protected virtual void Start() { Log.Debug("MBE Started"); }		// 3.
+		protected virtual void FixedUpdate() { }								// 4a. called (>1) per frame
+		protected virtual void Update() { }								// 4b.   ""   (=1) per frame
 		// 4c.        <coroutines run>
-		internal virtual void LateUpdate() { }								// 4d.   ""   (=1) per frame
+		protected virtual void LateUpdate() { }								// 4d.   ""   (=1) per frame
 		//internal virtual void OnGUI()			{ }								// 5.    ""   (>1) per frame
 		// 5a. (layout and repaint)
 		// 5a. (layout and input) (1 per input)
-		internal virtual void OnGUIEvery() { }
+		protected virtual void OnGUIEvery() { }
 		protected virtual void OnGUI_FirstRun() { Log.Debug("Running OnGUI OnceOnly Code"); }
 		//internal virtual void OnDisable()		{ }								// 6.
-		internal virtual void OnDestroy() { Log.Debug("MBE Destroy-ing"); }	// 7.
+		protected virtual void OnDestroy() { Log.Debug("MBE Destroy-ing"); }	// 7.
 
 		private void OnGUI()
 		{

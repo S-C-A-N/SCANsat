@@ -26,9 +26,9 @@ namespace SCANsat.SCAN_Data
 		Anomaly = 1 << 4,		    // anomalies (position of anomaly)
 		AnomalyDetail = 1 << 5,	// anomaly detail (name of anomaly, etc.)
 		Kethane = 1 << 6,         // Kethane - K-type - Kethane
-		Ore = 1 << 7,             // Ore - Regolith & K-type - EPL & MKS
-		Kethane_3 = 1 << 8,       // Reserved - K-type
-		Kethane_4 = 1 << 9,       // Reserved - K-type
+		MetallicOre = 1 << 7,             // CRP Ore - Regolith
+		Ore = 1 << 8,				//Stock Ore
+		He3 = 1 << 9,				// Helium 3
 		Uraninite = 1 << 10,        // Uranium - Regolith - KSPI
 		Thorium = 1 << 11,        // Thorium - Regolith - KSPI
 		Alumina = 1 << 12,        // Alumina - Regolith - KSPI
@@ -42,6 +42,8 @@ namespace SCANsat.SCAN_Data
 		Regolith_11 = 1<< 20,		// Reserved - Regolith
 
 		Everything_SCAN = (1 << 6) - 1,	// All default SCANsat scanners
+		AllResources = 2147483584,		// All resource types
+		DefinedResources = 393088,		// All defined resource types
 		Everything = Int32.MaxValue      // All scanner types
 	}
 }

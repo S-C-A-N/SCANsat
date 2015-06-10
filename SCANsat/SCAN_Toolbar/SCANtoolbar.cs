@@ -12,6 +12,7 @@
  * Created by David to allow the SCANsat plugin to function through the toolbar interface
  */
 #endregion
+
 using System.IO;
 using UnityEngine;
 using SCANsat.SCAN_Platform;
