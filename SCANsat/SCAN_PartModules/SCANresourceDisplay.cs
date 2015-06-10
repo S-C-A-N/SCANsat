@@ -192,7 +192,8 @@ namespace SCANsat.SCAN_PartModules
 
 			abundanceSummary = ResourceCache.Instance.AbundanceCache.
 				Where(a => a.ResourceName == ResourceName && a.HarvestType == HarvestTypes.Planetary && a.BodyId == bodyID).
-				ToDictionary(a => a.BiomeName, a => a);
+				GroupBy(a => a.BiomeName).
+				ToDictionary(b => b.Key, b => b.First());
 		}
 
 		public void EnableModule()
