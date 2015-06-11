@@ -24,11 +24,12 @@ namespace SCANsat.SCAN_Map
 {
 	public class SCANmap
 	{
-		internal SCANmap(CelestialBody Body, bool Cache)
+		internal SCANmap(CelestialBody Body, bool Cache, bool zoomMap = false)
 		{
 			body = Body;
 			pqs = body.pqsController != null;
 			biomeMap = body.BiomeMap != null;
+			zoom = zoomMap;
 			data = SCANUtil.getData(body);
 			if (data == null)
 			{
@@ -412,6 +413,7 @@ namespace SCANsat.SCAN_Map
 		private double unScaleLongitude(double lon, double scale)
 		{
 			lon -= lon_offset;
+			lon = SCANUtil.fixLonShift(lon);
 			lon += 180;
 			lon *= scale;
 			return lon;
@@ -428,6 +430,7 @@ namespace SCANsat.SCAN_Map
 
 		/* MAP: internal state */
 		private mapType mType;
+		private bool zoom;
 		private Texture2D map; // refs above: 214,215,216,232, below, and JSISCANsatRPM.
 		private CelestialBody body; // all refs are below
 		private SCANresourceGlobal resource;
@@ -578,16 +581,7 @@ namespace SCANsat.SCAN_Map
 				}
 				else
 				{
-					for (int j = 0; j < resourceMapHeight; j += resourceInterpolation)
-					{
-						for (int i = 0; i < resourceMapWidth; i += resourceInterpolation)
-						{
-							double rLon = (i * 1.0f / resourceMapScale) - 180f + lon_offset;
-							double rLat = (j * 1.0f / resourceMapScale) - 90f + lat_offset;
-
-							resourceCache[i, j] = SCANUtil.ResourceOverlay(rLat, rLon, resource.Name, body, SCANcontroller.controller.resourceBiomeLock) * 100f;
-						}
-					}
+					generateResourceCache();
 					mapstep++;
 					return map;
 				}
@@ -791,40 +785,27 @@ namespace SCANsat.SCAN_Map
 				if (resourceOn)
 				{
 					float abundance = 0;
-					double resourceLat = fixUnscale(unScaleLatitude(lat, resourceMapScale), resourceMapHeight);
-					double resourceLon = fixUnscale(unScaleLongitude(lon, resourceMapScale), resourceMapWidth);
-
-					//switch (projection)
-					//{
-					//	case MapProjection.Polar:
-					//		{
-					//			if ((lat <= 6 && lat >= 0) || (lat >= -6 && lat <=0))
-					//			{
-
-					//			}
-					//			//else if (lat >= 87 || lat <= -87)
-					//			//{
-
-					//			//}
-					//			else
-					//			{
-					abundance = resourceCache[Mathf.RoundToInt((float)resourceLon), Mathf.RoundToInt((float)resourceLat)];
-					//			}
-					//			break;
-					//		}
-					//	default:
-					//		{
-					//			if (lat <= -85 || lat >= 85)
-					//			{
-
-					//			}
-					//			else
-					//			{
-					//				abundance = resourceCache[Mathf.RoundToInt((float)resourceLon), Mathf.RoundToInt((float)resourceLat)];
-					//			}
-					//			break;
-					//		}
-					//}
+					switch (projection)
+					{
+						case MapProjection.Rectangular:
+							{
+								abundance = getResoureCache(lo, la);
+								break;
+							}
+						case MapProjection.KavrayskiyVII:
+							{
+								abundance = getResoureCache(lon, lat);
+								break;
+							}
+						case MapProjection.Polar:
+							{
+								if (zoom)
+									abundance = resourceCache[Mathf.RoundToInt(i * (resourceMapWidth / mapwidth)), Mathf.RoundToInt(mapstep * (resourceMapWidth / mapwidth))];
+								else
+									abundance = getResoureCache(lon, lat);
+								break;
+							}
+					}
 					pix[i] = SCANuiUtil.resourceToColor(baseColor, resource, abundance, data, lon, lat);
 				}
 				else
@@ -881,6 +862,49 @@ namespace SCANsat.SCAN_Map
 			}
 
 			return elevation;
+		}
+
+		private void generateResourceCache()
+		{
+			for (int j = 0; j < resourceMapHeight; j += resourceInterpolation)
+			{
+				for (int i = 0; i < resourceMapWidth; i += resourceInterpolation)
+				{
+					Vector2d coords;
+					if (zoom && projection == MapProjection.Polar)
+					{
+						double rLon = (i * 1.0f / resourceMapScale) - 180f + lon_offset;
+						double rLat = (j * 1.0f / resourceMapScale) - 90f + lat_offset;
+
+						double la = rLat, lo = rLon;
+						rLat = unprojectLatitude(lo, la);
+						rLon = unprojectLongitude(lo, la);
+
+						if (double.IsNaN(rLat) || double.IsNaN(rLon) || rLat < -90 || rLat > 90 || rLon < -180 || rLon > 180)
+						{
+							resourceCache[i, j] = 0;
+							continue;
+						}
+
+						coords = new Vector2d(rLon, rLat);
+					}
+					else
+					{
+						double rLon = SCANUtil.fixLonShift((i * 1.0f / resourceMapScale) - 180f + lon_offset);
+						double rLat = (j * 1.0f / resourceMapScale) - 90f + lat_offset;
+						coords = SCANUtil.fixRetardCoordinates(new Vector2d(rLon, rLat));
+					}
+
+					resourceCache[i, j] = SCANUtil.ResourceOverlay(coords.y, coords.x, resource.Name, body, SCANcontroller.controller.resourceBiomeLock) * 100f;
+				}
+			}
+		}
+
+		private float getResoureCache(double Lon, double Lat)
+		{
+			double resourceLat = fixUnscale(unScaleLatitude(Lat, resourceMapScale), resourceMapHeight);
+			double resourceLon = fixUnscale(unScaleLongitude(Lon, resourceMapScale), resourceMapWidth);
+			return resourceCache[Mathf.RoundToInt((float)resourceLon), Mathf.RoundToInt((float)resourceLat)];
 		}
 
 		#endregion
