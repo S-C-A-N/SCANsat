@@ -1375,16 +1375,24 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			return Lon;
 		}
 
-		internal static Texture2D drawResourceTexture(Texture2D map, int height, SCANdata data, SCANresourceGlobal resource, int stepScale = 8, float transparency = 0f)
+		internal static Texture2D drawResourceTexture(Texture2D map, Color32[] pix, float[,] values, int height, SCANdata data, SCANresourceGlobal resource, int stepScale = 8, float transparency = 0f)
 		{
 			int width = height * 2;
-			float[,] abundanceValues = new float[width, height];
-			Color32[] pix = new Color32[width * height];
 			float scale = height / 180f;
 
-			if (map == null || map.height != height)
+			if (map == null || pix == null || values == null || map.height != height)
 			{
 				map = new Texture2D(width, height, TextureFormat.ARGB32, true);
+				pix = new Color32[width * height];
+				values = new float[width, height];
+			}
+
+			for (int i = 0; i < width; i++ )
+			{
+				for (int j = 0; j < height; j++)
+				{
+					values[i, j] = 0;
+				}
 			}
 
 			System.Random r = new System.Random(ResourceScenario.Instance.gameSettings.Seed);
@@ -1396,17 +1404,17 @@ namespace SCANsat.SCAN_UI.UI_Framework
 					double lon = fixLon(i / scale);
 					double lat = (j / scale) - 90;
 
-					abundanceValues[i, j] = SCANUtil.ResourceOverlay(lat, lon, resource.Name, data.Body, SCANcontroller.controller.resourceBiomeLock) * 100;
+					values[i, j] = SCANUtil.ResourceOverlay(lat, lon, resource.Name, data.Body, SCANcontroller.controller.resourceBiomeLock) * 100;
 
-					pix[j * width + i] = resourceToColor32(palette.Clear, resource, abundanceValues[i, j], data, lon, lat, transparency);
+					pix[j * width + i] = resourceToColor32(palette.Clear, resource, values[i, j], data, lon, lat, transparency);
 				}
 			}
 
 			for (int i = stepScale / 2; i >= 1; i /= 2)
 			{
-				interpolate(pix, abundanceValues, height, i, i, i, resource, transparency, data, r);
-				interpolate(pix, abundanceValues, height, 0, i, i, resource, transparency, data, r);
-				interpolate(pix, abundanceValues, height, i, 0, i, resource, transparency, data, r);
+				interpolate(pix, values, height, i, i, i, resource, transparency, data, r);
+				interpolate(pix, values, height, 0, i, i, resource, transparency, data, r);
+				interpolate(pix, values, height, i, 0, i, resource, transparency, data, r);
 			}
 
 			map.SetPixels32(pix);
@@ -1415,19 +1423,19 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			return map;
 		}
 
-		internal static Texture2D drawBiomeMap(Texture2D map, SCANdata data, float transparency, int height = 256, bool useStock = false, bool whiteBorder = false)
+		internal static Texture2D drawBiomeMap(Texture2D map, Color32[] pix, SCANdata data, float transparency, int height = 256, bool useStock = false, bool whiteBorder = false)
 		{
 			if (!useStock && !whiteBorder)
-				return drawBiomeMap(map, data, transparency, height);
+				return drawBiomeMap(map, pix, data, transparency, height);
 
 			int width = height * 2;
 			float scale = (width * 1f) / 360f;
 			double[] mapline = new double[width];
-			Color32[] pix = new Color32[height * width];
 
-			if (map == null || map.height != height)
+			if (map == null || pix == null || map.height != height)
 			{
 				map = new Texture2D(width, height, TextureFormat.ARGB32, true);
+				pix = new Color32[width * height];
 			}
 
 			for (int j = 0; j < height; j++)
@@ -1466,17 +1474,17 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			return map;
 		}
 
-		private static Texture2D drawBiomeMap(Texture2D m, SCANdata d, float t, int h)
+		private static Texture2D drawBiomeMap(Texture2D m, Color32[] p, SCANdata d, float t, int h)
 		{
 			if (d.Body.BiomeMap == null)
 				return null;
 
-			if (m == null)
+			if (m == null || p == null || m.height != h)
 			{
 				m = new Texture2D(h * 2, h, TextureFormat.RGBA32, true);
+				p = new Color32[m.width * m.height];
 			}
 
-			Color32[] pix = new Color32[m.width * m.height];
 			float scale = m.width / 360f;
 
 			for (int j = 0; j < m.height; j++)
@@ -1491,11 +1499,11 @@ namespace SCANsat.SCAN_UI.UI_Framework
 					if (SCANUtil.isCovered(lon, lat, d, SCANtype.Biome))
 						c = (Color32)SCANUtil.getBiome(d.Body, lon, lat).mapColor;//, palette.clear, SCANcontroller.controller.biomeTransparency / 100);
 
-					pix[j *m.width + i] = c;
+					p[j *m.width + i] = c;
 				}
 			}
 
-			m.SetPixels32(pix);
+			m.SetPixels32(p);
 			m.Apply();
 
 			return m;

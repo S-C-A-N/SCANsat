@@ -25,6 +25,9 @@ namespace SCANsat.SCAN_UI
 
 		private Texture2D mapOverlay;
 		private Texture2D biomeOverlay;
+		private Color32[] resourcePixels;
+		private Color32[] biomePixels;
+		private float[,] abundanceValues;
 		private int mapHeight = 256;
 		private float transparency = 0f;
 		private int interpolationScale = 8;
@@ -252,9 +255,9 @@ namespace SCANsat.SCAN_UI
 		private void refreshMap()
 		{
 			if (biomeMode)
-				body.SetResourceMap(SCANuiUtil.drawBiomeMap(biomeOverlay, data, transparency, mapHeight * 2));
+				body.SetResourceMap(SCANuiUtil.drawBiomeMap(biomeOverlay, biomePixels, data, transparency, mapHeight * 2));
 			else
-				body.SetResourceMap(SCANuiUtil.drawResourceTexture(mapOverlay, mapHeight, data, currentResource, interpolationScale, transparency));
+				body.SetResourceMap(SCANuiUtil.drawResourceTexture(mapOverlay, resourcePixels, abundanceValues, mapHeight, data, currentResource, interpolationScale, transparency));
 		}
 
 		private void setBody(CelestialBody B)
