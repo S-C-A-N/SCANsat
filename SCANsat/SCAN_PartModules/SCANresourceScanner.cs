@@ -91,13 +91,13 @@ namespace SCANsat.SCAN_PartModules
 				return;
 			}
 
-			if (!HighLogic.LoadedSceneIsFlight)
+			if (!HighLogic.LoadedSceneIsFlight || !FlightGlobals.ready)
 				return;
 
-			if (!FlightGlobals.ready)
+			if (SCANcontroller.controller == null)
 				return;
 
-			if (forceStart && SCANcontroller.controller != null)
+			if (forceStart)
 			{
 				if (SCANcontroller.controller.disableStockResource)
 				{
@@ -115,9 +115,6 @@ namespace SCANsat.SCAN_PartModules
 				}
 				forceStart = false;
 			}
-
-			if (SCANcontroller.controller == null)
-				return;
 
 			if (!SCANcontroller.controller.easyModeScanning || SCANcontroller.controller.disableStockResource)
 				updateEvents();
