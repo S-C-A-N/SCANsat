@@ -90,7 +90,7 @@ namespace SCANsat.SCAN_PartModules
 			if (SCANcontroller.controller == null)
 				return;
 
-			if (forceStart && SCANcontroller.controller != null)
+			if (forceStart)
 			{
 				if (stockScanners != null && SCANcontroller.controller.disableStockResource)
 				{
@@ -136,9 +136,9 @@ namespace SCANsat.SCAN_PartModules
 			{
 				float biomeAbundance = abundanceSummary.ContainsKey(biome) ? abundanceSummary[biome].Abundance : 0f;
 				if (fuzzy)
-					abundanceField = biomeAbundance.ToString("P0");
+					abundanceField = biomeAbundance.ToString("P0") + "avg.";
 				else
-					abundanceField = biomeAbundance.ToString("P2");
+					abundanceField = biomeAbundance.ToString("P2") + "avg.";
 			}
 		}
 
