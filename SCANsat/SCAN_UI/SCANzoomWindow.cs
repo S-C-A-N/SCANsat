@@ -81,7 +81,7 @@ namespace SCANsat.SCAN_UI
 			}
 			if (spotmap == null)
 			{
-				spotmap = new SCANmap();
+				spotmap = new SCANmap(b, false, true);
 				spotmap.setSize(320, 240);
 			}
 
