@@ -155,19 +155,19 @@ namespace SCANsat
 		}
 
 		/// <summary>
-		/// Are the stock resource scanner functions disabled; prevents orbital resource surveys?
+		/// Are the stock resource scanner functions disabled? prevents orbital resource surveys
 		/// </summary>
 		/// <returns>Returns true if stock resource scanning is available</returns>
 		public static bool stockResourceScanEnabled()
 		{
 			if (SCANcontroller.controller == null)
-				return true;
+				return false;
 
 			return !SCANcontroller.controller.disableStockResource;
 		}
 
 		/// <summary>
-		/// Is the stock resource biome lock enabled; reduced resource abundace accuracy if enabled?
+		/// Is the stock resource biome lock enabled? reduced resource abundace accuracy if enabled
 		/// </summary>
 		/// <returns>Returns true if the biome lock is enabled</returns>
 		public static bool resourceBiomeLockEnabled()

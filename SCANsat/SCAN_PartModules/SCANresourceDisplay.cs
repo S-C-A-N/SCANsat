@@ -22,11 +22,12 @@ namespace SCANsat.SCAN_PartModules
 		private float abundanceValue;
 
 		private List<ModuleResourceScanner> stockScanners;
+		private ModuleAnimationGroup animGroup;
 		private Dictionary<string, ResourceCache.AbundanceSummary> abundanceSummary;
 		private CelestialBody body;
 		private bool tooHigh;
 		private bool fuzzy;
-		private bool forceStart;
+		private bool refreshState;
 		private bool activated;
 
 		public override void OnStart(PartModule.StartState state)
@@ -37,11 +38,15 @@ namespace SCANsat.SCAN_PartModules
 			GameEvents.onVesselSOIChanged.Add(onSOIChange);
 
 			part.force_activate();
-			this.enabled = true;
+			this.isEnabled = true;
 			activated = true;
-			forceStart = true;
+			refreshState = true;
 
 			stockScanners = findScanners();
+			animGroup = findAnimator();
+
+			if (animGroup == null || animGroup.isDeployed)
+				enableConnectedScanners();
 
 			setupFields(stockScanners.FirstOrDefault());
 
@@ -52,6 +57,11 @@ namespace SCANsat.SCAN_PartModules
 		private List<ModuleResourceScanner> findScanners()
 		{
 			return part.FindModulesImplementing<ModuleResourceScanner>().Where(r => r.ScannerType == 0 && r.ResourceName == ResourceName).ToList();
+		}
+
+		private ModuleAnimationGroup findAnimator()
+		{
+			return part.FindModulesImplementing<ModuleAnimationGroup>().FirstOrDefault();
 		}
 
 		private void setupFields(ModuleResourceScanner m)
@@ -90,15 +100,11 @@ namespace SCANsat.SCAN_PartModules
 			if (SCANcontroller.controller == null)
 				return;
 
-			if (forceStart && SCANcontroller.controller != null)
+			if (refreshState)
 			{
-				if (stockScanners != null && SCANcontroller.controller.disableStockResource)
-				{
-					foreach (ModuleResourceScanner m in stockScanners)
-					{
-						m.DisableModule();
-					}
-				}
+				if (SCANcontroller.controller.disableStockResource)
+					disableConnectedScanners();
+				refreshState = false;
 			}
 
 			if (!SCANcontroller.controller.disableStockResource)
@@ -136,9 +142,9 @@ namespace SCANsat.SCAN_PartModules
 			{
 				float biomeAbundance = abundanceSummary.ContainsKey(biome) ? abundanceSummary[biome].Abundance : 0f;
 				if (fuzzy)
-					abundanceField = biomeAbundance.ToString("P0");
+					abundanceField = biomeAbundance.ToString("P0") + "avg.";
 				else
-					abundanceField = biomeAbundance.ToString("P2");
+					abundanceField = biomeAbundance.ToString("P2") + "avg.";
 			}
 		}
 
@@ -155,7 +161,7 @@ namespace SCANsat.SCAN_PartModules
 				return;
 			}
 
-			if (vessel.altitude > MaxAbundanceAltitude)
+			if (ResourceUtilities.GetAltitude(vessel) > MaxAbundanceAltitude)
 			{
 				tooHigh = true;
 				return;
@@ -192,31 +198,44 @@ namespace SCANsat.SCAN_PartModules
 
 			abundanceSummary = ResourceCache.Instance.AbundanceCache.
 				Where(a => a.ResourceName == ResourceName && a.HarvestType == HarvestTypes.Planetary && a.BodyId == bodyID).
-				ToDictionary(a => a.BiomeName, a => a);
+				GroupBy(a => a.BiomeName).
+				ToDictionary(b => b.Key, b => b.First());
+		}
+
+		private void disableConnectedScanners()
+		{
+			if (stockScanners != null)
+			{
+				foreach (ModuleResourceScanner m in stockScanners)
+				{
+					m.DisableModule();
+				}
+			}
+		}
+
+		private void enableConnectedScanners()
+		{
+			if (stockScanners != null)
+			{
+				foreach (ModuleResourceScanner m in stockScanners)
+				{
+					m.EnableModule();
+				}
+			}
 		}
 
 		public void EnableModule()
 		{
 			activated = true;
-			if (stockScanners != null && SCANcontroller.controller != null && SCANcontroller.controller.disableStockResource)
-			{
-				foreach (ModuleResourceScanner m in stockScanners)
-				{
-					m.DisableModule();
-				}
-			}
+			if (SCANcontroller.controller != null && SCANcontroller.controller.disableStockResource)
+				disableConnectedScanners();
 		}
 
 		public void DisableModule()
 		{
 			activated = false;
-			if (stockScanners != null && SCANcontroller.controller != null && SCANcontroller.controller.disableStockResource)
-			{
-				foreach (ModuleResourceScanner m in stockScanners)
-				{
-					m.DisableModule();
-				}
-			}
+			if (SCANcontroller.controller != null && SCANcontroller.controller.disableStockResource)
+				disableConnectedScanners();
 		}
 
 		public bool ModuleIsActive()
