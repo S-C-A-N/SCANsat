@@ -255,9 +255,9 @@ namespace SCANsat.SCAN_UI
 		private void refreshMap()
 		{
 			if (biomeMode)
-				body.SetResourceMap(SCANuiUtil.drawBiomeMap(biomeOverlay, biomePixels, data, transparency, mapHeight * 2));
+				body.SetResourceMap(SCANuiUtil.drawBiomeMap(ref biomeOverlay, ref biomePixels, data, transparency, mapHeight * 2));
 			else
-				body.SetResourceMap(SCANuiUtil.drawResourceTexture(mapOverlay, resourcePixels, abundanceValues, mapHeight, data, currentResource, interpolationScale, transparency));
+				body.SetResourceMap(SCANuiUtil.drawResourceTexture(ref mapOverlay, ref resourcePixels, ref abundanceValues, mapHeight, data, currentResource, interpolationScale, transparency));
 		}
 
 		private void setBody(CelestialBody B)

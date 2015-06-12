@@ -1375,7 +1375,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			return Lon;
 		}
 
-		internal static Texture2D drawResourceTexture(Texture2D map, Color32[] pix, float[,] values, int height, SCANdata data, SCANresourceGlobal resource, int stepScale = 8, float transparency = 0f)
+		internal static Texture2D drawResourceTexture(ref Texture2D map, ref Color32[] pix, ref float[,] values, int height, SCANdata data, SCANresourceGlobal resource, int stepScale = 8, float transparency = 0f)
 		{
 			int width = height * 2;
 			float scale = height / 180f;
@@ -1423,10 +1423,10 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			return map;
 		}
 
-		internal static Texture2D drawBiomeMap(Texture2D map, Color32[] pix, SCANdata data, float transparency, int height = 256, bool useStock = false, bool whiteBorder = false)
+		internal static Texture2D drawBiomeMap(ref Texture2D map, ref Color32[] pix, SCANdata data, float transparency, int height = 256, bool useStock = false, bool whiteBorder = false)
 		{
 			if (!useStock && !whiteBorder)
-				return drawBiomeMap(map, pix, data, transparency, height);
+				return drawBiomeMap(ref map, ref pix, data, transparency, height);
 
 			int width = height * 2;
 			float scale = (width * 1f) / 360f;
@@ -1474,7 +1474,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			return map;
 		}
 
-		private static Texture2D drawBiomeMap(Texture2D m, Color32[] p, SCANdata d, float t, int h)
+		private static Texture2D drawBiomeMap(ref Texture2D m, ref Color32[] p, SCANdata d, float t, int h)
 		{
 			if (d.Body.BiomeMap == null)
 				return null;
