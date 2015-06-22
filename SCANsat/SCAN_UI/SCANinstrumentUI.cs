@@ -14,11 +14,13 @@
 #endregion
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using FinePrint;
 using FinePrint.Utilities;
 using SCANsat.SCAN_Platform;
 using SCANsat;
+using SCANsat.SCAN_PartModules;
 using SCANsat.SCAN_UI.UI_Framework;
 using SCANsat.SCAN_Data;
 using UnityEngine;
@@ -34,6 +36,9 @@ namespace SCANsat.SCAN_UI
 		private SCANtype sensors;
 		private SCANdata data;
 		private Vessel v;
+		private List<SCANresourceDisplay> resourceScanners = new List<SCANresourceDisplay>();
+		private List<SCANresourceGlobal> resources = new List<SCANresourceGlobal>();
+		private int currentResource;
 		private double degreeOffset;
 		private double vlat, vlon;
 		private float lastUpdate = 0f;
@@ -58,6 +63,8 @@ namespace SCANsat.SCAN_UI
 		protected override void Start()
 		{
 			GameEvents.onVesselSOIChanged.Add(soiChange);
+			GameEvents.onVesselChange.Add(vesselChange);
+			GameEvents.onVesselWasModified.Add(vesselChange);
 			data = SCANUtil.getData(FlightGlobals.currentMainBody);
 			if (data == null)
 			{
@@ -65,11 +72,16 @@ namespace SCANsat.SCAN_UI
 				SCANcontroller.controller.addToBodyData(FlightGlobals.currentMainBody, data);
 			}
 			planetConstants(FlightGlobals.currentMainBody);
+
+			resources = SCANcontroller.setLoadedResourceList();
+			resetResourceList();
 		}
 
 		protected override void OnDestroy()
 		{
 			GameEvents.onVesselSOIChanged.Remove(soiChange);
+			GameEvents.onVesselChange.Remove(vesselChange);
+			GameEvents.onVesselWasModified.Remove(vesselChange);
 		}
 
 		protected override void DrawWindowPre(int id)
@@ -98,6 +110,15 @@ namespace SCANsat.SCAN_UI
 				{
 					sensors |= SCANtype.Biome;
 				}
+
+				foreach (SCANresourceGlobal s in resources)
+				{
+					if (SCANUtil.isCovered(vlon, vlat, data, s.SType))
+						sensors |= s.SType;
+				}
+
+				if (SCANUtil.isCovered(vlon, vlat, data, SCANtype.FuzzyResources))
+					sensors |= SCANtype.FuzzyResources;
 			}
 		}
 
@@ -113,6 +134,7 @@ namespace SCANsat.SCAN_UI
 				locationInfo(id);					/* always-on indicator for current lat/long */
 				altInfo(id);						/* show current altitude and slope */
 				biomeInfo(id);						/* show current biome info */
+				resourceInfo(id);					/* show current resource abundance */
 				anomalyInfo(id);					/* show nearest anomaly detail - including BTDT view */
 				//if (parts <= 0) noData(id);		/* nothing to show */
 			}
@@ -272,6 +294,99 @@ namespace SCANsat.SCAN_UI
 			}
 		}
 
+		//Display resource abundace info
+		private void resourceInfo(int id)
+		{
+			if (SCANcontroller.controller.instrumentNeedsNarrowBand)
+			{
+				bool tooHigh = false;
+				bool scanner = false;
+
+				foreach (SCANresourceDisplay s in resourceScanners)
+				{
+					if (s == null)
+						continue;
+
+					if (s.ResourceName != resources[currentResource].Name)
+						continue;
+
+					if (ResourceUtilities.GetAltitude(v) > s.MaxAbundanceAltitude || !v.Landed)
+					{
+						tooHigh = true;
+						continue;
+					}
+
+					scanner = true;
+					tooHigh = false;
+					break;
+				}
+
+				if (tooHigh)
+				{
+					GUILayout.Label(string.Format("{0}: Too High", resources[currentResource].Name), SCANskins.SCAN_insColorLabel);
+					fillS(-10);
+				}
+				else if (!scanner)
+				{
+					GUILayout.Label(string.Format("{0}: No Scanner", resources[currentResource].Name), SCANskins.SCAN_insColorLabel);
+					fillS(-10);
+				}
+				else
+				{
+					resourceLabel(resources[currentResource]);
+				}
+			}
+			else
+			{
+				resourceLabel(resources[currentResource]);
+			}
+
+			if (resources.Count > 1)
+			{
+				Rect r = GUILayoutUtility.GetLastRect();
+
+				r.x = 4;
+				r.y -= 10;
+				r.width = 18;
+				r.height = 28;
+
+				if (GUI.Button(r, "<"))
+				{
+					currentResource -= 1;
+					if (currentResource < 0)
+						currentResource = resources.Count - 1;
+				}
+
+				r.x = WindowRect.width - 20;
+
+				if (GUI.Button(r, ">"))
+				{
+					currentResource += 1;
+					if (currentResource >= resources.Count)
+						currentResource = 0;
+				}
+			}
+		}
+
+		private void resourceLabel(SCANresourceGlobal r)
+		{
+			if ((sensors & r.SType) != SCANtype.Nothing)
+			{
+				GUILayout.Label(string.Format("{0}: {1:P2}", r.Name, SCANUtil.ResourceOverlay(vlat, vlon, resources[0].Name, v.mainBody, SCANcontroller.controller.resourceBiomeLock)), SCANskins.SCAN_insColorLabel);
+				fillS(-10);
+			}
+			else if ((sensors & SCANtype.FuzzyResources) != SCANtype.Nothing)
+			{
+				GUILayout.Label(string.Format("{0}: {1:P0}", r.Name, SCANUtil.ResourceOverlay(vlat, vlon, resources[0].Name, v.mainBody, SCANcontroller.controller.resourceBiomeLock)), SCANskins.SCAN_insColorLabel);
+				fillS(-10);
+			}
+			else
+			{
+				GUILayout.Label(string.Format("{0}: No Data", r.Name), SCANskins.SCAN_insColorLabel);
+				fillS(-10);
+			}
+		}
+
 		//Display info on the nearest anomaly *Need to separate the BTDT display*
 		private void anomalyInfo(int id)
 		{
@@ -355,6 +470,30 @@ namespace SCANsat.SCAN_UI
 				SCANcontroller.controller.addToBodyData(VC.to, data);
 			}
 			planetConstants(VC.to);
+		}
+
+		private void vesselChange(Vessel V)
+		{
+			resetResourceList();
+		}
+
+		public void resetResourceList()
+		{
+			resourceScanners = new List<SCANresourceDisplay>();
+
+			if (v == null)
+				return;
+
+			foreach (SCANresourceDisplay s in v.FindPartModulesImplementing<SCANresourceDisplay>())
+			{
+				if (s == null)
+					continue;
+
+				if (resourceScanners.Contains(s))
+					continue;
+
+				resourceScanners.Add(s);
+			}
 		}
 
 	}
