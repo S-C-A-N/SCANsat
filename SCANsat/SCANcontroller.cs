@@ -121,6 +121,8 @@ namespace SCANsat
 		public bool biomeBorder = true;
 		[KSPField(isPersistant = true)]
 		public bool disableStockResource = false;
+		[KSPField(isPersistant = true)]
+		public bool hiDetailZoomMap = false;
 
 		/* Biome and slope colors can't be serialized properly as a KSP Field */
 		public Color lowBiomeColor = new Color(0, 0.46f, 0.02345098f, 1);
@@ -163,6 +165,7 @@ namespace SCANsat
 		internal SCANcolorSelection colorManager;
 		internal SCANoverlayController resourceOverlay;
 		internal SCANresourceSettings resourceSettings;
+		internal SCANzoomHiDef hiDefMap;
 
 		/* App launcher object */
 		internal SCANappLauncher appLauncher;
@@ -179,6 +182,7 @@ namespace SCANsat
 		private CelestialBody body = null;
 		private bool bodyScanned = false;
 		private bool bodyCoverage = false;
+		private bool heightMapsBuilt = false;
 
 		#region Public Accessors
 
@@ -809,6 +813,11 @@ namespace SCANsat
 				scanFromAllVessels();
 			}
 
+			if (!heightMapsBuilt)
+			{
+				checkHeightMapStatus();
+			}
+
 			if (unDocked || docked)
 			{
 				if (timer < 30)
@@ -911,6 +920,32 @@ namespace SCANsat
 			}
 		}
 
+		private int dataStep, dataStart;
+
+		private void checkHeightMapStatus()
+		{
+			for (int i = 0; i < FlightGlobals.Bodies.Count; i++)
+			{
+				SCANdata data = getData(i);
+
+				if (data == null)
+					continue;
+
+				if (data.Built)
+					continue;
+
+				if (data.Building)
+					return;
+
+				data.ExternalBuilding = true;
+				data.generateHeightMap(ref dataStep, ref dataStart, 60);
+
+				return;
+			}
+
+			heightMapsBuilt = true;
+		}
+
 		private void OnDestroy()
 		{
 			GameEvents.onVesselSOIChanged.Remove(SOIChange);
@@ -933,6 +968,8 @@ namespace SCANsat
 				Destroy(resourceSettings);
 			if (appLauncher != null)
 				Destroy(appLauncher);
+			if (hiDefMap != null)
+				Destroy(hiDefMap);
 		}
 
 		private void drawTarget()
