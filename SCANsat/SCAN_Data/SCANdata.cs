@@ -30,13 +30,18 @@ namespace SCANsat.SCAN_Data
 {
 	public class SCANdata
 	{
+		private static Dictionary<int, float[,]> heightMaps = new Dictionary<int, float[,]>();
+
 		/* MAP: state */
 		private Int32[,] coverage = new Int32[360, 180];
-		private float[,] heightmap = new float[360, 180];
 		private float[,] kethaneValueMap = new float[360, 180]; //Store kethane cell data in here
+		private Color[] cols_height_map_small = new Color[360];
 		private CelestialBody body;
 		private Texture2D map_small = new Texture2D(360, 180, TextureFormat.RGB24, false);
 		private SCANterrainConfig terrainConfig;
+		private bool building, externalBuilding, built;
+
+		private static float[,] tempHeightMap = new float[360, 180];
 
 		/* MAP: options */
 		private bool disabled;
@@ -56,6 +61,9 @@ namespace SCANsat.SCAN_Data
 				terrainConfig = new SCANterrainConfig(SCANconfigLoader.SCANNode.DefaultMinHeightRange, SCANconfigLoader.SCANNode.DefaultMaxHeightRange, clamp, SCANUtil.paletteLoader(SCANconfigLoader.SCANNode.DefaultPalette, 7), 7, false, false, body);
 				SCANcontroller.addToTerrainConfigData(body.name, terrainConfig);
 			}
+
+			if (heightMaps.ContainsKey(body.flightGlobalsIndex))
+				built = true;
 		}
 
 		#region Public accessors
@@ -66,10 +74,15 @@ namespace SCANsat.SCAN_Data
 			internal set { coverage = value; }
 		}
 
-		public float[,] HeightMap
+		public float HeightMapValue(int i, int lon, int lat)
 		{
-			get { return heightmap; }
-			internal set { heightmap = value; }
+			if (!heightMaps.ContainsKey(i))
+				return 0;
+
+			if (body.pqsController == null)
+				return 0;
+
+			return heightMaps[i][lon, lat];
 		}
 
 		public CelestialBody Body
@@ -98,6 +111,22 @@ namespace SCANsat.SCAN_Data
 		{
 			get { return disabled; }
 			internal set { disabled = value; }
+		}
+
+		public bool Building
+		{
+			get { return building; }
+		}
+
+		public bool ExternalBuilding
+		{
+			get { return externalBuilding; }
+			internal set { externalBuilding = value; }
+		}
+
+		public bool Built
+		{
+			get { return built; }
 		}
 		#endregion
 
@@ -342,18 +371,97 @@ namespace SCANsat.SCAN_Data
 		private int scanline = 0;
 		private int scanstep = 0;
 		//Draws the actual map texture
+
+		internal Texture2D drawPartialMap(SCANtype type)
+		{
+			if (externalBuilding)
+			{
+				return map_small;
+			}
+
+			if (!built)
+			{
+				building = true;
+				generateHeightMap(ref scanline, ref scanstep, 360);
+				return map_small;
+			}
+
+			if (palette.small_redline == null)
+			{
+				palette.small_redline = new Color[360];
+				for (int i = 0; i < 360; i++)
+					palette.small_redline[i] = palette.red;
+			}
+
+			int scheme = SCANcontroller.controller.colours;
+
+			for (int ilon = 0; ilon < 360; ilon++)
+			{
+				if (body.pqsController == null)
+				{
+					cols_height_map_small[ilon] = palette.lerp(palette.black, palette.white, UnityEngine.Random.value);
+					continue;
+				}
+
+				Color c = palette.grey;
+				float val = heightMaps[body.flightGlobalsIndex][ilon, scanline];
+				if (SCANUtil.isCovered(ilon, scanline, this, SCANtype.Altimetry))
+				{
+					if (SCANUtil.isCovered(ilon, scanline, this, SCANtype.AltimetryHiRes))
+						c = palette.heightToColor(val, scheme, this);
+					else
+						c = palette.heightToColor(val, 1, this);
+				}
+				else
+				{
+					if (scanline % 30 == 0 && ilon % 3 == 0)
+					{
+						c = palette.white;
+					}
+					else if (ilon % 30 == 0 && scanline % 3 == 0)
+					{
+						c = palette.white;
+					}
+				}
+
+				if (type != SCANtype.Nothing)
+				{
+					if (!SCANUtil.isCoveredByAll(ilon, scanline, this, type))
+					{
+						c = palette.lerp(c, palette.black, 0.5f);
+					}
+				}
+
+				cols_height_map_small[ilon] = c;
+			}
+
+			map_small.SetPixels(0, scanline, 360, 1, cols_height_map_small);
+
+			if (scanline < 179)
+				map_small.SetPixels(0, scanline + 1, 360, 1, palette.small_redline);
+
+			scanline++;
+
+			if (scanline >= 180)
+				scanline = 0;
+
+			map_small.Apply();
+
+			return map_small;
+		}
+
 		internal void drawHeightScanline(SCANtype type)
 		{
-			Color[] cols_height_map_small = map_small.GetPixels(0, scanline, 360, 1);
+			Color[] cols_height_map_small = new Color[360];// map_small.GetPixels(0, scanline, 360, 1);
 			for (int ilon = 0; ilon < 360; ilon += 1)
 			{
 				int scheme = SCANcontroller.controller.colours;
-				float val = heightmap[ilon, scanline];
+				float val = heightMaps[body.flightGlobalsIndex][ilon, scanline];
 				if (val == 0)
 				{ //Some preparation for bigger changes in map caching, automatically calculate elevation for every point on the small map, only display scanned areas
 					if (body.pqsController == null)
 					{
-						heightmap[ilon, scanline] = 0;
+						heightMaps[body.flightGlobalsIndex][ilon, scanline] = 0;
 						cols_height_map_small[ilon] = palette.lerp(palette.black, palette.white, UnityEngine.Random.value);
 						continue;
 					}
@@ -363,7 +471,7 @@ namespace SCANsat.SCAN_Data
 						val = (float)SCANUtil.getElevation(body, ilon - 180, scanline - 90);
 						if (val == 0)
 							val = -0.001f; // this is terrible
-						heightmap[ilon, scanline] = val;
+						heightMaps[body.flightGlobalsIndex][ilon, scanline] = val;
 					}
 				}
 				Color c = palette.black;
@@ -407,18 +515,58 @@ namespace SCANsat.SCAN_Data
 		//Updates the red scanning line
 		internal void updateImages(SCANtype type)
 		{
-			if (palette.small_redline == null)
-			{
-				palette.small_redline = new Color[360];
-				for (int i = 0; i < 360; i++)
-					palette.small_redline[i] = palette.red;
-			}
+			//if (palette.small_redline == null)
+			//{
+			//	palette.small_redline = new Color[360];
+			//	for (int i = 0; i < 360; i++)
+			//		palette.small_redline[i] = palette.red;
+			//}
 			drawHeightScanline(type);
-			if (scanline < 179)
+			//if (scanline < 179)
+			//{
+			//	map_small.SetPixels(0, scanline + 1, 360, 1, palette.small_redline);
+			//}
+			//map_small.Apply();
+		}
+
+		internal void generateHeightMap(ref int step, ref int xStart, int width)
+		{
+			if (body.pqsController == null)
 			{
-				map_small.SetPixels(0, scanline + 1, 360, 1, palette.small_redline);
+				built = true;
+				building = false;
+				externalBuilding = false;
+				if (!heightMaps.ContainsKey(body.flightGlobalsIndex))
+					heightMaps.Add(body.flightGlobalsIndex, new float[1, 1]);
+				return;
 			}
-			map_small.Apply();
+
+			if (step >= 179)
+			{
+				step = 0;
+				xStart = 0;
+				built = true;
+				building = false;
+				externalBuilding = false;
+				if (!heightMaps.ContainsKey(body.flightGlobalsIndex))
+					heightMaps.Add(body.flightGlobalsIndex, tempHeightMap);
+				tempHeightMap = new float[360, 180];
+				return;
+			}
+
+			for (int i = xStart; i < xStart + width; i++)
+			{
+				tempHeightMap[i, step] = (float)SCANUtil.getElevation(body, i - 180, step - 90);
+			}
+
+			if (xStart + width >= 359)
+			{
+				step++;
+				xStart = 0;
+				return;
+			}
+
+			xStart += width;
 		}
 		#endregion
 
@@ -450,9 +598,9 @@ namespace SCANsat.SCAN_Data
 		internal void reset()
 		{
 			coverage = new Int32[360, 180];
-			heightmap = new float[360, 180];
 			resetImages();
 		}
+
 		internal void resetImages()
 		{
 			// Just draw a simple grid to initialize the image; the map will appear on top of it
@@ -472,6 +620,7 @@ namespace SCANsat.SCAN_Data
 			}
 			map_small.Apply();
 		}
+
 		internal void resetResources()
 		{
 			for (int x = 0; x < 360; x++)
@@ -570,7 +719,6 @@ namespace SCANsat.SCAN_Data
 			catch (Exception e)
 			{
 				Coverage = new Int32[360, 180];
-				HeightMap = new float[360, 180];
 				throw e;
 			}
 			resetImages();
