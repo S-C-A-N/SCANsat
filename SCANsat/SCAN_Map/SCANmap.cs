@@ -117,6 +117,11 @@ namespace SCANsat.SCAN_Map
 			get { return projection; }
 		}
 
+		public bool Zoom
+		{
+			get { return zoom; }
+		}
+
 		#endregion
 
 		#region Big Map methods and fields
@@ -640,9 +645,9 @@ namespace SCANsat.SCAN_Map
 				{
 					for (int i = resourceInterpolation / 2; i >= 1; i /= 2)
 					{
-						SCANuiUtil.interpolate(resourceCache, 0, resourceMapHeight, resourceMapWidth, i, i, i, r, randomEdges);
-						SCANuiUtil.interpolate(resourceCache, 0, resourceMapHeight, resourceMapWidth, 0, i, i, r, randomEdges);
-						SCANuiUtil.interpolate(resourceCache, 0, resourceMapHeight, resourceMapWidth, i, 0, i, r, randomEdges);
+						SCANuiUtil.interpolate(resourceCache, resourceMapHeight, resourceMapWidth, i, i, i, r, randomEdges);
+						SCANuiUtil.interpolate(resourceCache, resourceMapHeight, resourceMapWidth, 0, i, i, r, randomEdges);
+						SCANuiUtil.interpolate(resourceCache, resourceMapHeight, resourceMapWidth, i, 0, i, r, randomEdges);
 					}
 				}
 
