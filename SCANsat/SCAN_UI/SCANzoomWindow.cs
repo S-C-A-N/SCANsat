@@ -27,19 +27,22 @@ namespace SCANsat.SCAN_UI
 {
 	class SCANzoomWindow : SCAN_MBW
 	{
-		private SCANmap spotmap;
+		protected SCANmap spotmap;
 		private SCANmap bigmap;
-		private CelestialBody b;
-		private SCANdata data;
-		private Vessel v;
-		private bool showOrbit, showAnomaly, showWaypoints, showInfo, controlLock;
-		private bool narrowBand;
+		protected CelestialBody b;
+		protected SCANdata data;
+		protected Vessel v;
+		protected SCANresourceGlobal resource;
+		protected bool showOrbit, showAnomaly, showWaypoints;
+		private bool narrowBand, showInfo, controlLock;
 		private Vector2 dragStart;
 		private Vector2d mjTarget = new Vector2d();
 		private float resizeW, resizeH;
 		private const string lockID = "SCANzoom_LOCK";
 		internal readonly static Rect defaultRect = new Rect(50f, 50f, 340f, 240f);
 		private static Rect sessionRect = defaultRect;
+
+		protected bool highDetail;
 
 		protected override void Awake()
 		{
@@ -63,7 +66,7 @@ namespace SCANsat.SCAN_UI
 			Startup();
 		}
 
-		private void Startup()
+		protected virtual void Startup()
 		{
 			//Initialize the map object
 			Visible = false;
@@ -88,6 +91,8 @@ namespace SCANsat.SCAN_UI
 			showOrbit = SCANcontroller.controller.map_orbit;
 			showAnomaly = SCANcontroller.controller.map_markers;
 
+			resource = bigmap.Resource;
+
 			if (HighLogic.LoadedScene == GameScenes.SPACECENTER)
 				showWaypoints = false;
 			else
@@ -109,8 +114,9 @@ namespace SCANsat.SCAN_UI
 			controlLock = false;
 		}
 
-		public void setMapCenter(double lat, double lon, SCANmap big)
+		public virtual void setMapCenter(double lat, double lon, bool centering, SCANmap big = null)
 		{
+			highDetail = centering;
 			Visible = true;
 			bigmap = big;
 
@@ -136,7 +142,8 @@ namespace SCANsat.SCAN_UI
 
 			if (SCANconfigLoader.GlobalResource && narrowBand)
 			{
-				spotmap.Resource = bigmap.Resource;
+				resource = bigmap.Resource;
+				spotmap.Resource = resource;
 				spotmap.Resource.CurrentBodyConfig(b.name);
 			}
 
@@ -148,14 +155,52 @@ namespace SCANsat.SCAN_UI
 			spotmap.resetMap(bigmap.MType, false, narrowBand);
 		}
 
-		private void resetMap()
+		private void resetMap(double lon = 0, double lat = 0, bool withCenter = false)
 		{
+			if (withCenter)
+				spotmap.centerAround(lon, lat);
+
 			SCANcontroller.controller.TargetSelecting = false;
 			SCANcontroller.controller.TargetSelectingActive = false;
 			spotmap.centerAround(spotmap.CenteredLong, spotmap.CenteredLat);
 			if (SCANcontroller.controller.needsNarrowBand && SCANcontroller.controller.map_ResourceOverlay)
 				checkForScanners();
 			spotmap.resetMap(narrowBand);
+		}
+
+		protected virtual void resyncMap()
+		{
+			SCANcontroller.controller.TargetSelecting = false;
+			SCANcontroller.controller.TargetSelectingActive = false;
+
+			if (bigmap.Projection == MapProjection.Polar)
+				spotmap.setProjection(MapProjection.Polar);
+			else
+				spotmap.setProjection(MapProjection.Rectangular);
+
+			if (bigmap.Body != b)
+			{
+				SCANdata dat = SCANUtil.getData(bigmap.Body);
+				if (dat == null)
+					dat = new SCANdata(bigmap.Body);
+
+				data = dat;
+				b = data.Body;
+
+				spotmap.setBody(b);
+			}
+
+			if (SCANconfigLoader.GlobalResource && narrowBand)
+			{
+				resource = bigmap.Resource;
+				spotmap.Resource = resource;
+				spotmap.Resource.CurrentBodyConfig(b.name);
+			}
+
+			spotmap.centerAround(spotmap.CenteredLong, spotmap.CenteredLat);
+			if (SCANcontroller.controller.needsNarrowBand && SCANcontroller.controller.map_ResourceOverlay)
+				checkForScanners();
+			spotmap.resetMap(bigmap.MType, false, narrowBand);
 		}
 
 		public SCANmap SpotMap
@@ -231,12 +276,12 @@ namespace SCANsat.SCAN_UI
 						if (moduleNode.GetValue("ScannerType") != "0")
 							continue;
 
-						if (moduleNode.GetValue("ResourceName") != bigmap.Resource.Name)
+						if (moduleNode.GetValue("ResourceName") != resource.Name)
 							continue;
 
-						if (spotmap.Resource != bigmap.Resource)
+						if (spotmap.Resource != resource)
 						{
-							spotmap.Resource = bigmap.Resource;
+							spotmap.Resource = resource;
 							spotmap.Resource.CurrentBodyConfig(b.name);
 							if (SCANcontroller.controller.map_ResourceOverlay)
 								spotmap.resetMap(true);
@@ -492,36 +537,7 @@ namespace SCANsat.SCAN_UI
 
 			if (GUILayout.Button(textWithTT(spotmap.MapScale.ToString("N1") + " X", "Sync To Big Map"), SCANskins.SCAN_buttonBorderless, GUILayout.Width(50), GUILayout.Height(24)))
 			{
-				SCANcontroller.controller.TargetSelecting = false;
-				SCANcontroller.controller.TargetSelectingActive = false;
-
-				if (bigmap.Projection == MapProjection.Polar)
-					spotmap.setProjection(MapProjection.Polar);
-				else
-					spotmap.setProjection(MapProjection.Rectangular);
-
-				if (bigmap.Body != b)
-				{
-					SCANdata dat = SCANUtil.getData(bigmap.Body);
-					if (dat == null)
-						dat = new SCANdata(bigmap.Body);
-
-					data = dat;
-					b = data.Body;
-
-					spotmap.setBody(b);
-				}
-
-				if (SCANconfigLoader.GlobalResource && narrowBand)
-				{
-					spotmap.Resource = bigmap.Resource;
-					spotmap.Resource.CurrentBodyConfig(b.name);
-				}
-
-				spotmap.centerAround(spotmap.CenteredLong, spotmap.CenteredLat);
-				if (SCANcontroller.controller.needsNarrowBand && SCANcontroller.controller.map_ResourceOverlay)
-					checkForScanners();
-				spotmap.resetMap(bigmap.MType, false, narrowBand);
+				resyncMap();
 			}
 
 			if (GUILayout.Button(iconWithTT(SCANskins.SCAN_ZoomInIcon, "Zoom In"), SCANskins.SCAN_buttonBorderless, GUILayout.Width(26), GUILayout.Height(26)))
@@ -572,7 +588,7 @@ namespace SCANsat.SCAN_UI
 
 		private void drawMap(int id)
 		{
-			MapTexture = spotmap.getPartialMap();
+			MapTexture = getMap();
 
 			//A blank label used as a template for the actual map texture
 			if (IsResizing)
@@ -611,7 +627,11 @@ namespace SCANsat.SCAN_UI
 			{
 				GUI.DrawTexture(TextureRect, MapTexture);
 			}
+		}
 
+		protected virtual Texture2D getMap()
+		{
+			return spotmap.getPartialMap();
 		}
 
 		private void mouseOver(int id)
@@ -683,8 +703,7 @@ namespace SCANsat.SCAN_UI
 					{
 						if (in_map)
 						{
-							spotmap.centerAround(mlon, mlat);
-							resetMap();
+							resetMap(mlon, mlat, highDetail);
 						}
 					}
 					//Right click zoom in
@@ -693,8 +712,7 @@ namespace SCANsat.SCAN_UI
 						if (in_map)
 						{
 							spotmap.MapScale = spotmap.MapScale * 1.25f;
-							spotmap.centerAround(mlon, mlat);
-							resetMap();
+							resetMap(mlon, mlat, highDetail);
 						}
 					}
 					//Left click zoom out
@@ -705,8 +723,7 @@ namespace SCANsat.SCAN_UI
 							spotmap.MapScale = spotmap.MapScale / 1.25f;
 							if (spotmap.MapScale < 2)
 								spotmap.MapScale = 2;
-							spotmap.centerAround(mlon, mlat);
-							resetMap();
+							resetMap(mlon, mlat, highDetail);
 						}
 					}
 					Event.current.Use();
