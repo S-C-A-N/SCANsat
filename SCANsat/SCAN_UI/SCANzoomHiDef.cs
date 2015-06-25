@@ -88,7 +88,7 @@ namespace SCANsat.SCAN_UI
 				return base.getMap();
 			else
 			{
-				//return SCANuiUtil.drawLoDetailMap(data, MapTexture);
+				return null;//return SCANuiUtil.drawLoDetailMap(data, MapTexture);
 			}
 		}
 
