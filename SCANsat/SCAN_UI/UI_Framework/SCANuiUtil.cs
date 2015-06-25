@@ -1375,6 +1375,18 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			return Lon;
 		}
 
+		private static double unFixLon(double Lon)
+		{
+			Lon += 90;
+
+			Lon = (Lon - 180) * -1;
+
+			if (Lon < 0)
+				Lon += 360;
+
+			return Lon;
+		}
+
 		internal static Texture2D drawResourceTexture(ref Texture2D map, ref Color32[] pix, ref float[,] values, int height, SCANdata data, SCANresourceGlobal resource, int stepScale = 8, float transparency = 0f)
 		{
 			int width = height * 2;
@@ -1522,17 +1534,20 @@ namespace SCANsat.SCAN_UI.UI_Framework
 
 		internal static Texture2D drawTerrainMap(ref Texture2D map, ref Color32[] pix, ref float[,] values, SCANdata data, int height, int stepScale)
 		{
-			if (data.Building)
+			int timer = 0;
+
+			while (!data.Built && timer < 5000)
 			{
-				return null;
+				if (!data.Building)
+				{
+					data.ExternalBuilding = true;
+					data.generateHeightMap(ref mapStep, ref mapStart, 180);
+				}
+				timer++;
 			}
 
-			if (!data.Built)
-			{
-				data.ExternalBuilding = true;
-				data.generateHeightMap(ref mapStep, ref mapStart, 180);
+			if (timer >= 5000)
 				return null;
-			}
 
 			int width = height * 2;
 			float scale = height / 180f;
@@ -1547,7 +1562,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			{
 				for (int j = 0; j < 180; j++)
 				{
-					values[i * stepScale, j * stepScale] = data.HeightMapValue(data.Body.flightGlobalsIndex, i, j);
+					values[i * stepScale, j * stepScale] = data.HeightMapValue(data.Body.flightGlobalsIndex, (int)fixLon(i) + 180, j);
 				}
 			}
 
@@ -1572,7 +1587,9 @@ namespace SCANsat.SCAN_UI.UI_Framework
 						if (SCANUtil.isCovered(lon, lat, data, SCANtype.AltimetryHiRes))
 							c = palette.heightToColor(values[i, j], 0, data);
 						else
-							c = palette.heightToColor(values[i, j], 1, data);
+							c = palette.heightToColor(values[((int)(lon * scale * 5)) / 5, ((int)(lat * scale * 5)) / 5], 1, data);
+
+						c = palette.lerp(c, palette.Clear, 0.3f);
 					}
 					else
 						c = palette.Clear;
@@ -1587,21 +1604,26 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			return map;
 		}
 
-		internal static Texture2D drawLoDetailMap(ref Texture2D map, ref Color32[] pix, ref float[,] values, SCANdata data, int height, int stepScale, SCANmap m)
+		internal static Texture2D drawLoDetailMap(ref Color32[] pix, ref float[,] values, SCANmap map, SCANdata data, int width, int height, int stepScale)
 		{
-			int width = height * 2;
-
-			if (map == null || pix == null || map.height != height)
+			if (map.Map == null || pix == null || map.Map.height != height)
 			{
-				map = new Texture2D(width, height, TextureFormat.ARGB32, true);
+				map.Map= new Texture2D(width, height, TextureFormat.ARGB32, true);
 				pix = new Color32[width * height];
+				values = new float[width, height];
 			}
 
-			for (int i = 0; i < 360; i++)
+			for (int i = 0; i < width; i += stepScale)
 			{
-				for (int j = 0; j < 180; j++)
+				for (int j = 0; j < height; j += stepScale)
 				{
-					values[i * stepScale, j * stepScale] = data.HeightMapValue(data.Body.flightGlobalsIndex, i, j);
+					double lat = (j * 1.0f / map.MapScale) - 90f + map.Lat_Offset;
+					double lon = (i * 1.0f / map.MapScale) - 180f + map.Lon_Offset;
+					double la = lat, lo = lon;
+					lat = map.unprojectLatitude(lo, la);
+					lon = map.unprojectLongitude(lo, la);
+
+					values[i, j] = (float)SCANUtil.getElevation(data.Body, lon, lat);
 				}
 			}
 
@@ -1612,7 +1634,79 @@ namespace SCANsat.SCAN_UI.UI_Framework
 				SCANuiUtil.interpolate(values, height, width, i, 0, i, null, false);
 			}
 
-			return map;
+			for (int i = 0; i < width; i++)
+			{
+				for (int j = 0; j < height; j++)
+				{
+					pix[j * width + i] = palette.heightToColor(values[i, j], 1, data);
+				}
+			}
+
+			generateResourceCache(ref values, height, width, stepScale, map.MapScale, map);
+
+			for (int i = stepScale / 2; i >= 1; i /= 2)
+			{
+				SCANuiUtil.interpolate(values, height, width, i, i, i, null, false);
+				SCANuiUtil.interpolate(values, height, width, 0, i, i, null, false);
+				SCANuiUtil.interpolate(values, height, width, i, 0, i, null, false);
+			}
+
+			for (int i = 0; i < width; i++)
+			{
+				for (int j = 0; j < height; j++)
+				{
+					double lat = (j * 1.0f / map.MapScale) - 90f + map.Lat_Offset;
+					double lon = (i * 1.0f / map.MapScale) - 180f + map.Lon_Offset;
+					double la = lat, lo = lon;
+					lat = map.unprojectLatitude(lo, la);
+					lon = map.unprojectLongitude(lo, la);
+
+					Color32 c = pix[j * width + i];
+
+					pix[j * width + i] = resourceToColor32(c, map.Resource, values[i, j], data, lon, lat);
+				}
+			}
+
+			map.Map.SetPixels32(pix);
+			map.Map.Apply();
+
+			return map.Map;
+		}
+
+		internal static void generateResourceCache(ref float[,] values, int height, int width, int stepScale, double scale, SCANmap map)
+		{
+			for (int j = 0; j < height; j += stepScale)
+			{
+				for (int i = 0; i < width; i += stepScale)
+				{
+					Vector2d coords;
+					if (map.Zoom && map.Projection == MapProjection.Polar)
+					{
+						double rLon = (i * 1.0f / scale) - 180f + map.Lon_Offset;
+						double rLat = (j * 1.0f / scale) - 90f + map.Lat_Offset;
+
+						double la = rLat, lo = rLon;
+						rLat = map.unprojectLatitude(lo, la);
+						rLon = map.unprojectLongitude(lo, la);
+
+						if (double.IsNaN(rLat) || double.IsNaN(rLon) || rLat < -90 || rLat > 90 || rLon < -180 || rLon > 180)
+						{
+							values[i, j] = 0;
+							continue;
+						}
+
+						coords = new Vector2d(rLon, rLat);
+					}
+					else
+					{
+						double rLon = SCANUtil.fixLonShift((i * 1.0f / scale) - 180f + map.Lon_Offset);
+						double rLat = (j * 1.0f / scale) - 90f + map.Lat_Offset;
+						coords = SCANUtil.fixRetardCoordinates(new Vector2d(rLon, rLat));
+					}
+
+					values[i, j] = SCANUtil.ResourceOverlay(coords.y, coords.x, map.Resource.Name, map.Body, SCANcontroller.controller.resourceBiomeLock) * 100f;
+				}
+			}
 		}
 
 		private static float getLerp(System.Random rand, int l)
@@ -1735,42 +1829,6 @@ namespace SCANsat.SCAN_UI.UI_Framework
 				float avgX = Mathf.Lerp(v[xpos1, yStart], v[xpos2, yStart], lerp);
 
 				v[i, yStart] = avgX;
-			}
-		}
-
-		internal static void generateResourceCache(ref float[,] values, int height, int width, int stepScale, double scale, SCANmap map)
-		{
-			for (int j = 0; j < height; j += stepScale)
-			{
-				for (int i = 0; i < width; i += stepScale)
-				{
-					Vector2d coords;
-					if (map.Zoom && map.Projection == MapProjection.Polar)
-					{
-						double rLon = (i * 1.0f / scale) - 180f + map.Lon_Offset;
-						double rLat = (j * 1.0f / scale) - 90f + map.Lat_Offset;
-
-						double la = rLat, lo = rLon;
-						rLat = map.unprojectLatitude(lo, la);
-						rLon = map.unprojectLongitude(lo, la);
-
-						if (double.IsNaN(rLat) || double.IsNaN(rLon) || rLat < -90 || rLat > 90 || rLon < -180 || rLon > 180)
-						{
-							values[i, j] = 0;
-							continue;
-						}
-
-						coords = new Vector2d(rLon, rLat);
-					}
-					else
-					{
-						double rLon = SCANUtil.fixLonShift((i * 1.0f / scale) - 180f + map.Lon_Offset);
-						double rLat = (j * 1.0f / scale) - 90f + map.Lat_Offset;
-						coords = SCANUtil.fixRetardCoordinates(new Vector2d(rLon, rLat));
-					}
-
-					values[i, j] = SCANUtil.ResourceOverlay(coords.y, coords.x, map.Resource.Name, map.Body, SCANcontroller.controller.resourceBiomeLock) * 100f;
-				}
 			}
 		}
 
