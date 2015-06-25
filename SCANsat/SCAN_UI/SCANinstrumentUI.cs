@@ -310,7 +310,7 @@ namespace SCANsat.SCAN_UI
 					if (s.ResourceName != resources[currentResource].Name)
 						continue;
 
-					if (ResourceUtilities.GetAltitude(v) > s.MaxAbundanceAltitude || !v.Landed)
+					if (ResourceUtilities.GetAltitude(v) > s.MaxAbundanceAltitude || v.Landed)
 					{
 						tooHigh = true;
 						continue;
@@ -345,8 +345,8 @@ namespace SCANsat.SCAN_UI
 			{
 				Rect r = GUILayoutUtility.GetLastRect();
 
-				r.x = 4;
-				r.y -= 10;
+				r.x = 8;
+				r.y -= 30;
 				r.width = 18;
 				r.height = 28;
 
@@ -357,7 +357,7 @@ namespace SCANsat.SCAN_UI
 						currentResource = resources.Count - 1;
 				}
 
-				r.x = WindowRect.width - 20;
+				r.x = WindowRect.width - 24;
 
 				if (GUI.Button(r, ">"))
 				{
@@ -372,12 +372,12 @@ namespace SCANsat.SCAN_UI
 		{
 			if ((sensors & r.SType) != SCANtype.Nothing)
 			{
-				GUILayout.Label(string.Format("{0}: {1:P2}", r.Name, SCANUtil.ResourceOverlay(vlat, vlon, resources[0].Name, v.mainBody, SCANcontroller.controller.resourceBiomeLock)), SCANskins.SCAN_insColorLabel);
+				GUILayout.Label(string.Format("{0}: {1:P2}", r.Name, SCANUtil.ResourceOverlay(vlat, vlon, r.Name, v.mainBody, SCANcontroller.controller.resourceBiomeLock)), SCANskins.SCAN_insColorLabel);
 				fillS(-10);
 			}
 			else if ((sensors & SCANtype.FuzzyResources) != SCANtype.Nothing)
 			{
-				GUILayout.Label(string.Format("{0}: {1:P0}", r.Name, SCANUtil.ResourceOverlay(vlat, vlon, resources[0].Name, v.mainBody, SCANcontroller.controller.resourceBiomeLock)), SCANskins.SCAN_insColorLabel);
+				GUILayout.Label(string.Format("{0}: {1:P0}", r.Name, SCANUtil.ResourceOverlay(vlat, vlon, r.Name, v.mainBody, SCANcontroller.controller.resourceBiomeLock)), SCANskins.SCAN_insColorLabel);
 				fillS(-10);
 			}
 			else
