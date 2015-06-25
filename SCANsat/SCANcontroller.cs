@@ -937,8 +937,10 @@ namespace SCANsat
 				if (data.Building)
 					return;
 
+				SCANUtil.SCANdebugLog("Generate Terrain Map For: {0}", data.Body.name);
+
 				data.ExternalBuilding = true;
-				data.generateHeightMap(ref dataStep, ref dataStart, 60);
+				data.generateHeightMap(ref dataStep, ref dataStart, 120);
 
 				return;
 			}
