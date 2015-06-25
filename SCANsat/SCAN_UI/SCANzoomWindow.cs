@@ -18,6 +18,7 @@ using System.Linq;
 using SCANsat.SCAN_Platform;
 using SCANsat;
 using SCANsat.SCAN_UI.UI_Framework;
+using SCANsat.SCAN_PartModules;
 using SCANsat.SCAN_Data;
 using SCANsat.SCAN_Map;
 using palette = SCANsat.SCAN_UI.UI_Framework.SCANpalette;
@@ -35,6 +36,8 @@ namespace SCANsat.SCAN_UI
 		protected SCANresourceGlobal resource;
 		protected bool showOrbit, showAnomaly, showWaypoints;
 		private bool narrowBand, showInfo, controlLock;
+		protected float minZoom = 2;
+		protected float maxZoom = 1000;
 		private Vector2 dragStart;
 		private Vector2d mjTarget = new Vector2d();
 		private float resizeW, resizeH;
@@ -114,7 +117,7 @@ namespace SCANsat.SCAN_UI
 			controlLock = false;
 		}
 
-		public virtual void setMapCenter(double lat, double lon, bool centering, SCANmap big = null)
+		public virtual void setMapCenter(double lat, double lon, bool centering, SCANmap big = null, SCANhiDefCamera camera = null)
 		{
 			highDetail = centering;
 			Visible = true;
@@ -532,8 +535,8 @@ namespace SCANsat.SCAN_UI
 			if (GUILayout.Button(iconWithTT(SCANskins.SCAN_ZoomOutIcon, "Zoom Out"), SCANskins.SCAN_buttonBorderless, GUILayout.Width(26), GUILayout.Height(26)))
 			{
 				spotmap.MapScale = spotmap.MapScale / 1.25f;
-				if (spotmap.MapScale < 2)
-					spotmap.MapScale = 2;
+				if (spotmap.MapScale < minZoom)
+					spotmap.MapScale = minZoom;
 				resetMap();
 			}
 
@@ -545,6 +548,8 @@ namespace SCANsat.SCAN_UI
 			if (GUILayout.Button(iconWithTT(SCANskins.SCAN_ZoomInIcon, "Zoom In"), SCANskins.SCAN_buttonBorderless, GUILayout.Width(26), GUILayout.Height(26)))
 			{
 				spotmap.MapScale = spotmap.MapScale * 1.25f;
+				if (spotmap.MapScale > maxZoom)
+					spotmap.MapScale = maxZoom;
 				resetMap();
 			}
 
