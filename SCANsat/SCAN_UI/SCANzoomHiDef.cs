@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Linq;
-using SCANsat.SCAN_Platform;
 using SCANsat;
+using SCANsat.SCAN_PartModules;
 using SCANsat.SCAN_UI.UI_Framework;
 using SCANsat.SCAN_Data;
 using SCANsat.SCAN_Map;
@@ -12,6 +12,10 @@ namespace SCANsat.SCAN_UI
 {
 	class SCANzoomHiDef : SCANzoomWindow
 	{
+		private Color32[] mapPix;
+		private float[,] mapValues;
+		private SCANhiDefCamera cameraModule;
+
 		protected override void Startup()
 		{
 			//Initialize the map object
@@ -37,7 +41,7 @@ namespace SCANsat.SCAN_UI
 			spotmap.setBody(b);
 		}
 
-		public override void setMapCenter(double lat, double lon, bool centering, SCANmap big = null)
+		public override void setMapCenter(double lat, double lon, bool centering, SCANmap big = null, SCANhiDefCamera camera = null)
 		{
 			highDetail = centering;
 			Visible = true;
@@ -55,6 +59,12 @@ namespace SCANsat.SCAN_UI
 				b = data.Body;
 
 				spotmap.setBody(b);
+			}
+
+			if (camera != null)
+			{
+				minZoom = camera.minZoom;
+				maxZoom = camera.maxZoom;
 			}
 
 			spotmap.MapScale = 10;
@@ -88,7 +98,7 @@ namespace SCANsat.SCAN_UI
 				return base.getMap();
 			else
 			{
-				return null;//return SCANuiUtil.drawLoDetailMap(data, MapTexture);
+				return SCANuiUtil.drawLoDetailMap(ref mapPix, ref mapValues, spotmap, data, spotmap.MapWidth, spotmap.MapHeight, 4);
 			}
 		}
 
