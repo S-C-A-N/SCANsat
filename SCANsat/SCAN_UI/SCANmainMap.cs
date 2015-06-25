@@ -81,7 +81,6 @@ namespace SCANsat.SCAN_UI
 			topMenu(id);
 			growS();
 				mainMap(id);				/* Draws the main map texture */
-				fillS(-6);
 				growE();
 					scannerInfo(id);		/* Draws the scanner indicators */
 					windowButtons(id);		/* Draw the buttons for other SCANsat windows */
@@ -131,13 +130,15 @@ namespace SCANsat.SCAN_UI
 		{
 			//GUILayout.Label(data.Map);
 			//mapRect = GUILayoutUtility.GetLastRect();
-			mapRect = new Rect(10, 30, 360, 180);
+			mapRect = new Rect(10, 20, 360, 180);
 			GUI.DrawTexture(mapRect, data.drawPartialMap(sensors));
 
 			if (data.Building)
 			{
 				GUI.Label(new Rect(mapRect.x + 90, mapRect.y + 60, 180, 60), "");
 			}
+
+			GUILayout.Space(184);
 		}
 
 		//Draw the active scanner display
