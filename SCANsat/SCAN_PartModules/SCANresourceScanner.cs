@@ -24,6 +24,7 @@ namespace SCANsat.SCAN_PartModules
 		private ModuleAnimationGroup animGroup;
 		private bool activated;
 		private bool forceStart;
+		private bool loaded;
 
 		public override void OnStart(PartModule.StartState state)
 		{
@@ -99,6 +100,7 @@ namespace SCANsat.SCAN_PartModules
 
 			if (forceStart)
 			{
+				forceStart = false;
 				if (SCANcontroller.controller.disableStockResource)
 				{
 					if (mSurvey != null)
@@ -113,7 +115,7 @@ namespace SCANsat.SCAN_PartModules
 							m.DisableModule();
 					}
 				}
-				forceStart = false;
+				loaded = true;
 			}
 
 			if (!SCANcontroller.controller.easyModeScanning || SCANcontroller.controller.disableStockResource)
@@ -165,7 +167,7 @@ namespace SCANsat.SCAN_PartModules
 			activated = false;
 			base.Events["startScan"].active = false;
 			base.Events["stopScan"].active = false;
-			if (scanning)
+			if (scanning && loaded)
 				unregisterScanner();
 
 			if (SCANcontroller.controller != null && SCANcontroller.controller.disableStockResource)
