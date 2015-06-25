@@ -72,7 +72,6 @@ namespace SCANsat.SCAN_UI
 				SCANcontroller.controller.addToBodyData(v.mainBody, data);
 			}
 			sensors = SCANcontroller.controller.activeSensorsOnVessel(v.id);
-			//data.updateImages(sensors);
 		}
 
 		protected override void DrawWindow(int id)
@@ -128,14 +127,12 @@ namespace SCANsat.SCAN_UI
 		//Draw the map texture
 		private void mainMap(int id)
 		{
-			//GUILayout.Label(data.Map);
-			//mapRect = GUILayoutUtility.GetLastRect();
 			mapRect = new Rect(10, 20, 360, 180);
 			GUI.DrawTexture(mapRect, data.drawPartialMap(sensors));
 
 			if (data.Building)
 			{
-				GUI.Label(new Rect(mapRect.x + 90, mapRect.y + 60, 180, 60), "");
+				GUI.Label(new Rect(mapRect.x + 90, mapRect.y + 60, 180, 60), "Building Database...");
 			}
 
 			GUILayout.Space(184);
