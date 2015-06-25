@@ -93,6 +93,7 @@ namespace SCANsat.SCAN_Map
 		public Texture2D Map
 		{
 			get { return map; }
+			internal set { map = value; }
 		}
 
 		public CelestialBody Body
@@ -586,7 +587,8 @@ namespace SCANsat.SCAN_Map
 				}
 				else
 				{
-					generateResourceCache();
+					SCANuiUtil.generateResourceCache(ref resourceCache, resourceMapHeight, resourceMapWidth, resourceInterpolation, resourceMapScale, this);
+					//generateResourceCache();
 					mapstep++;
 					return map;
 				}
