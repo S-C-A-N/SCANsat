@@ -18,16 +18,20 @@ namespace SCANsat.SCAN_UI
 		private SCANresourceGlobal currentResource;
 		private List<SCANresourceGlobal> resources;
 		private List<PResource.Resource> resourceFractions;
-		private bool biomeMode = false;
-		private bool drawOverlay = false;
-		private bool oldOverlay = false;
+		private bool biomeMode;
+		private bool terrainMode;
+		private bool drawOverlay;
+		private bool oldOverlay;
 		private int selection;
 
 		private Texture2D mapOverlay;
 		private Texture2D biomeOverlay;
+		private Texture2D terrainOverlay;
 		private Color32[] resourcePixels;
 		private Color32[] biomePixels;
+		private Color32[] terrainPixels;
 		private float[,] abundanceValues;
+		private float[,] terrainValues;
 		private int mapHeight = 256;
 		private float transparency = 0f;
 		private int interpolationScale = 8;
@@ -167,12 +171,39 @@ namespace SCANsat.SCAN_UI
 			if (GUILayout.Button("Biome Map", selection == (resources.Count) ? SCANskins.SCAN_labelLeftActive : SCANskins.SCAN_labelLeft))
 			{
 				biomeMode = true;
+				terrainMode = false;
 
 				OverlayGenerator.Instance.ClearDisplay();
 
 				if (selection != resources.Count)
 				{
 					selection = resources.Count;
+					oldOverlay = drawOverlay = true;
+					refreshMap();
+					return;
+				}
+
+				if (drawOverlay)
+				{
+					oldOverlay = drawOverlay = false;
+				}
+				else
+				{
+					oldOverlay = drawOverlay = true;
+					refreshMap();
+				}
+			}
+
+			if (GUILayout.Button("Terrain Map", selection == (resources.Count + 1) ? SCANskins.SCAN_labelLeftActive : SCANskins.SCAN_labelLeft))
+			{
+				biomeMode = false;
+				terrainMode = true;
+
+				OverlayGenerator.Instance.ClearDisplay();
+
+				if (selection != resources.Count + 1)
+				{
+					selection = resources.Count + 1;
 					oldOverlay = drawOverlay = true;
 					refreshMap();
 					return;
@@ -256,6 +287,8 @@ namespace SCANsat.SCAN_UI
 		{
 			if (biomeMode)
 				body.SetResourceMap(SCANuiUtil.drawBiomeMap(ref biomeOverlay, ref biomePixels, data, transparency, mapHeight * 2));
+			else if (terrainMode)
+				body.SetResourceMap(SCANuiUtil.drawTerrainMap(ref terrainOverlay, ref terrainPixels, ref terrainValues, data, 360, 2));
 			else
 				body.SetResourceMap(SCANuiUtil.drawResourceTexture(ref mapOverlay, ref resourcePixels, ref abundanceValues, mapHeight, data, currentResource, interpolationScale, transparency));
 		}
