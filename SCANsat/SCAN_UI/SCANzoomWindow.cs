@@ -70,6 +70,7 @@ namespace SCANsat.SCAN_UI
 		{
 			//Initialize the map object
 			Visible = false;
+
 			if (HighLogic.LoadedSceneIsFlight)
 			{
 				v = SCANcontroller.controller.BigMap.V;
@@ -82,6 +83,7 @@ namespace SCANsat.SCAN_UI
 				b = SCANcontroller.controller.kscMap.Body;
 				data = SCANcontroller.controller.kscMap.Data;
 			}
+
 			if (spotmap == null)
 			{
 				spotmap = new SCANmap(b, false, true);
@@ -90,8 +92,6 @@ namespace SCANsat.SCAN_UI
 
 			showOrbit = SCANcontroller.controller.map_orbit;
 			showAnomaly = SCANcontroller.controller.map_markers;
-
-			resource = bigmap.Resource;
 
 			if (HighLogic.LoadedScene == GameScenes.SPACECENTER)
 				showWaypoints = false;
@@ -119,6 +119,8 @@ namespace SCANsat.SCAN_UI
 			highDetail = centering;
 			Visible = true;
 			bigmap = big;
+
+			resource = bigmap.Resource;
 
 			SCANcontroller.controller.TargetSelecting = false;
 			SCANcontroller.controller.TargetSelectingActive = false;
