@@ -23,6 +23,7 @@ using SCANsat.SCAN_Platform.Palettes;
 using SCANsat.SCAN_Platform.Palettes.ColorBrewer;
 using SCANsat.SCAN_Platform.Palettes.FixedColors;
 using SCANsat.SCAN_Data;
+using SCANsat.SCAN_UI.UI_Framework;
 using palette = SCANsat.SCAN_UI.UI_Framework.SCANpalette;
 
 namespace SCANsat
@@ -434,6 +435,148 @@ namespace SCANsat
 			}
 
 			return null;
+		}
+
+		internal static double slope(double centerElevation, CelestialBody body, double lon, double lat, double offset)
+		{
+			/* Slope is calculated using a nine point grid centered 5m around the vessel location
+						 * The rise between the vessel location's elevation and each point on the grid is calculated, converted to slope in degrees, and averaged;
+						 * Note: Averageing is not the most accurate method
+						 */
+
+			double latOffset = offset * Math.Cos(Mathf.Deg2Rad * lat);
+			double[] e = new double[9];
+			double[] s = new double[8];
+			e[0] = centerElevation;
+			e[1] = SCANUtil.getElevation(body, lon + latOffset, lat);
+			e[2] = SCANUtil.getElevation(body, lon - latOffset, lat);
+			e[3] = SCANUtil.getElevation(body, lon, lat + offset);
+			e[4] = SCANUtil.getElevation(body, lon, lat - offset);
+			e[5] = SCANUtil.getElevation(body, lon + latOffset, lat + offset);
+			e[6] = SCANUtil.getElevation(body, lon + latOffset, lat - offset);
+			e[7] = SCANUtil.getElevation(body, lon - latOffset, lat + offset);
+			e[8] = SCANUtil.getElevation(body, lon - latOffset, lat - offset);
+
+			return slope(e);
+		}
+
+		internal static double slope (double[] elevations)
+		{
+			double[] s = new double[8];
+
+			/* Calculate rise for each point on the grid
+			 * The distance is 5m for adjacent points and 7.071m for the points on the corners
+			 * Rise is converted to slope; i.e. a 5m elevation change over a 5m distance is a rise of 1
+			 * Converted to slope using the inverse tangent this gives a slope of 45°
+			 * */
+			for (int i = 1; i <= 4; i++)
+			{
+				s[i - 1] = Math.Atan((Math.Abs(elevations[i] - elevations[0])) / 5) * Mathf.Rad2Deg;
+			}
+			for (int i = 5; i <= 8; i++)
+			{
+				s[i - 1] = Math.Atan((Math.Abs(elevations[i] - elevations[0])) / 7.071) * Mathf.Rad2Deg;
+			}
+
+			return s.Sum() / 8;
+		}
+
+		internal static bool MouseIsOverWindow()
+		{
+			if (SCANcontroller.controller == null)
+				return false;
+
+			Vector2 pos = new Vector2(Input.mousePosition.x, Screen.height - Input.mousePosition.y);
+
+			if (SCANcontroller.controller.mainMapVisible && SCANcontroller.controller.mainMap.GetWindowRect.Contains(pos))
+				return true;
+			else if (SCANcontroller.controller.bigMapVisible && SCANcontroller.controller.BigMap.GetWindowRect.Contains(pos))
+				return true;
+			else if (SCANcontroller.controller.BigMap.spotMap != null && SCANcontroller.controller.BigMap.spotMap.Visible && SCANcontroller.controller.BigMap.spotMap.GetWindowRect.Contains(pos))
+				return true;
+			else if (SCANcontroller.controller.hiDefMap != null && SCANcontroller.controller.hiDefMap.Visible && SCANcontroller.controller.hiDefMap.GetWindowRect.Contains(pos))
+				return true;
+			else if (SCANcontroller.controller.settingsWindow.Visible && SCANcontroller.controller.settingsWindow.GetWindowRect.Contains(pos))
+				return true;
+			else if (SCANcontroller.controller.resourceSettings.Visible && SCANcontroller.controller.resourceSettings.GetWindowRect.Contains(pos))
+				return true;
+			else if (SCANcontroller.controller.instrumentsWindow.Visible && SCANcontroller.controller.instrumentsWindow.GetWindowRect.Contains(pos))
+				return true;
+			else if (SCANcontroller.controller.resourceOverlay.Visible && SCANcontroller.controller.resourceOverlay.GetWindowRect.Contains(pos))
+				return true;
+			else if (SCANcontroller.controller.colorManager.Visible && SCANcontroller.controller.colorManager.GetWindowRect.Contains(pos))
+				return true;
+
+			return false;
+		}
+
+		//This one is straight out of MechJeb :) - https://github.com/MuMech/MechJeb2/blob/master/MechJeb2/GuiUtils.cs#L463-L507
+		internal static SCANCoordinates GetMouseCoordinates(CelestialBody body)
+		{
+			Ray mouseRay = PlanetariumCamera.Camera.ScreenPointToRay(Input.mousePosition);
+			mouseRay.origin = ScaledSpace.ScaledToLocalSpace(mouseRay.origin);
+			Vector3d relOrigin = mouseRay.origin - body.position;
+			Vector3d relSurfacePosition;
+			double curRadius = body.pqsController.radiusMax;
+			double lastRadius = 0;
+			double error = 0;
+			int loops = 0;
+			float st = Time.time;
+			while (loops < 50)
+			{
+				if (PQS.LineSphereIntersection(relOrigin, mouseRay.direction, curRadius, out relSurfacePosition))
+				{
+					Vector3d surfacePoint = body.position + relSurfacePosition;
+					double alt = body.pqsController.GetSurfaceHeight(QuaternionD.AngleAxis(body.GetLongitude(surfacePoint), Vector3d.down) * QuaternionD.AngleAxis(body.GetLatitude(surfacePoint), Vector3d.forward) * Vector3d.right);
+					error = Math.Abs(curRadius - alt);
+					if (error < (body.pqsController.radiusMax - body.pqsController.radiusMin) / 100)
+					{
+						return new SCANCoordinates(fixLonShift((body.GetLongitude(surfacePoint))), fixLatShift(body.GetLatitude(surfacePoint)));
+					}
+					else
+					{
+						lastRadius = curRadius;
+						curRadius = alt;
+						loops++;
+					}
+				}
+				else
+				{
+					if (loops == 0)
+					{
+						break;
+					}
+					else
+					{ // Went too low, needs to try higher
+						curRadius = (lastRadius * 9 + curRadius) / 10;
+						loops++;
+					}
+				}
+			}
+
+			return null;
+		}
+
+		public class SCANCoordinates
+		{
+			public double latitude;
+			public double longitude;
+
+			public SCANCoordinates(double lon, double lat)
+			{
+				longitude = lon;
+				latitude = lat;
+			}
+
+			public string ToDegString()
+			{
+				return latitude.ToString("F1") + "°, " + longitude.ToString("F1") + "°";
+			}
+
+			public string ToDMS()
+			{
+				return SCANuiUtil.toDMS(latitude, longitude, 0);
+			}
 		}
 
 		internal static void SCANlog(string log, params object[] stringObjects)
