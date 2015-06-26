@@ -34,14 +34,14 @@ namespace SCANsat.SCAN_Data
 
 		/* MAP: state */
 		private Int32[,] coverage = new Int32[360, 180];
-		private float[,] kethaneValueMap = new float[360, 180]; //Store kethane cell data in here
+		//private float[,] kethaneValueMap = new float[360, 180]; //Store kethane cell data in here
 		private Color[] cols_height_map_small = new Color[360];
 		private CelestialBody body;
 		private Texture2D map_small = new Texture2D(360, 180, TextureFormat.RGB24, false);
 		private SCANterrainConfig terrainConfig;
 		private bool building, externalBuilding, built;
 
-		private static float[,] tempHeightMap = new float[360, 180];
+		private float[,] tempHeightMap = new float[360, 180];
 
 		/* MAP: options */
 		private bool disabled;
@@ -95,11 +95,11 @@ namespace SCANsat.SCAN_Data
 			get { return map_small; }
 		}
 
-		public float[,] KethaneValueMap
-		{
-			get { return kethaneValueMap; }
-			set { kethaneValueMap = value; }
-		}
+		//public float[,] KethaneValueMap
+		//{
+		//	get { return kethaneValueMap; }
+		//	set { kethaneValueMap = value; }
+		//}
 
 		public SCANterrainConfig TerrainConfig
 		{
@@ -471,7 +471,8 @@ namespace SCANsat.SCAN_Data
 				externalBuilding = false;
 				if (!heightMaps.ContainsKey(body.flightGlobalsIndex))
 					heightMaps.Add(body.flightGlobalsIndex, tempHeightMap);
-				tempHeightMap = new float[360, 180];
+				tempHeightMap = null;
+				SCANUtil.SCANlog("Height Map Of [{0}] Completed...", body.theName);
 				return;
 			}
 
