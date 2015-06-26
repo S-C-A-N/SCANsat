@@ -366,7 +366,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 
 		/* UI: conversions to and from DMS */
 		/* FIXME: These do not belong here. And they are only used once! */
-		private static string toDMS(double thing, string neg, string pos)
+		private static string toDMS(double thing, string neg, string pos, int prec)
 		{
 			string dms = "";
 			if (thing >= 0)
@@ -376,14 +376,14 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			thing = (thing - Math.Floor(thing)) * 60;
 			dms += Math.Floor(thing).ToString() + "'";
 			thing = (thing - Math.Floor(thing)) * 60;
-			dms += thing.ToString("F2") + "\"";
+			dms += thing.ToString("F" + prec.ToString()) + "\"";
 			dms += neg;
 			return dms;
 		}
 
-		internal static string toDMS(double lat, double lon)
+		internal static string toDMS(double lat, double lon, int precision = 2)
 		{
-			return string.Format("{0} {1}", toDMS(lat, "S", "N"), toDMS(lon, "W", "E"));
+			return string.Format("{0} {1}", toDMS(lat, "S", "N", precision), toDMS(lon, "W", "E", precision));
 		}
 
 		internal static string distanceString(double dist, double cutoff)
@@ -1534,6 +1534,9 @@ namespace SCANsat.SCAN_UI.UI_Framework
 
 		internal static Texture2D drawTerrainMap(ref Texture2D map, ref Color32[] pix, ref float[,] values, SCANdata data, int height, int stepScale)
 		{
+			if (data.Body.pqsController == null)
+				return null;
+
 			int timer = 0;
 
 			while (!data.Built && timer < 5000)
@@ -1556,6 +1559,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			{
 				map = new Texture2D(width, height, TextureFormat.ARGB32, true);
 				pix = new Color32[width * height];
+				values = new float[width, height];
 			}
 
 			for (int i = 0; i < 360; i++)
@@ -1587,9 +1591,15 @@ namespace SCANsat.SCAN_UI.UI_Framework
 						if (SCANUtil.isCovered(lon, lat, data, SCANtype.AltimetryHiRes))
 							c = palette.heightToColor(values[i, j], 0, data);
 						else
-							c = palette.heightToColor(values[((int)(lon * scale * 5)) / 5, ((int)(lat * scale * 5)) / 5], 1, data);
+						{
+							int ilon = SCANUtil.icLON(lon);
+							int ilat = SCANUtil.icLAT(lat);
+							int lo = ((int)(ilon * scale * 5)) / 5;
+							int la = ((int)(ilat * scale * 5)) / 5;
+							c = palette.heightToColor(values[lo, la], 1, data);
+						}
 
-						c = palette.lerp(c, palette.Clear, 0.3f);
+						c = palette.lerp(c, palette.Clear, 0.1f);
 					}
 					else
 						c = palette.Clear;
@@ -1602,6 +1612,139 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			map.Apply();
 
 			return map;
+		}
+
+		internal static Texture2D drawSlopeMap(ref Texture2D map, ref Color32[] pix, ref float[,] values, SCANdata data, int height, int stepScale)
+		{
+			if (data.Body.pqsController == null)
+				return null;
+
+			int timer = 0;
+
+			while (!data.Built && timer < 5000)
+			{
+				if (!data.Building)
+				{
+					data.ExternalBuilding = true;
+					data.generateHeightMap(ref mapStep, ref mapStart, 180);
+				}
+				timer++;
+			}
+
+			if (timer >= 5000)
+				return null;
+
+			int width = height * 2;
+			float scale = height / 180f;
+
+			if (map == null || pix == null || map.height != height)
+			{
+				map = new Texture2D(width, height, TextureFormat.ARGB32, true);
+				pix = new Color32[width * height];
+				values = new float[width, height];
+			}
+
+			for (int i = 0; i < 360; i++)
+			{
+				for (int j = 0; j < 180; j++)
+				{
+					values[i * stepScale, j * stepScale] = data.HeightMapValue(data.Body.flightGlobalsIndex, (int)fixLon(i) + 180, j);
+				}
+			}
+
+			for (int i = stepScale / 2; i >= 1; i /= 2)
+			{
+				SCANuiUtil.interpolate(values, height, width, i, i, i, null, false);
+				SCANuiUtil.interpolate(values, height, width, 0, i, i, null, false);
+				SCANuiUtil.interpolate(values, height, width, i, 0, i, null, false);
+			}
+
+			for (int i = 0; i < width; i++)
+			{
+				for (int j = 0; j < height; j++)
+				{
+					double lon = fixLon(i / scale);
+					double lat = (j / scale) - 90;
+
+					Color32 c = palette.Clear;
+
+					if (SCANUtil.isCovered(lon, lat, data, SCANtype.Altimetry))
+					{
+						double[] e = new double[9];
+						float slope = 0;
+
+						e[0] = values[i, j];
+
+						if (SCANUtil.isCovered(lon, lat, data, SCANtype.AltimetryHiRes))
+						{
+							Vector2 s = slipCoordinates(i + 1, j, width, height);
+							e[1] = values[(int)s.x, (int)s.y];
+							s = slipCoordinates(i - 1, j, width, height);
+							e[2] = values[(int)s.x, (int)s.y];
+							s = slipCoordinates(i, j + 1, width, height);
+							e[3] = values[(int)s.x, (int)s.y];
+							s = slipCoordinates(i, j - 1, width, height);
+							e[4] = values[(int)s.x, (int)s.y];
+							s = slipCoordinates(i + 1, j + 1, width, height);
+							e[5] = values[(int)s.x, (int)s.y];
+							s = slipCoordinates(i + 1, j - 1, width, height);
+							e[6] = values[(int)s.x, (int)s.y];
+							s = slipCoordinates(i - 1, j + 1, width, height);
+							e[7] = values[(int)s.x, (int)s.y];
+							s = slipCoordinates(i - 1, j - 1, width, height);
+							e[8] = values[(int)s.x, (int)s.y];
+
+							slope = (float)SCANUtil.slope(e);
+
+							c = palette.heightToColor(values[i, j], 0, data);
+						}
+						else
+						{
+							int ilon = SCANUtil.icLON(lon);
+							int ilat = SCANUtil.icLAT(lat);
+							int lo = ((int)(ilon * scale * 5)) / 5;
+							int la = ((int)(ilat * scale * 5)) / 5;
+							c = palette.heightToColor(values[lo, la], 1, data);
+						}
+
+						c = palette.lerp(c, palette.Clear, 0.1f);
+					}
+					else
+						c = palette.Clear;
+
+					pix[j * width + i] = c;
+				}
+			}
+
+			map.SetPixels32(pix);
+			map.Apply();
+
+			return map;
+		}
+
+		private static Vector2 slipCoordinates(int x, int y, int width, int height)
+		{
+			if (y < 0)
+			{
+				y = Math.Abs(y);
+				x += (width / 2);
+
+				return new Vector2(x, y);
+			}
+
+			if (y > height)
+			{
+				while (y > 180)
+					y -= 180;
+				y = 180 - Math.Abs(y);
+				x -= (width / 2);
+
+				return new Vector2(x, y);
+			}
+
+			x = (x + width) % width;
+
+			return new Vector2(x, y);
 		}
 
 		internal static Texture2D drawLoDetailMap(ref Color32[] pix, ref float[,] values, SCANmap map, SCANdata data, int width, int height, int stepScale)
@@ -1791,7 +1934,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 					float avgY = 0;
 
 					float lerp = 0.5f;
-					if (!edges)
+					if (edges)
 						lerp = getLerp(r, step * 2);
 
 					if (x == y)
@@ -1812,25 +1955,25 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			}
 		}
 
-		internal static void interpolate(float[,] v, int yStart, int width, int x, int step, System.Random r)
-		{
+		//internal static void interpolate(float[,] v, int yStart, int width, int x, int step, System.Random r)
+		//{
 
-			for (int i = x; i < width + x; i += 2 * step)
-			{
-				int xpos1 = i - step;
-				if (xpos1 < 0)
-					xpos1 += width;
-				int xpos2 = i + step;
-				if (xpos2 >= width)
-					xpos2 -= width;
+		//	for (int i = x; i < width + x; i += 2 * step)
+		//	{
+		//		int xpos1 = i - step;
+		//		if (xpos1 < 0)
+		//			xpos1 += width;
+		//		int xpos2 = i + step;
+		//		if (xpos2 >= width)
+		//			xpos2 -= width;
 
-				float lerp = getLerp(r, step * 2);
+		//		float lerp = getLerp(r, step * 2);
 
-				float avgX = Mathf.Lerp(v[xpos1, yStart], v[xpos2, yStart], lerp);
+		//		float avgX = Mathf.Lerp(v[xpos1, yStart], v[xpos2, yStart], lerp);
 
-				v[i, yStart] = avgX;
-			}
-		}
+		//		v[i, yStart] = avgX;
+		//	}
+		//}
 
 		/* Converts resource amount to pixel color */
 		internal static Color resourceToColor(Color BaseColor, SCANresourceGlobal Resource, float Abundance, SCANdata Data, double Lon, double Lat)
