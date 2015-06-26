@@ -457,10 +457,19 @@ namespace SCANsat
 			e[7] = SCANUtil.getElevation(body, lon - latOffset, lat + offset);
 			e[8] = SCANUtil.getElevation(body, lon - latOffset, lat - offset);
 
-			return slope(e);
+			if (body.ocean)
+			{
+				for (int i = 0; i < 9; i++)
+				{
+					if (e[i] < 0)
+						e[i] = 0;
+				}
+			}
+
+			return slope(e, 5);
 		}
 
-		internal static double slope (double[] elevations)
+		internal static double slope (double[] elevations, double distance)
 		{
 			double[] s = new double[8];
 
@@ -469,13 +478,16 @@ namespace SCANsat
 			 * Rise is converted to slope; i.e. a 5m elevation change over a 5m distance is a rise of 1
 			 * Converted to slope using the inverse tangent this gives a slope of 45°
 			 * */
+
+			double diagonalDistance = Math.Sqrt(Math.Pow(distance, 2) * 2);
+
 			for (int i = 1; i <= 4; i++)
 			{
-				s[i - 1] = Math.Atan((Math.Abs(elevations[i] - elevations[0])) / 5) * Mathf.Rad2Deg;
+				s[i - 1] = Math.Atan((Math.Abs(elevations[i] - elevations[0])) / distance) * Mathf.Rad2Deg;
 			}
 			for (int i = 5; i <= 8; i++)
 			{
-				s[i - 1] = Math.Atan((Math.Abs(elevations[i] - elevations[0])) / 7.071) * Mathf.Rad2Deg;
+				s[i - 1] = Math.Atan((Math.Abs(elevations[i] - elevations[0])) / diagonalDistance) * Mathf.Rad2Deg;
 			}
 
 			return s.Sum() / 8;
