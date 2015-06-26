@@ -6,7 +6,7 @@ using SCANsat.SCAN_Data;
 
 namespace SCANsat.SCAN_PartModules
 {
-	class SCANresourceDisplay : PartModule, IAnimatedModule
+	public class SCANresourceDisplay : PartModule, IAnimatedModule
 	{
 		[KSPField]
 		public int sensorType;
