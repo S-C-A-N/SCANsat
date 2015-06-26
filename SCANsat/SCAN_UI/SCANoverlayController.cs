@@ -23,6 +23,8 @@ namespace SCANsat.SCAN_UI
 		private bool drawOverlay;
 		private bool oldOverlay;
 		private int selection;
+		private double degreeOffset;
+		private bool enableUI = true;
 
 		private Texture2D mapOverlay;
 		private Texture2D biomeOverlay;
@@ -51,6 +53,9 @@ namespace SCANsat.SCAN_UI
 
 		protected override void Start()
 		{
+			GameEvents.onShowUI.Add(showUI);
+			GameEvents.onHideUI.Add(hideUI);
+
 			resources = SCANcontroller.setLoadedResourceList();
 
 			setBody(HighLogic.LoadedSceneIsFlight ? FlightGlobals.currentMainBody : Planetarium.fetch.Home);
@@ -77,7 +82,8 @@ namespace SCANsat.SCAN_UI
 
 		protected override void OnDestroy()
 		{
-
+			GameEvents.onShowUI.Remove(showUI);
+			GameEvents.onHideUI.Remove(hideUI);
 		}
 
 		public bool DrawOverlay
@@ -115,6 +121,12 @@ namespace SCANsat.SCAN_UI
 			sessionRect = WindowRect;
 		}
 
+		protected override void OnGUIEvery()
+		{
+			if (enableUI)
+				mouseOverToolTip();
+		}
+
 		//Draw the version label in the upper left corner
 		private void versionLabel(int id)
 		{
@@ -144,6 +156,8 @@ namespace SCANsat.SCAN_UI
 				if (GUILayout.Button(r.Name, selection == i ? SCANskins.SCAN_labelLeftActive : SCANskins.SCAN_labelLeft))
 				{
 					biomeMode = false;
+					terrainMode = false;
+
 					OverlayGenerator.Instance.ClearDisplay();
 
 					if (selection != i)
@@ -234,9 +248,10 @@ namespace SCANsat.SCAN_UI
 			if (GUILayout.Button("Refresh"))
 				refreshMap();
 
-			if (!biomeMode)
-			{
-				growE();
+			if (biomeMode || terrainMode)
+				return;
+
+			growE();
 				GUILayout.Label("Coverage Transparency:", SCANskins.SCAN_labelSmallLeft);
 
 				if (GUILayout.Button("-", SCANskins.SCAN_buttonSmall, GUILayout.Width(18)))
@@ -250,8 +265,7 @@ namespace SCANsat.SCAN_UI
 					transparency = Mathf.Min(1f, transparency + 0.1f);
 					refreshMap();
 				}
-				stopE();
-			}
+			stopE();
 		}
 
 		private void resourceSettings(int id)
@@ -272,6 +286,138 @@ namespace SCANsat.SCAN_UI
 
 				
 			//}
+		}
+
+		private void mouseOverToolTip()
+		{
+			if (!drawOverlay)
+				return;
+
+			if (SCANcontroller.controller == null)
+				return;
+
+			if (!SCANcontroller.controller.planetaryOverlayTooltips)
+				return;
+
+			if ((MapView.MapIsEnabled && HighLogic.LoadedSceneIsFlight && FlightGlobals.ready) || HighLogic.LoadedScene == GameScenes.TRACKSTATION)
+			{
+				if (SCANUtil.MouseIsOverWindow())
+					return;
+
+				SCANUtil.SCANCoordinates coords = SCANUtil.GetMouseCoordinates(body);
+
+				if (coords == null)
+					return;
+
+				Rect r = new Rect(Event.current.mousePosition.x - 80, Event.current.mousePosition.y - 106, 160, 102);
+
+				GUI.Box(r, "");
+
+				r.x += 5;
+				r.y += 4;
+				r.width = 150;
+				r.height = 22;
+
+				GUI.Label(r, coords.ToDMS());
+
+				if (body.pqsController != null)
+				{
+					if (SCANUtil.isCovered(coords.longitude, coords.latitude, data, SCANtype.Altimetry))
+					{
+						double elevation = SCANUtil.getElevation(body, coords.longitude, coords.latitude);
+
+						r.y += 19;
+
+						GUI.Label(r, string.Format("Terrain: {0:N0}m", elevation));
+
+						r.y += 19;
+
+						GUI.Label(r, string.Format("Slope: {0:F1}°", SCANUtil.slope(elevation, body, coords.longitude, coords.latitude, degreeOffset)));
+					}
+				}
+
+				if (body.BiomeMap != null)
+				{
+					if (SCANUtil.isCovered(coords.longitude, coords.latitude, data, SCANtype.Biome))
+					{
+						r.y += 19;
+
+						GUI.Label(r, string.Format("Biome: {0}", SCANUtil.getBiomeName(body, coords.longitude, coords.latitude)));
+					}
+				}
+
+				bool resources = false;
+				bool fuzzy = false;
+
+				if (SCANUtil.isCovered(coords.longitude, coords.latitude, data, currentResource.SType))
+				{
+					resources = true;
+				}
+				else if (SCANUtil.isCovered(coords.longitude, coords.latitude, data, SCANtype.FuzzyResources))
+				{
+					resources = true;
+					fuzzy = true;
+				}
+
+				if (resources)
+				{
+					r.y += 19;
+
+					if (SCANcontroller.controller.instrumentNeedsNarrowBand)
+					{
+						bool tooHigh = false;
+						bool scanner = false;
+
+						//foreach (SCANresourceDisplay s in resourceScanners)
+						//{
+						//	if (s == null)
+						//		continue;
+
+						//	if (s.ResourceName != resources[currentResource].Name)
+						//		continue;
+
+						//	if (ResourceUtilities.GetAltitude(v) > s.MaxAbundanceAltitude || v.Landed)
+						//	{
+						//		tooHigh = true;
+						//		continue;
+						//	}
+
+						//	scanner = true;
+						//	tooHigh = false;
+						//	break;
+						//}
+
+						if (tooHigh)
+						{
+							GUI.Label(r, string.Format("{0}: Too High", currentResource.Name));
+						}
+						else if (!scanner)
+						{
+							GUI.Label(r, string.Format("{0}: No Scanner", currentResource.Name));
+						}
+						else
+						{
+							resourceLabel(r, fuzzy, coords.latitude, coords.longitude);
+						}
+					}
+					else
+					{
+						resourceLabel(r, fuzzy, coords.latitude, coords.longitude);
+					}
+				}
+			}
+		}
+
+		private void resourceLabel(Rect pos, bool fuzz, double lat, double lon)
+		{
+			if (fuzz)
+			{
+				GUI.Label(pos, string.Format("{0}: {1:P0}", currentResource.Name, SCANUtil.ResourceOverlay(lat, lon, currentResource.Name, body, SCANcontroller.controller.resourceBiomeLock)));
+			}
+			else
+			{
+				GUI.Label(pos, string.Format("{0}: {1:P2}", currentResource.Name, SCANUtil.ResourceOverlay(lat, lon, currentResource.Name, body, SCANcontroller.controller.resourceBiomeLock)));
+			}
 		}
 
 		public void refreshMap(float t, int height, int interp)
@@ -319,6 +465,10 @@ namespace SCANsat.SCAN_UI
 			if (drawOverlay)
 				refreshMap();
 
+			double circum = body.Radius * 2 * Math.PI;
+			double eqDistancePerDegree = circum / 360;
+			degreeOffset = 5 / eqDistancePerDegree;
+
 
 			//resourceFractions = ResourceMap.Instance.GetResourceItemList(HarvestTypes.Planetary, body);
 			//if (resources.Count > 0)
@@ -335,6 +485,16 @@ namespace SCANsat.SCAN_UI
 			//	//	}
 			//	//}
 			//}
+		}
+
+		private void showUI()
+		{
+			enableUI = true;
+		}
+
+		private void hideUI()
+		{
+			enableUI = false;
 		}
 	}
 }
