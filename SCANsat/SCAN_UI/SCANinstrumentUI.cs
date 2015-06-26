@@ -73,6 +73,7 @@ namespace SCANsat.SCAN_UI
 			}
 			planetConstants(FlightGlobals.currentMainBody);
 
+			v = FlightGlobals.ActiveVessel;
 			resources = SCANcontroller.setLoadedResourceList();
 			resetResourceList();
 		}
@@ -252,39 +253,43 @@ namespace SCANsat.SCAN_UI
 					{
 						lastUpdate = Time.time;
 
+						slopeAVG = SCANUtil.slope(pqs, v.mainBody, vlon, vlat, degreeOffset);
+
+
+
 						/* Slope is calculated using a nine point grid centered 5m around the vessel location
 						 * The rise between the vessel location's elevation and each point on the grid is calculated, converted to slope in degrees, and averaged;
 						 * Note: Averageing is not the most accurate method
 						 */
 
-						double latOffset = degreeOffset * Math.Cos(Mathf.Deg2Rad * vlat);
-						double[] e = new double[9];
-						double[] s = new double[8];
-						e[0] = pqs;
-						e[1] = SCANUtil.getElevation(v.mainBody, vlon + latOffset, vlat);
-						e[2] = SCANUtil.getElevation(v.mainBody, vlon - latOffset, vlat);
-						e[3] = SCANUtil.getElevation(v.mainBody, vlon, vlat + degreeOffset);
-						e[4] = SCANUtil.getElevation(v.mainBody, vlon, vlat - degreeOffset);
-						e[5] = SCANUtil.getElevation(v.mainBody, vlon + latOffset, vlat + degreeOffset);
-						e[6] = SCANUtil.getElevation(v.mainBody, vlon + latOffset, vlat - degreeOffset);
-						e[7] = SCANUtil.getElevation(v.mainBody, vlon - latOffset, vlat + degreeOffset);
-						e[8] = SCANUtil.getElevation(v.mainBody, vlon - latOffset, vlat - degreeOffset);
+						//double latOffset = degreeOffset * Math.Cos(Mathf.Deg2Rad * vlat);
+						//double[] e = new double[9];
+						//double[] s = new double[8];
+						//e[0] = pqs;
+						//e[1] = SCANUtil.getElevation(v.mainBody, vlon + latOffset, vlat);
+						//e[2] = SCANUtil.getElevation(v.mainBody, vlon - latOffset, vlat);
+						//e[3] = SCANUtil.getElevation(v.mainBody, vlon, vlat + degreeOffset);
+						//e[4] = SCANUtil.getElevation(v.mainBody, vlon, vlat - degreeOffset);
+						//e[5] = SCANUtil.getElevation(v.mainBody, vlon + latOffset, vlat + degreeOffset);
+						//e[6] = SCANUtil.getElevation(v.mainBody, vlon + latOffset, vlat - degreeOffset);
+						//e[7] = SCANUtil.getElevation(v.mainBody, vlon - latOffset, vlat + degreeOffset);
+						//e[8] = SCANUtil.getElevation(v.mainBody, vlon - latOffset, vlat - degreeOffset);
 
-						/* Calculate rise for each point on the grid
-						 * The distance is 5m for adjacent points and 7.071m for the points on the corners
-						 * Rise is converted to slope; i.e. a 5m elevation change over a 5m distance is a rise of 1
-						 * Converted to slope using the inverse tangent this gives a slope of 45°
-						 * */
-						for (int i = 1; i <= 4; i++)
-						{
-							s[i - 1] = Math.Atan((Math.Abs(e[i] - e[0])) / 5) * Mathf.Rad2Deg;
-						}
-						for (int i = 5; i <= 8; i++)
-						{
-							s[i - 1] = Math.Atan((Math.Abs(e[i] - e[0])) / 7.071) * Mathf.Rad2Deg;
-						}
+						///* Calculate rise for each point on the grid
+						// * The distance is 5m for adjacent points and 7.071m for the points on the corners
+						// * Rise is converted to slope; i.e. a 5m elevation change over a 5m distance is a rise of 1
+						// * Converted to slope using the inverse tangent this gives a slope of 45°
+						// * */
+						//for (int i = 1; i <= 4; i++)
+						//{
+						//	s[i - 1] = Math.Atan((Math.Abs(e[i] - e[0])) / 5) * Mathf.Rad2Deg;
+						//}
+						//for (int i = 5; i <= 8; i++)
+						//{
+						//	s[i - 1] = Math.Atan((Math.Abs(e[i] - e[0])) / 7.071) * Mathf.Rad2Deg;
+						//}
 
-						slopeAVG = s.Sum() / 8;
+						//slopeAVG = s.Sum() / 8;
 
 					}
 
@@ -310,7 +315,7 @@ namespace SCANsat.SCAN_UI
 					if (s.ResourceName != resources[currentResource].Name)
 						continue;
 
-					if (ResourceUtilities.GetAltitude(v) > s.MaxAbundanceAltitude || v.Landed)
+					if (ResourceUtilities.GetAltitude(v) > s.MaxAbundanceAltitude && !v.Landed)
 					{
 						tooHigh = true;
 						continue;
