@@ -570,9 +570,9 @@ namespace SCANsat.SCAN_UI
 			{
 				rc.x = TextureRect.x + TextureRect.width / 2 - TextureRect.width / 8;
 				rc.y = TextureRect.y + TextureRect.height / 8;
-				SCANuiUtil.drawLabel(rc, "S", false, true, true);
+				SCANuiUtil.drawLabel(rc, "S", SCANskins.SCAN_orbitalLabelOff, true, SCANskins.SCAN_shadowReadoutLabel, false, SCANskins.SCAN_orbitalLabelOn, true);
 				rc.x = TextureRect.x + TextureRect.width / 2 + TextureRect.width / 8;
-				SCANuiUtil.drawLabel(rc, "N", false, true, true);
+				SCANuiUtil.drawLabel(rc, "N", SCANskins.SCAN_orbitalLabelOff, true, SCANskins.SCAN_shadowReadoutLabel, false, SCANskins.SCAN_orbitalLabelOn, true);
 			}
 
 			if (SCANcontroller.controller.map_grid && !IsResizing)
