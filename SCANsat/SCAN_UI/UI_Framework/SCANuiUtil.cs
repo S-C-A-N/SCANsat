@@ -58,33 +58,33 @@ namespace SCANsat.SCAN_UI.UI_Framework
 		}
 
 		//Used to label icons drawn over the map; similar to readableLabel
-		internal static void drawLabel(Rect r, string txt, bool Flash, bool aligned, bool outline)
+		internal static void drawLabel(Rect r, string txt, GUIStyle labelStyle, bool outline = false, GUIStyle shadowStyle = null, bool Flash = false, GUIStyle flashStyle = null,  bool aligned = false)
 		{
 			if (txt.Length < 1)
 				return;
 			if (aligned)
 			{
-				Vector2 sz = SCANskins.SCAN_orbitalLabelOn.CalcSize(new GUIContent(txt.Substring(0, 1)));
+				Vector2 sz = labelStyle.CalcSize(new GUIContent(txt.Substring(0, 1)));
 				r.x -= sz.x / 2;
 				r.y -= sz.y / 2;
 			}
 			if (outline)
 			{
 				r.x -= 1;
-				GUI.Label(r, txt, SCANskins.SCAN_shadowReadoutLabel);
+				GUI.Label(r, txt, shadowStyle);
 				r.x += 2;
-				GUI.Label(r, txt, SCANskins.SCAN_shadowReadoutLabel);
+				GUI.Label(r, txt, shadowStyle);
 				r.x -= 1;
 				r.y -= 1;
-				GUI.Label(r, txt, SCANskins.SCAN_shadowReadoutLabel);
+				GUI.Label(r, txt, shadowStyle);
 				r.y += 2;
-				GUI.Label(r, txt, SCANskins.SCAN_shadowReadoutLabel);
+				GUI.Label(r, txt, shadowStyle);
 				r.y -= 1;
 			}
 			if (Flash)
-				GUI.Label(r, txt, SCANskins.SCAN_orbitalLabelOn);
+				GUI.Label(r, txt, flashStyle);
 			else
-				GUI.Label(r, txt, SCANskins.SCAN_orbitalLabelOff);
+				GUI.Label(r, txt, labelStyle);
 		}
 
 		//A smaller font-size, simpler label method
@@ -143,14 +143,9 @@ namespace SCANsat.SCAN_UI.UI_Framework
 				}
 				else
 					info += palette.colored(palette.grey, "MULTI ");
-				if (SCANUtil.isCovered(lon, lat, data, SCANtype.AltimetryHiRes))
-				{
-					info += SCANUtil.getElevation(body, lon, lat).ToString("N2") + "m ";
-				}
-				else if (SCANUtil.isCovered(lon, lat, data, SCANtype.AltimetryLoRes))
-				{
-					info += (((int)SCANUtil.getElevation(body, lon, lat) / 500) * 500).ToString() + "m ";
-				}
+
+				info += getMouseOverElevation(lon, lat, data, 2);
+
 				if (SCANUtil.isCovered(lon, lat, data, SCANtype.Biome))
 				{
 					info += SCANUtil.getBiomeName(body, lon, lat) + " ";
@@ -228,14 +223,8 @@ namespace SCANsat.SCAN_UI.UI_Framework
 
 			if (b)
 			{
-				if (SCANUtil.isCovered(lon, lat, data, SCANtype.AltimetryHiRes))
-				{
-					info += SCANUtil.getElevation(body, lon, lat).ToString("N0") + "m ";
-				}
-				else if (SCANUtil.isCovered(lon, lat, data, SCANtype.AltimetryLoRes))
-				{
-					info += (((int)SCANUtil.getElevation(body, lon, lat) / 500) * 500).ToString() + "m ";
-				}
+				info += getMouseOverElevation(lon, lat, data, 0);
+
 				if (SCANUtil.isCovered(lon, lat, data, SCANtype.Biome))
 				{
 					info += SCANUtil.getBiomeName(body, lon, lat) + " ";
@@ -299,6 +288,22 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			readableLabel(info, false);
 			SCAN_MBW.fillS(-10);
 			readableLabel(posInfo, false);
+		}
+
+		internal static string getMouseOverElevation(double Lon, double Lat, SCANdata d, int precision)
+		{
+			string s = "";
+
+			if (SCANUtil.isCovered(Lon, Lat, d, SCANtype.AltimetryHiRes))
+			{
+				s = SCANUtil.getElevation(d.Body, Lon, Lat).ToString("N" + precision) + "m ";
+			}
+			else if (SCANUtil.isCovered(Lon, Lat, d, SCANtype.AltimetryLoRes))
+			{
+				s = (((int)SCANUtil.getElevation(d.Body, Lon, Lat) / 500) * 500).ToString() + "m ";
+			}
+
+			return s;
 		}
 
 		//Method to handle active scanner display
@@ -474,7 +479,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			if (maprect.width < 360)
 				return;
 			r.x += 12;
-			drawLabel(r, txt, flash, true, true);
+			drawLabel(r, txt, SCANskins.SCAN_orbitalLabelOff, true, SCANskins.SCAN_shadowReadoutLabel, flash, SCANskins.SCAN_orbitalLabelOn, true);
 		}
 
 		//Handles various map labels; probably should be split up into multiple methods
@@ -556,7 +561,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			if (!anomaly.Detail)
 				txt = SCANcontroller.controller.anomalyMarker + " Anomaly";
 			Rect r = new Rect(maprect.x + (float)lon, maprect.y + (float)lat, 250f, 25f);
-			drawLabel(r, txt, true, true, true);
+			drawLabel(r, txt, SCANskins.SCAN_orbitalLabelOff, true, SCANskins.SCAN_shadowReadoutLabel, true, SCANskins.SCAN_orbitalLabelOn, true);
 		}
 
 		private static void drawWaypointLabel(Rect maprect, SCANmap map, SCANwaypoint p, SCANdata data)
@@ -700,7 +705,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			float scale = r.width * 1f / (max - min);
 			float x = r.x + scale * (val - min);
 			Rect lr = new Rect(x, r.y + r.height / 4, 15, r.height);
-			drawLabel(lr, "|", false, true, true);
+			drawLabel(lr, "|", SCANskins.SCAN_orbitalLabelOff, true, SCANskins.SCAN_shadowReadoutLabel, false, SCANskins.SCAN_orbitalLabelOn, true);
 			string txt = val.ToString("N0");
 			GUIContent c = new GUIContent(txt);
 			Vector2 dim = SCANskins.SCAN_whiteReadoutLabel.CalcSize(c);
@@ -711,7 +716,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			if (lr.x + dim.x > r.x + r.width)
 				lr.x = r.x + r.width - dim.x;
 			lr.width = dim.x;
-			drawLabel(lr, txt, false, true, true);
+			drawLabel(lr, txt, SCANskins.SCAN_orbitalLabelOff, true, SCANskins.SCAN_shadowReadoutLabel, false, SCANskins.SCAN_orbitalLabelOn, true);
 		}
 		
 		internal static void drawSliderLabel(Rect r, string min, string max)
@@ -1063,7 +1068,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 				r.x += 24;
 				r.y -= 12;
 				if (!lite)
-					drawLabel(r, o.ApA.ToString("N0"), true, true, true);
+					drawLabel(r, o.ApA.ToString("N0"), SCANskins.SCAN_orbitalLabelOff, true, SCANskins.SCAN_shadowReadoutLabel, true, SCANskins.SCAN_orbitalLabelOn, true);
 			}
 			if (o.PeA > 0 && mapPosAtT(maprect, map, ref r, vessel, o, o.timeToPe, startUT))
 			{
@@ -1071,7 +1076,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 				r.x += 24;
 				r.y -= 12;
 				if (!lite)
-					drawLabel(r, o.PeA.ToString("N0"), true, true, true);
+					drawLabel(r, o.PeA.ToString("N0"), SCANskins.SCAN_orbitalLabelOff, true, SCANskins.SCAN_shadowReadoutLabel, true, SCANskins.SCAN_orbitalLabelOn, true);
 			}
 
 			if (lite)
@@ -1384,6 +1389,8 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			if (Lon < 0)
 				Lon += 360;
 
+			Lon -= 180;
+
 			return Lon;
 		}
 
@@ -1399,22 +1406,14 @@ namespace SCANsat.SCAN_UI.UI_Framework
 				values = new float[width, height];
 			}
 
-			for (int i = 0; i < width; i++ )
-			{
-				for (int j = 0; j < height; j++)
-				{
-					values[i, j] = 0;
-				}
-			}
-
 			System.Random r = new System.Random(ResourceScenario.Instance.gameSettings.Seed);
 
 			for (int j = 0; j < height;  j += stepScale)
 			{
+				double lat = (j / scale) - 90;
 				for (int i = 0; i < width; i += stepScale)
 				{
 					double lon = fixLon(i / scale);
-					double lat = (j / scale) - 90;
 
 					values[i, j] = SCANUtil.ResourceOverlay(lat, lon, resource.Name, data.Body, SCANcontroller.controller.resourceBiomeLock) * 100;
 				}
@@ -1429,9 +1428,9 @@ namespace SCANsat.SCAN_UI.UI_Framework
 
 			for (int i = 0; i < width; i++)
 			{
+				double lon = fixLon(i / scale);
 				for (int j = 0; j < height; j++)
 				{
-					double lon = fixLon(i / scale);
 					double lat = (j / scale) - 90;
 
 					pix[j * width + i] = resourceToColor32(palette.Clear, resource, values[i, j], data, lon, lat, transparency);
@@ -1461,10 +1460,10 @@ namespace SCANsat.SCAN_UI.UI_Framework
 
 			for (int j = 0; j < height; j++)
 			{
+				double lat = (j / scale) - 90;
 				for (int i = 0; i < width; i++)
 				{
 					double lon = fixLon(i / scale);
-					double lat = (j / scale) - 90;
 
 					if (!SCANUtil.isCovered(lon, lat, data, SCANtype.Biome))
 					{
@@ -1510,10 +1509,10 @@ namespace SCANsat.SCAN_UI.UI_Framework
 
 			for (int j = 0; j < m.height; j++)
 			{
+				double lat = (j / scale) - 90;
 				for (int i = 0; i < m.width; i++)
 				{
 					double lon = fixLon(i / scale);
-					double lat = (j / scale) - 90;
 
 					Color32 c = palette.Clear;
 
@@ -1579,9 +1578,9 @@ namespace SCANsat.SCAN_UI.UI_Framework
 
 			for (int i = 0; i < width; i++)
 			{
+				double lon = fixLon(i / scale);
 				for (int j = 0; j < height; j++)
 				{
-					double lon = fixLon(i / scale);
 					double lat = (j / scale) - 90;
 
 					Color32 c = palette.Clear;
@@ -1592,7 +1591,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 							c = palette.heightToColor(values[i, j], 0, data);
 						else
 						{
-							int ilon = SCANUtil.icLON(lon);
+							int ilon = SCANUtil.icLON(unFixLon(lon));
 							int ilat = SCANUtil.icLAT(lat);
 							int lo = ((int)(ilon * scale * 5)) / 5;
 							int la = ((int)(ilat * scale * 5)) / 5;
@@ -1637,6 +1636,8 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			int width = height * 2;
 			float scale = height / 180f;
 
+			double run = ((data.Body.Radius * 2 * Math.PI) / width) / 5;
+
 			if (map == null || pix == null || map.height != height)
 			{
 				map = new Texture2D(width, height, TextureFormat.ARGB32, true);
@@ -1659,12 +1660,14 @@ namespace SCANsat.SCAN_UI.UI_Framework
 				SCANuiUtil.interpolate(values, height, width, i, 0, i, null, false);
 			}
 
-			for (int i = 0; i < width; i++)
+			for (int j = 0; j < height; j++)
 			{
-				for (int j = 0; j < height; j++)
+				double lat = (j / scale) - 90;
+				double runFixed = Math.Max(run * Math.Cos(Mathf.Deg2Rad * lat), 1);
+
+				for (int i = 0; i < width; i++)
 				{
 					double lon = fixLon(i / scale);
-					double lat = (j / scale) - 90;
 
 					Color32 c = palette.Clear;
 
@@ -1675,36 +1678,57 @@ namespace SCANsat.SCAN_UI.UI_Framework
 
 						e[0] = values[i, j];
 
+						Vector2 s = slipCoordinates(i + 1, j, width, height);
+						e[1] = values[(int)s.x, (int)s.y];
+						s = slipCoordinates(i - 1, j, width, height);
+						e[2] = values[(int)s.x, (int)s.y];
+						s = slipCoordinates(i, j + 1, width, height);
+						e[3] = values[(int)s.x, (int)s.y];
+						s = slipCoordinates(i, j - 1, width, height);
+						e[4] = values[(int)s.x, (int)s.y];
+						s = slipCoordinates(i + 1, j + 1, width, height);
+						e[5] = values[(int)s.x, (int)s.y];
+						s = slipCoordinates(i + 1, j - 1, width, height);
+						e[6] = values[(int)s.x, (int)s.y];
+						s = slipCoordinates(i - 1, j + 1, width, height);
+						e[7] = values[(int)s.x, (int)s.y];
+						s = slipCoordinates(i - 1, j - 1, width, height);
+						e[8] = values[(int)s.x, (int)s.y];
+
+						if (data.Body.ocean)
+						{
+							for (int a = 0; a < 9; a++)
+							{
+								if (e[a] < 0)
+									e[a] = 0;
+							}
+						}
+
+						slope = (float)SCANUtil.slope(e, runFixed);
+
 						if (SCANUtil.isCovered(lon, lat, data, SCANtype.AltimetryHiRes))
 						{
-							Vector2 s = slipCoordinates(i + 1, j, width, height);
-							e[1] = values[(int)s.x, (int)s.y];
-							s = slipCoordinates(i - 1, j, width, height);
-							e[2] = values[(int)s.x, (int)s.y];
-							s = slipCoordinates(i, j + 1, width, height);
-							e[3] = values[(int)s.x, (int)s.y];
-							s = slipCoordinates(i, j - 1, width, height);
-							e[4] = values[(int)s.x, (int)s.y];
-							s = slipCoordinates(i + 1, j + 1, width, height);
-							e[5] = values[(int)s.x, (int)s.y];
-							s = slipCoordinates(i + 1, j - 1, width, height);
-							e[6] = values[(int)s.x, (int)s.y];
-							s = slipCoordinates(i - 1, j + 1, width, height);
-							e[7] = values[(int)s.x, (int)s.y];
-							s = slipCoordinates(i - 1, j - 1, width, height);
-							e[8] = values[(int)s.x, (int)s.y];
+							float slopeNormal = slope / 20;
 
-							slope = (float)SCANUtil.slope(e);
+							if (slopeNormal > 1)
+								slopeNormal = 1;
 
-							c = palette.heightToColor(values[i, j], 0, data);
+							if (slopeNormal < 0.6f)
+								c = palette.lerp(SCANcontroller.controller.lowSlopeColorOne32, SCANcontroller.controller.highSlopeColorOne32, slopeNormal);
+							else
+								c = palette.lerp(SCANcontroller.controller.lowSlopeColorTwo32, SCANcontroller.controller.highSlopeColorTwo32, slopeNormal);
 						}
 						else
 						{
-							int ilon = SCANUtil.icLON(lon);
-							int ilat = SCANUtil.icLAT(lat);
-							int lo = ((int)(ilon * scale * 5)) / 5;
-							int la = ((int)(ilat * scale * 5)) / 5;
-							c = palette.heightToColor(values[lo, la], 1, data);
+							float slopeRoundNormal = (float)(Math.Round(slope / 5) * 5) / 45;
+
+							if (slopeRoundNormal > 1)
+								slopeRoundNormal = 1;
+
+							if (slopeRoundNormal < 0.6f)
+								c = palette.lerp(SCANcontroller.controller.lowSlopeColorOne32, SCANcontroller.controller.highSlopeColorOne32, slopeRoundNormal);
+							else
+								c = palette.lerp(SCANcontroller.controller.lowSlopeColorTwo32, SCANcontroller.controller.highSlopeColorTwo32, slopeRoundNormal);
 						}
 
 						c = palette.lerp(c, palette.Clear, 0.1f);
@@ -1758,10 +1782,10 @@ namespace SCANsat.SCAN_UI.UI_Framework
 
 			for (int i = 0; i < width; i += stepScale)
 			{
+				double lon = (i * 1.0f / map.MapScale) - 180f + map.Lon_Offset;
 				for (int j = 0; j < height; j += stepScale)
 				{
 					double lat = (j * 1.0f / map.MapScale) - 90f + map.Lat_Offset;
-					double lon = (i * 1.0f / map.MapScale) - 180f + map.Lon_Offset;
 					double la = lat, lo = lon;
 					lat = map.unprojectLatitude(lo, la);
 					lon = map.unprojectLongitude(lo, la);
@@ -1796,10 +1820,10 @@ namespace SCANsat.SCAN_UI.UI_Framework
 
 			for (int i = 0; i < width; i++)
 			{
+				double lon = (i * 1.0f / map.MapScale) - 180f + map.Lon_Offset;
 				for (int j = 0; j < height; j++)
 				{
 					double lat = (j * 1.0f / map.MapScale) - 90f + map.Lat_Offset;
-					double lon = (i * 1.0f / map.MapScale) - 180f + map.Lon_Offset;
 					double la = lat, lo = lon;
 					lat = map.unprojectLatitude(lo, la);
 					lon = map.unprojectLongitude(lo, la);
@@ -1914,6 +1938,13 @@ namespace SCANsat.SCAN_UI.UI_Framework
 		{
 			for (int j = y; j < height + y; j += 2 * step)
 			{
+				int ypos1 = j - step;
+				if (ypos1 < 0)
+					ypos1 = 0;
+				int ypos2 = j + step;
+				if (ypos2 >= height)
+					ypos2 = height - 1;
+
 				for (int i = x; i < width + x; i += 2 * step)
 				{
 					int xpos1 = i - step;
@@ -1922,13 +1953,6 @@ namespace SCANsat.SCAN_UI.UI_Framework
 					int xpos2 = i + step;
 					if (xpos2 >= width)
 						xpos2 -= width;
-
-					int ypos1 = j - step;
-					if (ypos1 < 0)
-						ypos1 = 0;
-					int ypos2 = j + step;
-					if (ypos2 >= height)
-						ypos2 = height - 1;
 
 					float avgX = 0;
 					float avgY = 0;
