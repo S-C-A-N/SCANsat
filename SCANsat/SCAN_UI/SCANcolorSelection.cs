@@ -813,7 +813,9 @@ namespace SCANsat.SCAN_UI
 					if (GUILayout.Button("Apply Values", GUILayout.Width(110)))
 					{
 						SCANcontroller.controller.lowBiomeColor = biomeColorPicker.ColorLow;
+						SCANcontroller.controller.lowBiomeColor32 = biomeColorPicker.ColorLow;
 						SCANcontroller.controller.highBiomeColor = biomeColorPicker.ColorHigh;
+						SCANcontroller.controller.highBiomeColor32 = biomeColorPicker.ColorHigh;
 						SCANcontroller.controller.useStockBiomes = stockBiomes;
 						SCANcontroller.controller.biomeBorder = biomeBorders;
 						SCANcontroller.controller.biomeTransparency = bTrans;
@@ -832,7 +834,9 @@ namespace SCANsat.SCAN_UI
 					if (GUILayout.Button("Default Values", GUILayout.Width(110)))
 					{
 						SCANcontroller.controller.lowBiomeColor = SCANconfigLoader.SCANNode.LowBiomeColor;
+						SCANcontroller.controller.lowBiomeColor32 = SCANconfigLoader.SCANNode.LowBiomeColor;
 						SCANcontroller.controller.highBiomeColor = SCANconfigLoader.SCANNode.HighBiomeColor;
+						SCANcontroller.controller.highBiomeColor32 = SCANconfigLoader.SCANNode.HighBiomeColor;
 						SCANcontroller.controller.useStockBiomes = SCANconfigLoader.SCANNode.StockBiomeMap;
 						SCANcontroller.controller.biomeBorder = SCANconfigLoader.SCANNode.BiomeBorder;
 						SCANcontroller.controller.biomeTransparency = SCANconfigLoader.SCANNode.BiomeTransparency;
@@ -883,6 +887,10 @@ namespace SCANsat.SCAN_UI
 					SCANcontroller.controller.highSlopeColorOne = slopeColorPickerLow.ColorHigh;
 					SCANcontroller.controller.lowSlopeColorTwo = slopeColorPickerHigh.ColorLow;
 					SCANcontroller.controller.highSlopeColorTwo = slopeColorPickerHigh.ColorHigh;
+					SCANcontroller.controller.lowSlopeColorOne32 = slopeColorPickerLow.ColorLow;
+					SCANcontroller.controller.highSlopeColorOne32 = slopeColorPickerLow.ColorHigh;
+					SCANcontroller.controller.lowSlopeColorTwo32 = slopeColorPickerHigh.ColorLow;
+					SCANcontroller.controller.highSlopeColorTwo32 = slopeColorPickerHigh.ColorHigh;
 
 					slopeColorPickerLow.updateOldSwatches();
 					slopeColorPickerHigh.updateOldSwatches();
@@ -903,6 +911,10 @@ namespace SCANsat.SCAN_UI
 					SCANcontroller.controller.highSlopeColorOne = SCANconfigLoader.SCANNode.BottomHighSlopeColor;
 					SCANcontroller.controller.lowSlopeColorTwo = SCANconfigLoader.SCANNode.TopLowSlopeColor;
 					SCANcontroller.controller.highSlopeColorTwo = SCANconfigLoader.SCANNode.TopHighSlopeColor;
+					SCANcontroller.controller.lowSlopeColorOne32 = SCANconfigLoader.SCANNode.BottomLowSlopeColor;
+					SCANcontroller.controller.highSlopeColorOne32 = SCANconfigLoader.SCANNode.BottomHighSlopeColor;
+					SCANcontroller.controller.lowSlopeColorTwo32 = SCANconfigLoader.SCANNode.TopLowSlopeColor;
+					SCANcontroller.controller.highSlopeColorTwo32 = SCANconfigLoader.SCANNode.TopHighSlopeColor;
 
 					slopeColorPickerLow = new SCANuiColorPicker(SCANcontroller.controller.lowSlopeColorOne, SCANcontroller.controller.highSlopeColorOne, slopeColorPickerLow.LowColorChange);
 					slopeColorPickerHigh = new SCANuiColorPicker(SCANcontroller.controller.lowSlopeColorTwo, SCANcontroller.controller.highSlopeColorTwo, slopeColorPickerHigh.LowColorChange);

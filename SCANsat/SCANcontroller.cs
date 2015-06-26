@@ -135,6 +135,13 @@ namespace SCANsat
 		public Color lowSlopeColorTwo = new Color(0.9764706f, 1, 0.4627451f, 1);
 		public Color highSlopeColorTwo = new Color(0.94f, 0.2727843f, 0.007372549f, 1);
 
+		public Color32 lowBiomeColor32 = new Color(0, 0.46f, 0.02345098f, 1);
+		public Color32 highBiomeColor32 = new Color(0.7f, 0.2388235f, 0, 1);
+		public Color32 lowSlopeColorOne32 = new Color(0.004705883f, 0.6f, 0.3788235f, 1);
+		public Color32 highSlopeColorOne32 = new Color(0.9764706f, 1, 0.4627451f, 1);
+		public Color32 lowSlopeColorTwo32 = new Color(0.9764706f, 1, 0.4627451f, 1);
+		public Color32 highSlopeColorTwo32 = new Color(0.94f, 0.2727843f, 0.007372549f, 1);
+
 		/* Available resources for overlays; loaded from SCANsat configs; only loaded once */
 		private static Dictionary<string, SCANresourceGlobal> masterResourceNodes = new Dictionary<string,SCANresourceGlobal>();
 
@@ -199,7 +206,7 @@ namespace SCANsat
 
 		public SCANdata getData(int index)
 		{
-			if (body_data.Count >= index)
+			if (body_data.Count > index)
 				return body_data.ElementAt(index).Value;
 			else
 				SCANUtil.SCANdebugLog("SCANdata dictionary index out of range; something went wrong here...");
@@ -520,6 +527,13 @@ namespace SCANsat
 				highSlopeColorOne = ConfigNode.ParseColor(node.GetValue("highSlopeColorOne"));
 				lowSlopeColorTwo = ConfigNode.ParseColor(node.GetValue("lowSlopeColorTwo"));
 				highSlopeColorTwo = ConfigNode.ParseColor(node.GetValue("highSlopeColorTwo"));
+
+				lowBiomeColor32 = lowBiomeColor;
+				highBiomeColor32 = highBiomeColor;
+				lowSlopeColorOne32 = lowSlopeColorOne;
+				highSlopeColorOne32 = highSlopeColorOne;
+				lowSlopeColorTwo32 = lowSlopeColorTwo;
+				highSlopeColorTwo32 = highSlopeColorTwo;
 			}
 			catch (Exception e)
 			{
