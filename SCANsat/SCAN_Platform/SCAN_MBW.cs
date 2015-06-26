@@ -131,6 +131,11 @@ namespace SCANsat.SCAN_Platform
 		protected GUIStyle WindowStyle;
 		internal GUILayoutOption[] WindowOptions;
 
+		public Rect GetWindowRect
+		{
+			get { return WindowRect; }
+		}
+
 		/* dragging and clamping */
 
 		internal Rect DragRect;
