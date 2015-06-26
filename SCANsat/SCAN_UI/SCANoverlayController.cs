@@ -18,8 +18,6 @@ namespace SCANsat.SCAN_UI
 		private SCANresourceGlobal currentResource;
 		private List<SCANresourceGlobal> resources;
 		private List<PResource.Resource> resourceFractions;
-		private bool biomeMode;
-		private bool terrainMode;
 		private bool drawOverlay;
 		private bool oldOverlay;
 		private int selection;
@@ -155,9 +153,6 @@ namespace SCANsat.SCAN_UI
 
 				if (GUILayout.Button(r.Name, selection == i ? SCANskins.SCAN_labelLeftActive : SCANskins.SCAN_labelLeft))
 				{
-					biomeMode = false;
-					terrainMode = false;
-
 					OverlayGenerator.Instance.ClearDisplay();
 
 					if (selection != i)
@@ -184,9 +179,6 @@ namespace SCANsat.SCAN_UI
 
 			if (GUILayout.Button("Biome Map", selection == (resources.Count) ? SCANskins.SCAN_labelLeftActive : SCANskins.SCAN_labelLeft))
 			{
-				biomeMode = true;
-				terrainMode = false;
-
 				OverlayGenerator.Instance.ClearDisplay();
 
 				if (selection != resources.Count)
@@ -210,14 +202,34 @@ namespace SCANsat.SCAN_UI
 
 			if (GUILayout.Button("Terrain Map", selection == (resources.Count + 1) ? SCANskins.SCAN_labelLeftActive : SCANskins.SCAN_labelLeft))
 			{
-				biomeMode = false;
-				terrainMode = true;
-
 				OverlayGenerator.Instance.ClearDisplay();
 
 				if (selection != resources.Count + 1)
 				{
 					selection = resources.Count + 1;
+					oldOverlay = drawOverlay = true;
+					refreshMap();
+					return;
+				}
+
+				if (drawOverlay)
+				{
+					oldOverlay = drawOverlay = false;
+				}
+				else
+				{
+					oldOverlay = drawOverlay = true;
+					refreshMap();
+				}
+			}
+
+			if (GUILayout.Button("Slope Map", selection == (resources.Count + 2) ? SCANskins.SCAN_labelLeftActive : SCANskins.SCAN_labelLeft))
+			{
+				OverlayGenerator.Instance.ClearDisplay();
+
+				if (selection != resources.Count + 2)
+				{
+					selection = resources.Count + 2;
 					oldOverlay = drawOverlay = true;
 					refreshMap();
 					return;
@@ -248,7 +260,7 @@ namespace SCANsat.SCAN_UI
 			if (GUILayout.Button("Refresh"))
 				refreshMap();
 
-			if (biomeMode || terrainMode)
+			if (selection >= resources.Count)
 				return;
 
 			growE();
@@ -309,16 +321,9 @@ namespace SCANsat.SCAN_UI
 				if (coords == null)
 					return;
 
-				Rect r = new Rect(Event.current.mousePosition.x - 80, Event.current.mousePosition.y - 106, 160, 102);
+				string tooltip = "";
 
-				GUI.Box(r, "");
-
-				r.x += 5;
-				r.y += 4;
-				r.width = 150;
-				r.height = 22;
-
-				GUI.Label(r, coords.ToDMS());
+				tooltip += coords.ToDMS();
 
 				if (body.pqsController != null)
 				{
@@ -326,13 +331,9 @@ namespace SCANsat.SCAN_UI
 					{
 						double elevation = SCANUtil.getElevation(body, coords.longitude, coords.latitude);
 
-						r.y += 19;
+						tooltip += string.Format("\nTerrain: {0}", SCANuiUtil.getMouseOverElevation(coords.longitude, coords.latitude, data, 0));
 
-						GUI.Label(r, string.Format("Terrain: {0:N0}m", elevation));
-
-						r.y += 19;
-
-						GUI.Label(r, string.Format("Slope: {0:F1}°", SCANUtil.slope(elevation, body, coords.longitude, coords.latitude, degreeOffset)));
+						tooltip += string.Format("\nSlope: {0:F1}°", SCANUtil.slope(elevation, body, coords.longitude, coords.latitude, degreeOffset));
 					}
 				}
 
@@ -340,9 +341,7 @@ namespace SCANsat.SCAN_UI
 				{
 					if (SCANUtil.isCovered(coords.longitude, coords.latitude, data, SCANtype.Biome))
 					{
-						r.y += 19;
-
-						GUI.Label(r, string.Format("Biome: {0}", SCANUtil.getBiomeName(body, coords.longitude, coords.latitude)));
+						tooltip += string.Format("\nBiome: {0}", SCANUtil.getBiomeName(body, coords.longitude, coords.latitude));
 					}
 				}
 
@@ -361,8 +360,6 @@ namespace SCANsat.SCAN_UI
 
 				if (resources)
 				{
-					r.y += 19;
-
 					if (SCANcontroller.controller.instrumentNeedsNarrowBand)
 					{
 						bool tooHigh = false;
@@ -389,34 +386,53 @@ namespace SCANsat.SCAN_UI
 
 						if (tooHigh)
 						{
-							GUI.Label(r, string.Format("{0}: Too High", currentResource.Name));
+							tooltip += string.Format("\n{0}: Too High", currentResource.Name);
 						}
 						else if (!scanner)
 						{
-							GUI.Label(r, string.Format("{0}: No Scanner", currentResource.Name));
+							tooltip += string.Format("\n{0}: No Scanner", currentResource.Name);
 						}
 						else
 						{
-							resourceLabel(r, fuzzy, coords.latitude, coords.longitude);
+							resourceLabel(ref tooltip, fuzzy, coords.latitude, coords.longitude);
 						}
 					}
 					else
 					{
-						resourceLabel(r, fuzzy, coords.latitude, coords.longitude);
+						resourceLabel(ref tooltip, fuzzy, coords.latitude, coords.longitude);
 					}
 				}
+
+				Vector2 size = SCANskins.SCAN_readoutLabelCenter.CalcSize(new GUIContent(tooltip));
+
+				float sizeX = size.x;
+				if (sizeX < 160)
+					sizeX = 160;
+				else if (sizeX < 190)
+					sizeX = 190;
+
+				Rect r = new Rect(Event.current.mousePosition.x - (sizeX / 2), Event.current.mousePosition.y - (size.y + 16), sizeX + 10, size.y + 8);
+
+				GUI.Box(r, "");
+
+				r.x += 5;
+				r.y += 4;
+				r.width -= 10;
+				r.height -= 8;
+
+				SCANuiUtil.drawLabel(r, tooltip, SCANskins.SCAN_readoutLabelCenter, true, SCANskins.SCAN_shadowReadoutLabelCenter);
 			}
 		}
 
-		private void resourceLabel(Rect pos, bool fuzz, double lat, double lon)
+		private void resourceLabel(ref string t, bool fuzz, double lat, double lon)
 		{
 			if (fuzz)
 			{
-				GUI.Label(pos, string.Format("{0}: {1:P0}", currentResource.Name, SCANUtil.ResourceOverlay(lat, lon, currentResource.Name, body, SCANcontroller.controller.resourceBiomeLock)));
+				t += string.Format("\n{0}: {1:P0}", currentResource.Name, SCANUtil.ResourceOverlay(lat, lon, currentResource.Name, body, SCANcontroller.controller.resourceBiomeLock));
 			}
 			else
 			{
-				GUI.Label(pos, string.Format("{0}: {1:P2}", currentResource.Name, SCANUtil.ResourceOverlay(lat, lon, currentResource.Name, body, SCANcontroller.controller.resourceBiomeLock)));
+				t += string.Format("\n{0}: {1:P2}", currentResource.Name, SCANUtil.ResourceOverlay(lat, lon, currentResource.Name, body, SCANcontroller.controller.resourceBiomeLock));
 			}
 		}
 
@@ -431,10 +447,12 @@ namespace SCANsat.SCAN_UI
 
 		private void refreshMap()
 		{
-			if (biomeMode)
+			if (selection == resources.Count)
 				body.SetResourceMap(SCANuiUtil.drawBiomeMap(ref biomeOverlay, ref biomePixels, data, transparency, mapHeight * 2));
-			else if (terrainMode)
+			else if (selection == resources.Count + 1)
 				body.SetResourceMap(SCANuiUtil.drawTerrainMap(ref terrainOverlay, ref terrainPixels, ref terrainValues, data, 360, 2));
+			else if (selection == resources.Count + 2)
+				body.SetResourceMap(SCANuiUtil.drawSlopeMap(ref terrainOverlay, ref terrainPixels, ref terrainValues, data, 360, 2));
 			else
 				body.SetResourceMap(SCANuiUtil.drawResourceTexture(ref mapOverlay, ref resourcePixels, ref abundanceValues, mapHeight, data, currentResource, interpolationScale, transparency));
 		}
