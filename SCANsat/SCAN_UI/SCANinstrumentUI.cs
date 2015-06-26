@@ -107,6 +107,7 @@ namespace SCANsat.SCAN_UI
 				{
 					sensors |= SCANtype.Altimetry;
 				}
+
 				if (SCANUtil.isCovered(vlon, vlat, data, SCANtype.Biome))
 				{
 					sensors |= SCANtype.Biome;
