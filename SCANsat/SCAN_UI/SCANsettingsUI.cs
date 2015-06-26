@@ -308,9 +308,13 @@ namespace SCANsat.SCAN_UI
 		{
 			GUILayout.Label("Settings", SCANskins.SCAN_headline);
 			growE();
-				SCANcontroller.controller.useStockAppLauncher = GUILayout.Toggle(SCANcontroller.controller.useStockAppLauncher, "Stock Toolbar", SCANskins.SCAN_settingsToggle);
+				SCANcontroller.controller.planetaryOverlayTooltips = GUILayout.Toggle(SCANcontroller.controller.planetaryOverlayTooltips, "Planetary Overlay Tooltips", SCANskins.SCAN_settingsToggle);
 
-				SCANcontroller.controller.toolTips = GUILayout.Toggle(SCANcontroller.controller.toolTips, "Tooltips", SCANskins.SCAN_settingsToggle);
+				SCANcontroller.controller.toolTips = GUILayout.Toggle(SCANcontroller.controller.toolTips, "Window Tooltips", SCANskins.SCAN_settingsToggle);
+			stopE();
+
+			growE();
+				SCANcontroller.controller.useStockAppLauncher = GUILayout.Toggle(SCANcontroller.controller.useStockAppLauncher, "Stock Toolbar", SCANskins.SCAN_settingsToggle);
 
 				if (SCANmainMenuLoader.MechJebLoaded)
 					SCANcontroller.controller.mechJebTargetSelection = GUILayout.Toggle(SCANcontroller.controller.mechJebTargetSelection, "MechJeb Target Selection", SCANskins.SCAN_settingsToggle);

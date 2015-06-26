@@ -19,6 +19,7 @@ using UnityEngine;
 using SCANsat.SCAN_UI;
 using SCANsat.SCAN_UI.UI_Framework;
 using SCANsat.SCAN_Data;
+using SCANsat.SCAN_PartModules;
 using SCANsat.SCAN_Platform;
 using SCANsat.SCAN_Platform.Palettes;
 using SCANsat.SCAN_Platform.Palettes.ColorBrewer;
@@ -123,6 +124,8 @@ namespace SCANsat
 		public bool disableStockResource = false;
 		[KSPField(isPersistant = true)]
 		public bool hiDetailZoomMap = false;
+		[KSPField(isPersistant = true)]
+		public bool planetaryOverlayTooltips = true;
 
 		/* Biome and slope colors can't be serialized properly as a KSP Field */
 		public Color lowBiomeColor = new Color(0, 0.46f, 0.02345098f, 1);
@@ -505,7 +508,6 @@ namespace SCANsat
 			get { return landingTarget; }
 			set { landingTarget = value; }
 		}
-
 		#endregion
 
 		public override void OnLoad(ConfigNode node)
@@ -937,13 +939,13 @@ namespace SCANsat
 				if (data.Building)
 					return;
 
-				SCANUtil.SCANdebugLog("Generate Terrain Map For: {0}", data.Body.name);
-
 				data.ExternalBuilding = true;
 				data.generateHeightMap(ref dataStep, ref dataStart, 120);
 
 				return;
 			}
+
+			SCANUtil.SCANlog("All Height Maps Generated");
 
 			heightMapsBuilt = true;
 		}
