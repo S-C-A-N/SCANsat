@@ -639,12 +639,12 @@ namespace SCANsat.SCAN_UI
 					fillS();
 				stopE();
 				if (clampState)
-					{
-						growE();
-							fillS(10);
-							currentTerrain.ClampTerrain = clampTerrainSlider.drawSlider(false, ref clampT);
-						stopE();
-					}
+				{
+					growE();
+						fillS(10);
+						currentTerrain.ClampTerrain = clampTerrainSlider.drawSlider(false, ref clampT);
+					stopE();
+				}
 				fillS(6);
 				GUILayout.Label("Palette Options", SCANskins.SCAN_headlineSmall);
 				if (palette.CurrentPalettes.paletteType != Palette.Kind.Fixed)
@@ -692,6 +692,9 @@ namespace SCANsat.SCAN_UI
 						{
 							if (GUILayout.Button("Apply Values", GUILayout.Width(110)))
 							{
+								if (!clampState)
+									currentTerrain.ClampTerrain = null;
+
 								SCANcontroller.updateTerrainConfig(currentTerrain);
 
 								updateUI();
