@@ -1,3 +1,30 @@
+Version 13.3 - 
+------------------------
+
+- SCAN High Definition Camera
+	- New part module to replace the stock hi def camera, found on the narrow-band scanner
+	- Opens a modified SCANsat zoom window
+	
+- Planetary Overlay
+	- New terrain map planetary overlay
+	- Tooltips for overlays
+	
+- Terrain height map databases generated in the background
+	- Maps generated once per game session for each planet
+	- These maps are used to generate the small map and the terrain planetary overlay
+	- Performance impact during map generation is negligible
+	- Greatly speeds up small map rendering and terrain overlays
+	
+- Instrument window resource readout
+	
+- Misc bug fixes
+	- Fix bug when applying terrain color config to non-clamped color scheme
+	- Fix bug with detecting narrow-band scanners for zoom map resource overlays
+	- Fix bug causing resource scanners to deactivate upon loading
+	- Fix bug with landed resource scanners
+	- Fix bug with orbit overlays in zoom map
+
+
 Version 13.2 - 2015-6-11
 ------------------------
 
