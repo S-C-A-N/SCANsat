@@ -972,7 +972,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 		}
 
 		//Draw the orbit overlay
-		internal static void drawOrbit(Rect maprect, SCANmap map, Vessel vessel, CelestialBody body)
+		internal static void drawOrbit(Rect maprect, SCANmap map, Vessel vessel, CelestialBody body, bool lite = false)
 		{
 			if (vessel == null) return;
 			if (vessel.mainBody != body) return;
@@ -980,7 +980,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 
 			if (vessel.LandedOrSplashed)
 				return;
-			bool lite = maprect.width < 400;
+
 			Orbit o = vessel.orbit;
 			double startUT = Planetarium.GetUniversalTime();
 			double UT = startUT;
@@ -1079,9 +1079,6 @@ namespace SCANsat.SCAN_UI.UI_Framework
 					drawLabel(r, o.PeA.ToString("N0"), SCANskins.SCAN_orbitalLabelOff, true, SCANskins.SCAN_shadowReadoutLabel, true, SCANskins.SCAN_orbitalLabelOn, true);
 			}
 
-			if (lite)
-				return;
-
 			// show first maneuver node
 			if (vessel.patchedConicSolver != null)
 			{
@@ -1124,6 +1121,9 @@ namespace SCANsat.SCAN_UI.UI_Framework
 					}
 				}
 			}
+
+			if (lite)
+				return;
 
 			if (o.PeA < 0)
 				return;
@@ -1529,28 +1529,8 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			return m;
 		}
 
-		private static int mapStep, mapStart;
-
 		internal static Texture2D drawTerrainMap(ref Texture2D map, ref Color32[] pix, ref float[,] values, SCANdata data, int height, int stepScale)
 		{
-			if (data.Body.pqsController == null)
-				return null;
-
-			int timer = 0;
-
-			while (!data.Built && timer < 5000)
-			{
-				if (!data.Building)
-				{
-					data.ExternalBuilding = true;
-					data.generateHeightMap(ref mapStep, ref mapStart, 180);
-				}
-				timer++;
-			}
-
-			if (timer >= 5000)
-				return null;
-
 			int width = height * 2;
 			float scale = height / 180f;
 
@@ -1558,22 +1538,6 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			{
 				map = new Texture2D(width, height, TextureFormat.ARGB32, true);
 				pix = new Color32[width * height];
-				values = new float[width, height];
-			}
-
-			for (int i = 0; i < 360; i++)
-			{
-				for (int j = 0; j < 180; j++)
-				{
-					values[i * stepScale, j * stepScale] = data.HeightMapValue(data.Body.flightGlobalsIndex, (int)fixLon(i) + 180, j);
-				}
-			}
-
-			for (int i = stepScale / 2; i >= 1; i /= 2)
-			{
-				SCANuiUtil.interpolate(values, height, width, i, i, i, null, false);
-				SCANuiUtil.interpolate(values, height, width, 0, i, i, null, false);
-				SCANuiUtil.interpolate(values, height, width, i, 0, i, null, false);
 			}
 
 			for (int i = 0; i < width; i++)
@@ -1615,49 +1579,15 @@ namespace SCANsat.SCAN_UI.UI_Framework
 
 		internal static Texture2D drawSlopeMap(ref Texture2D map, ref Color32[] pix, ref float[,] values, SCANdata data, int height, int stepScale)
 		{
-			if (data.Body.pqsController == null)
-				return null;
-
-			int timer = 0;
-
-			while (!data.Built && timer < 5000)
-			{
-				if (!data.Building)
-				{
-					data.ExternalBuilding = true;
-					data.generateHeightMap(ref mapStep, ref mapStart, 180);
-				}
-				timer++;
-			}
-
-			if (timer >= 5000)
-				return null;
-
 			int width = height * 2;
 			float scale = height / 180f;
 
-			double run = ((data.Body.Radius * 2 * Math.PI) / width) / 5;
+			double run = ((data.Body.Radius * 2 * Math.PI) / width) / 3;
 
 			if (map == null || pix == null || map.height != height)
 			{
 				map = new Texture2D(width, height, TextureFormat.ARGB32, true);
 				pix = new Color32[width * height];
-				values = new float[width, height];
-			}
-
-			for (int i = 0; i < 360; i++)
-			{
-				for (int j = 0; j < 180; j++)
-				{
-					values[i * stepScale, j * stepScale] = data.HeightMapValue(data.Body.flightGlobalsIndex, (int)fixLon(i) + 180, j);
-				}
-			}
-
-			for (int i = stepScale / 2; i >= 1; i /= 2)
-			{
-				SCANuiUtil.interpolate(values, height, width, i, i, i, null, false);
-				SCANuiUtil.interpolate(values, height, width, 0, i, i, null, false);
-				SCANuiUtil.interpolate(values, height, width, i, 0, i, null, false);
 			}
 
 			for (int j = 0; j < height; j++)
@@ -1673,7 +1603,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 
 					if (SCANUtil.isCovered(lon, lat, data, SCANtype.Altimetry))
 					{
-						double[] e = new double[9];
+						double[] e = new double[5];
 						float slope = 0;
 
 						e[0] = values[i, j];
@@ -1687,28 +1617,28 @@ namespace SCANsat.SCAN_UI.UI_Framework
 						s = slipCoordinates(i, j - 1, width, height);
 						e[4] = values[(int)s.x, (int)s.y];
 						s = slipCoordinates(i + 1, j + 1, width, height);
-						e[5] = values[(int)s.x, (int)s.y];
-						s = slipCoordinates(i + 1, j - 1, width, height);
-						e[6] = values[(int)s.x, (int)s.y];
-						s = slipCoordinates(i - 1, j + 1, width, height);
-						e[7] = values[(int)s.x, (int)s.y];
-						s = slipCoordinates(i - 1, j - 1, width, height);
-						e[8] = values[(int)s.x, (int)s.y];
+						//e[5] = values[(int)s.x, (int)s.y];
+						//s = slipCoordinates(i + 1, j - 1, width, height);
+						//e[6] = values[(int)s.x, (int)s.y];
+						//s = slipCoordinates(i - 1, j + 1, width, height);
+						//e[7] = values[(int)s.x, (int)s.y];
+						//s = slipCoordinates(i - 1, j - 1, width, height);
+						//e[8] = values[(int)s.x, (int)s.y];
 
 						if (data.Body.ocean)
 						{
-							for (int a = 0; a < 9; a++)
+							for (int a = 0; a < 5; a++)
 							{
 								if (e[a] < 0)
 									e[a] = 0;
 							}
 						}
 
-						slope = (float)SCANUtil.slope(e, runFixed);
+						slope = (float)SCANUtil.slopeShort(e, runFixed);
 
 						if (SCANUtil.isCovered(lon, lat, data, SCANtype.AltimetryHiRes))
 						{
-							float slopeNormal = slope / 20;
+							float slopeNormal = slope / 30;
 
 							if (slopeNormal > 1)
 								slopeNormal = 1;
@@ -1720,7 +1650,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 						}
 						else
 						{
-							float slopeRoundNormal = (float)(Math.Round(slope / 5) * 5) / 45;
+							float slopeRoundNormal = (float)(Math.Round(slope / 5) * 5) / 30;
 
 							if (slopeRoundNormal > 1)
 								slopeRoundNormal = 1;
@@ -1746,26 +1676,46 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			return map;
 		}
 
+		internal static void generateTerrainArray(ref float[,] values, int height, int stepScale, SCANdata data)
+		{
+			int width = height * 2;
+			float scale = height / 180f;
+			
+			values = new float[width, height];
+
+			for (int i = 0; i < 360; i++)
+			{
+				for (int j = 0; j < 180; j++)
+				{
+					values[i * stepScale, j * stepScale] = data.HeightMapValue(data.Body.flightGlobalsIndex, (int)fixLon(i) + 180, j);
+				}
+			}
+
+			for (int i = stepScale / 2; i >= 1; i /= 2)
+			{
+				SCANuiUtil.interpolate(values, height, width, i, i, i, null, false);
+				SCANuiUtil.interpolate(values, height, width, 0, i, i, null, false);
+				SCANuiUtil.interpolate(values, height, width, i, 0, i, null, false);
+			}
+		}
+
 		private static Vector2 slipCoordinates(int x, int y, int width, int height)
 		{
 			if (y < 0)
 			{
 				y = Math.Abs(y);
 				x += (width / 2);
-
-				return new Vector2(x, y);
 			}
 
-			if (y > height)
+			else if (y > height)
 			{
 				while (y > 180)
 					y -= 180;
 				y = 180 - Math.Abs(y);
 				x -= (width / 2);
-
-				return new Vector2(x, y);
 			}
 
+			y = (y + height) % height;
 			x = (x + width) % width;
 
 			return new Vector2(x, y);
@@ -1808,6 +1758,8 @@ namespace SCANsat.SCAN_UI.UI_Framework
 					pix[j * width + i] = palette.heightToColor(values[i, j], 1, data);
 				}
 			}
+
+			stepScale = 2;
 
 			generateResourceCache(ref values, height, width, stepScale, map.MapScale, map);
 
