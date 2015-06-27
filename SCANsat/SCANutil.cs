@@ -493,6 +493,18 @@ namespace SCANsat
 			return s.Sum() / 8;
 		}
 
+		internal static double slopeShort(double[] elevations, double distance)
+		{
+			double[] s = new double[4];
+
+			for (int i = 1; i <= 4; i++)
+			{
+				s[i - 1] = Math.Atan((Math.Abs(elevations[i] - elevations[0])) / distance) * Mathf.Rad2Deg;
+			}
+
+			return s.Sum() / 4;
+		}
+
 		internal static bool MouseIsOverWindow()
 		{
 			if (SCANcontroller.controller == null)
