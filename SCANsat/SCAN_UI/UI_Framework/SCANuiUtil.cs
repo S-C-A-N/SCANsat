@@ -151,7 +151,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 					info += SCANUtil.getBiomeName(body, lon, lat) + " ";
 				}
 
-				if (SCANcontroller.controller.map_ResourceOverlay && SCANconfigLoader.GlobalResource && mapObj.Resource != null) //Adds selected resource amount to big map legend
+				if (mapObj.ResourceActive && SCANconfigLoader.GlobalResource && mapObj.Resource != null) //Adds selected resource amount to big map legend
 				{
 					string label = "";
 
@@ -230,7 +230,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 					info += SCANUtil.getBiomeName(body, lon, lat) + " ";
 				}
 
-				if (SCANcontroller.controller.map_ResourceOverlay && SCANconfigLoader.GlobalResource && mapObj.Resource != null) //Adds selected resource amount to big map legend
+				if (mapObj.ResourceActive && SCANconfigLoader.GlobalResource && mapObj.Resource != null)
 				{
 					string label = "";
 					if (SCANUtil.isCovered(lon, lat, data, mapObj.Resource.SType))
@@ -1721,7 +1721,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			return new Vector2(x, y);
 		}
 
-		internal static Texture2D drawLoDetailMap(ref Color32[] pix, ref float[,] values, SCANmap map, SCANdata data, int width, int height, int stepScale)
+		internal static Texture2D drawLoDetailMap(ref Color32[] pix, ref float[,] values, SCANmap map, SCANdata data, int width, int height, int stepScale, bool withResources)
 		{
 			if (map.Map == null || pix == null || map.Map.height != height)
 			{
@@ -1746,9 +1746,9 @@ namespace SCANsat.SCAN_UI.UI_Framework
 
 			for (int i = stepScale / 2; i >= 1; i /= 2)
 			{
-				SCANuiUtil.interpolate(values, height, width, i, i, i, null, false);
-				SCANuiUtil.interpolate(values, height, width, 0, i, i, null, false);
-				SCANuiUtil.interpolate(values, height, width, i, 0, i, null, false);
+				SCANuiUtil.interpolate(values, height, width, i, i, i, null, false, true);
+				SCANuiUtil.interpolate(values, height, width, 0, i, i, null, false, true);
+				SCANuiUtil.interpolate(values, height, width, i, 0, i, null, false, true);
 			}
 
 			for (int i = 0; i < width; i++)
@@ -1759,30 +1759,33 @@ namespace SCANsat.SCAN_UI.UI_Framework
 				}
 			}
 
-			stepScale = 2;
-
-			generateResourceCache(ref values, height, width, stepScale, map.MapScale, map);
-
-			for (int i = stepScale / 2; i >= 1; i /= 2)
+			if (withResources)
 			{
-				SCANuiUtil.interpolate(values, height, width, i, i, i, null, false);
-				SCANuiUtil.interpolate(values, height, width, 0, i, i, null, false);
-				SCANuiUtil.interpolate(values, height, width, i, 0, i, null, false);
-			}
+				stepScale = 2;
 
-			for (int i = 0; i < width; i++)
-			{
-				double lon = (i * 1.0f / map.MapScale) - 180f + map.Lon_Offset;
-				for (int j = 0; j < height; j++)
+				generateResourceCache(ref values, height, width, stepScale, map.MapScale, map);
+
+				for (int i = stepScale / 2; i >= 1; i /= 2)
 				{
-					double lat = (j * 1.0f / map.MapScale) - 90f + map.Lat_Offset;
-					double la = lat, lo = lon;
-					lat = map.unprojectLatitude(lo, la);
-					lon = map.unprojectLongitude(lo, la);
+					SCANuiUtil.interpolate(values, height, width, i, i, i, null, false, true);
+					SCANuiUtil.interpolate(values, height, width, 0, i, i, null, false, true);
+					SCANuiUtil.interpolate(values, height, width, i, 0, i, null, false, true);
+				}
 
-					Color32 c = pix[j * width + i];
+				for (int i = 0; i < width; i++)
+				{
+					double lon = (i * 1.0f / map.MapScale) - 180f + map.Lon_Offset;
+					for (int j = 0; j < height; j++)
+					{
+						double lat = (j * 1.0f / map.MapScale) - 90f + map.Lat_Offset;
+						double la = lat, lo = lon;
+						lat = map.unprojectLatitude(lo, la);
+						lon = map.unprojectLongitude(lo, la);
 
-					pix[j * width + i] = resourceToColor32(c, map.Resource, values[i, j], data, lon, lat);
+						Color32 c = pix[j * width + i];
+
+						pix[j * width + i] = resourceToColor32(c, map.Resource, values[i, j], data, lon, lat);
+					}
 				}
 			}
 
@@ -1886,7 +1889,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 		//	}
 		//}
 
-		internal static void interpolate(float[,] v, int height, int width, int x, int y, int step, System.Random r, bool edges)
+		internal static void interpolate(float[,] v, int height, int width, int x, int y, int step, System.Random r, bool softEdges, bool hardEdges = false)
 		{
 			for (int j = y; j < height + y; j += 2 * step)
 			{
@@ -1901,16 +1904,26 @@ namespace SCANsat.SCAN_UI.UI_Framework
 				{
 					int xpos1 = i - step;
 					if (xpos1 < 0)
-						xpos1 += width;
+					{
+						if (hardEdges)
+							xpos1 = 0;
+						else
+							xpos1 += width;
+					}
 					int xpos2 = i + step;
 					if (xpos2 >= width)
-						xpos2 -= width;
+					{
+						if (hardEdges)
+							xpos2 = width - 1;
+						else
+							xpos2 -= width;
+					}
 
 					float avgX = 0;
 					float avgY = 0;
 
 					float lerp = 0.5f;
-					if (edges)
+					if (softEdges)
 						lerp = getLerp(r, step * 2);
 
 					if (x == y)
