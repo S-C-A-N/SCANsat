@@ -15,6 +15,7 @@ namespace SCANsat.SCAN_UI
 		private Color32[] mapPix;
 		private float[,] mapValues;
 		private SCANhiDefCamera cameraModule;
+		private bool mapGenerated;
 
 		protected override void Startup()
 		{
@@ -23,7 +24,8 @@ namespace SCANsat.SCAN_UI
 			if (HighLogic.LoadedSceneIsFlight)
 			{
 				v = FlightGlobals.ActiveVessel;
-				data = SCANcontroller.controller.getData(v.mainBody.name);
+				b = FlightGlobals.ActiveVessel.mainBody;
+				data = SCANcontroller.controller.getData(b.name);
 			}
 
 			if (spotmap == null)
@@ -39,6 +41,13 @@ namespace SCANsat.SCAN_UI
 			TooltipsEnabled = SCANcontroller.controller.toolTips;
 
 			spotmap.setBody(b);
+		}
+
+		protected override void resetMap(bool checkScanner = false, double lon = 0, double lat = 0, bool withCenter = false)
+		{
+			mapGenerated = false;
+
+			base.resetMap(false, lon, lat, withCenter);
 		}
 
 		public override void setMapCenter(double lat, double lon, bool centering, SCANmap big = null, SCANhiDefCamera camera = null)
@@ -67,10 +76,21 @@ namespace SCANsat.SCAN_UI
 				maxZoom = camera.maxZoom;
 			}
 
+			if (SCANconfigLoader.GlobalResource)
+			{
+				resource = SCANcontroller.getResourceNode(SCANcontroller.controller.resourceSelection);
+				if (resource == null)
+					resource = SCANcontroller.GetFirstResource;
+				resource.CurrentBodyConfig(b.name);
+				spotmap.Resource = resource;
+			}
+
 			spotmap.MapScale = 10;
 
 			spotmap.centerAround(lon, lat);
 			spotmap.resetMap(mapType.Altimetry, false);
+
+			mapGenerated = false;
 		}
 
 		protected override void resyncMap()
@@ -87,9 +107,20 @@ namespace SCANsat.SCAN_UI
 				spotmap.setBody(b);
 			}
 
+			if (SCANconfigLoader.GlobalResource)
+			{
+				resource = SCANcontroller.getResourceNode(SCANcontroller.controller.resourceSelection);
+				if (resource == null)
+					resource = SCANcontroller.GetFirstResource;
+				resource.CurrentBodyConfig(b.name);
+				spotmap.Resource = resource;
+			}
+
 			spotmap.centerAround(SCANUtil.fixLonShift(v.longitude), SCANUtil.fixLatShift(v.latitude));
 
 			spotmap.resetMap(spotmap.MType, false);
+
+			mapGenerated = false;
 		}
 
 		protected override Texture2D getMap()
@@ -98,7 +129,13 @@ namespace SCANsat.SCAN_UI
 				return base.getMap();
 			else
 			{
-				return SCANuiUtil.drawLoDetailMap(ref mapPix, ref mapValues, spotmap, data, spotmap.MapWidth, spotmap.MapHeight, 4);
+				if (mapGenerated)
+					return spotmap.Map;
+				else
+				{
+					mapGenerated = true;
+					return SCANuiUtil.drawLoDetailMap(ref mapPix, ref mapValues, spotmap, data, spotmap.MapWidth, spotmap.MapHeight, 4);
+				}
 			}
 		}
 
