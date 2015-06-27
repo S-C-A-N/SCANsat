@@ -17,16 +17,23 @@ namespace SCANsat.SCAN_UI
 		private SCANhiDefCamera cameraModule;
 		private bool mapGenerated;
 
+		private static Rect sessionRectHiDef = defaultRect;
+
+		protected override void Awake()
+		{
+			base.Awake();
+
+			WindowRect = sessionRectHiDef;
+		}
+
 		protected override void Startup()
 		{
 			//Initialize the map object
 			Visible = false;
-			if (HighLogic.LoadedSceneIsFlight)
-			{
-				v = FlightGlobals.ActiveVessel;
-				b = FlightGlobals.ActiveVessel.mainBody;
-				data = SCANcontroller.controller.getData(b.name);
-			}
+
+			v = FlightGlobals.ActiveVessel;
+			b = FlightGlobals.ActiveVessel.mainBody;
+			data = SCANcontroller.controller.getData(b.name);
 
 			if (spotmap == null)
 			{
@@ -37,10 +44,36 @@ namespace SCANsat.SCAN_UI
 			showOrbit = SCANcontroller.controller.map_orbit;
 			showAnomaly = SCANcontroller.controller.map_markers;
 			showWaypoints = SCANcontroller.controller.map_waypoints;
+			resourceOverlay = true;
+
+			if (SCANconfigLoader.GlobalResource)
+			{
+				loadedResources = SCANcontroller.setLoadedResourceList();
+				resource = SCANcontroller.getResourceNode(SCANcontroller.controller.resourceSelection);
+				if (resource == null)
+					resource = SCANcontroller.GetFirstResource;
+				resource.CurrentBodyConfig(b.name);
+				spotmap.Resource = resource;
+			}
 
 			TooltipsEnabled = SCANcontroller.controller.toolTips;
 
 			spotmap.setBody(b);
+		}
+
+		protected override void DrawWindowPost(int id)
+		{
+			sessionRectHiDef = WindowRect;
+
+			if (SCANcontroller.controller.TargetSelecting && Event.current.type == EventType.mouseDown && !TextureRect.Contains(Event.current.mousePosition))
+			{
+				SCANcontroller.controller.TargetSelecting = false;
+				SCANcontroller.controller.TargetSelectingActive = false;
+				data.removeTargetWaypoint();
+			}
+
+			if (dropDown && Event.current.type == EventType.mouseUp && !ddRect.Contains(Event.current.mousePosition))
+				dropDown = false;
 		}
 
 		protected override void resetMap(bool checkScanner = false, double lon = 0, double lat = 0, bool withCenter = false)
@@ -72,23 +105,15 @@ namespace SCANsat.SCAN_UI
 
 			if (camera != null)
 			{
+				cameraModule = camera;
 				minZoom = camera.minZoom;
 				maxZoom = camera.maxZoom;
-			}
-
-			if (SCANconfigLoader.GlobalResource)
-			{
-				resource = SCANcontroller.getResourceNode(SCANcontroller.controller.resourceSelection);
-				if (resource == null)
-					resource = SCANcontroller.GetFirstResource;
-				resource.CurrentBodyConfig(b.name);
-				spotmap.Resource = resource;
 			}
 
 			spotmap.MapScale = 10;
 
 			spotmap.centerAround(lon, lat);
-			spotmap.resetMap(mapType.Altimetry, false);
+			spotmap.resetMap(mapType.Altimetry, false, resourceOverlay);
 
 			mapGenerated = false;
 		}
@@ -107,18 +132,9 @@ namespace SCANsat.SCAN_UI
 				spotmap.setBody(b);
 			}
 
-			if (SCANconfigLoader.GlobalResource)
-			{
-				resource = SCANcontroller.getResourceNode(SCANcontroller.controller.resourceSelection);
-				if (resource == null)
-					resource = SCANcontroller.GetFirstResource;
-				resource.CurrentBodyConfig(b.name);
-				spotmap.Resource = resource;
-			}
-
 			spotmap.centerAround(SCANUtil.fixLonShift(v.longitude), SCANUtil.fixLatShift(v.latitude));
 
-			spotmap.resetMap(spotmap.MType, false);
+			spotmap.resetMap(spotmap.MType, false, resourceOverlay);
 
 			mapGenerated = false;
 		}
@@ -134,14 +150,17 @@ namespace SCANsat.SCAN_UI
 				else
 				{
 					mapGenerated = true;
-					return SCANuiUtil.drawLoDetailMap(ref mapPix, ref mapValues, spotmap, data, spotmap.MapWidth, spotmap.MapHeight, 4);
+					return SCANuiUtil.drawLoDetailMap(ref mapPix, ref mapValues, spotmap, data, spotmap.MapWidth, spotmap.MapHeight, 4, resourceOverlay);
 				}
 			}
 		}
 
-		private Texture2D lowDetailMap()
+		protected override void closeMap()
 		{
-			return null;
+			if (cameraModule == null)
+				return;
+
+			cameraModule.Events["resetCenter"].active = false;
 		}
 	}
 }
