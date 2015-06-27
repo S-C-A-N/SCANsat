@@ -51,6 +51,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 
 		//Instrument readout styles
 		internal static GUIStyle SCAN_insColorLabel;
+		internal static GUIStyle SCAN_insColorLabelShadow;
 		internal static GUIStyle SCAN_insWhiteLabel;
 		internal static GUIStyle SCAN_anomalyOverlay;
 
@@ -81,6 +82,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 
 		//Drop down menu styles
 		internal static GUIStyle SCAN_dropDownButton;
+		internal static GUIStyle SCAN_dropDownButtonActive;
 		internal static GUIStyle SCAN_dropDownBox;
 
 		internal static Font dotty;
@@ -229,13 +231,16 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			SCAN_dropDownButton = new GUIStyle(SCAN_label);
 			SCAN_dropDownButton.name = "SCAN_DropDownButton";
 			SCAN_dropDownButton.padding = new RectOffset(2, 2, 2, 2);
-			SCAN_dropDownButton.normal.textColor = palette.xkcd_PukeGreen;
+			SCAN_dropDownButton.normal.textColor = palette.xkcd_White;
 			SCAN_dropDownButton.hover.textColor = palette.black;
 			Texture2D sortBackground = new Texture2D(1, 1);
 			sortBackground.SetPixel(1, 1, palette.xkcd_White);
 			sortBackground.Apply();
 			SCAN_dropDownButton.hover.background = sortBackground;
 			SCAN_dropDownButton.alignment = TextAnchor.MiddleLeft;
+
+			SCAN_dropDownButtonActive = new GUIStyle(SCAN_dropDownButton);
+			SCAN_dropDownButtonActive.normal.textColor = palette.xkcd_PukeGreen;
 
 			//Initialize info readout styles
 			SCAN_readoutLabel = new GUIStyle(SCAN_label);
@@ -275,6 +280,9 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			SCAN_insColorLabel.name = "SCAN_InsColorLabel";
 			SCAN_insColorLabel.alignment = TextAnchor.MiddleCenter;
 			SCAN_insColorLabel.fontSize = 20;
+
+			SCAN_insColorLabelShadow = new GUIStyle(SCAN_insColorLabel);
+			SCAN_insColorLabelShadow.normal.textColor = palette.black;
 
 			SCAN_insWhiteLabel = new GUIStyle(SCAN_whiteReadoutLabel);
 			SCAN_insWhiteLabel.name = "SCAN_InsWhiteLabel";
