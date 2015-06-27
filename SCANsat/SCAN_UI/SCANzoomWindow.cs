@@ -160,17 +160,20 @@ namespace SCANsat.SCAN_UI
 			spotmap.resetMap(bigmap.MType, false, narrowBand);
 		}
 
-		private void resetMap(double lon = 0, double lat = 0, bool withCenter = false)
+		protected virtual void resetMap(bool checkScanner = false, double lon = 0, double lat = 0, bool withCenter = false)
 		{
 			if (withCenter)
 				spotmap.centerAround(lon, lat);
+			else
+				spotmap.centerAround(spotmap.CenteredLong, spotmap.CenteredLat);
 
 			SCANcontroller.controller.TargetSelecting = false;
 			SCANcontroller.controller.TargetSelectingActive = false;
-			spotmap.centerAround(spotmap.CenteredLong, spotmap.CenteredLat);
-			if (SCANcontroller.controller.needsNarrowBand && SCANcontroller.controller.map_ResourceOverlay)
+
+			if (checkScanner && SCANcontroller.controller.needsNarrowBand && SCANcontroller.controller.map_ResourceOverlay)
 				checkForScanners();
-			spotmap.resetMap(narrowBand);
+
+			spotmap.resetMap(narrowBand || !checkScanner);
 		}
 
 		protected virtual void resyncMap()
@@ -274,7 +277,7 @@ namespace SCANsat.SCAN_UI
 							if (!float.TryParse(alt, out f))
 								continue;
 
-							if (f < 10000)
+							if (f < vessel.altitude)
 								continue;
 						}
 
@@ -356,10 +359,15 @@ namespace SCANsat.SCAN_UI
 					if ((int)resizeH % 2 != 0)
 						resizeH += 1;
 
+					if ((int)resizeW % 4 != 0)
+						resizeW += 2;
+					if ((int)resizeH % 4 != 0)
+						resizeH += 2;
+
 					spotmap.setSize((int)resizeW, (int)resizeH);
 					spotmap.MapScale = scale;
-					spotmap.centerAround(spotmap.CenteredLong, spotmap.CenteredLat);
-					spotmap.resetMap(spotmap.MType, false);
+
+					resetMap(true);
 				}
 				else
 				{
@@ -710,7 +718,7 @@ namespace SCANsat.SCAN_UI
 					{
 						if (in_map)
 						{
-							resetMap(mlon, mlat, highDetail);
+							resetMap(true, mlon, mlat, highDetail);
 						}
 					}
 					//Right click zoom in
@@ -719,7 +727,9 @@ namespace SCANsat.SCAN_UI
 						if (in_map)
 						{
 							spotmap.MapScale = spotmap.MapScale * 1.25f;
-							resetMap(mlon, mlat, highDetail);
+							if (spotmap.MapScale > maxZoom)
+								spotmap.MapScale = maxZoom;
+							resetMap(true, mlon, mlat, highDetail);
 						}
 					}
 					//Left click zoom out
@@ -730,7 +740,7 @@ namespace SCANsat.SCAN_UI
 							spotmap.MapScale = spotmap.MapScale / 1.25f;
 							if (spotmap.MapScale < 2)
 								spotmap.MapScale = 2;
-							resetMap(mlon, mlat, highDetail);
+							resetMap(true, mlon, mlat, highDetail);
 						}
 					}
 					Event.current.Use();
@@ -769,7 +779,7 @@ namespace SCANsat.SCAN_UI
 			//Draw the orbit overlays
 			if (showOrbit && v != null)
 			{
-				SCANuiUtil.drawOrbit(TextureRect, spotmap, v, spotmap.Body);
+				SCANuiUtil.drawOrbit(TextureRect, spotmap, v, spotmap.Body, true);
 			}
 
 			SCANuiUtil.drawMapLabels(TextureRect, v, spotmap, data, spotmap.Body, showAnomaly, showWaypoints);
