@@ -17,9 +17,20 @@ namespace SCANsat.SCAN_PartModules
 
 		private List<ModuleHighDefCamera> stockCameras;
 
+		private bool activated;
+		private bool refreshState;
+
 		public override void OnStart(PartModule.StartState state)
 		{
-			base.OnStart(state);
+			if (state == StartState.Editor)
+				return;
+
+			SCANUtil.SCANdebugLog("Starting Hi Def Module");
+
+			part.force_activate();
+			this.isEnabled = true;
+			activated = true;
+			refreshState = true;
 
 			stockCameras = findCameras();
 
@@ -40,7 +51,37 @@ namespace SCANsat.SCAN_PartModules
 			return Mathf.Clamp(value, min, max);
 		}
 
-		[KSPEvent(guiActive = true, active = true)]
+		private void Update()
+		{
+			if (!activated)
+			{
+				Events["toggleSCANHiDef"].active = false;
+				return;
+			}
+
+			if (!HighLogic.LoadedSceneIsFlight || !FlightGlobals.ready)
+				return;
+
+			if (SCANcontroller.controller == null)
+				return;
+
+			if (refreshState)
+			{
+				if (SCANcontroller.controller.disableStockResource)
+					disableConnectedModules();
+				refreshState = false;
+			}
+
+			if (!SCANcontroller.controller.disableStockResource)
+			{
+				Events["toggleSCANHiDef"].active = false;
+				return;
+			}
+
+			Events["toggleSCANHiDef"].active = true;
+		}
+
+		[KSPEvent(guiActive = true, active = false)]
 		public void toggleSCANHiDef()
 		{
 			if (SCANcontroller.controller.hiDefMap == null)
@@ -71,6 +112,7 @@ namespace SCANsat.SCAN_PartModules
 		{
 			if (stockCameras != null)
 			{
+				SCANUtil.SCANdebugLog("Enabling Connected Hi Defs");
 				foreach (ModuleHighDefCamera m in stockCameras)
 				{
 					m.EnableModule();
@@ -82,6 +124,7 @@ namespace SCANsat.SCAN_PartModules
 		{
 			if (stockCameras != null)
 			{
+				SCANUtil.SCANdebugLog("Disabling Connected Hi Defs");
 				foreach (ModuleHighDefCamera m in stockCameras)
 				{
 					m.DisableModule();
@@ -91,21 +134,25 @@ namespace SCANsat.SCAN_PartModules
 
 		public void EnableModule()
 		{
-			isEnabled = true;
+			SCANUtil.SCANdebugLog("Enable Hi Def");
+
+			activated = true;
 			if (SCANcontroller.controller != null && SCANcontroller.controller.disableStockResource)
 				disableConnectedModules();
 		}
 
 		public void DisableModule()
 		{
-			isEnabled = false;
+			SCANUtil.SCANdebugLog("Disable Hi Def");
+
+			activated = false;
 			if (SCANcontroller.controller != null && SCANcontroller.controller.disableStockResource)
 				disableConnectedModules();
 		}
 
 		public bool ModuleIsActive()
 		{
-			return isEnabled;
+			return activated;
 		}
 
 		public bool IsSituationValid()
