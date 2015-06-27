@@ -614,7 +614,7 @@ namespace SCANsat.SCAN_UI
 			if (zoomLevel == 0)
 				mapCenterLat = 0;
 			map.centerAround(mapCenterLong, mapCenterLat);
-			map.resetMap((mapType)mapMode, false);
+			map.resetMap((mapType)mapMode, false, SCANcontroller.controller.map_ResourceOverlay);
 
 			// Compute and store the map scale factors in mapSizeScale.  We
 			// use these values for every segment when drawing trails, so it
