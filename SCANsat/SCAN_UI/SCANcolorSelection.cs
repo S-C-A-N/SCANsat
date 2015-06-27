@@ -702,7 +702,7 @@ namespace SCANsat.SCAN_UI
 								if (bigMap != null)
 								{
 									if (bigMap.MType == mapType.Altimetry && SCANcontroller.controller.colours == 0)
-										bigMap.resetMap();
+										bigMap.resetMap(SCANcontroller.controller.map_ResourceOverlay);
 								}
 							}
 
@@ -723,7 +723,7 @@ namespace SCANsat.SCAN_UI
 								if (bigMap != null)
 								{
 									if (bigMap.MType == mapType.Altimetry && SCANcontroller.controller.colours == 0)
-										bigMap.resetMap();
+										bigMap.resetMap(SCANcontroller.controller.map_ResourceOverlay);
 								}
 							}
 						}
@@ -828,7 +828,7 @@ namespace SCANsat.SCAN_UI
 						if (bigMap != null)
 						{
 							if (bigMap.MType == mapType.Biome)
-								bigMap.resetMap();
+								bigMap.resetMap(SCANcontroller.controller.map_ResourceOverlay);
 						}
 					}
 
@@ -856,7 +856,7 @@ namespace SCANsat.SCAN_UI
 						if (bigMap != null)
 						{
 							if (bigMap.MType == mapType.Biome)
-								bigMap.resetMap();
+								bigMap.resetMap(SCANcontroller.controller.map_ResourceOverlay);
 						}
 					}
 				}
@@ -901,7 +901,7 @@ namespace SCANsat.SCAN_UI
 					if (bigMap != null)
 					{
 						if (bigMap.MType == mapType.Slope)
-							bigMap.resetMap();
+							bigMap.resetMap(SCANcontroller.controller.map_ResourceOverlay);
 					}
 
 				}
@@ -928,7 +928,7 @@ namespace SCANsat.SCAN_UI
 					if (bigMap != null)
 					{
 						if (bigMap.MType == mapType.Slope)
-							bigMap.resetMap();
+							bigMap.resetMap(SCANcontroller.controller.map_ResourceOverlay);
 					}
 				}
 
@@ -966,7 +966,7 @@ namespace SCANsat.SCAN_UI
 						updateUI();
 
 						if (bigMap != null && SCANcontroller.controller.map_ResourceOverlay)
-							bigMap.resetMap();
+							bigMap.resetMap(SCANcontroller.controller.map_ResourceOverlay);
 					}
 
 					fillS(6);
@@ -991,7 +991,7 @@ namespace SCANsat.SCAN_UI
 						updateUI();
 
 						if (bigMap != null && SCANcontroller.controller.map_ResourceOverlay)
-							bigMap.resetMap();
+							bigMap.resetMap(SCANcontroller.controller.map_ResourceOverlay);
 					}
 				}
 				else
@@ -1018,7 +1018,7 @@ namespace SCANsat.SCAN_UI
 						updateUI();
 
 						if (bigMap != null && SCANcontroller.controller.map_ResourceOverlay)
-							bigMap.resetMap();
+							bigMap.resetMap(SCANcontroller.controller.map_ResourceOverlay);
 					}
 
 					fillS(6);
@@ -1044,7 +1044,7 @@ namespace SCANsat.SCAN_UI
 						updateUI();
 
 						if (bigMap != null && SCANcontroller.controller.map_ResourceOverlay)
-							bigMap.resetMap();
+							bigMap.resetMap(SCANcontroller.controller.map_ResourceOverlay);
 					}
 				}
 				else
@@ -1095,7 +1095,7 @@ namespace SCANsat.SCAN_UI
 					{
 						scrollR = GUI.BeginScrollView(ddRect, scrollR, new Rect(0, 0, 140, 23 * loadedResources.Count));
 						Rect r = new Rect(2, i * 23, 136, 22);
-						if (GUI.Button(r, loadedResources[i].Name, SCANskins.SCAN_dropDownButton))
+						if (GUI.Button(r, loadedResources[i].Name, currentResource.Name == loadedResources[i].Name ? SCANskins.SCAN_dropDownButtonActive : SCANskins.SCAN_dropDownButton))
 						{
 							currentResource = new SCANresourceGlobal(loadedResources[i]);
 							currentResource.CurrentBodyConfig(data.Body.name);
