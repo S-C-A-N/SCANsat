@@ -303,7 +303,7 @@ namespace SCANsat.SCAN_UI
 		//Display resource abundace info
 		private void resourceInfo(int id)
 		{
-			if (SCANcontroller.controller.instrumentNeedsNarrowBand)
+			if (SCANcontroller.controller.needsNarrowBand)
 			{
 				bool tooHigh = false;
 				bool scanner = false;

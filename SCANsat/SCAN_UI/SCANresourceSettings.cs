@@ -16,7 +16,7 @@ namespace SCANsat.SCAN_UI
 		private int mapHeight = 256;
 		private float transparency = 0f;
 		private int interpolationScale = 8;
-		private bool popup, warningResource, warningStockResource, controlLock, oldInsResource;
+		private bool popup, warningResource, warningStockResource, controlLock, oldNarrowBand;
 		private const string lockID = "resourceSettingLockID";
 		private Rect warningRect;
 
@@ -35,7 +35,7 @@ namespace SCANsat.SCAN_UI
 
 		protected override void Start()
 		{
-			oldInsResource = SCANcontroller.controller.instrumentNeedsNarrowBand;
+			oldNarrowBand = SCANcontroller.controller.needsNarrowBand;
 		}
 
 		internal void removeControlLocks()
@@ -105,10 +105,10 @@ namespace SCANsat.SCAN_UI
 				popup = false;
 			}
 
-			if (oldInsResource != SCANcontroller.controller.instrumentNeedsNarrowBand)
+			if (oldNarrowBand != SCANcontroller.controller.needsNarrowBand)
 			{
-				oldInsResource = SCANcontroller.controller.instrumentNeedsNarrowBand;
-				if (SCANcontroller.controller.instrumentsWindow != null && oldInsResource)
+				oldNarrowBand = SCANcontroller.controller.needsNarrowBand;
+				if (SCANcontroller.controller.instrumentsWindow != null && oldNarrowBand)
 					SCANcontroller.controller.instrumentsWindow.resetResourceList();
 			}
 
@@ -156,12 +156,7 @@ namespace SCANsat.SCAN_UI
 			stopE();
 			growE();
 			fillS();
-			SCANcontroller.controller.needsNarrowBand = GUILayout.Toggle(SCANcontroller.controller.needsNarrowBand, "Zoom Requires Narrow Band Scanner", SCANskins.SCAN_settingsToggle);
-			fillS();
-			stopE();
-			growE();
-			fillS();
-			SCANcontroller.controller.instrumentNeedsNarrowBand = GUILayout.Toggle(SCANcontroller.controller.instrumentNeedsNarrowBand, "Instrument Readout Requires Narrow Band Scanner", SCANskins.SCAN_settingsToggle);
+			SCANcontroller.controller.needsNarrowBand = GUILayout.Toggle(SCANcontroller.controller.needsNarrowBand, "Requires Narrow Band Scanner", SCANskins.SCAN_settingsToggle);
 			fillS();
 			stopE();
 			growE();

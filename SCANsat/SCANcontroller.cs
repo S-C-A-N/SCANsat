@@ -117,8 +117,6 @@ namespace SCANsat
 		[KSPField(isPersistant = true)]
 		public bool needsNarrowBand = true;
 		[KSPField(isPersistant = true)]
-		public bool instrumentNeedsNarrowBand = true;
-		[KSPField(isPersistant = true)]
 		public bool biomeBorder = true;
 		[KSPField(isPersistant = true)]
 		public bool disableStockResource = false;
