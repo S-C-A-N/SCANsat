@@ -107,6 +107,11 @@ namespace SCANsat.SCAN_Map
 			internal set { resource = value; }
 		}
 
+		public bool ResourceActive
+		{
+			get { return resourceActive; }
+		}
+
 		public SCANmapLegend MapLegend
 		{
 			get { return mapLegend; }
@@ -294,6 +299,7 @@ namespace SCANsat.SCAN_Map
 		private double mapscale, lon_offset, lat_offset;
 		private int mapwidth, mapheight;
 		private Color[] pix;
+		private bool resourceActive;
 		private float[,] resourceCache;
 		private int resourceInterpolation;
 		private int resourceMapWidth;
@@ -357,7 +363,7 @@ namespace SCANsat.SCAN_Map
 			/* big map caching */
 			big_heightmap = new float[mapwidth, mapheight];
 			map = null;
-			resetMap();
+			resetMap(resourceActive);
 		}
 
 		internal void centerAround(double lon, double lat)
@@ -467,6 +473,7 @@ namespace SCANsat.SCAN_Map
 
 			if (SCANconfigLoader.GlobalResource)
 			{
+				resourceActive = SCANcontroller.controller.map_ResourceOverlay;
 				resource = SCANcontroller.getResourceNode(SCANcontroller.controller.resourceSelection);
 				if (resource == null)
 					resource = SCANcontroller.GetFirstResource;
@@ -481,9 +488,10 @@ namespace SCANsat.SCAN_Map
 			return mapstep >= map.height;
 		}
 
-		public void resetMap(bool setRes = true)
+		public void resetMap(bool resourceOn, bool setRes = true)
 		{
 			mapstep = -2;
+			resourceActive = resourceOn;
 			if (SCANconfigLoader.GlobalResource && setRes)
 			{ //Make sure that a resource is initialized if necessary
 				if (resource == null && body != null)
@@ -497,11 +505,11 @@ namespace SCANsat.SCAN_Map
 			}
 		}
 
-		public void resetMap(mapType mode, bool Cache, bool setRes = true)
+		public void resetMap(mapType mode, bool Cache, bool resourceOn, bool setRes = true)
 		{
 			mType = mode;
 			cache = Cache;
-			resetMap(setRes);
+			resetMap(resourceOn, setRes);
 		}
 
 		public void resetResourceMap()
@@ -527,7 +535,7 @@ namespace SCANsat.SCAN_Map
 				case mapType.Slope: mode = "slope"; break;
 				case mapType.Biome: mode = "biome"; break;
 			}
-			if (SCANcontroller.controller.map_ResourceOverlay && SCANconfigLoader.GlobalResource && !string.IsNullOrEmpty(SCANcontroller.controller.resourceSelection))
+			if (resourceActive && SCANconfigLoader.GlobalResource && !string.IsNullOrEmpty(SCANcontroller.controller.resourceSelection))
 				mode += "-" + SCANcontroller.controller.resourceSelection;
 			if (SCANcontroller.controller.colours == 1)
 				mode += "-grey";
@@ -576,7 +584,7 @@ namespace SCANsat.SCAN_Map
 					palette.redline[i] = palette.red;
 			}
 
-			resourceOn = SCANcontroller.controller.map_ResourceOverlay && SCANconfigLoader.GlobalResource && resource != null;
+			resourceOn = resourceActive && SCANconfigLoader.GlobalResource && resource != null;
 
 			if (mapstep <= -2)
 			{
@@ -647,9 +655,9 @@ namespace SCANsat.SCAN_Map
 				{
 					for (int i = resourceInterpolation / 2; i >= 1; i /= 2)
 					{
-						SCANuiUtil.interpolate(resourceCache, resourceMapHeight, resourceMapWidth, i, i, i, r, randomEdges);
-						SCANuiUtil.interpolate(resourceCache, resourceMapHeight, resourceMapWidth, 0, i, i, r, randomEdges);
-						SCANuiUtil.interpolate(resourceCache, resourceMapHeight, resourceMapWidth, i, 0, i, r, randomEdges);
+						SCANuiUtil.interpolate(resourceCache, resourceMapHeight, resourceMapWidth, i, i, i, r, randomEdges, zoom);
+						SCANuiUtil.interpolate(resourceCache, resourceMapHeight, resourceMapWidth, 0, i, i, r, randomEdges, zoom);
+						SCANuiUtil.interpolate(resourceCache, resourceMapHeight, resourceMapWidth, i, 0, i, r, randomEdges, zoom);
 					}
 				}
 
