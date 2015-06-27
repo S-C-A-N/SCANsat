@@ -12,7 +12,7 @@ namespace SCANsat.SCAN_UI
 {
 	class SCANoverlayController : SCAN_MBW
 	{
-		internal readonly static Rect defaultRect = new Rect(Screen.width - 280, 200, 200, 260);
+		internal readonly static Rect defaultRect = new Rect(Screen.width - 280, 200, 200, 100);
 		private static Rect sessionRect = defaultRect;
 		private CelestialBody body;
 		private SCANdata data;
@@ -36,16 +36,13 @@ namespace SCANsat.SCAN_UI
 		private Color32[] terrainPixels;
 		private float[,] abundanceValues;
 		private float[,] terrainValues;
-		private int mapHeight = 256;
-		private float transparency = 0f;
-		private int interpolationScale = 8;
 
 		protected override void Awake()
 		{
 			WindowCaption = "S.C.A.N. Overlay";
 			WindowRect = sessionRect;
 			WindowStyle = SCANskins.SCAN_window;
-			WindowOptions = new GUILayoutOption[2] { GUILayout.Width(200), GUILayout.Height(260) };
+			WindowOptions = new GUILayoutOption[2] { GUILayout.Width(200), GUILayout.Height(100) };
 			Visible = false;
 			DragEnabled = true;
 			ClampToScreenOffset = new RectOffset(-140, -140, -200, -200);
@@ -287,13 +284,13 @@ namespace SCANsat.SCAN_UI
 
 				if (GUILayout.Button("-", SCANskins.SCAN_buttonSmall, GUILayout.Width(18)))
 				{
-					transparency = Mathf.Max(0f, transparency - 0.1f);
+					SCANcontroller.controller.overlayTransparency = Mathf.Max(0f, SCANcontroller.controller.overlayTransparency - 0.1f);
 					refreshMap();
 				}
-				GUILayout.Label(transparency.ToString("P0"), SCANskins.SCAN_labelSmall);
+				GUILayout.Label(SCANcontroller.controller.overlayTransparency.ToString("P0"), SCANskins.SCAN_labelSmall);
 				if (GUILayout.Button("+", SCANskins.SCAN_buttonSmall, GUILayout.Width(18)))
 				{
-					transparency = Mathf.Min(1f, transparency + 0.1f);
+					SCANcontroller.controller.overlayTransparency = Mathf.Min(1f, SCANcontroller.controller.overlayTransparency + 0.1f);
 					refreshMap();
 				}
 			stopE();
@@ -302,6 +299,9 @@ namespace SCANsat.SCAN_UI
 		private void resourceSettings(int id)
 		{
 			fillS();
+
+			SCANcontroller.controller.planetaryOverlayTooltips = GUILayout.Toggle(SCANcontroller.controller.planetaryOverlayTooltips, "Tooltips", SCANskins.SCAN_settingsToggle);
+
 			if (GUILayout.Button("Resource Settings"))
 			{
 				SCANcontroller.controller.resourceSettings.Visible = !SCANcontroller.controller.resourceSettings.Visible;
@@ -501,9 +501,9 @@ namespace SCANsat.SCAN_UI
 
 		public void refreshMap(float t, int height, int interp)
 		{
-			transparency = t;
-			mapHeight = height;
-			interpolationScale = interp;
+			SCANcontroller.controller.overlayTransparency = t;
+			SCANcontroller.controller.overlayMapHeight = height;
+			SCANcontroller.controller.overlayInterpolation = interp;
 			if (drawOverlay)
 				refreshMap();
 		}
@@ -514,13 +514,13 @@ namespace SCANsat.SCAN_UI
 				return;
 
 			if (selection == resources.Count)
-				body.SetResourceMap(SCANuiUtil.drawBiomeMap(ref biomeOverlay, ref biomePixels, data, transparency, mapHeight * 2));
+				body.SetResourceMap(SCANuiUtil.drawBiomeMap(ref biomeOverlay, ref biomePixels, data, SCANcontroller.controller.overlayTransparency, SCANcontroller.controller.overlayMapHeight * 2));
 			else if (selection == resources.Count + 1)
 				StartCoroutine(setTerrainMap());
 			else if (selection == resources.Count + 2)
 				StartCoroutine(setSlopeMap());
 			else
-				body.SetResourceMap(SCANuiUtil.drawResourceTexture(ref mapOverlay, ref resourcePixels, ref abundanceValues, mapHeight, data, currentResource, interpolationScale, transparency));
+				body.SetResourceMap(SCANuiUtil.drawResourceTexture(ref mapOverlay, ref resourcePixels, ref abundanceValues, SCANcontroller.controller.overlayMapHeight, data, currentResource, SCANcontroller.controller.overlayInterpolation, SCANcontroller.controller.overlayTransparency));
 		}
 
 		private IEnumerator setTerrainMap()

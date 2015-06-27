@@ -124,6 +124,12 @@ namespace SCANsat
 		public bool hiDetailZoomMap = false;
 		[KSPField(isPersistant = true)]
 		public bool planetaryOverlayTooltips = true;
+		[KSPField(isPersistant = true)]
+		public int overlayInterpolation = 8;
+		[KSPField(isPersistant = true)]
+		public int overlayMapHeight = 256;
+		[KSPField(isPersistant = true)]
+		public float overlayTransparency = 0;
 
 		/* Biome and slope colors can't be serialized properly as a KSP Field */
 		public Color lowBiomeColor = new Color(0, 0.46f, 0.02345098f, 1);

@@ -13,9 +13,9 @@ namespace SCANsat.SCAN_UI
 	{
 		internal readonly static Rect defaultRect = new Rect(300, 200, 300, 300);
 		private static Rect sessionRect = defaultRect;
-		private int mapHeight = 256;
-		private float transparency = 0f;
-		private int interpolationScale = 8;
+		private int mapHeight;
+		private float transparency;
+		private int interpolationScale;
 		private bool popup, warningResource, warningStockResource, controlLock, oldNarrowBand;
 		private const string lockID = "resourceSettingLockID";
 		private Rect warningRect;
@@ -36,6 +36,10 @@ namespace SCANsat.SCAN_UI
 		protected override void Start()
 		{
 			oldNarrowBand = SCANcontroller.controller.needsNarrowBand;
+
+			mapHeight = SCANcontroller.controller.overlayMapHeight;
+			transparency = SCANcontroller.controller.overlayTransparency;
+			interpolationScale = SCANcontroller.controller.overlayInterpolation;
 		}
 
 		internal void removeControlLocks()
