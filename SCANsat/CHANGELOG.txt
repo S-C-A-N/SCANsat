@@ -15,9 +15,13 @@ Version 13.3 -
 	- Performance impact during map generation is negligible
 	- Greatly speeds up small map rendering and terrain overlays
 	
+- Resource selector on zoom map
+	
 - Instrument window resource readout
 	
-- Misc bug fixes
+- Misc bug fixes and changes
+	- Highlight active selection in drop down menus
+	- Planetary overlay map settings persistent
 	- Fix bug when applying terrain color config to non-clamped color scheme
 	- Fix bug with detecting narrow-band scanners for zoom map resource overlays
 	- Fix bug causing resource scanners to deactivate upon loading
