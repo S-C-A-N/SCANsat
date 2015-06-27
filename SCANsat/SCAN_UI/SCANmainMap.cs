@@ -32,6 +32,7 @@ namespace SCANsat.SCAN_UI
 		private static bool showVesselInfo = true;
 		internal static readonly Rect defaultRect = new Rect(10, 55, 380, 230);
 		private static Rect sessionRect = defaultRect;
+		private bool flash;
 
 		protected override void Awake()
 		{
@@ -130,9 +131,10 @@ namespace SCANsat.SCAN_UI
 			mapRect = new Rect(10, 20, 360, 180);
 			GUI.DrawTexture(mapRect, data.drawPartialMap(sensors));
 
-			if (data.Building)
+			if (data.Building || data.ExternalBuilding)
 			{
-				GUI.Label(new Rect(mapRect.x + 90, mapRect.y + 60, 180, 60), "Building Database...");
+				flash = (int)(Time.realtimeSinceStartup % 2) == 0;
+				SCANuiUtil.drawLabel(new Rect(mapRect.x + 80, mapRect.y + 50, 200, 60), "Building Database...", SCANskins.SCAN_insColorLabel, true, SCANskins.SCAN_insColorLabelShadow, flash, SCANskins.SCAN_insWhiteLabel);
 			}
 
 			GUILayout.Space(184);
