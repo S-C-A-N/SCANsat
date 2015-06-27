@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using SCANsat.SCAN_Data;
@@ -20,9 +21,12 @@ namespace SCANsat.SCAN_UI
 		private List<PResource.Resource> resourceFractions;
 		private bool drawOverlay;
 		private bool oldOverlay;
+		private bool terrainGenerated;
+		private bool mapGenerating;
 		private int selection;
 		private double degreeOffset;
 		private bool enableUI = true;
+		private int mapStep, mapStart;
 
 		private Texture2D mapOverlay;
 		private Texture2D biomeOverlay;
@@ -146,6 +150,9 @@ namespace SCANsat.SCAN_UI
 		{
 			for (int i = 0; i < resources.Count; i++)
 			{
+				if (mapGenerating)
+					return;
+
 				SCANresourceGlobal r = resources[i];
 
 				if (r == null)
@@ -179,6 +186,9 @@ namespace SCANsat.SCAN_UI
 
 			if (GUILayout.Button("Biome Map", selection == (resources.Count) ? SCANskins.SCAN_labelLeftActive : SCANskins.SCAN_labelLeft))
 			{
+				if (mapGenerating)
+					return;
+
 				OverlayGenerator.Instance.ClearDisplay();
 
 				if (selection != resources.Count)
@@ -202,6 +212,9 @@ namespace SCANsat.SCAN_UI
 
 			if (GUILayout.Button("Terrain Map", selection == (resources.Count + 1) ? SCANskins.SCAN_labelLeftActive : SCANskins.SCAN_labelLeft))
 			{
+				if (mapGenerating)
+					return;
+
 				OverlayGenerator.Instance.ClearDisplay();
 
 				if (selection != resources.Count + 1)
@@ -223,28 +236,31 @@ namespace SCANsat.SCAN_UI
 				}
 			}
 
-			if (GUILayout.Button("Slope Map", selection == (resources.Count + 2) ? SCANskins.SCAN_labelLeftActive : SCANskins.SCAN_labelLeft))
-			{
-				OverlayGenerator.Instance.ClearDisplay();
+			//if (GUILayout.Button("Slope Map", selection == (resources.Count + 2) ? SCANskins.SCAN_labelLeftActive : SCANskins.SCAN_labelLeft))
+			//{
+			//	if (mapGenerating)
+			//		return;
 
-				if (selection != resources.Count + 2)
-				{
-					selection = resources.Count + 2;
-					oldOverlay = drawOverlay = true;
-					refreshMap();
-					return;
-				}
+			//	OverlayGenerator.Instance.ClearDisplay();
 
-				if (drawOverlay)
-				{
-					oldOverlay = drawOverlay = false;
-				}
-				else
-				{
-					oldOverlay = drawOverlay = true;
-					refreshMap();
-				}
-			}
+			//	if (selection != resources.Count + 2)
+			//	{
+			//		selection = resources.Count + 2;
+			//		oldOverlay = drawOverlay = true;
+			//		refreshMap();
+			//		return;
+			//	}
+
+			//	if (drawOverlay)
+			//	{
+			//		oldOverlay = drawOverlay = false;
+			//	}
+			//	else
+			//	{
+			//		oldOverlay = drawOverlay = true;
+			//		refreshMap();
+			//	}
+			//}
 		}
 
 		private void overlayToggle(int id)
@@ -255,6 +271,9 @@ namespace SCANsat.SCAN_UI
 		private void overlayOptions(int id)
 		{
 			if (!drawOverlay)
+				return;
+
+			if (mapGenerating)
 				return;
 
 			if (GUILayout.Button("Refresh"))
@@ -340,9 +359,7 @@ namespace SCANsat.SCAN_UI
 				if (body.BiomeMap != null)
 				{
 					if (SCANUtil.isCovered(coords.longitude, coords.latitude, data, SCANtype.Biome))
-					{
 						tooltip += string.Format("\nBiome: {0}", SCANUtil.getBiomeName(body, coords.longitude, coords.latitude));
-					}
 				}
 
 				bool resources = false;
@@ -360,47 +377,97 @@ namespace SCANsat.SCAN_UI
 
 				if (resources)
 				{
-					if (SCANcontroller.controller.instrumentNeedsNarrowBand)
+					if (SCANcontroller.controller.needsNarrowBand)
 					{
-						bool tooHigh = false;
+						bool coverage = false;
 						bool scanner = false;
 
-						//foreach (SCANresourceDisplay s in resourceScanners)
-						//{
-						//	if (s == null)
-						//		continue;
-
-						//	if (s.ResourceName != resources[currentResource].Name)
-						//		continue;
-
-						//	if (ResourceUtilities.GetAltitude(v) > s.MaxAbundanceAltitude || v.Landed)
-						//	{
-						//		tooHigh = true;
-						//		continue;
-						//	}
-
-						//	scanner = true;
-						//	tooHigh = false;
-						//	break;
-						//}
-
-						if (tooHigh)
+						foreach (Vessel vessel in FlightGlobals.Vessels)
 						{
-							tooltip += string.Format("\n{0}: Too High", currentResource.Name);
+							if (vessel.protoVessel.protoPartSnapshots.Count <= 1)
+								continue;
+
+							if (vessel.vesselType == VesselType.Debris || vessel.vesselType == VesselType.Unknown || vessel.vesselType == VesselType.EVA || vessel.vesselType == VesselType.Flag)
+								continue;
+
+							if (vessel.mainBody != body)
+								continue;
+
+							if (vessel.situation != Vessel.Situations.ORBITING)
+								continue;
+
+							if (inc(vessel.orbit.inclination) < Math.Abs(coords.latitude))
+							{
+								coverage = true;
+								continue;
+							}
+
+							var scanners = from pref in vessel.protoVessel.protoPartSnapshots
+										   where pref.modules.Any(a => a.moduleName == "ModuleResourceScanner")
+										   select pref;
+
+							if (scanners.Count() == 0)
+								continue;
+
+							foreach (var p in scanners)
+							{
+								if (p.partInfo == null)
+									continue;
+
+								ConfigNode node = p.partInfo.partConfig;
+
+								if (node == null)
+									continue;
+
+								var moduleNodes = from nodes in node.GetNodes("MODULE")
+												  where nodes.GetValue("name") == "ModuleResourceScanner"
+												  select nodes;
+
+								foreach (ConfigNode moduleNode in moduleNodes)
+								{
+									if (moduleNode == null)
+										continue;
+
+									if (moduleNode.GetValue("ScannerType") != "0")
+										continue;
+
+									if (moduleNode.GetValue("ResourceName") != currentResource.Name)
+										continue;
+
+									if (moduleNode.HasValue("MaxAbundanceAltitude") && !vessel.Landed)
+									{
+										string alt = moduleNode.GetValue("MaxAbundanceAltitude");
+										float f = 0;
+										if (!float.TryParse(alt, out f))
+											continue;
+
+										if (f < vessel.altitude)
+										{
+											coverage = true;
+											continue;
+										}
+									}
+
+									coverage = false;
+									scanner = true;
+									break;
+								}
+								if (scanner)
+									break;
+							}
+							if (scanner)
+								break;
 						}
+
+						if (coverage)
+							tooltip += string.Format("\n{0}: No Coverage", currentResource.Name);
 						else if (!scanner)
-						{
 							tooltip += string.Format("\n{0}: No Scanner", currentResource.Name);
-						}
 						else
-						{
 							resourceLabel(ref tooltip, fuzzy, coords.latitude, coords.longitude);
-						}
 					}
 					else
-					{
 						resourceLabel(ref tooltip, fuzzy, coords.latitude, coords.longitude);
-					}
 				}
 
 				Vector2 size = SCANskins.SCAN_readoutLabelCenter.CalcSize(new GUIContent(tooltip));
@@ -427,13 +494,9 @@ namespace SCANsat.SCAN_UI
 		private void resourceLabel(ref string t, bool fuzz, double lat, double lon)
 		{
 			if (fuzz)
-			{
 				t += string.Format("\n{0}: {1:P0}", currentResource.Name, SCANUtil.ResourceOverlay(lat, lon, currentResource.Name, body, SCANcontroller.controller.resourceBiomeLock));
-			}
 			else
-			{
 				t += string.Format("\n{0}: {1:P2}", currentResource.Name, SCANUtil.ResourceOverlay(lat, lon, currentResource.Name, body, SCANcontroller.controller.resourceBiomeLock));
-			}
 		}
 
 		public void refreshMap(float t, int height, int interp)
@@ -447,14 +510,83 @@ namespace SCANsat.SCAN_UI
 
 		private void refreshMap()
 		{
+			if (mapGenerating)
+				return;
+
 			if (selection == resources.Count)
 				body.SetResourceMap(SCANuiUtil.drawBiomeMap(ref biomeOverlay, ref biomePixels, data, transparency, mapHeight * 2));
 			else if (selection == resources.Count + 1)
-				body.SetResourceMap(SCANuiUtil.drawTerrainMap(ref terrainOverlay, ref terrainPixels, ref terrainValues, data, 360, 2));
+				StartCoroutine(setTerrainMap());
 			else if (selection == resources.Count + 2)
-				body.SetResourceMap(SCANuiUtil.drawSlopeMap(ref terrainOverlay, ref terrainPixels, ref terrainValues, data, 360, 2));
+				StartCoroutine(setSlopeMap());
 			else
 				body.SetResourceMap(SCANuiUtil.drawResourceTexture(ref mapOverlay, ref resourcePixels, ref abundanceValues, mapHeight, data, currentResource, interpolationScale, transparency));
+		}
+
+		private IEnumerator setTerrainMap()
+		{
+			if (data.Body.pqsController == null)
+				yield return null;
+
+			int timer = 0;
+
+			while (!data.Built && timer < 5000)
+			{
+				mapGenerating = true;
+				if (!data.Building)
+				{
+					data.ExternalBuilding = true;
+					data.generateHeightMap(ref mapStep, ref mapStart, 360);
+				}
+				timer++;
+				yield return null;
+			}
+
+			mapGenerating = false;
+
+			if (timer >= 5000)
+				yield return null;
+
+			if (!terrainGenerated)
+			{
+				SCANuiUtil.generateTerrainArray(ref terrainValues, 720, 4, data);
+				terrainGenerated = true;
+			}
+
+			body.SetResourceMap(SCANuiUtil.drawTerrainMap(ref terrainOverlay, ref terrainPixels, ref terrainValues, data, 720, 4));
+		}
+
+		private IEnumerator setSlopeMap()
+		{
+			if (data.Body.pqsController == null)
+				yield return null;
+
+			int timer = 0;
+
+			while (!data.Built && timer < 5000)
+			{
+				mapGenerating = true;
+				if (!data.Building)
+				{
+					data.ExternalBuilding = true;
+					data.generateHeightMap(ref mapStep, ref mapStart, 360);
+				}
+				timer++;
+				yield return null;
+			}
+
+			mapGenerating = false;
+
+			if (timer >= 5000)
+				yield return null;
+
+			if (!terrainGenerated)
+			{
+				SCANuiUtil.generateTerrainArray(ref terrainValues, 720, 4, data);
+				terrainGenerated = true;
+			}
+
+			body.SetResourceMap(SCANuiUtil.drawSlopeMap(ref terrainOverlay, ref terrainPixels, ref terrainValues, data, 720, 4));
 		}
 
 		private void setBody(CelestialBody B)
@@ -480,13 +612,14 @@ namespace SCANsat.SCAN_UI
 				currentResource.CurrentBodyConfig(body.name);
 			}
 
+			terrainGenerated = false;
+
 			if (drawOverlay)
 				refreshMap();
 
 			double circum = body.Radius * 2 * Math.PI;
 			double eqDistancePerDegree = circum / 360;
 			degreeOffset = 5 / eqDistancePerDegree;
-
 
 			//resourceFractions = ResourceMap.Instance.GetResourceItemList(HarvestTypes.Planetary, body);
 			//if (resources.Count > 0)
@@ -503,6 +636,14 @@ namespace SCANsat.SCAN_UI
 			//	//	}
 			//	//}
 			//}
+		}
+
+		private double inc(double d)
+		{
+			if (d > 90)
+				d = 180 - d;
+
+			return d;
 		}
 
 		private void showUI()
