@@ -879,41 +879,41 @@ namespace SCANsat.SCAN_Map
 			return elevation;
 		}
 
-		private void generateResourceCache()
-		{
-			for (int j = 0; j < resourceMapHeight; j += resourceInterpolation)
-			{
-				for (int i = 0; i < resourceMapWidth; i += resourceInterpolation)
-				{
-					Vector2d coords;
-					if (zoom && projection == MapProjection.Polar)
-					{
-						double rLon = (i * 1.0f / resourceMapScale) - 180f + lon_offset;
-						double rLat = (j * 1.0f / resourceMapScale) - 90f + lat_offset;
+		//private void generateResourceCache()
+		//{
+		//	for (int j = 0; j < resourceMapHeight; j += resourceInterpolation)
+		//	{
+		//		for (int i = 0; i < resourceMapWidth; i += resourceInterpolation)
+		//		{
+		//			Vector2d coords;
+		//			if (zoom && projection == MapProjection.Polar)
+		//			{
+		//				double rLon = (i * 1.0f / resourceMapScale) - 180f + lon_offset;
+		//				double rLat = (j * 1.0f / resourceMapScale) - 90f + lat_offset;
 
-						double la = rLat, lo = rLon;
-						rLat = unprojectLatitude(lo, la);
-						rLon = unprojectLongitude(lo, la);
+		//				double la = rLat, lo = rLon;
+		//				rLat = unprojectLatitude(lo, la);
+		//				rLon = unprojectLongitude(lo, la);
 
-						if (double.IsNaN(rLat) || double.IsNaN(rLon) || rLat < -90 || rLat > 90 || rLon < -180 || rLon > 180)
-						{
-							resourceCache[i, j] = 0;
-							continue;
-						}
+		//				if (double.IsNaN(rLat) || double.IsNaN(rLon) || rLat < -90 || rLat > 90 || rLon < -180 || rLon > 180)
+		//				{
+		//					resourceCache[i, j] = 0;
+		//					continue;
+		//				}
 
-						coords = new Vector2d(rLon, rLat);
-					}
-					else
-					{
-						double rLon = SCANUtil.fixLonShift((i * 1.0f / resourceMapScale) - 180f + lon_offset);
-						double rLat = (j * 1.0f / resourceMapScale) - 90f + lat_offset;
-						coords = SCANUtil.fixRetardCoordinates(new Vector2d(rLon, rLat));
-					}
+		//				coords = new Vector2d(rLon, rLat);
+		//			}
+		//			else
+		//			{
+		//				double rLon = SCANUtil.fixLonShift((i * 1.0f / resourceMapScale) - 180f + lon_offset);
+		//				double rLat = (j * 1.0f / resourceMapScale) - 90f + lat_offset;
+		//				coords = SCANUtil.fixRetardCoordinates(new Vector2d(rLon, rLat));
+		//			}
 
-					resourceCache[i, j] = SCANUtil.ResourceOverlay(coords.y, coords.x, resource.Name, body, SCANcontroller.controller.resourceBiomeLock) * 100f;
-				}
-			}
-		}
+		//			resourceCache[i, j] = SCANUtil.ResourceOverlay(coords.y, coords.x, resource.Name, body, SCANcontroller.controller.resourceBiomeLock) * 100f;
+		//		}
+		//	}
+		//}
 
 		private float getResoureCache(double Lon, double Lat)
 		{
