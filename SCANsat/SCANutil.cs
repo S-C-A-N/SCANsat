@@ -216,9 +216,9 @@ namespace SCANsat
 		}
 
 		internal static void registerPass ( double lon, double lat, SCANdata data, SCANtype type ) {
-			int ilon = SCANUtil.icLON(lon);
-			int ilat = SCANUtil.icLAT(lat);
-			if (SCANUtil.badLonLat(ilon, ilat)) return;
+			int ilon = icLON(lon);
+			int ilat = icLAT(lat);
+			if (badLonLat(ilon, ilat)) return;
 			data.Coverage[ilon, ilat] |= (Int32)type;
 		}
 
