@@ -130,6 +130,8 @@ namespace SCANsat
 		public int overlayMapHeight = 256;
 		[KSPField(isPersistant = true)]
 		public float overlayTransparency = 0;
+		[KSPField(isPersistant = true)]
+		public bool version14Patch = false;
 
 		/* Biome and slope colors can't be serialized properly as a KSP Field */
 		public Color lowBiomeColor = new Color(0, 0.46f, 0.02345098f, 1);
@@ -576,6 +578,29 @@ namespace SCANsat
 						if (!double.TryParse(node_sensor.GetValue("best_alt"), out best_alt))
 							best_alt = bestScanAlt;
 						registerSensor(id, (SCANtype)sensor, fov, min_alt, max_alt, best_alt);
+					}
+				}
+
+				if (!version14Patch)
+				{
+					version14Patch = true;
+
+					List<SCANvessel> removeList = new List<SCANvessel>();
+					foreach (SCANvessel v in knownVessels.Values)
+					{
+						var scanners = from pref in v.vessel.protoVessel.protoPartSnapshots
+									   where pref.modules.Any(a => a.moduleName == "ModuleResourceScanner")
+									   select pref;
+
+						if (scanners.Count() == 0)
+							continue;
+
+						removeList.Add(v);
+					}
+
+					foreach (SCANvessel v in removeList)
+					{
+						unregisterSensor(v.vessel, SCANtype.DefinedResources);
 					}
 				}
 			}
@@ -1491,7 +1516,7 @@ namespace SCANsat
 					for (int y = -f; y <= f1; ++y)
 					{
 						clampLat = lat + y;
-						if (clampLat > 90) clampLat = 90;
+						if (clampLat > 89) clampLat = 89;
 						if (clampLat < -90) clampLat = -90;
 						SCANUtil.registerPass(clampLon, clampLat, data, sensor.sensor);
 					}
