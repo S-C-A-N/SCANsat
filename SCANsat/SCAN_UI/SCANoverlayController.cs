@@ -279,21 +279,21 @@ namespace SCANsat.SCAN_UI
 			if (selection >= resources.Count)
 				return;
 
-			growE();
-				GUILayout.Label("Coverage Transparency:", SCANskins.SCAN_labelSmallLeft);
+			//growE();
+			//	GUILayout.Label("Coverage Transparency:", SCANskins.SCAN_labelSmallLeft);
 
-				if (GUILayout.Button("-", SCANskins.SCAN_buttonSmall, GUILayout.Width(18)))
-				{
-					SCANcontroller.controller.overlayTransparency = Mathf.Max(0f, SCANcontroller.controller.overlayTransparency - 0.1f);
-					refreshMap();
-				}
-				GUILayout.Label(SCANcontroller.controller.overlayTransparency.ToString("P0"), SCANskins.SCAN_labelSmall);
-				if (GUILayout.Button("+", SCANskins.SCAN_buttonSmall, GUILayout.Width(18)))
-				{
-					SCANcontroller.controller.overlayTransparency = Mathf.Min(1f, SCANcontroller.controller.overlayTransparency + 0.1f);
-					refreshMap();
-				}
-			stopE();
+			//	if (GUILayout.Button("-", SCANskins.SCAN_buttonSmall, GUILayout.Width(18)))
+			//	{
+			//		SCANcontroller.controller.overlayTransparency = Mathf.Max(0f, SCANcontroller.controller.overlayTransparency - 0.1f);
+			//		refreshMap();
+			//	}
+			//	GUILayout.Label(SCANcontroller.controller.overlayTransparency.ToString("P0"), SCANskins.SCAN_labelSmall);
+			//	if (GUILayout.Button("+", SCANskins.SCAN_buttonSmall, GUILayout.Width(18)))
+			//	{
+			//		SCANcontroller.controller.overlayTransparency = Mathf.Min(1f, SCANcontroller.controller.overlayTransparency + 0.1f);
+			//		refreshMap();
+			//	}
+			//stopE();
 		}
 
 		private void resourceSettings(int id)
@@ -530,7 +530,7 @@ namespace SCANsat.SCAN_UI
 
 			int timer = 0;
 
-			while (!data.Built && timer < 5000)
+			while (!data.Built && timer < 2000)
 			{
 				mapGenerating = true;
 				if (!data.Building)
@@ -544,7 +544,7 @@ namespace SCANsat.SCAN_UI
 
 			mapGenerating = false;
 
-			if (timer >= 5000)
+			if (timer >= 2000)
 				yield return null;
 
 			if (!terrainGenerated)
@@ -563,7 +563,7 @@ namespace SCANsat.SCAN_UI
 
 			int timer = 0;
 
-			while (!data.Built && timer < 5000)
+			while (!data.Built && timer < 2000)
 			{
 				mapGenerating = true;
 				if (!data.Building)
@@ -577,7 +577,7 @@ namespace SCANsat.SCAN_UI
 
 			mapGenerating = false;
 
-			if (timer >= 5000)
+			if (timer >= 2000)
 				yield return null;
 
 			if (!terrainGenerated)
