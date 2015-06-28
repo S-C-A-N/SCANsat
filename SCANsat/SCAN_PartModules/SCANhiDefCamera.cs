@@ -25,8 +25,6 @@ namespace SCANsat.SCAN_PartModules
 			if (state == StartState.Editor)
 				return;
 
-			SCANUtil.SCANdebugLog("Starting Hi Def Module");
-
 			part.force_activate();
 			this.isEnabled = true;
 			activated = true;
@@ -39,6 +37,11 @@ namespace SCANsat.SCAN_PartModules
 
 			Events["toggleSCANHiDef"].guiName = "Toggle Map";
 			Events["resetCenter"].guiName = "Reset Map Center";
+		}
+
+		private void OnDestroy()
+		{
+			Events["resetCenter"].active = false;
 		}
 
 		private List<ModuleHighDefCamera> findCameras()
@@ -94,7 +97,7 @@ namespace SCANsat.SCAN_PartModules
 				SCANcontroller.controller.hiDefMap.setMapCenter(SCANUtil.fixLatShift(vessel.latitude), SCANUtil.fixLonShift(vessel.longitude), hiDetailOnly || SCANcontroller.controller.hiDetailZoomMap, null, this);
 			}
 			else
-				SCANcontroller.controller.hiDefMap.Visible = false;
+				SCANcontroller.controller.hiDefMap.closeMap();
 
 			Events["resetCenter"].active = SCANcontroller.controller.hiDefMap.Visible;
 		}
@@ -112,7 +115,6 @@ namespace SCANsat.SCAN_PartModules
 		{
 			if (stockCameras != null)
 			{
-				SCANUtil.SCANdebugLog("Enabling Connected Hi Defs");
 				foreach (ModuleHighDefCamera m in stockCameras)
 				{
 					m.EnableModule();
@@ -124,7 +126,6 @@ namespace SCANsat.SCAN_PartModules
 		{
 			if (stockCameras != null)
 			{
-				SCANUtil.SCANdebugLog("Disabling Connected Hi Defs");
 				foreach (ModuleHighDefCamera m in stockCameras)
 				{
 					m.DisableModule();
@@ -134,8 +135,6 @@ namespace SCANsat.SCAN_PartModules
 
 		public void EnableModule()
 		{
-			SCANUtil.SCANdebugLog("Enable Hi Def");
-
 			activated = true;
 			if (SCANcontroller.controller != null && SCANcontroller.controller.disableStockResource)
 				disableConnectedModules();
@@ -143,9 +142,8 @@ namespace SCANsat.SCAN_PartModules
 
 		public void DisableModule()
 		{
-			SCANUtil.SCANdebugLog("Disable Hi Def");
-
 			activated = false;
+			Events["resetCenter"].active = false;
 			if (SCANcontroller.controller != null && SCANcontroller.controller.disableStockResource)
 				disableConnectedModules();
 		}
