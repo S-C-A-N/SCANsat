@@ -101,6 +101,7 @@ namespace SCANsat.SCAN_PartModules
 			if (refreshState)
 			{
 				refreshState = false;
+
 				if (SCANcontroller.controller.disableStockResource)
 				{
 					if (mSurvey != null)
