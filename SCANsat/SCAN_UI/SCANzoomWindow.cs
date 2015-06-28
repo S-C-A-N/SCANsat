@@ -241,9 +241,10 @@ namespace SCANsat.SCAN_UI
 			return d;
 		}
 
-		protected virtual void closeMap()
+		public virtual void closeMap()
 		{
-
+			removeControlLocks();
+			Visible = false;
 		}
 
 		private void checkForScanners()
@@ -501,9 +502,7 @@ namespace SCANsat.SCAN_UI
 			r.y += 1;
 			if (GUI.Button(r, SCANcontroller.controller.closeBox, SCANskins.SCAN_closeButton))
 			{
-				removeControlLocks();
 				closeMap();
-				Visible = false;
 			}
 		}
 

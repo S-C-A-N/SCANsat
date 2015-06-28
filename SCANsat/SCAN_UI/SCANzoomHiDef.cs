@@ -155,8 +155,10 @@ namespace SCANsat.SCAN_UI
 			}
 		}
 
-		protected override void closeMap()
+		public override void closeMap()
 		{
+			base.closeMap();
+
 			if (cameraModule == null)
 				return;
 
