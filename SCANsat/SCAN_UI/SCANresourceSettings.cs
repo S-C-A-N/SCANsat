@@ -11,7 +11,7 @@ namespace SCANsat.SCAN_UI
 {
 	class SCANresourceSettings : SCAN_MBW
 	{
-		internal readonly static Rect defaultRect = new Rect(300, 200, 300, 300);
+		internal readonly static Rect defaultRect = new Rect(300, 200, 300, 270);
 		private static Rect sessionRect = defaultRect;
 		private int mapHeight;
 		private float transparency;
@@ -25,7 +25,7 @@ namespace SCANsat.SCAN_UI
 			WindowCaption = "S.C.A.N. Resources Settings";
 			WindowRect = sessionRect;
 			WindowStyle = SCANskins.SCAN_window;
-			WindowOptions = new GUILayoutOption[2] { GUILayout.Width(350), GUILayout.Height(300) };
+			WindowOptions = new GUILayoutOption[2] { GUILayout.Width(300), GUILayout.Height(270) };
 			Visible = false;
 			DragEnabled = true;
 			ClampToScreenOffset = new RectOffset(-200, -200, -200, -200);
@@ -199,39 +199,57 @@ namespace SCANsat.SCAN_UI
 		private void overlayOptions(int id)
 		{
 			growE();
-			GUILayout.Label("Interpolation:", SCANskins.SCAN_labelSmallLeft);
+				GUILayout.Label("Interpolation:", SCANskins.SCAN_labelSmallLeft);
 
-			fillS();
+				fillS();
 
-			if (GUILayout.Button("-", SCANskins.SCAN_buttonSmall, GUILayout.Width(18)))
-			{
-				interpolationScale = Math.Max(2, interpolationScale / 2);
-				refreshMap();
-			}
-			GUILayout.Label(interpolationScale.ToString(), SCANskins.SCAN_labelSmall, GUILayout.Width(36));
-			if (GUILayout.Button("+", SCANskins.SCAN_buttonSmall, GUILayout.Width(18)))
-			{
-				interpolationScale = Math.Min(32, interpolationScale * 2);
-				refreshMap();
-			}
+				if (GUILayout.Button("-", SCANskins.SCAN_buttonSmall, GUILayout.Width(18)))
+				{
+					interpolationScale = Math.Max(2, interpolationScale / 2);
+					refreshMap();
+				}
+				GUILayout.Label(interpolationScale.ToString(), SCANskins.SCAN_labelSmall, GUILayout.Width(36));
+				if (GUILayout.Button("+", SCANskins.SCAN_buttonSmall, GUILayout.Width(18)))
+				{
+					interpolationScale = Math.Min(32, interpolationScale * 2);
+					refreshMap();
+				}
 			stopE();
 
 			growE();
-			GUILayout.Label("Map Height:", SCANskins.SCAN_labelSmallLeft);
+				GUILayout.Label("Map Height:", SCANskins.SCAN_labelSmallLeft);
 
-			fillS();
+				fillS();
 
-			if (GUILayout.Button("-", SCANskins.SCAN_buttonSmall, GUILayout.Width(18)))
-			{
-				mapHeight = Math.Max(64, mapHeight / 2);
-				refreshMap();
-			}
-			GUILayout.Label(mapHeight.ToString(), SCANskins.SCAN_labelSmall, GUILayout.Width(36));
-			if (GUILayout.Button("+", SCANskins.SCAN_buttonSmall, GUILayout.Width(18)))
-			{
-				mapHeight = Math.Min(1024, mapHeight * 2);
-				refreshMap();
-			}
+				if (GUILayout.Button("-", SCANskins.SCAN_buttonSmall, GUILayout.Width(18)))
+				{
+					mapHeight = Math.Max(64, mapHeight / 2);
+					refreshMap();
+				}
+				GUILayout.Label(mapHeight.ToString(), SCANskins.SCAN_labelSmall, GUILayout.Width(36));
+				if (GUILayout.Button("+", SCANskins.SCAN_buttonSmall, GUILayout.Width(18)))
+				{
+					mapHeight = Math.Min(1024, mapHeight * 2);
+					refreshMap();
+				}
+			stopE();
+
+			growE();
+				GUILayout.Label("Coverage Transparency:", SCANskins.SCAN_labelSmallLeft);
+
+				fillS();
+
+				if (GUILayout.Button("-", SCANskins.SCAN_buttonSmall, GUILayout.Width(18)))
+				{
+					transparency = Mathf.Max(0f, transparency - 0.1f);
+					refreshMap();
+				}
+				GUILayout.Label(transparency.ToString("P0"), SCANskins.SCAN_labelSmall, GUILayout.Width(36));
+				if (GUILayout.Button("+", SCANskins.SCAN_buttonSmall, GUILayout.Width(18)))
+				{
+					transparency = Mathf.Min(1f, transparency + 0.1f);
+					refreshMap();
+				}
 			stopE();
 		}
 
