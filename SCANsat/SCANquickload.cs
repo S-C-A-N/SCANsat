@@ -30,7 +30,7 @@ public class Debug_AutoLoadPersistentSaveOnStartup : MonoBehaviour {
             
 		if (first) {
 			first = false;
-			HighLogic.SaveFolder = "SCANsat Testing";
+			HighLogic.SaveFolder = "Testing";
 			var game = GamePersistence.LoadGame ("persistent" , HighLogic.SaveFolder , true , false);
 			if (game != null && game.flightState != null && game.compatible) {
                      

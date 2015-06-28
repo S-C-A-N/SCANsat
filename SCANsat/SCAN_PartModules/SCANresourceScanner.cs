@@ -23,7 +23,8 @@ namespace SCANsat.SCAN_PartModules
 		private List<ModuleOrbitalScanner> mScanner;
 		private ModuleAnimationGroup animGroup;
 		private bool activated;
-		private bool forceStart;
+		private bool refreshState;
+		private bool loaded;
 
 		public override void OnStart(PartModule.StartState state)
 		{
@@ -46,7 +47,7 @@ namespace SCANsat.SCAN_PartModules
 			if (animGroup == null)
 				activated = true;
 
-			forceStart = true;
+			refreshState = true;
 		}
 
 		public override string GetInfo()
@@ -80,13 +81,11 @@ namespace SCANsat.SCAN_PartModules
 
 		public void Update()
 		{
-			base.OnUpdate();
-
 			if (!activated)
 			{
 				base.Events["startScan"].active = false;
 				base.Events["stopScan"].active = false;
-				if (scanning)
+				if (scanning && loaded)
 					unregisterScanner();
 				return;
 			}
@@ -97,8 +96,12 @@ namespace SCANsat.SCAN_PartModules
 			if (SCANcontroller.controller == null)
 				return;
 
-			if (forceStart)
+			base.OnUpdate();
+
+			if (refreshState)
 			{
+				refreshState = false;
+
 				if (SCANcontroller.controller.disableStockResource)
 				{
 					if (mSurvey != null)
@@ -113,7 +116,7 @@ namespace SCANsat.SCAN_PartModules
 							m.DisableModule();
 					}
 				}
-				forceStart = false;
+				loaded = true;
 			}
 
 			if (!SCANcontroller.controller.easyModeScanning || SCANcontroller.controller.disableStockResource)
@@ -165,7 +168,7 @@ namespace SCANsat.SCAN_PartModules
 			activated = false;
 			base.Events["startScan"].active = false;
 			base.Events["stopScan"].active = false;
-			if (scanning)
+			if (scanning && loaded)
 				unregisterScanner();
 
 			if (SCANcontroller.controller != null && SCANcontroller.controller.disableStockResource)

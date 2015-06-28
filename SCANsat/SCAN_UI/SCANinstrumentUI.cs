@@ -14,11 +14,13 @@
 #endregion
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using FinePrint;
 using FinePrint.Utilities;
 using SCANsat.SCAN_Platform;
 using SCANsat;
+using SCANsat.SCAN_PartModules;
 using SCANsat.SCAN_UI.UI_Framework;
 using SCANsat.SCAN_Data;
 using UnityEngine;
@@ -34,6 +36,9 @@ namespace SCANsat.SCAN_UI
 		private SCANtype sensors;
 		private SCANdata data;
 		private Vessel v;
+		private List<SCANresourceDisplay> resourceScanners = new List<SCANresourceDisplay>();
+		private List<SCANresourceGlobal> resources = new List<SCANresourceGlobal>();
+		private int currentResource;
 		private double degreeOffset;
 		private double vlat, vlon;
 		private float lastUpdate = 0f;
@@ -58,6 +63,8 @@ namespace SCANsat.SCAN_UI
 		protected override void Start()
 		{
 			GameEvents.onVesselSOIChanged.Add(soiChange);
+			GameEvents.onVesselChange.Add(vesselChange);
+			GameEvents.onVesselWasModified.Add(vesselChange);
 			data = SCANUtil.getData(FlightGlobals.currentMainBody);
 			if (data == null)
 			{
@@ -65,11 +72,17 @@ namespace SCANsat.SCAN_UI
 				SCANcontroller.controller.addToBodyData(FlightGlobals.currentMainBody, data);
 			}
 			planetConstants(FlightGlobals.currentMainBody);
+
+			v = FlightGlobals.ActiveVessel;
+			resources = SCANcontroller.setLoadedResourceList();
+			resetResourceList();
 		}
 
 		protected override void OnDestroy()
 		{
 			GameEvents.onVesselSOIChanged.Remove(soiChange);
+			GameEvents.onVesselChange.Remove(vesselChange);
+			GameEvents.onVesselWasModified.Remove(vesselChange);
 		}
 
 		protected override void DrawWindowPre(int id)
@@ -94,10 +107,20 @@ namespace SCANsat.SCAN_UI
 				{
 					sensors |= SCANtype.Altimetry;
 				}
+
 				if (SCANUtil.isCovered(vlon, vlat, data, SCANtype.Biome))
 				{
 					sensors |= SCANtype.Biome;
 				}
+
+				foreach (SCANresourceGlobal s in resources)
+				{
+					if (SCANUtil.isCovered(vlon, vlat, data, s.SType))
+						sensors |= s.SType;
+				}
+
+				if (SCANUtil.isCovered(vlon, vlat, data, SCANtype.FuzzyResources))
+					sensors |= SCANtype.FuzzyResources;
 			}
 		}
 
@@ -113,6 +136,7 @@ namespace SCANsat.SCAN_UI
 				locationInfo(id);					/* always-on indicator for current lat/long */
 				altInfo(id);						/* show current altitude and slope */
 				biomeInfo(id);						/* show current biome info */
+				resourceInfo(id);					/* show current resource abundance */
 				anomalyInfo(id);					/* show nearest anomaly detail - including BTDT view */
 				//if (parts <= 0) noData(id);		/* nothing to show */
 			}
@@ -230,45 +254,142 @@ namespace SCANsat.SCAN_UI
 					{
 						lastUpdate = Time.time;
 
+						slopeAVG = SCANUtil.slope(pqs, v.mainBody, vlon, vlat, degreeOffset);
+
+
+
 						/* Slope is calculated using a nine point grid centered 5m around the vessel location
 						 * The rise between the vessel location's elevation and each point on the grid is calculated, converted to slope in degrees, and averaged;
 						 * Note: Averageing is not the most accurate method
 						 */
 
-						double latOffset = degreeOffset * Math.Cos(Mathf.Deg2Rad * vlat);
-						double[] e = new double[9];
-						double[] s = new double[8];
-						e[0] = pqs;
-						e[1] = SCANUtil.getElevation(v.mainBody, vlon + latOffset, vlat);
-						e[2] = SCANUtil.getElevation(v.mainBody, vlon - latOffset, vlat);
-						e[3] = SCANUtil.getElevation(v.mainBody, vlon, vlat + degreeOffset);
-						e[4] = SCANUtil.getElevation(v.mainBody, vlon, vlat - degreeOffset);
-						e[5] = SCANUtil.getElevation(v.mainBody, vlon + latOffset, vlat + degreeOffset);
-						e[6] = SCANUtil.getElevation(v.mainBody, vlon + latOffset, vlat - degreeOffset);
-						e[7] = SCANUtil.getElevation(v.mainBody, vlon - latOffset, vlat + degreeOffset);
-						e[8] = SCANUtil.getElevation(v.mainBody, vlon - latOffset, vlat - degreeOffset);
+						//double latOffset = degreeOffset * Math.Cos(Mathf.Deg2Rad * vlat);
+						//double[] e = new double[9];
+						//double[] s = new double[8];
+						//e[0] = pqs;
+						//e[1] = SCANUtil.getElevation(v.mainBody, vlon + latOffset, vlat);
+						//e[2] = SCANUtil.getElevation(v.mainBody, vlon - latOffset, vlat);
+						//e[3] = SCANUtil.getElevation(v.mainBody, vlon, vlat + degreeOffset);
+						//e[4] = SCANUtil.getElevation(v.mainBody, vlon, vlat - degreeOffset);
+						//e[5] = SCANUtil.getElevation(v.mainBody, vlon + latOffset, vlat + degreeOffset);
+						//e[6] = SCANUtil.getElevation(v.mainBody, vlon + latOffset, vlat - degreeOffset);
+						//e[7] = SCANUtil.getElevation(v.mainBody, vlon - latOffset, vlat + degreeOffset);
+						//e[8] = SCANUtil.getElevation(v.mainBody, vlon - latOffset, vlat - degreeOffset);
 
-						/* Calculate rise for each point on the grid
-						 * The distance is 5m for adjacent points and 7.071m for the points on the corners
-						 * Rise is converted to slope; i.e. a 5m elevation change over a 5m distance is a rise of 1
-						 * Converted to slope using the inverse tangent this gives a slope of 45°
-						 * */
-						for (int i = 1; i <= 4; i++)
-						{
-							s[i - 1] = Math.Atan((Math.Abs(e[i] - e[0])) / 5) * Mathf.Rad2Deg;
-						}
-						for (int i = 5; i <= 8; i++)
-						{
-							s[i - 1] = Math.Atan((Math.Abs(e[i] - e[0])) / 7.071) * Mathf.Rad2Deg;
-						}
+						///* Calculate rise for each point on the grid
+						// * The distance is 5m for adjacent points and 7.071m for the points on the corners
+						// * Rise is converted to slope; i.e. a 5m elevation change over a 5m distance is a rise of 1
+						// * Converted to slope using the inverse tangent this gives a slope of 45°
+						// * */
+						//for (int i = 1; i <= 4; i++)
+						//{
+						//	s[i - 1] = Math.Atan((Math.Abs(e[i] - e[0])) / 5) * Mathf.Rad2Deg;
+						//}
+						//for (int i = 5; i <= 8; i++)
+						//{
+						//	s[i - 1] = Math.Atan((Math.Abs(e[i] - e[0])) / 7.071) * Mathf.Rad2Deg;
+						//}
 
-						slopeAVG = s.Sum() / 8;
+						//slopeAVG = s.Sum() / 8;
 
 					}
 
 					GUILayout.Label(string.Format("Slope: {0:F2}°", slopeAVG), SCANskins.SCAN_insColorLabel);
 					fillS(-10);
 				}
+			}
+		}
+
+		//Display resource abundace info
+		private void resourceInfo(int id)
+		{
+			if (SCANcontroller.controller.needsNarrowBand)
+			{
+				bool tooHigh = false;
+				bool scanner = false;
+
+				foreach (SCANresourceDisplay s in resourceScanners)
+				{
+					if (s == null)
+						continue;
+
+					if (s.ResourceName != resources[currentResource].Name)
+						continue;
+
+					if (ResourceUtilities.GetAltitude(v) > s.MaxAbundanceAltitude && !v.Landed)
+					{
+						tooHigh = true;
+						continue;
+					}
+
+					scanner = true;
+					tooHigh = false;
+					break;
+				}
+
+				if (tooHigh)
+				{
+					GUILayout.Label(string.Format("{0}: Too High", resources[currentResource].Name), SCANskins.SCAN_insColorLabel);
+					fillS(-10);
+				}
+				else if (!scanner)
+				{
+					GUILayout.Label(string.Format("{0}: No Scanner", resources[currentResource].Name), SCANskins.SCAN_insColorLabel);
+					fillS(-10);
+				}
+				else
+				{
+					resourceLabel(resources[currentResource]);
+				}
+			}
+			else
+			{
+				resourceLabel(resources[currentResource]);
+			}
+
+			if (resources.Count > 1)
+			{
+				Rect r = GUILayoutUtility.GetLastRect();
+
+				r.x = 8;
+				r.y -= 30;
+				r.width = 18;
+				r.height = 28;
+
+				if (GUI.Button(r, "<"))
+				{
+					currentResource -= 1;
+					if (currentResource < 0)
+						currentResource = resources.Count - 1;
+				}
+
+				r.x = WindowRect.width - 24;
+
+				if (GUI.Button(r, ">"))
+				{
+					currentResource += 1;
+					if (currentResource >= resources.Count)
+						currentResource = 0;
+				}
+			}
+		}
+
+		private void resourceLabel(SCANresourceGlobal r)
+		{
+			if ((sensors & r.SType) != SCANtype.Nothing)
+			{
+				GUILayout.Label(string.Format("{0}: {1:P2}", r.Name, SCANUtil.ResourceOverlay(vlat, vlon, r.Name, v.mainBody, SCANcontroller.controller.resourceBiomeLock)), SCANskins.SCAN_insColorLabel);
+				fillS(-10);
+			}
+			else if ((sensors & SCANtype.FuzzyResources) != SCANtype.Nothing)
+			{
+				GUILayout.Label(string.Format("{0}: {1:P0}", r.Name, SCANUtil.ResourceOverlay(vlat, vlon, r.Name, v.mainBody, SCANcontroller.controller.resourceBiomeLock)), SCANskins.SCAN_insColorLabel);
+				fillS(-10);
+			}
+			else
+			{
+				GUILayout.Label(string.Format("{0}: No Data", r.Name), SCANskins.SCAN_insColorLabel);
+				fillS(-10);
 			}
 		}
 
@@ -355,6 +476,30 @@ namespace SCANsat.SCAN_UI
 				SCANcontroller.controller.addToBodyData(VC.to, data);
 			}
 			planetConstants(VC.to);
+		}
+
+		private void vesselChange(Vessel V)
+		{
+			resetResourceList();
+		}
+
+		public void resetResourceList()
+		{
+			resourceScanners = new List<SCANresourceDisplay>();
+
+			if (v == null)
+				return;
+
+			foreach (SCANresourceDisplay s in v.FindPartModulesImplementing<SCANresourceDisplay>())
+			{
+				if (s == null)
+					continue;
+
+				if (resourceScanners.Contains(s))
+					continue;
+
+				resourceScanners.Add(s);
+			}
 		}
 
 	}

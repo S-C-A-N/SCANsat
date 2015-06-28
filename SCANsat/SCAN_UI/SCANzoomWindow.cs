@@ -14,10 +14,12 @@
 #endregion
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using SCANsat.SCAN_Platform;
 using SCANsat;
 using SCANsat.SCAN_UI.UI_Framework;
+using SCANsat.SCAN_PartModules;
 using SCANsat.SCAN_Data;
 using SCANsat.SCAN_Map;
 using palette = SCANsat.SCAN_UI.UI_Framework.SCANpalette;
@@ -27,19 +29,30 @@ namespace SCANsat.SCAN_UI
 {
 	class SCANzoomWindow : SCAN_MBW
 	{
-		private SCANmap spotmap;
+		protected SCANmap spotmap;
 		private SCANmap bigmap;
-		private CelestialBody b;
-		private SCANdata data;
-		private Vessel v;
-		private bool showOrbit, showAnomaly, showWaypoints, showInfo, controlLock;
-		private bool narrowBand;
+		protected CelestialBody b;
+		protected SCANdata data;
+		protected Vessel v;
+		protected SCANresourceGlobal resource;
+		protected bool showOrbit, showAnomaly, showWaypoints;
+		private bool narrowBand, showInfo, controlLock;
+		protected float minZoom = 2;
+		protected float maxZoom = 1000;
 		private Vector2 dragStart;
 		private Vector2d mjTarget = new Vector2d();
 		private float resizeW, resizeH;
 		private const string lockID = "SCANzoom_LOCK";
 		internal readonly static Rect defaultRect = new Rect(50f, 50f, 340f, 240f);
 		private static Rect sessionRect = defaultRect;
+
+		protected bool dropDown;
+		protected Rect ddRect;
+		private Vector2 scrollR;
+		protected List<SCANresourceGlobal> loadedResources = new List<SCANresourceGlobal>();
+		protected bool resourceOverlay;
+
+		protected bool highDetail;
 
 		protected override void Awake()
 		{
@@ -63,10 +76,11 @@ namespace SCANsat.SCAN_UI
 			Startup();
 		}
 
-		private void Startup()
+		protected virtual void Startup()
 		{
 			//Initialize the map object
 			Visible = false;
+
 			if (HighLogic.LoadedSceneIsFlight)
 			{
 				v = SCANcontroller.controller.BigMap.V;
@@ -79,6 +93,7 @@ namespace SCANsat.SCAN_UI
 				b = SCANcontroller.controller.kscMap.Body;
 				data = SCANcontroller.controller.kscMap.Data;
 			}
+
 			if (spotmap == null)
 			{
 				spotmap = new SCANmap(b, false, true);
@@ -87,6 +102,12 @@ namespace SCANsat.SCAN_UI
 
 			showOrbit = SCANcontroller.controller.map_orbit;
 			showAnomaly = SCANcontroller.controller.map_markers;
+			resourceOverlay = SCANcontroller.controller.map_ResourceOverlay;
+
+			if (SCANconfigLoader.GlobalResource)
+			{
+				loadedResources = SCANcontroller.setLoadedResourceList();
+			}
 
 			if (HighLogic.LoadedScene == GameScenes.SPACECENTER)
 				showWaypoints = false;
@@ -109,10 +130,13 @@ namespace SCANsat.SCAN_UI
 			controlLock = false;
 		}
 
-		public void setMapCenter(double lat, double lon, SCANmap big)
+		public virtual void setMapCenter(double lat, double lon, bool centering, SCANmap big = null, SCANhiDefCamera camera = null)
 		{
+			highDetail = centering;
 			Visible = true;
 			bigmap = big;
+
+			resource = bigmap.Resource;
 
 			SCANcontroller.controller.TargetSelecting = false;
 			SCANcontroller.controller.TargetSelectingActive = false;
@@ -136,26 +160,72 @@ namespace SCANsat.SCAN_UI
 
 			if (SCANconfigLoader.GlobalResource && narrowBand)
 			{
-				spotmap.Resource = bigmap.Resource;
+				resource = bigmap.Resource;
+				spotmap.Resource = resource;
 				spotmap.Resource.CurrentBodyConfig(b.name);
 			}
+	
+			if (SCANcontroller.controller.needsNarrowBand && resourceOverlay)
+				checkForScanners();
 
 			spotmap.MapScale = 10;
 
 			spotmap.centerAround(lon, lat);
-			if (SCANcontroller.controller.needsNarrowBand && SCANcontroller.controller.map_ResourceOverlay)
-				checkForScanners();
-			spotmap.resetMap(bigmap.MType, false, narrowBand);
+
+			spotmap.resetMap(bigmap.MType, false, resourceOverlay, narrowBand);
 		}
 
-		private void resetMap()
+		protected virtual void resetMap(bool checkScanner = false, double lon = 0, double lat = 0, bool withCenter = false)
+		{
+			if (withCenter)
+				spotmap.centerAround(lon, lat);
+			else
+				spotmap.centerAround(spotmap.CenteredLong, spotmap.CenteredLat);
+
+			SCANcontroller.controller.TargetSelecting = false;
+			SCANcontroller.controller.TargetSelectingActive = false;
+
+			if (checkScanner && SCANcontroller.controller.needsNarrowBand && resourceOverlay)
+				checkForScanners();
+
+			spotmap.resetMap(resourceOverlay, narrowBand || !checkScanner);
+		}
+
+		protected virtual void resyncMap()
 		{
 			SCANcontroller.controller.TargetSelecting = false;
 			SCANcontroller.controller.TargetSelectingActive = false;
-			spotmap.centerAround(spotmap.CenteredLong, spotmap.CenteredLat);
-			if (SCANcontroller.controller.needsNarrowBand && SCANcontroller.controller.map_ResourceOverlay)
+
+			if (bigmap.Projection == MapProjection.Polar)
+				spotmap.setProjection(MapProjection.Polar);
+			else
+				spotmap.setProjection(MapProjection.Rectangular);
+
+			if (bigmap.Body != b)
+			{
+				SCANdata dat = SCANUtil.getData(bigmap.Body);
+				if (dat == null)
+					dat = new SCANdata(bigmap.Body);
+
+				data = dat;
+				b = data.Body;
+
+				spotmap.setBody(b);
+			}
+
+			if (SCANconfigLoader.GlobalResource && narrowBand)
+			{
+				resource = bigmap.Resource;
+				spotmap.Resource = resource;
+				spotmap.Resource.CurrentBodyConfig(b.name);
+			}
+
+			if (SCANcontroller.controller.needsNarrowBand && resourceOverlay)
 				checkForScanners();
-			spotmap.resetMap(narrowBand);
+
+			spotmap.centerAround(spotmap.CenteredLong, spotmap.CenteredLat);
+
+			spotmap.resetMap(bigmap.MType, false, resourceOverlay, narrowBand);
 		}
 
 		public SCANmap SpotMap
@@ -169,6 +239,12 @@ namespace SCANsat.SCAN_UI
 				d = 180 - d;
 
 			return d;
+		}
+
+		public virtual void closeMap()
+		{
+			removeControlLocks();
+			Visible = false;
 		}
 
 		private void checkForScanners()
@@ -224,22 +300,22 @@ namespace SCANsat.SCAN_UI
 							if (!float.TryParse(alt, out f))
 								continue;
 
-							if (f < 10000)
+							if (f < vessel.altitude)
 								continue;
 						}
 
 						if (moduleNode.GetValue("ScannerType") != "0")
 							continue;
 
-						if (moduleNode.GetValue("ResourceName") != bigmap.Resource.Name)
+						if (moduleNode.GetValue("ResourceName") != resource.Name)
 							continue;
 
-						if (spotmap.Resource != bigmap.Resource)
+						if (spotmap.Resource != resource)
 						{
-							spotmap.Resource = bigmap.Resource;
+							spotmap.Resource = resource;
 							spotmap.Resource.CurrentBodyConfig(b.name);
-							if (SCANcontroller.controller.map_ResourceOverlay)
-								spotmap.resetMap(true);
+							if (resourceOverlay)
+								spotmap.resetMap(resourceOverlay, true);
 						}
 
 						if (spotmap.Resource != null)
@@ -306,10 +382,15 @@ namespace SCANsat.SCAN_UI
 					if ((int)resizeH % 2 != 0)
 						resizeH += 1;
 
+					if ((int)resizeW % 4 != 0)
+						resizeW += 2;
+					if ((int)resizeH % 4 != 0)
+						resizeH += 2;
+
 					spotmap.setSize((int)resizeW, (int)resizeH);
 					spotmap.MapScale = scale;
-					spotmap.centerAround(spotmap.CenteredLong, spotmap.CenteredLat);
-					spotmap.resetMap(spotmap.MType, false);
+
+					resetMap(true);
 				}
 				else
 				{
@@ -371,11 +452,14 @@ namespace SCANsat.SCAN_UI
 
 			growS();
 				topBar(id);
+				fillS(28);
 				drawMap(id);
 				mouseOver(id);
 			stopS();
 
 			mapLabels(id);
+
+			drawDropDown(id);
 		}
 
 		protected override void DrawWindowPost(int id)
@@ -388,6 +472,9 @@ namespace SCANsat.SCAN_UI
 				SCANcontroller.controller.TargetSelectingActive = false;
 				data.removeTargetWaypoint();
 			}
+
+			if (dropDown && Event.current.type == EventType.mouseUp && !ddRect.Contains(Event.current.mousePosition))
+				dropDown = false;
 		}
 
 		//Draw version label in upper left corner
@@ -415,64 +502,64 @@ namespace SCANsat.SCAN_UI
 			r.y += 1;
 			if (GUI.Button(r, SCANcontroller.controller.closeBox, SCANskins.SCAN_closeButton))
 			{
-				removeControlLocks();
-				Visible = false;
+				closeMap();
 			}
 		}
 
 		private void topBar(int id)
 		{
-			growE();
-			if (HighLogic.LoadedScene == GameScenes.SPACECENTER)
-			{
-				GUILayout.Label("", GUILayout.Width(70));
-			}
-			else
+			Rect r = new Rect();
+
+			if (HighLogic.LoadedScene != GameScenes.SPACECENTER)
 			{
 				if (v != null)
 				{
-					showOrbit = GUILayout.Toggle(showOrbit, textWithTT("", "Toggle Orbit"));
+					r = new Rect(6, 20, 16, 16);
 
-					Rect d = GUILayoutUtility.GetLastRect();
-					d.x += 30;
-					d.y += 2;
-					d.width = 40;
-					d.height = 20;
+					showOrbit = GUI.Toggle(r, showOrbit, textWithTT("", "Toggle Orbit"), SCANskins.SCAN_settingsToggle);
 
-					if (GUI.Button(d, iconWithTT(SCANskins.SCAN_OrbitIcon, "Toggle Orbit"), SCANskins.SCAN_buttonBorderless))
+					r.x += 16;
+					r.width = 40;
+					r.height = 20;
+
+					if (GUI.Button(r, iconWithTT(SCANskins.SCAN_OrbitIcon, "Toggle Orbit"), SCANskins.SCAN_buttonBorderless))
 					{
 						showOrbit = !showOrbit;
 					}
 				}
-				else
-					GUILayout.Label("", GUILayout.Width(10));
+
+				r = new Rect(78, 20, 24, 24);
 
 				if (SCANcontroller.controller.mechJebTargetSelection)
 				{
 					if (SCANcontroller.controller.MechJebLoaded && SCANcontroller.controller.LandingTargetBody == b)
 					{
-						fillS(50);
-						if (GUILayout.Button(textWithTT("", "Set MechJeb Target"), SCANskins.SCAN_buttonBorderless, GUILayout.Width(24), GUILayout.Height(24)))
+						if (GUI.Button(r, textWithTT("", "Set MechJeb Target"), SCANskins.SCAN_buttonBorderless))
 						{
 							SCANcontroller.controller.TargetSelecting = !SCANcontroller.controller.TargetSelecting;
 						}
-						Rect r = GUILayoutUtility.GetLastRect();
+
+						r.x += 1;
+						r.y += 1;
+						r.width = r.height = 22;
+
 						Color old = GUI.color;
 						GUI.color = palette.red;
 						GUI.DrawTexture(r, SCANskins.SCAN_MechJebIcon);
 						GUI.color = old;
 					}
-					else
-						GUILayout.Label("", GUILayout.Width(70));
 				}
 				else
 				{
-					fillS(50);
-					if (GUILayout.Button(textWithTT("", "Set Landing Target"), SCANskins.SCAN_buttonBorderless, GUILayout.Width(24), GUILayout.Height(24)))
+					if (GUI.Button(r, textWithTT("", "Set Landing Target"), SCANskins.SCAN_buttonBorderless))
 					{
 						SCANcontroller.controller.TargetSelecting = !SCANcontroller.controller.TargetSelecting;
 					}
-					Rect r = GUILayoutUtility.GetLastRect();
+
+					r.x += 1;
+					r.y += 1;
+					r.width = r.height = 22;
+
 					Color old = GUI.color;
 					GUI.color = palette.xkcd_PukeGreen;
 					GUI.DrawTexture(r, SCANskins.SCAN_TargetIcon);
@@ -480,99 +567,76 @@ namespace SCANsat.SCAN_UI
 				}
 			}
 
-			fillS();
+			r = new Rect(WindowRect.width / 2 - 58, 20, 26, 26);
 
-			if (GUILayout.Button(iconWithTT(SCANskins.SCAN_ZoomOutIcon, "Zoom Out"), SCANskins.SCAN_buttonBorderless, GUILayout.Width(26), GUILayout.Height(26)))
+			if (GUI.Button(r, iconWithTT(SCANskins.SCAN_ZoomOutIcon, "Zoom Out"), SCANskins.SCAN_buttonBorderless))
 			{
 				spotmap.MapScale = spotmap.MapScale / 1.25f;
-				if (spotmap.MapScale < 2)
-					spotmap.MapScale = 2;
+				if (spotmap.MapScale < minZoom)
+					spotmap.MapScale = minZoom;
 				resetMap();
 			}
 
-			if (GUILayout.Button(textWithTT(spotmap.MapScale.ToString("N1") + " X", "Sync To Big Map"), SCANskins.SCAN_buttonBorderless, GUILayout.Width(50), GUILayout.Height(24)))
+			r.x += 30;
+			r.width = 50;
+
+			if (GUI.Button(r, textWithTT(spotmap.MapScale.ToString("N1") + " X", "Sync To Big Map"), SCANskins.SCAN_buttonBorderless))
 			{
-				SCANcontroller.controller.TargetSelecting = false;
-				SCANcontroller.controller.TargetSelectingActive = false;
-
-				if (bigmap.Projection == MapProjection.Polar)
-					spotmap.setProjection(MapProjection.Polar);
-				else
-					spotmap.setProjection(MapProjection.Rectangular);
-
-				if (bigmap.Body != b)
-				{
-					SCANdata dat = SCANUtil.getData(bigmap.Body);
-					if (dat == null)
-						dat = new SCANdata(bigmap.Body);
-
-					data = dat;
-					b = data.Body;
-
-					spotmap.setBody(b);
-				}
-
-				if (SCANconfigLoader.GlobalResource && narrowBand)
-				{
-					spotmap.Resource = bigmap.Resource;
-					spotmap.Resource.CurrentBodyConfig(b.name);
-				}
-
-				spotmap.centerAround(spotmap.CenteredLong, spotmap.CenteredLat);
-				if (SCANcontroller.controller.needsNarrowBand && SCANcontroller.controller.map_ResourceOverlay)
-					checkForScanners();
-				spotmap.resetMap(bigmap.MType, false, narrowBand);
+				resyncMap();
 			}
 
-			if (GUILayout.Button(iconWithTT(SCANskins.SCAN_ZoomInIcon, "Zoom In"), SCANskins.SCAN_buttonBorderless, GUILayout.Width(26), GUILayout.Height(26)))
+			r.x += 54;
+			r.width = 26;
+
+			if (GUI.Button(r, iconWithTT(SCANskins.SCAN_ZoomInIcon, "Zoom In"), SCANskins.SCAN_buttonBorderless))
 			{
 				spotmap.MapScale = spotmap.MapScale * 1.25f;
+				if (spotmap.MapScale > maxZoom)
+					spotmap.MapScale = maxZoom;
 				resetMap();
 			}
 
-			fillS();
+			if (SCANconfigLoader.GlobalResource)
+			{
+				r = new Rect(WindowRect.width - 100, 20, 24, 24);
+
+				if (GUI.Button(r, iconWithTT(SCANskins.SCAN_ResourceIcon, "Resources"), SCANskins.SCAN_buttonBorderless))
+				{
+					dropDown = !dropDown;
+				}
+			}
 
 			if (HighLogic.LoadedScene != GameScenes.SPACECENTER)
 			{
-				showWaypoints = GUILayout.Toggle(showWaypoints, textWithTT("", "Toggle Waypoints"));
+				r = new Rect(WindowRect.width - 68, 20, 18, 18);
 
-				Rect w = GUILayoutUtility.GetLastRect();
-				w.x += 28;
-				w.y += 2;
-				w.width = 20;
-				w.height = 20;
+				showWaypoints = GUI.Toggle(r, showWaypoints, textWithTT("", "Toggle Waypoints"), SCANskins.SCAN_settingsToggle);
 
-				if (GUI.Button(w, iconWithTT(SCANskins.SCAN_WaypointIcon, "Toggle Waypoints"), SCANskins.SCAN_buttonBorderless))
+				r.x += 13;
+				r.width = r.height = 20;
+
+				if (GUI.Button(r, iconWithTT(SCANskins.SCAN_WaypointIcon, "Toggle Waypoints"), SCANskins.SCAN_buttonBorderless))
 				{
 					showWaypoints = !showWaypoints;
 				}
-
-				fillS(16);
 			}
-			else
-				GUILayout.Label("", GUILayout.Width(40));
 
-			showAnomaly = GUILayout.Toggle(showAnomaly, textWithTT("", "Toggle Anomalies"));
+			r = new Rect(WindowRect.width - 35, 20, 18, 18);
 
-			Rect a = GUILayoutUtility.GetLastRect();
-			a.x += 26;
-			a.y += 2;
-			a.width = 20;
-			a.height = 20;
+			showAnomaly = GUI.Toggle(r, showAnomaly, textWithTT("", "Toggle Anomalies"), SCANskins.SCAN_settingsToggle);
 
-			if (GUI.Button(a, textWithTT(SCANcontroller.controller.anomalyMarker, "Toggle Anomalies"), SCANskins.SCAN_buttonBorderless))
+			r.x += 13;
+			r.width = r.height = 20;
+
+			if (GUI.Button(r, textWithTT(SCANcontroller.controller.anomalyMarker, "Toggle Anomalies"), SCANskins.SCAN_buttonBorderless))
 			{
 				showAnomaly = !showAnomaly;
 			}
-
-			fillS(16);
-
-			stopE();
 		}
 
 		private void drawMap(int id)
 		{
-			MapTexture = spotmap.getPartialMap();
+			MapTexture = getMap();
 
 			//A blank label used as a template for the actual map texture
 			if (IsResizing)
@@ -611,7 +675,11 @@ namespace SCANsat.SCAN_UI
 			{
 				GUI.DrawTexture(TextureRect, MapTexture);
 			}
+		}
 
+		protected virtual Texture2D getMap()
+		{
+			return spotmap.getPartialMap();
 		}
 
 		private void mouseOver(int id)
@@ -664,7 +732,7 @@ namespace SCANsat.SCAN_UI
 				SCANcontroller.controller.TargetSelectingActive = false;
 
 			//Handles mouse click while inside map
-			if (Event.current.isMouse)
+			if (!dropDown && Event.current.isMouse)
 			{
 				if (Event.current.type == EventType.MouseUp)
 				{
@@ -683,8 +751,7 @@ namespace SCANsat.SCAN_UI
 					{
 						if (in_map)
 						{
-							spotmap.centerAround(mlon, mlat);
-							resetMap();
+							resetMap(true, mlon, mlat, highDetail);
 						}
 					}
 					//Right click zoom in
@@ -693,8 +760,9 @@ namespace SCANsat.SCAN_UI
 						if (in_map)
 						{
 							spotmap.MapScale = spotmap.MapScale * 1.25f;
-							spotmap.centerAround(mlon, mlat);
-							resetMap();
+							if (spotmap.MapScale > maxZoom)
+								spotmap.MapScale = maxZoom;
+							resetMap(true, mlon, mlat, highDetail);
 						}
 					}
 					//Left click zoom out
@@ -705,8 +773,7 @@ namespace SCANsat.SCAN_UI
 							spotmap.MapScale = spotmap.MapScale / 1.25f;
 							if (spotmap.MapScale < 2)
 								spotmap.MapScale = 2;
-							spotmap.centerAround(mlon, mlat);
-							resetMap();
+							resetMap(true, mlon, mlat, highDetail);
 						}
 					}
 					Event.current.Use();
@@ -745,10 +812,54 @@ namespace SCANsat.SCAN_UI
 			//Draw the orbit overlays
 			if (showOrbit && v != null)
 			{
-				SCANuiUtil.drawOrbit(TextureRect, spotmap, v, spotmap.Body);
+				SCANuiUtil.drawOrbit(TextureRect, spotmap, v, spotmap.Body, true);
 			}
 
 			SCANuiUtil.drawMapLabels(TextureRect, v, spotmap, data, spotmap.Body, showAnomaly, showWaypoints);
+		}
+
+		private void drawDropDown(int id)
+		{
+			if (!dropDown)
+				return;
+
+			ddRect = new Rect(WindowRect.width - 190, 48, 160, 200);
+			GUI.Box(ddRect, "");
+			for (int i = -1; i < loadedResources.Count; i++)
+			{
+				scrollR = GUI.BeginScrollView(ddRect, scrollR, new Rect(0, 0, 140, 20 * (loadedResources.Count + 1)));
+
+				Rect r;
+
+				if (i == -1)
+				{
+					r = new Rect(2, 0, 130, 20);
+					if (GUI.Button(r, "Toggle Resources", resourceOverlay ? SCANskins.SCAN_dropDownButtonActive : SCANskins.SCAN_dropDownButton))
+					{
+						resourceOverlay = !resourceOverlay;
+
+						resetMap(true);
+						dropDown = false;
+					}
+				}
+				else
+				{
+					r = new Rect(2, 20 * (i + 1), 130, 20);
+					if (GUI.Button(r, loadedResources[i].Name, resource.Name == loadedResources[i].Name ? SCANskins.SCAN_dropDownButtonActive : SCANskins.SCAN_dropDownButton))
+					{
+						resourceOverlay = true;
+
+						resource = loadedResources[i];
+						spotmap.Resource = resource;
+						spotmap.Resource.CurrentBodyConfig(b.name);
+
+						resetMap(true);
+
+						dropDown = false;
+					}
+				}
+				GUI.EndScrollView();
+			}
 		}
 
 	}

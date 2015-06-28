@@ -32,6 +32,7 @@ namespace SCANsat.SCAN_UI
 		private static bool showVesselInfo = true;
 		internal static readonly Rect defaultRect = new Rect(10, 55, 380, 230);
 		private static Rect sessionRect = defaultRect;
+		private bool flash;
 
 		protected override void Awake()
 		{
@@ -72,7 +73,6 @@ namespace SCANsat.SCAN_UI
 				SCANcontroller.controller.addToBodyData(v.mainBody, data);
 			}
 			sensors = SCANcontroller.controller.activeSensorsOnVessel(v.id);
-			data.updateImages(sensors);
 		}
 
 		protected override void DrawWindow(int id)
@@ -81,7 +81,6 @@ namespace SCANsat.SCAN_UI
 			topMenu(id);
 			growS();
 				mainMap(id);				/* Draws the main map texture */
-				fillS(-6);
 				growE();
 					scannerInfo(id);		/* Draws the scanner indicators */
 					windowButtons(id);		/* Draw the buttons for other SCANsat windows */
@@ -129,8 +128,16 @@ namespace SCANsat.SCAN_UI
 		//Draw the map texture
 		private void mainMap(int id)
 		{
-			GUILayout.Label(data.Map);
-			mapRect = GUILayoutUtility.GetLastRect();
+			mapRect = new Rect(10, 20, 360, 180);
+			GUI.DrawTexture(mapRect, data.drawPartialMap(sensors));
+
+			if (data.Building || data.ExternalBuilding)
+			{
+				flash = (int)(Time.realtimeSinceStartup % 2) == 0;
+				SCANuiUtil.drawLabel(new Rect(mapRect.x + 80, mapRect.y + 50, 200, 60), "Building Database...", SCANskins.SCAN_insColorLabel, true, SCANskins.SCAN_insColorLabelShadow, flash, SCANskins.SCAN_insWhiteLabel);
+			}
+
+			GUILayout.Space(184);
 		}
 
 		//Draw the active scanner display

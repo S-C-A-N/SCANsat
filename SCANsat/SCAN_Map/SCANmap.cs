@@ -93,6 +93,7 @@ namespace SCANsat.SCAN_Map
 		public Texture2D Map
 		{
 			get { return map; }
+			internal set { map = value; }
 		}
 
 		public CelestialBody Body
@@ -106,6 +107,11 @@ namespace SCANsat.SCAN_Map
 			internal set { resource = value; }
 		}
 
+		public bool ResourceActive
+		{
+			get { return resourceActive; }
+		}
+
 		public SCANmapLegend MapLegend
 		{
 			get { return mapLegend; }
@@ -115,6 +121,11 @@ namespace SCANsat.SCAN_Map
 		public MapProjection Projection
 		{
 			get { return projection; }
+		}
+
+		public bool Zoom
+		{
+			get { return zoom; }
 		}
 
 		#endregion
@@ -288,6 +299,7 @@ namespace SCANsat.SCAN_Map
 		private double mapscale, lon_offset, lat_offset;
 		private int mapwidth, mapheight;
 		private Color[] pix;
+		private bool resourceActive;
 		private float[,] resourceCache;
 		private int resourceInterpolation;
 		private int resourceMapWidth;
@@ -351,7 +363,7 @@ namespace SCANsat.SCAN_Map
 			/* big map caching */
 			big_heightmap = new float[mapwidth, mapheight];
 			map = null;
-			resetMap();
+			resetMap(resourceActive);
 		}
 
 		internal void centerAround(double lon, double lat)
@@ -461,6 +473,7 @@ namespace SCANsat.SCAN_Map
 
 			if (SCANconfigLoader.GlobalResource)
 			{
+				resourceActive = SCANcontroller.controller.map_ResourceOverlay;
 				resource = SCANcontroller.getResourceNode(SCANcontroller.controller.resourceSelection);
 				if (resource == null)
 					resource = SCANcontroller.GetFirstResource;
@@ -475,9 +488,10 @@ namespace SCANsat.SCAN_Map
 			return mapstep >= map.height;
 		}
 
-		public void resetMap(bool setRes = true)
+		public void resetMap(bool resourceOn, bool setRes = true)
 		{
 			mapstep = -2;
+			resourceActive = resourceOn;
 			if (SCANconfigLoader.GlobalResource && setRes)
 			{ //Make sure that a resource is initialized if necessary
 				if (resource == null && body != null)
@@ -491,11 +505,11 @@ namespace SCANsat.SCAN_Map
 			}
 		}
 
-		public void resetMap(mapType mode, bool Cache, bool setRes = true)
+		public void resetMap(mapType mode, bool Cache, bool resourceOn, bool setRes = true)
 		{
 			mType = mode;
 			cache = Cache;
-			resetMap(setRes);
+			resetMap(resourceOn, setRes);
 		}
 
 		public void resetResourceMap()
@@ -521,7 +535,7 @@ namespace SCANsat.SCAN_Map
 				case mapType.Slope: mode = "slope"; break;
 				case mapType.Biome: mode = "biome"; break;
 			}
-			if (SCANcontroller.controller.map_ResourceOverlay && SCANconfigLoader.GlobalResource && !string.IsNullOrEmpty(SCANcontroller.controller.resourceSelection))
+			if (resourceActive && SCANconfigLoader.GlobalResource && !string.IsNullOrEmpty(SCANcontroller.controller.resourceSelection))
 				mode += "-" + SCANcontroller.controller.resourceSelection;
 			if (SCANcontroller.controller.colours == 1)
 				mode += "-grey";
@@ -570,7 +584,7 @@ namespace SCANsat.SCAN_Map
 					palette.redline[i] = palette.red;
 			}
 
-			resourceOn = SCANcontroller.controller.map_ResourceOverlay && SCANconfigLoader.GlobalResource && resource != null;
+			resourceOn = resourceActive && SCANconfigLoader.GlobalResource && resource != null;
 
 			if (mapstep <= -2)
 			{
@@ -581,7 +595,8 @@ namespace SCANsat.SCAN_Map
 				}
 				else
 				{
-					generateResourceCache();
+					SCANuiUtil.generateResourceCache(ref resourceCache, resourceMapHeight, resourceMapWidth, resourceInterpolation, resourceMapScale, this);
+					//generateResourceCache();
 					mapstep++;
 					return map;
 				}
@@ -640,9 +655,9 @@ namespace SCANsat.SCAN_Map
 				{
 					for (int i = resourceInterpolation / 2; i >= 1; i /= 2)
 					{
-						SCANuiUtil.interpolate(resourceCache, 0, resourceMapHeight, resourceMapWidth, i, i, i, r, randomEdges);
-						SCANuiUtil.interpolate(resourceCache, 0, resourceMapHeight, resourceMapWidth, 0, i, i, r, randomEdges);
-						SCANuiUtil.interpolate(resourceCache, 0, resourceMapHeight, resourceMapWidth, i, 0, i, r, randomEdges);
+						SCANuiUtil.interpolate(resourceCache, resourceMapHeight, resourceMapWidth, i, i, i, r, randomEdges, zoom);
+						SCANuiUtil.interpolate(resourceCache, resourceMapHeight, resourceMapWidth, 0, i, i, r, randomEdges, zoom);
+						SCANuiUtil.interpolate(resourceCache, resourceMapHeight, resourceMapWidth, i, 0, i, r, randomEdges, zoom);
 					}
 				}
 
@@ -864,41 +879,41 @@ namespace SCANsat.SCAN_Map
 			return elevation;
 		}
 
-		private void generateResourceCache()
-		{
-			for (int j = 0; j < resourceMapHeight; j += resourceInterpolation)
-			{
-				for (int i = 0; i < resourceMapWidth; i += resourceInterpolation)
-				{
-					Vector2d coords;
-					if (zoom && projection == MapProjection.Polar)
-					{
-						double rLon = (i * 1.0f / resourceMapScale) - 180f + lon_offset;
-						double rLat = (j * 1.0f / resourceMapScale) - 90f + lat_offset;
+		//private void generateResourceCache()
+		//{
+		//	for (int j = 0; j < resourceMapHeight; j += resourceInterpolation)
+		//	{
+		//		for (int i = 0; i < resourceMapWidth; i += resourceInterpolation)
+		//		{
+		//			Vector2d coords;
+		//			if (zoom && projection == MapProjection.Polar)
+		//			{
+		//				double rLon = (i * 1.0f / resourceMapScale) - 180f + lon_offset;
+		//				double rLat = (j * 1.0f / resourceMapScale) - 90f + lat_offset;
 
-						double la = rLat, lo = rLon;
-						rLat = unprojectLatitude(lo, la);
-						rLon = unprojectLongitude(lo, la);
+		//				double la = rLat, lo = rLon;
+		//				rLat = unprojectLatitude(lo, la);
+		//				rLon = unprojectLongitude(lo, la);
 
-						if (double.IsNaN(rLat) || double.IsNaN(rLon) || rLat < -90 || rLat > 90 || rLon < -180 || rLon > 180)
-						{
-							resourceCache[i, j] = 0;
-							continue;
-						}
+		//				if (double.IsNaN(rLat) || double.IsNaN(rLon) || rLat < -90 || rLat > 90 || rLon < -180 || rLon > 180)
+		//				{
+		//					resourceCache[i, j] = 0;
+		//					continue;
+		//				}
 
-						coords = new Vector2d(rLon, rLat);
-					}
-					else
-					{
-						double rLon = SCANUtil.fixLonShift((i * 1.0f / resourceMapScale) - 180f + lon_offset);
-						double rLat = (j * 1.0f / resourceMapScale) - 90f + lat_offset;
-						coords = SCANUtil.fixRetardCoordinates(new Vector2d(rLon, rLat));
-					}
+		//				coords = new Vector2d(rLon, rLat);
+		//			}
+		//			else
+		//			{
+		//				double rLon = SCANUtil.fixLonShift((i * 1.0f / resourceMapScale) - 180f + lon_offset);
+		//				double rLat = (j * 1.0f / resourceMapScale) - 90f + lat_offset;
+		//				coords = SCANUtil.fixRetardCoordinates(new Vector2d(rLon, rLat));
+		//			}
 
-					resourceCache[i, j] = SCANUtil.ResourceOverlay(coords.y, coords.x, resource.Name, body, SCANcontroller.controller.resourceBiomeLock) * 100f;
-				}
-			}
-		}
+		//			resourceCache[i, j] = SCANUtil.ResourceOverlay(coords.y, coords.x, resource.Name, body, SCANcontroller.controller.resourceBiomeLock) * 100f;
+		//		}
+		//	}
+		//}
 
 		private float getResoureCache(double Lon, double Lat)
 		{

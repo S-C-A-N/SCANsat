@@ -19,6 +19,7 @@ using UnityEngine;
 using SCANsat.SCAN_UI;
 using SCANsat.SCAN_UI.UI_Framework;
 using SCANsat.SCAN_Data;
+using SCANsat.SCAN_PartModules;
 using SCANsat.SCAN_Platform;
 using SCANsat.SCAN_Platform.Palettes;
 using SCANsat.SCAN_Platform.Palettes.ColorBrewer;
@@ -119,6 +120,18 @@ namespace SCANsat
 		public bool biomeBorder = true;
 		[KSPField(isPersistant = true)]
 		public bool disableStockResource = false;
+		[KSPField(isPersistant = true)]
+		public bool hiDetailZoomMap = false;
+		[KSPField(isPersistant = true)]
+		public bool planetaryOverlayTooltips = true;
+		[KSPField(isPersistant = true)]
+		public int overlayInterpolation = 8;
+		[KSPField(isPersistant = true)]
+		public int overlayMapHeight = 256;
+		[KSPField(isPersistant = true)]
+		public float overlayTransparency = 0;
+		[KSPField(isPersistant = true)]
+		public bool version14Patch = false;
 
 		/* Biome and slope colors can't be serialized properly as a KSP Field */
 		public Color lowBiomeColor = new Color(0, 0.46f, 0.02345098f, 1);
@@ -127,6 +140,13 @@ namespace SCANsat
 		public Color highSlopeColorOne = new Color(0.9764706f, 1, 0.4627451f, 1);
 		public Color lowSlopeColorTwo = new Color(0.9764706f, 1, 0.4627451f, 1);
 		public Color highSlopeColorTwo = new Color(0.94f, 0.2727843f, 0.007372549f, 1);
+
+		public Color32 lowBiomeColor32 = new Color(0, 0.46f, 0.02345098f, 1);
+		public Color32 highBiomeColor32 = new Color(0.7f, 0.2388235f, 0, 1);
+		public Color32 lowSlopeColorOne32 = new Color(0.004705883f, 0.6f, 0.3788235f, 1);
+		public Color32 highSlopeColorOne32 = new Color(0.9764706f, 1, 0.4627451f, 1);
+		public Color32 lowSlopeColorTwo32 = new Color(0.9764706f, 1, 0.4627451f, 1);
+		public Color32 highSlopeColorTwo32 = new Color(0.94f, 0.2727843f, 0.007372549f, 1);
 
 		/* Available resources for overlays; loaded from SCANsat configs; only loaded once */
 		private static Dictionary<string, SCANresourceGlobal> masterResourceNodes = new Dictionary<string,SCANresourceGlobal>();
@@ -161,6 +181,7 @@ namespace SCANsat
 		internal SCANcolorSelection colorManager;
 		internal SCANoverlayController resourceOverlay;
 		internal SCANresourceSettings resourceSettings;
+		internal SCANzoomHiDef hiDefMap;
 
 		/* App launcher object */
 		internal SCANappLauncher appLauncher;
@@ -177,6 +198,7 @@ namespace SCANsat
 		private CelestialBody body = null;
 		private bool bodyScanned = false;
 		private bool bodyCoverage = false;
+		private bool heightMapsBuilt = false;
 
 		#region Public Accessors
 
@@ -190,7 +212,7 @@ namespace SCANsat
 
 		public SCANdata getData(int index)
 		{
-			if (body_data.Count >= index)
+			if (body_data.Count > index)
 				return body_data.ElementAt(index).Value;
 			else
 				SCANUtil.SCANdebugLog("SCANdata dictionary index out of range; something went wrong here...");
@@ -499,7 +521,6 @@ namespace SCANsat
 			get { return landingTarget; }
 			set { landingTarget = value; }
 		}
-
 		#endregion
 
 		public override void OnLoad(ConfigNode node)
@@ -512,6 +533,13 @@ namespace SCANsat
 				highSlopeColorOne = ConfigNode.ParseColor(node.GetValue("highSlopeColorOne"));
 				lowSlopeColorTwo = ConfigNode.ParseColor(node.GetValue("lowSlopeColorTwo"));
 				highSlopeColorTwo = ConfigNode.ParseColor(node.GetValue("highSlopeColorTwo"));
+
+				lowBiomeColor32 = lowBiomeColor;
+				highBiomeColor32 = highBiomeColor;
+				lowSlopeColorOne32 = lowSlopeColorOne;
+				highSlopeColorOne32 = highSlopeColorOne;
+				lowSlopeColorTwo32 = lowSlopeColorTwo;
+				highSlopeColorTwo32 = highSlopeColorTwo;
 			}
 			catch (Exception e)
 			{
@@ -550,6 +578,29 @@ namespace SCANsat
 						if (!double.TryParse(node_sensor.GetValue("best_alt"), out best_alt))
 							best_alt = bestScanAlt;
 						registerSensor(id, (SCANtype)sensor, fov, min_alt, max_alt, best_alt);
+					}
+				}
+
+				if (!version14Patch)
+				{
+					version14Patch = true;
+
+					List<SCANvessel> removeList = new List<SCANvessel>();
+					foreach (SCANvessel v in knownVessels.Values)
+					{
+						var scanners = from pref in v.vessel.protoVessel.protoPartSnapshots
+									   where pref.modules.Any(a => a.moduleName == "ModuleResourceScanner")
+									   select pref;
+
+						if (scanners.Count() == 0)
+							continue;
+
+						removeList.Add(v);
+					}
+
+					foreach (SCANvessel v in removeList)
+					{
+						unregisterSensor(v.vessel, SCANtype.DefinedResources);
 					}
 				}
 			}
@@ -807,6 +858,11 @@ namespace SCANsat
 				scanFromAllVessels();
 			}
 
+			if (!heightMapsBuilt)
+			{
+				checkHeightMapStatus();
+			}
+
 			if (unDocked || docked)
 			{
 				if (timer < 30)
@@ -909,6 +965,34 @@ namespace SCANsat
 			}
 		}
 
+		private int dataStep, dataStart;
+
+		private void checkHeightMapStatus()
+		{
+			for (int i = 0; i < FlightGlobals.Bodies.Count; i++)
+			{
+				SCANdata data = getData(i);
+
+				if (data == null)
+					continue;
+
+				if (data.Built)
+					continue;
+
+				if (data.Building)
+					return;
+
+				data.ExternalBuilding = true;
+				data.generateHeightMap(ref dataStep, ref dataStart, 120);
+
+				return;
+			}
+
+			SCANUtil.SCANlog("All Height Maps Generated");
+
+			heightMapsBuilt = true;
+		}
+
 		private void OnDestroy()
 		{
 			GameEvents.onVesselSOIChanged.Remove(SOIChange);
@@ -931,6 +1015,8 @@ namespace SCANsat
 				Destroy(resourceSettings);
 			if (appLauncher != null)
 				Destroy(appLauncher);
+			if (hiDefMap != null)
+				Destroy(hiDefMap);
 		}
 
 		private void drawTarget()
@@ -1430,7 +1516,7 @@ namespace SCANsat
 					for (int y = -f; y <= f1; ++y)
 					{
 						clampLat = lat + y;
-						if (clampLat > 90) clampLat = 90;
+						if (clampLat > 89) clampLat = 89;
 						if (clampLat < -90) clampLat = -90;
 						SCANUtil.registerPass(clampLon, clampLat, data, sensor.sensor);
 					}
