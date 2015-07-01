@@ -332,23 +332,26 @@ namespace SCANsat.SCAN_PartModules
 			if (anim != null && anim[animationName] != null)
 			{
 				anim[animationName].speed = speed;
-				if (anim.IsPlaying(animationName))
+				if (!anim.IsPlaying(animationName))
 				{
-					if (anim[animationName].normalizedTime <= 0)
-					{
-						anim[animationName].normalizedTime = time;
-					}
-					else if (anim[animationName].normalizedTime >= 1 - float.Epsilon)
-					{
-						anim[animationName].normalizedTime = time;
-					}
-				}
-				else
-				{
-					anim[animationName].wrapMode = WrapMode.ClampForever;
+					anim[animationName].wrapMode = WrapMode.Clamp;
 					anim[animationName].normalizedTime = time;
 					anim.Play(animationName);
+					//if (anim[animationName].normalizedTime <= 0)
+					//{
+					//	anim[animationName].normalizedTime = time;
+					//}
+					//else if (anim[animationName].normalizedTime >= 1 - float.Epsilon)
+					//{
+					//	anim[animationName].normalizedTime = time;
+					//}
 				}
+				//else
+				//{
+				//	anim[animationName].wrapMode = WrapMode.Clamp;
+				//	anim[animationName].normalizedTime = time;
+				//	anim.Play(animationName);
+				//}
 			}
 		}
 
