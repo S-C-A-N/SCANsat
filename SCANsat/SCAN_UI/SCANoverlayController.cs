@@ -12,7 +12,7 @@ namespace SCANsat.SCAN_UI
 {
 	class SCANoverlayController : SCAN_MBW
 	{
-		internal readonly static Rect defaultRect = new Rect(Screen.width - 280, 200, 200, 100);
+		internal readonly static Rect defaultRect = new Rect(Screen.width - 280, 200, 160, 100);
 		private static Rect sessionRect = defaultRect;
 		private CelestialBody body;
 		private SCANdata data;
@@ -42,10 +42,10 @@ namespace SCANsat.SCAN_UI
 			WindowCaption = "S.C.A.N. Overlay";
 			WindowRect = sessionRect;
 			WindowStyle = SCANskins.SCAN_window;
-			WindowOptions = new GUILayoutOption[2] { GUILayout.Width(200), GUILayout.Height(100) };
+			WindowOptions = new GUILayoutOption[2] { GUILayout.Width(160), GUILayout.Height(100) };
 			Visible = false;
 			DragEnabled = true;
-			ClampToScreenOffset = new RectOffset(-140, -140, -200, -200);
+			ClampToScreenOffset = new RectOffset(-120, -120, -100, -100);
 
 			SCAN_SkinsLibrary.SetCurrent("SCAN_Unity");
 		}
@@ -278,22 +278,6 @@ namespace SCANsat.SCAN_UI
 
 			if (selection >= resources.Count)
 				return;
-
-			//growE();
-			//	GUILayout.Label("Coverage Transparency:", SCANskins.SCAN_labelSmallLeft);
-
-			//	if (GUILayout.Button("-", SCANskins.SCAN_buttonSmall, GUILayout.Width(18)))
-			//	{
-			//		SCANcontroller.controller.overlayTransparency = Mathf.Max(0f, SCANcontroller.controller.overlayTransparency - 0.1f);
-			//		refreshMap();
-			//	}
-			//	GUILayout.Label(SCANcontroller.controller.overlayTransparency.ToString("P0"), SCANskins.SCAN_labelSmall);
-			//	if (GUILayout.Button("+", SCANskins.SCAN_buttonSmall, GUILayout.Width(18)))
-			//	{
-			//		SCANcontroller.controller.overlayTransparency = Mathf.Min(1f, SCANcontroller.controller.overlayTransparency + 0.1f);
-			//		refreshMap();
-			//	}
-			//stopE();
 		}
 
 		private void resourceSettings(int id)
