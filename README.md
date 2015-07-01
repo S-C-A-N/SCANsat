@@ -233,7 +233,7 @@ With default resource scanning options enabled the SCANsat resource map will aut
 
 No further resource scanning is necessary while using stock scanning mode.
 
-#### [:top][top] 3b. SCANsat Scanning Mode
+#### [:top:][top] 3b. SCANsat Scanning Mode
 
 There are two levels of **SCANsat Scanning Mode**:
 * Disable **Instant Scanning** in the **Resource Settings Window**
