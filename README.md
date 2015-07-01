@@ -29,9 +29,9 @@
 * [2. Types of Scans][2]
   * [a. Native SCANsat][2a]
 * [3. Resource Scanning][3]
-  * [a. ][3a]
-  * [b. ][3b]
-  * [c. ][3c]
+  * [a. Stock Scanning Mode][3a]
+  * [b. SCANsat Scanning Mode][3b]
+  * [c. Resource Setting][3c]
 * [4. Basic Usage][4]
   * [a. FAQ: Finding a Good Altitude][4a]
   * [b. Mismatched Scanners][4b]
@@ -226,10 +226,30 @@ Anomaly | **Been There, Done That(tm)** | **BTDT**
 
 **SCANsat** will scan celestial bodies for resources using the new stock resource system.
 
+#### [:top:][top] 3a. Stock Scanning Mode
+
 With default resource scanning options enabled the SCANsat resource map will automatically update as soon as a **stock resource scan** is completed.
 > ![][resource-instant]
 
-Resource scans are initiated in the same way as any other scan. In this case they use the stock **Orbital Survey Scanner**.
+No further resource scanning is necessary while using stock scanning mode.
+
+#### [:top][top] 3b. SCANsat Scanning Mode
+
+There are two levels of **SCANsat Scanning Mode**:
+* Disable **Instant Scanning** in the **Resource Settings Window**
+  * This will prevent SCANsat maps from being updated based on stock scanning coverage
+  * All stock scanning parts will continue to work as normal
+  * SCANsat resource scanning essentially works alongside stock scanning in this mode
+* Disable **Stock Scanning** in the **Resource Settings Window**
+  * This will prevent all stock scanning functions
+  * All stock scanning modules will use replacement SCANsat modules
+  * These include:
+    * The planetary resource overlays (these are available in all scanning modes)
+    * The resource abundance readouts for the right-click menu
+	* The fixed-position resource map found on the Narrow-Band scanner
+  * This **does not** affect the stock biome scanning mechanic; resource abundance accuracy is still affected by biome scanning status, the same as with stock resource scanning
+
+Resource scans are initiated in the same way as any other scan. In this case they use the stock **M700 Orbital Survey Scanner**.
 > ![][resource-scanner]
 
 Resource scanning proceeds the same way as standard SCANsat scanning instruments do. The grey scale color option generally works best when viewing resource overlays.
@@ -237,6 +257,8 @@ Resource scanning proceeds the same way as standard SCANsat scanning instruments
 
 The resource system can be enabled through the **SCANsat** Big Map:
 > ![][resource-walkthrough]
+
+The **M700 Orbital Survey Scanner** provides a low-detail resource map for all available surface resources. For high detail maps a specific scanner is needed for each different resource. For stock Ore the **M4435 Narrow-Band Scanner** is used; high detail scanner modules are added to other parts for addon resources as needed.
 
 The examples below show the difference between high (top) and low (bottom) resolution resource scans
 > ![][resource-bigmap-hires-full-biome]
@@ -246,7 +268,7 @@ The examples below show the difference between high (top) and low (bottom) resol
 Zoom map resource overlays require that a vessel with a narrow-band scanner be present in orbit and at an inclination high enough to cover the area in the zoom map.
 > ![][resource-zoom-map-covered]
 
-If a vessel with a narrow-band scanner is not present, or its inclination is not high enough, the zoom map will not display the resource overlay.
+If a vessel with a narrow-band scanner is not present, or its inclination is not high enough, the zoom map will not display the resource overlay. The same restrictions apply to **overlay tooltips** and the **instrument window resource readout**.
 > ![][resource-zoom-map-uncovered]
 
 Resource overlays will work in IVA, too:
@@ -259,27 +281,31 @@ A number of options are available in the **Resource Settings Menu** for SCANsat 
 > ![][resource-settings]
 
 * **Instant Resource Scan**
-   * When this option is active all resources will be fully scanned for a given planet using the stock **Orbital Survey Scanner** instrument.
-   * When disabled the SCANsat resource overlays will need to be generated using the method described above.
+   * When this option is active all resources will be fully scanned for a given planet using the stock **Orbital Survey Scanner** instrument
+   * When disabled the SCANsat resource overlays will need to be generated using the method described above
+   * When **Disable Stock Scanning** is activated the **Instant Scan** option will automatically turn off
 * **Resource Biome Lock**
-   * With this option active biomes will need to be scanned from the surface to obtain accurate resource abundance reading on SCANsat maps.
-   * When disabled all resource abundance values will be fully accurate, with no need for ground surveys.
-* **Zoom Requires Narrow Band Scanner**
-   * With this active the zoom map will only display resource overlays when a suitable **Narrow-Band Scanner** is in orbit around the planet, and its orbit covers the region showed in the zoom map.
-   * When disabled the zoom map will display resource overlays regardless of **Narrow-Band Scanner** coverage.
+   * With this option active, biomes will need to be scanned from the surface to obtain accurate resource abundance reading on SCANsat maps
+   * When disabled all resource abundance values will be fully accurate, with no need for ground surveys
+* **Requires Narrow Band Scanner**
+   * With this active the zoom map will only display resource overlays when a suitable **Narrow-Band Scanner** is in orbit around the planet, and its orbit covers the region showed in the zoom map
+   * **Instruments Window** resource readout will require a narrow-band scanner on the current vessel within its maximum altitude limits
+   * **Planetary Overlay Tooltips** will check for any suitable vessel in orbit around the planet before showing resource abundance
+   * When disabled the zoom map, instruments window, and overlay tooltips will display resource values regardless of Narrow-Band scanner status
 * **Disable Stock Scanning** 
    * Disables the stock orbital survey
    * Replaces the resource concentration readout from scanners with SCANsat modules
    * Right-click menu resource concentration readout dependent on SCANsat scanning coverage
 * **Reset SCANsat Resource Coverage**
-   * This button will erase all resource scanning data for the current planet.
-   * Regular SCANsat data will not be affected.
-   * A confirmation window will appear upon clicking the button.
+   * This button will erase all resource scanning data for the current planet
+   * Regular SCANsat data will not be affected
+   * A confirmation window will appear upon clicking the button
 * **Reset Stock Resource Scanning**
    * Stock resource scanning data can be erased for each planet (does not affect resource biome scanning data)   
 * **SCAN Planet Overlay Quality Settings**
-   * Interpolation settings can be increased or decreased to increase the accuracy of overlays
-   * Overlay map size can be adjusted for higher quality, but slower maps
+   * **Interpolation** settings can be increased or decreased to increase the accuracy of overlays
+   * **Overlay Map Size** can be adjusted for higher quality, but slower maps
+   * **Coverage Transparency** adjusts the transparency of a grey overlay for areas that have been scanned but contain no resources, this makes it easier to track resource scanning progress
    
 ### [:top:][top] 4. Basic Usage
 ------------------------------------------
@@ -367,9 +393,11 @@ A separate window is used to control planetary overlay maps. These maps are draw
 
 #### [:top:][top] 6a. Terrain and Biome Overlays
 > ![][terrain-planet-overlay]
+
 SCANsat terrain maps can be displayed with the overlay window. These maps use the same height map data as the small SCANsat map and generate very quickly.
 
 > ![][terrain-planet-overlay-tooltip]
+
 Tooltips can be activated to show data for the location under the current mouse position while in map mode.
 
 SCANsat biome coverage can also be displayed using the overlay window.
@@ -409,9 +437,11 @@ Parts with the stock ModuleHiDefCamera (i.e. the Narrow-Band Scanner) have a spe
 * All available resources can be viewed using this map and selected using the **Resource Drop Down Menu**
 
 > ![][hidef-map-comp-1]
+
 The **Hi Def** map shows all standard SCANsat map overlays
 
 > ![][hidef-map-comp-2]
+
 The **Hi Def** map is limited to show only low quality terrain maps that are not dependant on SCANsat coverage
 
 #### [:top:][top] 7b. Target Selection
@@ -682,7 +712,7 @@ sneaky then they can of course be sneaky.
 [resource-walkthrough]: http://i.imgur.com/KS4FTh0.gif
 [resource-scanner]: http://i.imgur.com/mY0fFjr.gif
 [resource-bigmap]: http://i.imgur.com/JYKG6f5.gif
-[resource-settings]: http://i.imgur.com/TTKttD2.png
+[resource-settings]: http://i.imgur.com/qIMMfpJ.png
 [resource-zoom-map-covered]: http://i.imgur.com/7YuYMGW.png
 [resource-zoom-map-uncovered]: http://i.imgur.com/cJ9JtdW.png
 [resource-instant]: http://i.imgur.com/mfIMBEP.gif
@@ -734,9 +764,9 @@ sneaky then they can of course be sneaky.
 [2]: #top-2-types-of-scans
 [2a]: #top-2a-scansat-scans
 [3]: #top-3-resource-scanning
-[3a]: #top-3a-
-[3b]: #top-3b-
-[3c]: #top-3c-
+[3a]: #top-3a-stock-scanning-mode
+[3b]: #top-3b-scansat-scanning-mode
+[3c]: #top-3c-resource-setting
 [4]: #top-4-basic-usage
 [4a]: #top-4a-faq-finding-a-good-altitude
 [4b]: #top-4b-mismatched-scanners
