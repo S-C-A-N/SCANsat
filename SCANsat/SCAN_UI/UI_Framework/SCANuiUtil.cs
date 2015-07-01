@@ -1732,9 +1732,9 @@ namespace SCANsat.SCAN_UI.UI_Framework
 
 			for (int i = 0; i < width; i += stepScale)
 			{
-				double lon = (i * 1.0f / map.MapScale) - 180f + map.Lon_Offset;
 				for (int j = 0; j < height; j += stepScale)
 				{
+					double lon = (i * 1.0f / map.MapScale) - 180f + map.Lon_Offset;
 					double lat = (j * 1.0f / map.MapScale) - 90f + map.Lat_Offset;
 					double la = lat, lo = lon;
 					lat = map.unprojectLatitude(lo, la);
@@ -1774,9 +1774,9 @@ namespace SCANsat.SCAN_UI.UI_Framework
 
 				for (int i = 0; i < width; i++)
 				{
-					double lon = (i * 1.0f / map.MapScale) - 180f + map.Lon_Offset;
 					for (int j = 0; j < height; j++)
 					{
+						double lon = (i * 1.0f / map.MapScale) - 180f + map.Lon_Offset;
 						double lat = (j * 1.0f / map.MapScale) - 90f + map.Lat_Offset;
 						double la = lat, lo = lon;
 						lat = map.unprojectLatitude(lo, la);
@@ -1839,56 +1839,6 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			return (float)l / 100f + (float)rand.Next(100 - (l / 2)) / 100f;
 		}
 
-		//private static void interpolate(Color32[] c, float[,] v, int height, int x, int y, int step, SCANresourceGlobal r, float t, SCANdata d, System.Random rand)
-		//{
-		//	int width = height * 2;
-		//	float scale = width / 360f;
-		//	for (int j = y; j < height + y; j += 2 * step)
-		//	{
-		//		for (int i = x; i < width + x; i += 2 * step)
-		//		{
-		//			double lon = fixLon(i / scale);
-		//			double lat = (j / scale) - 90;
-
-		//			int xpos1 = i - step;
-		//			if (xpos1 < 0)
-		//				xpos1 += width;
-		//			int xpos2 = i + step;
-		//			if (xpos2 >= width)
-		//				xpos2 -= width;
-
-		//			int ypos1 = j - step;
-		//			if (ypos1 < 0)
-		//				ypos1 = 0;
-		//			int ypos2 = j + step;
-		//			if (ypos2 >= height)
-		//				ypos2 = height - 1;
-
-		//			float avgX = 0;
-		//			float avgY = 0;
-
-		//			float lerp = getLerp(rand, step * 2);
-
-		//			if (x == y)
-		//			{
-		//				avgX = Mathf.Lerp(v[xpos1, ypos1], v[xpos2, ypos2], lerp);
-		//				avgY = Mathf.Lerp(v[xpos1, ypos2], v[xpos2, ypos1], lerp);
-		//			}
-		//			else
-		//			{
-		//				avgX = Mathf.Lerp(v[xpos1, j], v[xpos2, j], lerp);
-		//				avgY = Mathf.Lerp(v[i, ypos2], v[i, ypos1], lerp);
-		//			}
-
-		//			float avgFinal = Mathf.Lerp(avgX, avgY, lerp);
-
-		//			v[i, j] = avgFinal;
-
-		//			c[j * width + i] = resourceToColor32(palette.Clear, r, v[i, j], d, lon, lat, t);
-		//		}
-		//	}
-		//}
-
 		internal static void interpolate(float[,] v, int height, int width, int x, int y, int step, System.Random r, bool softEdges, bool hardEdges = false)
 		{
 			for (int j = y; j < height + y; j += 2 * step)
@@ -1943,26 +1893,6 @@ namespace SCANsat.SCAN_UI.UI_Framework
 				}
 			}
 		}
-
-		//internal static void interpolate(float[,] v, int yStart, int width, int x, int step, System.Random r)
-		//{
-
-		//	for (int i = x; i < width + x; i += 2 * step)
-		//	{
-		//		int xpos1 = i - step;
-		//		if (xpos1 < 0)
-		//			xpos1 += width;
-		//		int xpos2 = i + step;
-		//		if (xpos2 >= width)
-		//			xpos2 -= width;
-
-		//		float lerp = getLerp(r, step * 2);
-
-		//		float avgX = Mathf.Lerp(v[xpos1, yStart], v[xpos2, yStart], lerp);
-
-		//		v[i, yStart] = avgX;
-		//	}
-		//}
 
 		/* Converts resource amount to pixel color */
 		internal static Color resourceToColor(Color BaseColor, SCANresourceGlobal Resource, float Abundance, SCANdata Data, double Lon, double Lat)
