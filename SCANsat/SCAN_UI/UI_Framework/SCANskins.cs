@@ -238,6 +238,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			sortBackground.Apply();
 			SCAN_dropDownButton.hover.background = sortBackground;
 			SCAN_dropDownButton.alignment = TextAnchor.MiddleLeft;
+			SCAN_dropDownButton.fontStyle = FontStyle.Bold;
 
 			SCAN_dropDownButtonActive = new GUIStyle(SCAN_dropDownButton);
 			SCAN_dropDownButtonActive.normal.textColor = palette.xkcd_PukeGreen;
