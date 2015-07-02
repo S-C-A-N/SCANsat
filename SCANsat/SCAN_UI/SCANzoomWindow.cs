@@ -771,8 +771,8 @@ namespace SCANsat.SCAN_UI
 						if (in_map)
 						{
 							spotmap.MapScale = spotmap.MapScale / 1.25f;
-							if (spotmap.MapScale < 2)
-								spotmap.MapScale = 2;
+							if (spotmap.MapScale < minZoom)
+								spotmap.MapScale = minZoom;
 							resetMap(true, mlon, mlat, highDetail);
 						}
 					}
