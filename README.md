@@ -745,10 +745,10 @@ sneaky then they can of course be sneaky.
 [color-resource]: http://i.imgur.com/9NR8gvP.gif
 [color-biome-stock]: http://i.imgur.com/T14sFzl.png
 
-[instruments-small]: http://i.imgur.com/sZ2MXiK.gif
+[instruments-small]: http://i.imgur.com/tpjveyn.gif
 [instruments-btdt]: http://i.imgur.com/tybbDap.gif
 
-[settings-window]: http://i.imgur.com/MYIfE05.png
+[settings-window]: http://i.imgur.com/OU0GzOu.png
 
 [tinypirate-video-screen]: http://img.youtube.com/vi/UY7eBuReSYU/0.jpg
 [tinypirate-video]: https://www.youtube.com/watch?v=UY7eBuReSYU
