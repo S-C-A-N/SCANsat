@@ -12,7 +12,7 @@ namespace SCANsat.SCAN_UI
 {
 	class SCANoverlayController : SCAN_MBW
 	{
-		internal readonly static Rect defaultRect = new Rect(Screen.width - 280, 200, 190, 100);
+		internal readonly static Rect defaultRect = new Rect(Screen.width - 280, 200, 175, 100);
 		private static Rect sessionRect = defaultRect;
 		private CelestialBody body;
 		private SCANdata data;
@@ -42,10 +42,10 @@ namespace SCANsat.SCAN_UI
 
 		protected override void Awake()
 		{
-			WindowCaption = "S.C.A.N. Overlay";
+			WindowCaption = "  S.C.A.N. Overlay";
 			WindowRect = sessionRect;
 			WindowStyle = SCANskins.SCAN_window;
-			WindowOptions = new GUILayoutOption[2] { GUILayout.Width(190), GUILayout.Height(100) };
+			WindowOptions = new GUILayoutOption[2] { GUILayout.Width(175), GUILayout.Height(100) };
 			Visible = false;
 			DragEnabled = true;
 			ClampToScreenOffset = new RectOffset(-120, -120, -100, -100);
