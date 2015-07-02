@@ -306,7 +306,10 @@ namespace SCANsat.SCAN_UI
 		//Resets all window positions, tooltip toggle
 		private void gui_settings_window_resets_tooltips(int id)
 		{
+#if DEBUG
 			GUILayout.Label("Settings", SCANskins.SCAN_headline);
+			SCANcontroller.controller.trueGreyScale = GUILayout.Toggle(SCANcontroller.controller.trueGreyScale, "Use True Grey Scale", SCANskins.SCAN_settingsToggle);
+#endif
 			growE();
 				SCANcontroller.controller.planetaryOverlayTooltips = GUILayout.Toggle(SCANcontroller.controller.planetaryOverlayTooltips, "Planetary Overlay Tooltips", SCANskins.SCAN_settingsToggle);
 

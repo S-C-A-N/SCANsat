@@ -132,6 +132,8 @@ namespace SCANsat
 		public float overlayTransparency = 0;
 		[KSPField(isPersistant = true)]
 		public bool version14Patch = false;
+		[KSPField(isPersistant = true)]
+		public bool trueGreyScale = false;
 
 		/* Biome and slope colors can't be serialized properly as a KSP Field */
 		public Color lowBiomeColor = new Color(0, 0.46f, 0.02345098f, 1);
