@@ -548,6 +548,8 @@ namespace SCANsat.SCAN_Map
 			System.IO.File.WriteAllBytes(fullPath, map.EncodeToPNG());
 
 			ScreenMessages.PostScreenMessage("Map saved: GameData/SCANsat/PluginData/" + filename, 8, ScreenMessageStyle.UPPER_CENTER);
+
+			SCANUtil.SCANdebugLog("Map of [{0}] saved\nMap Size: {1} X {2}\nMinimum Altitude: {3:F0}m; Maximum Altitude: {4:F0}m\nPixel Width At Equator: {5:F6}m", body.theName, map.width, map.height, data.TerrainConfig.MinTerrain, data.TerrainConfig.MaxTerrain, (body.Radius * 2 * Math.PI) / (map.width * 1f));
 		}
 
 		#endregion
