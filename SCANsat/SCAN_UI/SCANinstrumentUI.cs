@@ -138,9 +138,10 @@ namespace SCANsat.SCAN_UI
 				altInfo(id);						/* show current altitude and slope */
 				biomeInfo(id);						/* show current biome info */
 				resourceInfo(id);					/* show current resource abundance */
-				anomalyInfo(id);					/* show nearest anomaly detail - including BTDT view */
-				drawInfoLabel(id);
-				drawBTDTInfo(id);
+				drawInfoLabel(id);					/* method to actually draw the label */
+				drawResourceButtons(id);			/* draw the toggle buttons to change resources */
+				anomalyInfo(id);					/* show nearest anomaly detail */
+				drawBTDTInfo(id);					/* draws the BTDT anomaly viewer */
 				//if (parts <= 0) noData(id);		/* nothing to show */
 			stopS();
 		}
@@ -305,13 +306,37 @@ namespace SCANsat.SCAN_UI
 			{
 				resourceLabel(resources[currentResource]);
 			}
+		}
 
+		private void resourceLabel(SCANresourceGlobal r)
+		{
+			if ((sensors & r.SType) != SCANtype.Nothing)
+			{
+				infoLabel += string.Format("\n{0}: {1:P2}", r.Name, SCANUtil.ResourceOverlay(vlat, vlon, r.Name, v.mainBody, SCANcontroller.controller.resourceBiomeLock));
+			}
+			else if ((sensors & SCANtype.FuzzyResources) != SCANtype.Nothing)
+			{
+				infoLabel += string.Format("\n{0}: {1:P0}", r.Name, SCANUtil.ResourceOverlay(vlat, vlon, r.Name, v.mainBody, SCANcontroller.controller.resourceBiomeLock));
+			}
+			else
+			{
+				infoLabel += string.Format("\n{0}: No Data", r.Name);
+			}
+		}
+
+		private void drawInfoLabel(int id)
+		{
+			GUILayout.Label(infoLabel, SCANskins.SCAN_insColorLabel);
+		}
+
+		private void drawResourceButtons(int id)
+		{
 			if (resources.Count > 1)
 			{
 				Rect r = GUILayoutUtility.GetLastRect();
 
 				r.x = 8;
-				r.y -= 30;
+				r.y = r.yMax - 30;
 				r.width = 18;
 				r.height = 28;
 
@@ -330,22 +355,6 @@ namespace SCANsat.SCAN_UI
 					if (currentResource >= resources.Count)
 						currentResource = 0;
 				}
-			}
-		}
-
-		private void resourceLabel(SCANresourceGlobal r)
-		{
-			if ((sensors & r.SType) != SCANtype.Nothing)
-			{
-				infoLabel += string.Format("\n{0}: {1:P2}", r.Name, SCANUtil.ResourceOverlay(vlat, vlon, r.Name, v.mainBody, SCANcontroller.controller.resourceBiomeLock));
-			}
-			else if ((sensors & SCANtype.FuzzyResources) != SCANtype.Nothing)
-			{
-				infoLabel += string.Format("\n{0}: {1:P0}", r.Name, SCANUtil.ResourceOverlay(vlat, vlon, r.Name, v.mainBody, SCANcontroller.controller.resourceBiomeLock));
-			}
-			else
-			{
-				infoLabel += string.Format("\n{0}: No Data", r.Name);
 			}
 		}
 
@@ -372,17 +381,18 @@ namespace SCANsat.SCAN_UI
 				}
 				if (nearest != null)
 				{
+					string txt = "";
 					if (nearest.Detail)
-						infoLabel += "\n" + nearest.Name;
+						txt = nearest.Name;
 					else
-						infoLabel += "\nAnomaly";
+						txt += "Anomaly";
+
+					fillS(-10);
+					GUILayout.Label(txt, SCANskins.SCAN_insColorLabel);
 				}
 			}
-		}
-
-		private void drawInfoLabel(int id)
-		{
-			GUILayout.Label(infoLabel, SCANskins.SCAN_insColorLabel);
+			else
+				nearest = null;
 		}
 
 		private void drawBTDTInfo(int id)
