@@ -43,6 +43,8 @@ namespace SCANsat.SCAN_UI
 		private Rect pos_spotmap_x = new Rect(10f, 10f, 25f, 25f);
 		internal static Rect defaultRect = new Rect(250, 60, 780, 460);
 
+		private string exportSize = "";
+
 		//private bool overlay = false;
 		//private int step = 0;
 
@@ -520,6 +522,28 @@ namespace SCANsat.SCAN_UI
 				if (bigmap.isMapComplete())
 					bigmap.exportPNG();
 			}
+
+#if DEBUG
+			s.x -= 74;
+			s.y -= 30;
+			s.width = 60;
+			s.height = 24;
+
+			exportSize = GUI.TextField(s, exportSize, 4);
+
+			s.x += 65;
+
+			if (GUI.Button(s, "Set"))
+			{
+				int i = 0;
+				if (int.TryParse(exportSize, out i))
+				{
+					bigmap.setWidth(i);
+					drawGrid = true;
+					SCANcontroller.controller.map_width = bigmap.MapWidth;
+				}
+			}
+#endif
 		}
 
 		private void mapDraw(int id)
