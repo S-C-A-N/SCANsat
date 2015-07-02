@@ -14,6 +14,7 @@
 
 using System;
 using System.Linq;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using SCANsat.SCAN_UI;
@@ -194,9 +195,6 @@ namespace SCANsat
 		/* Used to make sure all contracts are loaded */
 		private bool contractsLoaded = false;
 
-		private bool unDocked, docked = false;
-		private Vessel PartFromVessel, PartToVessel, NewVessel, OldVessel;
-		private int timer = 0;
 		private CelestialBody body = null;
 		private bool bodyScanned = false;
 		private bool bodyCoverage = false;
@@ -865,52 +863,6 @@ namespace SCANsat
 				checkHeightMapStatus();
 			}
 
-			if (unDocked || docked)
-			{
-				if (timer < 30)
-					timer++;
-				else
-				{
-					if (unDocked)
-					{
-						if (NewVessel != null)
-						{
-							removeVessel(NewVessel);
-							addVessel(NewVessel);
-							NewVessel = null;
-						}
-
-						if (OldVessel != null)
-						{
-							removeVessel(OldVessel);
-							addVessel(OldVessel);
-							OldVessel = null;
-						}
-					}
-
-					if (docked)
-					{
-						if (PartFromVessel != null)
-						{
-							removeVessel(PartFromVessel);
-							PartFromVessel = null;
-						}
-
-						if (PartToVessel != null)
-						{
-							removeVessel(PartToVessel);
-							PartToVessel = null;
-						}
-
-						addVessel(FlightGlobals.ActiveVessel);
-					}
-
-					unDocked = false;
-					docked = false;
-					timer = 0;
-				}
-			}
-
 			if (!HighLogic.LoadedSceneIsFlight && HighLogic.LoadedScene != GameScenes.TRACKSTATION)
 				return;
 
@@ -1067,23 +1019,69 @@ namespace SCANsat
 
 		private void dockingCheck(GameEvents.FromToAction<Part, Part> Parts)
 		{
-			PartFromVessel = Parts.from.vessel;
-			PartToVessel = Parts.to.vessel;
+			StartCoroutine(dockingCheckCoRoutine(Parts.to.vessel, Parts.from.vessel));
+		}
 
-			docked = true;
+		IEnumerator dockingCheckCoRoutine(Vessel to, Vessel from)
+		{
+			int timer = 0;
+
+			while (timer < 45)
+			{
+				timer++;
+				yield return null;
+			}
+
+			if (from != null)
+			{
+				removeVessel(from);
+			}
+
+			if (to != null)
+			{
+				removeVessel(to);
+			}
+
+			addVessel(FlightGlobals.ActiveVessel);
 		}
 
 		private void newVesselCheck(Vessel v)
 		{
 			if (v.loaded)
 			{
-				if (v.Parts.Count > 1)
-					NewVessel = v;
-				else
-					NewVessel = null;
-				OldVessel = FlightGlobals.ActiveVessel;
+				Vessel newVessel = null;
 
-				unDocked = true;
+				if (v.Parts.Count > 1)
+					newVessel = v;
+				else
+					newVessel = null;
+
+				Vessel oldVessel = FlightGlobals.ActiveVessel;
+
+				StartCoroutine(newVesselCoRoutine(newVessel, oldVessel));
+			}
+		}
+
+		IEnumerator newVesselCoRoutine(Vessel newV, Vessel oldV)
+		{
+			int timer = 0;
+
+			while (timer < 45)
+			{
+				timer++;
+				yield return null;
+			}
+
+			if (newV != null)
+			{
+				removeVessel(newV);
+				addVessel(newV);
+			}
+
+			if (oldV != null)
+			{
+				removeVessel(oldV);
+				addVessel(oldV);
 			}
 		}
 
