@@ -712,7 +712,7 @@ sneaky then they can of course be sneaky.
 [resource-walkthrough]: http://i.imgur.com/KS4FTh0.gif
 [resource-scanner]: http://i.imgur.com/mY0fFjr.gif
 [resource-bigmap]: http://i.imgur.com/JYKG6f5.gif
-[resource-settings]: http://i.imgur.com/qIMMfpJ.png
+[resource-settings]: http://i.imgur.com/yWYbgOM.png
 [resource-zoom-map-covered]: http://i.imgur.com/7YuYMGW.png
 [resource-zoom-map-uncovered]: http://i.imgur.com/cJ9JtdW.png
 [resource-instant]: http://i.imgur.com/mfIMBEP.gif
