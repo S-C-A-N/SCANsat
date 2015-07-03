@@ -1311,8 +1311,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 
 			Vector3d north = Vector3d.Exclude(up, body.transform.up).normalized;
 
-			if (radius <= 0)
-				radius = body.Radius / 15;
+			radius = body.Radius / 15;
 
 			GLTriangleMap(new Vector3d[] { center, center + radius * (QuaternionD.AngleAxis(rotation - 55, up) * north), center + radius * (QuaternionD.AngleAxis(rotation -35, up) * north) }, c);
 
@@ -1321,6 +1320,32 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			GLTriangleMap(new Vector3d[] { center, center + radius * (QuaternionD.AngleAxis(rotation - 145, up) * north), center + radius * (QuaternionD.AngleAxis(rotation - 125, up) * north) }, c);
 
 			GLTriangleMap(new Vector3d[] { center, center + radius * (QuaternionD.AngleAxis(rotation + 145, up) * north), center + radius * (QuaternionD.AngleAxis(rotation + 125, up) * north) }, c);
+		}
+
+		internal static void drawGroundTrackTris(CelestialBody body, Vessel v, double width, Color c)
+		{
+			double rotation = 0;
+			double lat = SCANUtil.fixLatShift(v.latitude);
+			double lon = SCANUtil.fixLonShift(v.longitude);
+			Vector3d center = v.transform.position;
+
+			var height = SCANUtil.getElevation(body, lon, lat);
+			if (height < body.Radius)
+				height = body.Radius;
+
+
+
+			Vector3d upLeft = body.GetSurfaceNVector(lat + (width / 2), lon + (width / 2));
+			Vector3d upRight = body.GetSurfaceNVector(lat - (width / 2), lon - (width / 2));
+
+			Vector3d left = body.position + height * upLeft;
+			Vector3d right = body.position + height * upRight;
+
+
+			if (occluded(center, body))
+				return;
+
+			GLTriangleMap(new Vector3d[] { center, left , right }, c);
 		}
 
 		private static bool occluded(Vector3d pos, CelestialBody body)

@@ -135,6 +135,10 @@ namespace SCANsat
 		public bool version14Patch = false;
 		[KSPField(isPersistant = true)]
 		public bool trueGreyScale = false;
+		[KSPField(isPersistant = true)]
+		public bool groundTracks = true;
+		[KSPField(isPersistant = true)]
+		public bool groundTrackActiveOnly = true;
 
 		/* Biome and slope colors can't be serialized properly as a KSP Field */
 		public Color lowBiomeColor = new Color(0, 0.46f, 0.02345098f, 1);
@@ -975,9 +979,6 @@ namespace SCANsat
 
 		private void drawTarget()
 		{
-			if (mechJebTargetSelection)
-				return;
-
 			if (!MapView.MapIsEnabled)
 				return;
 
@@ -991,12 +992,115 @@ namespace SCANsat
 			if (d == null)
 				return;
 
+			if (groundTracks)
+				drawGroundTracks(b);
+
+			if (mechJebTargetSelection)
+				return;
+
 			SCANwaypoint target = d.Waypoints.FirstOrDefault(a => a.LandingTarget);
 
 			if (target == null)
 				return;
 
 			SCANuiUtil.drawTargetOverlay(b, target.Latitude, target.Longitude, XKCDColors.DarkGreen);
+		}
+
+		private void drawGroundTracks(CelestialBody body)
+		{
+			if (groundTrackActiveOnly)
+			{
+				SCANUtil.SCANdebugLog("Draw Active Vessel Tris");
+
+				if (FlightGlobals.ActiveVessel.situation == Vessel.Situations.LANDED || FlightGlobals.ActiveVessel.situation == Vessel.Situations.PRELAUNCH || FlightGlobals.ActiveVessel.situation == Vessel.Situations.SPLASHED)
+					return;
+
+				if (!isVesselKnown(FlightGlobals.ActiveVessel))
+					return;
+
+				SCANvessel sv = knownVessels[FlightGlobals.ActiveVessel.id];
+
+				if (sv == null)
+					return;
+
+				Color col;
+
+				double groundWidth = getFOV(sv, body, out col);
+
+				if (groundWidth < 1)
+					return;
+
+				//double surfaceScale = (2 * Math.PI * body.Radius) / 360;
+
+				//groundWidth *= surfaceScale;
+
+				SCANUtil.SCANdebugLog("Suitable Sensor Found...");
+
+				SCANuiUtil.drawGroundTrackTris(body, sv.vessel, groundWidth, col);
+			}
+			else
+			{
+				//double surfaceScale = (2 * Math.PI * body.Radius) / 360;
+
+				foreach (SCANvessel sv in knownVessels.Values)
+				{
+					if (sv == null)
+						continue;
+
+					if (sv.vessel.mainBody != FlightGlobals.currentMainBody)
+						continue;
+
+					if (sv.vessel.situation == Vessel.Situations.LANDED || sv.vessel.situation == Vessel.Situations.PRELAUNCH || sv.vessel.situation == Vessel.Situations.SPLASHED)
+						continue;
+
+					Color col;
+
+					double groundWidth = getFOV(sv, body, out col);
+
+					if (groundWidth < 1)
+						continue;
+
+					//groundWidth *= surfaceScale;
+
+					SCANuiUtil.drawGroundTrackTris(body, sv.vessel, groundWidth, col);
+				}
+			}
+		}
+
+		private double getFOV(SCANvessel v, CelestialBody b, out Color c)
+		{
+			c = XKCDColors.DarkGreen;
+			double maxFOV = 0;
+			double alt = v.vessel.altitude;
+			double soi_radius = b.sphereOfInfluence - b.Radius;
+			double surfscale = Planetarium.fetch.Home.Radius / b.Radius;
+			if (surfscale < 1)
+				surfscale = 1;
+			surfscale = Math.Sqrt(surfscale);
+
+			foreach (SCANsensor s in v.sensors.Values)
+			{
+				if (alt < s.min_alt)
+					continue;
+				if (alt > Math.Min(s.max_alt, soi_radius))
+					continue;
+
+				double fov = s.fov;
+				double ba = Math.Min(s.best_alt, soi_radius);
+				if (alt < ba)
+				{
+					fov = (alt / ba) * fov;
+				}
+
+				fov *= surfscale;
+				if (fov > 20)
+					fov = 20;
+
+				if (fov > maxFOV)
+					maxFOV = fov;
+			}
+
+			return maxFOV;
 		}
 
 		private void removeVessel(Vessel v)

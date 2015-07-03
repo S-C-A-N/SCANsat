@@ -311,6 +311,12 @@ namespace SCANsat.SCAN_UI
 			SCANcontroller.controller.trueGreyScale = GUILayout.Toggle(SCANcontroller.controller.trueGreyScale, "Use True Grey Scale", SCANskins.SCAN_settingsToggle);
 #endif
 			growE();
+				SCANcontroller.controller.groundTracks = GUILayout.Toggle(SCANcontroller.controller.groundTracks, "Show Ground Tracks", SCANskins.SCAN_settingsToggle);
+
+				if (SCANcontroller.controller.groundTracks)
+					SCANcontroller.controller.groundTrackActiveOnly = GUILayout.Toggle(SCANcontroller.controller.groundTrackActiveOnly, "Active Vessel Only", SCANskins.SCAN_settingsToggle);
+			stopE();
+			growE();
 				SCANcontroller.controller.planetaryOverlayTooltips = GUILayout.Toggle(SCANcontroller.controller.planetaryOverlayTooltips, "Planetary Overlay Tooltips", SCANskins.SCAN_settingsToggle);
 
 				SCANcontroller.controller.toolTips = GUILayout.Toggle(SCANcontroller.controller.toolTips, "Window Tooltips", SCANskins.SCAN_settingsToggle);
