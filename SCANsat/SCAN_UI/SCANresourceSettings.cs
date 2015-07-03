@@ -168,6 +168,7 @@ namespace SCANsat.SCAN_UI
 			SCANcontroller.controller.disableStockResource = GUILayout.Toggle(SCANcontroller.controller.disableStockResource, "Disable Stock Scanning", SCANskins.SCAN_settingsToggle);
 			fillS();
 			stopE();
+			GUILayout.Label("Resource Scan Data", SCANskins.SCAN_headline);
 			if (popup)
 			{
 				GUILayout.Label("Reset SCANsat Resource Coverage", SCANskins.SCAN_button);
@@ -198,6 +199,7 @@ namespace SCANsat.SCAN_UI
 
 		private void overlayOptions(int id)
 		{
+			GUILayout.Label("Overlay Map Quality", SCANskins.SCAN_headline);
 			growE();
 				GUILayout.Label("Interpolation:", SCANskins.SCAN_labelSmallLeft);
 
