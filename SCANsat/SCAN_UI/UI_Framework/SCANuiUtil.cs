@@ -1324,23 +1324,23 @@ namespace SCANsat.SCAN_UI.UI_Framework
 
 		internal static void drawGroundTrackTris(CelestialBody body, Vessel v, double width, Color c)
 		{
-			double rotation = 0;
 			double lat = SCANUtil.fixLatShift(v.latitude);
 			double lon = SCANUtil.fixLonShift(v.longitude);
-			Vector3d center = v.transform.position;
 
 			var height = SCANUtil.getElevation(body, lon, lat);
 			if (height < body.Radius)
 				height = body.Radius;
 
+			Vector3d center = v.transform.position;
+			Vector3d up = body.GetSurfaceNVector(lat, lon);
 
+			Vector3d srfCenter = body.position + height * up;
 
-			Vector3d upLeft = body.GetSurfaceNVector(lat + (width / 2), lon + (width / 2));
-			Vector3d upRight = body.GetSurfaceNVector(lat - (width / 2), lon - (width / 2));
+			Vector3d VelFor = Vector3.ProjectOnPlane(v.srf_velocity, up).normalized;
+			Vector3d vesselPerp = Vector3d.Cross(VelFor, up).normalized;
 
-			Vector3d left = body.position + height * upLeft;
-			Vector3d right = body.position + height * upRight;
-
+			Vector3d left = srfCenter + width * vesselPerp;
+			Vector3d right = srfCenter - width * vesselPerp;
 
 			if (occluded(center, body))
 				return;
