@@ -1030,9 +1030,9 @@ namespace SCANsat
 				if (groundWidth < 1)
 					return;
 
-				//double surfaceScale = (2 * Math.PI * body.Radius) / 360;
+				double surfaceScale = (2 * Math.PI * body.Radius) / 360;
 
-				//groundWidth *= surfaceScale;
+				groundWidth *= surfaceScale;
 
 				SCANUtil.SCANdebugLog("Suitable Sensor Found...");
 
@@ -1040,7 +1040,7 @@ namespace SCANsat
 			}
 			else
 			{
-				//double surfaceScale = (2 * Math.PI * body.Radius) / 360;
+				double surfaceScale = (2 * Math.PI * body.Radius) / 360;
 
 				foreach (SCANvessel sv in knownVessels.Values)
 				{
@@ -1060,7 +1060,7 @@ namespace SCANsat
 					if (groundWidth < 1)
 						continue;
 
-					//groundWidth *= surfaceScale;
+					groundWidth *= surfaceScale;
 
 					SCANuiUtil.drawGroundTrackTris(body, sv.vessel, groundWidth, col);
 				}
@@ -1346,8 +1346,14 @@ namespace SCANsat
 
 			public CelestialBody body;
 			public double latitude, longitude;
+			public double metersPerDegree;
 			public int frame;
 			public double lastUT;
+
+			public void updateGroundCoverage()
+			{
+				metersPerDegree = ((2 * Math.PI * body.Radius) / 360);
+			}
 		}
 
 		internal void registerSensor(Vessel v, SCANtype sensors, double fov, double min_alt, double max_alt, double best_alt)
@@ -1514,6 +1520,8 @@ namespace SCANsat
 				if (data == null)
 					continue;
 				vessel.vessel = v;
+				vessel.body = v.mainBody;
+				vessel.updateGroundCoverage();
 
 				if (!data.Disabled)
 				{
@@ -1528,7 +1536,6 @@ namespace SCANsat
 					}
 				}
 
-				vessel.body = v.mainBody;
 				vessel.frame = Time.frameCount;
 				vessel.lastUT = scan_UT;
 				vessel.latitude = SCANUtil.fixLatShift(v.latitude);
@@ -1551,6 +1558,7 @@ namespace SCANsat
 			double res = 0;
 			Orbit o = v.orbit;
 			bool uncovered;
+			double groundWidth = vessel.metersPerDegree;
 
 			if (scanQueue == null) scanQueue = new Queue<double>();
 			if (scanQueue.Count != 0) scanQueue.Clear();
@@ -1570,6 +1578,7 @@ namespace SCANsat
 				alt = v.mainBody.GetAltitude(pos);
 				lat = SCANUtil.fixLatShift(v.mainBody.GetLatitude(pos));
 				lon = SCANUtil.fixLonShift(v.mainBody.GetLongitude(pos) - rotation);
+				groundWidth *= Math.Cos(Mathf.Deg2Rad * (Math.Min(65, Math.Abs(lat))));
 				if (alt < 0) alt = 0;
 				if (res > maxRes) maxRes = (int)res;
 			}
@@ -1605,14 +1614,19 @@ namespace SCANsat
 				if (surfscale < 1) surfscale = 1;
 				surfscale = Math.Sqrt(surfscale);
 				fov *= surfscale;
-				if (fov > 20) fov = 20;
+				if (fov > 15) fov = 15;
 
 				int f = (int)Math.Truncate(fov);
 				int f1 = f + (int)Math.Round(fov - f);
 
+				double lonModifier = (fov * vessel.metersPerDegree) / groundWidth;
+
+				int flon = (int)Math.Truncate(lonModifier);
+				int f1lon = flon + (int)Math.Round(lonModifier - flon);
+
 				double clampLat;
 				double clampLon;
-				for (int x = -f; x <= f1; ++x)
+				for (int x = -flon; x <= f1lon; ++x)
 				{
 					clampLon = lon + x;	// longitude does not need clamping
 					/*if (clampLon < 0  ) clampLon = 0; */
@@ -1620,8 +1634,17 @@ namespace SCANsat
 					for (int y = -f; y <= f1; ++y)
 					{
 						clampLat = lat + y;
-						if (clampLat > 89) clampLat = 89;
-						if (clampLat < -90) clampLat = -90;
+						if (clampLat > 89)
+						{
+							clampLat = 179 - clampLat;
+							clampLon += 180;
+						}
+						if (clampLat < -90)
+						{
+							clampLat = -180 - clampLat;
+							clampLon += 180;
+						}
+
 						SCANUtil.registerPass(clampLon, clampLat, data, sensor.sensor);
 					}
 				}
