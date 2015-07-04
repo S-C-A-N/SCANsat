@@ -814,7 +814,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 							whiteLineList.Add(points);
 							blackLineList.Add(pointsBlack);
 						}
-							break;
+						break;
 					}
 				case MapProjection.KavrayskiyVII:
 					{
@@ -946,7 +946,6 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			yStart += top;
 			for (int i = 1; i < points.Count; i++)
 			{
-
 				float xEnd = (float)points[i].x;
 				float yEnd = (mapWidth / 2) - (float)points[i].y;
 				if (xEnd < 0 || yEnd < 0 || yEnd > (mapWidth / 2) || xEnd > mapWidth)
