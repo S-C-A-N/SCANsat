@@ -35,6 +35,7 @@
 * [4. Basic Usage][4]
   * [a. FAQ: Finding a Good Altitude][4a]
   * [b. Mismatched Scanners][4b]
+  * [c. Ground Track Indicators][4c]
 * [5. Big Map][5]
   * [a. Big Map Options][5a]
 * [6. Planetary Overlay][6]
@@ -351,6 +352,14 @@ Be sure to remember to pack enough batteries, radioisotope generators, and solar
 ###### Static! Oh no, adjust the rabbit ears!
 > ![][small-static]
 
+#### [:top:][top] 4c. Ground Track Indicators
+> ![][ground-track]
+
+When activated in the settings menu, ground track indicators are drawn for vessels around the current planet. 
+* The indicators are drawn only if at least one sensor on board the vessel is within scanning altitude
+* The indicator width on the surface represents the scanning FOV at the equator
+* The scanner with the widest FOV on a vessel is used to create the indicator 
+
 ### [:top:][top] 5. Big Map
 ------------------------------------------
 
@@ -625,6 +634,7 @@ The settings menu has a various general options
 * The marker used for **Anomalies** can be specified
 * **Background scanning** can be controlled for each planet
 * **Background scanning** resolution can be lowered for better performance (watch for short pauses when several scanners are active at very high timewarp; reducing the scanning resolution can help with this)
+* **Ground Track** indicators can be toggled for the current vessel or for all vessels at the current planet
 * Toggles control the availability of the **Stock App Launcher** button, and the **Tooltips** for various icons on other windows and **Planetary Overlay Tooltips**
 * If MechJeb is installed an additional option is available to toggle the MechJeb Landing Guidance interface
 * If the windows are ever dragged off screen there is an option to **Reset All Windows** to their default positions
@@ -732,6 +742,8 @@ sneaky then they can of course be sneaky.
 [resource-bigmap-lores-limited-biome]: http://i.imgur.com/iHCBfes.png
 [resource-bigmap-lores-full-biome]: http://i.imgur.com/TIR1xv5.png
 
+[ground-track]: http://i.imgur.com/casTBeW.gif
+
 [resource-overlay-window]: http://i.imgur.com/n68InYq.png
 
 [hidef-map-open]: http://i.imgur.com/xjEDybF.gif
@@ -748,7 +760,7 @@ sneaky then they can of course be sneaky.
 [instruments-small]: http://i.imgur.com/tpjveyn.gif
 [instruments-btdt]: http://i.imgur.com/tybbDap.gif
 
-[settings-window]: http://i.imgur.com/OU0GzOu.png
+[settings-window]: http://i.imgur.com/zD1bNVc.png
 
 [tinypirate-video-screen]: http://img.youtube.com/vi/UY7eBuReSYU/0.jpg
 [tinypirate-video]: https://www.youtube.com/watch?v=UY7eBuReSYU
@@ -770,6 +782,7 @@ sneaky then they can of course be sneaky.
 [4]: #top-4-basic-usage
 [4a]: #top-4a-faq-finding-a-good-altitude
 [4b]: #top-4b-mismatched-scanners
+[4c]: #top-4c-ground-track-indicators
 [5]: #top-5-big-map
 [5a]: #top-5a-big-map-options
 [6]: #top-6-planetary-overlay
