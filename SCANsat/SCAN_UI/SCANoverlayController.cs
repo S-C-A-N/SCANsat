@@ -12,7 +12,7 @@ namespace SCANsat.SCAN_UI
 {
 	class SCANoverlayController : SCAN_MBW
 	{
-		internal readonly static Rect defaultRect = new Rect(Screen.width - 280, 200, 200, 100);
+		internal readonly static Rect defaultRect = new Rect(Screen.width - 280, 200, 175, 100);
 		private static Rect sessionRect = defaultRect;
 		private CelestialBody body;
 		private SCANdata data;
@@ -28,6 +28,9 @@ namespace SCANsat.SCAN_UI
 		private bool enableUI = true;
 		private int mapStep, mapStart;
 
+		private int timer;
+		private string tooltipText = "";
+
 		private Texture2D mapOverlay;
 		private Texture2D biomeOverlay;
 		private Texture2D terrainOverlay;
@@ -39,13 +42,13 @@ namespace SCANsat.SCAN_UI
 
 		protected override void Awake()
 		{
-			WindowCaption = "S.C.A.N. Overlay";
+			WindowCaption = "  S.C.A.N. Overlay";
 			WindowRect = sessionRect;
 			WindowStyle = SCANskins.SCAN_window;
-			WindowOptions = new GUILayoutOption[2] { GUILayout.Width(200), GUILayout.Height(100) };
+			WindowOptions = new GUILayoutOption[2] { GUILayout.Width(175), GUILayout.Height(100) };
 			Visible = false;
 			DragEnabled = true;
-			ClampToScreenOffset = new RectOffset(-140, -140, -200, -200);
+			ClampToScreenOffset = new RectOffset(-120, -120, -100, -100);
 
 			SCAN_SkinsLibrary.SetCurrent("SCAN_Unity");
 		}
@@ -278,22 +281,6 @@ namespace SCANsat.SCAN_UI
 
 			if (selection >= resources.Count)
 				return;
-
-			//growE();
-			//	GUILayout.Label("Coverage Transparency:", SCANskins.SCAN_labelSmallLeft);
-
-			//	if (GUILayout.Button("-", SCANskins.SCAN_buttonSmall, GUILayout.Width(18)))
-			//	{
-			//		SCANcontroller.controller.overlayTransparency = Mathf.Max(0f, SCANcontroller.controller.overlayTransparency - 0.1f);
-			//		refreshMap();
-			//	}
-			//	GUILayout.Label(SCANcontroller.controller.overlayTransparency.ToString("P0"), SCANskins.SCAN_labelSmall);
-			//	if (GUILayout.Button("+", SCANskins.SCAN_buttonSmall, GUILayout.Width(18)))
-			//	{
-			//		SCANcontroller.controller.overlayTransparency = Mathf.Min(1f, SCANcontroller.controller.overlayTransparency + 0.1f);
-			//		refreshMap();
-			//	}
-			//stopE();
 		}
 
 		private void resourceSettings(int id)
@@ -340,9 +327,17 @@ namespace SCANsat.SCAN_UI
 				if (coords == null)
 					return;
 
-				string tooltip = "";
+				if (timer < 5)
+				{
+					timer++;
+					drawToolTipLabel();
+					return;
+				}
 
-				tooltip += coords.ToDMS();
+				timer = 0;
+				tooltipText = "";
+
+				tooltipText += coords.ToDMS();
 
 				if (body.pqsController != null)
 				{
@@ -350,16 +345,16 @@ namespace SCANsat.SCAN_UI
 					{
 						double elevation = SCANUtil.getElevation(body, coords.longitude, coords.latitude);
 
-						tooltip += string.Format("\nTerrain: {0}", SCANuiUtil.getMouseOverElevation(coords.longitude, coords.latitude, data, 0));
+						tooltipText += string.Format("\nTerrain: {0}", SCANuiUtil.getMouseOverElevation(coords.longitude, coords.latitude, data, 0));
 
-						tooltip += string.Format("\nSlope: {0:F1}°", SCANUtil.slope(elevation, body, coords.longitude, coords.latitude, degreeOffset));
+						tooltipText += string.Format("\nSlope: {0:F1}°", SCANUtil.slope(elevation, body, coords.longitude, coords.latitude, degreeOffset));
 					}
 				}
 
 				if (body.BiomeMap != null)
 				{
 					if (SCANUtil.isCovered(coords.longitude, coords.latitude, data, SCANtype.Biome))
-						tooltip += string.Format("\nBiome: {0}", SCANUtil.getBiomeName(body, coords.longitude, coords.latitude));
+						tooltipText += string.Format("\nBiome: {0}", SCANUtil.getBiomeName(body, coords.longitude, coords.latitude));
 				}
 
 				bool resources = false;
@@ -460,34 +455,17 @@ namespace SCANsat.SCAN_UI
 						}
 
 						if (coverage)
-							tooltip += string.Format("\n{0}: No Coverage", currentResource.Name);
+							tooltipText += string.Format("\n{0}: No Coverage", currentResource.Name);
 						else if (!scanner)
-							tooltip += string.Format("\n{0}: No Scanner", currentResource.Name);
+							tooltipText += string.Format("\n{0}: No Scanner", currentResource.Name);
 						else
-							resourceLabel(ref tooltip, fuzzy, coords.latitude, coords.longitude);
+							resourceLabel(ref tooltipText, fuzzy, coords.latitude, coords.longitude);
 					}
 					else
-						resourceLabel(ref tooltip, fuzzy, coords.latitude, coords.longitude);
+						resourceLabel(ref tooltipText, fuzzy, coords.latitude, coords.longitude);
 				}
 
-				Vector2 size = SCANskins.SCAN_readoutLabelCenter.CalcSize(new GUIContent(tooltip));
-
-				float sizeX = size.x;
-				if (sizeX < 160)
-					sizeX = 160;
-				else if (sizeX < 190)
-					sizeX = 190;
-
-				Rect r = new Rect(Event.current.mousePosition.x - (sizeX / 2), Event.current.mousePosition.y - (size.y + 16), sizeX + 10, size.y + 8);
-
-				GUI.Box(r, "");
-
-				r.x += 5;
-				r.y += 4;
-				r.width -= 10;
-				r.height -= 8;
-
-				SCANuiUtil.drawLabel(r, tooltip, SCANskins.SCAN_readoutLabelCenter, true, SCANskins.SCAN_shadowReadoutLabelCenter);
+				drawToolTipLabel();
 			}
 		}
 
@@ -497,6 +475,28 @@ namespace SCANsat.SCAN_UI
 				t += string.Format("\n{0}: {1:P0}", currentResource.Name, SCANUtil.ResourceOverlay(lat, lon, currentResource.Name, body, SCANcontroller.controller.resourceBiomeLock));
 			else
 				t += string.Format("\n{0}: {1:P2}", currentResource.Name, SCANUtil.ResourceOverlay(lat, lon, currentResource.Name, body, SCANcontroller.controller.resourceBiomeLock));
+		}
+
+		private void drawToolTipLabel()
+		{
+			Vector2 size = SCANskins.SCAN_readoutLabelCenter.CalcSize(new GUIContent(tooltipText));
+
+			float sizeX = size.x;
+			if (sizeX < 160)
+				sizeX = 160;
+			else if (sizeX < 190)
+				sizeX = 190;
+
+			Rect r = new Rect(Event.current.mousePosition.x - (sizeX / 2), Event.current.mousePosition.y - (size.y + 16), sizeX + 10, size.y + 8);
+
+			GUI.Box(r, "");
+
+			r.x += 5;
+			r.y += 4;
+			r.width -= 10;
+			r.height -= 8;
+
+			SCANuiUtil.drawLabel(r, tooltipText, SCANskins.SCAN_readoutLabelCenter, true, SCANskins.SCAN_shadowReadoutLabelCenter);
 		}
 
 		public void refreshMap(float t, int height, int interp)

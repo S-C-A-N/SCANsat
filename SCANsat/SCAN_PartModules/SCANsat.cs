@@ -112,6 +112,13 @@ namespace SCANsat.SCAN_PartModules
 			Events["stopScan"].active = scanning;
 			if (sensorType != 32)
 				Fields["alt_indicator"].guiActive = scanning;
+
+			if (powerIsProblem)
+			{
+				addStatic();
+				registerScanner();
+			}
+
 			if (scanning)
 			{
 				if (SCANcontroller.controller == null)
@@ -147,14 +154,6 @@ namespace SCANsat.SCAN_PartModules
 					else
 						unregisterScanner();
 					alt_indicator = scanAlt();
-				}
-			}
-			if (vessel == FlightGlobals.ActiveVessel)
-			{
-				if (powerIsProblem)
-				{
-					addStatic();
-					registerScanner();
 				}
 			}
 		}
@@ -332,20 +331,9 @@ namespace SCANsat.SCAN_PartModules
 			if (anim != null && anim[animationName] != null)
 			{
 				anim[animationName].speed = speed;
-				if (anim.IsPlaying(animationName))
+				if (!anim.IsPlaying(animationName))
 				{
-					if (anim[animationName].normalizedTime <= 0)
-					{
-						anim[animationName].normalizedTime = time;
-					}
-					else if (anim[animationName].normalizedTime >= 1 - float.Epsilon)
-					{
-						anim[animationName].normalizedTime = time;
-					}
-				}
-				else
-				{
-					anim[animationName].wrapMode = WrapMode.ClampForever;
+					anim[animationName].wrapMode = WrapMode.Clamp;
 					anim[animationName].normalizedTime = time;
 					anim.Play(animationName);
 				}

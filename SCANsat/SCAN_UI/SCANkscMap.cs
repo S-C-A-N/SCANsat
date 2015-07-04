@@ -540,7 +540,7 @@ namespace SCANsat.SCAN_UI
 
 			if (SCANcontroller.controller.map_grid)
 			{
-				if (gridLines.Count > 0)
+				if (gridLines.Count > 0 && inRepaint())
 				{
 					GL.PushMatrix();
 					foreach (List<Vector2d> points in gridLines[0])

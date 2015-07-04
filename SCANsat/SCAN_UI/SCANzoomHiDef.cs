@@ -80,7 +80,7 @@ namespace SCANsat.SCAN_UI
 		{
 			mapGenerated = false;
 
-			base.resetMap(false, lon, lat, withCenter);
+			base.resetMap(false, SCANUtil.fixLonShift(v.longitude), SCANUtil.fixLatShift(v.latitude), true);
 		}
 
 		public override void setMapCenter(double lat, double lon, bool centering, SCANmap big = null, SCANhiDefCamera camera = null)

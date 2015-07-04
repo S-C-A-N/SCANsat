@@ -133,19 +133,27 @@ namespace SCANsat.SCAN_UI.UI_Framework
 		{
 			Color c = black;
 			val -= min;
-			if (discrete)
+			if (SCANcontroller.controller.trueGreyScale)
 			{
-				val = (greyScalePalette.colorsReverse.Length) * Mathf.Clamp(val, 0, range) / range;
-				if (Math.Floor(val) > greyScalePalette.colorsReverse.Length - 1)
-					val = greyScalePalette.colorsReverse.Length - 0.01f;
-				c = greyScalePalette.colorsReverse[(int)Math.Floor(val)];
+				val = Mathf.Clamp(val, 0, range) / range;
+				c = lerp(black, white, val);
 			}
 			else
 			{
-				val = (greyScalePalette.colorsReverse.Length - 1) * Mathf.Clamp(val, 0, range) / range;
-				if (Math.Floor(val) > greyScalePalette.colorsReverse.Length - 2)
-					val = greyScalePalette.colorsReverse.Length - 1.01f;
-				c = lerp(greyScalePalette.colorsReverse[(int)Math.Floor(val)], greyScalePalette.colorsReverse[(int)Math.Floor(val) + 1], val - (int)Math.Floor(val));
+				if (discrete)
+				{
+					val = (greyScalePalette.colorsReverse.Length) * Mathf.Clamp(val, 0, range) / range;
+					if (Math.Floor(val) > greyScalePalette.colorsReverse.Length - 1)
+						val = greyScalePalette.colorsReverse.Length - 0.01f;
+					c = greyScalePalette.colorsReverse[(int)Math.Floor(val)];
+				}
+				else
+				{
+					val = (greyScalePalette.colorsReverse.Length - 1) * Mathf.Clamp(val, 0, range) / range;
+					if (Math.Floor(val) > greyScalePalette.colorsReverse.Length - 2)
+						val = greyScalePalette.colorsReverse.Length - 1.01f;
+					c = lerp(greyScalePalette.colorsReverse[(int)Math.Floor(val)], greyScalePalette.colorsReverse[(int)Math.Floor(val) + 1], val - (int)Math.Floor(val));
+				}
 			}
 			return c;
 		}

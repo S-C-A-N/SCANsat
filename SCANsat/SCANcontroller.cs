@@ -14,6 +14,7 @@
 
 using System;
 using System.Linq;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using SCANsat.SCAN_UI;
@@ -132,6 +133,12 @@ namespace SCANsat
 		public float overlayTransparency = 0;
 		[KSPField(isPersistant = true)]
 		public bool version14Patch = false;
+		[KSPField(isPersistant = true)]
+		public bool trueGreyScale = false;
+		[KSPField(isPersistant = true)]
+		public bool groundTracks = true;
+		[KSPField(isPersistant = true)]
+		public bool groundTrackActiveOnly = true;
 
 		/* Biome and slope colors can't be serialized properly as a KSP Field */
 		public Color lowBiomeColor = new Color(0, 0.46f, 0.02345098f, 1);
@@ -192,9 +199,6 @@ namespace SCANsat
 		/* Used to make sure all contracts are loaded */
 		private bool contractsLoaded = false;
 
-		private bool unDocked, docked = false;
-		private Vessel PartFromVessel, PartToVessel, NewVessel, OldVessel;
-		private int timer = 0;
 		private CelestialBody body = null;
 		private bool bodyScanned = false;
 		private bool bodyCoverage = false;
@@ -863,52 +867,6 @@ namespace SCANsat
 				checkHeightMapStatus();
 			}
 
-			if (unDocked || docked)
-			{
-				if (timer < 30)
-					timer++;
-				else
-				{
-					if (unDocked)
-					{
-						if (NewVessel != null)
-						{
-							removeVessel(NewVessel);
-							addVessel(NewVessel);
-							NewVessel = null;
-						}
-
-						if (OldVessel != null)
-						{
-							removeVessel(OldVessel);
-							addVessel(OldVessel);
-							OldVessel = null;
-						}
-					}
-
-					if (docked)
-					{
-						if (PartFromVessel != null)
-						{
-							removeVessel(PartFromVessel);
-							PartFromVessel = null;
-						}
-
-						if (PartToVessel != null)
-						{
-							removeVessel(PartToVessel);
-							PartToVessel = null;
-						}
-
-						addVessel(FlightGlobals.ActiveVessel);
-					}
-
-					unDocked = false;
-					docked = false;
-					timer = 0;
-				}
-			}
-
 			if (!HighLogic.LoadedSceneIsFlight && HighLogic.LoadedScene != GameScenes.TRACKSTATION)
 				return;
 
@@ -1021,9 +979,6 @@ namespace SCANsat
 
 		private void drawTarget()
 		{
-			if (mechJebTargetSelection)
-				return;
-
 			if (!MapView.MapIsEnabled)
 				return;
 
@@ -1037,12 +992,115 @@ namespace SCANsat
 			if (d == null)
 				return;
 
+			if (groundTracks)
+				drawGroundTracks(b);
+
+			if (mechJebTargetSelection)
+				return;
+
 			SCANwaypoint target = d.Waypoints.FirstOrDefault(a => a.LandingTarget);
 
 			if (target == null)
 				return;
 
 			SCANuiUtil.drawTargetOverlay(b, target.Latitude, target.Longitude, XKCDColors.DarkGreen);
+		}
+
+		private void drawGroundTracks(CelestialBody body)
+		{
+			if (groundTrackActiveOnly)
+			{
+				SCANUtil.SCANdebugLog("Draw Active Vessel Tris");
+
+				if (FlightGlobals.ActiveVessel.situation == Vessel.Situations.LANDED || FlightGlobals.ActiveVessel.situation == Vessel.Situations.PRELAUNCH || FlightGlobals.ActiveVessel.situation == Vessel.Situations.SPLASHED)
+					return;
+
+				if (!isVesselKnown(FlightGlobals.ActiveVessel))
+					return;
+
+				SCANvessel sv = knownVessels[FlightGlobals.ActiveVessel.id];
+
+				if (sv == null)
+					return;
+
+				Color col;
+
+				double groundWidth = getFOV(sv, body, out col);
+
+				if (groundWidth < 1)
+					return;
+
+				double surfaceScale = (2 * Math.PI * body.Radius) / 360;
+
+				groundWidth *= surfaceScale;
+
+				SCANUtil.SCANdebugLog("Suitable Sensor Found...");
+
+				SCANuiUtil.drawGroundTrackTris(body, sv.vessel, groundWidth, col);
+			}
+			else
+			{
+				double surfaceScale = (2 * Math.PI * body.Radius) / 360;
+
+				foreach (SCANvessel sv in knownVessels.Values)
+				{
+					if (sv == null)
+						continue;
+
+					if (sv.vessel.mainBody != FlightGlobals.currentMainBody)
+						continue;
+
+					if (sv.vessel.situation == Vessel.Situations.LANDED || sv.vessel.situation == Vessel.Situations.PRELAUNCH || sv.vessel.situation == Vessel.Situations.SPLASHED)
+						continue;
+
+					Color col;
+
+					double groundWidth = getFOV(sv, body, out col);
+
+					if (groundWidth < 1)
+						continue;
+
+					groundWidth *= surfaceScale;
+
+					SCANuiUtil.drawGroundTrackTris(body, sv.vessel, groundWidth, col);
+				}
+			}
+		}
+
+		private double getFOV(SCANvessel v, CelestialBody b, out Color c)
+		{
+			c = XKCDColors.DarkGreen;
+			double maxFOV = 0;
+			double alt = v.vessel.altitude;
+			double soi_radius = b.sphereOfInfluence - b.Radius;
+			double surfscale = Planetarium.fetch.Home.Radius / b.Radius;
+			if (surfscale < 1)
+				surfscale = 1;
+			surfscale = Math.Sqrt(surfscale);
+
+			foreach (SCANsensor s in v.sensors.Values)
+			{
+				if (alt < s.min_alt)
+					continue;
+				if (alt > Math.Min(s.max_alt, soi_radius))
+					continue;
+
+				double fov = s.fov;
+				double ba = Math.Min(s.best_alt, soi_radius);
+				if (alt < ba)
+				{
+					fov = (alt / ba) * fov;
+				}
+
+				fov *= surfscale;
+				if (fov > 20)
+					fov = 20;
+
+				if (fov > maxFOV)
+					maxFOV = fov;
+			}
+
+			return maxFOV;
 		}
 
 		private void removeVessel(Vessel v)
@@ -1065,23 +1123,69 @@ namespace SCANsat
 
 		private void dockingCheck(GameEvents.FromToAction<Part, Part> Parts)
 		{
-			PartFromVessel = Parts.from.vessel;
-			PartToVessel = Parts.to.vessel;
+			StartCoroutine(dockingCheckCoRoutine(Parts.to.vessel, Parts.from.vessel));
+		}
 
-			docked = true;
+		IEnumerator dockingCheckCoRoutine(Vessel to, Vessel from)
+		{
+			int timer = 0;
+
+			while (timer < 45)
+			{
+				timer++;
+				yield return null;
+			}
+
+			if (from != null)
+			{
+				removeVessel(from);
+			}
+
+			if (to != null)
+			{
+				removeVessel(to);
+			}
+
+			addVessel(FlightGlobals.ActiveVessel);
 		}
 
 		private void newVesselCheck(Vessel v)
 		{
 			if (v.loaded)
 			{
-				if (v.Parts.Count > 1)
-					NewVessel = v;
-				else
-					NewVessel = null;
-				OldVessel = FlightGlobals.ActiveVessel;
+				Vessel newVessel = null;
 
-				unDocked = true;
+				if (v.Parts.Count > 1)
+					newVessel = v;
+				else
+					newVessel = null;
+
+				Vessel oldVessel = FlightGlobals.ActiveVessel;
+
+				StartCoroutine(newVesselCoRoutine(newVessel, oldVessel));
+			}
+		}
+
+		IEnumerator newVesselCoRoutine(Vessel newV, Vessel oldV)
+		{
+			int timer = 0;
+
+			while (timer < 45)
+			{
+				timer++;
+				yield return null;
+			}
+
+			if (newV != null)
+			{
+				removeVessel(newV);
+				addVessel(newV);
+			}
+
+			if (oldV != null)
+			{
+				removeVessel(oldV);
+				addVessel(oldV);
 			}
 		}
 
@@ -1506,18 +1610,23 @@ namespace SCANsat
 				int f = (int)Math.Truncate(fov);
 				int f1 = f + (int)Math.Round(fov - f);
 
-				double clampLat;
-				double clampLon;
 				for (int x = -f; x <= f1; ++x)
 				{
-					clampLon = lon + x;	// longitude does not need clamping
-					/*if (clampLon < 0  ) clampLon = 0; */
-					/*if (clampLon > 360) clampLon = 360; */
 					for (int y = -f; y <= f1; ++y)
 					{
-						clampLat = lat + y;
-						if (clampLat > 89) clampLat = 89;
-						if (clampLat < -90) clampLat = -90;
+						double clampLon = lon + x;
+						double clampLat = lat + y;
+						if (clampLat > 89)
+						{
+							clampLat = 179 - clampLat;
+							clampLon += 180;
+						}
+						if (clampLat < -90)
+						{
+							clampLat = -180 - clampLat;
+							clampLon += 180;
+						}
+
 						SCANUtil.registerPass(clampLon, clampLat, data, sensor.sensor);
 					}
 				}

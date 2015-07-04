@@ -47,6 +47,10 @@ namespace SCANsat.SCAN_UI
 		internal readonly static Rect defaultRect = new Rect(30, 600, 260, 60);
 		private static Rect sessionRect = defaultRect;
 
+		private string infoLabel = "";
+		SCANanomaly nearest = null;
+		private string slopeString = "";
+
 		protected override void Awake()
 		{
 			WindowCaption = "S.C.A.N. Instruments";
@@ -95,9 +99,9 @@ namespace SCANsat.SCAN_UI
 			//Grab the active scanners on this vessel
 			sensors = SCANcontroller.controller.activeSensorsOnVessel(v.id);
 
-			//if (maptraq_frame >= Time.frameCount - 5) //Still not sure what this actually does
 			if (true)
 			{
+				infoLabel = "";
 				//Check if region below the vessel is scanned
 				if (SCANUtil.isCovered(vlon, vlat, data, SCANtype.AltimetryLoRes))
 				{
@@ -130,16 +134,15 @@ namespace SCANsat.SCAN_UI
 			closeBox(id);
 
 			growS();
-			if (notMappingToday) noData(id);		/* to be shown when power is out *FixMe - non-functional */
-			else
-			{
 				locationInfo(id);					/* always-on indicator for current lat/long */
 				altInfo(id);						/* show current altitude and slope */
 				biomeInfo(id);						/* show current biome info */
 				resourceInfo(id);					/* show current resource abundance */
-				anomalyInfo(id);					/* show nearest anomaly detail - including BTDT view */
+				drawInfoLabel(id);					/* method to actually draw the label */
+				drawResourceButtons(id);			/* draw the toggle buttons to change resources */
+				anomalyInfo(id);					/* show nearest anomaly detail */
+				drawBTDTInfo(id);					/* draws the BTDT anomaly viewer */
 				//if (parts <= 0) noData(id);		/* nothing to show */
-			}
 			stopS();
 		}
 
@@ -167,14 +170,13 @@ namespace SCANsat.SCAN_UI
 
 		private void noData(int id)
 		{
-			GUILayout.Label("NO DATA", SCANskins.SCAN_insWhiteLabel);
+			infoLabel = "No Data";
 		}
 
 		//Displays current vessel location info
 		private void locationInfo(int id)
 		{
-			GUILayout.Label(string.Format("Lat: {0:F2}°, Lon: {1:F2}°", vlat, vlon), SCANskins.SCAN_insColorLabel);
-			fillS(-10);
+			infoLabel += string.Format("Lat: {0:F2}°, Lon: {1:F2}°", vlat, vlon);
 
 			if (WaypointManager.Instance() != null)
 			{
@@ -202,8 +204,7 @@ namespace SCANsat.SCAN_UI
 
 					if (WaypointManager.Instance().Distance(vlat, vlon, v.altitude, p.Latitude, p.Longitude, v.altitude, data.Body) <= range)
 					{
-						GUILayout.Label(string.Format("Waypoint: {0}", p.Name), SCANskins.SCAN_insColorLabel);
-						fillS(-10);
+						infoLabel += string.Format("\nWaypoint: {0}", p.Name);
 						break;
 					}
 				}
@@ -215,8 +216,7 @@ namespace SCANsat.SCAN_UI
 		{
 			if ((sensors & SCANtype.Biome) != SCANtype.Nothing && v.mainBody.BiomeMap != null)
 			{
-				GUILayout.Label(string.Format("Biome: {0}", SCANUtil.getBiomeName(v.mainBody, vlon, vlat)), SCANskins.SCAN_insColorLabel);
-				fillS(-10);
+				infoLabel += string.Format("\nBiome: {0}", SCANUtil.getBiomeName(v.mainBody, vlon, vlat));
 			}
 		}
 
@@ -237,10 +237,9 @@ namespace SCANsat.SCAN_UI
 					h = v.altitude;
 
 				if (v.situation == Vessel.Situations.LANDED || v.situation == Vessel.Situations.SPLASHED || v.situation == Vessel.Situations.PRELAUNCH)
-					GUILayout.Label(string.Format("Terrain: {0:N1}m", pqs), SCANskins.SCAN_insColorLabel);
+					infoLabel += string.Format("\nTerrain: {0:N1}m", pqs);
 				else
-					GUILayout.Label(string.Format("Altitude: {0}", SCANuiUtil.distanceString(h, 100000)), SCANskins.SCAN_insColorLabel);
-				fillS(-10);
+					infoLabel += string.Format("\nAltitude: {0}", SCANuiUtil.distanceString(h, 100000));
 
 				//Calculate slope less frequently; the rapidly changing value makes it difficult to read otherwise
 				if (v.mainBody.pqsController != null)
@@ -255,47 +254,10 @@ namespace SCANsat.SCAN_UI
 						lastUpdate = Time.time;
 
 						slopeAVG = SCANUtil.slope(pqs, v.mainBody, vlon, vlat, degreeOffset);
-
-
-
-						/* Slope is calculated using a nine point grid centered 5m around the vessel location
-						 * The rise between the vessel location's elevation and each point on the grid is calculated, converted to slope in degrees, and averaged;
-						 * Note: Averageing is not the most accurate method
-						 */
-
-						//double latOffset = degreeOffset * Math.Cos(Mathf.Deg2Rad * vlat);
-						//double[] e = new double[9];
-						//double[] s = new double[8];
-						//e[0] = pqs;
-						//e[1] = SCANUtil.getElevation(v.mainBody, vlon + latOffset, vlat);
-						//e[2] = SCANUtil.getElevation(v.mainBody, vlon - latOffset, vlat);
-						//e[3] = SCANUtil.getElevation(v.mainBody, vlon, vlat + degreeOffset);
-						//e[4] = SCANUtil.getElevation(v.mainBody, vlon, vlat - degreeOffset);
-						//e[5] = SCANUtil.getElevation(v.mainBody, vlon + latOffset, vlat + degreeOffset);
-						//e[6] = SCANUtil.getElevation(v.mainBody, vlon + latOffset, vlat - degreeOffset);
-						//e[7] = SCANUtil.getElevation(v.mainBody, vlon - latOffset, vlat + degreeOffset);
-						//e[8] = SCANUtil.getElevation(v.mainBody, vlon - latOffset, vlat - degreeOffset);
-
-						///* Calculate rise for each point on the grid
-						// * The distance is 5m for adjacent points and 7.071m for the points on the corners
-						// * Rise is converted to slope; i.e. a 5m elevation change over a 5m distance is a rise of 1
-						// * Converted to slope using the inverse tangent this gives a slope of 45°
-						// * */
-						//for (int i = 1; i <= 4; i++)
-						//{
-						//	s[i - 1] = Math.Atan((Math.Abs(e[i] - e[0])) / 5) * Mathf.Rad2Deg;
-						//}
-						//for (int i = 5; i <= 8; i++)
-						//{
-						//	s[i - 1] = Math.Atan((Math.Abs(e[i] - e[0])) / 7.071) * Mathf.Rad2Deg;
-						//}
-
-						//slopeAVG = s.Sum() / 8;
-
+						slopeString = string.Format("\nSlope: {0:F2}°", slopeAVG);
 					}
 
-					GUILayout.Label(string.Format("Slope: {0:F2}°", slopeAVG), SCANskins.SCAN_insColorLabel);
-					fillS(-10);
+					infoLabel += slopeString;
 				}
 			}
 		}
@@ -329,13 +291,11 @@ namespace SCANsat.SCAN_UI
 
 				if (tooHigh)
 				{
-					GUILayout.Label(string.Format("{0}: Too High", resources[currentResource].Name), SCANskins.SCAN_insColorLabel);
-					fillS(-10);
+					infoLabel += string.Format("\n{0}: Too High", resources[currentResource].Name);
 				}
 				else if (!scanner)
 				{
-					GUILayout.Label(string.Format("{0}: No Scanner", resources[currentResource].Name), SCANskins.SCAN_insColorLabel);
-					fillS(-10);
+					infoLabel += string.Format("\n{0}: No Scanner", resources[currentResource].Name);
 				}
 				else
 				{
@@ -346,13 +306,37 @@ namespace SCANsat.SCAN_UI
 			{
 				resourceLabel(resources[currentResource]);
 			}
+		}
 
+		private void resourceLabel(SCANresourceGlobal r)
+		{
+			if ((sensors & r.SType) != SCANtype.Nothing)
+			{
+				infoLabel += string.Format("\n{0}: {1:P2}", r.Name, SCANUtil.ResourceOverlay(vlat, vlon, r.Name, v.mainBody, SCANcontroller.controller.resourceBiomeLock));
+			}
+			else if ((sensors & SCANtype.FuzzyResources) != SCANtype.Nothing)
+			{
+				infoLabel += string.Format("\n{0}: {1:P0}", r.Name, SCANUtil.ResourceOverlay(vlat, vlon, r.Name, v.mainBody, SCANcontroller.controller.resourceBiomeLock));
+			}
+			else
+			{
+				infoLabel += string.Format("\n{0}: No Data", r.Name);
+			}
+		}
+
+		private void drawInfoLabel(int id)
+		{
+			GUILayout.Label(infoLabel, SCANskins.SCAN_insColorLabel);
+		}
+
+		private void drawResourceButtons(int id)
+		{
 			if (resources.Count > 1)
 			{
 				Rect r = GUILayoutUtility.GetLastRect();
 
 				r.x = 8;
-				r.y -= 30;
+				r.y = r.yMax - 30;
 				r.width = 18;
 				r.height = 28;
 
@@ -374,31 +358,12 @@ namespace SCANsat.SCAN_UI
 			}
 		}
 
-		private void resourceLabel(SCANresourceGlobal r)
-		{
-			if ((sensors & r.SType) != SCANtype.Nothing)
-			{
-				GUILayout.Label(string.Format("{0}: {1:P2}", r.Name, SCANUtil.ResourceOverlay(vlat, vlon, r.Name, v.mainBody, SCANcontroller.controller.resourceBiomeLock)), SCANskins.SCAN_insColorLabel);
-				fillS(-10);
-			}
-			else if ((sensors & SCANtype.FuzzyResources) != SCANtype.Nothing)
-			{
-				GUILayout.Label(string.Format("{0}: {1:P0}", r.Name, SCANUtil.ResourceOverlay(vlat, vlon, r.Name, v.mainBody, SCANcontroller.controller.resourceBiomeLock)), SCANskins.SCAN_insColorLabel);
-				fillS(-10);
-			}
-			else
-			{
-				GUILayout.Label(string.Format("{0}: No Data", r.Name), SCANskins.SCAN_insColorLabel);
-				fillS(-10);
-			}
-		}
-
 		//Display info on the nearest anomaly *Need to separate the BTDT display*
 		private void anomalyInfo(int id)
 		{
 			if ((sensors & SCANtype.AnomalyDetail) != SCANtype.Nothing)
 			{
-				SCANanomaly nearest = null;
+				nearest = null;
 				double nearest_dist = -1;
 				foreach (SCANanomaly a in data.Anomalies)
 				{
@@ -416,27 +381,41 @@ namespace SCANsat.SCAN_UI
 				}
 				if (nearest != null)
 				{
-					string txt = "Anomaly";
+					string txt = "";
 					if (nearest.Detail)
 						txt = nearest.Name;
-					txt += ":  " + SCANuiUtil.distanceString(nearest_dist, 5000);
-					GUILayout.Label(txt, SCANskins.SCAN_insColorLabel);
+					else
+						txt += "Anomaly";
 
-					if (anomalyView == null)
-						anomalyView = new SCANremoteView();
-					if (anomalyView != null)
+					fillS(-10);
+					GUILayout.Label(txt, SCANskins.SCAN_insColorLabel);
+				}
+			}
+			else
+				nearest = null;
+		}
+
+		private void drawBTDTInfo(int id)
+		{
+			if (nearest == null)
+				return;
+
+			if (!nearest.Detail)
+				return;
+
+			if (anomalyView == null)
+				anomalyView = new SCANremoteView();
+			if (anomalyView != null)
+			{
+				if (nearest.Mod != null)
+				{
+					if (anomalyView.lookat != nearest.Mod.gameObject)
+						anomalyView.setup(320, 240, nearest.Mod.gameObject);
+					Texture t = anomalyView.getTexture();
+					if (t != null)
 					{
-						if (nearest.Mod != null)
-						{
-							if (anomalyView.lookat != nearest.Mod.gameObject)
-								anomalyView.setup(320, 240, nearest.Mod.gameObject);
-							Texture t = anomalyView.getTexture();
-							if (t != null)
-							{
-								GUILayout.Label(anomalyView.getTexture());
-								anomalyView.drawOverlay(GUILayoutUtility.GetLastRect(), SCANskins.SCAN_anomalyOverlay, nearest.Detail);
-							}
-						}
+						GUILayout.Label(anomalyView.getTexture());
+						anomalyView.drawOverlay(GUILayoutUtility.GetLastRect(), SCANskins.SCAN_anomalyOverlay, nearest.Detail);
 					}
 				}
 			}
