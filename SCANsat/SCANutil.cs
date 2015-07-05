@@ -180,10 +180,10 @@ namespace SCANsat
 		}
 
 		/// <summary>
-		/// Does the zoom map resource overlay require a narrow-band scanner in orbit?
+		/// Is a narrow-band scanner required on the current vessel for full resource data?
 		/// </summary>
 		/// <returns>Returns true if a narrow-band scanner is required</returns>
-		public static bool zoomWindowResourceRestrictionEnabled()
+		public static bool narrowBandResourceRestrictionEnabled()
 		{
 			if (SCANcontroller.controller == null)
 				return true;
