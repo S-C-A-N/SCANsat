@@ -1,8 +1,20 @@
-﻿using System;
+﻿#region license
+/*  [Scientific Committee on Advanced Navigation]
+ * 			S.C.A.N. Satellite
+ *
+ * SCANresourceDisplay - Resource abundance display
+ * 
+ * Copyright (c)2013 damny;
+ * Copyright (c)2014 technogeeky <technogeeky@gmail.com>;
+ * Copyright (c)2014 DMagic
+ * Copyright (c)2014 (Your Name Here) <your email here>; see LICENSE.txt for licensing details.
+ */
+#endregion
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using SCANsat.SCAN_Data;
-
 
 namespace SCANsat.SCAN_PartModules
 {
@@ -68,7 +80,7 @@ namespace SCANsat.SCAN_PartModules
 		{
 			if (m != null)
 			{
-				SCANUtil.SCANlog("Resource Display Module set to Max Alt: {0} ; Unlock: {1}", m.MaxAbundanceAltitude, m.RequiresUnlock);
+				SCANUtil.SCANlog("{0} Resource Display Module set to Max Alt: {1} ; Unlock: {2}", m.ResourceName, m.MaxAbundanceAltitude, m.RequiresUnlock);
 				MaxAbundanceAltitude = m.MaxAbundanceAltitude;
 				RequiresUnlock = m.RequiresUnlock;
 			}

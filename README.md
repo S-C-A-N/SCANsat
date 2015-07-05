@@ -171,8 +171,8 @@ S.C.A.N. is proud to collaborate with other KSP mods and modding teams. Followin
 [**RasterPropMonitor**][rpm:release]  | 
 
 * **SCANsat**
-  * [x] [**v12.0**][SCANsat:rel-thread] SCANsat Release **version: v12.0**
-  * [x] [**v13.0**][SCANsat:dev-thread] SCANsat Dev **version: v13.0**
+  * [x] [**v14.0**][SCANsat:rel-thread] SCANsat Release **version: v14.0**
+  * [x] [**v15.0**][SCANsat:dev-thread] SCANsat Dev **version: v15.0**
 
  **MM**, **RPM**, **MechJeb**, and **Toolbar** are all **soft** dependencies. This means your experience with SCANsat will be enhanced if you are using these mods, but they are not necessary.
 
@@ -829,7 +829,7 @@ sneaky then they can of course be sneaky.
 [shield:support-epl]: http://img.shields.io/badge/works%20with%20EPL-4.2.3-ff8c00.svg
 [shield:support-ccfg]: https://img.shields.io/badge/works%20with%20Contract%20Configurator-1.x-yellowgreen.svg
 [shield:ckan]: https://img.shields.io/badge/CKAN-Indexed-brightgreen.svg
-[shield:support-mechjeb]: http://img.shields.io/badge/works%20with%20MechJeb-2.5.1-lightgrey.svg
+[shield:support-mechjeb]: http://img.shields.io/badge/works%20with%20MechJeb-2.5.2-lightgrey.svg
 
 [shield:gittip-tg-img]: http://img.shields.io/gittip/technogeeky.png
 [shield:gittip-tg]: https://www.gittip.com/technogeeky/

@@ -1,110 +1,100 @@
-Version 13.4 - 2015-7-3
+Version 14.0 - 2014-7-5
 ------------------------
 
+- Updated for KSP 1.0.4
+
+- Updated for MechJeb 2.5.2
+
+- Resource Scanning System Overhaul
+------------------------
+
+- Replaces or augments most aspects of the stock surface resource scanning system
+
+	- New option available to disable stock scanning
+		- Disables the orbital survey
+		- Replaces the resource concentration readout from scanners with SCANsat modules
+		- Replaces the resource map found on Narrow-Band scanners with a modified SCANsat zoom map
+		- Right-click menu resource concentration readout dependent on SCANsat scanning coverage 
+		- Stock resource scanning data can be erased for each planet (does not affect resource biome scanning data)
+
+	- Stock resource parts adapted for SCANsat resource scanning
+		- Module Manager required for SCANsat resource scanning
+		- M700 (clamshell) scanner used for low-resolution resource scanning; covers all resources
+			- A one-time patch on updating will deactivate all resource scanners to prevent existing M700 scanners from being used as they were in version 12
+		- Narrow-band scanners used for high-resolution, individual resource scanning
+
+	- Planetary map overlay
+		- New window to control resource, terrain, and biome map overlays
+		- Biome overlays limited to stock color scheme for now
+		- Tooltips for overlays when the mouse cursor is over the planet
+		- Overlay window buttons added to the big map and small map windows; also added to the Toolbar menu
+		- Select between all available resources, terrain maps, and biome maps
+
+	- Resource settings window
+		- New window to control resource options and planetary overlay quality
+		- Biome lock, instant scan, and narrow-band scanner options are the same as in previous versions
+		- The instant scan option is automatically disabled when Disable Stock Resources is activated
+		- Both SCANsat and stock resource scanning data for the current planet can be reset
+		- Interpolation and map overlay size can be configured
+		- Biome maps use twice the map height as resource maps (512*256 for resources; 1024*512 for biomes by default)
+		- Coverage Transparency option shows scanned areas in grey if there are no resources present; useful for determining what areas have already been scanned
+		
+	- SCAN High Definition Camera
+		- New part module to replace the stock hi def camera, found on the narrow-band scanner
+		- Opens a modified SCANsat zoom window
+		- Only active when stock resource scanning is disabled
+
+- Other Updates
+------------------------
+		
+- SCANsat big map
+	- Resource overlay now matches the planetary overlay more closely
+	- Interpolation is used to generate the resource map overlay; this greatly speeds up big map rendering speed
+	- Zoom map uses more accurate interpolation method for resource overlays
+	- Biome maps can be generated without the white border
+	
 - Add ground track display for scanning vessels while in map mode
 	- Scanning width is displayed for the widest FOV
 	- Width is only accurate at the equator
-	
-- Fix SCAN Hi Def camera when used near the poles
-- Fix bug allowing scanners to continue scanning without power
-- Fix a bug with scanning near the poles
-- Fix a bug causing duplicate grid lines to be drawn on the space center map
-- Fix adding SCANsat resource abundance display module to parts that require multiple modules
-- Stop animations when they reach their endpoints - may prevent FAR from getting stuck recalculating the vessel surface
-- Slower update for planetary overlay tooltips; makes them easier to read
-- Various UI tweaks and improvements to internal UI code
-
-Version 13.3 - 2015-6-28
-------------------------
-
-- SCAN High Definition Camera
-	- New part module to replace the stock hi def camera, found on the narrow-band scanner
-	- Opens a modified SCANsat zoom window
-	- Only active when stock resource scanning is disabled
-	
-- Planetary Overlay
-	- New terrain map planetary overlay
-	- Tooltips for overlays
 	
 - Terrain height map databases generated in the background
 	- Maps generated once per game session for each planet
 	- These maps are used to generate the small map and the terrain planetary overlay
 	- Performance impact during map generation is negligible
 	- Greatly speeds up small map rendering and terrain overlays
+	- An accelerated map generation method is used if the small map is open or a terrain overlay is selected from a planet which doesn't have its terrain map already created
 	
-- Resource selector on zoom map
+- A resource selection drop down has been added to the zoom map
+	- Can be used to change the seleceted resource or disable the overlay
 	
 - Instrument window resource readout
-	
-- Misc bug fixes and changes
-	- A one-time patch disables all resource scanners upon loading; subsequent loading will work as normal
-		- All resource scanners will need to be cycled on and off
-	- Highlight active selection in drop down menus
-	- Planetary overlay map settings persistent
+	- Resource abundance at the current location is displayed on the instruments window
+	- When more than one resource is present buttons along the side allow for switching the resource readout
+	- Narrow-band scanner restrictions apply if that option is selected in the resource settings window
+
+
+- Bug Fixes and Misc Features
+------------------------
+
+	- Waypoint location correct when waypoint coordinates are stored with nonsense values (ie. -120 S...)
+	- Active vessel properly updates for the big map orbit display
 	- Prevent pole scanning overlap at the north pole
 	- Fixed slope calculation over water
 	- Fix bug when applying terrain color config to non-clamped color scheme
-	- Fix bug with detecting narrow-band scanners for zoom map resource overlays
-	- Fix bug causing resource scanners to deactivate upon loading
-	- Fix bug with landed resource scanners
 	- Fix bug with orbit overlays in zoom map
+	- Fix bug allowing scanners to continue scanning without power
+	- Fix another bug with scanning near the poles
+	- Fix a bug causing duplicate grid lines to be drawn on the space center map
 
+	- Highlight active selection in drop down menus
+	- Stop animations when they reach their endpoints - may prevent FAR from getting stuck recalculating the vessel surface
+	- Various UI tweaks and updates
 
-Version 13.2 - 2015-6-11
-------------------------
+- Updates from Version 13.4
 
-- Fix planetary overlay memory usage
-
-- Make resource settings window accessible in the Space Center scene and from the toolbar menu
-
-- Fixes for resource abundance scanners
-    - Correctly calculate height above terrain
-    - Right-click display fields should activate and deactivate properly
-
-- Fix zoom map resource overlays near the edges of the map and when using polar projection
-
-- Fix Tylo biome scanning bug
-
-Version 13.1 - 2015-6-6
-------------------------
-
-- Resource Scanning Overhaul
-
-- New option available to disable stock scanning
-	- Disables the orbital survey
-	- Replaces the resource concentration readout from scanners with SCANsat modules
-	- Right-click menu resource concentration readout dependent on SCANsat scanning coverage 
-	- Stock resource scanning data can be erased for each planet (does not affect resource biome scanning data)
-
-- Stock resource parts adapted for SCANsat resource scanning
-	- Module Manager required for SCANsat resource scanning
-	- M700 (clamshell) scanner used for low-resolution resource scanning; covers all resources
-	- Narrow-band scanners used for high-resolution, individual resource scanning
-
-- Planetary map overlay
-	- New window to control resource and biome map overlays
-	- Biome overlays limited to stock color scheme for now
-	- Overlay window buttons added to the big map and small map windows; also added to the Toolbar menu
-	- Select between all available resources and biome maps
-	- Coverage Transparency option shows scanned areas in grey if there are no resources present
-
-- Resource settings window
-	- New window to control resource options and planetary overlay quality
-	- Biome lock, instant scan, and zoom window options are the same as in previous versions
-	- The instant scan option is automatically disabled when Disable Stock Resources is activated
-	- Both SCANsat and stock resource scanning data for the current planet can be reset
-	- Interpolation and map overlay size can be configured
-	- Biome maps use twice the map height as resource maps (512*256 for resources; 1024*512 for biomes by default)
+	- Fix ground tracks being displayed on the wrong planet
+	- Fix bug in overlay control window while a planet's terrain map is being generated
 	
-- SCANsat big map
-	- Resource overlay now matches the planetary overlay more closely
-	- Interpolation is used to generate the map overlay; this greatly speeds up big map rendering speed
-	- Zoom map uses more accurate interpolation method
-	- Biome maps can be generated without the white border
-	
-- Bug Fixes
-	- Waypoint location correct when waypoint coordinates are stored with nonsense values (ie. -120 S...)
-	- Active vessel properly updates for the big map orbit display
 
 Version 12.1 - 2015-5-30
 ------------------------

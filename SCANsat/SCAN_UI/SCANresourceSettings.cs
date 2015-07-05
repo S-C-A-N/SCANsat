@@ -1,6 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿#region license
+/*  [Scientific Committee on Advanced Navigation]
+ * 			S.C.A.N. Satellite
+ *
+ * SCANresourceSettings - Window for resource scanning options
+ * 
+ * Copyright (c)2013 damny;
+ * Copyright (c)2014 technogeeky <technogeeky@gmail.com>;
+ * Copyright (c)2014 DMagic
+ * Copyright (c)2014 (Your Name Here) <your email here>; see LICENSE.txt for licensing details.
+ */
+#endregion
+
+using System;
 using SCANsat.SCAN_Data;
 using SCANsat.SCAN_UI.UI_Framework;
 using SCANsat.SCAN_Platform;
