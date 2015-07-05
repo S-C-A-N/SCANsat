@@ -1,4 +1,17 @@
-﻿using System;
+﻿#region license
+/*  [Scientific Committee on Advanced Navigation]
+ * 			S.C.A.N. Satellite
+ *
+ * SCANoverlayController - Window to control the planetary overlay maps
+ * 
+ * Copyright (c)2013 damny;
+ * Copyright (c)2014 technogeeky <technogeeky@gmail.com>;
+ * Copyright (c)2014 DMagic
+ * Copyright (c)2014 (Your Name Here) <your email here>; see LICENSE.txt for licensing details.
+ */
+#endregion
+
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -150,9 +163,6 @@ namespace SCANsat.SCAN_UI
 		{
 			for (int i = 0; i < resources.Count; i++)
 			{
-				if (mapGenerating)
-					return;
-
 				SCANresourceGlobal r = resources[i];
 
 				if (r == null)
@@ -160,6 +170,9 @@ namespace SCANsat.SCAN_UI
 
 				if (GUILayout.Button(r.Name, selection == i ? SCANskins.SCAN_labelLeftActive : SCANskins.SCAN_labelLeft))
 				{
+					if (mapGenerating)
+						return;
+
 					OverlayGenerator.Instance.ClearDisplay();
 
 					if (selection != i)
