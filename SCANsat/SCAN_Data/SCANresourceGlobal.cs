@@ -44,8 +44,9 @@ namespace SCANsat.SCAN_Data
 
 		private Color defaultLowColor;
 		private Color defaultHighColor;
+		private Color32 lowColor32;
+		private Color32 highColor32;
 		private float defaultTrans;
-		private Texture2D mapOverlay;
 
 		private SCANresourceBody currentBody;
 
@@ -55,6 +56,8 @@ namespace SCANsat.SCAN_Data
 			resourceTransparency = trans;
 			lowResourceColor = minC;
 			highResourceColor = maxC;
+			lowColor32 = (Color32)lowResourceColor;
+			highColor32 = (Color32)highResourceColor;
 			defaultMinValue = defMin;
 			defaultMaxValue = defMax;
 			resourceType = t;
@@ -73,6 +76,8 @@ namespace SCANsat.SCAN_Data
 			resourceTransparency = copy.resourceTransparency;
 			lowResourceColor = copy.lowResourceColor;
 			highResourceColor = copy.highResourceColor;
+			lowColor32 = copy.lowColor32;
+			highColor32 = copy.highColor32;
 			sType = copy.sType;
 			resourceType = copy.resourceType;
 			masterBodyConfigs = copyBodyConfigs(copy);
@@ -100,6 +105,9 @@ namespace SCANsat.SCAN_Data
 		{
 			resourceType = SCANcontroller.getResourceType(name);
 			sType = resourceType.Type;
+
+			lowColor32 = (Color32)lowResourceColor;
+			highColor32 = (Color32)highResourceColor;
 
 			setDefaultValues();
 			try
@@ -171,13 +179,31 @@ namespace SCANsat.SCAN_Data
 		public Color MinColor
 		{
 			get { return lowResourceColor; }
-			internal set { lowResourceColor = value; }
+			internal set
+			{
+				lowResourceColor = value;
+				lowColor32 = (Color32)value;
+			}
 		}
 
 		public Color MaxColor
 		{
 			get { return highResourceColor; }
-			internal set { highResourceColor = value; }
+			internal set
+			{
+				highResourceColor = value;
+				highColor32 = (Color32)value;
+			}
+		}
+
+		public Color32 MinColor32
+		{
+			get { return lowColor32; }
+		}
+
+		public Color32 MaxColor32
+		{
+			get { return highColor32; }
 		}
 
 		public float DefaultMinValue
@@ -261,12 +287,6 @@ namespace SCANsat.SCAN_Data
 		public float DefaultTrans
 		{
 			get { return defaultTrans; }
-		}
-
-		public Texture2D MapOverlay
-		{
-			get { return mapOverlay; }
-			set { mapOverlay = value; }
 		}
 	}
 }

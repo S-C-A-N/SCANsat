@@ -43,6 +43,7 @@ namespace SCANsat.SCAN_UI
 		private float bTrans, rTrans;
 
 		private bool stockBiomes = false;
+		private bool biomeBorders = true;
 
 		private SCANresourceGlobal currentResource;
 		private float lowRCutoff, highRCutoff;
@@ -111,6 +112,7 @@ namespace SCANsat.SCAN_UI
 			currentTerrain = new SCANterrainConfig(data.TerrainConfig);
 
 			stockBiomes = SCANcontroller.controller.useStockBiomes;
+			biomeBorders = SCANcontroller.controller.biomeBorder;
 
 			minTerrainSlider = new SCANuiSlider(data.TerrainConfig.DefaultMinHeight - SCANconfigLoader.SCANNode.RangeBelowMinHeight, data.TerrainConfig.MaxTerrain - 100, data.TerrainConfig.MinTerrain, "Min: ", "m", -2);
 			maxTerrainSlider = new SCANuiSlider(data.TerrainConfig.MinTerrain + 100, data.TerrainConfig.DefaultMaxHeight + SCANconfigLoader.SCANNode.RangeAboveMaxHeight, data.TerrainConfig.MaxTerrain, "Max: ", "m", -2);
@@ -637,12 +639,12 @@ namespace SCANsat.SCAN_UI
 					fillS();
 				stopE();
 				if (clampState)
-					{
-						growE();
-							fillS(10);
-							currentTerrain.ClampTerrain = clampTerrainSlider.drawSlider(false, ref clampT);
-						stopE();
-					}
+				{
+					growE();
+						fillS(10);
+						currentTerrain.ClampTerrain = clampTerrainSlider.drawSlider(false, ref clampT);
+					stopE();
+				}
 				fillS(6);
 				GUILayout.Label("Palette Options", SCANskins.SCAN_headlineSmall);
 				if (palette.CurrentPalettes.paletteType != Palette.Kind.Fixed)
@@ -690,6 +692,9 @@ namespace SCANsat.SCAN_UI
 						{
 							if (GUILayout.Button("Apply Values", GUILayout.Width(110)))
 							{
+								if (!clampState)
+									currentTerrain.ClampTerrain = null;
+
 								SCANcontroller.updateTerrainConfig(currentTerrain);
 
 								updateUI();
@@ -697,7 +702,7 @@ namespace SCANsat.SCAN_UI
 								if (bigMap != null)
 								{
 									if (bigMap.MType == mapType.Altimetry && SCANcontroller.controller.colours == 0)
-										bigMap.resetMap();
+										bigMap.resetMap(SCANcontroller.controller.map_ResourceOverlay);
 								}
 							}
 
@@ -718,7 +723,7 @@ namespace SCANsat.SCAN_UI
 								if (bigMap != null)
 								{
 									if (bigMap.MType == mapType.Altimetry && SCANcontroller.controller.colours == 0)
-										bigMap.resetMap();
+										bigMap.resetMap(SCANcontroller.controller.map_ResourceOverlay);
 								}
 							}
 						}
@@ -749,6 +754,8 @@ namespace SCANsat.SCAN_UI
 
 			fillS(20);
 			stockBiomes = GUILayout.Toggle(stockBiomes, "Use Stock Biome Maps", SCANskins.SCAN_toggle);
+			fillS(8);
+			biomeBorders = GUILayout.Toggle(biomeBorders, "White Biome Borders", SCANskins.SCAN_toggle);
 			fillS(8);
 			growE();
 				fillS(10);
@@ -809,8 +816,11 @@ namespace SCANsat.SCAN_UI
 					if (GUILayout.Button("Apply Values", GUILayout.Width(110)))
 					{
 						SCANcontroller.controller.lowBiomeColor = biomeColorPicker.ColorLow;
+						SCANcontroller.controller.lowBiomeColor32 = biomeColorPicker.ColorLow;
 						SCANcontroller.controller.highBiomeColor = biomeColorPicker.ColorHigh;
+						SCANcontroller.controller.highBiomeColor32 = biomeColorPicker.ColorHigh;
 						SCANcontroller.controller.useStockBiomes = stockBiomes;
+						SCANcontroller.controller.biomeBorder = biomeBorders;
 						SCANcontroller.controller.biomeTransparency = bTrans;
 
 						biomeColorPicker.updateOldSwatches();
@@ -818,7 +828,7 @@ namespace SCANsat.SCAN_UI
 						if (bigMap != null)
 						{
 							if (bigMap.MType == mapType.Biome)
-								bigMap.resetMap();
+								bigMap.resetMap(SCANcontroller.controller.map_ResourceOverlay);
 						}
 					}
 
@@ -827,11 +837,15 @@ namespace SCANsat.SCAN_UI
 					if (GUILayout.Button("Default Values", GUILayout.Width(110)))
 					{
 						SCANcontroller.controller.lowBiomeColor = SCANconfigLoader.SCANNode.LowBiomeColor;
+						SCANcontroller.controller.lowBiomeColor32 = SCANconfigLoader.SCANNode.LowBiomeColor;
 						SCANcontroller.controller.highBiomeColor = SCANconfigLoader.SCANNode.HighBiomeColor;
+						SCANcontroller.controller.highBiomeColor32 = SCANconfigLoader.SCANNode.HighBiomeColor;
 						SCANcontroller.controller.useStockBiomes = SCANconfigLoader.SCANNode.StockBiomeMap;
+						SCANcontroller.controller.biomeBorder = SCANconfigLoader.SCANNode.BiomeBorder;
 						SCANcontroller.controller.biomeTransparency = SCANconfigLoader.SCANNode.BiomeTransparency;
 
-						stockBiomes = false;
+						stockBiomes = SCANcontroller.controller.useStockBiomes;
+						biomeBorders = SCANcontroller.controller.biomeBorder;
 
 						biomeColorPicker = new SCANuiColorPicker(SCANcontroller.controller.lowBiomeColor, SCANcontroller.controller.highBiomeColor, biomeColorPicker.LowColorChange);
 
@@ -842,7 +856,7 @@ namespace SCANsat.SCAN_UI
 						if (bigMap != null)
 						{
 							if (bigMap.MType == mapType.Biome)
-								bigMap.resetMap();
+								bigMap.resetMap(SCANcontroller.controller.map_ResourceOverlay);
 						}
 					}
 				}
@@ -876,6 +890,10 @@ namespace SCANsat.SCAN_UI
 					SCANcontroller.controller.highSlopeColorOne = slopeColorPickerLow.ColorHigh;
 					SCANcontroller.controller.lowSlopeColorTwo = slopeColorPickerHigh.ColorLow;
 					SCANcontroller.controller.highSlopeColorTwo = slopeColorPickerHigh.ColorHigh;
+					SCANcontroller.controller.lowSlopeColorOne32 = slopeColorPickerLow.ColorLow;
+					SCANcontroller.controller.highSlopeColorOne32 = slopeColorPickerLow.ColorHigh;
+					SCANcontroller.controller.lowSlopeColorTwo32 = slopeColorPickerHigh.ColorLow;
+					SCANcontroller.controller.highSlopeColorTwo32 = slopeColorPickerHigh.ColorHigh;
 
 					slopeColorPickerLow.updateOldSwatches();
 					slopeColorPickerHigh.updateOldSwatches();
@@ -883,7 +901,7 @@ namespace SCANsat.SCAN_UI
 					if (bigMap != null)
 					{
 						if (bigMap.MType == mapType.Slope)
-							bigMap.resetMap();
+							bigMap.resetMap(SCANcontroller.controller.map_ResourceOverlay);
 					}
 
 				}
@@ -896,6 +914,10 @@ namespace SCANsat.SCAN_UI
 					SCANcontroller.controller.highSlopeColorOne = SCANconfigLoader.SCANNode.BottomHighSlopeColor;
 					SCANcontroller.controller.lowSlopeColorTwo = SCANconfigLoader.SCANNode.TopLowSlopeColor;
 					SCANcontroller.controller.highSlopeColorTwo = SCANconfigLoader.SCANNode.TopHighSlopeColor;
+					SCANcontroller.controller.lowSlopeColorOne32 = SCANconfigLoader.SCANNode.BottomLowSlopeColor;
+					SCANcontroller.controller.highSlopeColorOne32 = SCANconfigLoader.SCANNode.BottomHighSlopeColor;
+					SCANcontroller.controller.lowSlopeColorTwo32 = SCANconfigLoader.SCANNode.TopLowSlopeColor;
+					SCANcontroller.controller.highSlopeColorTwo32 = SCANconfigLoader.SCANNode.TopHighSlopeColor;
 
 					slopeColorPickerLow = new SCANuiColorPicker(SCANcontroller.controller.lowSlopeColorOne, SCANcontroller.controller.highSlopeColorOne, slopeColorPickerLow.LowColorChange);
 					slopeColorPickerHigh = new SCANuiColorPicker(SCANcontroller.controller.lowSlopeColorTwo, SCANcontroller.controller.highSlopeColorTwo, slopeColorPickerHigh.LowColorChange);
@@ -906,7 +928,7 @@ namespace SCANsat.SCAN_UI
 					if (bigMap != null)
 					{
 						if (bigMap.MType == mapType.Slope)
-							bigMap.resetMap();
+							bigMap.resetMap(SCANcontroller.controller.map_ResourceOverlay);
 					}
 				}
 
@@ -944,7 +966,7 @@ namespace SCANsat.SCAN_UI
 						updateUI();
 
 						if (bigMap != null && SCANcontroller.controller.map_ResourceOverlay)
-							bigMap.resetMap();
+							bigMap.resetMap(SCANcontroller.controller.map_ResourceOverlay);
 					}
 
 					fillS(6);
@@ -969,7 +991,7 @@ namespace SCANsat.SCAN_UI
 						updateUI();
 
 						if (bigMap != null && SCANcontroller.controller.map_ResourceOverlay)
-							bigMap.resetMap();
+							bigMap.resetMap(SCANcontroller.controller.map_ResourceOverlay);
 					}
 				}
 				else
@@ -996,7 +1018,7 @@ namespace SCANsat.SCAN_UI
 						updateUI();
 
 						if (bigMap != null && SCANcontroller.controller.map_ResourceOverlay)
-							bigMap.resetMap();
+							bigMap.resetMap(SCANcontroller.controller.map_ResourceOverlay);
 					}
 
 					fillS(6);
@@ -1022,7 +1044,7 @@ namespace SCANsat.SCAN_UI
 						updateUI();
 
 						if (bigMap != null && SCANcontroller.controller.map_ResourceOverlay)
-							bigMap.resetMap();
+							bigMap.resetMap(SCANcontroller.controller.map_ResourceOverlay);
 					}
 				}
 				else
@@ -1073,7 +1095,7 @@ namespace SCANsat.SCAN_UI
 					{
 						scrollR = GUI.BeginScrollView(ddRect, scrollR, new Rect(0, 0, 140, 23 * loadedResources.Count));
 						Rect r = new Rect(2, i * 23, 136, 22);
-						if (GUI.Button(r, loadedResources[i].Name, SCANskins.SCAN_dropDownButton))
+						if (GUI.Button(r, loadedResources[i].Name, currentResource.Name == loadedResources[i].Name ? SCANskins.SCAN_dropDownButtonActive : SCANskins.SCAN_dropDownButton))
 						{
 							currentResource = new SCANresourceGlobal(loadedResources[i]);
 							currentResource.CurrentBodyConfig(data.Body.name);
@@ -1166,7 +1188,7 @@ namespace SCANsat.SCAN_UI
 			if (currentTerrain.PalRev)
 				c = currentTerrain.ColorPal.colorsReverse;
 			previewLegend = new SCANmapLegend();
-			previewLegend.Legend = previewLegend.getLegend(maxT, minT, clamp, currentTerrain.PalDis, c);
+			previewLegend.Legend = previewLegend.getLegend(maxT, minT, maxT - minT, clamp, currentTerrain.PalDis, c);
 		}
 
 		//Resets the palettes whenever the size slider is adjusted

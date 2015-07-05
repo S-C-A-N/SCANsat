@@ -23,6 +23,7 @@ using SCANsat.SCAN_Platform.Palettes;
 using SCANsat.SCAN_Platform.Palettes.ColorBrewer;
 using SCANsat.SCAN_Platform.Palettes.FixedColors;
 using SCANsat.SCAN_Data;
+using SCANsat.SCAN_UI.UI_Framework;
 using palette = SCANsat.SCAN_UI.UI_Framework.SCANpalette;
 
 namespace SCANsat
@@ -142,6 +143,54 @@ namespace SCANsat
 			return SCANcontroller.controller.getData(BodyName);
 		}
 
+		/// <summary>
+		/// Do SCANsat maps automatically update with the stock, instant-scan orbital surveys?
+		/// </summary>
+		/// <returns>Returns true if instant scan is enabled</returns>
+		public static bool instantResourceScanEnabled()
+		{
+			if (SCANcontroller.controller == null)
+				return true;
+
+			return SCANcontroller.controller.easyModeScanning;
+		}
+
+		/// <summary>
+		/// Are the stock resource scanner functions disabled? prevents orbital resource surveys
+		/// </summary>
+		/// <returns>Returns true if stock resource scanning is available</returns>
+		public static bool stockResourceScanEnabled()
+		{
+			if (SCANcontroller.controller == null)
+				return false;
+
+			return !SCANcontroller.controller.disableStockResource;
+		}
+
+		/// <summary>
+		/// Is the stock resource biome lock enabled? reduced resource abundace accuracy if enabled
+		/// </summary>
+		/// <returns>Returns true if the biome lock is enabled</returns>
+		public static bool resourceBiomeLockEnabled()
+		{
+			if (SCANcontroller.controller == null)
+				return true;
+
+			return SCANcontroller.controller.resourceBiomeLock;
+		}
+
+		/// <summary>
+		/// Is a narrow-band scanner required on the current vessel for full resource data?
+		/// </summary>
+		/// <returns>Returns true if a narrow-band scanner is required</returns>
+		public static bool narrowBandResourceRestrictionEnabled()
+		{
+			if (SCANcontroller.controller == null)
+				return true;
+
+			return SCANcontroller.controller.needsNarrowBand;
+		}
+
 		#endregion
 
 		#region Internal Utilities
@@ -167,9 +216,9 @@ namespace SCANsat
 		}
 
 		internal static void registerPass ( double lon, double lat, SCANdata data, SCANtype type ) {
-			int ilon = SCANUtil.icLON(lon);
-			int ilat = SCANUtil.icLAT(lat);
-			if (SCANUtil.badLonLat(ilon, ilat)) return;
+			int ilon = icLON(lon);
+			int ilat = icLAT(lat);
+			if (badLonLat(ilon, ilat)) return;
 			data.Coverage[ilon, ilat] |= (Int32)type;
 		}
 
@@ -214,6 +263,33 @@ namespace SCANsat
 			return (lon + 360 + 180) % 360;
 		}
 
+		internal static Vector2d fixRetardCoordinates(Vector2d coords)
+		{
+			if (coords.y < -90)
+			{
+				while (coords.y < -90)
+					coords.y += 90;
+				coords.y = -90 + Math.Abs(coords.y);
+				coords.x = fixLonShift(coords.x + 180);
+
+				return coords;
+			}
+
+			if (coords.y > 90)
+			{
+				while (coords.y > 90)
+					coords.y -= 90;
+				coords.y = 90 - Math.Abs(coords.y);
+				coords.x = fixLonShift(coords.x - 180);
+
+				return coords;
+			}
+
+			coords.x = fixLonShift(coords.x);
+
+			return coords;
+		}
+
 		internal static double getElevation(CelestialBody body, double lon, double lat)
 		{
 			if (body.pqsController == null) return 0;
@@ -243,7 +319,7 @@ namespace SCANsat
 			return ret;
 		}
 
-		internal static float ResourceOverlay(double lat, double lon, string name, CelestialBody body)
+		internal static float ResourceOverlay(double lat, double lon, string name, CelestialBody body, bool biomeLock)
 		{
 			float amount = 0f;
 			var aRequest = new AbundanceRequest
@@ -254,7 +330,7 @@ namespace SCANsat
 				ResourceName = name,
 				ResourceType = HarvestTypes.Planetary,
 				Altitude = 0,
-				CheckForLock = SCANcontroller.controller.resourceBiomeLock,
+				CheckForLock = biomeLock,
 				BiomeName = getBiomeName(body, lon, lat),
 				ExcludeVariance = false,
 			};
@@ -263,7 +339,7 @@ namespace SCANsat
 			return amount;
 		}
 
-		internal static int getBiomeIndex(CelestialBody body, double lon , double lat)
+		private static int getBiomeIndex(CelestialBody body, double lon , double lat)
 		{
 			if (body.BiomeMap == null)		return -1;
 			double u = fixLon(lon);
@@ -290,6 +366,8 @@ namespace SCANsat
 		{
 			if (body.BiomeMap == null) return null;
 			int i = getBiomeIndex(body, lon , lat);
+			if (i == -1)
+				return null;
 			return body.BiomeMap.Attributes [i];
 		}
 
@@ -338,6 +416,190 @@ namespace SCANsat
 					SCANUtil.SCANlog("Error Loading Color Palette; Revert To Default: {0}", e);
 					return PaletteLoader.defaultPalette;
 				}
+			}
+		}
+
+		internal static CelestialBody getTargetBody(MapObject target)
+		{
+			if (target.type == MapObject.MapObjectType.CELESTIALBODY)
+			{
+				return target.celestialBody;
+			}
+			else if (target.type == MapObject.MapObjectType.MANEUVERNODE)
+			{
+				return target.maneuverNode.patch.referenceBody;
+			}
+			else if (target.type == MapObject.MapObjectType.VESSEL)
+			{
+				return target.vessel.mainBody;
+			}
+
+			return null;
+		}
+
+		internal static double slope(double centerElevation, CelestialBody body, double lon, double lat, double offset)
+		{
+			/* Slope is calculated using a nine point grid centered 5m around the vessel location
+						 * The rise between the vessel location's elevation and each point on the grid is calculated, converted to slope in degrees, and averaged;
+						 * Note: Averageing is not the most accurate method
+						 */
+
+			double latOffset = offset * Math.Cos(Mathf.Deg2Rad * lat);
+			double[] e = new double[9];
+			double[] s = new double[8];
+			e[0] = centerElevation;
+			e[1] = SCANUtil.getElevation(body, lon + latOffset, lat);
+			e[2] = SCANUtil.getElevation(body, lon - latOffset, lat);
+			e[3] = SCANUtil.getElevation(body, lon, lat + offset);
+			e[4] = SCANUtil.getElevation(body, lon, lat - offset);
+			e[5] = SCANUtil.getElevation(body, lon + latOffset, lat + offset);
+			e[6] = SCANUtil.getElevation(body, lon + latOffset, lat - offset);
+			e[7] = SCANUtil.getElevation(body, lon - latOffset, lat + offset);
+			e[8] = SCANUtil.getElevation(body, lon - latOffset, lat - offset);
+
+			if (body.ocean)
+			{
+				for (int i = 0; i < 9; i++)
+				{
+					if (e[i] < 0)
+						e[i] = 0;
+				}
+			}
+
+			return slope(e, 5);
+		}
+
+		internal static double slope (double[] elevations, double distance)
+		{
+			double[] s = new double[8];
+
+			/* Calculate rise for each point on the grid
+			 * The distance is 5m for adjacent points and 7.071m for the points on the corners
+			 * Rise is converted to slope; i.e. a 5m elevation change over a 5m distance is a rise of 1
+			 * Converted to slope using the inverse tangent this gives a slope of 45°
+			 * */
+
+			double diagonalDistance = Math.Sqrt(Math.Pow(distance, 2) * 2);
+
+			for (int i = 1; i <= 4; i++)
+			{
+				s[i - 1] = Math.Atan((Math.Abs(elevations[i] - elevations[0])) / distance) * Mathf.Rad2Deg;
+			}
+			for (int i = 5; i <= 8; i++)
+			{
+				s[i - 1] = Math.Atan((Math.Abs(elevations[i] - elevations[0])) / diagonalDistance) * Mathf.Rad2Deg;
+			}
+
+			return s.Sum() / 8;
+		}
+
+		internal static double slopeShort(double[] elevations, double distance)
+		{
+			double[] s = new double[4];
+
+			for (int i = 1; i <= 4; i++)
+			{
+				s[i - 1] = Math.Atan((Math.Abs(elevations[i] - elevations[0])) / distance) * Mathf.Rad2Deg;
+			}
+
+			return s.Sum() / 4;
+		}
+
+		internal static bool MouseIsOverWindow()
+		{
+			if (SCANcontroller.controller == null)
+				return false;
+
+			Vector2 pos = new Vector2(Input.mousePosition.x, Screen.height - Input.mousePosition.y);
+
+			if (SCANcontroller.controller.mainMapVisible && SCANcontroller.controller.mainMap.GetWindowRect.Contains(pos))
+				return true;
+			else if (SCANcontroller.controller.bigMapVisible && SCANcontroller.controller.BigMap.GetWindowRect.Contains(pos))
+				return true;
+			else if (SCANcontroller.controller.BigMap.spotMap != null && SCANcontroller.controller.BigMap.spotMap.Visible && SCANcontroller.controller.BigMap.spotMap.GetWindowRect.Contains(pos))
+				return true;
+			else if (SCANcontroller.controller.hiDefMap != null && SCANcontroller.controller.hiDefMap.Visible && SCANcontroller.controller.hiDefMap.GetWindowRect.Contains(pos))
+				return true;
+			else if (SCANcontroller.controller.settingsWindow.Visible && SCANcontroller.controller.settingsWindow.GetWindowRect.Contains(pos))
+				return true;
+			else if (SCANcontroller.controller.resourceSettings.Visible && SCANcontroller.controller.resourceSettings.GetWindowRect.Contains(pos))
+				return true;
+			else if (SCANcontroller.controller.instrumentsWindow.Visible && SCANcontroller.controller.instrumentsWindow.GetWindowRect.Contains(pos))
+				return true;
+			else if (SCANcontroller.controller.resourceOverlay.Visible && SCANcontroller.controller.resourceOverlay.GetWindowRect.Contains(pos))
+				return true;
+			else if (SCANcontroller.controller.colorManager.Visible && SCANcontroller.controller.colorManager.GetWindowRect.Contains(pos))
+				return true;
+
+			return false;
+		}
+
+		//This one is straight out of MechJeb :) - https://github.com/MuMech/MechJeb2/blob/master/MechJeb2/GuiUtils.cs#L463-L507
+		internal static SCANCoordinates GetMouseCoordinates(CelestialBody body)
+		{
+			Ray mouseRay = PlanetariumCamera.Camera.ScreenPointToRay(Input.mousePosition);
+			mouseRay.origin = ScaledSpace.ScaledToLocalSpace(mouseRay.origin);
+			Vector3d relOrigin = mouseRay.origin - body.position;
+			Vector3d relSurfacePosition;
+			double curRadius = body.pqsController.radiusMax;
+			double lastRadius = 0;
+			double error = 0;
+			int loops = 0;
+			float st = Time.time;
+			while (loops < 50)
+			{
+				if (PQS.LineSphereIntersection(relOrigin, mouseRay.direction, curRadius, out relSurfacePosition))
+				{
+					Vector3d surfacePoint = body.position + relSurfacePosition;
+					double alt = body.pqsController.GetSurfaceHeight(QuaternionD.AngleAxis(body.GetLongitude(surfacePoint), Vector3d.down) * QuaternionD.AngleAxis(body.GetLatitude(surfacePoint), Vector3d.forward) * Vector3d.right);
+					error = Math.Abs(curRadius - alt);
+					if (error < (body.pqsController.radiusMax - body.pqsController.radiusMin) / 100)
+					{
+						return new SCANCoordinates(fixLonShift((body.GetLongitude(surfacePoint))), fixLatShift(body.GetLatitude(surfacePoint)));
+					}
+					else
+					{
+						lastRadius = curRadius;
+						curRadius = alt;
+						loops++;
+					}
+				}
+				else
+				{
+					if (loops == 0)
+					{
+						break;
+					}
+					else
+					{ // Went too low, needs to try higher
+						curRadius = (lastRadius * 9 + curRadius) / 10;
+						loops++;
+					}
+				}
+			}
+
+			return null;
+		}
+
+		public class SCANCoordinates
+		{
+			public double latitude;
+			public double longitude;
+
+			public SCANCoordinates(double lon, double lat)
+			{
+				longitude = lon;
+				latitude = lat;
+			}
+
+			public string ToDegString()
+			{
+				return latitude.ToString("F1") + "°, " + longitude.ToString("F1") + "°";
+			}
+
+			public string ToDMS()
+			{
+				return SCANuiUtil.toDMS(latitude, longitude, 0);
 			}
 		}
 

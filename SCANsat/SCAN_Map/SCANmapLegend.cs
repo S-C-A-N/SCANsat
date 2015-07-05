@@ -66,14 +66,14 @@ namespace SCANsat.SCAN_Map
 			return t;
 		}
 
-		internal Texture2D getLegend(float max, float min, float? clamp, bool discrete, Color32[] c)
+		internal Texture2D getLegend(float max, float min, float range, float? clamp, bool discrete, Color32[] c)
 		{
 			Texture2D t = new Texture2D(128, 1, TextureFormat.RGB24, false);
 			Color[] pix = t.GetPixels();
 			for (int x = 0; x < 128; x++)
 			{
 				float val = (x * (max - min)) / 128f + min;
-				pix[x] = palette.heightToColor(val, max, min, clamp, discrete, c);
+				pix[x] = palette.heightToColor(val, max, min, range, clamp, discrete, c);
 			}
 			t.SetPixels(pix);
 			t.Apply();

@@ -43,6 +43,7 @@ namespace SCANsat.SCAN_Data
 		private float? clampTerrain;
 
 		private float defaultMinHeight, defaultMaxHeight;
+		private float terrainRange;
 		private Palette defaultPalette;
 		private int defaultPaletteSize;
 		private bool defaultReverse, defaultDiscrete;
@@ -52,6 +53,7 @@ namespace SCANsat.SCAN_Data
 		{
 			minHeightRange = min;
 			maxHeightRange = max;
+			terrainRange = max - min;
 			clampTerrain = clamp;
 			if (clampTerrain == null)
 				clampHeight = "Null";
@@ -77,6 +79,7 @@ namespace SCANsat.SCAN_Data
 		{
 			minHeightRange = copy.minHeightRange;
 			maxHeightRange = copy.maxHeightRange;
+			terrainRange = maxHeightRange - minHeightRange;
 			clampTerrain = copy.clampTerrain;
 			clampHeight = copy.clampHeight;
 			colorPal = copy.colorPal;
@@ -104,18 +107,9 @@ namespace SCANsat.SCAN_Data
 			else
 				clampTerrain = null;
 
-			setDefaultValues();
+			terrainRange = maxHeightRange - minHeightRange;
 
-			SCANUtil.SCANdebugLog("SCANsat Terrain Config Decode");
-			SCANUtil.SCANdebugLog("-------->Body Name             =>   {0}", name);
-			SCANUtil.SCANdebugLog("-------->Body Index            =>   {0}", index);
-			SCANUtil.SCANdebugLog("-------->Min Height Range      =>   {0}", minHeightRange);
-			SCANUtil.SCANdebugLog("-------->Max Height Range      =>   {0}", maxHeightRange);
-			SCANUtil.SCANdebugLog("-------->Clamp Height          =>   {0}", clampHeight);
-			SCANUtil.SCANdebugLog("-------->Palette Name          =>   {0}", paletteName);
-			SCANUtil.SCANdebugLog("-------->Palette Size          =>   {0}", paletteSize);
-			SCANUtil.SCANdebugLog("-------->Palette Reverse       =>   {0}", paletteReverse);
-			SCANUtil.SCANdebugLog("-------->Palette Discrete      =>   {0}", paletteDiscrete);
+			setDefaultValues();
 		}
 
 		private void setDefaultValues()
@@ -131,7 +125,6 @@ namespace SCANsat.SCAN_Data
 
 		public override void OnEncodeToConfigNode()
 		{
-			SCANUtil.SCANdebugLog("Saving Terrain Node");
 			if (clampTerrain == null)
 				clampHeight = "Null";
 			else
@@ -146,7 +139,10 @@ namespace SCANsat.SCAN_Data
 			internal set
 			{
 				if (value < maxHeightRange)
+				{
+					terrainRange = maxHeightRange - value;
 					minHeightRange = value;
+				}
 			}
 		}
 
@@ -156,8 +152,16 @@ namespace SCANsat.SCAN_Data
 			internal set
 			{
 				if (value > minHeightRange)
+				{
+					terrainRange = value - minHeightRange;
 					maxHeightRange = value;
+				}
 			}
+		}
+
+		public float TerrainRange
+		{
+			get { return terrainRange; }
 		}
 
 		public float? ClampTerrain
