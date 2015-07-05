@@ -1326,23 +1326,24 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			double lat = SCANUtil.fixLatShift(v.latitude);
 			double lon = SCANUtil.fixLonShift(v.longitude);
 
+			Vector3d center = v.transform.position;
+
+			if (occluded(center, body))
+				return;
+
 			var height = SCANUtil.getElevation(body, lon, lat);
 			if (height < body.Radius)
 				height = body.Radius;
 
-			Vector3d center = v.transform.position;
 			Vector3d up = body.GetSurfaceNVector(lat, lon);
 
 			Vector3d srfCenter = body.position + height * up;
 
-			Vector3d VelFor = Vector3.ProjectOnPlane(v.srf_velocity, up).normalized;
+			Vector3d VelFor = Vector3.ProjectOnPlane(v.obt_velocity, up).normalized;
 			Vector3d vesselPerp = Vector3d.Cross(VelFor, up).normalized;
 
 			Vector3d left = srfCenter + width * vesselPerp;
 			Vector3d right = srfCenter - width * vesselPerp;
-
-			if (occluded(center, body))
-				return;
 
 			GLTriangleMap(new Vector3d[] { center, left , right }, c);
 		}
