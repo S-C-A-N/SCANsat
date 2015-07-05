@@ -90,7 +90,7 @@ namespace SCANsat
 		[KSPField(isPersistant = true)]
 		public bool scan_background = true;
 		[KSPField(isPersistant = true)]
-		public int timeWarpResolution = 20;
+		public int timeWarpResolution = 15;
 		[KSPField(isPersistant = true)]
 		public string resourceSelection;
 		[KSPField(isPersistant = true)]
@@ -1010,15 +1010,18 @@ namespace SCANsat
 		{
 			if (groundTrackActiveOnly)
 			{
-				SCANUtil.SCANdebugLog("Draw Active Vessel Tris");
+				Vessel v = FlightGlobals.ActiveVessel;
 
-				if (FlightGlobals.ActiveVessel.situation == Vessel.Situations.LANDED || FlightGlobals.ActiveVessel.situation == Vessel.Situations.PRELAUNCH || FlightGlobals.ActiveVessel.situation == Vessel.Situations.SPLASHED)
+				if (v.mainBody != body)
 					return;
 
-				if (!isVesselKnown(FlightGlobals.ActiveVessel))
+				if (v.situation == Vessel.Situations.LANDED || v.situation == Vessel.Situations.PRELAUNCH || v.situation == Vessel.Situations.SPLASHED)
 					return;
 
-				SCANvessel sv = knownVessels[FlightGlobals.ActiveVessel.id];
+				if (!isVesselKnown(v))
+					return;
+
+				SCANvessel sv = knownVessels[v.id];
 
 				if (sv == null)
 					return;
@@ -1034,8 +1037,6 @@ namespace SCANsat
 
 				groundWidth *= surfaceScale;
 
-				SCANUtil.SCANdebugLog("Suitable Sensor Found...");
-
 				SCANuiUtil.drawGroundTrackTris(body, sv.vessel, groundWidth, col);
 			}
 			else
@@ -1047,7 +1048,7 @@ namespace SCANsat
 					if (sv == null)
 						continue;
 
-					if (sv.vessel.mainBody != FlightGlobals.currentMainBody)
+					if (sv.vessel.mainBody != body)
 						continue;
 
 					if (sv.vessel.situation == Vessel.Situations.LANDED || sv.vessel.situation == Vessel.Situations.PRELAUNCH || sv.vessel.situation == Vessel.Situations.SPLASHED)
