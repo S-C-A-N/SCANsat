@@ -41,16 +41,26 @@ namespace SCANsat.SCAN_UI.UI_Framework
 
 		//Map info readout styles
 		internal static GUIStyle SCAN_readoutLabel;
+		internal static GUIStyle SCAN_readoutLabelCenter;
 		internal static GUIStyle SCAN_whiteReadoutLabel;
 		internal static GUIStyle SCAN_activeReadoutLabel;
 		internal static GUIStyle SCAN_inactiveReadoutLabel;
 		internal static GUIStyle SCAN_shadowReadoutLabel;
+		internal static GUIStyle SCAN_shadowReadoutLabelCenter;
 		internal static GUIStyle SCAN_whiteLabelCenter;
 
 		//Instrument readout styles
 		internal static GUIStyle SCAN_insColorLabel;
+		internal static GUIStyle SCAN_insColorLabelShadow;
 		internal static GUIStyle SCAN_insWhiteLabel;
 		internal static GUIStyle SCAN_anomalyOverlay;
+
+		//Resource controller styles
+		internal static GUIStyle SCAN_labelLeft;
+		internal static GUIStyle SCAN_labelRight;
+		internal static GUIStyle SCAN_labelSmall;
+		internal static GUIStyle SCAN_labelLeftActive;
+		internal static GUIStyle SCAN_buttonSmall;
 
 		//Settings menu styles
 		internal static GUIStyle SCAN_headline;
@@ -72,6 +82,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 
 		//Drop down menu styles
 		internal static GUIStyle SCAN_dropDownButton;
+		internal static GUIStyle SCAN_dropDownButtonActive;
 		internal static GUIStyle SCAN_dropDownBox;
 
 		internal static Font dotty;
@@ -100,6 +111,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 		internal static Texture2D SCAN_InstrumentIcon;
 		internal static Texture2D SCAN_SmallMapIcon;
 		internal static Texture2D SCAN_BigMapIcon;
+		internal static Texture2D SCAN_OverlayIcon;
 
 		//Zoom Window Textures
 		internal static Texture2D SCAN_ZoomOutIcon;
@@ -149,6 +161,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			SCAN_WaypointIcon = GameDatabase.Instance.GetTexture("SCANsat/Icons/SCAN_WayPointIcon", false);
 			SCAN_MechJebIcon = GameDatabase.Instance.GetTexture("SCANsat/Icons/SCAN_MechJebIcon", false);
 			SCAN_TargetIcon = GameDatabase.Instance.GetTexture("SCANsat/Icons/SCAN_TargetIcon", false);
+			SCAN_OverlayIcon = GameDatabase.Instance.GetTexture("SCANsat/Icons/SCAN_Overlay_Icon", false);
 		}
 
 		private static void initializeColors()
@@ -218,18 +231,26 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			SCAN_dropDownButton = new GUIStyle(SCAN_label);
 			SCAN_dropDownButton.name = "SCAN_DropDownButton";
 			SCAN_dropDownButton.padding = new RectOffset(2, 2, 2, 2);
-			SCAN_dropDownButton.normal.textColor = palette.xkcd_PukeGreen;
+			SCAN_dropDownButton.normal.textColor = palette.xkcd_White;
 			SCAN_dropDownButton.hover.textColor = palette.black;
 			Texture2D sortBackground = new Texture2D(1, 1);
 			sortBackground.SetPixel(1, 1, palette.xkcd_White);
 			sortBackground.Apply();
 			SCAN_dropDownButton.hover.background = sortBackground;
 			SCAN_dropDownButton.alignment = TextAnchor.MiddleLeft;
+			SCAN_dropDownButton.fontStyle = FontStyle.Bold;
+
+			SCAN_dropDownButtonActive = new GUIStyle(SCAN_dropDownButton);
+			SCAN_dropDownButtonActive.normal.textColor = palette.xkcd_PukeGreen;
 
 			//Initialize info readout styles
 			SCAN_readoutLabel = new GUIStyle(SCAN_label);
 			SCAN_readoutLabel.name = "SCAN_ReadoutLabel";
 			SCAN_readoutLabel.fontStyle = FontStyle.Bold;
+
+			SCAN_readoutLabelCenter = new GUIStyle(SCAN_readoutLabel);
+			SCAN_readoutLabelCenter.alignment = TextAnchor.MiddleCenter;
+			SCAN_readoutLabelCenter.wordWrap = false;
 
 			SCAN_whiteReadoutLabel = new GUIStyle(SCAN_readoutLabel);
 			SCAN_whiteReadoutLabel.name = "SCAN_WhiteLabel";
@@ -248,6 +269,9 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			SCAN_shadowReadoutLabel.name = "SCAN_ShadowLabel";
 			SCAN_shadowReadoutLabel.normal.textColor = palette.black;
 
+			SCAN_shadowReadoutLabelCenter = new GUIStyle(SCAN_shadowReadoutLabel);
+			SCAN_shadowReadoutLabelCenter.alignment = TextAnchor.MiddleCenter;
+
 			SCAN_whiteLabelCenter = new GUIStyle(SCAN_whiteReadoutLabel);
 			SCAN_whiteLabelCenter.name = "SCAN_WhiteLabelCenter";
 			SCAN_whiteLabelCenter.alignment = TextAnchor.MiddleCenter;
@@ -257,6 +281,9 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			SCAN_insColorLabel.name = "SCAN_InsColorLabel";
 			SCAN_insColorLabel.alignment = TextAnchor.MiddleCenter;
 			SCAN_insColorLabel.fontSize = 20;
+
+			SCAN_insColorLabelShadow = new GUIStyle(SCAN_insColorLabel);
+			SCAN_insColorLabelShadow.normal.textColor = palette.black;
 
 			SCAN_insWhiteLabel = new GUIStyle(SCAN_whiteReadoutLabel);
 			SCAN_insWhiteLabel.name = "SCAN_InsWhiteLabel";
@@ -270,6 +297,28 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			SCAN_anomalyOverlay.fontSize = 32;
 			SCAN_anomalyOverlay.fontStyle = FontStyle.Bold;
 			SCAN_anomalyOverlay.normal.textColor = palette.cb_skyBlue;
+
+			//Resource Control settings
+			SCAN_labelLeft = new GUIStyle(SCAN_texButton);
+			SCAN_labelLeft.fontSize = 12;
+			SCAN_labelLeft.hover.textColor = palette.cb_bluishGreen;
+			SCAN_labelLeft.alignment = TextAnchor.MiddleLeft;
+
+			SCAN_labelLeftActive = new GUIStyle(SCAN_labelLeft);
+			SCAN_labelLeftActive.normal.textColor = palette.cb_bluishGreen;
+
+			SCAN_labelRight = new GUIStyle(SCAN_labelLeft);
+			SCAN_labelRight.alignment = TextAnchor.MiddleRight;
+
+			SCAN_labelSmall = new GUIStyle(SCAN_whiteReadoutLabel);
+			SCAN_labelSmall.fontSize = 10;
+			SCAN_labelSmall.alignment = TextAnchor.MiddleCenter;
+			SCAN_labelSmall.fontStyle = FontStyle.Bold;
+
+			SCAN_buttonSmall = new GUIStyle(SCAN_SkinsLibrary.DefUnitySkin.button);
+			SCAN_buttonSmall.fontSize = 10;
+			SCAN_buttonSmall.alignment = TextAnchor.MiddleLeft;
+			SCAN_buttonSmall.fontStyle = FontStyle.Bold;
 
 			//Initialize settings menu styles
 			SCAN_headline = new GUIStyle(SCAN_SkinsLibrary.DefUnitySkin.label);

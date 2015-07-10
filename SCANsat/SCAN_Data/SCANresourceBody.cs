@@ -31,6 +31,7 @@ namespace SCANsat.SCAN_Data
 
 		private CelestialBody body;
 		private float defaultMinValue, defaultMaxValue;
+		private float fraction;
 
 		internal SCANresourceBody(string rName, CelestialBody Body, float min, float max)
 		{
@@ -124,6 +125,12 @@ namespace SCANsat.SCAN_Data
 				if (value >= 0 && value > defaultMinValue && value <= 100)
 					defaultMaxValue = value;
 			}
+		}
+
+		public float Fraction
+		{
+			get { return fraction; }
+			internal set { fraction = value; }
 		}
 	}
 }

@@ -121,6 +121,8 @@ namespace SCANsat.SCAN_Toolbar
 			IButton bigMap = list.AddOption("Big Map");
 			IButton settings = list.AddOption("Settings");
 			IButton color = list.AddOption("Color Options");
+			IButton resource = list.AddOption("Planetary Overlay");
+			IButton resourceSettings = list.AddOption("Resource Settings");
 
 			smallMap.OnClick += (e2) =>
 				{
@@ -143,6 +145,14 @@ namespace SCANsat.SCAN_Toolbar
 			color.OnClick += (e2) =>
 				{
 					SCANcontroller.controller.colorManager.Visible = !SCANcontroller.controller.colorManager.Visible;
+				};
+			resource.OnClick += (e2) =>
+				{
+					SCANcontroller.controller.resourceOverlay.Visible = !SCANcontroller.controller.resourceOverlay.Visible;
+				};
+			resourceSettings.OnClick += (e2) =>
+				{
+					SCANcontroller.controller.resourceSettings.Visible = !SCANcontroller.controller.resourceSettings.Visible;
 				};
 			list.OnAnyOptionClicked += () => destroyMenu(menu);
 			menu.Drawable = list;

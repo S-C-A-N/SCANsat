@@ -22,6 +22,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using SCANsat.SCAN_Map;
 using SCANsat.SCAN_Data;
+using SCANsat.SCAN_PartModules;
 using SCANsat.SCAN_UI.UI_Framework;
 
 namespace SCANsat.SCAN_UI
@@ -109,7 +110,7 @@ namespace SCANsat.SCAN_UI
 		private SCANanomaly[] localAnomalies;
 		private List<SCANwaypoint> localWaypoints;
 		private Material iconMaterial;
-		private SCANsat sat;
+		private SCANsat.SCAN_PartModules.SCANsat sat;
 		internal RPMPersistence persist;
 		private string persistentVarName;
 		private double pixelsPerKm;
@@ -613,7 +614,7 @@ namespace SCANsat.SCAN_UI
 			if (zoomLevel == 0)
 				mapCenterLat = 0;
 			map.centerAround(mapCenterLong, mapCenterLat);
-			map.resetMap((mapType)mapMode, false);
+			map.resetMap((mapType)mapMode, false, SCANcontroller.controller.map_ResourceOverlay);
 
 			// Compute and store the map scale factors in mapSizeScale.  We
 			// use these values for every segment when drawing trails, so it
@@ -667,7 +668,7 @@ namespace SCANsat.SCAN_UI
 			persistentVarName = "scansat" + internalProp.propID;
 
 			try {
-				sat = part.FindModulesImplementing<SCANsat>().First();
+				sat = part.FindModulesImplementing<SCANsat.SCAN_PartModules.SCANsat>().First();
 			}
 			catch {
 				Debug.LogWarning("[SCANsatRPM] SCANsat module not attached to this IVA, check for Module Manager problems and make sure the RPMMapTraq.cfg file is in the SCANsat/MMconfigs folder");

@@ -15,6 +15,7 @@ using Contracts;
 using FinePrint.Contracts.Parameters;
 using FinePrint;
 using FinePrint.Utilities;
+using UnityEngine;
 
 namespace SCANsat.SCAN_Data
 {
@@ -29,8 +30,9 @@ namespace SCANsat.SCAN_Data
 				root = p.Root;
 				param = p;
 				name = way.name;
-				longitude = SCANUtil.fixLonShift(way.longitude);
-				latitude = SCANUtil.fixLatShift(way.latitude);
+				Vector2d coords = SCANUtil.fixRetardCoordinates(new Vector2d(way.longitude, way.latitude));
+				longitude = coords.x;
+				latitude = coords.y;
 				landingTarget = false;
 			}
 		}
@@ -44,8 +46,9 @@ namespace SCANsat.SCAN_Data
 				root = p.Root;
 				param = p;
 				name = way.name;
-				longitude = SCANUtil.fixLonShift(way.longitude);
-				latitude = SCANUtil.fixLatShift(way.latitude);
+				Vector2d coords = SCANUtil.fixRetardCoordinates(new Vector2d(way.longitude, way.latitude));
+				longitude = coords.x;
+				latitude = coords.y;
 				landingTarget = false;
 			}
 		}
@@ -57,8 +60,9 @@ namespace SCANsat.SCAN_Data
 			root = p.contractReference;
 			param = null;
 			name = way.name;
-			longitude = SCANUtil.fixLonShift(way.longitude);
-			latitude = SCANUtil.fixLatShift(way.latitude);
+			Vector2d coords = SCANUtil.fixRetardCoordinates(new Vector2d(way.longitude, way.latitude));
+			longitude = coords.x;
+			latitude = coords.y;
 			landingTarget = false;
 		}
 

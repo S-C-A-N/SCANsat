@@ -235,7 +235,7 @@ namespace SCANsat.SCAN_UI
 				else
 					SCANcontroller.controller.colours = 0;
 				data.resetImages();
-				bigmap.resetMap();
+				bigmap.resetMap(SCANcontroller.controller.map_ResourceOverlay);
 			}
 
 			//Updates the grid overlay status
@@ -249,7 +249,7 @@ namespace SCANsat.SCAN_UI
 			if (lastResource != SCANcontroller.controller.map_ResourceOverlay)
 			{
 				lastResource = SCANcontroller.controller.map_ResourceOverlay;
-				bigmap.resetMap();
+				bigmap.resetMap(SCANcontroller.controller.map_ResourceOverlay);
 			}
 
 			sessionRect = WindowRect;
@@ -298,7 +298,7 @@ namespace SCANsat.SCAN_UI
 			fillS();
 			if (GUILayout.Button(iconWithTT(SCANskins.SCAN_RefreshIcon, "Refresh Map"), SCANskins.SCAN_buttonBorderless, GUILayout.MaxWidth(34), GUILayout.MaxHeight(28)))
 			{
-				bigmap.resetMap();
+				bigmap.resetMap(SCANcontroller.controller.map_ResourceOverlay);
 			}
 			fillS();
 
@@ -482,12 +482,22 @@ namespace SCANsat.SCAN_UI
 				SCANcontroller.controller.settingsWindow.removeControlLocks();
 			}
 
-			s.x += 40;
+			s.x += 36;
 
 			if (GUI.Button(s, iconWithTT(SCANskins.SCAN_ColorIcon, "Color Control"), SCANskins.SCAN_windowButton))
 			{
 				SCANcontroller.controller.colorManager.Visible = !SCANcontroller.controller.colorManager.Visible;
 				SCANcontroller.controller.colorManager.removeControlLocks();
+			}
+
+			if (HighLogic.LoadedScene == GameScenes.TRACKSTATION)
+			{
+				s.x += 36;
+
+				if (GUI.Button(s, iconWithTT(SCANskins.SCAN_OverlayIcon, "Overlay Control"), SCANskins.SCAN_windowButton))
+				{
+					SCANcontroller.controller.resourceOverlay.Visible = !SCANcontroller.controller.resourceOverlay.Visible;
+				}
 			}
 
 			s.x = WindowRect.width - 66;
@@ -523,14 +533,14 @@ namespace SCANsat.SCAN_UI
 			{
 				rc.x = TextureRect.x + TextureRect.width / 2 - TextureRect.width / 8;
 				rc.y = TextureRect.y + TextureRect.height / 8;
-				SCANuiUtil.drawLabel(rc, "S", false, true, true);
+				SCANuiUtil.drawLabel(rc, "S", SCANskins.SCAN_orbitalLabelOff, true, SCANskins.SCAN_shadowReadoutLabel, false, SCANskins.SCAN_orbitalLabelOn, true);
 				rc.x = TextureRect.x + TextureRect.width / 2 + TextureRect.width / 8;
-				SCANuiUtil.drawLabel(rc, "N", false, true, true);
+				SCANuiUtil.drawLabel(rc, "N", SCANskins.SCAN_orbitalLabelOff, true, SCANskins.SCAN_shadowReadoutLabel, false, SCANskins.SCAN_orbitalLabelOn, true);
 			}
 
 			if (SCANcontroller.controller.map_grid)
 			{
-				if (gridLines.Count > 0)
+				if (gridLines.Count > 0 && inRepaint())
 				{
 					GL.PushMatrix();
 					foreach (List<Vector2d> points in gridLines[0])
@@ -581,7 +591,7 @@ namespace SCANsat.SCAN_UI
 							{
 								spotMap = gameObject.AddComponent<SCANzoomWindow>();
 							}
-							spotMap.setMapCenter(mlat, mlon, bigmap);
+							spotMap.setMapCenter(mlat, mlon, true, bigmap);
 						}
 					}
 					Event.current.Use();
@@ -636,10 +646,10 @@ namespace SCANsat.SCAN_UI
 				for (int i = 0; i < SCANmapProjection.projectionNames.Length; ++i)
 				{
 					Rect r = new Rect(ddRect.x + 2, ddRect.y + (24 * i), ddRect.width - 4, 20);
-					if (GUI.Button(r, SCANmapProjection.projectionNames[i], SCANskins.SCAN_dropDownButton))
+					if (GUI.Button(r, SCANmapProjection.projectionNames[i], SCANcontroller.controller.projection == i ? SCANskins.SCAN_dropDownButtonActive : SCANskins.SCAN_dropDownButton))
 					{
 						bigmap.setProjection((MapProjection)i);
-						bigmap.resetMap();
+						bigmap.resetMap(SCANcontroller.controller.map_ResourceOverlay);
 						SCANcontroller.controller.projection = i;
 						drawGrid = true;
 						drop_down_open = false;
@@ -654,9 +664,9 @@ namespace SCANsat.SCAN_UI
 				for (int i = 0; i < SCANmapType.mapTypeNames.Length; i++)
 				{
 					Rect r = new Rect(ddRect.x + 2, ddRect.y + (24 * i), ddRect.width - 4, 20);
-					if (GUI.Button(r, SCANmapType.mapTypeNames[i], SCANskins.SCAN_dropDownButton))
+					if (GUI.Button(r, SCANmapType.mapTypeNames[i], (int)(bigmap.MType) == i ? SCANskins.SCAN_dropDownButtonActive : SCANskins.SCAN_dropDownButton))
 					{
-						bigmap.resetMap((mapType)i, true);
+						bigmap.resetMap((mapType)i, true, SCANcontroller.controller.map_ResourceOverlay);
 						drop_down_open = false;
 					}
 				}
@@ -670,7 +680,7 @@ namespace SCANsat.SCAN_UI
 				{
 					scrollR = GUI.BeginScrollView(ddRect, scrollR, new Rect(0, 0, 100, 20 * loadedResources.Count));
 					Rect r = new Rect(2, 20 * i, 96, 20);
-					if (GUI.Button(r, loadedResources[i].Name, SCANskins.SCAN_dropDownButton))
+					if (GUI.Button(r, loadedResources[i].Name, SCANcontroller.controller.resourceSelection == loadedResources[i].Name ? SCANskins.SCAN_dropDownButtonActive : SCANskins.SCAN_dropDownButton))
 					{
 						bigmap.Resource = loadedResources[i];
 						bigmap.Resource.CurrentBodyConfig(bigmap.Body.name);
@@ -678,7 +688,7 @@ namespace SCANsat.SCAN_UI
 						SCANcontroller.controller.resourceSelection = bigmap.Resource.Name;
 
 						if (SCANcontroller.controller.map_ResourceOverlay)
-							bigmap.resetMap();
+							bigmap.resetMap(SCANcontroller.controller.map_ResourceOverlay);
 
 						drop_down_open = false;
 					}
@@ -699,12 +709,12 @@ namespace SCANsat.SCAN_UI
 					if (dropDownData != null)
 					{
 						Rect r = new Rect(2, 20 * j, 76, 20);
-						if (GUI.Button(r, dropDownData.Body.name, SCANskins.SCAN_dropDownButton))
+						if (GUI.Button(r, dropDownData.Body.name, b.name == dropDownData.Body.name ? SCANskins.SCAN_dropDownButtonActive : SCANskins.SCAN_dropDownButton))
 						{
 							data = dropDownData;
 							b = data.Body;
 							bigmap.setBody(data.Body);
-							bigmap.resetMap();
+							bigmap.resetMap(SCANcontroller.controller.map_ResourceOverlay);
 							drop_down_open = false;
 						}
 						j++;

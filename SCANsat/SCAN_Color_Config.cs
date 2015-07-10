@@ -44,6 +44,8 @@ namespace SCANsat
 		[Persistent]
 		private bool stockBiomeMap = false;
 		[Persistent]
+		private bool biomeBorder = true;
+		[Persistent]
 		private Color bottomLowSlopeColor = palette.xkcd_PukeGreen;
 		[Persistent]
 		private Color bottemHighSlopeColor = palette.xkcd_Lemon;
@@ -82,6 +84,8 @@ namespace SCANsat
 				lowBiomeColor = SCANcontroller.controller.lowBiomeColor;
 				highBiomeColor = SCANcontroller.controller.highBiomeColor;
 				biomeTransparency = SCANcontroller.controller.biomeTransparency;
+				stockBiomeMap = SCANcontroller.controller.useStockBiomes;
+				biomeBorder = SCANcontroller.controller.biomeBorder;
 				bottomLowSlopeColor = SCANcontroller.controller.lowSlopeColorOne;
 				bottemHighSlopeColor = SCANcontroller.controller.highSlopeColorOne;
 				topLowSlopeColor = SCANcontroller.controller.lowSlopeColorTwo;
@@ -132,6 +136,11 @@ namespace SCANsat
 		public bool StockBiomeMap
 		{
 			get { return stockBiomeMap; }
+		}
+
+		public bool BiomeBorder
+		{
+			get { return biomeBorder; }
 		}
 
 		public Color BottomLowSlopeColor
