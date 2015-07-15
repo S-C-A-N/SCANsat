@@ -35,24 +35,7 @@ namespace SCANsat
 	{
 		public static SCANcontroller controller
 		{
-			get
-			{
-				Game g = HighLogic.CurrentGame;
-				if (g == null) return null;
-				try
-				{
-					var mod = g.scenarios.FirstOrDefault(m => m.moduleName == typeof(SCANcontroller).Name);
-					if (mod != null)
-						return (SCANcontroller)mod.moduleRef;
-					else
-						return null;
-				}
-				catch (Exception e)
-				{
-					SCANUtil.SCANlog("Could not find SCANsat Scenario Module: {0}", e);
-					return null;
-				}
-			}
+			get { return instance; }
 		}
 
 		private static int minScanAlt = 5000;
@@ -203,6 +186,8 @@ namespace SCANsat
 		private bool bodyScanned = false;
 		private bool bodyCoverage = false;
 		private bool heightMapsBuilt = false;
+
+		private static SCANcontroller instance;
 
 		#region Public Accessors
 
@@ -529,6 +514,8 @@ namespace SCANsat
 
 		public override void OnLoad(ConfigNode node)
 		{
+			instance = this;
+
 			try
 			{
 				lowBiomeColor = ConfigNode.ParseColor(node.GetValue("lowBiomeColor"));
