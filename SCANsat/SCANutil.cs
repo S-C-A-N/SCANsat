@@ -47,16 +47,13 @@ namespace SCANsat
 			int ilon = icLON(lon);
 			int ilat = icLAT(lat);
 			if (badLonLat (ilon, ilat)) return false;
-			if (SCANcontroller.controller != null)
-			{
-				SCANdata data = getData(body);
-				if (data != null)
-					return (data.Coverage[ilon, ilat] & SCANtype) != 0;
-				else
-					return false;
-			}
-			else
+
+			SCANdata data = getData(body.name);
+
+			if (data == null)
 				return false;
+
+			return (data.Coverage[ilon, ilat] & SCANtype) != 0;
 		}
 
 		/// <summary>
@@ -70,16 +67,13 @@ namespace SCANsat
 		public static bool isCovered(int lon, int lat, CelestialBody body, int SCANtype)
 		{
 			if (badLonLat(lon, lat)) return false;
-			if (SCANcontroller.controller != null)
-			{
-				SCANdata data = getData(body);
-				if (data != null)
-					return (data.Coverage[lon, lat] & SCANtype) != 0;
-				else
-					return false;
-			}
-			else
+
+			SCANdata data = getData(body.name);
+
+			if (data == null)
 				return false;
+
+			return (data.Coverage[lon, lat] & SCANtype) != 0;
 		}
 
 		/// <summary>
@@ -90,16 +84,12 @@ namespace SCANsat
 		/// <returns>Scanning percentage as a double from 0-100</returns>
 		public static double GetCoverage(int SCANtype, CelestialBody Body)
 		{
-			if (SCANcontroller.controller != null)
-			{
-				SCANdata data = getData(Body);
-				if (data != null)
-					return getCoveragePercentage(data, (SCANtype)SCANtype);
-				else
-					return 0;
-			}
-			else
+			SCANdata data = getData(Body.name);
+
+			if (data == null)
 				return 0;
+
+			return getCoveragePercentage(data, (SCANtype)SCANtype);
 		}
 
 		/// <summary>
