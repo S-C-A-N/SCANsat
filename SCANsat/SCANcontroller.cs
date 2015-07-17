@@ -16,6 +16,7 @@ using System;
 using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
+using SCANsat.Hooks;
 using UnityEngine;
 using SCANsat.SCAN_UI;
 using SCANsat.SCAN_UI.UI_Framework;
@@ -96,6 +97,8 @@ namespace SCANsat
 		public float biomeTransparency = 40;
 		[KSPField(isPersistant = true)]
 		public bool mechJebTargetSelection = false;
+        [KSPField(isPersistant = true)]
+        public bool rt2Integration = false;
 		[KSPField(isPersistant = true)]
 		public bool easyModeScanning = true;
 		[KSPField(isPersistant = true)]
@@ -1494,6 +1497,9 @@ namespace SCANsat
 				i++;
 				if (i >= body_data.Count) i = 0;
 			}
+
+		    var remoteTechAPI = RT2Hook.Instance;
+
 			foreach (Vessel v in FlightGlobals.Vessels)
 			{
 				if (!knownVessels.ContainsKey(v.id)) continue;
@@ -1507,12 +1513,16 @@ namespace SCANsat
 				{
 					if (v.mainBody == FlightGlobals.currentMainBody || scan_background)
 					{
-						if (isVesselKnown(v))
-						{
-							doScanPass(knownVessels[v.id], scan_UT, scan_UT, vessel.lastUT, vessel.latitude, vessel.longitude);
-							++currentActiveVessel;
-							currentActiveSensor += knownVessels[v.id].sensors.Count;
-						}
+					    if (isVesselKnown(v))
+					    {
+					        // Check for connection to KSC if RemoteTech mod is installed and integration enabled.
+					        if (!rt2Integration || remoteTechAPI == null || remoteTechAPI.HasConnectionToKSC(v.id))
+					        {
+					            doScanPass(knownVessels[v.id], scan_UT, scan_UT, vessel.lastUT, vessel.latitude, vessel.longitude);
+					            ++currentActiveVessel;
+					            currentActiveSensor += knownVessels[v.id].sensors.Count;
+					        }
+					    }
 					}
 				}
 

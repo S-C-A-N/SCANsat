@@ -45,6 +45,7 @@
     <NoStdLib>true</NoStdLib>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="Hooks\RT2Hook.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SCANconfigLoader.cs" />
     <Compile Include="SCAN_Color_Config.cs" />
