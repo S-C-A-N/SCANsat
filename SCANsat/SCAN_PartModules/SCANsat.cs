@@ -372,16 +372,18 @@ namespace SCANsat.SCAN_PartModules
 		/* SCAN: add static (a warning that we're low on electric charge) */
 		private void addStatic()
 		{
-			SCANdata data = SCANUtil.getData(vessel.mainBody);
-			if (data == null)
+			if (SCANcontroller.controller == null)
 				return;
-			Texture2D map = data.Map;
-			if (map != null)
+
+			if (SCANcontroller.controller.mainMap == null)
+				return;
+
+			if (SCANcontroller.controller.mainMap.Map == null)
+				return;
+
+			for (int i = 0; i < 1000; i++)
 			{
-				for (int i = 0; i < 1000; ++i)
-				{
-					map.SetPixel(UnityEngine.Random.Range(0, 360), UnityEngine.Random.Range(0, 180), palette.lerp(palette.black, palette.white, UnityEngine.Random.value));
-				}
+				SCANcontroller.controller.mainMap.Map.SetPixel(UnityEngine.Random.Range(0, 360), UnityEngine.Random.Range(0, 180), palette.lerp(palette.black, palette.white, UnityEngine.Random.value));
 			}
 		}
 

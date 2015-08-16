@@ -237,7 +237,7 @@ namespace SCANsat.SCAN_UI
 					SCANcontroller.controller.colours = 1;
 				else
 					SCANcontroller.controller.colours = 0;
-				data.resetImages();
+				SCANcontroller.controller.mainMap.resetImages();
 				bigmap.resetMap(SCANcontroller.controller.map_ResourceOverlay);
 			}
 
