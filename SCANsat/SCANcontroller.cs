@@ -1030,8 +1030,10 @@ namespace SCANsat
 			{
 				double surfaceScale = (2 * Math.PI * body.Radius) / 360;
 
-				foreach (SCANvessel sv in knownVessels.Values)
+				for (int j = 0; j < knownVessels.Count; j++)
 				{
+					SCANvessel sv = knownVessels.Values.ElementAt(j);
+
 					if (sv == null)
 						continue;
 
@@ -1066,8 +1068,10 @@ namespace SCANsat
 				surfscale = 1;
 			surfscale = Math.Sqrt(surfscale);
 
-			foreach (SCANsensor s in v.sensors.Values)
+			for (int j = 0; j < v.sensors.Count; j++)
 			{
+				SCANsensor s = v.sensors.Values.ElementAt(j);
+
 				if (alt < s.min_alt)
 					continue;
 				if (alt > Math.Min(s.max_alt, soi_radius))
@@ -1494,9 +1498,12 @@ namespace SCANsat
 				i++;
 				if (i >= body_data.Count) i = 0;
 			}
-			foreach (Vessel v in FlightGlobals.Vessels)
+			for (int j = 0; j < FlightGlobals.Vessels.Count; j++)
 			{
-				if (!knownVessels.ContainsKey(v.id)) continue;
+				Vessel v = FlightGlobals.Vessels[j];
+				if (!knownVessels.ContainsKey(v.id))
+					continue;
+
 				SCANvessel vessel = knownVessels[v.id];
 				SCANdata data = SCANUtil.getData(v.mainBody);
 				if (data == null)
@@ -1571,8 +1578,10 @@ namespace SCANsat
 			actualPasses++;
 
 			uncovered = res <= 0;
-			foreach (SCANsensor sensor in knownVessels[v.id].sensors.Values)
+			for (int j = 0; j < knownVessels[v.id].sensors.Count; j++)
 			{
+				SCANsensor sensor = knownVessels[v.id].sensors.Values.ElementAt(j);
+
 				if (res <= 0)
 				{
 					if (data.getCoverage(sensor.sensor) > 0) uncovered = false;
