@@ -1419,6 +1419,57 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			return Lon;
 		}
 
+		internal static void generateOverlayResourceValues(ref float[,] values, int height, SCANdata data, SCANresourceGlobal resource, int stepScale = 8)
+		{
+			int width = height * 2;
+			float scale = height / 180f;
+
+			if (values == null || height * width != values.Length)
+			{
+				values = new float[width, height];
+			}
+
+			for (int j = 0; j < height; j += stepScale)
+			{
+				double lat = (j / scale) - 90;
+				for (int i = 0; i < width; i += stepScale)
+				{
+					double lon = fixLon(i / scale);
+
+					values[i, j] = SCANUtil.ResourceOverlay(lat, lon, resource.Name, data.Body, SCANcontroller.controller.resourceBiomeLock) * 100;
+				}
+			}
+		}
+
+		internal static void generateOverlayResourcePixels(ref Color32[] pix, ref float[,] values, int height, SCANdata data, SCANresourceGlobal resource, System.Random r, int stepScale, float transparency = 0f)
+		{
+			int width = height * 2;
+			float scale = height / 180f;
+
+			if (pix == null || height * width != pix.Length)
+			{
+				pix = new Color32[width * height];
+			}
+
+			for (int i = stepScale / 2; i >= 1; i /= 2)
+			{
+				interpolate(values, height, width, i, i, i, r, true);
+				interpolate(values, height, width, 0, i, i, r, true);
+				interpolate(values, height, width, i, 0, i, r, true);
+			}
+
+			for (int i = 0; i < width; i++)
+			{
+				double lon = fixLon(i / scale);
+				for (int j = 0; j < height; j++)
+				{
+					double lat = (j / scale) - 90;
+
+					pix[j * width + i] = resourceToColor32(palette.Clear, resource, values[i, j], data, lon, lat, transparency);
+				}
+			}
+		}
+
 		internal static Texture2D drawResourceTexture(ref Texture2D map, ref Color32[] pix, ref float[,] values, int height, SCANdata data, SCANresourceGlobal resource, int stepScale = 8, float transparency = 0f)
 		{
 			int width = height * 2;
@@ -1554,14 +1605,15 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			return m;
 		}
 
-		internal static Texture2D drawTerrainMap(ref Texture2D map, ref Color32[] pix, ref float[,] values, SCANdata data, int height, int stepScale)
+		internal static void drawTerrainMap(ref Color32[] pix, ref float[,] values, SCANdata data, int height, int stepScale)
 		{
+			Debug.Log("Drawing Terrain Map");
+
 			int width = height * 2;
 			float scale = height / 180f;
 
-			if (map == null || pix == null || map.height != height)
+			if (pix == null)
 			{
-				map = new Texture2D(width, height, TextureFormat.ARGB32, true);
 				pix = new Color32[width * height];
 			}
 
@@ -1595,11 +1647,6 @@ namespace SCANsat.SCAN_UI.UI_Framework
 					pix[j * width + i] = c;
 				}
 			}
-
-			map.SetPixels32(pix);
-			map.Apply();
-
-			return map;
 		}
 
 		internal static Texture2D drawSlopeMap(ref Texture2D map, ref Color32[] pix, ref float[,] values, SCANdata data, int height, int stepScale)
@@ -1701,8 +1748,10 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			return map;
 		}
 
-		internal static void generateTerrainArray(ref float[,] values, int height, int stepScale, SCANdata data)
+		internal static void generateTerrainArray(ref float[,] values, int height, int stepScale, SCANdata data, int index)
 		{
+			Debug.Log("Generating Terrain Array...");
+
 			int width = height * 2;
 			float scale = height / 180f;
 			
@@ -1712,7 +1761,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			{
 				for (int j = 0; j < 180; j++)
 				{
-					values[i * stepScale, j * stepScale] = data.HeightMapValue(data.Body.flightGlobalsIndex, (int)fixLon(i) + 180, j);
+					values[i * stepScale, j * stepScale] = data.HeightMapValue(index, (int)fixLon(i) + 180, j, true);
 				}
 			}
 

@@ -15,6 +15,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using SCANsat.SCAN_Data;
 using SCANsat.SCAN_UI.UI_Framework;
 using SCANsat.SCAN_Platform;
@@ -40,13 +41,13 @@ namespace SCANsat.SCAN_UI
 		private double degreeOffset;
 		private bool enableUI = true;
 		private int mapStep, mapStart;
+		private bool bodyBiome, bodyPQS;
 
 		private int timer;
+		private bool threadRunning;
 		private string tooltipText = "";
 
 		private Texture2D mapOverlay;
-		private Texture2D biomeOverlay;
-		private Texture2D terrainOverlay;
 		private Color32[] resourcePixels;
 		private Color32[] biomePixels;
 		private Color32[] terrainPixels;
@@ -130,7 +131,7 @@ namespace SCANsat.SCAN_UI
 				if (oldOverlay)
 					refreshMap();
 				else
-					OverlayGenerator.Instance.ClearDisplay();
+					removeOverlay();
 			}
 
 			sessionRect = WindowRect;
@@ -170,10 +171,10 @@ namespace SCANsat.SCAN_UI
 
 				if (GUILayout.Button(r.Name, selection == i ? SCANskins.SCAN_labelLeftActive : SCANskins.SCAN_labelLeft))
 				{
-					if (mapGenerating)
+					if (mapGenerating || threadRunning)
 						return;
 
-					OverlayGenerator.Instance.ClearDisplay();
+					removeOverlay();
 
 					if (selection != i)
 					{
@@ -197,55 +198,61 @@ namespace SCANsat.SCAN_UI
 				}
 			}
 
-			if (GUILayout.Button("Biome Map", selection == (resources.Count) ? SCANskins.SCAN_labelLeftActive : SCANskins.SCAN_labelLeft))
+			if (bodyBiome)
 			{
-				if (mapGenerating)
-					return;
-
-				OverlayGenerator.Instance.ClearDisplay();
-
-				if (selection != resources.Count)
+				if (GUILayout.Button("Biome Map", selection == (resources.Count) ? SCANskins.SCAN_labelLeftActive : SCANskins.SCAN_labelLeft))
 				{
-					selection = resources.Count;
-					oldOverlay = drawOverlay = true;
-					refreshMap();
-					return;
-				}
+					if (mapGenerating || threadRunning)
+						return;
 
-				if (drawOverlay)
-				{
-					oldOverlay = drawOverlay = false;
-				}
-				else
-				{
-					oldOverlay = drawOverlay = true;
-					refreshMap();
+					removeOverlay();
+
+					if (selection != resources.Count)
+					{
+						selection = resources.Count;
+						oldOverlay = drawOverlay = true;
+						refreshMap();
+						return;
+					}
+
+					if (drawOverlay)
+					{
+						oldOverlay = drawOverlay = false;
+					}
+					else
+					{
+						oldOverlay = drawOverlay = true;
+						refreshMap();
+					}
 				}
 			}
 
-			if (GUILayout.Button("Terrain Map", selection == (resources.Count + 1) ? SCANskins.SCAN_labelLeftActive : SCANskins.SCAN_labelLeft))
+			if (bodyPQS)
 			{
-				if (mapGenerating)
-					return;
-
-				OverlayGenerator.Instance.ClearDisplay();
-
-				if (selection != resources.Count + 1)
+				if (GUILayout.Button("Terrain Map", selection == (resources.Count + 1) ? SCANskins.SCAN_labelLeftActive : SCANskins.SCAN_labelLeft))
 				{
-					selection = resources.Count + 1;
-					oldOverlay = drawOverlay = true;
-					refreshMap();
-					return;
-				}
+					if (mapGenerating || threadRunning)
+						return;
 
-				if (drawOverlay)
-				{
-					oldOverlay = drawOverlay = false;
-				}
-				else
-				{
-					oldOverlay = drawOverlay = true;
-					refreshMap();
+					removeOverlay();
+
+					if (selection != resources.Count + 1)
+					{
+						selection = resources.Count + 1;
+						oldOverlay = drawOverlay = true;
+						refreshMap();
+						return;
+					}
+
+					if (drawOverlay)
+					{
+						oldOverlay = drawOverlay = false;
+					}
+					else
+					{
+						oldOverlay = drawOverlay = true;
+						refreshMap();
+					}
 				}
 			}
 
@@ -314,9 +321,16 @@ namespace SCANsat.SCAN_UI
 			//		if (a.ResourceName == "Ore" && a.HarvestType == HarvestTypes.Planetary)
 			//			SCANUtil.SCANlog("{0}: For {1} on Body {2} of scanner type {3}: Abundance = {4:P3}", a.ResourceName, a.BiomeName, a.BodyId, a.HarvestType, a.Abundance);
 			//	}
-
-				
 			//}
+		}
+
+		private void removeOverlay()
+		{
+			OverlayGenerator.Instance.ClearDisplay();
+
+			Destroy(mapOverlay);
+
+			mapOverlay = null;
 		}
 
 		private void mouseOverToolTip()
@@ -525,21 +539,79 @@ namespace SCANsat.SCAN_UI
 		{
 			if (mapGenerating)
 				return;
+			if (threadRunning)
+				return;
 
 			if (selection == resources.Count)
-				body.SetResourceMap(SCANuiUtil.drawBiomeMap(ref biomeOverlay, ref biomePixels, data, SCANcontroller.controller.overlayTransparency, SCANcontroller.controller.overlayMapHeight * 2));
+				body.SetResourceMap(SCANuiUtil.drawBiomeMap(ref mapOverlay, ref biomePixels, data, SCANcontroller.controller.overlayTransparency, SCANcontroller.controller.overlayMapHeight * 2));
 			else if (selection == resources.Count + 1)
 				StartCoroutine(setTerrainMap());
 			else if (selection == resources.Count + 2)
 				StartCoroutine(setSlopeMap());
 			else
-				body.SetResourceMap(SCANuiUtil.drawResourceTexture(ref mapOverlay, ref resourcePixels, ref abundanceValues, SCANcontroller.controller.overlayMapHeight, data, currentResource, SCANcontroller.controller.overlayInterpolation, SCANcontroller.controller.overlayTransparency));
+				StartCoroutine(setOverlayMap());
+		}
+
+		private IEnumerator setOverlayMap()
+		{
+			int timer = 0;
+
+			mapGenerating = true;
+
+			SCANuiUtil.generateOverlayResourceValues(ref abundanceValues, SCANcontroller.controller.overlayMapHeight, data, currentResource, SCANcontroller.controller.overlayInterpolation);
+
+			SCANdata copy = new SCANdata(data);
+
+			SCANUtil.SCANlog("Starting Resource Thread");
+
+			Thread t = new Thread( () => resourceThreadRun(SCANcontroller.controller.overlayMapHeight, SCANcontroller.controller.overlayInterpolation, SCANcontroller.controller.overlayTransparency, new System.Random(ResourceScenario.Instance.gameSettings.Seed), copy));
+			t.Start();
+
+			SCANUtil.SCANlog("Resource Thread Started...");
+
+			while (threadRunning && timer < 1000)
+			{
+				SCANUtil.SCANlog("Resource Thread Running...");
+				timer++;
+				yield return null;
+			}
+
+			if (timer >= 1000)
+			{
+				t.Abort();
+				threadRunning = false;
+				mapGenerating = false;
+				yield break;
+			}
+
+			mapGenerating = false;
+
+			copy = null;
+
+			SCANUtil.SCANlog("Resource Thread Finished; {0} Frames Used", timer);
+
+			if (mapOverlay == null || mapOverlay.height != SCANcontroller.controller.overlayMapHeight)
+				mapOverlay = new Texture2D(SCANcontroller.controller.overlayMapHeight * 2, SCANcontroller.controller.overlayMapHeight, TextureFormat.ARGB32, true);
+
+			mapOverlay.SetPixels32(resourcePixels);
+			mapOverlay.Apply();
+
+			body.SetResourceMap(mapOverlay);
+		}
+
+		private void resourceThreadRun(int height, int step, float transparent, System.Random r, SCANdata copyData)
+		{
+			threadRunning = true;
+
+			SCANuiUtil.generateOverlayResourcePixels(ref resourcePixels, ref abundanceValues, height, copyData, currentResource, r, step, transparent);
+
+			threadRunning = false;
 		}
 
 		private IEnumerator setTerrainMap()
 		{
 			if (data.Body.pqsController == null)
-				yield return null;
+				yield break;
 
 			int timer = 0;
 
@@ -555,24 +627,73 @@ namespace SCANsat.SCAN_UI
 				yield return null;
 			}
 
+			if (timer >= 2000)
+			{
+				mapGenerating = false;
+				yield break;
+			}
+
+			timer = 0;
+
+			SCANdata copy = new SCANdata(data);
+			int index = data.Body.flightGlobalsIndex;
+
+			SCANUtil.SCANlog("Starting Terrain Thread");
+
+			Thread t = new Thread( () => terrainThreadRun(copy, index));
+			t.Start();
+
+			SCANUtil.SCANlog("Terrain Thread Started...");
+
+			while (threadRunning && timer < 1000)
+			{
+				SCANUtil.SCANlog("Terrain Thread Running...");
+				timer++;
+				yield return null;
+			}
+
+			if (timer >= 1000)
+			{
+				t.Abort();
+				threadRunning = false;
+				mapGenerating = false;
+				yield break;
+			}
+
 			mapGenerating = false;
 
-			if (timer >= 2000)
-				yield return null;
+			copy = null;
+
+			SCANUtil.SCANlog("Terrain Thread Finished; {0} Frames Used", timer);
+
+			if (mapOverlay == null)
+				mapOverlay = new Texture2D(1440, 720, TextureFormat.ARGB32, true);
+
+			mapOverlay.SetPixels32(terrainPixels);
+			mapOverlay.Apply();
+
+			body.SetResourceMap(mapOverlay);
+		}
+
+		private void terrainThreadRun(SCANdata copyData, int i)
+		{
+			threadRunning = true;
 
 			if (!terrainGenerated)
 			{
-				SCANuiUtil.generateTerrainArray(ref terrainValues, 720, 4, data);
+				SCANuiUtil.generateTerrainArray(ref terrainValues, 720, 4, copyData, i);
 				terrainGenerated = true;
 			}
 
-			body.SetResourceMap(SCANuiUtil.drawTerrainMap(ref terrainOverlay, ref terrainPixels, ref terrainValues, data, 720, 4));
+			SCANuiUtil.drawTerrainMap(ref terrainPixels, ref terrainValues, copyData, 720, 4);
+
+			threadRunning = false;
 		}
 
 		private IEnumerator setSlopeMap()
 		{
 			if (data.Body.pqsController == null)
-				yield return null;
+				yield break;
 
 			int timer = 0;
 
@@ -591,20 +712,21 @@ namespace SCANsat.SCAN_UI
 			mapGenerating = false;
 
 			if (timer >= 2000)
-				yield return null;
+				yield break;
 
 			if (!terrainGenerated)
 			{
-				SCANuiUtil.generateTerrainArray(ref terrainValues, 720, 4, data);
+				SCANuiUtil.generateTerrainArray(ref terrainValues, 720, 4, data, data.Body.flightGlobalsIndex);
 				terrainGenerated = true;
 			}
 
-			body.SetResourceMap(SCANuiUtil.drawSlopeMap(ref terrainOverlay, ref terrainPixels, ref terrainValues, data, 720, 4));
+			body.SetResourceMap(SCANuiUtil.drawSlopeMap(ref mapOverlay, ref terrainPixels, ref terrainValues, data, 720, 4));
 		}
 
 		private void setBody(CelestialBody B)
 		{
 			body = B;
+
 			data = SCANUtil.getData(body);
 			if (data == null)
 			{
@@ -624,6 +746,9 @@ namespace SCANsat.SCAN_UI
 			{
 				currentResource.CurrentBodyConfig(body.name);
 			}
+
+			bodyBiome = body.BiomeMap != null;
+			bodyPQS = body.pqsController != null;
 
 			terrainGenerated = false;
 
