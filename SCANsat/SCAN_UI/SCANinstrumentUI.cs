@@ -91,8 +91,6 @@ namespace SCANsat.SCAN_UI
 
 		protected override void DrawWindowPre(int id)
 		{
-			v = FlightGlobals.ActiveVessel;
-
 			vlat = SCANUtil.fixLatShift(v.latitude);
 			vlon = SCANUtil.fixLonShift(v.longitude);
 
@@ -459,6 +457,7 @@ namespace SCANsat.SCAN_UI
 
 		private void vesselChange(Vessel V)
 		{
+			v = FlightGlobals.ActiveVessel;
 			resetResourceList();
 		}
 
