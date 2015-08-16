@@ -33,6 +33,10 @@ namespace SCANsat.SCAN_UI
 		internal static readonly Rect defaultRect = new Rect(10, 55, 380, 230);
 		private static Rect sessionRect = defaultRect;
 		private bool flash;
+		private Texture2D map_small;
+		private Color[] cols_height_map_small;
+		private int scanline;
+		private int scanstep;
 
 		protected override void Awake()
 		{
@@ -129,7 +133,7 @@ namespace SCANsat.SCAN_UI
 		private void mainMap(int id)
 		{
 			mapRect = new Rect(10, 20, 360, 180);
-			GUI.DrawTexture(mapRect, data.drawPartialMap(sensors));
+			GUI.DrawTexture(mapRect, drawPartialMap(sensors));
 
 			if (data.Building || data.ExternalBuilding)
 			{
@@ -227,6 +231,120 @@ namespace SCANsat.SCAN_UI
 				return true;
 			}
 			return false;
+		}
+
+		internal Texture2D drawPartialMap(SCANtype type)
+		{
+			if (map_small == null)
+			{
+				map_small = new Texture2D(360, 180, TextureFormat.ARGB32, false);
+				resetImages();
+			}
+
+			if (cols_height_map_small == null)
+			{
+				cols_height_map_small = new Color[360];
+			}
+
+			if (data.ExternalBuilding)
+			{
+				return map_small;
+			}
+
+			if (!data.Built)
+			{
+				data.Building = true;
+				data.generateHeightMap(ref scanline, ref scanstep, 360);
+				return map_small;
+			}
+
+			if (palette.small_redline == null)
+			{
+				palette.small_redline = new Color[360];
+				for (int i = 0; i < 360; i++)
+					palette.small_redline[i] = palette.red;
+			}
+
+			int scheme = SCANcontroller.controller.colours;
+
+			for (int ilon = 0; ilon < 360; ilon++)
+			{
+				if (data.Body.pqsController == null)
+				{
+					cols_height_map_small[ilon] = palette.lerp(palette.black, palette.white, UnityEngine.Random.value);
+					continue;
+				}
+
+				Color c = palette.grey;
+				float val = data.HeightMapValue(data.Body.flightGlobalsIndex, ilon, scanline);
+				if (SCANUtil.isCovered(ilon, scanline, data, SCANtype.Altimetry))
+				{
+					if (SCANUtil.isCovered(ilon, scanline, data, SCANtype.AltimetryHiRes))
+						c = palette.heightToColor(val, scheme, data);
+					else
+						c = palette.heightToColor(val, 1, data);
+				}
+				else
+				{
+					if (scanline % 30 == 0 && ilon % 3 == 0)
+					{
+						c = palette.white;
+					}
+					else if (ilon % 30 == 0 && scanline % 3 == 0)
+					{
+						c = palette.white;
+					}
+				}
+
+				if (type != SCANtype.Nothing)
+				{
+					if (!SCANUtil.isCoveredByAll(ilon, scanline, data, type))
+					{
+						c = palette.lerp(c, palette.black, 0.5f);
+					}
+				}
+
+				cols_height_map_small[ilon] = c;
+			}
+
+			map_small.SetPixels(0, scanline, 360, 1, cols_height_map_small);
+
+			if (scanline < 179)
+				map_small.SetPixels(0, scanline + 1, 360, 1, palette.small_redline);
+
+			scanline++;
+
+			if (scanline >= 180)
+				scanline = 0;
+
+			map_small.Apply();
+
+			return map_small;
+		}
+
+		public Texture2D Map
+		{
+			get { return map_small; }
+		}
+
+		internal void resetImages()
+		{
+			// Just draw a simple grid to initialize the image; the map will appear on top of it
+			for (int y = 0; y < map_small.height; y++)
+			{
+				for (int x = 0; x < map_small.width; x++)
+				{
+					if ((x % 30 == 0 && y % 3 > 0) || (y % 30 == 0 && x % 3 > 0))
+					{
+						map_small.SetPixel(x, y, palette.white);
+					}
+					else
+					{
+						map_small.SetPixel(x, y, palette.grey);
+					}
+				}
+			}
+			map_small.Apply();
 		}
 
 	}
