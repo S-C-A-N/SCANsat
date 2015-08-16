@@ -531,7 +531,7 @@ namespace SCANsat
 			mouseRay.origin = ScaledSpace.ScaledToLocalSpace(mouseRay.origin);
 			Vector3d relOrigin = mouseRay.origin - body.position;
 			Vector3d relSurfacePosition;
-			double curRadius = body.pqsController.radiusMax;
+			double curRadius = body.pqsController == null ? body.Radius : body.pqsController.radiusMax;
 			double lastRadius = 0;
 			double error = 0;
 			int loops = 0;
@@ -541,14 +541,15 @@ namespace SCANsat
 				if (PQS.LineSphereIntersection(relOrigin, mouseRay.direction, curRadius, out relSurfacePosition))
 				{
 					Vector3d surfacePoint = body.position + relSurfacePosition;
-					double alt = body.pqsController.GetSurfaceHeight(QuaternionD.AngleAxis(body.GetLongitude(surfacePoint), Vector3d.down) * QuaternionD.AngleAxis(body.GetLatitude(surfacePoint), Vector3d.forward) * Vector3d.right);
+					double alt = body.pqsController == null ? 0 : body.pqsController.GetSurfaceHeight(QuaternionD.AngleAxis(body.GetLongitude(surfacePoint), Vector3d.down) * QuaternionD.AngleAxis(body.GetLatitude(surfacePoint), Vector3d.forward) * Vector3d.right);
 					error = Math.Abs(curRadius - alt);
-					if (error < (body.pqsController.radiusMax - body.pqsController.radiusMin) / 100)
+					if (body.pqsController == null || error < (body.pqsController.radiusMax - body.pqsController.radiusMin) / 100)
 					{
 						return new SCANCoordinates(fixLonShift((body.GetLongitude(surfacePoint))), fixLatShift(body.GetLatitude(surfacePoint)));
 					}
 					else
 					{
+
 						lastRadius = curRadius;
 						curRadius = alt;
 						loops++;
