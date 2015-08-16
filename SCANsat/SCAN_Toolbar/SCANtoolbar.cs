@@ -25,6 +25,7 @@ namespace SCANsat.SCAN_Toolbar
 		private IButton SCANButton;
 		private IButton MapButton;
 		private IButton SmallButton;
+		private IButton OverlayButton;
 		private IButton KSCButton;
 
 		internal SCANtoolbar()
@@ -36,6 +37,7 @@ namespace SCANsat.SCAN_Toolbar
 				SCANButton = ToolbarManager.Instance.add("SCANsat", "UIMenu");
 				MapButton = ToolbarManager.Instance.add("SCANsat", "BigMap");
 				SmallButton = ToolbarManager.Instance.add("SCANsat", "SmallMap");
+				OverlayButton = ToolbarManager.Instance.add("SCANsat", "Overlay");
 
 				//Fall back to some default toolbar icons if someone deletes the SCANsat icons or puts them in the wrong folder
 				if (File.Exists(Path.Combine(new DirectoryInfo(KSPUtil.ApplicationRootPath).FullName, "GameData/SCANsat/Icons/SCANsat_Icon.png").Replace("\\", "/")))
@@ -50,10 +52,15 @@ namespace SCANsat.SCAN_Toolbar
 					SmallButton.TexturePath = "SCANsat/Icons/SCANsat_SmallMap_Icon"; // from unity, edited by DG
 				else
 					SmallButton.TexturePath = "000_Toolbar/resize-cursor";
+				if (File.Exists(Path.Combine(new DirectoryInfo(KSPUtil.ApplicationRootPath).FullName, "GameData/SCANsat/Icons/SCANsat_OverlayToolbar_Icon.png").Replace("\\", "/")))
+					OverlayButton.TexturePath = "SCANsat/Icons/SCANsat_OverlayToolbar_Icon";
+				else
+					OverlayButton.TexturePath = "000_Toolbar/resize-cursor";
 
 				SCANButton.ToolTip = "SCANsat";
 				MapButton.ToolTip = "SCANsat Big Map";
 				SmallButton.ToolTip = "SCANsat Small Map";
+				OverlayButton.ToolTip = "SCANsat Overlay Controller";
 
 				SCANButton.OnClick += (e) => 
 					{
@@ -76,6 +83,13 @@ namespace SCANsat.SCAN_Toolbar
 					{
 						SCANcontroller.controller.mainMap.Visible = !SCANcontroller.controller.mainMap.Visible;
 						SCANcontroller.controller.mainMapVisible = !SCANcontroller.controller.mainMapVisible;
+					}
+				};
+				OverlayButton.OnClick += (e) =>
+				{
+					if (SCANcontroller.controller != null)
+					{
+						SCANcontroller.controller.resourceOverlay.Visible = !SCANcontroller.controller.resourceOverlay.Visible;
 					}
 				};
 			}
@@ -176,6 +190,8 @@ namespace SCANsat.SCAN_Toolbar
 				SmallButton.Destroy();
 			if (KSCButton != null)
 				KSCButton.Destroy();
+			if (OverlayButton != null)
+				OverlayButton.Destroy();
 		}
 
 	}
