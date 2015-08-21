@@ -1998,7 +1998,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			if (Abundance == 0)
 				return palette.lerp(BaseColor, palette.grey, 0.3f);
 			else
-				return palette.lerp(palette.lerp(Resource.MinColor, Resource.MaxColor, Abundance / (Resource.CurrentBody.MaxValue - Resource.CurrentBody.MinValue)), BaseColor, Resource.Transparency / 100f);
+				return palette.lerp(palette.lerp(Resource.MinColor, Resource.MaxColor, (Abundance - Resource.CurrentBody.MinValue) / (Resource.CurrentBody.MaxValue - Resource.CurrentBody.MinValue)), BaseColor, Resource.Transparency / 100f);
 		}
 
 		private static Color32 resourceToColor32(Color32 BaseColor, SCANresourceGlobal Resource, float Abundance, SCANdata Data, double Lon, double Lat, float Transparency = 0.3f)
@@ -2030,7 +2030,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			if (Abundance == 0)
 				return palette.lerp(BaseColor, palette.Grey, Transparency);
 			else
-				return palette.lerp(palette.lerp(Resource.MinColor32, Resource.MaxColor32, Abundance / (Resource.CurrentBody.MaxValue - Resource.CurrentBody.MinValue)), BaseColor, Resource.Transparency / 100f);
+				return palette.lerp(palette.lerp(Resource.MinColor32, Resource.MaxColor32, (Abundance - Resource.CurrentBody.MinValue) / (Resource.CurrentBody.MaxValue - Resource.CurrentBody.MinValue)), BaseColor, Resource.Transparency / 100f);
 		}
 
 		#endregion
