@@ -237,8 +237,8 @@ namespace SCANsat.SCAN_UI
 					SCANcontroller.controller.colours = 1;
 				else
 					SCANcontroller.controller.colours = 0;
-				SCANcontroller.controller.mainMap.resetImages();
 				bigmap.resetMap(SCANcontroller.controller.map_ResourceOverlay);
+				SCANcontroller.controller.mainMap.resetImages();
 			}
 
 			//Update grid overlay status
