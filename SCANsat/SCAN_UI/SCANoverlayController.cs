@@ -44,7 +44,9 @@ namespace SCANsat.SCAN_UI
 		private bool bodyBiome, bodyPQS;
 
 		private int timer;
-		private bool threadRunning;
+		//These are read/written on multiple threads; we use volatile to ensure that cached values are not used when reading the value
+		private volatile bool threadRunning, threadFinished;
+
 		private string tooltipText = "";
 
 		private Texture2D mapOverlay;
@@ -100,16 +102,19 @@ namespace SCANsat.SCAN_UI
 		{
 			GameEvents.onShowUI.Remove(showUI);
 			GameEvents.onHideUI.Remove(hideUI);
+
+			if (mapOverlay != null)
+				Destroy(mapOverlay);
+			resourcePixels = null;
+			biomePixels = null;
+			terrainPixels = null;
+			abundanceValues = null;
+			terrainValues = null;
 		}
 
 		public bool DrawOverlay
 		{
 			get { return drawOverlay; }
-		}
-
-		protected override void DrawWindowPre(int id)
-		{
-
 		}
 
 		protected override void DrawWindow(int id)
@@ -565,6 +570,8 @@ namespace SCANsat.SCAN_UI
 			SCANUtil.SCANlog("Starting Resource Thread");
 
 			Thread t = new Thread( () => resourceThreadRun(SCANcontroller.controller.overlayMapHeight, SCANcontroller.controller.overlayInterpolation, SCANcontroller.controller.overlayTransparency, new System.Random(ResourceScenario.Instance.gameSettings.Seed), copy));
+			threadRunning = true;
+			threadFinished = false;
 			t.Start();
 
 			SCANUtil.SCANlog("Resource Thread Started...");
@@ -576,17 +583,20 @@ namespace SCANsat.SCAN_UI
 				yield return null;
 			}
 
+			mapGenerating = false;
+			copy = null;
+
 			if (timer >= 1000)
 			{
 				t.Abort();
 				threadRunning = false;
-				mapGenerating = false;
 				yield break;
 			}
 
-			mapGenerating = false;
-
-			copy = null;
+			if (!threadFinished)
+			{
+				yield break;
+			}
 
 			SCANUtil.SCANlog("Resource Thread Finished; {0} Frames Used", timer);
 
@@ -601,11 +611,19 @@ namespace SCANsat.SCAN_UI
 
 		private void resourceThreadRun(int height, int step, float transparent, System.Random r, SCANdata copyData)
 		{
-			threadRunning = true;
-
-			SCANuiUtil.generateOverlayResourcePixels(ref resourcePixels, ref abundanceValues, height, copyData, currentResource, r, step, transparent);
-
-			threadRunning = false;
+			try
+			{
+				SCANuiUtil.generateOverlayResourcePixels(ref resourcePixels, ref abundanceValues, height, copyData, currentResource, r, step, transparent);
+				threadFinished = true;
+			}
+			catch
+			{
+				threadFinished = false;
+			}
+			finally
+			{
+				threadRunning = false;
+			}
 		}
 
 		private IEnumerator setTerrainMap()
@@ -641,6 +659,8 @@ namespace SCANsat.SCAN_UI
 			SCANUtil.SCANlog("Starting Terrain Thread");
 
 			Thread t = new Thread( () => terrainThreadRun(copy, index));
+			threadFinished = false;
+			threadRunning = true;
 			t.Start();
 
 			SCANUtil.SCANlog("Terrain Thread Started...");
@@ -652,17 +672,20 @@ namespace SCANsat.SCAN_UI
 				yield return null;
 			}
 
+			mapGenerating = false;
+			copy = null;
+
 			if (timer >= 1000)
 			{
 				t.Abort();
 				threadRunning = false;
-				mapGenerating = false;
 				yield break;
 			}
 
-			mapGenerating = false;
-
-			copy = null;
+			if (!threadFinished)
+			{
+				yield break;
+			}
 
 			SCANUtil.SCANlog("Terrain Thread Finished; {0} Frames Used", timer);
 
@@ -677,17 +700,26 @@ namespace SCANsat.SCAN_UI
 
 		private void terrainThreadRun(SCANdata copyData, int i)
 		{
-			threadRunning = true;
-
-			if (!terrainGenerated)
+			try
 			{
-				SCANuiUtil.generateTerrainArray(ref terrainValues, 720, 4, copyData, i);
-				terrainGenerated = true;
+				if (!terrainGenerated)
+				{
+					SCANuiUtil.generateTerrainArray(ref terrainValues, 720, 4, copyData, i);
+					terrainGenerated = true;
+				}
+
+				SCANuiUtil.drawTerrainMap(ref terrainPixels, ref terrainValues, copyData, 720, 4);
+
+				threadFinished = true;
 			}
-
-			SCANuiUtil.drawTerrainMap(ref terrainPixels, ref terrainValues, copyData, 720, 4);
-
-			threadRunning = false;
+			catch
+			{
+				threadFinished = false;
+			}
+			finally
+			{
+				threadRunning = false;
+			}
 		}
 
 		private IEnumerator setSlopeMap()
