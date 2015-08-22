@@ -352,9 +352,9 @@ namespace SCANsat.SCAN_Map
 			pix = new Color[w];
 			biomeIndex = new double[w];
 			stockBiomeColor = new Color[w];
-			resourceMapWidth = 512;
-			resourceMapHeight = resourceMapWidth / 2;
-			resourceInterpolation = 8;
+			resourceMapHeight = SCANcontroller.controller.overlayMapHeight;
+			resourceMapWidth = resourceMapHeight * 2;
+			resourceInterpolation = SCANcontroller.controller.overlayInterpolation;
 			resourceMapScale = resourceMapWidth / 360f;
 			resourceCache = new float[resourceMapWidth, resourceMapHeight];
 			randomEdges = true;
@@ -461,7 +461,7 @@ namespace SCANsat.SCAN_Map
 			biomeMap = body.BiomeMap != null;
 			data = SCANUtil.getData(body);
 
-			/* init cache if necessary */
+			/* clear cache in place if necessary */
 			if (cache)
 			{
 				for (int x = 0; x < mapwidth; x++)
@@ -514,6 +514,17 @@ namespace SCANsat.SCAN_Map
 
 		public void resetResourceMap()
 		{
+			if (SCANcontroller.controller.overlayMapHeight != resourceMapHeight)
+			{
+				resourceMapHeight = SCANcontroller.controller.overlayMapHeight;
+				resourceMapWidth = resourceMapHeight * 2;
+				resourceMapScale = resourceMapWidth / 360f;
+				resourceCache = new float[resourceMapWidth, resourceMapHeight];
+			}
+
+			if (SCANcontroller.controller.overlayInterpolation != resourceInterpolation)
+				resourceInterpolation = SCANcontroller.controller.overlayInterpolation;
+
 			for (int i = 0; i < resourceMapWidth; i++ )
 			{
 				for (int j = 0; j < resourceMapHeight; j++)
