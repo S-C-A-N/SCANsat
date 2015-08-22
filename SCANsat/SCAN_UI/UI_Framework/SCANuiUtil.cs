@@ -1629,14 +1629,14 @@ namespace SCANsat.SCAN_UI.UI_Framework
 					if (SCANUtil.isCovered(lon, lat, data, SCANtype.Altimetry))
 					{
 						if (SCANUtil.isCovered(lon, lat, data, SCANtype.AltimetryHiRes))
-							c = palette.heightToColor(values[i, j], 0, data);
+							c = palette.heightToColor(values[i, j], 0, data.TerrainConfig);
 						else
 						{
 							int ilon = SCANUtil.icLON(unFixLon(lon));
 							int ilat = SCANUtil.icLAT(lat);
 							int lo = ((int)(ilon * scale * 5)) / 5;
 							int la = ((int)(ilat * scale * 5)) / 5;
-							c = palette.heightToColor(values[lo, la], 1, data);
+							c = palette.heightToColor(values[lo, la], 1, data.TerrainConfig);
 						}
 
 						c = palette.lerp(c, palette.Clear, 0.1f);
@@ -1829,7 +1829,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			{
 				for (int j = 0; j < height; j++)
 				{
-					pix[j * width + i] = palette.heightToColor(values[i, j], 1, data);
+					pix[j * width + i] = palette.heightToColor(values[i, j], 1, data.TerrainConfig);
 				}
 			}
 
