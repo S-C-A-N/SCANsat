@@ -118,15 +118,15 @@ namespace SCANsat.SCAN_UI.UI_Framework
 
 		public static Color[] small_redline;
 
-		public static Color heightToColor(float val, int scheme, SCANdata data)
+		public static Color heightToColor(float val, int scheme, SCANterrainConfig terrain)
 		{
-			Color32[] c = data.TerrainConfig.ColorPal.colors;
-			if (data.TerrainConfig.PalRev)
-				c = data.TerrainConfig.ColorPal.colorsReverse;
+			Color32[] c = terrain.ColorPal.colors;
+			if (terrain.PalRev)
+				c = terrain.ColorPal.colorsReverse;
 			if (scheme == 0)
-				return heightToColor(val, data.TerrainConfig.MaxTerrain, data.TerrainConfig.MinTerrain, data.TerrainConfig.TerrainRange, data.TerrainConfig.ClampTerrain, data.TerrainConfig.PalDis, c);
+				return heightToColor(val, terrain.MaxTerrain, terrain.MinTerrain, terrain.TerrainRange, terrain.ClampTerrain, terrain.PalDis, c);
 			else
-				return heightToColor(val, data.TerrainConfig.MaxTerrain, data.TerrainConfig.MinTerrain, data.TerrainConfig.TerrainRange, data.TerrainConfig.PalDis);
+				return heightToColor(val, terrain.MaxTerrain, terrain.MinTerrain, terrain.TerrainRange, terrain.PalDis);
 		}
 
 		private static Color heightToColor(float val, float max, float min, float range, bool discrete)

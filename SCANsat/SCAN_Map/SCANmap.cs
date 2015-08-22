@@ -697,7 +697,7 @@ namespace SCANsat.SCAN_Map
 							else if (SCANUtil.isCovered(lon, lat, data, SCANtype.Altimetry))
 							{
 								projVal = terrainElevation(lon, lat, data, out scheme);
-								baseColor = palette.heightToColor(projVal, scheme, data);
+								baseColor = palette.heightToColor(projVal, scheme, data.TerrainConfig);
 							}
 							break;
 						}

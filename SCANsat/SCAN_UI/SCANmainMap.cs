@@ -280,9 +280,9 @@ namespace SCANsat.SCAN_UI
 				if (SCANUtil.isCovered(ilon, scanline, data, SCANtype.Altimetry))
 				{
 					if (SCANUtil.isCovered(ilon, scanline, data, SCANtype.AltimetryHiRes))
-						c = palette.heightToColor(val, scheme, data);
+						c = palette.heightToColor(val, scheme, data.TerrainConfig);
 					else
-						c = palette.heightToColor(val, 1, data);
+						c = palette.heightToColor(val, 1, data.TerrainConfig);
 				}
 				else
 				{
