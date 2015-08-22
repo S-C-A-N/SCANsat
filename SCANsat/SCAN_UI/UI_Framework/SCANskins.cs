@@ -38,6 +38,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 		internal static GUIStyle SCAN_texButton;
 		internal static GUIStyle SCAN_buttonBorderless;
 		internal static GUIStyle SCAN_closeButton;
+		internal static GUIStyle SCAN_headerButton;
 
 		//Map info readout styles
 		internal static GUIStyle SCAN_readoutLabel;
@@ -73,8 +74,10 @@ namespace SCANsat.SCAN_UI.UI_Framework
 		internal static GUIStyle SCAN_labelSmallLeft;
 		internal static GUIStyle SCAN_labelSmallRight;
 		internal static GUIStyle SCAN_vertSlider;
+		internal static GUIStyle SCAN_horSlider;
 		internal static GUIStyle SCAN_sliderThumb;
 		internal static GUIStyle SCAN_colorWheelButton;
+		internal static GUIStyle SCAN_headerLabel;
 
 		//Styles for map overlay icons
 		internal static GUIStyle SCAN_orbitalLabelOn;
@@ -325,8 +328,16 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			SCAN_headline.name = "SCAN_Headline";
 			SCAN_headline.normal.textColor = palette.xkcd_YellowGreen;
 			SCAN_headline.alignment = TextAnchor.MiddleCenter;
-			SCAN_headline.fontSize = 40;
+			SCAN_headline.fontSize = 30;
 			SCAN_headline.font = dotty;
+
+			SCAN_headerButton = new GUIStyle(SCAN_SkinsLibrary.DefUnitySkin.button);
+			SCAN_headerButton.fontSize = 18;
+			SCAN_headerButton.fontStyle = FontStyle.Bold;
+
+			SCAN_headerLabel = new GUIStyle(SCAN_SkinsLibrary.DefUnitySkin.label);
+			SCAN_headerLabel.fontSize = 18;
+			SCAN_headerLabel.fontStyle = FontStyle.Bold;
 
 			SCAN_headlineSmall = new GUIStyle(SCAN_headline);
 			SCAN_headlineSmall.name = "SCAN_HeadlineSmall";
@@ -377,6 +388,8 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			SCAN_vertSlider = new GUIStyle(SCAN_SkinsLibrary.DefKSPSkin.verticalSlider);
 			SCAN_vertSlider.name = "SCAN_VertSlider";
 
+			SCAN_horSlider = new GUIStyle(SCAN_SkinsLibrary.DefUnitySkin.horizontalSlider);
+
 			SCAN_sliderThumb = new GUIStyle(SCAN_SkinsLibrary.DefKSPSkin.verticalSliderThumb);
 			SCAN_sliderThumb.name = "SCAN_SliderThumb";
 
@@ -404,6 +417,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			SCAN_SkinsLibrary.knownSkins["SCAN_Unity"].toggle = new GUIStyle(SCAN_toggle);
 			SCAN_SkinsLibrary.knownSkins["SCAN_Unity"].label = new GUIStyle(SCAN_label);
 			SCAN_SkinsLibrary.knownSkins["SCAN_Unity"].box = new GUIStyle(SCAN_dropDownBox);
+			SCAN_SkinsLibrary.knownSkins["SCAN_Unity"].horizontalSlider = new GUIStyle(SCAN_horSlider);
 
 			SCAN_SkinsLibrary.AddStyle(SCAN_window, "SCAN_Unity");
 			SCAN_SkinsLibrary.AddStyle(SCAN_button, "SCAN_Unity");
@@ -411,6 +425,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			SCAN_SkinsLibrary.AddStyle(SCAN_label, "SCAN_Unity");
 			SCAN_SkinsLibrary.AddStyle(SCAN_tooltip, "SCAN_Unity");
 			SCAN_SkinsLibrary.AddStyle(SCAN_dropDownBox, "SCAN_Unity");
+			SCAN_SkinsLibrary.AddStyle(SCAN_horSlider, "SCAN_Unity");
 		}
 
 	}
