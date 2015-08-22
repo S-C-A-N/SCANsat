@@ -136,8 +136,6 @@ namespace SCANsat.SCAN_UI
 			Visible = true;
 			bigmap = big;
 
-			resource = bigmap.Resource;
-
 			SCANcontroller.controller.TargetSelecting = false;
 			SCANcontroller.controller.TargetSelectingActive = false;
 
@@ -158,7 +156,7 @@ namespace SCANsat.SCAN_UI
 				spotmap.setBody(b);
 			}
 
-			if (SCANconfigLoader.GlobalResource && narrowBand)
+			if (SCANconfigLoader.GlobalResource)
 			{
 				resource = bigmap.Resource;
 				spotmap.Resource = resource;
@@ -213,17 +211,17 @@ namespace SCANsat.SCAN_UI
 				spotmap.setBody(b);
 			}
 
-			if (SCANconfigLoader.GlobalResource && narrowBand)
+			if (SCANconfigLoader.GlobalResource && resourceOverlay)
 			{
 				resource = bigmap.Resource;
 				spotmap.Resource = resource;
 				spotmap.Resource.CurrentBodyConfig(b.name);
 			}
 
+			spotmap.centerAround(spotmap.CenteredLong, spotmap.CenteredLat);
+
 			if (SCANcontroller.controller.needsNarrowBand && resourceOverlay)
 				checkForScanners();
-
-			spotmap.centerAround(spotmap.CenteredLong, spotmap.CenteredLat);
 
 			spotmap.resetMap(bigmap.MType, false, resourceOverlay, narrowBand);
 		}
@@ -231,14 +229,6 @@ namespace SCANsat.SCAN_UI
 		public SCANmap SpotMap
 		{
 			get { return spotmap; }
-		}
-
-		private double inc(double d)
-		{
-			if (d > 90)
-				d = 180 - d;
-
-			return d;
 		}
 
 		public virtual void closeMap()
@@ -249,92 +239,18 @@ namespace SCANsat.SCAN_UI
 
 		private void checkForScanners()
 		{
-			narrowBand = false;
-			foreach (Vessel vessel in FlightGlobals.Vessels)
-			{
-				if (vessel.protoVessel.protoPartSnapshots.Count <= 1)
-					continue;
-
-				if (vessel.vesselType == VesselType.Debris || vessel.vesselType == VesselType.Unknown || vessel.vesselType == VesselType.EVA || vessel.vesselType == VesselType.Flag)
-					continue;
-
-				if (vessel.mainBody != b)
-					continue;
-
-				if (vessel.situation != Vessel.Situations.ORBITING)
-					continue;
-
-				if (inc(vessel.orbit.inclination) < Math.Abs(spotmap.CenteredLat) - 10)
-					continue;
-
-				var scanners = from pref in vessel.protoVessel.protoPartSnapshots
-							   where pref.modules.Any(a => a.moduleName == "ModuleResourceScanner")
-							   select pref;
-
-				if (scanners.Count() == 0)
-					continue;
-
-				foreach (var p in scanners)
-				{
-					if (p.partInfo == null)
-						continue;
-
-					ConfigNode node = p.partInfo.partConfig;
-
-					if (node == null)
-						continue;
-
-					var moduleNodes = from nodes in node.GetNodes("MODULE")
-									  where nodes.GetValue("name") == "ModuleResourceScanner"
-									  select nodes;
-
-					foreach (ConfigNode moduleNode in moduleNodes)
-					{
-						if (moduleNode == null)
-							continue;
-
-						if (moduleNode.HasValue("MaxAbundanceAltitude"))
-						{
-							string alt = moduleNode.GetValue("MaxAbundanceAltitude");
-							float f = 0;
-							if (!float.TryParse(alt, out f))
-								continue;
-
-							if (f < vessel.altitude)
-								continue;
-						}
-
-						if (moduleNode.GetValue("ScannerType") != "0")
-							continue;
-
-						if (moduleNode.GetValue("ResourceName") != resource.Name)
-							continue;
-
-						if (spotmap.Resource != resource)
-						{
-							spotmap.Resource = resource;
-							spotmap.Resource.CurrentBodyConfig(b.name);
-							if (resourceOverlay)
-								spotmap.resetMap(resourceOverlay, true);
-						}
-
-						if (spotmap.Resource != null)
-						{
-							narrowBand = true;
-							break;
-						}
-					}
-
-					if (narrowBand)
-						break;
-				}
-
-				if (narrowBand)
-					break;
-			}
+			string t = "";
+			narrowBand = SCANuiUtil.narrowBandInOrbit(ref t, b, Math.Abs(spotmap.CenteredLat - 10), resource);
 
 			if (!narrowBand)
 				spotmap.Resource = null;
+			else
+			{
+				spotmap.Resource = resource;
+				spotmap.Resource.CurrentBodyConfig(b.name);
+				if (resourceOverlay)
+					spotmap.resetMap(resourceOverlay, true);
+			}
 		}
 
 		protected override void Update()
@@ -565,6 +481,18 @@ namespace SCANsat.SCAN_UI
 					GUI.DrawTexture(r, SCANskins.SCAN_TargetIcon);
 					GUI.color = old;
 				}
+
+				r = new Rect(WindowRect.width - 68, 20, 18, 18);
+
+				showWaypoints = GUI.Toggle(r, showWaypoints, textWithTT("", "Toggle Waypoints"), SCANskins.SCAN_settingsToggle);
+
+				r.x += 13;
+				r.width = r.height = 20;
+
+				if (GUI.Button(r, iconWithTT(SCANskins.SCAN_WaypointIcon, "Toggle Waypoints"), SCANskins.SCAN_buttonBorderless))
+				{
+					showWaypoints = !showWaypoints;
+				}
 			}
 
 			r = new Rect(WindowRect.width / 2 - 58, 20, 26, 26);
@@ -606,21 +534,6 @@ namespace SCANsat.SCAN_UI
 				}
 			}
 
-			if (HighLogic.LoadedScene != GameScenes.SPACECENTER)
-			{
-				r = new Rect(WindowRect.width - 68, 20, 18, 18);
-
-				showWaypoints = GUI.Toggle(r, showWaypoints, textWithTT("", "Toggle Waypoints"), SCANskins.SCAN_settingsToggle);
-
-				r.x += 13;
-				r.width = r.height = 20;
-
-				if (GUI.Button(r, iconWithTT(SCANskins.SCAN_WaypointIcon, "Toggle Waypoints"), SCANskins.SCAN_buttonBorderless))
-				{
-					showWaypoints = !showWaypoints;
-				}
-			}
-
 			r = new Rect(WindowRect.width - 35, 20, 18, 18);
 
 			showAnomaly = GUI.Toggle(r, showAnomaly, textWithTT("", "Toggle Anomalies"), SCANskins.SCAN_settingsToggle);
@@ -638,7 +551,6 @@ namespace SCANsat.SCAN_UI
 		{
 			MapTexture = getMap();
 
-			//A blank label used as a template for the actual map texture
 			if (IsResizing)
 			{
 				//Set minimum map size during re-sizing
