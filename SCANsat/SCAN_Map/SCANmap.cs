@@ -514,16 +514,19 @@ namespace SCANsat.SCAN_Map
 
 		public void resetResourceMap()
 		{
-			if (SCANcontroller.controller.overlayMapHeight != resourceMapHeight)
+			if (!zoom)
 			{
-				resourceMapHeight = SCANcontroller.controller.overlayMapHeight;
-				resourceMapWidth = resourceMapHeight * 2;
-				resourceMapScale = resourceMapWidth / 360f;
-				resourceCache = new float[resourceMapWidth, resourceMapHeight];
-			}
+				if (SCANcontroller.controller.overlayMapHeight != resourceMapHeight)
+				{
+					resourceMapHeight = SCANcontroller.controller.overlayMapHeight;
+					resourceMapWidth = resourceMapHeight * 2;
+					resourceMapScale = resourceMapWidth / 360f;
+					resourceCache = new float[resourceMapWidth, resourceMapHeight];
+				}
 
-			if (SCANcontroller.controller.overlayInterpolation != resourceInterpolation)
-				resourceInterpolation = SCANcontroller.controller.overlayInterpolation;
+				if (SCANcontroller.controller.overlayInterpolation != resourceInterpolation)
+					resourceInterpolation = SCANcontroller.controller.overlayInterpolation;
+			}
 
 			for (int i = 0; i < resourceMapWidth; i++ )
 			{
