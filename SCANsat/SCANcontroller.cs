@@ -113,6 +113,8 @@ namespace SCANsat
 		[KSPField(isPersistant = true)]
 		public int overlayMapHeight = 256;
 		[KSPField(isPersistant = true)]
+		public int overlayBiomeHeight = 512;
+		[KSPField(isPersistant = true)]
 		public float overlayTransparency = 0;
 		[KSPField(isPersistant = true)]
 		public bool version14Patch = false;
