@@ -411,20 +411,17 @@ namespace SCANsat
 
 		internal static CelestialBody getTargetBody(MapObject target)
 		{
-			if (target.type == MapObject.MapObjectType.CELESTIALBODY)
+			switch (target.type)
 			{
-				return target.celestialBody;
+				case MapObject.MapObjectType.CELESTIALBODY:
+					return target.celestialBody;
+				case MapObject.MapObjectType.MANEUVERNODE:
+					return target.maneuverNode.patch.referenceBody;
+				case MapObject.MapObjectType.VESSEL:
+					return target.vessel.mainBody;
+				default:
+					return null;
 			}
-			else if (target.type == MapObject.MapObjectType.MANEUVERNODE)
-			{
-				return target.maneuverNode.patch.referenceBody;
-			}
-			else if (target.type == MapObject.MapObjectType.VESSEL)
-			{
-				return target.vessel.mainBody;
-			}
-
-			return null;
 		}
 
 		internal static double slope(double centerElevation, CelestialBody body, double lon, double lat, double offset)
