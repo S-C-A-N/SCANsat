@@ -47,22 +47,23 @@ namespace SCANsat.SCAN_Data
 		internal SCANdata(CelestialBody b)
 		{
 			body = b;
-			float? clamp = null;
-			if (b.ocean)
-				clamp = 0;
 
 			coverage = new int[360, 180];
+
+			if (heightMaps.ContainsKey(body.flightGlobalsIndex))
+				built = true;
 
 			terrainConfig = SCANcontroller.getTerrainNode(b.name);
 
 			if (terrainConfig == null)
 			{
+				float? clamp = null;
+				if (b.ocean)
+					clamp = 0;
+
 				terrainConfig = new SCANterrainConfig(SCANconfigLoader.SCANNode.DefaultMinHeightRange, SCANconfigLoader.SCANNode.DefaultMaxHeightRange, clamp, SCANUtil.paletteLoader(SCANconfigLoader.SCANNode.DefaultPalette, 7), 7, false, false, body);
 				SCANcontroller.addToTerrainConfigData(body.name, terrainConfig);
 			}
-
-			if (heightMaps.ContainsKey(body.flightGlobalsIndex))
-				built = true;
 		}
 
 		public SCANdata (SCANdata copy)
