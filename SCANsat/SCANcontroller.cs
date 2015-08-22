@@ -256,6 +256,19 @@ namespace SCANsat
 			{
 				SCANUtil.SCANlog("Error while loading SCANsat terrain config settings: {0}", e);
 			}
+
+			for (int i = 0; i < FlightGlobals.Bodies.Count; i++)
+			{
+				CelestialBody b = FlightGlobals.Bodies[i];
+				if (getTerrainNode(b.name) == null)
+				{
+					float? clamp = null;
+					if (b.ocean)
+						clamp = 0;
+
+					addToTerrainConfigData(b.name, new SCANterrainConfig(SCANconfigLoader.SCANNode.DefaultMinHeightRange, SCANconfigLoader.SCANNode.DefaultMaxHeightRange, clamp, SCANUtil.paletteLoader(SCANconfigLoader.SCANNode.DefaultPalette, 7), 7, false, false, b));
+				}
+			}
 		}
 
 		public static SCANterrainConfig getTerrainNode(string name)
