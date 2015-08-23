@@ -48,6 +48,10 @@ namespace SCANsat.SCAN_UI
 		[KSPField]
 		public int buttonR10 = 8;
 		[KSPField]
+		public int startLine = 0;
+		[KSPField]
+		public int stopLine = 0;
+		[KSPField]
 		public int maxZoom = 20;
 		[KSPField]
 		public float iconPixelSize = 8f;
@@ -681,7 +685,7 @@ namespace SCANsat.SCAN_UI
 			map.setProjection(MapProjection.Rectangular);
 			orbitingBody = vessel.mainBody;
 			map.setBody(vessel.mainBody);
-			map.setSize(screenWidth, screenHeight, 4);
+			map.setSize(screenWidth /2, screenHeight / 2, 4, startLine, stopLine);
 			map.MapScale *= (zoomLevel * zoomLevel + zoomModifier);
 			mapCenterLong = vessel.longitude;
 			mapCenterLat = vessel.latitude;
