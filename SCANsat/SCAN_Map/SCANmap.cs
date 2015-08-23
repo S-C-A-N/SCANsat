@@ -308,8 +308,10 @@ namespace SCANsat.SCAN_Map
 		private bool randomEdges = true;
 		private double[] biomeIndex;
 		private Color[] stockBiomeColor;
+		private int startLine;
+		private int stopLine;
 
-		internal void setSize(int w, int h, int interpolation = 2)
+		internal void setSize(int w, int h, int interpolation = 2, int start = 0, int stop = 0)
 		{
 			if (w == 0)
 				w = 360 * (Screen.width / 360);
@@ -323,6 +325,8 @@ namespace SCANsat.SCAN_Map
 			if (h <= 0)
 				h = (int)(180 * mapscale);
 			mapheight = h;
+			startLine = start;
+			stopLine = stop == 0 ? mapheight - 1 : stop;
 			resourceMapWidth = mapwidth;
 			resourceMapHeight = mapheight;
 			resourceCache = new float[resourceMapWidth, resourceMapHeight];
@@ -360,6 +364,8 @@ namespace SCANsat.SCAN_Map
 			randomEdges = true;
 			mapscale = mapwidth / 360f;
 			mapheight = (int)(w / 2);
+			startLine = 0;
+			stopLine = mapheight - 1;
 			/* big map caching */
 			big_heightmap = new float[mapwidth, mapheight];
 			map = null;
@@ -587,6 +593,7 @@ namespace SCANsat.SCAN_Map
 				for (int i = 0; i < pix.Length; ++i)
 					pix[i] = palette.clear;
 				map.SetPixels(pix);
+				mapline = new double[map.width];
 			}
 			else if (mapstep >= map.height)
 			{
@@ -604,16 +611,23 @@ namespace SCANsat.SCAN_Map
 
 			if (mapstep <= -2)
 			{
-				if (!resourceOn)
-				{
-					mapstep++;
-					return map;
-				}
-				else
-				{
+				if (resourceOn)
 					SCANuiUtil.generateResourceCache(ref resourceCache, resourceMapHeight, resourceMapWidth, resourceInterpolation, resourceMapScale, this);
-					mapstep++;
-					return map;
+
+				mapstep++;
+				return map;
+			}
+
+			if (mapstep <= -1)
+			{
+				if (resourceOn)
+				{
+					for (int i = resourceInterpolation / 2; i >= 1; i /= 2)
+					{
+						SCANuiUtil.interpolate(resourceCache, resourceMapHeight, resourceMapWidth, i, i, i, r, randomEdges, zoom);
+						SCANuiUtil.interpolate(resourceCache, resourceMapHeight, resourceMapWidth, 0, i, i, r, randomEdges, zoom);
+						SCANuiUtil.interpolate(resourceCache, resourceMapHeight, resourceMapWidth, i, 0, i, r, randomEdges, zoom);
+					}
 				}
 			}
 
@@ -637,6 +651,9 @@ namespace SCANsat.SCAN_Map
 				}
 
 				if (mapstep < 0)
+					continue;
+
+				if (mapstep < startLine || mapstep > stopLine)
 					continue;
 
 				if (mType != mapType.Biome || !biomeMap)
@@ -666,24 +683,18 @@ namespace SCANsat.SCAN_Map
 
 			if (mapstep <= -1)
 			{
-				if (resourceOn)
-				{
-					for (int i = resourceInterpolation / 2; i >= 1; i /= 2)
-					{
-						SCANuiUtil.interpolate(resourceCache, resourceMapHeight, resourceMapWidth, i, i, i, r, randomEdges, zoom);
-						SCANuiUtil.interpolate(resourceCache, resourceMapHeight, resourceMapWidth, 0, i, i, r, randomEdges, zoom);
-						SCANuiUtil.interpolate(resourceCache, resourceMapHeight, resourceMapWidth, i, 0, i, r, randomEdges, zoom);
-					}
-				}
-
-				mapstep = -1;
-				mapline = new double[map.width];
 				mapstep++;
 				return map;
 			}
 
 			for (int i = 0; i < map.width; i++)
 			{
+				if (mapstep < startLine || mapstep > stopLine)
+				{
+					pix[i] = palette.clear;
+					continue;
+				}
+
 				Color baseColor = palette.grey;
 				pix[i] = baseColor;
 				int scheme = SCANcontroller.controller.colours;
