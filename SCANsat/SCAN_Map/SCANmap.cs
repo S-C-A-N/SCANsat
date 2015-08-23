@@ -309,7 +309,7 @@ namespace SCANsat.SCAN_Map
 		private double[] biomeIndex;
 		private Color[] stockBiomeColor;
 
-		internal void setSize(int w, int h)
+		internal void setSize(int w, int h, int interpolation = 2)
 		{
 			if (w == 0)
 				w = 360 * (Screen.width / 360);
@@ -326,7 +326,7 @@ namespace SCANsat.SCAN_Map
 			resourceMapWidth = mapwidth;
 			resourceMapHeight = mapheight;
 			resourceCache = new float[resourceMapWidth, resourceMapHeight];
-			resourceInterpolation = 2;
+			resourceInterpolation = interpolation;
 			resourceMapScale = resourceMapWidth / 360;
 			randomEdges = false;
 			if (map != null)
