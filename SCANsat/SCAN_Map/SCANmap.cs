@@ -585,6 +585,7 @@ namespace SCANsat.SCAN_Map
 			System.Random r = new System.Random(ResourceScenario.Instance.gameSettings.Seed);
 
 			bool resourceOn = false;
+			bool mapHidden = mapstep < startLine || mapstep > stopLine;
 
 			if (map == null)
 			{
@@ -653,7 +654,7 @@ namespace SCANsat.SCAN_Map
 				if (mapstep < 0)
 					continue;
 
-				if (mapstep < startLine || mapstep > stopLine)
+				if (mapHidden)
 					continue;
 
 				if (mType != mapType.Biome || !biomeMap)
@@ -689,7 +690,7 @@ namespace SCANsat.SCAN_Map
 
 			for (int i = 0; i < map.width; i++)
 			{
-				if (mapstep < startLine || mapstep > stopLine)
+				if (mapHidden)
 				{
 					pix[i] = palette.clear;
 					continue;
