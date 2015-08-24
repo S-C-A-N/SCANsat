@@ -409,11 +409,11 @@ namespace SCANsat
 				Debug.LogError(string.Format("[SCANsat] Warning: SCANResource Dictionary Already Contains Key of This Type: Resource: {0}", name));
 		}
 
-		public static SCANresourceType getResourceType (string name)
+		public static SCANresourceType getResourceType (string name, bool warn = true)
 		{
 			if (resourceTypes.ContainsKey(name))
 				return resourceTypes[name];
-			else
+			else if (warn)
 				SCANUtil.SCANlog("SCANsat resource type [{0}] cannot be found in master resource type storage list", name);
 
 			return null;
