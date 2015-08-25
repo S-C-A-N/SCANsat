@@ -146,6 +146,15 @@ namespace SCANsat.SCAN_UI.UI_Framework
 
 				info += getMouseOverElevation(lon, lat, data, 2);
 
+				if (SCANUtil.isCovered(lon, lat, data, SCANtype.Altimetry))
+				{
+					double circum = body.Radius * 2 * Math.PI;
+					double eqDistancePerDegree = circum / 360;
+					double degreeOffset = 5 / eqDistancePerDegree;
+
+					info += string.Format(" {0:F1}° ", SCANUtil.slope(SCANUtil.getElevation(body, lon, lat), body, lon, lat, degreeOffset));
+				}
+
 				if (SCANUtil.isCovered(lon, lat, data, SCANtype.Biome))
 				{
 					info += SCANUtil.getBiomeName(body, lon, lat) + " ";
@@ -220,6 +229,15 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			if (b)
 			{
 				info += getMouseOverElevation(lon, lat, data, 0);
+
+				if (SCANUtil.isCovered(lon, lat, data, SCANtype.Altimetry))
+				{
+					double circum = body.Radius * 2 * Math.PI;
+					double eqDistancePerDegree = circum / 360;
+					double degreeOffset = 5 / eqDistancePerDegree;
+
+					info += string.Format(" {0:F1}° ", SCANUtil.slope(SCANUtil.getElevation(body, lon, lat), body, lon, lat, degreeOffset));
+				}
 
 				if (SCANUtil.isCovered(lon, lat, data, SCANtype.Biome))
 				{
@@ -414,7 +432,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 
 		internal static string getMouseOverElevation(double Lon, double Lat, SCANdata d, int precision)
 		{
-			string s = "";
+			string s = " ";
 
 			if (SCANUtil.isCovered(Lon, Lat, d, SCANtype.AltimetryHiRes))
 			{
@@ -1641,7 +1659,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			return map;
 		}
 
-		internal static Texture2D drawBiomeMap(ref Texture2D map, ref Color32[] pix, SCANdata data, float transparency, int height = 256, bool useStock = false, bool whiteBorder = false)
+		internal static Texture2D drawBiomeMap(ref Texture2D map, ref Color[] pix, SCANdata data, float transparency, int height = 256, bool useStock = false, bool whiteBorder = false)
 		{
 			if (!useStock && !whiteBorder)
 				return drawBiomeMap(ref map, ref pix, data, height);
@@ -1653,7 +1671,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			if (map == null || pix == null || map.height != height)
 			{
 				map = new Texture2D(width, height, TextureFormat.ARGB32, true);
-				pix = new Color32[width * height];
+				pix = new Color[width * height];
 			}
 
 			for (int j = 0; j < height; j++)
@@ -1686,13 +1704,13 @@ namespace SCANsat.SCAN_UI.UI_Framework
 				}
 			}
 
-			map.SetPixels32(pix);
+			map.SetPixels(pix);
 			map.Apply();
 
 			return map;
 		}
 
-		private static Texture2D drawBiomeMap(ref Texture2D m, ref Color32[] p, SCANdata d, int h)
+		private static Texture2D drawBiomeMap(ref Texture2D m, ref Color[] p, SCANdata d, int h)
 		{
 			if (d.Body.BiomeMap == null)
 				return null;
@@ -1702,9 +1720,9 @@ namespace SCANsat.SCAN_UI.UI_Framework
 				m = new Texture2D(h * 2, h, TextureFormat.RGBA32, true);
 			}
 
-			if (p == null || p.Length != h * h * 2)
+			if (p == null || p.Length != h * 2)
 			{
-				p = new Color32[m.width * m.height];
+				p = new Color[m.width];
 			}
 
 			float scale = m.width / 360f;
@@ -1717,13 +1735,14 @@ namespace SCANsat.SCAN_UI.UI_Framework
 					double lon = fixLon(i / scale);
 
 					if (SCANUtil.isCovered(lon, lat, d, SCANtype.Biome))
-						p[j * m.width + i] = (Color32)SCANUtil.getBiome(d.Body, lon, lat).mapColor;
+						p[i] = SCANUtil.getBiome(d.Body, lon, lat).mapColor;
 					else
-						p[j * m.width + i] = palette.Clear;
+						p[i] = palette.clear;
 				}
+
+				m.SetPixels(0, j, m.width, 1, p);
 			}
 
-			m.SetPixels32(p);
 			m.Apply();
 
 			return m;
