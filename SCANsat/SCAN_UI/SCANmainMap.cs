@@ -193,6 +193,10 @@ namespace SCANsat.SCAN_UI
 			{
 				SCANcontroller.controller.resourceOverlay.Visible = !SCANcontroller.controller.resourceOverlay.Visible;
 			}
+			if (GUILayout.Button("<->", SCANskins.SCAN_windowButton, GUILayout.Height(32), GUILayout.Width(20)))
+			{
+				drawBiome = !drawBiome;
+			}
 		}
 
 		//Draw the vessel location and alt info
@@ -384,7 +388,7 @@ namespace SCANsat.SCAN_UI
 
 		private void buildBiomeCache()
 		{
-			for (int i = 0; i < 180; i++)
+			for (int i = 0; i < 360; i++)
 			{
 				double index = SCANUtil.getBiomeIndexFraction(data.Body, i - 180, scanline - 90);
 				Color c = palette.grey;
