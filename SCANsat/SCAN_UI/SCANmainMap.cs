@@ -196,6 +196,7 @@ namespace SCANsat.SCAN_UI
 			if (GUILayout.Button("<->", SCANskins.SCAN_windowButton, GUILayout.Height(32), GUILayout.Width(20)))
 			{
 				drawBiome = !drawBiome;
+				resetImages();
 			}
 		}
 
@@ -340,9 +341,7 @@ namespace SCANsat.SCAN_UI
 			bool biomeMap = data.Body.BiomeMap != null;
 
 			if (biomeBuilding)
-			{
 				buildBiomeCache();
-			}
 
 			int scheme = SCANcontroller.controller.colours;
 
@@ -411,7 +410,7 @@ namespace SCANsat.SCAN_UI
 				biomeIndex[i] = index;
 			}
 
-			if (scanline >= 180)
+			if (scanline >= 179)
 				biomeBuilding = false;
 		}
 
@@ -438,7 +437,11 @@ namespace SCANsat.SCAN_UI
 				}
 			}
 			map_small.Apply();
-			biomeBuilding = true;
+			if (drawBiome)
+			{
+				biomeBuilding = true;
+				scanline = 0;
+			}
 		}
 
 	}
