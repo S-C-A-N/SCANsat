@@ -447,6 +447,12 @@ namespace SCANsat.SCAN_Data
 		internal void reset()
 		{
 			coverage = new Int32[360, 180];
+			if (SCANcontroller.controller == null)
+				return;
+
+			if (SCANcontroller.controller.mainMap == null)
+				return;
+
 			SCANcontroller.controller.mainMap.resetImages();
 		}
 
