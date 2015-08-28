@@ -1938,7 +1938,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 		{
 			if (map.Map == null || pix == null || map.Map.height != height)
 			{
-				map.Map= new Texture2D(width, height, TextureFormat.ARGB32, true);
+				map.Map= new Texture2D(width, height, TextureFormat.ARGB32, false);
 				pix = new Color32[width * height];
 				values = new float[width, height];
 			}
