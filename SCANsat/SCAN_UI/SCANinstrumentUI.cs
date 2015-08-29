@@ -103,11 +103,11 @@ namespace SCANsat.SCAN_UI
 				//Check if region below the vessel is scanned
 				if (SCANUtil.isCovered(vlon, vlat, data, SCANtype.AltimetryLoRes))
 				{
-					sensors |= SCANtype.Altimetry;
+					sensors |= SCANtype.AltimetryLoRes;
 				}
 				else if (SCANUtil.isCovered(vlon, vlat, data, SCANtype.AltimetryHiRes))
 				{
-					sensors |= SCANtype.Altimetry;
+					sensors |= SCANtype.AltimetryHiRes;
 				}
 
 				if (SCANUtil.isCovered(vlon, vlat, data, SCANtype.Biome))
@@ -221,24 +221,52 @@ namespace SCANsat.SCAN_UI
 		//Display the current vessel altitude
 		private void altInfo(int id)
 		{
+			double h = v.altitude;
+			double pqs = 0;
+			if (v.mainBody.pqsController != null)
+			{
+				pqs = v.PQSAltitude();
+				if (pqs > 0 || !v.mainBody.ocean)
+					h -= pqs;
+			}
+			if (h < 0)
+				h = v.altitude;
+
+			bool drawSlope = false;
+
 			if ((sensors & SCANtype.Altimetry) != SCANtype.Nothing)
 			{
-				double h = v.altitude;
-				double pqs = 0;
-				if (v.mainBody.pqsController != null)
+				if (v.situation == Vessel.Situations.LANDED || v.situation == Vessel.Situations.SPLASHED || v.situation == Vessel.Situations.PRELAUNCH)
 				{
-					pqs = v.PQSAltitude();
-					if (pqs > 0 || !v.mainBody.ocean)
-						h -= pqs;
+					infoLabel += string.Format("\nTerrain: {0:N1}m", pqs);
+					drawSlope = true;
 				}
-				if (h < 0)
-					h = v.altitude;
-
+				else
+				{
+					if (h < 1000 || (sensors & SCANtype.AltimetryHiRes) != SCANtype.Nothing)
+					{
+						infoLabel += string.Format("\nAltitude: {0}", SCANuiUtil.distanceString(h, 100000));
+						drawSlope = true;
+					}
+					else
+					{
+						h = ((int)(h / 500)) * 500;
+						infoLabel += string.Format("\nAltitude: {0}", SCANuiUtil.distanceString(h, 100000));
+					}
+				}
+			}
+			else if (h < 1000)
+			{
 				if (v.situation == Vessel.Situations.LANDED || v.situation == Vessel.Situations.SPLASHED || v.situation == Vessel.Situations.PRELAUNCH)
 					infoLabel += string.Format("\nTerrain: {0:N1}m", pqs);
 				else
 					infoLabel += string.Format("\nAltitude: {0}", SCANuiUtil.distanceString(h, 100000));
 
+				drawSlope = true;
+			}
+
+			if (drawSlope)
+			{
 				//Calculate slope less frequently; the rapidly changing value makes it difficult to read otherwise
 				if (v.mainBody.pqsController != null)
 				{

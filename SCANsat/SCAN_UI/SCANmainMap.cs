@@ -240,10 +240,25 @@ namespace SCANsat.SCAN_UI
 				}
 				else
 				{
-					float alt = scanV.heightFromTerrain;
-					if (alt < 0)
-						alt = (float)scanV.altitude;
-					units = "; " + alt.ToString("N1") + "m";
+					if (SCANUtil.isCovered(lon, lat, data, SCANtype.Altimetry))
+					{
+						if (SCANUtil.isCovered(lon, lat, data, SCANtype.AltimetryHiRes))
+						{
+							float alt = scanV.heightFromTerrain;
+							if (alt < 0)
+								alt = (float)scanV.altitude;
+							units = "; " + alt.ToString("N1") + "m";
+						}
+						else
+						{
+							float alt = scanV.heightFromTerrain;
+							if (alt < 0)
+								alt = (float)scanV.altitude;
+
+							alt = ((int)(alt / 500)) * 500;
+							units = "; " + alt.ToString("F0") + "m";
+						}
+					}
 				}
 
 				string text = string.Format("[{0}] {1} ({2:F1}°,{3:F1}°{4})", i, scanV.vesselName, lat, lon, units);
