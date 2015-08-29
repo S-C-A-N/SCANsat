@@ -236,23 +236,26 @@ namespace SCANsat.SCAN_UI
 
 			if ((sensors & SCANtype.Altimetry) != SCANtype.Nothing)
 			{
-				if (v.situation == Vessel.Situations.LANDED || v.situation == Vessel.Situations.SPLASHED || v.situation == Vessel.Situations.PRELAUNCH)
+				switch (v.situation)
 				{
-					infoLabel += string.Format("\nTerrain: {0:N1}m", pqs);
-					drawSlope = true;
-				}
-				else
-				{
-					if (h < 1000 || (sensors & SCANtype.AltimetryHiRes) != SCANtype.Nothing)
-					{
-						infoLabel += string.Format("\nAltitude: {0}", SCANuiUtil.distanceString(h, 100000));
+					case Vessel.Situations.LANDED:
+					case Vessel.Situations.SPLASHED:
+					case Vessel.Situations.PRELAUNCH:
+						infoLabel += string.Format("\nTerrain: {0:N1}m", pqs);
 						drawSlope = true;
-					}
-					else
-					{
-						h = ((int)(h / 500)) * 500;
-						infoLabel += string.Format("\nAltitude: {0}", SCANuiUtil.distanceString(h, 100000));
-					}
+						break;
+					default:
+						if (h < 1000 || (sensors & SCANtype.AltimetryHiRes) != SCANtype.Nothing)
+						{
+							infoLabel += string.Format("\nAltitude: {0}", SCANuiUtil.distanceString(h, 100000));
+							drawSlope = true;
+						}
+						else
+						{
+							h = ((int)(h / 500)) * 500;
+							infoLabel += string.Format("\nAltitude: {0}", SCANuiUtil.distanceString(h, 100000));
+						}
+						break;
 				}
 			}
 			else if (h < 1000)

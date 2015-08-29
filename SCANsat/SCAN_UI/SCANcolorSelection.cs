@@ -167,69 +167,65 @@ namespace SCANsat.SCAN_UI
 		protected override void DrawWindowPre(int id)
 		{
 			//Some clumsy logic is used here to ensure that the color selection fields always remain in sync with the current map in each scene
-			if (HighLogic.LoadedSceneIsFlight)
+			switch (HighLogic.LoadedScene)
 			{
-				if (SCANBigMap.BigMap != null)
-				{
-					bigMap = SCANBigMap.BigMap;
-				}
+				case GameScenes.FLIGHT:
+					if (SCANBigMap.BigMap != null)
+					{
+						bigMap = SCANBigMap.BigMap;
+					}
 
-				if (body == null)
-				{
-					body = FlightGlobals.currentMainBody;
-				}
-			}
+					if (body == null)
+					{
+						body = FlightGlobals.currentMainBody;
+					}
+					break;
+				case GameScenes.SPACECENTER:
+					if (kscMapObj.Visible)
+					{
+						bigMap = SCANkscMap.BigMap;
+					}
 
-			//Lock space center click through - Sync SCANdata
-			else if (HighLogic.LoadedScene == GameScenes.SPACECENTER)
-			{
-				if (kscMapObj.Visible)
-				{
-					bigMap = SCANkscMap.BigMap;
-				}
+					if (body == null)
+					{
+						body = Planetarium.fetch.Home;
+					}
 
-				if (body == null)
-				{
-					body = Planetarium.fetch.Home;
-				}
+					Vector2 mousePos = Input.mousePosition;
+					mousePos.y = Screen.height - mousePos.y;
+					if (WindowRect.Contains(mousePos) && !controlLock)
+					{
+						InputLockManager.SetControlLock(ControlTypes.CAMERACONTROLS | ControlTypes.KSC_ALL, lockID);
+						controlLock = true;
+					}
+					else if (!WindowRect.Contains(mousePos) && controlLock)
+					{
+						removeControlLocks();
+					}
+					break;
+				case GameScenes.TRACKSTATION:
+					if (kscMapObj.Visible)
+					{
+						bigMap = SCANkscMap.BigMap;
+					}
 
-				Vector2 mousePos = Input.mousePosition;
-				mousePos.y = Screen.height - mousePos.y;
-				if (WindowRect.Contains(mousePos) && !controlLock)
-				{
-					InputLockManager.SetControlLock(ControlTypes.CAMERACONTROLS | ControlTypes.KSC_ALL, lockID);
-					controlLock = true;
-				}
-				else if (!WindowRect.Contains(mousePos) && controlLock)
-				{
-					removeControlLocks();
-				}
-			}
+					if (body == null)
+					{
+						body = Planetarium.fetch.Home;
+					}
 
-			//Lock tracking scene click through - Sync SCANdata
-			else if (HighLogic.LoadedScene == GameScenes.TRACKSTATION)
-			{
-				if (kscMapObj.Visible)
-				{
-					bigMap = SCANkscMap.BigMap;
-				}
-
-				if (body == null)
-				{
-					body = Planetarium.fetch.Home;
-				}
-
-				Vector2 mousePos = Input.mousePosition;
-				mousePos.y = Screen.height - mousePos.y;
-				if (WindowRect.Contains(mousePos) && !controlLock)
-				{
-					InputLockManager.SetControlLock(ControlTypes.TRACKINGSTATION_UI, lockID);
-					controlLock = true;
-				}
-				else if (!WindowRect.Contains(mousePos) && controlLock)
-				{
-					removeControlLocks();
-				}
+					Vector2 mousePosT = Input.mousePosition;
+					mousePosT.y = Screen.height - mousePosT.y;
+					if (WindowRect.Contains(mousePosT) && !controlLock)
+					{
+						InputLockManager.SetControlLock(ControlTypes.TRACKINGSTATION_UI, lockID);
+						controlLock = true;
+					}
+					else if (!WindowRect.Contains(mousePosT) && controlLock)
+					{
+						removeControlLocks();
+					}
+					break;
 			}
 
 			//This updates all of the fields whenever the palette selection is changed
@@ -331,107 +327,111 @@ namespace SCANsat.SCAN_UI
 			}
 
 			//These methods update all of the UI elements whenever any of the options are changed
-			if (windowMode == 0)
+			switch (windowMode)
 			{
-				if (currentTerrain.PalRev != oldReverseState)
-				{
-					oldReverseState = currentTerrain.PalRev;
-					drawPreviewLegend();
-				}
-
-				if (minTerrainSlider.valueChanged() || maxTerrainSlider.valueChanged())
-				{
-					setTerrainSliders();
-				}
-
-				if (currentTerrain.PalDis != oldDiscreteState)
-				{
-					oldDiscreteState = currentTerrain.PalDis;
-					drawPreviewLegend();
-				}
-
-				if (clampState != oldClampState)
-				{
-					oldClampState = clampState;
-					drawPreviewLegend();
-				}
-
-				if (paletteSizeSlider.valueChanged())
-				{
-					regenPaletteSets();
-					currentTerrain.ColorPal = palette.CurrentPalettes.availablePalettes[paletteIndex];
-					drawPreviewLegend();
-				}
-			}
-			else if (windowMode == 1)
-			{
-				slopeColorPickerLow.colorStateChanged();
-				slopeColorPickerLow.brightnessChanged();
-				slopeColorPickerHigh.colorStateChanged();
-				slopeColorPickerHigh.brightnessChanged();
-			}
-			else if (windowMode == 2)
-			{
-				biomeColorPicker.colorStateChanged();
-				biomeColorPicker.brightnessChanged();
-			}
-			else if (windowMode == 3)
-			{
-				if (resourceMinSlider.valueChanged() || resourceMaxSlider.valueChanged())
-				{
-					setResourceSliders();
-				}
-
-				if (bodyIndex != body.flightGlobalsIndex)
-				{
-					SCANUtil.SCANdebugLog("Trigger Body Change");
-					bodyIndex = body.flightGlobalsIndex;
-
-					currentResource.CurrentBodyConfig(body.name);
-
-					lowRCutoff = currentResource.CurrentBody.MinValue;
-					highRCutoff = currentResource.CurrentBody.MaxValue;
-
-					oldFineControl = fineControlMode = false;
-
-					setResourceSliders();
-				}
-
-				if (oldFineControl != fineControlMode)
-				{
-					oldFineControl = fineControlMode;
-					if (fineControlMode)
+				case 0:
+					if (currentTerrain.PalRev != oldReverseState)
 					{
-						if (lowRCutoff < 5f)
-							resourceMinSlider.MinValue = 0f;
-						else
-							resourceMinSlider.MinValue = lowRCutoff - 5;
-
-						if (lowRCutoff > 95f)
-							resourceMinSlider.MaxValue = 100f;
-						else if (highRCutoff < lowRCutoff + 5f)
-							resourceMinSlider.MaxValue = highRCutoff - 0.1f;
-						else
-							resourceMinSlider.MaxValue = lowRCutoff + 5f;
-
-						if (highRCutoff < 5f)
-							resourceMaxSlider.MinValue = 0f;
-						else if (lowRCutoff > highRCutoff - 5f)
-							resourceMaxSlider.MinValue = lowRCutoff + 0.1f;
-						else
-							resourceMaxSlider.MinValue = highRCutoff - 5f;
-
-						if (highRCutoff > 95f)
-							resourceMaxSlider.MaxValue = 100f;
-						else
-							resourceMaxSlider.MaxValue = highRCutoff + 5f;
+						oldReverseState = currentTerrain.PalRev;
+						drawPreviewLegend();
 					}
-					else
-						setResourceSliders();
-				}
 
-				resourceColorPicker.colorStateChanged();
-				resourceColorPicker.brightnessChanged();
+					if (minTerrainSlider.valueChanged() || maxTerrainSlider.valueChanged())
+					{
+						setTerrainSliders();
+					}
+
+					if (currentTerrain.PalDis != oldDiscreteState)
+					{
+						oldDiscreteState = currentTerrain.PalDis;
+						drawPreviewLegend();
+					}
+
+					if (clampState != oldClampState)
+					{
+						oldClampState = clampState;
+						drawPreviewLegend();
+					}
+
+					if (paletteSizeSlider.valueChanged())
+					{
+						regenPaletteSets();
+						currentTerrain.ColorPal = palette.CurrentPalettes.availablePalettes[paletteIndex];
+						drawPreviewLegend();
+					}
+					break;
+
+				case 1:
+					slopeColorPickerLow.colorStateChanged();
+					slopeColorPickerLow.brightnessChanged();
+					slopeColorPickerHigh.colorStateChanged();
+					slopeColorPickerHigh.brightnessChanged();
+					break;
+
+				case 2:
+					biomeColorPicker.colorStateChanged();
+					biomeColorPicker.brightnessChanged();
+					break;
+
+				case 3:
+					if (resourceMinSlider.valueChanged() || resourceMaxSlider.valueChanged())
+					{
+						setResourceSliders();
+					}
+
+					if (bodyIndex != body.flightGlobalsIndex)
+					{
+						SCANUtil.SCANdebugLog("Trigger Body Change");
+						bodyIndex = body.flightGlobalsIndex;
+
+						currentResource.CurrentBodyConfig(body.name);
+
+						lowRCutoff = currentResource.CurrentBody.MinValue;
+						highRCutoff = currentResource.CurrentBody.MaxValue;
+
+						oldFineControl = fineControlMode = false;
+
+						setResourceSliders();
+					}
+
+					if (oldFineControl != fineControlMode)
+					{
+						oldFineControl = fineControlMode;
+						if (fineControlMode)
+						{
+							if (lowRCutoff < 5f)
+								resourceMinSlider.MinValue = 0f;
+							else
+								resourceMinSlider.MinValue = lowRCutoff - 5;
+
+							if (lowRCutoff > 95f)
+								resourceMinSlider.MaxValue = 100f;
+							else if (highRCutoff < lowRCutoff + 5f)
+								resourceMinSlider.MaxValue = highRCutoff - 0.1f;
+							else
+								resourceMinSlider.MaxValue = lowRCutoff + 5f;
+
+							if (highRCutoff < 5f)
+								resourceMaxSlider.MinValue = 0f;
+							else if (lowRCutoff > highRCutoff - 5f)
+								resourceMaxSlider.MinValue = lowRCutoff + 0.1f;
+							else
+								resourceMaxSlider.MinValue = highRCutoff - 5f;
+
+							if (highRCutoff > 95f)
+								resourceMaxSlider.MaxValue = 100f;
+							else
+								resourceMaxSlider.MaxValue = highRCutoff + 5f;
+						}
+						else
+							setResourceSliders();
+					}
+
+					resourceColorPicker.colorStateChanged();
+					resourceColorPicker.brightnessChanged();
+					break;
+				default:
+					break;
 			}
 
 			sessionRect = WindowRect;

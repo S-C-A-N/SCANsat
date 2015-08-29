@@ -159,36 +159,34 @@ namespace SCANsat.SCAN_UI
 				planetoid_drop_down = false;
 			}
 
-			//Lock space center click through
-			if (HighLogic.LoadedScene == GameScenes.SPACECENTER)
+			switch (HighLogic.LoadedScene)
 			{
-				Vector2 mousePos = Input.mousePosition;
-				mousePos.y = Screen.height - mousePos.y;
-				if (WindowRect.Contains(mousePos) && !controlLock)
-				{
-					InputLockManager.SetControlLock(ControlTypes.CAMERACONTROLS | ControlTypes.KSC_ALL, lockID);
-					controlLock = true;
-				}
-				else if (!WindowRect.Contains(mousePos) && controlLock)
-				{
-					removeControlLocks();
-				}
-			}
-
-			//Lock tracking scene click through
-			if (HighLogic.LoadedScene == GameScenes.TRACKSTATION)
-			{
-				Vector2 mousePos = Input.mousePosition;
-				mousePos.y = Screen.height - mousePos.y;
-				if (WindowRect.Contains(mousePos) && !controlLock)
-				{
-					InputLockManager.SetControlLock(ControlTypes.TRACKINGSTATION_UI, lockID);
-					controlLock = true;
-				}
-				else if (!WindowRect.Contains(mousePos) && controlLock)
-				{
-					removeControlLocks();
-				}
+				case GameScenes.SPACECENTER:
+					Vector2 mousePos = Input.mousePosition;
+					mousePos.y = Screen.height - mousePos.y;
+					if (WindowRect.Contains(mousePos) && !controlLock)
+					{
+						InputLockManager.SetControlLock(ControlTypes.CAMERACONTROLS | ControlTypes.KSC_ALL, lockID);
+						controlLock = true;
+					}
+					else if (!WindowRect.Contains(mousePos) && controlLock)
+					{
+						removeControlLocks();
+					}
+					break;
+				case GameScenes.TRACKSTATION:
+					Vector2 mousePosT = Input.mousePosition;
+					mousePosT.y = Screen.height - mousePosT.y;
+					if (WindowRect.Contains(mousePosT) && !controlLock)
+					{
+						InputLockManager.SetControlLock(ControlTypes.TRACKINGSTATION_UI, lockID);
+						controlLock = true;
+					}
+					else if (!WindowRect.Contains(mousePosT) && controlLock)
+					{
+						removeControlLocks();
+					}
+					break;
 			}
 		}
 
