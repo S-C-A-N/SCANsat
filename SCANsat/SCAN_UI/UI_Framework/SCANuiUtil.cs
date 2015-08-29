@@ -144,10 +144,10 @@ namespace SCANsat.SCAN_UI.UI_Framework
 				else
 					info += palette.colored(palette.grey, "MULTI ");
 
-				info += getMouseOverElevation(lon, lat, data, 2);
-
 				if (SCANUtil.isCovered(lon, lat, data, SCANtype.Altimetry))
 				{
+					info += getMouseOverElevation(lon, lat, data, 2);
+
 					double circum = body.Radius * 2 * Math.PI;
 					double eqDistancePerDegree = circum / 360;
 					double degreeOffset = 5 / eqDistancePerDegree;
@@ -228,10 +228,10 @@ namespace SCANsat.SCAN_UI.UI_Framework
 
 			if (b)
 			{
-				info += getMouseOverElevation(lon, lat, data, 0);
-
 				if (SCANUtil.isCovered(lon, lat, data, SCANtype.Altimetry))
 				{
+					info += getMouseOverElevation(lon, lat, data, 0);
+
 					double circum = body.Radius * 2 * Math.PI;
 					double eqDistancePerDegree = circum / 360;
 					double degreeOffset = 5 / eqDistancePerDegree;
@@ -438,7 +438,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			{
 				s = SCANUtil.getElevation(d.Body, Lon, Lat).ToString("N" + precision) + "m ";
 			}
-			else if (SCANUtil.isCovered(Lon, Lat, d, SCANtype.AltimetryLoRes))
+			else
 			{
 				s = (((int)SCANUtil.getElevation(d.Body, Lon, Lat) / 500) * 500).ToString() + "m ";
 			}
