@@ -376,11 +376,9 @@ namespace SCANsat.SCAN_UI
 				{
 					if (SCANUtil.isCovered(coords.longitude, coords.latitude, data, SCANtype.Altimetry))
 					{
-						double elevation = SCANUtil.getElevation(body, coords.longitude, coords.latitude);
-
 						tooltipText += string.Format("\nTerrain: {0}", SCANuiUtil.getMouseOverElevation(coords.longitude, coords.latitude, data, 0));
 
-						tooltipText += string.Format("\nSlope: {0:F1}°", SCANUtil.slope(elevation, body, coords.longitude, coords.latitude, degreeOffset));
+						tooltipText += string.Format("\nSlope: {0:F1}°", SCANUtil.slope(SCANUtil.getElevation(body, coords.longitude, coords.latitude), body, coords.longitude, coords.latitude, degreeOffset));
 					}
 				}
 
