@@ -148,11 +148,14 @@ namespace SCANsat.SCAN_UI.UI_Framework
 				{
 					info += getMouseOverElevation(lon, lat, data, 2);
 
-					double circum = body.Radius * 2 * Math.PI;
-					double eqDistancePerDegree = circum / 360;
-					double degreeOffset = 5 / eqDistancePerDegree;
+					if (SCANUtil.isCovered(lon, lat, data, SCANtype.AltimetryHiRes))
+					{
+						double circum = body.Radius * 2 * Math.PI;
+						double eqDistancePerDegree = circum / 360;
+						double degreeOffset = 5 / eqDistancePerDegree;
 
-					info += string.Format(" {0:F1}° ", SCANUtil.slope(SCANUtil.getElevation(body, lon, lat), body, lon, lat, degreeOffset));
+						info += string.Format(" {0:F1}° ", SCANUtil.slope(SCANUtil.getElevation(body, lon, lat), body, lon, lat, degreeOffset));
+					}
 				}
 
 				if (SCANUtil.isCovered(lon, lat, data, SCANtype.Biome))
@@ -232,11 +235,14 @@ namespace SCANsat.SCAN_UI.UI_Framework
 				{
 					info += getMouseOverElevation(lon, lat, data, 0);
 
-					double circum = body.Radius * 2 * Math.PI;
-					double eqDistancePerDegree = circum / 360;
-					double degreeOffset = 5 / eqDistancePerDegree;
+					if (SCANUtil.isCovered(lon, lat, data, SCANtype.AltimetryHiRes))
+					{
+						double circum = body.Radius * 2 * Math.PI;
+						double eqDistancePerDegree = circum / 360;
+						double degreeOffset = 5 / eqDistancePerDegree;
 
-					info += string.Format(" {0:F1}° ", SCANUtil.slope(SCANUtil.getElevation(body, lon, lat), body, lon, lat, degreeOffset));
+						info += string.Format(" {0:F1}° ", SCANUtil.slope(SCANUtil.getElevation(body, lon, lat), body, lon, lat, degreeOffset));
+					}
 				}
 
 				if (SCANUtil.isCovered(lon, lat, data, SCANtype.Biome))
