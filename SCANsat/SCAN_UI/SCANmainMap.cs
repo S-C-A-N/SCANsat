@@ -102,7 +102,7 @@ namespace SCANsat.SCAN_UI
 					scannerInfo(id);		/* Draws the scanner indicators */
 					windowButtons(id);		/* Draw the buttons for other SCANsat windows */
 				stopE();
-				fillS(-8);
+				fillS(-6);
 				vesselInfo(id);				/* Shows info for any SCANsat vessels */
 			stopS();
 		}
@@ -122,17 +122,18 @@ namespace SCANsat.SCAN_UI
 		//Draw the top menu items
 		private void topMenu(int id)
 		{
-			Rect r = new Rect(WindowRect.width - 40, 0, 18, 18);
-			if (showVesselInfo)
+			Rect r = new Rect(WindowRect.width - 90, 2, 50, 18);
+
+			if (GUI.Button(r, drawBiome ? "Biome" : "Terrain", SCANskins.SCAN_buttonBorderlessSmall))
 			{
-				if (GUI.Button(r, "-", SCANskins.SCAN_buttonBorderless))
-					showVesselInfo = !showVesselInfo;
+				drawBiome = !drawBiome;
+				resetImages();
 			}
-			else
-			{
-				if (GUI.Button(r, "+", SCANskins.SCAN_buttonBorderless))
-					showVesselInfo = !showVesselInfo;
-			}
+			r.x += 50;
+			r.y -= 2;
+			r.width = 18;
+			if (GUI.Button(r, showVesselInfo ? "-" : "+", SCANskins.SCAN_buttonBorderless))
+				showVesselInfo = !showVesselInfo;
 			r.x += 20;
 			r.y += 1;
 			if (GUI.Button(r, SCANcontroller.controller.closeBox, SCANskins.SCAN_closeButton))
@@ -164,14 +165,12 @@ namespace SCANsat.SCAN_UI
 			if (!repainting)
 				infoText = SCANuiUtil.InfoText(v, data, notMappingToday);
 
-			if (infoText != null)
-				SCANuiUtil.readableLabel(infoText, false);
+			SCANuiUtil.readableLabel(infoText, false);
 		}
 
 		//Draw the SCANsat window buttons with icons
 		private void windowButtons(int id)
 		{
-			//fillS();
 			if (GUILayout.Button(iconWithTT(SCANskins.SCAN_BigMapIcon, "Big Map"), SCANskins.SCAN_windowButton, GUILayout.Height(32), GUILayout.Width(32)))
 			{
 				SCANcontroller.controller.BigMap.Visible = !SCANcontroller.controller.BigMap.Visible;
@@ -192,11 +191,6 @@ namespace SCANsat.SCAN_UI
 			if (GUILayout.Button(iconWithTT(SCANskins.SCAN_OverlayIcon, "Overlay Contral"), SCANskins.SCAN_windowButton, GUILayout.Height(32), GUILayout.Width(32)))
 			{
 				SCANcontroller.controller.resourceOverlay.Visible = !SCANcontroller.controller.resourceOverlay.Visible;
-			}
-			if (GUILayout.Button("<->", SCANskins.SCAN_windowButton, GUILayout.Height(32), GUILayout.Width(20)))
-			{
-				drawBiome = !drawBiome;
-				resetImages();
 			}
 		}
 
@@ -247,7 +241,7 @@ namespace SCANsat.SCAN_UI
 							float alt = scanV.heightFromTerrain;
 							if (alt < 0)
 								alt = (float)scanV.altitude;
-							units = "; " + alt.ToString("N1") + "m";
+							units = "; " + SCANuiUtil.distanceString(alt, 100000);
 						}
 						else
 						{
@@ -256,7 +250,7 @@ namespace SCANsat.SCAN_UI
 								alt = (float)scanV.altitude;
 
 							alt = ((int)(alt / 500)) * 500;
-							units = "; " + alt.ToString("F0") + "m";
+							units = "; " + SCANuiUtil.distanceString(alt, 100000);
 						}
 					}
 				}
