@@ -112,7 +112,7 @@ In addition to the authors, the following people have contributed:
   
   + (Science results text) [madsailor][madsailor]
   
-  + (Contracts) [severedSolo][severedSolo]
+  + (Contracts) [severedsolo][severedsolo]
 
 #### Licenses
 
@@ -695,7 +695,7 @@ sneaky then they can of course be sneaky.
 [Olympic1]: http://forum.kerbalspaceprogram.com/members/81815
 [madsailor]: http://forum.kerbalspaceprogram.com/members/123944
 [tinypirate]: http://forum.kerbalspaceprogram.com/members/79868
-[severedSolo]: http://forum.kerbalspaceprogram.com/members/82445
+[severedsolo]: http://forum.kerbalspaceprogram.com/members/82445
 
 [KSP:developers]: https://kerbalspaceprogram.com/index.php
 [KSP:reddit]: http://www.reddit.com/r/KerbalSpaceProgram
@@ -953,4 +953,4 @@ sneaky then they can of course be sneaky.
 
 [ccfgSCANsat:release]: http://forum.kerbalspaceprogram.com/threads/108097
 
-[mechjeb:release]: http://forum.kerbalspaceprogram.com/threads/12384
+[mechjeb:release]: http://forum.kerbalspaceprogram.com/threads/124336
