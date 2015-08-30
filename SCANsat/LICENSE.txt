@@ -218,4 +218,11 @@ CLZF2:
  * you do not delete the provisions above, a recipient may use your version
  * of this file under either the BSD or the GPL.
  
+ ----------------------------------------------------------------
  
+ Contract Pack:
+ 
+ The contract pack is based on the SCANsatLite Contract Configurator pack by severedSolo
+ 
+ Released under the Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International license (see above)
+

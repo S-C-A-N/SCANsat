@@ -1,3 +1,58 @@
+Version 14.2 - 2015-8-29
+------------------------
+
+- Performance and RAM usage improvements
+	- Storage modules for each planet use less RAM
+	- Planetary overlays use less RAM
+	- Biome overlay texture size can be changed independently of resource size
+	- Planetary overlays generated on a different thread when possible
+		- This reduces or prevents the slight freeze or hiccup when generating a new overlay
+		
+- Raster Prop Monitor
+	- Additional functions added to RPM panels
+	- The standard MFDs use the four buttons on the left for resource and anomaly/waypoint overlays
+	- ALCOR pods also have additional functions where possible
+	- Increased map rendering performance by reducing map texture size
+		- Map texture size and resource overlay quality can be adjusted in the RPM configs
+	- Prevent the non full-screen panels from drawing maps underneath opaque sections of the display (ie the left hand ALCOR panel)
+	- A Module Manager patch is required for full ALCOR MFD functionality
+		
+- Parts
+	- Slight reduction in size of SAR and MultiSpectral scanners
+	- Proper use of MODEL node scaling; fixes KIS inventory size problems (thanks Kerbas_ad_astra)
+	- Slightly increased scanning width and altitude parameters for M700 (clamshell) resource scanner
+	
+- Contract Configurator Contracts included
+	- Based on a slightly modified version of severedsolo's SCANsatLite pack
+	
+- SCAN agency and manufacturers group added
+
+- Big map and KSC map
+	- Resource overlays now use the same quality settings as the planetary overlays
+	- Resource mouse-over info now follows the same narrow-band scanner restrictions as planetary overlay tooltips
+	- Slope added to mouse-over info for terrain scanned with high-resolution terrain scanner
+	
+- Small map
+	- Biome maps available on the small map
+		- The vessel info readout will display the current biome (if scanned) for each vessel
+	- The altitude readout for each vessel is now dependent on scanning coverage
+	
+- Instruments UI
+	- New rules for the altitude and slope readout
+		- Below 1000m full height-above-terrain and slope info is given regardless of scanning coverage
+		- Above 1000m altitude the readout is based on low or high resolution terrain scanning; slope is only given for high resolution scans
+		
+- Color Management Window
+	- Planet selection boxes available for terrain and resource color configs
+	- Fix possible bugs created by adding and deleting mod planets
+	
+- Misc and bug fixes
+	- Resource overlay colors properly use the assigned abundance ranges
+	- Added a resource overlay control window toolbar button
+	- Update the active vessel in the instruments window
+	- Various minor performance improvements
+	- Various minor UI tweaks
+
 Version 14.1 - 2015-7-15
 ------------------------
 

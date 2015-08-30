@@ -146,7 +146,7 @@ namespace SCANsat
 
 		private static SCANresourceType OverlayResourceType(string s)
 		{
-			return SCANcontroller.getResourceType(s);
+			return SCANcontroller.getResourceType(s, false);
 		}
 	}
 }
