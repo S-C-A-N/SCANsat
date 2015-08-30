@@ -33,6 +33,14 @@ namespace SCANsat.SCAN_UI
 		internal static readonly Rect defaultRect = new Rect(10, 55, 380, 230);
 		private static Rect sessionRect = defaultRect;
 		private bool flash;
+		private Texture2D map_small = new Texture2D(360, 180, TextureFormat.ARGB32, false);
+		private Color[] cols_height_map_small = new Color[360];
+		private Color32[] biomeCache = new Color32[360 * 180];
+		private bool biomeBuilding;
+		private bool drawBiome;
+		private double[] biomeIndex = new double[360];
+		private int scanline;
+		private int scanstep;
 
 		protected override void Awake()
 		{
@@ -60,6 +68,15 @@ namespace SCANsat.SCAN_UI
 				SCANcontroller.controller.addToBodyData(v.mainBody, data);
 			}
 			TooltipsEnabled = SCANcontroller.controller.toolTips;
+
+			if (palette.small_redline == null)
+			{
+				palette.small_redline = new Color[360];
+				for (int i = 0; i < 360; i++)
+					palette.small_redline[i] = palette.red;
+			}
+
+			resetImages();
 		}
 
 		protected override void DrawWindowPre(int id)
@@ -85,7 +102,7 @@ namespace SCANsat.SCAN_UI
 					scannerInfo(id);		/* Draws the scanner indicators */
 					windowButtons(id);		/* Draw the buttons for other SCANsat windows */
 				stopE();
-				fillS(-8);
+				fillS(-6);
 				vesselInfo(id);				/* Shows info for any SCANsat vessels */
 			stopS();
 		}
@@ -105,17 +122,18 @@ namespace SCANsat.SCAN_UI
 		//Draw the top menu items
 		private void topMenu(int id)
 		{
-			Rect r = new Rect(WindowRect.width - 40, 0, 18, 18);
-			if (showVesselInfo)
+			Rect r = new Rect(WindowRect.width - 90, 2, 50, 18);
+
+			if (GUI.Button(r, drawBiome ? "Biome" : "Terrain", SCANskins.SCAN_buttonBorderlessSmall))
 			{
-				if (GUI.Button(r, "-", SCANskins.SCAN_buttonBorderless))
-					showVesselInfo = !showVesselInfo;
+				drawBiome = !drawBiome;
+				resetImages();
 			}
-			else
-			{
-				if (GUI.Button(r, "+", SCANskins.SCAN_buttonBorderless))
-					showVesselInfo = !showVesselInfo;
-			}
+			r.x += 50;
+			r.y -= 2;
+			r.width = 18;
+			if (GUI.Button(r, showVesselInfo ? "-" : "+", SCANskins.SCAN_buttonBorderless))
+				showVesselInfo = !showVesselInfo;
 			r.x += 20;
 			r.y += 1;
 			if (GUI.Button(r, SCANcontroller.controller.closeBox, SCANskins.SCAN_closeButton))
@@ -129,7 +147,7 @@ namespace SCANsat.SCAN_UI
 		private void mainMap(int id)
 		{
 			mapRect = new Rect(10, 20, 360, 180);
-			GUI.DrawTexture(mapRect, data.drawPartialMap(sensors));
+			GUI.DrawTexture(mapRect, drawBiome ? drawBiomeMap(sensors) : drawPartialMap(sensors));
 
 			if (data.Building || data.ExternalBuilding)
 			{
@@ -147,14 +165,12 @@ namespace SCANsat.SCAN_UI
 			if (!repainting)
 				infoText = SCANuiUtil.InfoText(v, data, notMappingToday);
 
-			if (infoText != null)
-				SCANuiUtil.readableLabel(infoText, false);
+			SCANuiUtil.readableLabel(infoText, false);
 		}
 
 		//Draw the SCANsat window buttons with icons
 		private void windowButtons(int id)
 		{
-			//fillS();
 			if (GUILayout.Button(iconWithTT(SCANskins.SCAN_BigMapIcon, "Big Map"), SCANskins.SCAN_windowButton, GUILayout.Height(32), GUILayout.Width(32)))
 			{
 				SCANcontroller.controller.BigMap.Visible = !SCANcontroller.controller.BigMap.Visible;
@@ -209,10 +225,37 @@ namespace SCANsat.SCAN_UI
 				}
 				float lon = (float)SCANUtil.fixLonShift(scanV.longitude);
 				float lat = (float)SCANUtil.fixLatShift(scanV.latitude);
-				float alt = scanV.heightFromTerrain;
-				if (alt < 0)
-					alt = (float)scanV.altitude;
-				string text = string.Format("[{0}] {1} ({2:F1}°,{3:F1}°; {4:N1}m)", i, scanV.vesselName, lat, lon, alt);
+
+				string units = "";
+				if (drawBiome)
+				{
+					if (SCANUtil.isCovered(lon, lat, data, SCANtype.Biome))
+						units = "; " + SCANUtil.getBiomeName(data.Body, lon, lat);
+				}
+				else
+				{
+					if (SCANUtil.isCovered(lon, lat, data, SCANtype.Altimetry))
+					{
+						if (SCANUtil.isCovered(lon, lat, data, SCANtype.AltimetryHiRes))
+						{
+							float alt = scanV.heightFromTerrain;
+							if (alt < 0)
+								alt = (float)scanV.altitude;
+							units = "; " + SCANuiUtil.distanceString(alt, 100000);
+						}
+						else
+						{
+							float alt = scanV.heightFromTerrain;
+							if (alt < 0)
+								alt = (float)scanV.altitude;
+
+							alt = ((int)(alt / 500)) * 500;
+							units = "; " + SCANuiUtil.distanceString(alt, 100000);
+						}
+					}
+				}
+
+				string text = string.Format("[{0}] {1} ({2:F1}°,{3:F1}°{4})", i, scanV.vesselName, lat, lon, units);
 				if (SCANuiUtil.readableLabel(text, b))
 				{
 					if (Event.current.clickCount > 1)
@@ -227,6 +270,187 @@ namespace SCANsat.SCAN_UI
 				return true;
 			}
 			return false;
+		}
+
+		private Texture2D drawPartialMap(SCANtype type)
+		{
+			bool pqsController = data.Body.pqsController != null;
+
+			if (data.ExternalBuilding)
+			{
+				return map_small;
+			}
+
+			if (!data.Built)
+			{
+				data.Building = true;
+				data.generateHeightMap(ref scanline, ref scanstep, 360);
+				return map_small;
+			}
+
+			int scheme = SCANcontroller.controller.colours;
+
+			for (int ilon = 0; ilon < 360; ilon++)
+			{
+				if (!pqsController)
+				{
+					cols_height_map_small[ilon] = palette.lerp(palette.black, palette.white, UnityEngine.Random.value);
+					continue;
+				}
+
+				Color c = palette.grey;
+				float val = data.HeightMapValue(data.Body.flightGlobalsIndex, ilon, scanline);
+				if (SCANUtil.isCovered(ilon, scanline, data, SCANtype.Altimetry))
+				{
+					if (SCANUtil.isCovered(ilon, scanline, data, SCANtype.AltimetryHiRes))
+						c = palette.heightToColor(val, scheme, data.TerrainConfig);
+					else
+						c = palette.heightToColor(val, 1, data.TerrainConfig);
+				}
+				else
+				{
+					if (scanline % 30 == 0 && ilon % 3 == 0)
+					{
+						c = palette.white;
+					}
+					else if (ilon % 30 == 0 && scanline % 3 == 0)
+					{
+						c = palette.white;
+					}
+				}
+
+				if (type != SCANtype.Nothing)
+				{
+					if (!SCANUtil.isCoveredByAll(ilon, scanline, data, type))
+					{
+						c = palette.lerp(c, palette.black, 0.5f);
+					}
+				}
+
+				cols_height_map_small[ilon] = c;
+			}
+
+			map_small.SetPixels(0, scanline, 360, 1, cols_height_map_small);
+
+			if (scanline < 179)
+				map_small.SetPixels(0, scanline + 1, 360, 1, palette.small_redline);
+
+			scanline++;
+
+			if (scanline >= 180)
+				scanline = 0;
+
+			map_small.Apply();
+
+			return map_small;
+		}
+
+		private Texture2D drawBiomeMap(SCANtype type)
+		{
+			bool biomeMap = data.Body.BiomeMap != null;
+
+			if (biomeBuilding)
+				buildBiomeCache();
+
+			int scheme = SCANcontroller.controller.colours;
+
+			for (int ilon = 0; ilon < 360; ilon++)
+			{
+				if (!biomeMap)
+				{
+					cols_height_map_small[ilon] = palette.lerp(palette.black, palette.white, UnityEngine.Random.value);
+					continue;
+				}
+
+				Color c = biomeCache[scanline * 360 + ilon];
+				if (!SCANUtil.isCovered(ilon, scanline, data, SCANtype.Biome))
+				{
+					c = palette.grey;
+				}
+
+				if (type != SCANtype.Nothing)
+				{
+					if (!SCANUtil.isCoveredByAll(ilon, scanline, data, type))
+					{
+						c = palette.lerp(c, palette.black, 0.5f);
+					}
+				}
+
+				cols_height_map_small[ilon] = c;
+			}
+
+			map_small.SetPixels(0, scanline, 360, 1, cols_height_map_small);
+
+			if (scanline < 179)
+				map_small.SetPixels(0, scanline + 1, 360, 1, palette.small_redline);
+
+			scanline++;
+
+			if (scanline >= 180)
+				scanline = 0;
+
+			map_small.Apply();
+
+			return map_small;
+		}
+
+		private void buildBiomeCache()
+		{
+			for (int i = 0; i < 360; i++)
+			{
+				double index = SCANUtil.getBiomeIndexFraction(data.Body, i - 180, scanline - 90);
+				Color c = palette.grey;
+
+				if (SCANcontroller.controller.biomeBorder && ((i > 0 && biomeIndex[i - 1] != index) || (scanline > 0 && biomeIndex[i] != index)))
+				{
+					c = palette.white;
+				}
+				else if (SCANcontroller.controller.useStockBiomes)
+				{
+					c = SCANUtil.getBiome(data.Body, i - 180, scanline - 90).mapColor;
+				}
+				else
+				{
+					c = palette.lerp(SCANcontroller.controller.lowBiomeColor, SCANcontroller.controller.highBiomeColor, (float)index);
+				}
+
+				biomeCache[scanline * 360 + i] = c;
+
+				biomeIndex[i] = index;
+			}
+
+			if (scanline >= 179)
+				biomeBuilding = false;
+		}
+
+		public Texture2D Map
+		{
+			get { return map_small; }
+		}
+
+		internal void resetImages()
+		{
+			// Just draw a simple grid to initialize the image; the map will appear on top of it
+			for (int y = 0; y < map_small.height; y++)
+			{
+				for (int x = 0; x < map_small.width; x++)
+				{
+					if ((x % 30 == 0 && y % 3 > 0) || (y % 30 == 0 && x % 3 > 0))
+					{
+						map_small.SetPixel(x, y, palette.white);
+					}
+					else
+					{
+						map_small.SetPixel(x, y, palette.grey);
+					}
+				}
+			}
+			map_small.Apply();
+			if (drawBiome)
+			{
+				biomeBuilding = true;
+				scanline = 0;
+			}
 		}
 
 	}

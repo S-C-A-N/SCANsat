@@ -68,7 +68,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			r.width = 260;
 
 			if (under)
-				GUI.HorizontalSlider(r, value, minValue, maxValue).Mathf_Round(precision);
+				GUI.Label(r, "", SCANskins.SCAN_horSlider);
 			else
 				value = GUI.HorizontalSlider(r, value, minValue, maxValue).Mathf_Round(precision);
 

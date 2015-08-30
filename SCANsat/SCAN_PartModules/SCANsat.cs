@@ -174,11 +174,26 @@ namespace SCANsat.SCAN_PartModules
 				foreach (ConfigNode RPMNode in RPMPersistence.GetNodes("Prop"))
 				{
 					string id = RPMNode.GetValue("Prop ID");
-					int Mode = Convert.ToInt32(RPMNode.GetValue("Mode"));
-					int Color = Convert.ToInt32(RPMNode.GetValue("Color"));
-					int Zoom = Convert.ToInt32(RPMNode.GetValue("Zoom"));
-					bool Lines = Convert.ToBoolean(RPMNode.GetValue("Lines"));
-					RPMList.Add(new RPMPersistence(id, Mode, Color, Zoom, Lines));
+					int m = 0;
+					int c = 0;
+					int z = 0;
+					int r = 0;
+					bool lines = true;
+					bool anom = true;
+					bool resource = true;
+
+					int.TryParse(RPMNode.GetValue("Mode"), out m);
+					int.TryParse(RPMNode.GetValue("Color"), out c);
+					int.TryParse(RPMNode.GetValue("Zoom"), out z);
+					int.TryParse(RPMNode.GetValue("Resource"), out r);
+					if (!bool.TryParse(RPMNode.GetValue("Lines"), out lines))
+						lines = true;
+					if (!bool.TryParse(RPMNode.GetValue("Anomalies"), out anom))
+						anom = true;
+					if (!bool.TryParse(RPMNode.GetValue("DrawResource"), out resource))
+						resource = true;
+
+					RPMList.Add(new RPMPersistence(id, m, c, z, lines, anom, resource, r));
 				}
 			}
 		}
@@ -201,7 +216,10 @@ namespace SCANsat.SCAN_PartModules
 					RPMProp.AddValue("Mode", RPMMFD.RPMMode);
 					RPMProp.AddValue("Color", RPMMFD.RPMColor);
 					RPMProp.AddValue("Zoom", RPMMFD.RPMZoom);
+					RPMProp.AddValue("Resource", RPMMFD.RPMResource);
 					RPMProp.AddValue("Lines", RPMMFD.RPMLines);
+					RPMProp.AddValue("Anomalies", RPMMFD.RPMAnomaly);
+					RPMProp.AddValue("DrawResource", RPMMFD.RPMDrawResource);
 					RPMPersistence.AddNode(RPMProp);
 				}
 				node.AddNode(RPMPersistence);
@@ -372,16 +390,18 @@ namespace SCANsat.SCAN_PartModules
 		/* SCAN: add static (a warning that we're low on electric charge) */
 		private void addStatic()
 		{
-			SCANdata data = SCANUtil.getData(vessel.mainBody);
-			if (data == null)
+			if (SCANcontroller.controller == null)
 				return;
-			Texture2D map = data.Map;
-			if (map != null)
+
+			if (SCANcontroller.controller.mainMap == null)
+				return;
+
+			if (SCANcontroller.controller.mainMap.Map == null)
+				return;
+
+			for (int i = 0; i < 1000; i++)
 			{
-				for (int i = 0; i < 1000; ++i)
-				{
-					map.SetPixel(UnityEngine.Random.Range(0, 360), UnityEngine.Random.Range(0, 180), palette.lerp(palette.black, palette.white, UnityEngine.Random.value));
-				}
+				SCANcontroller.controller.mainMap.Map.SetPixel(UnityEngine.Random.Range(0, 360), UnityEngine.Random.Range(0, 180), palette.lerp(palette.black, palette.white, UnityEngine.Random.value));
 			}
 		}
 

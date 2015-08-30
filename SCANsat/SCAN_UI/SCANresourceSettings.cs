@@ -24,7 +24,7 @@ namespace SCANsat.SCAN_UI
 	{
 		internal readonly static Rect defaultRect = new Rect(300, 200, 300, 270);
 		private static Rect sessionRect = defaultRect;
-		private int mapHeight;
+		private int mapHeight, biomeMapHeight;
 		private float transparency;
 		private int interpolationScale;
 		private bool popup, warningResource, warningStockResource, controlLock, oldNarrowBand;
@@ -48,6 +48,7 @@ namespace SCANsat.SCAN_UI
 		{
 			oldNarrowBand = SCANcontroller.controller.needsNarrowBand;
 
+			biomeMapHeight = SCANcontroller.controller.overlayBiomeHeight;
 			mapHeight = SCANcontroller.controller.overlayMapHeight;
 			transparency = SCANcontroller.controller.overlayTransparency;
 			interpolationScale = SCANcontroller.controller.overlayInterpolation;
@@ -163,21 +164,21 @@ namespace SCANsat.SCAN_UI
 		{
 			GUILayout.Label("Resource Settings", SCANskins.SCAN_headline);
 			growE();
-			SCANcontroller.controller.resourceBiomeLock = GUILayout.Toggle(SCANcontroller.controller.resourceBiomeLock, "Resource Biome Lock", SCANskins.SCAN_settingsToggle);
-			if (SCANcontroller.controller.disableStockResource)
-				GUILayout.Toggle(false, "Instant Resource Scan", SCANskins.SCAN_settingsToggle);
-			else
-				SCANcontroller.controller.easyModeScanning = GUILayout.Toggle(SCANcontroller.controller.easyModeScanning, "Instant Resource Scan", SCANskins.SCAN_settingsToggle);
+				SCANcontroller.controller.resourceBiomeLock = GUILayout.Toggle(SCANcontroller.controller.resourceBiomeLock, "Resource Biome Lock", SCANskins.SCAN_settingsToggle);
+				if (SCANcontroller.controller.disableStockResource)
+					GUILayout.Toggle(false, "Instant Resource Scan", SCANskins.SCAN_settingsToggle);
+				else
+					SCANcontroller.controller.easyModeScanning = GUILayout.Toggle(SCANcontroller.controller.easyModeScanning, "Instant Resource Scan", SCANskins.SCAN_settingsToggle);
 			stopE();
 			growE();
-			fillS();
-			SCANcontroller.controller.needsNarrowBand = GUILayout.Toggle(SCANcontroller.controller.needsNarrowBand, "Requires Narrow Band Scanner", SCANskins.SCAN_settingsToggle);
-			fillS();
+				fillS();
+				SCANcontroller.controller.needsNarrowBand = GUILayout.Toggle(SCANcontroller.controller.needsNarrowBand, "Requires Narrow Band Scanner", SCANskins.SCAN_settingsToggle);
+				fillS();
 			stopE();
 			growE();
-			fillS();
-			SCANcontroller.controller.disableStockResource = GUILayout.Toggle(SCANcontroller.controller.disableStockResource, "Disable Stock Scanning", SCANskins.SCAN_settingsToggle);
-			fillS();
+				fillS();
+				SCANcontroller.controller.disableStockResource = GUILayout.Toggle(SCANcontroller.controller.disableStockResource, "Disable Stock Scanning", SCANskins.SCAN_settingsToggle);
+				fillS();
 			stopE();
 			GUILayout.Label("Resource Scan Data", SCANskins.SCAN_headline);
 			if (popup)
@@ -264,6 +265,24 @@ namespace SCANsat.SCAN_UI
 					refreshMap();
 				}
 			stopE();
+
+			growE();
+				GUILayout.Label("Biome Map Height:", SCANskins.SCAN_labelSmallLeft);
+
+				fillS();
+
+				if (GUILayout.Button("-", SCANskins.SCAN_buttonSmall, GUILayout.Width(18)))
+				{
+					biomeMapHeight = Math.Max(256, biomeMapHeight / 2);
+					refreshMap();
+				}
+				GUILayout.Label(biomeMapHeight.ToString(), SCANskins.SCAN_labelSmall, GUILayout.Width(36));
+				if (GUILayout.Button("+", SCANskins.SCAN_buttonSmall, GUILayout.Width(18)))
+				{
+					biomeMapHeight = Math.Min(1024, biomeMapHeight * 2);
+					refreshMap();
+				}
+			stopE();
 		}
 
 		//Confirmation boxes for map resets
@@ -333,7 +352,7 @@ namespace SCANsat.SCAN_UI
 			if (SCANcontroller.controller.resourceOverlay == null)
 				return;
 
-			SCANcontroller.controller.resourceOverlay.refreshMap(transparency, mapHeight, interpolationScale);
+			SCANcontroller.controller.resourceOverlay.refreshMap(transparency, mapHeight, interpolationScale, biomeMapHeight);
 		}
 
 		private CelestialBody getTargetBody()

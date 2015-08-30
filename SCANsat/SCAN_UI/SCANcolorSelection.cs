@@ -26,7 +26,7 @@ namespace SCANsat.SCAN_UI
 {
 	class SCANcolorSelection: SCAN_MBW
 	{
-		private bool dropDown, paletteBox, resourceBox, saveWarning;
+		private bool dropDown, paletteBox, resourceBox, planetBox, saveWarning;
 		private bool oldReverseState, oldDiscreteState;
 		private bool controlLock, clampState, oldClampState;
 		private Rect ddRect;
@@ -35,6 +35,7 @@ namespace SCANsat.SCAN_UI
 		private int windowMode = 0;
 
 		private SCANterrainConfig currentTerrain;
+		private SCANterrainConfig bodyTerrain;
 		private float minT, maxT, clampT, pSize;
 
 		private SCANuiSlider minTerrainSlider, maxTerrainSlider, clampTerrainSlider, paletteSizeSlider, resourceMinSlider, resourceMaxSlider, resourceTransSlider, biomeTransSlider;
@@ -63,7 +64,7 @@ namespace SCANsat.SCAN_UI
 		private SCANBigMap bigMapObj;
 
 		private static SCANmap bigMap;
-		private SCANdata data;
+		private CelestialBody body;
 
 		protected override void Awake()
 		{
@@ -88,7 +89,9 @@ namespace SCANsat.SCAN_UI
 				if (SCANkscMap.BigMap != null)
 					bigMap = SCANkscMap.BigMap;
 				if (kscMapObj.Data != null)
-					data = kscMapObj.Data;
+					body = kscMapObj.Body;
+				if (body == null)
+					body = Planetarium.fetch.Home;
 			}
 			else if (HighLogic.LoadedSceneIsFlight)
 			{
@@ -96,28 +99,22 @@ namespace SCANsat.SCAN_UI
 				if (SCANBigMap.BigMap != null)
 					bigMap = SCANBigMap.BigMap;
 				if (bigMapObj.Data != null)
-					data = bigMapObj.Data;
+					body = bigMapObj.Data.Body;
+				if (body == null)
+					body = FlightGlobals.currentMainBody;
 			}
 
-			if (data == null)
-			{
-				data = SCANUtil.getData(Planetarium.fetch.Home);
-				if (data == null)
-				{
-					data = new SCANdata(Planetarium.fetch.Home);
-					SCANcontroller.controller.addToBodyData(Planetarium.fetch.Home, data);
-				}
-			}
+			setBodyTerrain();
 
-			currentTerrain = new SCANterrainConfig(data.TerrainConfig);
+			currentTerrain = new SCANterrainConfig(bodyTerrain);
 
 			stockBiomes = SCANcontroller.controller.useStockBiomes;
 			biomeBorders = SCANcontroller.controller.biomeBorder;
 
-			minTerrainSlider = new SCANuiSlider(data.TerrainConfig.DefaultMinHeight - SCANconfigLoader.SCANNode.RangeBelowMinHeight, data.TerrainConfig.MaxTerrain - 100, data.TerrainConfig.MinTerrain, "Min: ", "m", -2);
-			maxTerrainSlider = new SCANuiSlider(data.TerrainConfig.MinTerrain + 100, data.TerrainConfig.DefaultMaxHeight + SCANconfigLoader.SCANNode.RangeAboveMaxHeight, data.TerrainConfig.MaxTerrain, "Max: ", "m", -2);
-			clampTerrainSlider = new SCANuiSlider(data.TerrainConfig.MinTerrain + 10, data.TerrainConfig.MaxTerrain - 10, data.TerrainConfig.ClampTerrain ?? data.TerrainConfig.MinTerrain + 10, "Clamp: ", "m", -1);
-			paletteSizeSlider = new SCANuiSlider(3, 12, data.TerrainConfig.PalSize, "Palette Size: ", "", 0);
+			minTerrainSlider = new SCANuiSlider(currentTerrain.DefaultMinHeight - SCANconfigLoader.SCANNode.RangeBelowMinHeight, currentTerrain.MaxTerrain - 100, currentTerrain.MinTerrain, "Min: ", "m", -2);
+			maxTerrainSlider = new SCANuiSlider(currentTerrain.MinTerrain + 100, currentTerrain.DefaultMaxHeight + SCANconfigLoader.SCANNode.RangeAboveMaxHeight, currentTerrain.MaxTerrain, "Max: ", "m", -2);
+			clampTerrainSlider = new SCANuiSlider(currentTerrain.MinTerrain + 10, currentTerrain.MaxTerrain - 10, currentTerrain.ClampTerrain ?? currentTerrain.MinTerrain + 10, "Clamp: ", "m", -1);
+			paletteSizeSlider = new SCANuiSlider(3, 12, currentTerrain.PalSize, "Palette Size: ", "", 0);
 
 			slopeColorPickerLow = new SCANuiColorPicker(SCANcontroller.controller.lowSlopeColorOne, SCANcontroller.controller.highSlopeColorOne, true);
 			slopeColorPickerHigh = new SCANuiColorPicker(SCANcontroller.controller.lowSlopeColorTwo, SCANcontroller.controller.highSlopeColorTwo, true);
@@ -136,7 +133,7 @@ namespace SCANsat.SCAN_UI
 			{
 				loadedResources = SCANcontroller.setLoadedResourceList();
 				currentResource = new SCANresourceGlobal(loadedResources[0]);
-				currentResource.CurrentBodyConfig(data.Body.name);
+				currentResource.CurrentBodyConfig(body.name);
 
 				if (currentResource != null)
 				{
@@ -148,7 +145,7 @@ namespace SCANsat.SCAN_UI
 				}
 			}
 
-			bodyIndex = data.Body.flightGlobalsIndex;
+			bodyIndex = body.flightGlobalsIndex;
 
 			if (windowMode > 3 || (windowMode > 2 && !SCANconfigLoader.GlobalResource))
 				windowMode = 0;
@@ -170,143 +167,75 @@ namespace SCANsat.SCAN_UI
 		protected override void DrawWindowPre(int id)
 		{
 			//Some clumsy logic is used here to ensure that the color selection fields always remain in sync with the current map in each scene
-			if (HighLogic.LoadedSceneIsFlight)
+			switch (HighLogic.LoadedScene)
 			{
-				if (data == null)
-				{
-					data = SCANUtil.getData(FlightGlobals.currentMainBody);
-					if (data == null)
-					{
-						data = new SCANdata(FlightGlobals.currentMainBody);
-						SCANcontroller.controller.addToBodyData(FlightGlobals.currentMainBody, data);
-					}
-				}
-
-				if (bigMapObj.Visible && SCANBigMap.BigMap != null)
-				{
-					data = bigMapObj.Data;
-					bigMap = SCANBigMap.BigMap;
-				}
-				else if (data.Body != FlightGlobals.currentMainBody)
-				{
-					data = SCANUtil.getData(FlightGlobals.currentMainBody);
-					if (data == null)
-					{
-						data = new SCANdata(FlightGlobals.currentMainBody);
-						SCANcontroller.controller.addToBodyData(FlightGlobals.currentMainBody, data);
-					}
-				}
-
-				if (bigMap == null)
-				{
+				case GameScenes.FLIGHT:
 					if (SCANBigMap.BigMap != null)
 					{
 						bigMap = SCANBigMap.BigMap;
 					}
-				}
-			}
 
-			//Lock space center click through - Sync SCANdata
-			else if (HighLogic.LoadedScene == GameScenes.SPACECENTER)
-			{
-				if (data == null)
-				{
-					data = SCANUtil.getData(Planetarium.fetch.Home);
-					if (data == null)
+					if (body == null)
 					{
-						data = new SCANdata(Planetarium.fetch.Home);
-						SCANcontroller.controller.addToBodyData(Planetarium.fetch.Home, data);
+						body = FlightGlobals.currentMainBody;
 					}
-				}
-				if (kscMapObj.Visible)
-				{
-					data = kscMapObj.Data;
-					bigMap = SCANkscMap.BigMap;
-				}
-				else if (data.Body != Planetarium.fetch.Home)
-				{
-					data = SCANUtil.getData(Planetarium.fetch.Home);
-					if (data == null)
-					{
-						data = new SCANdata(Planetarium.fetch.Home);
-						SCANcontroller.controller.addToBodyData(Planetarium.fetch.Home, data);
-					}
-				}
-				if (bigMap == null)
-				{
-					if (SCANkscMap.BigMap != null)
+					break;
+				case GameScenes.SPACECENTER:
+					if (kscMapObj.Visible)
 					{
 						bigMap = SCANkscMap.BigMap;
 					}
-				}
-				Vector2 mousePos = Input.mousePosition;
-				mousePos.y = Screen.height - mousePos.y;
-				if (WindowRect.Contains(mousePos) && !controlLock)
-				{
-					InputLockManager.SetControlLock(ControlTypes.CAMERACONTROLS | ControlTypes.KSC_ALL, lockID);
-					controlLock = true;
-				}
-				else if (!WindowRect.Contains(mousePos) && controlLock)
-				{
-					removeControlLocks();
-				}
-			}
 
-			//Lock tracking scene click through - Sync SCANdata
-			else if (HighLogic.LoadedScene == GameScenes.TRACKSTATION)
-			{
-				if (data == null)
-				{
-					data = SCANUtil.getData(Planetarium.fetch.Home);
-					if (data == null)
+					if (body == null)
 					{
-						data = new SCANdata(Planetarium.fetch.Home);
-						SCANcontroller.controller.addToBodyData(Planetarium.fetch.Home, data);
+						body = Planetarium.fetch.Home;
 					}
-				}
-				if (kscMapObj.Visible)
-				{
-					data = kscMapObj.Data;
-					bigMap = SCANkscMap.BigMap;
-				}
-				else if (data.Body != Planetarium.fetch.Home)
-				{
-					data = SCANUtil.getData(Planetarium.fetch.Home);
-					if (data == null)
+
+					Vector2 mousePos = Input.mousePosition;
+					mousePos.y = Screen.height - mousePos.y;
+					if (WindowRect.Contains(mousePos) && !controlLock)
 					{
-						data = new SCANdata(Planetarium.fetch.Home);
-						SCANcontroller.controller.addToBodyData(Planetarium.fetch.Home, data);
+						InputLockManager.SetControlLock(ControlTypes.CAMERACONTROLS | ControlTypes.KSC_ALL, lockID);
+						controlLock = true;
 					}
-				}
-				if (bigMap == null)
-				{
-					if (SCANkscMap.BigMap != null)
+					else if (!WindowRect.Contains(mousePos) && controlLock)
+					{
+						removeControlLocks();
+					}
+					break;
+				case GameScenes.TRACKSTATION:
+					if (kscMapObj.Visible)
 					{
 						bigMap = SCANkscMap.BigMap;
 					}
-				}
-				Vector2 mousePos = Input.mousePosition;
-				mousePos.y = Screen.height - mousePos.y;
-				if (WindowRect.Contains(mousePos) && !controlLock)
-				{
-					InputLockManager.SetControlLock(ControlTypes.TRACKINGSTATION_UI, lockID);
-					controlLock = true;
-				}
-				else if (!WindowRect.Contains(mousePos) && controlLock)
-				{
-					removeControlLocks();
-				}
+
+					if (body == null)
+					{
+						body = Planetarium.fetch.Home;
+					}
+
+					Vector2 mousePosT = Input.mousePosition;
+					mousePosT.y = Screen.height - mousePosT.y;
+					if (WindowRect.Contains(mousePosT) && !controlLock)
+					{
+						InputLockManager.SetControlLock(ControlTypes.TRACKINGSTATION_UI, lockID);
+						controlLock = true;
+					}
+					else if (!WindowRect.Contains(mousePosT) && controlLock)
+					{
+						removeControlLocks();
+					}
+					break;
 			}
 
 			//This updates all of the fields whenever the palette selection is changed
-			if (windowMode == 0 && (currentLegend == null || bodyIndex != data.Body.flightGlobalsIndex))
+			if (windowMode == 0 && (currentLegend == null || bodyIndex != body.flightGlobalsIndex))
 			{
-				currentTerrain = new SCANterrainConfig(data.TerrainConfig);
+				setBodyTerrain();
 
-				SCANUtil.SCANdebugLog("Trigger Body Change");
-				bodyIndex = data.Body.flightGlobalsIndex;
+				currentTerrain = new SCANterrainConfig(bodyTerrain);
 
-				currentTerrain = new SCANterrainConfig(data.TerrainConfig);
+				bodyIndex = body.flightGlobalsIndex;
 
 				updateUI();
 			}
@@ -320,6 +249,7 @@ namespace SCANsat.SCAN_UI
 			{
 				paletteBox = false;
 				resourceBox = false;
+				planetBox = false;
 				saveWarning = false;
 			}
 		}
@@ -375,7 +305,7 @@ namespace SCANsat.SCAN_UI
 					growE();
 						fillS(10);
 						resourceColorPicker.drawColorSelector(WindowRect);
-						fillS(90);
+						fillS(120);
 						growS();
 							resourceOptions(id);
 							resourceConfirm(id);
@@ -397,107 +327,111 @@ namespace SCANsat.SCAN_UI
 			}
 
 			//These methods update all of the UI elements whenever any of the options are changed
-			if (windowMode == 0)
+			switch (windowMode)
 			{
-				if (currentTerrain.PalRev != oldReverseState)
-				{
-					oldReverseState = currentTerrain.PalRev;
-					drawPreviewLegend();
-				}
-
-				if (minTerrainSlider.valueChanged() || maxTerrainSlider.valueChanged())
-				{
-					setTerrainSliders();
-				}
-
-				if (currentTerrain.PalDis != oldDiscreteState)
-				{
-					oldDiscreteState = currentTerrain.PalDis;
-					drawPreviewLegend();
-				}
-
-				if (clampState != oldClampState)
-				{
-					oldClampState = clampState;
-					drawPreviewLegend();
-				}
-
-				if (paletteSizeSlider.valueChanged())
-				{
-					regenPaletteSets();
-					currentTerrain.ColorPal = palette.CurrentPalettes.availablePalettes[paletteIndex];
-					drawPreviewLegend();
-				}
-			}
-			else if (windowMode == 1)
-			{
-				slopeColorPickerLow.colorStateChanged();
-				slopeColorPickerLow.brightnessChanged();
-				slopeColorPickerHigh.colorStateChanged();
-				slopeColorPickerHigh.brightnessChanged();
-			}
-			else if (windowMode == 2)
-			{
-				biomeColorPicker.colorStateChanged();
-				biomeColorPicker.brightnessChanged();
-			}
-			else if (windowMode == 3)
-			{
-				if (resourceMinSlider.valueChanged() || resourceMaxSlider.valueChanged())
-				{
-					setResourceSliders();
-				}
-
-				if (bodyIndex != data.Body.flightGlobalsIndex)
-				{
-					SCANUtil.SCANdebugLog("Trigger Body Change");
-					bodyIndex = data.Body.flightGlobalsIndex;
-
-					currentResource.CurrentBodyConfig(data.Body.name);
-
-					lowRCutoff = currentResource.CurrentBody.MinValue;
-					highRCutoff = currentResource.CurrentBody.MaxValue;
-
-					oldFineControl = fineControlMode = false;
-
-					setResourceSliders();
-				}
-
-				if (oldFineControl != fineControlMode)
-				{
-					oldFineControl = fineControlMode;
-					if (fineControlMode)
+				case 0:
+					if (currentTerrain.PalRev != oldReverseState)
 					{
-						if (lowRCutoff < 5f)
-							resourceMinSlider.MinValue = 0f;
-						else
-							resourceMinSlider.MinValue = lowRCutoff - 5;
-
-						if (lowRCutoff > 95f)
-							resourceMinSlider.MaxValue = 100f;
-						else if (highRCutoff < lowRCutoff + 5f)
-							resourceMinSlider.MaxValue = highRCutoff - 0.1f;
-						else
-							resourceMinSlider.MaxValue = lowRCutoff + 5f;
-
-						if (highRCutoff < 5f)
-							resourceMaxSlider.MinValue = 0f;
-						else if (lowRCutoff > highRCutoff - 5f)
-							resourceMaxSlider.MinValue = lowRCutoff + 0.1f;
-						else
-							resourceMaxSlider.MinValue = highRCutoff - 5f;
-
-						if (highRCutoff > 95f)
-							resourceMaxSlider.MaxValue = 100f;
-						else
-							resourceMaxSlider.MaxValue = highRCutoff + 5f;
+						oldReverseState = currentTerrain.PalRev;
+						drawPreviewLegend();
 					}
-					else
-						setResourceSliders();
-				}
 
-				resourceColorPicker.colorStateChanged();
-				resourceColorPicker.brightnessChanged();
+					if (minTerrainSlider.valueChanged() || maxTerrainSlider.valueChanged())
+					{
+						setTerrainSliders();
+					}
+
+					if (currentTerrain.PalDis != oldDiscreteState)
+					{
+						oldDiscreteState = currentTerrain.PalDis;
+						drawPreviewLegend();
+					}
+
+					if (clampState != oldClampState)
+					{
+						oldClampState = clampState;
+						drawPreviewLegend();
+					}
+
+					if (paletteSizeSlider.valueChanged())
+					{
+						regenPaletteSets();
+						currentTerrain.ColorPal = palette.CurrentPalettes.availablePalettes[paletteIndex];
+						drawPreviewLegend();
+					}
+					break;
+
+				case 1:
+					slopeColorPickerLow.colorStateChanged();
+					slopeColorPickerLow.brightnessChanged();
+					slopeColorPickerHigh.colorStateChanged();
+					slopeColorPickerHigh.brightnessChanged();
+					break;
+
+				case 2:
+					biomeColorPicker.colorStateChanged();
+					biomeColorPicker.brightnessChanged();
+					break;
+
+				case 3:
+					if (resourceMinSlider.valueChanged() || resourceMaxSlider.valueChanged())
+					{
+						setResourceSliders();
+					}
+
+					if (bodyIndex != body.flightGlobalsIndex)
+					{
+						SCANUtil.SCANdebugLog("Trigger Body Change");
+						bodyIndex = body.flightGlobalsIndex;
+
+						currentResource.CurrentBodyConfig(body.name);
+
+						lowRCutoff = currentResource.CurrentBody.MinValue;
+						highRCutoff = currentResource.CurrentBody.MaxValue;
+
+						oldFineControl = fineControlMode = false;
+
+						setResourceSliders();
+					}
+
+					if (oldFineControl != fineControlMode)
+					{
+						oldFineControl = fineControlMode;
+						if (fineControlMode)
+						{
+							if (lowRCutoff < 5f)
+								resourceMinSlider.MinValue = 0f;
+							else
+								resourceMinSlider.MinValue = lowRCutoff - 5;
+
+							if (lowRCutoff > 95f)
+								resourceMinSlider.MaxValue = 100f;
+							else if (highRCutoff < lowRCutoff + 5f)
+								resourceMinSlider.MaxValue = highRCutoff - 0.1f;
+							else
+								resourceMinSlider.MaxValue = lowRCutoff + 5f;
+
+							if (highRCutoff < 5f)
+								resourceMaxSlider.MinValue = 0f;
+							else if (lowRCutoff > highRCutoff - 5f)
+								resourceMaxSlider.MinValue = lowRCutoff + 0.1f;
+							else
+								resourceMaxSlider.MinValue = highRCutoff - 5f;
+
+							if (highRCutoff > 95f)
+								resourceMaxSlider.MaxValue = 100f;
+							else
+								resourceMaxSlider.MaxValue = highRCutoff + 5f;
+						}
+						else
+							setResourceSliders();
+					}
+
+					resourceColorPicker.colorStateChanged();
+					resourceColorPicker.brightnessChanged();
+					break;
+				default:
+					break;
 			}
 
 			sessionRect = WindowRect;
@@ -529,9 +463,11 @@ namespace SCANsat.SCAN_UI
 				{
 					windowMode = 0;
 
-					currentTerrain = new SCANterrainConfig(data.TerrainConfig);
+					setBodyTerrain();
 
-					bodyIndex = data.Body.flightGlobalsIndex;
+					currentTerrain = new SCANterrainConfig(bodyTerrain);
+
+					bodyIndex = body.flightGlobalsIndex;
 
 					updateUI();
 				}
@@ -551,9 +487,9 @@ namespace SCANsat.SCAN_UI
 
 						fineControlMode = oldFineControl = false;
 
-						currentResource.CurrentBodyConfig(data.Body.name);
+						currentResource.CurrentBodyConfig(body.name);
 
-						bodyIndex = data.Body.flightGlobalsIndex;
+						bodyIndex = body.flightGlobalsIndex;
 
 						updateUI();
 					}
@@ -621,28 +557,40 @@ namespace SCANsat.SCAN_UI
 		{
 			growS();
 				fillS(4);
-				GUILayout.Label("Terrain Options: " + data.Body.name, SCANskins.SCAN_headlineSmall);
+				growE();
+					fillS(20);
+					GUILayout.Label("Terrain Options: ", SCANskins.SCAN_headlineSmall, GUILayout.Width(150));
+
+					if (GUILayout.Button(body.name, SCANskins.SCAN_headerButton, GUILayout.Width(170)))
+					{
+						dropDown = !dropDown;
+						planetBox = !planetBox;
+					}
+				stopE();
 
 				growE();
 					fillS(10);
-					currentTerrain.MinTerrain = minTerrainSlider.drawSlider(false, ref minT);
+					currentTerrain.MinTerrain = minTerrainSlider.drawSlider(dropDown, ref minT);
 				stopE();
 				fillS(8);
 				growE();
 					fillS(10);
-					currentTerrain.MaxTerrain = maxTerrainSlider.drawSlider(false, ref maxT);
+					currentTerrain.MaxTerrain = maxTerrainSlider.drawSlider(dropDown, ref maxT);
 				stopE();
 				fillS(6);
 				growE();
 					fillS();
-					clampState = GUILayout.Toggle(clampState, "Clamp Terrain", SCANskins.SCAN_settingsToggle, GUILayout.Width(100));
+						if (dropDown)
+							GUILayout.Label("Clamp Terrain", SCANskins.SCAN_settingsToggle, GUILayout.Width(100));
+						else
+						clampState = GUILayout.Toggle(clampState, "Clamp Terrain", SCANskins.SCAN_settingsToggle, GUILayout.Width(100));
 					fillS();
 				stopE();
 				if (clampState)
 				{
 					growE();
 						fillS(10);
-						currentTerrain.ClampTerrain = clampTerrainSlider.drawSlider(false, ref clampT);
+						currentTerrain.ClampTerrain = clampTerrainSlider.drawSlider(dropDown, ref clampT);
 					stopE();
 				}
 				fillS(6);
@@ -651,14 +599,23 @@ namespace SCANsat.SCAN_UI
 				{
 					growE();
 						fillS(10);
-						currentTerrain.PalSize = (int)paletteSizeSlider.drawSlider(false, ref pSize);
+						currentTerrain.PalSize = (int)paletteSizeSlider.drawSlider(dropDown, ref pSize);
 					stopE();
 				}
 
 				growE();
-					currentTerrain.PalRev = GUILayout.Toggle(currentTerrain.PalRev, " Reverse Order", SCANskins.SCAN_boldToggle, GUILayout.Width(120));
-					fillS(10);
-					currentTerrain.PalDis = GUILayout.Toggle(currentTerrain.PalDis, " Discrete Gradient", SCANskins.SCAN_boldToggle, GUILayout.Width(140));
+					if (dropDown)
+					{
+						GUILayout.Label(" Reverse Order", SCANskins.SCAN_boldToggle, GUILayout.Width(120));
+						fillS(10);
+						GUILayout.Label(" Discrete Gradient", SCANskins.SCAN_boldToggle, GUILayout.Width(140));
+					}
+					else
+					{
+						currentTerrain.PalRev = GUILayout.Toggle(currentTerrain.PalRev, " Reverse Order", SCANskins.SCAN_boldToggle, GUILayout.Width(120));
+						fillS(10);
+						currentTerrain.PalDis = GUILayout.Toggle(currentTerrain.PalDis, " Discrete Gradient", SCANskins.SCAN_boldToggle, GUILayout.Width(140));
+					}
 				stopE();
 
 			stopS();
@@ -699,7 +656,7 @@ namespace SCANsat.SCAN_UI
 
 								updateUI();
 
-								if (bigMap != null)
+								if (bigMap != null && bigMap.Body == body)
 								{
 									if (bigMap.MType == mapType.Altimetry && SCANcontroller.controller.colours == 0)
 										bigMap.resetMap(SCANcontroller.controller.map_ResourceOverlay);
@@ -710,17 +667,21 @@ namespace SCANsat.SCAN_UI
 
 							if (GUILayout.Button("Default Values", GUILayout.Width(110)))
 							{
-								currentTerrain.MinTerrain = data.TerrainConfig.DefaultMinHeight;
-								currentTerrain.MaxTerrain = data.TerrainConfig.DefaultMaxHeight;
-								currentTerrain.ClampTerrain = data.TerrainConfig.DefaultClampHeight;
-								currentTerrain.ColorPal = data.TerrainConfig.DefaultPalette;
-								currentTerrain.PalRev = data.TerrainConfig.DefaultReverse;
-								currentTerrain.PalDis = data.TerrainConfig.DefaultDiscrete;
-								currentTerrain.PalSize = data.TerrainConfig.DefaultPaletteSize;
+								setBodyTerrain();
+
+								currentTerrain.MinTerrain = bodyTerrain.DefaultMinHeight;
+								currentTerrain.MaxTerrain = bodyTerrain.DefaultMaxHeight;
+								currentTerrain.ClampTerrain = bodyTerrain.DefaultClampHeight;
+								currentTerrain.ColorPal = bodyTerrain.DefaultPalette;
+								currentTerrain.PalRev = bodyTerrain.DefaultReverse;
+								currentTerrain.PalDis = bodyTerrain.DefaultDiscrete;
+								currentTerrain.PalSize = bodyTerrain.DefaultPaletteSize;
+
+								SCANcontroller.updateTerrainConfig(currentTerrain);
 
 								updateUI();
 
-								if (bigMap != null)
+								if (bigMap != null && bigMap.Body == body)
 								{
 									if (bigMap.MType == mapType.Altimetry && SCANcontroller.controller.colours == 0)
 										bigMap.resetMap(SCANcontroller.controller.map_ResourceOverlay);
@@ -770,23 +731,43 @@ namespace SCANsat.SCAN_UI
 
 		private void resourceOptions(int id)
 		{
-			GUILayout.Label("Resource Options: " + data.Body.name, SCANskins.SCAN_headline, GUILayout.Width(300));
+			growE();
+
+			fillS(30);
+			GUILayout.Label("Resource Options: ", SCANskins.SCAN_headlineSmall, GUILayout.Width(150));
+
+			if (GUILayout.Button(body.name, SCANskins.SCAN_headerButton, GUILayout.Width(170)))
+			{
+				dropDown = !dropDown;
+				planetBox = !planetBox;
+			}
+
+			stopE();
 
 			fillS(10);
 			growE();
-				if (GUILayout.Button("Resource Selection:"))
+				fillS(20);
+				GUILayout.Label("Resource Selection: ", SCANskins.SCAN_headlineSmall, GUILayout.Width(180));
+
+				if (dropDown)
 				{
-					dropDown = !dropDown;
-					resourceBox = !resourceBox;
+					GUILayout.Label(currentResource.Name, SCANskins.SCAN_headerButton, GUILayout.Width(140));
 				}
-				fillS(10);
-				GUILayout.Label(currentResource.Name, SCANskins.SCAN_whiteReadoutLabel);
+				else
+				{
+					if (GUILayout.Button(currentResource.Name, SCANskins.SCAN_headerButton, GUILayout.Width(140)))
+					{
+						dropDown = !dropDown;
+						resourceBox = !resourceBox;
+					}
+				}
+
 			stopE();
-			fillS(20);
+			fillS(10);
 			growE();
 				fillS(110);
 				if (dropDown)
-					GUILayout.Toggle(fineControlMode, " Fine Control Mode", SCANskins.SCAN_boldToggle, GUILayout.Width(140));
+					GUILayout.Label(" Fine Control Mode", SCANskins.SCAN_boldToggle, GUILayout.Width(140));
 				else
 					fineControlMode = GUILayout.Toggle(fineControlMode, " Fine Control Mode", SCANskins.SCAN_boldToggle, GUILayout.Width(140));
 			stopE();
@@ -1089,7 +1070,7 @@ namespace SCANsat.SCAN_UI
 				}
 				else if (resourceBox && windowMode == 3)
 				{
-					ddRect = new Rect(WindowRect.width - 440, 115, 160, 140);
+					ddRect = new Rect(WindowRect.width - 240, 112, 160, 140);
 					GUI.Box(ddRect, "");
 					for (int i = 0; i < loadedResources.Count; i ++)
 					{
@@ -1098,7 +1079,7 @@ namespace SCANsat.SCAN_UI
 						if (GUI.Button(r, loadedResources[i].Name, currentResource.Name == loadedResources[i].Name ? SCANskins.SCAN_dropDownButtonActive : SCANskins.SCAN_dropDownButton))
 						{
 							currentResource = new SCANresourceGlobal(loadedResources[i]);
-							currentResource.CurrentBodyConfig(data.Body.name);
+							currentResource.CurrentBodyConfig(body.name);
 
 							fineControlMode = oldFineControl = false;
 
@@ -1106,6 +1087,47 @@ namespace SCANsat.SCAN_UI
 
 							dropDown = false;
 							resourceBox = false;
+						}
+						GUI.EndScrollView();
+					}
+				}
+				else if (planetBox)
+				{
+					ddRect = new Rect(WindowRect.width - 250, 78, 180, 180);
+					GUI.Box(ddRect, "");
+					for (int i = 0; i < FlightGlobals.Bodies.Count; i++)
+					{
+						CelestialBody b = FlightGlobals.Bodies[i];
+						scrollR = GUI.BeginScrollView(ddRect, scrollR, new Rect(0, 0, 140, 23 * FlightGlobals.Bodies.Count));
+						Rect r = new Rect(2, i * 23, 136, 22);
+						if (GUI.Button(r, b.name, body == b ? SCANskins.SCAN_dropDownButtonActive : SCANskins.SCAN_dropDownButton))
+						{
+							body = b;
+
+							bodyIndex = body.flightGlobalsIndex;
+
+							if (windowMode == 0)
+							{
+								setBodyTerrain();
+
+								currentTerrain = new SCANterrainConfig(bodyTerrain);
+							}
+							else if (windowMode == 3)
+							{
+								currentResource.CurrentBodyConfig(body.name);
+
+								lowRCutoff = currentResource.CurrentBody.MinValue;
+								highRCutoff = currentResource.CurrentBody.MaxValue;
+
+								oldFineControl = fineControlMode = false;
+
+								setResourceSliders();
+							}
+
+							updateUI();
+
+							dropDown = false;
+							planetBox = false;
 						}
 						GUI.EndScrollView();
 					}
@@ -1175,7 +1197,7 @@ namespace SCANsat.SCAN_UI
 		private void drawCurrentLegend()
 		{
 			currentLegend = new SCANmapLegend();
-			currentLegend.Legend = currentLegend.getLegend(0, data);
+			currentLegend.Legend = currentLegend.getLegend(0, bodyTerrain);
 		}
 
 		//Draws the palette swatch for the newly adjusted palette
@@ -1233,8 +1255,10 @@ namespace SCANsat.SCAN_UI
 		//Dynamically adjust the min and max values on all of the terrain height sliders; avoids impossible values
 		private void setTerrainSliders()
 		{
-			minTerrainSlider.MinValue = data.TerrainConfig.DefaultMinHeight - SCANconfigLoader.SCANNode.RangeBelowMinHeight;
-			maxTerrainSlider.MaxValue = data.TerrainConfig.DefaultMaxHeight + SCANconfigLoader.SCANNode.RangeAboveMaxHeight;
+			setBodyTerrain();
+
+			minTerrainSlider.MinValue = bodyTerrain.DefaultMinHeight - SCANconfigLoader.SCANNode.RangeBelowMinHeight;
+			maxTerrainSlider.MaxValue = bodyTerrain.DefaultMaxHeight + SCANconfigLoader.SCANNode.RangeAboveMaxHeight;
 			minTerrainSlider.MaxValue = maxT - 100f;
 			maxTerrainSlider.MinValue = minT + 100f;
 			clampTerrainSlider.MinValue = minT + 10f;
@@ -1261,6 +1285,22 @@ namespace SCANsat.SCAN_UI
 				resourceMinSlider.MaxValue = highRCutoff - 0.1f;
 				resourceMaxSlider.MinValue = lowRCutoff + 0.1f;
 				resourceMaxSlider.MaxValue = 100f;
+			}
+		}
+
+		private void setBodyTerrain()
+		{
+			bodyTerrain = SCANcontroller.getTerrainNode(body.name);
+
+			if (bodyTerrain == null)
+			{
+				float? clamp = null;
+				if (body.ocean)
+					clamp = 0;
+
+				bodyTerrain = new SCANterrainConfig(SCANconfigLoader.SCANNode.DefaultMinHeightRange, SCANconfigLoader.SCANNode.DefaultMaxHeightRange, clamp, SCANUtil.paletteLoader(SCANconfigLoader.SCANNode.DefaultPalette, 7), 7, false, false, body);
+
+				SCANcontroller.addToTerrainConfigData(body.name, bodyTerrain);
 			}
 		}
 

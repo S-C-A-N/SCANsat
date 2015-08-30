@@ -30,7 +30,7 @@ namespace SCANsat.SCAN_UI
 	public class JSISCANsatRPM: InternalModule
 	{
 		[KSPField]
-		public int buttonUp;
+		public int buttonUp = 0;
 		[KSPField]
 		public int buttonDown = 1;
 		[KSPField]
@@ -39,6 +39,22 @@ namespace SCANsat.SCAN_UI
 		public int buttonEsc = 3;
 		[KSPField]
 		public int buttonHome = 4;
+		[KSPField]
+		public int buttonRight = 5;
+		[KSPField]
+		public int buttonLeft = 6;
+		[KSPField]
+		public int buttonR9 = 7;
+		[KSPField]
+		public int buttonR10 = 8;
+		[KSPField]
+		public int startLine = 0;
+		[KSPField]
+		public int stopLine = 0;
+		[KSPField]
+		public int mapDivider = 2;
+		[KSPField]
+		public int resourceInterpolation = 4;
 		[KSPField]
 		public int maxZoom = 20;
 		[KSPField]
@@ -125,6 +141,10 @@ namespace SCANsat.SCAN_UI
 		private double start;
 		private readonly List<MapMarkupLine> mapMarkup = new List<MapMarkupLine>();
 		private readonly Color scaleTint = new Color(0.5f, 0.5f, 0.5f, 0.5f);
+		private bool resourceOverlay;
+		private List<SCANresourceGlobal> loadedResources = new List<SCANresourceGlobal>();
+		private int currentResource;
+		private bool drawAnomaly;
 		// Neutral tint.
 		private bool satFound;
 		private bool satModuleFound = true;
@@ -160,6 +180,17 @@ namespace SCANsat.SCAN_UI
 					zoomLevel = loadedZoom ?? 0;
 					int? loadedColors = persist.RPMColor;
 					SCANcontroller.controller.colours = loadedColors ?? 0;
+
+					if (SCANconfigLoader.GlobalResource)
+					{
+						loadedResources = SCANcontroller.setLoadedResourceList();
+
+						int? loadedResource = persist.RPMResource;
+						currentResource = loadedResource ?? 0;
+
+						loadedResources[currentResource].CurrentBodyConfig(vessel.mainBody.name);
+					}
+
 				}
 				else {
 					mapMode = 0;
@@ -200,29 +231,34 @@ namespace SCANsat.SCAN_UI
 				DrawTrail(trail, trailColorValue, new Vector2d(vessel.longitude, vessel.latitude), true);
 		
 			// Anomalies go above trails
-			foreach (SCANanomaly anomaly in localAnomalies) {
-				if (anomaly.Known)
-					DrawIcon(anomaly.Longitude, anomaly.Latitude, SCANicon.orbitIconForVesselType(anomaly.Detail ? (VesselType)int.MaxValue : VesselType.Unknown),
-						anomaly.Detail ? iconColorVisitedAnomalyValue : iconColorUnvisitedAnomalyValue);
-			}
-			foreach (SCANwaypoint w in localWaypoints)
+			if (drawAnomaly)
 			{
-				if (!w.LandingTarget)
+				foreach (SCANanomaly anomaly in localAnomalies)
 				{
-					if (w.Root != null)
-					{
-						if (w.Root.ContractState != Contracts.Contract.State.Active)
-							continue;
-					}
-					if (w.Param != null)
-					{
-						if (w.Param.State != Contracts.ParameterState.Incomplete)
-							continue;
-					}
+					if (anomaly.Known)
+						DrawIcon(anomaly.Longitude, anomaly.Latitude, SCANicon.orbitIconForVesselType(anomaly.Detail ? (VesselType)int.MaxValue : VesselType.Unknown),
+							anomaly.Detail ? iconColorVisitedAnomalyValue : iconColorUnvisitedAnomalyValue);
 				}
+				foreach (SCANwaypoint w in localWaypoints)
+				{
+					if (!w.LandingTarget)
+					{
+						if (w.Root != null)
+						{
+							if (w.Root.ContractState != Contracts.Contract.State.Active)
+								continue;
+						}
+						if (w.Param != null)
+						{
+							if (w.Param.State != Contracts.ParameterState.Incomplete)
+								continue;
+						}
+					}
 
-				DrawIcon(w, iconColorVisitedAnomalyValue);
+					DrawIcon(w, iconColorVisitedAnomalyValue);
+				}
 			}
+
 			// Target orbit and targets go above anomalies
 			if (targetVessel != null && targetVessel.mainBody == orbitingBody) {
 				if (showLines && JUtil.OrbitMakesSense(targetVessel)) {
@@ -517,23 +553,45 @@ namespace SCANsat.SCAN_UI
 			if (buttonID == buttonUp) {
 				ChangeZoom(false);
 			}
-			if (buttonID == buttonDown) {
+			else if (buttonID == buttonDown) {
 				ChangeZoom(true);
 			}
-			if (buttonID == buttonEnter) {
+			else if (buttonID == buttonEnter) {
 				ChangeMapMode(true);
 			}
-			if (buttonID == buttonEsc) {
+			else if (buttonID == buttonEsc) {
 				// Whatever possessed him to do THAT?
 				SCANcontroller.controller.colours = SCANcontroller.controller.colours == 0 ? 1 : 0;
 				if (satModuleFound)
 					persist.RPMColor = SCANcontroller.controller.colours;
 				RedrawMap();
 			}
-			if (buttonID == buttonHome) {
+			else if (buttonID == buttonHome) {
 				showLines = !showLines;
 				if (satModuleFound)
 					persist.RPMLines = showLines;
+			}
+			else if (buttonID == buttonRight)
+			{
+				resourceOverlay = !resourceOverlay;
+				if (SCANconfigLoader.GlobalResource)
+					RedrawMap();
+				if (satModuleFound)
+					persist.RPMDrawResource = resourceOverlay;
+			}
+			else if (buttonID == buttonLeft)
+			{
+				drawAnomaly = !drawAnomaly;
+				if (satModuleFound)
+					persist.RPMAnomaly = drawAnomaly;
+			}
+			else if (buttonID == buttonR9)
+			{
+				ChangeResource(true);
+			}
+			else if (buttonID == buttonR10)
+			{
+				ChangeResource(false);
 			}
 		}
 
@@ -561,6 +619,31 @@ namespace SCANsat.SCAN_UI
 			if (zoomLevel != oldZoom) {
 				if (satModuleFound)
 					persist.RPMZoom = zoomLevel;
+				RedrawMap();
+			}
+		}
+
+		private void ChangeResource(bool up)
+		{
+			if (loadedResources.Count <= 0)
+				return;
+
+			int oldResource = currentResource;
+
+			currentResource += up ? 1 : -1;
+
+			if (currentResource < 0)
+				currentResource = loadedResources.Count -1;
+			if (currentResource >= loadedResources.Count)
+				currentResource = 0;
+			if (currentResource != oldResource)
+			{
+				resourceOverlay = true;
+				if (satModuleFound)
+				{
+					persist.RPMResource = currentResource;
+					persist.RPMDrawResource = true;
+				}
 				RedrawMap();
 			}
 		}
@@ -606,7 +689,7 @@ namespace SCANsat.SCAN_UI
 			map.setProjection(MapProjection.Rectangular);
 			orbitingBody = vessel.mainBody;
 			map.setBody(vessel.mainBody);
-			map.setSize(screenWidth, screenHeight);
+			map.setSize(screenWidth / mapDivider, screenHeight / mapDivider, resourceInterpolation, startLine, stopLine);
 			map.MapScale *= (zoomLevel * zoomLevel + zoomModifier);
 			mapCenterLong = vessel.longitude;
 			mapCenterLat = vessel.latitude;
@@ -614,7 +697,12 @@ namespace SCANsat.SCAN_UI
 			if (zoomLevel == 0)
 				mapCenterLat = 0;
 			map.centerAround(mapCenterLong, mapCenterLat);
-			map.resetMap((mapType)mapMode, false, SCANcontroller.controller.map_ResourceOverlay);
+			if (SCANconfigLoader.GlobalResource)
+			{
+				map.Resource = loadedResources[currentResource];
+				map.Resource.CurrentBodyConfig(vessel.mainBody.name);
+			}
+			map.resetMap((mapType)mapMode, false, SCANconfigLoader.GlobalResource && resourceOverlay);
 
 			// Compute and store the map scale factors in mapSizeScale.  We
 			// use these values for every segment when drawing trails, so it
@@ -668,7 +756,7 @@ namespace SCANsat.SCAN_UI
 			persistentVarName = "scansat" + internalProp.propID;
 
 			try {
-				sat = part.FindModulesImplementing<SCANsat.SCAN_PartModules.SCANsat>().First();
+				sat = part.FindModulesImplementing<SCANsat.SCAN_PartModules.SCANsat>().FirstOrDefault();
 			}
 			catch {
 				Debug.LogWarning("[SCANsatRPM] SCANsat module not attached to this IVA, check for Module Manager problems and make sure the RPMMapTraq.cfg file is in the SCANsat/MMconfigs folder");
@@ -690,6 +778,8 @@ namespace SCANsat.SCAN_UI
 					sat.RPMList.Add(persist);
 				}
 				showLines = persist.RPMLines;
+				drawAnomaly = persist.RPMAnomaly;
+				resourceOverlay = persist.RPMDrawResource;
 			}
 			else
 				satModuleFound = false;
@@ -715,8 +805,6 @@ namespace SCANsat.SCAN_UI
 				iconColorNodeValue = ConfigNode.ParseColor32(iconColorNode);
 			if (!string.IsNullOrEmpty(trailColor))
 				trailColorValue = ConfigNode.ParseColor32(trailColor);
-
-
 
 			trailMaterial = JUtil.DrawLineMaterial();
 
@@ -793,7 +881,10 @@ namespace SCANsat.SCAN_UI
 	internal class RPMPersistence
 	{
 		internal int RPMMode, RPMColor, RPMZoom = 0;
+		internal int RPMResource = 0;
 		internal bool RPMLines = true;
+		internal bool RPMAnomaly = true;
+		internal bool RPMDrawResource = true;
 		internal string RPMID;
 
 		internal RPMPersistence(string id)
@@ -801,13 +892,16 @@ namespace SCANsat.SCAN_UI
 			RPMID = id;
 		}
 
-		internal RPMPersistence(string id, int mode, int color, int zoom, bool lines)
+		internal RPMPersistence(string id, int mode, int color, int zoom, bool lines, bool anomaly, bool drawResource, int resource)
 		{
 			RPMID = id;
 			RPMMode = mode;
 			RPMColor = color;
 			RPMZoom = zoom;
 			RPMLines = lines;
+			RPMResource = resource;
+			RPMDrawResource = drawResource;
+			RPMAnomaly = anomaly;
 		}
 	}
 
