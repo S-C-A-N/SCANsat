@@ -105,7 +105,8 @@ namespace SCANsat.SCAN_UI
 				{
 					sensors |= SCANtype.AltimetryLoRes;
 				}
-				else if (SCANUtil.isCovered(vlon, vlat, data, SCANtype.AltimetryHiRes))
+
+				if (SCANUtil.isCovered(vlon, vlat, data, SCANtype.AltimetryHiRes))
 				{
 					sensors |= SCANtype.AltimetryHiRes;
 				}
@@ -294,6 +295,9 @@ namespace SCANsat.SCAN_UI
 		//Display resource abundace info
 		private void resourceInfo(int id)
 		{
+			if (v.mainBody.pqsController == null)
+				return;
+
 			if (SCANcontroller.controller.needsNarrowBand)
 			{
 				bool tooHigh = false;
@@ -360,6 +364,9 @@ namespace SCANsat.SCAN_UI
 
 		private void drawResourceButtons(int id)
 		{
+			if (v.mainBody.pqsController == null)
+				return;
+
 			if (resources.Count > 1)
 			{
 				Rect r = GUILayoutUtility.GetLastRect();
