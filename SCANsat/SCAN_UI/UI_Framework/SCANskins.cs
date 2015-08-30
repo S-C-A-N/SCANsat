@@ -37,6 +37,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 		internal static GUIStyle SCAN_windowButton;
 		internal static GUIStyle SCAN_texButton;
 		internal static GUIStyle SCAN_buttonBorderless;
+		internal static GUIStyle SCAN_buttonBorderlessSmall;
 		internal static GUIStyle SCAN_closeButton;
 		internal static GUIStyle SCAN_headerButton;
 
@@ -220,6 +221,9 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			SCAN_buttonBorderless.margin = new RectOffset(2, 2, 2, 2);
 			SCAN_buttonBorderless.padding = new RectOffset(2, 2, 2, 2);
 			SCAN_buttonBorderless.normal.background = SCAN_SkinsLibrary.DefUnitySkin.label.normal.background;
+
+			SCAN_buttonBorderlessSmall = new GUIStyle(SCAN_buttonBorderless);
+			SCAN_buttonBorderlessSmall.fontSize = 12;
 
 			SCAN_closeButton = new GUIStyle(SCAN_buttonBorderless);
 			SCAN_closeButton.name = "SCAN_CloseButton";
