@@ -35,7 +35,8 @@
 * [4. Basic Usage][4]
   * [a. FAQ: Finding a Good Altitude][4a]
   * [b. Mismatched Scanners][4b]
-  * [c. Ground Track Indicators][4c]
+  * [c. Biome Map][4c]
+  * [d. Ground Track Indicators][4d]
 * [5. Big Map][5]
   * [a. Big Map Options][5a]
 * [6. Planetary Overlay][6]
@@ -46,24 +47,25 @@
   * [b. Target Selection][7b]
   * [c. MechJeb Landing Guidance][7c]
 * [8. Instrument Window][8]
-* [9. Parts and Sensors Types][9]
-  * [a. RADAR][9a]
-  * [b. SAR][9b]
-  * [c. Multi][9c]
-  * [d. BTDT][9d]
-  * [e. MapTraq (deprecated)][9e]
-* [10. (Career Mode) Research and Development][10]
-  * [a. Minimum Scan for Science (30%)][10a]
-  * [b. Getting Maximum Science][10b]
-  * [c. Contracts][10c]
-* [11. Color Management][11]
-  * [a. Terrain Colors and Options][11a]
-  * [b. Biome Colors and Options][11b]
-  * [c. Resource Colors and Options][11c]
-* [12. Background Scanning][12]
-* [13. Time Warp][13]
-* [14. Settings Menu][14]
-* [15. Note: Data Sources][15]
+* [9. Raster Prop Monitor][9]
+* [10. Parts and Sensors Types][10]
+  * [a. RADAR][10a]
+  * [b. SAR][10b]
+  * [c. Multi][10c]
+  * [d. BTDT][10d]
+  * [e. MapTraq (deprecated)][10e]
+* [11. (Career Mode) Research and Development][11]
+  * [a. Minimum Scan for Science (30%)][11a]
+  * [b. Getting Maximum Science][11b]
+  * [c. Contracts][11c]
+* [12. Color Management][12]
+  * [a. Terrain Colors and Options][12a]
+  * [b. Biome Colors and Options][12b]
+  * [c. Resource Colors and Options][12c]
+* [13. Background Scanning][13]
+* [14. Time Warp][14]
+* [15. Settings Menu][15]
+* [16. Note: Data Sources][16]
 
 **WARNING**:
 
@@ -109,6 +111,8 @@ In addition to the authors, the following people have contributed:
   + (Models, Graphics, Textures) [Milkshakefiend][Milkshakefiend]
   
   + (Science results text) [madsailor][madsailor]
+  
+  + (Contracts) [severedSolo][severedSolo]
 
 #### Licenses
 
@@ -352,7 +356,13 @@ Be sure to remember to pack enough batteries, radioisotope generators, and solar
 ###### Static! Oh no, adjust the rabbit ears!
 > ![][small-static]
 
-#### [:top:][top] 4c. Ground Track Indicators
+#### [:top:][top] 4c. Biome Map
+> ![][small-biome]
+
+The **Biome/Terrain** button in the top right corner can be used to toggle between the standard terrain map and a biome map
+* When in biome mode, the current biome of each vessel will be displayed if it has been scanned
+
+#### [:top:][top] 4d. Ground Track Indicators
 > ![][ground-track]
 
 When activated in the settings menu, ground track indicators are drawn for vessels around the current planet. 
@@ -495,7 +505,20 @@ The instruments window provides a readout of several types of data based on curr
 
 > ![][instruments-btdt]
 
-### [:top:][top] 9. Parts and Sensor Types
+### [:top:][top] 9. Raster Prop Monitor
+------------------------------------------
+
+> ![][rpm-multi]
+
+SCANsat includes support for IVA maps through [Raster Prop Monitor][rpm:release]. Standard RPM multi-function displays and those using the [ASET props][alcor:release] are supported.
+
+> ![][rpm-mfd-labeled]
+
+> ![][rpm-ALCOR-left]
+
+> ![][rpm-ALCOR-right]
+
+### [:top:][top] 10. Parts and Sensor Types
 ------------------------------------------
 
 | **Part** | **Scan Type** | **FOV** | Altitude (**Min**) | (**Ideal**) | (**Max**) 
@@ -506,19 +529,19 @@ The instruments window provides a readout of several types of data based on curr
 | [Been There Done That®][5d] | **Anomaly** | 1 | 0 m | 0 m | 2 km
 | [MapTraq® (deprecated)][5e] | **None** | N/A | N/A | N/A | N/A 
 
-#### [:top:][top] 9a. The RADAR Altimetry Sensor
+#### [:top:][top] 10a. The RADAR Altimetry Sensor
 > ![RADAR][vab-radar]
-#### [:top:][top] 9b. The SAR Altimetry Sensor
+#### [:top:][top] 10b. The SAR Altimetry Sensor
 > ![SAR][vab-sar]
-#### [:top:][top] 9c. The Multispectral Sensor
+#### [:top:][top] 10c. The Multispectral Sensor
 > ![Multi][vab-multi]
-#### [:top:][top] 9d. Been There Done That
+#### [:top:][top] 10d. Been There Done That
 > ![BTDT][vab-btdt]
-#### [:top:][top] 9e. MapTraq (deprecated)
+#### [:top:][top] 10e. MapTraq (deprecated)
 > ![MapTraq][vab-maptraq] 
 
 
-### [:top:][top] 10. (Career Mode) Research and Development
+### [:top:][top] 11. (Career Mode) Research and Development
 ------------------------------------------
 
 The **RADAR Altimetry** sensor can be unlocked in **Basic Science**.
@@ -529,24 +552,25 @@ The **Multispectral** sensor can be unlocked in **Advanced Exploration**.
 
 The **BTDT** sensor can be unlocked in **Field Science**.
 
-##### [:top:][top] 10a. Minimum Scan for Science
+##### [:top:][top] 11a. Minimum Scan for Science
 Once you scan at least 30% of a particular map, you can use **Analyze Data** to get delicious science:
 
 > ![30% is your minimum][science-min]
 
-##### [:top:][top] 10b. Getting Maximum Science
+##### [:top:][top] 11b. Getting Maximum Science
 Between 30% and 100%, you will get a number of science points proportional to the percentage. Really,
 the upper cutoff is 95% in case you didn't scan the whole map.
 
 > ![Scan 95% to get all science][science-max]
 
-##### [:top:][top] 10c. Contract Support
+##### [:top:][top] 11c. Contract Support
 Career mode contracts are supported through third party addons.
 
 * [Contract Configurator Forum Thread][cconfig:release]
-* [SCANsat Contract Pack][ccfgSCANsat:release]
 
-### [:top:][top] 11. Color Management
+SCANsat includes Contract Configurator contracts for scanning each planet.
+
+### [:top:][top] 12. Color Management
 ------------------------------------------
 
 > ![][color-window]
@@ -555,7 +579,7 @@ SCANsat provides multiple options for map color configurations and terrain level
 
 The color management window can be accessed from the big or small map with the color palette icon, or from the toolbar menu.
 
-##### [:top:][top] 11a. Terrain Colors and Options
+##### [:top:][top] 12a. Terrain Colors and Options
 On the left are the various color palettes available; there are four different styles that can be selected from the drop down menu. 
 Palettes can be customized by changing the number of colors in the palette, reversing the order, or making the palette use discrete
 color transitions, rather than the smooth gradient used by default.
@@ -575,7 +599,7 @@ from ocean to solid terrain more pronounced
 All stock KSP planets have default color palette and terrain height values appropriate for the planet's terrain. Standard default values are used
 for any addon planets.
 
-##### [:top:][top] 11b. Biome Colors and Options
+##### [:top:][top] 12b. Biome Colors and Options
 Biome map colors and options can be controlled in the **Biome** tab of the window
 * The end-point colors can be selected using the HSV color-picker; the value slider controls the brightness of the color
 * Terrain transparency is controlled with a slider
@@ -588,7 +612,7 @@ Biomes can also be displayed using the stock color maps.
 
 > ![][color-biome-stock]
 
-##### [:top:][top] 11c. Resource Colors and Options
+##### [:top:][top] 12c. Resource Colors and Options
 Resource overlays can also be adjusted, using the **Resource** tab
 * Resource colors are selected in the same manner as biome colors
 * Upper and lower resource cutoff values can be adjusted with the sliders; use fine control mode for small adjustments
@@ -598,7 +622,7 @@ Resource overlays can also be adjusted, using the **Resource** tab
 
 > ![][color-resource]
 
-### [:top:][top] 12. Background Scanning
+### [:top:][top] 13. Background Scanning
 ------------------------------------------
 
 ![Note the background scanning (non-active vessels are scanning)][small-scan]
@@ -607,7 +631,7 @@ Unlike some other KSP scanning systems, SCANsat allows scanning with multiple
 vessels.  All online scanners scan at the same time during any scene where time progresses; no active SCANsat
 parts are necessary. 
 
-### [:top:][top] 13. Time Warp
+### [:top:][top] 14. Time Warp
 ------------------------------------------
 
 SCANsat does not interpolate satellite paths during time warp; nevertheless, due to the relatively large field of view
@@ -624,7 +648,7 @@ It starts at **1000x** and then speeds up to **10,000x**:
 
 Notice that the only gaps in coverage are those at the poles (ie, the selected inclination was not high enough to capture the poles).
 
-### [:top:][top] 14. Settings Menu
+### [:top:][top] 15. Settings Menu
 ------------------------------------------
 
 > ![][settings-window]
@@ -644,7 +668,7 @@ The settings menu has a various general options
 	* **Sensors:** The total number of SCANsat sensors on all vessels; note that all combination sensors are separated into their invidual components, i.e. the Multi-Spectral scanner consists of two sensors, Biomes and Anomalies.
 	* **Passes:** The number of scanning passes recorded per second, this number can easily be in the tens of thousands at high time warp with multiple vessels and sensors active.
 
-### [:top:][top] 15. Note Concerning Data Sources
+### [:top:][top] 16. Note Concerning Data Sources
 ------------------------------------------
 
 All data this mod shows you is pulled from your game as you play. This
@@ -671,6 +695,7 @@ sneaky then they can of course be sneaky.
 [Olympic1]: http://forum.kerbalspaceprogram.com/members/81815
 [madsailor]: http://forum.kerbalspaceprogram.com/members/123944
 [tinypirate]: http://forum.kerbalspaceprogram.com/members/79868
+[severedSolo]: http://forum.kerbalspaceprogram.com/members/82445
 
 [KSP:developers]: https://kerbalspaceprogram.com/index.php
 [KSP:reddit]: http://www.reddit.com/r/KerbalSpaceProgram
@@ -701,10 +726,11 @@ sneaky then they can of course be sneaky.
 [small-justright]: https://i.imgur.com/Oft4xXP.gif
 [small-mismatch1]: https://i.imgur.com/fNztoUN.gif
 [small-mismatch2]: https://i.imgur.com/aQtTGvV.gif
-[small-newMap1]: http://i.imgur.com/mCnphuZ.gif
+[small-newMap1]: http://i.imgur.com/qS542xo.gif
 [small-toolow-v10]: http://i.imgur.com/USsvSSs.gif
 [small-toohigh-v10]: http://i.imgur.com/i7rGDIj.gif
 [small-justright-v10]: http://i.imgur.com/y7mHvEF.gif
+[small-biome]: http://i.imgur.com/4kZMofq.png
 
 [bigmap-scan-10000x]: http://i.imgur.com/VEPL3oN.gif
 [bigmap-scan-100x]: http://i.imgur.com/bcht47p.gif
@@ -741,6 +767,11 @@ sneaky then they can of course be sneaky.
 [resource-bigmap-hires-full-biome]: http://i.imgur.com/fCdXTIq.png
 [resource-bigmap-lores-limited-biome]: http://i.imgur.com/iHCBfes.png
 [resource-bigmap-lores-full-biome]: http://i.imgur.com/TIR1xv5.png
+
+[rpm-multi]: http://i.imgur.com/nXzPtRE.png
+[rpm-mfd-labeled]: http://i.imgur.com/hgFnw2y.png
+[rpm-ALCOR-left]: http://i.imgur.com/9NxK4d6.png
+[rpm-ALCOR-right]: http://i.imgur.com/7GnAdDN.png
 
 [ground-track]: http://i.imgur.com/casTBeW.gif
 
@@ -782,7 +813,8 @@ sneaky then they can of course be sneaky.
 [4]: #top-4-basic-usage
 [4a]: #top-4a-faq-finding-a-good-altitude
 [4b]: #top-4b-mismatched-scanners
-[4c]: #top-4c-ground-track-indicators
+[4c]: #top-4c-biome-map
+[4d]: #top-4d-ground-track-indicators
 [5]: #top-5-big-map
 [5a]: #top-5a-big-map-options
 [6]: #top-6-planetary-overlay
@@ -793,24 +825,25 @@ sneaky then they can of course be sneaky.
 [7b]: #top-7b-target-selection
 [7c]: #top-7c-mechJeb-landing-guidance
 [8]: #top-8-instrument-window
-[9]: #top-9-parts-and-sensor-types
-[9a]: #top-9a-the-radar-altimetry-sensor
-[9b]: #top-9b-the-sar-altimetry-sensor
-[9c]: #top-9c-the-multispectral-sensor
-[9d]: #top-9d-been-there-done-that
-[9e]: #top-9e-maptraq-deprecated
-[10]: #top-10-career-mode-research-and-development
-[10a]: #top-10a-minimum-scan-for-science
-[10b]: #top-10b-getting-maximum-science
-[10c]: #top-10c-contract-support
-[11]: #top-11-color-management
-[11a]: #top-11a-terrain-colors-and-options
-[11b]: #top-11b-biome-colors-and-options
-[11c]: #top-11c-resource-colors-and-options
-[12]: #top-12-background-scanning
-[13]: #top-13-time-warp
-[14]: #top-14-settings-menu
-[15]: #top-15-note-concerning-data-sources
+[9]: #top-9-raster-prop-monitor
+[10]: #top-10-parts-and-sensor-types
+[10a]: #top-10a-the-radar-altimetry-sensor
+[10b]: #top-10b-the-sar-altimetry-sensor
+[10c]: #top-10c-the-multispectral-sensor
+[10d]: #top-10d-been-there-done-that
+[10e]: #top-10e-maptraq-deprecated
+[11]: #top-11-career-mode-research-and-development
+[11a]: #top-11a-minimum-scan-for-science
+[11b]: #top-11b-getting-maximum-science
+[11c]: #top-11c-contract-support
+[12]: #top-12-color-management
+[12a]: #top-12a-terrain-colors-and-options
+[12b]: #top-12b-biome-colors-and-options
+[12c]: #top-12c-resource-colors-and-options
+[13]: #top-13-background-scanning
+[14]: #top-14-time-warp
+[15]: #top-15-settings-menu
+[16]: #top-16-note-concerning-data-sources
 
 [shield:license-bsd]: http://img.shields.io/:license-bsd-blue.svg
 [shield:license-mit]: http://img.shields.io/:license-mit-a31f34.svg
@@ -914,7 +947,7 @@ sneaky then they can of course be sneaky.
 
 [toolbar:release]: http://forum.kerbalspaceprogram.com/threads/60863
 
-[rpm:release]: http://forum.kerbalspaceprogram.com/threads/57603
+[rpm:release]: http://forum.kerbalspaceprogram.com/threads/117471
 
 [cconfig:release]: http://forum.kerbalspaceprogram.com/threads/101604
 
