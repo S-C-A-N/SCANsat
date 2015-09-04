@@ -118,15 +118,15 @@ namespace SCANsat.SCAN_UI.UI_Framework
 
 		public static Color[] small_redline;
 
-		public static Color heightToColor(float val, int scheme, SCANdata data)
+		public static Color heightToColor(float val, int scheme, SCANterrainConfig terrain)
 		{
-			Color32[] c = data.TerrainConfig.ColorPal.colors;
-			if (data.TerrainConfig.PalRev)
-				c = data.TerrainConfig.ColorPal.colorsReverse;
+			Color32[] c = terrain.ColorPal.colors;
+			if (terrain.PalRev)
+				c = terrain.ColorPal.colorsReverse;
 			if (scheme == 0)
-				return heightToColor(val, data.TerrainConfig.MaxTerrain, data.TerrainConfig.MinTerrain, data.TerrainConfig.TerrainRange, data.TerrainConfig.ClampTerrain, data.TerrainConfig.PalDis, c);
+				return heightToColor(val, terrain.MaxTerrain, terrain.MinTerrain, terrain.TerrainRange, terrain.ClampTerrain, terrain.PalDis, c);
 			else
-				return heightToColor(val, data.TerrainConfig.MaxTerrain, data.TerrainConfig.MinTerrain, data.TerrainConfig.TerrainRange, data.TerrainConfig.PalDis);
+				return heightToColor(val, terrain.MaxTerrain, terrain.MinTerrain, terrain.TerrainRange, terrain.PalDis);
 		}
 
 		private static Color heightToColor(float val, float max, float min, float range, bool discrete)
@@ -217,17 +217,6 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			return c;
 		}
 
-			//int sealevel = 0;
-			//if (val <= sealevel) {
-			//	val = (Mathf.Clamp (val , -1500 , sealevel) + 1500) / 1000f;
-			//	c = lerp (xkcd_DarkPurple , xkcd_Cerulean , val);
-			//} else {
-			//	val = (heightGradient.Length - 2) * Mathf.Clamp (val , sealevel , (sealevel + 7500)) / (sealevel + 7500.0f);
-			//	c = lerp (heightGradient [(int)val] , heightGradient [(int)val + 1] , val - (int)val);
-			//}
-		//	return c;
-		//}
-
 		public static string colorHex ( Color32 c ) {
 			return "#" + c.r.ToString ("x2") + c.g.ToString ("x2") + c.b.ToString ("x2");
 		}
@@ -283,11 +272,6 @@ namespace SCANsat.SCAN_UI.UI_Framework
 		}
 
 		private static _Palettes currentPaletteSet;
-		//private static _Palettes divPaletteSet;
-		//private static _Palettes qualPaletteSet;
-		//private static _Palettes seqPaletteSet;
-		//private static _Palettes fixedPaletteSet;
-		//private static Palette currentHeightPalette;
 		private static Palette greyScalePalette = BrewerPalettes.Greys(9);
 
 		private static _Palettes generatePaletteSet(int size, Palette.Kind type)
@@ -305,20 +289,6 @@ namespace SCANsat.SCAN_UI.UI_Framework
 				default:
 					return generatePaletteSet(size, type);
 			}
-			//switch (type)
-			//{
-			//	case Palette.Kind.Diverging:
-			//		return generatePaletteSet(size, type);
-			//		//return divPaletteSet; 
-			//	case Palette.Kind.Qualitative:
-			//		//return qualPaletteSet;
-			//	case Palette.Kind.Sequential:
-			//		//return seqPaletteSet;
-			//	case Palette.Kind.Fixed:
-			//		//return fixedPaletteSet;
-			//	default:
-			//		//return divPaletteSet;
-			//}
 		}
 
 		public static Palette GreyScalePalette
@@ -339,36 +309,6 @@ namespace SCANsat.SCAN_UI.UI_Framework
 		{
 			get { return currentPaletteSet.paletteType.ToString(); }
 		}
-		
-		//public static _Palettes DivPaletteSet
-		//{
-		//	get { return divPaletteSet; }
-		//	internal set { divPaletteSet = value; }
-		//}
-
-		//public static _Palettes QualPaletteSet
-		//{
-		//	get { return qualPaletteSet; }
-		//	internal set { qualPaletteSet = value; }
-		//}
-
-		//public static _Palettes SeqPaletteSet
-		//{
-		//	get { return seqPaletteSet; }
-		//	internal set { seqPaletteSet = value; }
-		//}
-
-		//public static _Palettes FixedPaletteSet
-		//{
-		//	get { return fixedPaletteSet; }
-		//	internal set { fixedPaletteSet = value; }
-		//}
-
-		//public static Palette CurrentPalette
-		//{
-		//	get { return currentHeightPalette; }
-		//	internal set { currentHeightPalette = value; }
-		//}
 
 	}
 }

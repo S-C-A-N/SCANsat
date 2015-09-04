@@ -35,24 +35,7 @@ namespace SCANsat
 	{
 		public static SCANcontroller controller
 		{
-			get
-			{
-				Game g = HighLogic.CurrentGame;
-				if (g == null) return null;
-				try
-				{
-					var mod = g.scenarios.FirstOrDefault(m => m.moduleName == typeof(SCANcontroller).Name);
-					if (mod != null)
-						return (SCANcontroller)mod.moduleRef;
-					else
-						return null;
-				}
-				catch (Exception e)
-				{
-					SCANUtil.SCANlog("Could not find SCANsat Scenario Module: {0}", e);
-					return null;
-				}
-			}
+			get { return instance; }
 		}
 
 		private static int minScanAlt = 5000;
@@ -130,6 +113,8 @@ namespace SCANsat
 		[KSPField(isPersistant = true)]
 		public int overlayMapHeight = 256;
 		[KSPField(isPersistant = true)]
+		public int overlayBiomeHeight = 512;
+		[KSPField(isPersistant = true)]
 		public float overlayTransparency = 0;
 		[KSPField(isPersistant = true)]
 		public bool version14Patch = false;
@@ -204,6 +189,8 @@ namespace SCANsat
 		private bool bodyCoverage = false;
 		private bool heightMapsBuilt = false;
 
+		private static SCANcontroller instance;
+
 		#region Public Accessors
 
 		public SCANdata getData(string bodyName)
@@ -270,6 +257,19 @@ namespace SCANsat
 			catch (Exception e)
 			{
 				SCANUtil.SCANlog("Error while loading SCANsat terrain config settings: {0}", e);
+			}
+
+			for (int i = 0; i < FlightGlobals.Bodies.Count; i++)
+			{
+				CelestialBody b = FlightGlobals.Bodies[i];
+				if (getTerrainNode(b.name) == null)
+				{
+					float? clamp = null;
+					if (b.ocean)
+						clamp = 0;
+
+					addToTerrainConfigData(b.name, new SCANterrainConfig(SCANconfigLoader.SCANNode.DefaultMinHeightRange, SCANconfigLoader.SCANNode.DefaultMaxHeightRange, clamp, SCANUtil.paletteLoader(SCANconfigLoader.SCANNode.DefaultPalette, 7), 7, false, false, b));
+				}
 			}
 		}
 
@@ -409,11 +409,11 @@ namespace SCANsat
 				Debug.LogError(string.Format("[SCANsat] Warning: SCANResource Dictionary Already Contains Key of This Type: Resource: {0}", name));
 		}
 
-		public static SCANresourceType getResourceType (string name)
+		public static SCANresourceType getResourceType (string name, bool warn = true)
 		{
 			if (resourceTypes.ContainsKey(name))
 				return resourceTypes[name];
-			else
+			else if (warn)
 				SCANUtil.SCANlog("SCANsat resource type [{0}] cannot be found in master resource type storage list", name);
 
 			return null;
@@ -529,6 +529,8 @@ namespace SCANsat
 
 		public override void OnLoad(ConfigNode node)
 		{
+			instance = this;
+
 			try
 			{
 				lowBiomeColor = ConfigNode.ParseColor(node.GetValue("lowBiomeColor"));
@@ -1043,8 +1045,10 @@ namespace SCANsat
 			{
 				double surfaceScale = (2 * Math.PI * body.Radius) / 360;
 
-				foreach (SCANvessel sv in knownVessels.Values)
+				for (int j = 0; j < knownVessels.Count; j++)
 				{
+					SCANvessel sv = knownVessels.Values.ElementAt(j);
+
 					if (sv == null)
 						continue;
 
@@ -1079,8 +1083,10 @@ namespace SCANsat
 				surfscale = 1;
 			surfscale = Math.Sqrt(surfscale);
 
-			foreach (SCANsensor s in v.sensors.Values)
+			for (int j = 0; j < v.sensors.Count; j++)
 			{
+				SCANsensor s = v.sensors.Values.ElementAt(j);
+
 				if (alt < s.min_alt)
 					continue;
 				if (alt > Math.Min(s.max_alt, soi_radius))
@@ -1507,9 +1513,12 @@ namespace SCANsat
 				i++;
 				if (i >= body_data.Count) i = 0;
 			}
-			foreach (Vessel v in FlightGlobals.Vessels)
+			for (int j = 0; j < FlightGlobals.Vessels.Count; j++)
 			{
-				if (!knownVessels.ContainsKey(v.id)) continue;
+				Vessel v = FlightGlobals.Vessels[j];
+				if (!knownVessels.ContainsKey(v.id))
+					continue;
+
 				SCANvessel vessel = knownVessels[v.id];
 				SCANdata data = SCANUtil.getData(v.mainBody);
 				if (data == null)
@@ -1584,8 +1593,10 @@ namespace SCANsat
 			actualPasses++;
 
 			uncovered = res <= 0;
-			foreach (SCANsensor sensor in knownVessels[v.id].sensors.Values)
+			for (int j = 0; j < knownVessels[v.id].sensors.Count; j++)
 			{
+				SCANsensor sensor = knownVessels[v.id].sensors.Values.ElementAt(j);
+
 				if (res <= 0)
 				{
 					if (data.getCoverage(sensor.sensor) > 0) uncovered = false;

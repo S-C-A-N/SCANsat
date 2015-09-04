@@ -170,10 +170,11 @@ namespace SCANsat.SCAN_PartModules
 			if (!activated)
 			{
 				abundanceValue = -1f;
+				tooHigh = false;
 				return;
 			}
 
-			if (ResourceUtilities.GetAltitude(vessel) > MaxAbundanceAltitude)
+			if (!vessel.Landed && ResourceUtilities.GetAltitude(vessel) > MaxAbundanceAltitude)
 			{
 				tooHigh = true;
 				return;

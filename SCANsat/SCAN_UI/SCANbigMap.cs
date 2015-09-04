@@ -237,8 +237,8 @@ namespace SCANsat.SCAN_UI
 					SCANcontroller.controller.colours = 1;
 				else
 					SCANcontroller.controller.colours = 0;
-				data.resetImages();
 				bigmap.resetMap(SCANcontroller.controller.map_ResourceOverlay);
+				SCANcontroller.controller.mainMap.resetImages();
 			}
 
 			//Update grid overlay status
@@ -307,26 +307,6 @@ namespace SCANsat.SCAN_UI
 						drop_down_open = !drop_down_open;
 					}
 					fillS(40);
-					//if (GUILayout.Button("R", GUILayout.Width(20)))
-					//	step = 0;
-					//if (GUILayout.Button("Map", GUILayout.Width(60)))
-					//{
-					//	overlay = !overlay;
-					//	if (bigmap.Resource.MapOverlay == null)
-					//	{
-					//		bigmap.Resource.MapOverlay = new Texture2D(512, 256, TextureFormat.ARGB32, true);
-					//		Color[] pix = bigmap.Resource.MapOverlay.GetPixels();
-					//		for (int i = 0; i < pix.Length; i++)
-					//			pix[i] = palette.clear;
-					//		bigmap.Resource.MapOverlay.SetPixels(pix);
-					//	}
-					//	if (overlay)
-					//		Body.SetResourceMap(bigmap.Resource.MapOverlay);
-					//	else
-					//		Body.SetResourceMap(null);
-					//}
-					//if (overlay)
-					//	SCANuiUtil.drawResourceTexture(256, ref step, data, bigmap.Resource);
 				}
 				if (GUILayout.Button("Celestial Body", GUILayout.MaxWidth(110)))
 				{
@@ -691,7 +671,7 @@ namespace SCANsat.SCAN_UI
 			{
 				if (bigmap.MapLegend == null)
 					bigmap.MapLegend = new SCANmapLegend();
-				bigmap.MapLegend.Legend = bigmap.MapLegend.getLegend(data.TerrainConfig.MinTerrain, data.TerrainConfig.MaxTerrain, SCANcontroller.controller.colours, data);
+				bigmap.MapLegend.Legend = bigmap.MapLegend.getLegend(data.TerrainConfig.MinTerrain, data.TerrainConfig.MaxTerrain, SCANcontroller.controller.colours, data.TerrainConfig);
 				SCANuiUtil.drawLegend(data, bigmap.MapLegend);
 			}
 		}

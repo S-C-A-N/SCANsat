@@ -96,6 +96,8 @@ namespace SCANsat.SCAN_Data
 			body = FlightGlobals.Bodies.FirstOrDefault(b => b.flightGlobalsIndex == index);
 			if (body != null)
 				name = body.name;
+			else
+				name = "WrongBody" + index;
 
 			colorPal = SCANUtil.paletteLoader(paletteName, paletteSize);
 

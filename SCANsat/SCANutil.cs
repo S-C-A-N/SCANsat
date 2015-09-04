@@ -47,16 +47,13 @@ namespace SCANsat
 			int ilon = icLON(lon);
 			int ilat = icLAT(lat);
 			if (badLonLat (ilon, ilat)) return false;
-			if (SCANcontroller.controller != null)
-			{
-				SCANdata data = getData(body);
-				if (data != null)
-					return (data.Coverage[ilon, ilat] & SCANtype) != 0;
-				else
-					return false;
-			}
-			else
+
+			SCANdata data = getData(body.name);
+
+			if (data == null)
 				return false;
+
+			return (data.Coverage[ilon, ilat] & SCANtype) != 0;
 		}
 
 		/// <summary>
@@ -70,16 +67,13 @@ namespace SCANsat
 		public static bool isCovered(int lon, int lat, CelestialBody body, int SCANtype)
 		{
 			if (badLonLat(lon, lat)) return false;
-			if (SCANcontroller.controller != null)
-			{
-				SCANdata data = getData(body);
-				if (data != null)
-					return (data.Coverage[lon, lat] & SCANtype) != 0;
-				else
-					return false;
-			}
-			else
+
+			SCANdata data = getData(body.name);
+
+			if (data == null)
 				return false;
+
+			return (data.Coverage[lon, lat] & SCANtype) != 0;
 		}
 
 		/// <summary>
@@ -90,16 +84,12 @@ namespace SCANsat
 		/// <returns>Scanning percentage as a double from 0-100</returns>
 		public static double GetCoverage(int SCANtype, CelestialBody Body)
 		{
-			if (SCANcontroller.controller != null)
-			{
-				SCANdata data = getData(Body);
-				if (data != null)
-					return getCoveragePercentage(data, (SCANtype)SCANtype);
-				else
-					return 0;
-			}
-			else
+			SCANdata data = getData(Body.name);
+
+			if (data == null)
 				return 0;
+
+			return getCoveragePercentage(data, (SCANtype)SCANtype);
 		}
 
 		/// <summary>
@@ -421,20 +411,17 @@ namespace SCANsat
 
 		internal static CelestialBody getTargetBody(MapObject target)
 		{
-			if (target.type == MapObject.MapObjectType.CELESTIALBODY)
+			switch (target.type)
 			{
-				return target.celestialBody;
+				case MapObject.MapObjectType.CELESTIALBODY:
+					return target.celestialBody;
+				case MapObject.MapObjectType.MANEUVERNODE:
+					return target.maneuverNode.patch.referenceBody;
+				case MapObject.MapObjectType.VESSEL:
+					return target.vessel.mainBody;
+				default:
+					return null;
 			}
-			else if (target.type == MapObject.MapObjectType.MANEUVERNODE)
-			{
-				return target.maneuverNode.patch.referenceBody;
-			}
-			else if (target.type == MapObject.MapObjectType.VESSEL)
-			{
-				return target.vessel.mainBody;
-			}
-
-			return null;
 		}
 
 		internal static double slope(double centerElevation, CelestialBody body, double lon, double lat, double offset)
@@ -541,7 +528,7 @@ namespace SCANsat
 			mouseRay.origin = ScaledSpace.ScaledToLocalSpace(mouseRay.origin);
 			Vector3d relOrigin = mouseRay.origin - body.position;
 			Vector3d relSurfacePosition;
-			double curRadius = body.pqsController.radiusMax;
+			double curRadius = body.pqsController == null ? body.Radius : body.pqsController.radiusMax;
 			double lastRadius = 0;
 			double error = 0;
 			int loops = 0;
@@ -551,14 +538,15 @@ namespace SCANsat
 				if (PQS.LineSphereIntersection(relOrigin, mouseRay.direction, curRadius, out relSurfacePosition))
 				{
 					Vector3d surfacePoint = body.position + relSurfacePosition;
-					double alt = body.pqsController.GetSurfaceHeight(QuaternionD.AngleAxis(body.GetLongitude(surfacePoint), Vector3d.down) * QuaternionD.AngleAxis(body.GetLatitude(surfacePoint), Vector3d.forward) * Vector3d.right);
+					double alt = body.pqsController == null ? 0 : body.pqsController.GetSurfaceHeight(QuaternionD.AngleAxis(body.GetLongitude(surfacePoint), Vector3d.down) * QuaternionD.AngleAxis(body.GetLatitude(surfacePoint), Vector3d.forward) * Vector3d.right);
 					error = Math.Abs(curRadius - alt);
-					if (error < (body.pqsController.radiusMax - body.pqsController.radiusMin) / 100)
+					if (body.pqsController == null || error < (body.pqsController.radiusMax - body.pqsController.radiusMin) / 100)
 					{
 						return new SCANCoordinates(fixLonShift((body.GetLongitude(surfacePoint))), fixLatShift(body.GetLatitude(surfacePoint)));
 					}
 					else
 					{
+
 						lastRadius = curRadius;
 						curRadius = alt;
 						loops++;
