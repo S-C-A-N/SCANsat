@@ -31,7 +31,7 @@
 * [3. Resource Scanning][3]
   * [a. Stock Scanning Mode][3a]
   * [b. SCANsat Scanning Mode][3b]
-  * [c. Resource Setting][3c]
+  * [c. Resource Settings][3c]
 * [4. Basic Usage][4]
   * [a. FAQ: Finding a Good Altitude][4a]
   * [b. Mismatched Scanners][4b]
@@ -122,6 +122,8 @@ For licensing information, please see the [included LICENSE.txt][SCANsat:rel-lic
 
 ### [:top:][top] 0a. FAQs
 
+  * For some basic scanning strategies, as well as a description of resource scanning, check out the [SCANsat wiki][SCANsat:wiki]
+
   * What does SCANsat do?
     * It allows you to scan planetary bodies for terrain, biome, and resource information and generate various kinds of maps.
   * How does SCANsat affect gameplay?
@@ -207,7 +209,7 @@ on custom parts, but this is not a requirement.
 
 #### [:top:][top] 2a. SCANsat Scans
 
-Without any resource scanning mods installed, **SCANsat** can scan for a few basic types of data. All of these (non-resource) scans are shown as indicators on the Small Map.
+**SCANsat** can scan for a few basic types of data. All of these (non-resource) scans are shown as indicators on the Small Map. For more information about basic SCANsat scanning checkout the [wiki][SCANsat:wiki]
 
 > ![][small-newMap1]
 
@@ -229,7 +231,7 @@ Anomaly | **Been There, Done That(tm)** | **BTDT**
 ### [:top:][top] 3. Resource Scanning
 ------------------------------------------
 
-**SCANsat** will scan celestial bodies for resources using the new stock resource system.
+**SCANsat** will scan celestial bodies for resources using the new stock resource system. For a full description of both stack and SCANsat resource scanning methods check out the [SCANsat wiki][SCANsat:wiki].
 
 #### [:top:][top] 3a. Stock Scanning Mode
 
@@ -279,7 +281,7 @@ If a vessel with a narrow-band scanner is not present, or its inclination is not
 Resource overlays will work in IVA, too:
 > ![][resource-iva]
 
-#### [:top:][top] 3c. Resource Setting
+#### [:top:][top] 3c. Resource Settings
 
 A number of options are available in the **Resource Settings Menu** for SCANsat resource scanning.
 
@@ -809,7 +811,7 @@ sneaky then they can of course be sneaky.
 [3]: #top-3-resource-scanning
 [3a]: #top-3a-stock-scanning-mode
 [3b]: #top-3b-scansat-scanning-mode
-[3c]: #top-3c-resource-setting
+[3c]: #top-3c-resource-settings
 [4]: #top-4-basic-usage
 [4a]: #top-4a-faq-finding-a-good-altitude
 [4b]: #top-4b-mismatched-scanners
@@ -879,6 +881,7 @@ sneaky then they can of course be sneaky.
 [SCANsat:best-orbits-table]: https://www.example.com
 [SCANsat:email]: mailto:SCANscansat@gmail.com
 [SCANsat:gamedata]: http://i.imgur.com/cS1Lu5w.jpg
+[SCANsat:wiki]: https://github.com/S-C-A-N/SCANsat/wiki
 
 [SCANsat:dev-readme]: https://github.com/S-C-A-N/SCANsat/tree/dev/#table-of-contents
 [SCANsat:rel-readme]: https://github.com/S-C-A-N/SCANsat/#table-of-contents
