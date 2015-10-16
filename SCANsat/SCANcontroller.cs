@@ -1373,7 +1373,14 @@ namespace SCANsat
 				knownVessels[id] = new SCANvessel();
 			SCANvessel sv = knownVessels[id];
 			sv.id = id;
-			sv.vessel = FlightGlobals.Vessels.FirstOrDefault(a => a.id == id);
+			try
+			{
+				sv.vessel = FlightGlobals.Vessels.FirstOrDefault(a => a.id == id);
+			}
+			catch (Exception e)
+			{
+				Debug.LogError("[SCANsat] Something went wrong while trying to load this SCANsat vessel; moving on the next vessel... \n" + e);
+			}
 			if (sv.vessel == null)
 			{
 				knownVessels.Remove(id);
