@@ -165,7 +165,8 @@ namespace SCANsat.SCAN_UI
 			if (!repainting)
 				infoText = SCANuiUtil.InfoText(v, data, notMappingToday);
 
-			SCANuiUtil.readableLabel(infoText, false);
+			if (!string.IsNullOrEmpty(infoText))
+				SCANuiUtil.readableLabel(infoText, false);
 		}
 
 		//Draw the SCANsat window buttons with icons
