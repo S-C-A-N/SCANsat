@@ -26,6 +26,20 @@ namespace SCANsat.SCAN_UI
 {
 	class SCANsettingsUI: SCAN_MBW
 	{
+		private string settingsHelpAnomalies = "";
+		private string settingsHelpBackground = "";
+		private string settingsHelpTimeWarp = "";
+		private string settingsHelpGroundTracks = "";
+		private string settingsHelpGroundTracksActive = "";
+		private string settingsHelpOverlayTooltips = "";
+		private string settingsHelpWindowTooltips = "";
+		private string settingsHelpStockToolbar = "";
+		private string settingsHelpMechJeb = "";
+		private string settingsHelpResetWindows = "";
+		private string settingsHelpResetPlanetData = "";
+		private string settingsHelpResetAllData = "";
+		private string settingsHelpVessels = "";
+
 		/* UI: a list of glyphs that are used for something */
 		private string[] exmarks = { "✗", "✘", "×", "✖", "x", "X", "∇", "☉", "★", "*", "•", "º", "+" };
 
@@ -36,6 +50,7 @@ namespace SCANsat.SCAN_UI
 		private Rect warningRect;
 		private const string lockID = "settingLockID";
 		private bool oldTooltips, stockToolbar;
+		private bool helpMode;
 
 		internal readonly static Rect defaultRect = new Rect(Screen.width - (Screen.width / 2) - 180, 100, 360, 300);
 
@@ -58,6 +73,7 @@ namespace SCANsat.SCAN_UI
 		protected override void OnDestroy()
 		{
 			removeControlLocks();
+			helpMode = false;
 		}
 
 		internal void removeControlLocks()
@@ -70,6 +86,26 @@ namespace SCANsat.SCAN_UI
 		{
 			oldTooltips = TooltipsEnabled = SCANcontroller.controller.toolTips;
 			stockToolbar = SCANcontroller.controller.useStockAppLauncher;
+
+			if (SCANconfigLoader.languagePack != null)
+				loadStrings();
+		}
+
+		private void loadStrings()
+		{
+			settingsHelpAnomalies = SCANconfigLoader.languagePack.settingsHelpAnomalies;
+			settingsHelpBackground = SCANconfigLoader.languagePack.settingsHelpBackground;
+			settingsHelpTimeWarp = SCANconfigLoader.languagePack.settingsHelpTimeWarp;
+			settingsHelpGroundTracks = SCANconfigLoader.languagePack.settingsHelpGroundTracks;
+			settingsHelpGroundTracksActive = SCANconfigLoader.languagePack.settingsHelpGroundTracksActive;
+			settingsHelpOverlayTooltips = SCANconfigLoader.languagePack.settingsHelpOverlayTooltips;
+			settingsHelpWindowTooltips = SCANconfigLoader.languagePack.settingsHelpWindowTooltips;
+			settingsHelpStockToolbar = SCANconfigLoader.languagePack.settingsHelpStockToolbar;
+			settingsHelpMechJeb = SCANconfigLoader.languagePack.settingsHelpMechJeb;
+			settingsHelpResetWindows = SCANconfigLoader.languagePack.settingsHelpResetWindows;
+			settingsHelpResetPlanetData = SCANconfigLoader.languagePack.settingsHelpResetPlanetData;
+			settingsHelpResetAllData = SCANconfigLoader.languagePack.settingsHelpResetAllData;
+			settingsHelpVessels = SCANconfigLoader.languagePack.settingsHelpVesselsSensorsPasses;
 		}
 
 		protected override void DrawWindowPre(int id)
@@ -182,10 +218,16 @@ namespace SCANsat.SCAN_UI
 		private void closeBox(int id)
 		{
 			Rect r = new Rect(WindowRect.width - 20, 1, 18, 18);
+			if (GUI.Button(r, textWithTT("?", "Show Help Tips"), SCANskins.SCAN_closeButton))
+			{
+				helpMode = !helpMode;
+			}
+
 			if (GUI.Button(r, SCANcontroller.controller.closeBox, SCANskins.SCAN_closeButton))
 			{
 				removeControlLocks();
 				Visible = false;
+				helpMode = false;
 			}
 		}
 
@@ -193,18 +235,18 @@ namespace SCANsat.SCAN_UI
 		private void gui_settings_xmarks(int id)
 		{
 			fillS(8);
-			GUILayout.Label("Anomaly Marker", SCANskins.SCAN_headline);
+			GUILayout.Label(helpMode ? textWithTT("Anomaly Marker", settingsHelpAnomalies) : new GUIContent("Anomaly Marker"), SCANskins.SCAN_headline);
 			growE();
 			for (int i = 0; i < exmarks.Length; ++i)
 			{
 				if (SCANcontroller.controller.anomalyMarker == exmarks[i])
 				{
-					if (GUILayout.Button(exmarks[i], SCANskins.SCAN_closeButton))
+					if (GUILayout.Button(helpMode ? textWithTT(exmarks[i], settingsHelpAnomalies) : new GUIContent(exmarks[i]), SCANskins.SCAN_closeButton))
 						SCANcontroller.controller.anomalyMarker = exmarks[i];
 				}
 				else
 				{
-					if (GUILayout.Button(exmarks[i], SCANskins.SCAN_buttonBorderless))
+					if (GUILayout.Button(helpMode ? textWithTT(exmarks[i], settingsHelpAnomalies) : new GUIContent(exmarks[i]), SCANskins.SCAN_buttonBorderless))
 						SCANcontroller.controller.anomalyMarker = exmarks[i];
 				}
 			}
@@ -216,16 +258,16 @@ namespace SCANsat.SCAN_UI
 		private void gui_settings_toggle_body_scanning(int id)
 		{
 
-			GUILayout.Label("Background Scanning", SCANskins.SCAN_headline);
+			GUILayout.Label(helpMode ? textWithTT("Background Scanning", settingsHelpBackground) : new GUIContent("Background Scanning"), SCANskins.SCAN_headline);
 			// scan background
-			SCANcontroller.controller.scan_background = GUILayout.Toggle(SCANcontroller.controller.scan_background, "Scan all active celestials", SCANskins.SCAN_settingsToggle);
+			SCANcontroller.controller.scan_background = GUILayout.Toggle(SCANcontroller.controller.scan_background, helpMode ? textWithTT("Scan all active celestials", settingsHelpBackground) : new GUIContent("Scan all active celestials"), SCANskins.SCAN_settingsToggle);
 			// scanning for individual SoIs
 			growE();
 			int count = 0;
 			foreach (SCANdata data in SCANcontroller.controller.GetAllData)
 			{
 				if (count == 0) growS();
-					data.Disabled = !GUILayout.Toggle(!data.Disabled, string.Format("{0} ({1:N1}%)", data.Body.name, SCANUtil.getCoveragePercentage(data, SCANtype.Nothing)), SCANskins.SCAN_settingsToggle);
+				data.Disabled = !GUILayout.Toggle(!data.Disabled, helpMode ? textWithTT(string.Format("{0} ({1:N1}%)", data.Body.name, SCANUtil.getCoveragePercentage(data, SCANtype.Nothing)), settingsHelpBackground) : new GUIContent(string.Format("{0} ({1:N1}%)", data.Body.name, SCANUtil.getCoveragePercentage(data, SCANtype.Nothing))), SCANskins.SCAN_settingsToggle);
 				switch (count)
 				{
 					case 5: stopS(); count = 0; break;
@@ -240,19 +282,19 @@ namespace SCANsat.SCAN_UI
 		//Control scanning resolution
 		private void gui_settings_timewarp(int id)
 		{
-			GUILayout.Label("Time Warp Resolution", SCANskins.SCAN_headline);
+			GUILayout.Label(helpMode ? textWithTT("Time Warp Resolution", settingsHelpTimeWarp) : new GUIContent("Time Warp Resolution"), SCANskins.SCAN_headline);
 			growE();
 
 			for (int i = 0; i < twnames.Length; ++i)
 			{
 				if (SCANcontroller.controller.timeWarpResolution == twvals[i])
 				{
-					if (GUILayout.Button(twnames[i], SCANskins.SCAN_buttonActive))
+					if (GUILayout.Button(helpMode ? textWithTT(twnames[i], settingsHelpTimeWarp) : new GUIContent(twnames[i]), SCANskins.SCAN_buttonActive))
 						SCANcontroller.controller.timeWarpResolution = twvals[i];
 				}
 				else
 				{
-					if (GUILayout.Button(twnames[i]))
+					if (GUILayout.Button(helpMode ? textWithTT(twnames[i], settingsHelpTimeWarp) : new GUIContent(twnames[i])))
 						SCANcontroller.controller.timeWarpResolution = twvals[i];
 				}
 			}
@@ -267,7 +309,7 @@ namespace SCANsat.SCAN_UI
 			string s = 	"Vessels: " + SCANcontroller.controller.ActiveVessels.ToString() +
 						" Sensors: " + SCANcontroller.controller.ActiveSensors +
 						" Passes: " + SCANcontroller.controller.ActualPasses.ToString();
-			GUILayout.Label(s, SCANskins.SCAN_whiteReadoutLabel);
+			GUILayout.Label(helpMode ? textWithTT(s, settingsHelpVessels) : new GUIContent(s), SCANskins.SCAN_whiteReadoutLabel);
 			fillS(16);
 		}
 
@@ -288,12 +330,12 @@ namespace SCANsat.SCAN_UI
 			}
 			else
 			{
-				if (GUILayout.Button("Reset map of " + thisBody.theName))
+				if (GUILayout.Button(helpMode ? textWithTT("Reset map of " + thisBody.theName, settingsHelpResetPlanetData) : new GUIContent("Reset map of " + thisBody.theName)))
 				{
 					popup = !popup;
 					warningBoxOne = !warningBoxOne;
 				}
-				if (GUILayout.Button("Reset <b>all</b> data"))
+				if (GUILayout.Button(helpMode ? textWithTT("Reset <b>all</b> data", settingsHelpResetAllData) : new GUIContent("Reset <b>all</b> data")))
 				{
 					popup = !popup;
 					warningBoxAll = !warningBoxAll;
@@ -311,22 +353,22 @@ namespace SCANsat.SCAN_UI
 			SCANcontroller.controller.trueGreyScale = GUILayout.Toggle(SCANcontroller.controller.trueGreyScale, "Use True Grey Scale", SCANskins.SCAN_settingsToggle);
 #endif
 			growE();
-				SCANcontroller.controller.groundTracks = GUILayout.Toggle(SCANcontroller.controller.groundTracks, "Show Ground Tracks", SCANskins.SCAN_settingsToggle);
+			SCANcontroller.controller.groundTracks = GUILayout.Toggle(SCANcontroller.controller.groundTracks, helpMode ? textWithTT("Show Ground Tracks", settingsHelpGroundTracks) : new GUIContent("Show Ground Tracks"), SCANskins.SCAN_settingsToggle);
 
 				if (SCANcontroller.controller.groundTracks)
-					SCANcontroller.controller.groundTrackActiveOnly = GUILayout.Toggle(SCANcontroller.controller.groundTrackActiveOnly, "Active Vessel Only", SCANskins.SCAN_settingsToggle);
+					SCANcontroller.controller.groundTrackActiveOnly = GUILayout.Toggle(SCANcontroller.controller.groundTrackActiveOnly, helpMode ? textWithTT("Active Vessel Only", settingsHelpGroundTracksActive) : new GUIContent("Active Vessel Only"), SCANskins.SCAN_settingsToggle);
 			stopE();
 			growE();
-				SCANcontroller.controller.planetaryOverlayTooltips = GUILayout.Toggle(SCANcontroller.controller.planetaryOverlayTooltips, "Planetary Overlay Tooltips", SCANskins.SCAN_settingsToggle);
+				SCANcontroller.controller.planetaryOverlayTooltips = GUILayout.Toggle(SCANcontroller.controller.planetaryOverlayTooltips, helpMode ? textWithTT("Planetary Overlay Tooltips", settingsHelpOverlayTooltips) : new GUIContent("Planetary Overlay Tooltips"), SCANskins.SCAN_settingsToggle);
 
-				SCANcontroller.controller.toolTips = GUILayout.Toggle(SCANcontroller.controller.toolTips, "Window Tooltips", SCANskins.SCAN_settingsToggle);
+				SCANcontroller.controller.toolTips = GUILayout.Toggle(SCANcontroller.controller.toolTips, helpMode ? textWithTT("Window Tooltips", settingsHelpWindowTooltips) : new GUIContent("Window Tooltips"), SCANskins.SCAN_settingsToggle);
 			stopE();
 
 			growE();
-				SCANcontroller.controller.useStockAppLauncher = GUILayout.Toggle(SCANcontroller.controller.useStockAppLauncher, "Stock Toolbar", SCANskins.SCAN_settingsToggle);
+				SCANcontroller.controller.useStockAppLauncher = GUILayout.Toggle(SCANcontroller.controller.useStockAppLauncher, helpMode ? textWithTT("Stock Toolbar", settingsHelpStockToolbar) : new GUIContent("Stock Toolbar"), SCANskins.SCAN_settingsToggle);
 
 				if (SCANmainMenuLoader.MechJebLoaded)
-					SCANcontroller.controller.mechJebTargetSelection = GUILayout.Toggle(SCANcontroller.controller.mechJebTargetSelection, "MechJeb Target Selection", SCANskins.SCAN_settingsToggle);
+					SCANcontroller.controller.mechJebTargetSelection = GUILayout.Toggle(SCANcontroller.controller.mechJebTargetSelection, helpMode ? textWithTT("MechJeb Target Selection", settingsHelpMechJeb) : new GUIContent("MechJeb Target Selection"), SCANskins.SCAN_settingsToggle);
 			stopE();
 			fillS(8);
 			if (popup)
@@ -335,7 +377,7 @@ namespace SCANsat.SCAN_UI
 			}
 			else
 			{
-				if (GUILayout.Button("Reset window positions"))
+				if (GUILayout.Button(helpMode ? textWithTT("Reset window positions", settingsHelpResetWindows) : new GUIContent("Reset window positions")))
 				{
 					if (HighLogic.LoadedSceneIsFlight)
 					{
