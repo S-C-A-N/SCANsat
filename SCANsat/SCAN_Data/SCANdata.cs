@@ -96,6 +96,9 @@ namespace SCANsat.SCAN_Data
 			if (body.pqsController == null)
 				return 0;
 
+			if (heightMaps[i].Length < 10)
+				return 0;
+
 			return heightMaps[i][lon, lat];
 		}
 
@@ -382,6 +385,24 @@ namespace SCANsat.SCAN_Data
 				if (!heightMaps.ContainsKey(body.flightGlobalsIndex))
 					heightMaps.Add(body.flightGlobalsIndex, new float[1, 1]);
 				return;
+			}
+
+			if (step <= 0)
+			{
+				try
+				{
+					double d = SCANUtil.getElevation(body, 0, 0);
+				}
+				catch (Exception e)
+				{
+					Debug.LogError("[SCANsat] Error In Detecting Terrain Height Map; Stopping Height Map Generator\n" + e);
+					built = true;
+					building = false;
+					externalBuilding = false;
+					if (!heightMaps.ContainsKey(body.flightGlobalsIndex))
+						heightMaps.Add(body.flightGlobalsIndex, new float[1, 1]);
+					return;
+				}
 			}
 
 			if (tempHeightMap == null)
