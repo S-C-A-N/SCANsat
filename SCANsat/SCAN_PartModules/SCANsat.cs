@@ -112,7 +112,10 @@ namespace SCANsat.SCAN_PartModules
 			Events["stopScan"].active = scanning;
 			if (sensorType != 32)
 				Fields["alt_indicator"].guiActive = scanning;
+		}
 
+		public override void OnFixedUpdate()
+		{
 			if (powerIsProblem)
 			{
 				addStatic();
@@ -130,29 +133,22 @@ namespace SCANsat.SCAN_PartModules
 				{
 					if (sensorType != 0 || SCANcontroller.controller.isVesselKnown(vessel.id, (SCANtype)sensorType))
 					{
-						if (TimeWarp.CurrentRate < 1500)
+						float p = power * TimeWarp.fixedDeltaTime;
+						float e = part.RequestResource("ElectricCharge", p);
+						if (e < p)
 						{
-							float p = power * TimeWarp.deltaTime;
-							float e = part.RequestResource("ElectricCharge", p);
-							if (e < p)
-							{
-								unregisterScanner();
-								powerIsProblem = true;
-							}
-							else
-							{
-								registerScanner();
-								powerIsProblem = false;
-							}
+							unregisterScanner();
+							powerIsProblem = true;
 						}
-						else if (powerIsProblem)
+						else
 						{
-							registerScanner();
+							//registerScanner();
 							powerIsProblem = false;
 						}
 					}
 					else
 						unregisterScanner();
+
 					alt_indicator = scanAlt();
 				}
 			}
