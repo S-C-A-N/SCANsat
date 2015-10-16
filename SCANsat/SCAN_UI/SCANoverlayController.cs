@@ -74,6 +74,7 @@ namespace SCANsat.SCAN_UI
 		{
 			GameEvents.onShowUI.Add(showUI);
 			GameEvents.onHideUI.Add(hideUI);
+			GameEvents.onGameSceneSwitchRequested.Add(switchScene);
 
 			resources = SCANcontroller.setLoadedResourceList();
 
@@ -99,13 +100,17 @@ namespace SCANsat.SCAN_UI
 			}
 		}
 
+		private void switchScene(GameEvents.FromToAction<GameScenes, GameScenes> FT)
+		{
+			removeOverlay();
+		}
+
 		protected override void OnDestroy()
 		{
 			GameEvents.onShowUI.Remove(showUI);
 			GameEvents.onHideUI.Remove(hideUI);
+			GameEvents.onGameSceneSwitchRequested.Remove(switchScene);
 
-			if (mapOverlay != null)
-				Destroy(mapOverlay);
 			resourcePixels = null;
 			biomePixels = null;
 			terrainPixels = null;
@@ -334,7 +339,8 @@ namespace SCANsat.SCAN_UI
 		{
 			OverlayGenerator.Instance.ClearDisplay();
 
-			Destroy(mapOverlay);
+			if (mapOverlay != null)
+				Destroy(mapOverlay);
 
 			mapOverlay = null;
 		}
@@ -471,18 +477,13 @@ namespace SCANsat.SCAN_UI
 			SCANresourceGlobal resourceCopy = new SCANresourceGlobal(currentResource);
 			resourceCopy.CurrentBodyConfig(body.name);
 
-			SCANUtil.SCANlog("Starting Resource Thread");
-
 			Thread t = new Thread(() => resourceThreadRun(SCANcontroller.controller.overlayMapHeight, SCANcontroller.controller.overlayInterpolation, SCANcontroller.controller.overlayTransparency, new System.Random(ResourceScenario.Instance.gameSettings.Seed), copy, resourceCopy));
 			threadRunning = true;
 			threadFinished = false;
 			t.Start();
 
-			SCANUtil.SCANlog("Resource Thread Started...");
-
 			while (threadRunning && timer < 1000)
 			{
-				SCANUtil.SCANlog("Resource Thread Running...");
 				timer++;
 				yield return null;
 			}
@@ -493,6 +494,7 @@ namespace SCANsat.SCAN_UI
 
 			if (timer >= 1000)
 			{
+				Debug.LogError("[SCANsat] Something went wrong when drawing the SCANsat resource map overlay...");
 				t.Abort();
 				threadRunning = false;
 				yield break;
@@ -500,10 +502,9 @@ namespace SCANsat.SCAN_UI
 
 			if (!threadFinished)
 			{
+				Debug.LogError("[SCANsat] Something went wrong when drawing the SCANsat resource map overlay...");
 				yield break;
 			}
-
-			SCANUtil.SCANlog("Resource Thread Finished; {0} Frames Used", timer);
 
 			if (mapOverlay == null || mapOverlay.height != SCANcontroller.controller.overlayMapHeight)
 				mapOverlay = new Texture2D(SCANcontroller.controller.overlayMapHeight * 2, SCANcontroller.controller.overlayMapHeight, TextureFormat.ARGB32, true);
@@ -561,18 +562,13 @@ namespace SCANsat.SCAN_UI
 			SCANdata copy = new SCANdata(data);
 			int index = data.Body.flightGlobalsIndex;
 
-			SCANUtil.SCANlog("Starting Terrain Thread");
-
 			Thread t = new Thread( () => terrainThreadRun(copy, index));
 			threadFinished = false;
 			threadRunning = true;
 			t.Start();
 
-			SCANUtil.SCANlog("Terrain Thread Started...");
-
 			while (threadRunning && timer < 1000)
 			{
-				SCANUtil.SCANlog("Terrain Thread Running...");
 				timer++;
 				yield return null;
 			}
@@ -582,6 +578,7 @@ namespace SCANsat.SCAN_UI
 
 			if (timer >= 1000)
 			{
+				Debug.LogError("[SCANsat] Something went wrong when drawing the SCANsat terrain map overlay...");
 				t.Abort();
 				threadRunning = false;
 				yield break;
@@ -589,10 +586,9 @@ namespace SCANsat.SCAN_UI
 
 			if (!threadFinished)
 			{
+				Debug.LogError("[SCANsat] Something went wrong when drawing the SCANsat terrain map overlay...");
 				yield break;
 			}
-
-			SCANUtil.SCANlog("Terrain Thread Finished; {0} Frames Used", timer);
 
 			if (mapOverlay == null)
 				mapOverlay = new Texture2D(1440, 720, TextureFormat.ARGB32, true);
