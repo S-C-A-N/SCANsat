@@ -17,7 +17,12 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			FilePath = path;
 			TopNodeName = node;
 
-			Load();
+			if (!Load())
+			{
+				activePack = new SCANlanguagePack();
+				languagePacks.Add(activePack);
+				Save();
+			}
 		}
 
 		public override void OnDecodeFromConfigNode()
