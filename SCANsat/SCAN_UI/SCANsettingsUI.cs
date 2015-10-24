@@ -62,6 +62,7 @@ namespace SCANsat.SCAN_UI
 			Visible = false;
 			DragEnabled = true;
 			TooltipMouseOffset = new Vector2d(-10, -25);
+			TooltipMaxWidth = 350;
 			TooltipDisplayForSecs = 60;
 			ClampToScreenOffset = new RectOffset(-280, -280, -600, -600);
 
