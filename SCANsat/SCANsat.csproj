@@ -100,7 +100,7 @@
     <Compile Include="SCAN_UI\SCANzoomHiDef.cs" />
     <Compile Include="SCAN_UI\SCANzoomWindow.cs" />
     <Compile Include="SCAN_UI\UI_Framework\SCANlanguagePack.cs" />
-    <Compile Include="SCAN_UI\UI_Framework\SCANlocalization.cs" />
+    <Compile Include="SCAN_UI\UI_Framework\SCAN_Localization.cs" />
     <Compile Include="SCAN_UI\UI_Framework\SCANremoteView.cs" />
     <Compile Include="SCANcontroller.cs" />
     <Compile Include="SCAN_UI\UI_Framework\SCANicon.cs" />

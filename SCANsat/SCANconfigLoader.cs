@@ -35,7 +35,7 @@ namespace SCANsat
 		private const string localizationNode = "SCAN_Localization";
 
 		private static SCAN_Color_Config SCANnode;
-		private static SCANlocalization localNode;
+		private static SCAN_Localization localNode;
 
 		public static SCAN_Color_Config SCANNode
 		{
@@ -65,7 +65,7 @@ namespace SCANsat
 
 			loadResources();
 
-			localNode = new SCANlocalization(localizationFile, localizationNode);
+			localNode = new SCAN_Localization(localizationFile, localizationNode);
 		}
 
 		private static void loadSCANtypes()
