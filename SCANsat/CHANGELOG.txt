@@ -14,6 +14,8 @@ Version 14.3 - 2015-
 	- Fix planetary overlay tooltips while in the tracking station
 	- Fix a potential loading error
 	- Fix bug generating terrain height maps on planets with PQS errors; prevents endless NRE spam
+	- Fix some problems with the background terrain height map generator
+	- Power usage works correctly up to 10000X time warp, instead of 1000X
 	- Remove debug log messages during planetary overlay map generation
 
 Version 14.2 - 2015-8-29
