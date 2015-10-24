@@ -133,16 +133,23 @@ namespace SCANsat.SCAN_PartModules
 				{
 					if (sensorType != 0 || SCANcontroller.controller.isVesselKnown(vessel.id, (SCANtype)sensorType))
 					{
-						float p = power * TimeWarp.fixedDeltaTime;
-						float e = part.RequestResource("ElectricCharge", p);
-						if (e < p)
+						if (TimeWarp.CurrentRate < 15000)
 						{
-							unregisterScanner();
-							powerIsProblem = true;
+							float p = power * TimeWarp.fixedDeltaTime;
+							float e = part.RequestResource("ElectricCharge", p);
+							if (e < p)
+							{
+								unregisterScanner();
+								powerIsProblem = true;
+							}
+							else
+							{
+								powerIsProblem = false;
+							}
 						}
-						else
+						else if (powerIsProblem)
 						{
-							//registerScanner();
+							registerScanner();
 							powerIsProblem = false;
 						}
 					}
