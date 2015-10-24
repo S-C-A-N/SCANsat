@@ -542,9 +542,9 @@ namespace SCANsat.SCAN_UI
 			while (!data.Built && timer < 2000)
 			{
 				mapGenerating = true;
-				if (!data.Building)
+				if (!data.ControllerBuilding && !data.MapBuilding)
 				{
-					data.ExternalBuilding = true;
+					data.OverlayBuilding = true;
 					data.generateHeightMap(ref mapStep, ref mapStart, 360);
 				}
 				timer++;
@@ -633,9 +633,9 @@ namespace SCANsat.SCAN_UI
 			while (!data.Built && timer < 2000)
 			{
 				mapGenerating = true;
-				if (!data.Building)
+				if (!data.ControllerBuilding && !data.MapBuilding)
 				{
-					data.ExternalBuilding = true;
+					data.OverlayBuilding = true;
 					data.generateHeightMap(ref mapStep, ref mapStart, 360);
 				}
 				timer++;

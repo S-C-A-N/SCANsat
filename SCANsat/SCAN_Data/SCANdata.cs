@@ -36,7 +36,7 @@ namespace SCANsat.SCAN_Data
 		private Int32[,] coverage;
 		private CelestialBody body;
 		private SCANterrainConfig terrainConfig;
-		private bool building, externalBuilding, built;
+		private bool mapBuilding, overlayBuilding, controllerBuilding, built;
 
 		private float[,] tempHeightMap;
 
@@ -119,16 +119,22 @@ namespace SCANsat.SCAN_Data
 			internal set { disabled = value; }
 		}
 
-		public bool Building
+		public bool MapBuilding
 		{
-			get { return building; }
-			internal set { building = value; }
+			get { return mapBuilding; }
+			internal set { mapBuilding = value; }
 		}
 
-		public bool ExternalBuilding
+		public bool OverlayBuilding
 		{
-			get { return externalBuilding; }
-			internal set { externalBuilding = value; }
+			get { return overlayBuilding; }
+			internal set { overlayBuilding = value; }
+		}
+
+		public bool ControllerBuilding
+		{
+			get { return controllerBuilding; }
+			internal set { controllerBuilding = value; }
 		}
 
 		public bool Built
@@ -380,8 +386,9 @@ namespace SCANsat.SCAN_Data
 			if (body.pqsController == null)
 			{
 				built = true;
-				building = false;
-				externalBuilding = false;
+				mapBuilding = false;
+				overlayBuilding = false;
+				controllerBuilding = false;
 				if (!heightMaps.ContainsKey(body.flightGlobalsIndex))
 					heightMaps.Add(body.flightGlobalsIndex, new float[1, 1]);
 				return;
@@ -397,8 +404,9 @@ namespace SCANsat.SCAN_Data
 				{
 					Debug.LogError("[SCANsat] Error In Detecting Terrain Height Map; Stopping Height Map Generator\n" + e);
 					built = true;
-					building = false;
-					externalBuilding = false;
+					mapBuilding = false;
+					overlayBuilding = false;
+					controllerBuilding = false;
 					if (!heightMaps.ContainsKey(body.flightGlobalsIndex))
 						heightMaps.Add(body.flightGlobalsIndex, new float[1, 1]);
 					return;
@@ -415,8 +423,9 @@ namespace SCANsat.SCAN_Data
 				step = 0;
 				xStart = 0;
 				built = true;
-				building = false;
-				externalBuilding = false;
+				mapBuilding = false;
+				overlayBuilding = false;
+				controllerBuilding = false;
 				if (!heightMaps.ContainsKey(body.flightGlobalsIndex))
 					heightMaps.Add(body.flightGlobalsIndex, tempHeightMap);
 				tempHeightMap = null;

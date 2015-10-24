@@ -860,14 +860,10 @@ namespace SCANsat
 		private void Update()
 		{
 			if (scan_background && loaded)
-			{
 				scanFromAllVessels();
-			}
 
 			if (!heightMapsBuilt)
-			{
 				checkHeightMapStatus();
-			}
 
 			if (!HighLogic.LoadedSceneIsFlight && HighLogic.LoadedScene != GameScenes.TRACKSTATION)
 				return;
@@ -926,30 +922,57 @@ namespace SCANsat
 		}
 
 		private int dataStep, dataStart;
+		private bool currentlyBuilding;
+		private SCANdata buildingData;
 
 		private void checkHeightMapStatus()
 		{
-			for (int i = 0; i < FlightGlobals.Bodies.Count; i++)
+			if (!currentlyBuilding)
 			{
-				SCANdata data = getData(i);
+				for (int i = 0; i < body_data.Count; i++)
+				{
+					buildingData = getData(i);
 
-				if (data == null)
-					continue;
+					if (buildingData == null)
+						continue;
 
-				if (data.Built)
-					continue;
+					if (buildingData.Built)
+						continue;
 
-				if (data.Building)
+					if (buildingData.MapBuilding || buildingData.OverlayBuilding)
+						continue;
+
+					buildingData.ControllerBuilding = true;
+					currentlyBuilding = true;
+
 					return;
+				}
+			}
+			else
+			{
+				if (buildingData == null)
+				{
+					currentlyBuilding = false;
+					return;
+				}
 
-				data.ExternalBuilding = true;
-				data.generateHeightMap(ref dataStep, ref dataStart, 120);
+				if (buildingData.Built)
+				{
+					currentlyBuilding = false;
+					buildingData.ControllerBuilding = false;
+					return;
+				}
 
-				return;
+				if (buildingData.ControllerBuilding)
+				{
+					buildingData.generateHeightMap(ref dataStep, ref dataStart, 120);
+					return;
+				}
 			}
 
 			SCANUtil.SCANlog("All Height Maps Generated");
 
+			buildingData = null;
 			heightMapsBuilt = true;
 		}
 

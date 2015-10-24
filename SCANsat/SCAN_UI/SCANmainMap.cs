@@ -149,7 +149,7 @@ namespace SCANsat.SCAN_UI
 			mapRect = new Rect(10, 20, 360, 180);
 			GUI.DrawTexture(mapRect, drawBiome ? drawBiomeMap(sensors) : drawPartialMap(sensors));
 
-			if (data.Building || data.ExternalBuilding)
+			if (data.MapBuilding || data.OverlayBuilding || data.ControllerBuilding)
 			{
 				flash = (int)(Time.realtimeSinceStartup % 2) == 0;
 				SCANuiUtil.drawLabel(new Rect(mapRect.x + 80, mapRect.y + 50, 200, 60), "Building Database...", SCANskins.SCAN_insColorLabel, true, SCANskins.SCAN_insColorLabelShadow, flash, SCANskins.SCAN_insWhiteLabel);
@@ -277,14 +277,14 @@ namespace SCANsat.SCAN_UI
 		{
 			bool pqsController = data.Body.pqsController != null;
 
-			if (data.ExternalBuilding)
+			if (data.ControllerBuilding || data.OverlayBuilding)
 			{
 				return map_small;
 			}
 
 			if (!data.Built)
 			{
-				data.Building = true;
+				data.MapBuilding = true;
 				data.generateHeightMap(ref scanline, ref scanstep, 360);
 				return map_small;
 			}
