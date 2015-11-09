@@ -525,6 +525,16 @@ namespace SCANsat.SCAN_PartModules
 			return storedData.ToArray();
 		}
 
+		public void ReturnData(ScienceData data)
+		{
+			if (data == null)
+				return;
+
+			storedData.Clear();
+
+			storedData.Add(data);
+		}
+
 		private void KeepData(ScienceData data)
 		{
 			expDialog = null;
