@@ -256,7 +256,7 @@ namespace SCANsat.SCAN_Data
 							if (orbit == null)
 								continue;
 
-							if (orbit.targetBody == body)
+							if (orbit.TargetBody == body)
 							{
 								for (int j = 0; j < stationary[i].AllParameters.Count(); j++)
 								{
