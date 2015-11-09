@@ -1,5 +1,6 @@
 Version 14.3 - 2015-
 ------------------------
+- Update for KSP 1.0.5
 
 - In-Game Help Function
 	- Help section for Settings window, Resource Settings window, and Color Selection window
