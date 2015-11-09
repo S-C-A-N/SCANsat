@@ -22,6 +22,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 				activePack = new SCANlanguagePack();
 				Language_Packs.Add(activePack);
 				Save();
+				LoadSavedCopy();
 			}
 			else
 			{
