@@ -23,7 +23,7 @@ namespace SCANsat.SCAN_Data
 	{
 		internal SCANwaypoint(SurveyWaypointParameter p)
 		{
-			way = reflectWaypoint(p);
+			way = p.wp;
 			if (way != null)
 			{
 				band = reflectFlightBand(p);
@@ -125,14 +125,6 @@ namespace SCANsat.SCAN_Data
 		public bool LandingTarget
 		{
 			get { return landingTarget; }
-		}
-
-		private Waypoint reflectWaypoint(SurveyWaypointParameter p)
-		{
-			if (SCANmainMenuLoader.FinePrintWaypoint)
-				return SCANreflection.FinePrintWaypointObject(p);
-
-			return null;
 		}
 
 		private Waypoint reflectWaypoint(StationaryPointParameter p)
