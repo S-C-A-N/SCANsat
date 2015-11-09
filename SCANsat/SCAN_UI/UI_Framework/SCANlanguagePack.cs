@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using SCANsat.SCAN_Platform;
+using System.Text.RegularExpressions;
+using System.Reflection;
 
 namespace SCANsat.SCAN_UI.UI_Framework
 {
@@ -109,5 +111,50 @@ namespace SCANsat.SCAN_UI.UI_Framework
 		public string colorResourceHelpDefaultAll = "Reverts to the default values for the selected resource for all celestial bodies.";
 		[Persistent]
 		public string colorHelpSaveToConfig = "Save all color configuration values to the config file found in your SCANsat/Resources folder These values serve as the defaults for new saves and for all. Revert To Default buttons Values do not need to be saved to the config file to be applied for this save file.";
+
+		public override void OnDecodeFromConfigNode()
+		{
+			Regex openBracket = new Regex(@"\[(?=\d+:?\w?\d?\])");
+
+			Regex closeBraket = new Regex(@"(?<=\{\d+:?\w?\d?)\]");
+
+			Regex newLines = new Regex(@"\\n");
+
+			var stringFields = this.GetType().GetFields(BindingFlags.Instance | BindingFlags.Public).Where(a => a.FieldType == typeof(string)).ToList();
+
+			for (int i = 0; i < stringFields.Count(); i++)
+			{
+				FieldInfo f = stringFields[i];
+
+				f.SetValue(this, openBracket.Replace((string)f.GetValue(this), "{"));
+
+				f.SetValue(this, closeBraket.Replace((string)f.GetValue(this), "}"));
+
+				f.SetValue(this, newLines.Replace((string)f.GetValue(this), Environment.NewLine));
+			}
+		}
+
+		public override void OnEncodeToConfigNode()
+		{
+			Regex openCurlyBracket = new Regex(@"\{(?=\d+:?\w?\d?\})");
+
+			Regex closeCurlyBraket = new Regex(@"(?<=\[\d+:?\w?\d?)\}");
+
+			Regex newLines = new Regex(@"\n");
+
+			var stringFields = this.GetType().GetFields(BindingFlags.Instance | BindingFlags.Public).Where(a => a.FieldType == typeof(string)).ToList();
+
+			for (int i = 0; i < stringFields.Count(); i++)
+			{
+				FieldInfo f = stringFields[i];
+
+				f.SetValue(this, openCurlyBracket.Replace((string)f.GetValue(this), "["));
+
+				f.SetValue(this, closeCurlyBraket.Replace((string)f.GetValue(this), "]"));
+
+				f.SetValue(this, newLines.Replace((string)f.GetValue(this), @"\n"));
+			}
+		}
+
 	}
 }
