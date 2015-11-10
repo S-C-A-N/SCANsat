@@ -66,6 +66,29 @@ namespace SCANsat.SCAN_UI
 		private static SCANmap bigMap;
 		private CelestialBody body;
 
+		private string colorTerrainHelpMin = "";
+		private string colorTerrainHelpMax = "";
+		private string colorTerrainHelpClampToggle = "";
+		private string colorTerrainHelpClamp = "";
+		private string colorTerrainHelpReverse = "";
+		private string colorTerrainHelpDiscrete = "";
+		private string colorTerrainHelpPaletteSize = "";
+		private string colorBiomeHelpStock = "";
+		private string colorBiomeHelpWhiteBorder = "";
+		private string colorBiomeHelpTransparency = "";
+		private string colorPickerHelpLow = "";
+		private string colorPickerHelpHigh = "";
+		private string colorPickerHelpValue = "";
+		private string colorResourceHelpFineControl = "";
+		private string colorResourceHelpMin = "";
+		private string colorResourceHelpMax = "";
+		private string colorResourceHelpTransparency = "";
+		private string colorResourceHelpApply = "";
+		private string colorResourceHelpApplyAll = "";
+		private string colorResourceHelpDefault = "";
+		private string colorResourceHelpDefaultAll = "";
+		private string colorHelpSaveToConfig = "";
+
 		protected override void Awake()
 		{
 			WindowCaption = "S.C.A.N. Color Management";
@@ -74,6 +97,9 @@ namespace SCANsat.SCAN_UI
 			WindowOptions = new GUILayoutOption[2] { GUILayout.Width(780), GUILayout.Height(360) };
 			Visible = false;
 			DragEnabled = true;
+			TooltipMouseOffset = new Vector2d(-10, -25);
+			TooltipMaxWidth = 350;
+			TooltipDisplayForSecs = 60;
 			ClampToScreenOffset = new RectOffset(-450, -450, -250, -250);
 
 			SCAN_SkinsLibrary.SetCurrent("SCAN_Unity");
@@ -83,6 +109,11 @@ namespace SCANsat.SCAN_UI
 
 		protected override void Start()
 		{
+			TooltipsEnabled = false;
+
+			if (SCANconfigLoader.languagePack != null)
+				loadStrings();
+
 			if (HighLogic.LoadedScene == GameScenes.SPACECENTER || HighLogic.LoadedScene == GameScenes.TRACKSTATION)
 			{
 				kscMapObj = (SCANkscMap)SCANcontroller.controller.kscMap;
@@ -111,21 +142,21 @@ namespace SCANsat.SCAN_UI
 			stockBiomes = SCANcontroller.controller.useStockBiomes;
 			biomeBorders = SCANcontroller.controller.biomeBorder;
 
-			minTerrainSlider = new SCANuiSlider(currentTerrain.DefaultMinHeight - SCANconfigLoader.SCANNode.RangeBelowMinHeight, currentTerrain.MaxTerrain - 100, currentTerrain.MinTerrain, "Min: ", "m", -2);
-			maxTerrainSlider = new SCANuiSlider(currentTerrain.MinTerrain + 100, currentTerrain.DefaultMaxHeight + SCANconfigLoader.SCANNode.RangeAboveMaxHeight, currentTerrain.MaxTerrain, "Max: ", "m", -2);
-			clampTerrainSlider = new SCANuiSlider(currentTerrain.MinTerrain + 10, currentTerrain.MaxTerrain - 10, currentTerrain.ClampTerrain ?? currentTerrain.MinTerrain + 10, "Clamp: ", "m", -1);
-			paletteSizeSlider = new SCANuiSlider(3, 12, currentTerrain.PalSize, "Palette Size: ", "", 0);
+			minTerrainSlider = new SCANuiSlider(currentTerrain.DefaultMinHeight - SCANconfigLoader.SCANNode.RangeBelowMinHeight, currentTerrain.MaxTerrain - 100, currentTerrain.MinTerrain, "Min: ", "m", colorTerrainHelpMin, -2);
+			maxTerrainSlider = new SCANuiSlider(currentTerrain.MinTerrain + 100, currentTerrain.DefaultMaxHeight + SCANconfigLoader.SCANNode.RangeAboveMaxHeight, currentTerrain.MaxTerrain, "Max: ", "m", colorTerrainHelpMax, -2);
+			clampTerrainSlider = new SCANuiSlider(currentTerrain.MinTerrain + 10, currentTerrain.MaxTerrain - 10, currentTerrain.ClampTerrain ?? currentTerrain.MinTerrain + 10, "Clamp: ", "m", colorTerrainHelpClamp, -1);
+			paletteSizeSlider = new SCANuiSlider(3, 12, currentTerrain.PalSize, "Palette Size: ", "", colorTerrainHelpPaletteSize, 0);
 
-			slopeColorPickerLow = new SCANuiColorPicker(SCANcontroller.controller.lowSlopeColorOne, SCANcontroller.controller.highSlopeColorOne, true);
-			slopeColorPickerHigh = new SCANuiColorPicker(SCANcontroller.controller.lowSlopeColorTwo, SCANcontroller.controller.highSlopeColorTwo, true);
+			slopeColorPickerLow = new SCANuiColorPicker(SCANcontroller.controller.lowSlopeColorOne, SCANcontroller.controller.highSlopeColorOne, colorPickerHelpLow, colorPickerHelpHigh, colorPickerHelpValue, true);
+			slopeColorPickerHigh = new SCANuiColorPicker(SCANcontroller.controller.lowSlopeColorTwo, SCANcontroller.controller.highSlopeColorTwo, colorPickerHelpLow, colorPickerHelpHigh, colorPickerHelpValue, true);
 
 			slopeColorPickerLow.updateOldSwatches();
 			slopeColorPickerHigh.updateOldSwatches();
 
 			bTrans = SCANcontroller.controller.biomeTransparency;
-			biomeTransSlider = new SCANuiSlider(0, 80, bTrans, "Ter. Trans: ", "%", 0);
+			biomeTransSlider = new SCANuiSlider(0, 80, bTrans, "Ter. Trans: ", "%", colorBiomeHelpTransparency, 0);
 
-			biomeColorPicker = new SCANuiColorPicker(SCANcontroller.controller.lowBiomeColor, SCANcontroller.controller.highBiomeColor, true);
+			biomeColorPicker = new SCANuiColorPicker(SCANcontroller.controller.lowBiomeColor, SCANcontroller.controller.highBiomeColor, colorPickerHelpLow, colorPickerHelpHigh, colorPickerHelpValue, true);
 
 			biomeColorPicker.updateOldSwatches();
 
@@ -137,11 +168,11 @@ namespace SCANsat.SCAN_UI
 
 				if (currentResource != null)
 				{
-					resourceMinSlider = new SCANuiSlider(0, currentResource.CurrentBody.MinValue - 0.1f, currentResource.CurrentBody.MinValue, "Min: ", "%", 1);
-					resourceMaxSlider = new SCANuiSlider(currentResource.CurrentBody.MinValue + 0.1f, 100, currentResource.CurrentBody.MaxValue, "Max: ", "%", 1);
-					resourceTransSlider = new SCANuiSlider(0, 80, currentResource.Transparency, "Trans: ", "%", 0);
+					resourceMinSlider = new SCANuiSlider(0, currentResource.CurrentBody.MinValue - 0.1f, currentResource.CurrentBody.MinValue, "Min: ", "%", colorResourceHelpMin, 1);
+					resourceMaxSlider = new SCANuiSlider(currentResource.CurrentBody.MinValue + 0.1f, 100, currentResource.CurrentBody.MaxValue, "Max: ", "%", colorResourceHelpMax, 1);
+					resourceTransSlider = new SCANuiSlider(0, 80, currentResource.Transparency, "Trans: ", "%", colorResourceHelpTransparency, 0);
 
-					resourceColorPicker = new SCANuiColorPicker(currentResource.MinColor, currentResource.MaxColor, true);
+					resourceColorPicker = new SCANuiColorPicker(currentResource.MinColor, currentResource.MaxColor, colorPickerHelpLow, colorPickerHelpHigh, colorPickerHelpValue, true);
 				}
 			}
 
@@ -153,9 +184,36 @@ namespace SCANsat.SCAN_UI
 			setSizeSlider(currentTerrain.ColorPal.kind);
 		}
 
+		private void loadStrings()
+		{
+			colorTerrainHelpMin = SCANconfigLoader.languagePack.colorTerrainHelpMin;
+			colorTerrainHelpMax = SCANconfigLoader.languagePack.colorTerrainHelpMax;
+			colorTerrainHelpClampToggle = SCANconfigLoader.languagePack.colorTerrainHelpClampToggle;
+			colorTerrainHelpClamp = SCANconfigLoader.languagePack.colorTerrainHelpClamp;
+			colorTerrainHelpReverse = SCANconfigLoader.languagePack.colorTerrainHelpReverse;
+			colorTerrainHelpDiscrete = SCANconfigLoader.languagePack.colorTerrainHelpDiscrete;
+			colorTerrainHelpPaletteSize = SCANconfigLoader.languagePack.colorTerrainHelpPaletteSize;
+			colorBiomeHelpStock = SCANconfigLoader.languagePack.colorBiomeHelpStock;
+			colorBiomeHelpWhiteBorder = SCANconfigLoader.languagePack.colorBiomeHelpWhiteBorder;
+			colorBiomeHelpTransparency = SCANconfigLoader.languagePack.colorBiomeHelpTransparency;
+			colorPickerHelpLow = SCANconfigLoader.languagePack.colorPickerHelpLow;
+			colorPickerHelpHigh = SCANconfigLoader.languagePack.colorPickerHelpHigh;
+			colorPickerHelpValue = SCANconfigLoader.languagePack.colorPickerHelpValue;
+			colorResourceHelpFineControl = SCANconfigLoader.languagePack.colorResourceHelpFineControl;
+			colorResourceHelpMin = SCANconfigLoader.languagePack.colorResourceHelpMin;
+			colorResourceHelpMax = SCANconfigLoader.languagePack.colorResourceHelpMax;
+			colorResourceHelpTransparency = SCANconfigLoader.languagePack.colorResourceHelpTransparency;
+			colorResourceHelpApply = SCANconfigLoader.languagePack.colorResourceHelpApply;
+			colorResourceHelpApplyAll = SCANconfigLoader.languagePack.colorResourceHelpApplyAll;
+			colorResourceHelpDefault = SCANconfigLoader.languagePack.colorResourceHelpDefault;
+			colorResourceHelpDefaultAll = SCANconfigLoader.languagePack.colorResourceHelpDefaultAll;
+			colorHelpSaveToConfig = SCANconfigLoader.languagePack.colorHelpSaveToConfig;
+		}
+
 		protected override void OnDestroy()
 		{
 			removeControlLocks();
+			TooltipsEnabled = false;
 		}
 
 		internal void removeControlLocks()
@@ -447,11 +505,19 @@ namespace SCANsat.SCAN_UI
 		//Draw the close button in the upper right corner
 		private void closeBox(int id)
 		{
-			Rect r = new Rect(WindowRect.width - 20, 1, 18, 18);
+			Rect r = new Rect(WindowRect.width - 42, 1, 18, 18);
+			if (GUI.Button(r, textWithTT("?", "Show Help Tips"), SCANskins.SCAN_closeButton))
+			{
+				TooltipsEnabled = !TooltipsEnabled;
+			}
+
+			r.x += 22;
+
 			if (GUI.Button(r, SCANcontroller.controller.closeBox, SCANskins.SCAN_closeButton))
 			{
 				removeControlLocks();
 				Visible = false;
+				TooltipsEnabled = false;
 			}
 		}
 
@@ -583,7 +649,7 @@ namespace SCANsat.SCAN_UI
 						if (dropDown)
 							GUILayout.Label("Clamp Terrain", SCANskins.SCAN_settingsToggle, GUILayout.Width(100));
 						else
-						clampState = GUILayout.Toggle(clampState, "Clamp Terrain", SCANskins.SCAN_settingsToggle, GUILayout.Width(100));
+						clampState = GUILayout.Toggle(clampState, textWithTT("Clamp Terrain", colorTerrainHelpClampToggle), SCANskins.SCAN_settingsToggle, GUILayout.Width(100));
 					fillS();
 				stopE();
 				if (clampState)
@@ -612,9 +678,9 @@ namespace SCANsat.SCAN_UI
 					}
 					else
 					{
-						currentTerrain.PalRev = GUILayout.Toggle(currentTerrain.PalRev, " Reverse Order", SCANskins.SCAN_boldToggle, GUILayout.Width(120));
+						currentTerrain.PalRev = GUILayout.Toggle(currentTerrain.PalRev, textWithTT(" Reverse Order", colorTerrainHelpReverse), SCANskins.SCAN_boldToggle, GUILayout.Width(120));
 						fillS(10);
-						currentTerrain.PalDis = GUILayout.Toggle(currentTerrain.PalDis, " Discrete Gradient", SCANskins.SCAN_boldToggle, GUILayout.Width(140));
+						currentTerrain.PalDis = GUILayout.Toggle(currentTerrain.PalDis, textWithTT(" Discrete Gradient", colorTerrainHelpDiscrete), SCANskins.SCAN_boldToggle, GUILayout.Width(140));
 					}
 				stopE();
 
@@ -698,7 +764,7 @@ namespace SCANsat.SCAN_UI
 				fillS(8);
 				if (!dropDown)
 				{
-					if (GUILayout.Button("Save Values To Config", GUILayout.Width(180)))
+					if (GUILayout.Button(textWithTT("Save Values To Config", colorHelpSaveToConfig), GUILayout.Width(180)))
 					{
 						dropDown = true;
 						saveWarning = true;
@@ -714,9 +780,9 @@ namespace SCANsat.SCAN_UI
 			GUILayout.Label("Biome Options", SCANskins.SCAN_headline, GUILayout.Width(300));
 
 			fillS(20);
-			stockBiomes = GUILayout.Toggle(stockBiomes, "Use Stock Biome Maps", SCANskins.SCAN_toggle);
+			stockBiomes = GUILayout.Toggle(stockBiomes, textWithTT("Use Stock Biome Maps", colorBiomeHelpStock), SCANskins.SCAN_toggle, GUILayout.Width(200));
 			fillS(8);
-			biomeBorders = GUILayout.Toggle(biomeBorders, "White Biome Borders", SCANskins.SCAN_toggle);
+			biomeBorders = GUILayout.Toggle(biomeBorders, textWithTT("White Biome Borders", colorBiomeHelpWhiteBorder), SCANskins.SCAN_toggle, GUILayout.Width(190));
 			fillS(8);
 			growE();
 				fillS(10);
@@ -769,7 +835,7 @@ namespace SCANsat.SCAN_UI
 				if (dropDown)
 					GUILayout.Label(" Fine Control Mode", SCANskins.SCAN_boldToggle, GUILayout.Width(140));
 				else
-					fineControlMode = GUILayout.Toggle(fineControlMode, " Fine Control Mode", SCANskins.SCAN_boldToggle, GUILayout.Width(140));
+					fineControlMode = GUILayout.Toggle(fineControlMode, textWithTT(" Fine Control Mode", colorResourceHelpFineControl), SCANskins.SCAN_boldToggle, GUILayout.Width(140));
 			stopE();
 			growE();
 				fillS(10);
@@ -828,7 +894,7 @@ namespace SCANsat.SCAN_UI
 						stockBiomes = SCANcontroller.controller.useStockBiomes;
 						biomeBorders = SCANcontroller.controller.biomeBorder;
 
-						biomeColorPicker = new SCANuiColorPicker(SCANcontroller.controller.lowBiomeColor, SCANcontroller.controller.highBiomeColor, biomeColorPicker.LowColorChange);
+						biomeColorPicker = new SCANuiColorPicker(SCANcontroller.controller.lowBiomeColor, SCANcontroller.controller.highBiomeColor, colorPickerHelpLow, colorPickerHelpHigh, colorPickerHelpValue, biomeColorPicker.LowColorChange);
 
 						biomeColorPicker.updateOldSwatches();
 
@@ -851,7 +917,7 @@ namespace SCANsat.SCAN_UI
 			fillS(8);
 			if (!dropDown)
 			{
-				if (GUILayout.Button("Save Values To Config", GUILayout.Width(180)))
+				if (GUILayout.Button(textWithTT("Save Values To Config", colorHelpSaveToConfig), GUILayout.Width(180)))
 				{
 					dropDown = true;
 					saveWarning = true;
@@ -900,8 +966,8 @@ namespace SCANsat.SCAN_UI
 					SCANcontroller.controller.lowSlopeColorTwo32 = SCANconfigLoader.SCANNode.TopLowSlopeColor;
 					SCANcontroller.controller.highSlopeColorTwo32 = SCANconfigLoader.SCANNode.TopHighSlopeColor;
 
-					slopeColorPickerLow = new SCANuiColorPicker(SCANcontroller.controller.lowSlopeColorOne, SCANcontroller.controller.highSlopeColorOne, slopeColorPickerLow.LowColorChange);
-					slopeColorPickerHigh = new SCANuiColorPicker(SCANcontroller.controller.lowSlopeColorTwo, SCANcontroller.controller.highSlopeColorTwo, slopeColorPickerHigh.LowColorChange);
+					slopeColorPickerLow = new SCANuiColorPicker(SCANcontroller.controller.lowSlopeColorOne, SCANcontroller.controller.highSlopeColorOne, colorPickerHelpLow, colorPickerHelpHigh, colorPickerHelpValue, slopeColorPickerLow.LowColorChange);
+					slopeColorPickerHigh = new SCANuiColorPicker(SCANcontroller.controller.lowSlopeColorTwo, SCANcontroller.controller.highSlopeColorTwo, colorPickerHelpLow, colorPickerHelpHigh, colorPickerHelpValue, slopeColorPickerHigh.LowColorChange);
 
 					slopeColorPickerLow.updateOldSwatches();
 					slopeColorPickerHigh.updateOldSwatches();
@@ -915,7 +981,7 @@ namespace SCANsat.SCAN_UI
 
 				fillS(80);
 
-				if (GUILayout.Button("Save Values To Config", GUILayout.Width(180)))
+				if (GUILayout.Button(textWithTT("Save Values To Config", colorHelpSaveToConfig), GUILayout.Width(180)))
 				{
 					dropDown = true;
 					saveWarning = true;
@@ -937,7 +1003,7 @@ namespace SCANsat.SCAN_UI
 			growE();
 				if (!dropDown)
 				{
-					if (GUILayout.Button("Apply Values", GUILayout.Width(110)))
+					if (GUILayout.Button(textWithTT("Apply Values", colorResourceHelpApply), GUILayout.Width(110)))
 					{
 						currentResource.MinColor = resourceColorPicker.ColorLow;
 						currentResource.MaxColor = resourceColorPicker.ColorHigh;
@@ -952,7 +1018,7 @@ namespace SCANsat.SCAN_UI
 
 					fillS(6);
 
-					if (GUILayout.Button("Apply To All Planets", GUILayout.Width(200)))
+					if (GUILayout.Button(textWithTT("Apply To All Planets", colorResourceHelpApplyAll), GUILayout.Width(200)))
 					{
 						for (int i = 0; i < currentResource.getBodyCount; i++)
 						{
@@ -986,7 +1052,7 @@ namespace SCANsat.SCAN_UI
 			growE();
 				if (!dropDown)
 				{
-					if (GUILayout.Button("Default Values", GUILayout.Width(110)))
+					if (GUILayout.Button(textWithTT("Default Values", colorResourceHelpDefault), GUILayout.Width(110)))
 					{
 						currentResource.CurrentBody.MinValue = currentResource.CurrentBody.DefaultMinValue;
 						currentResource.CurrentBody.MaxValue = currentResource.CurrentBody.DefaultMaxValue;
@@ -1004,7 +1070,7 @@ namespace SCANsat.SCAN_UI
 
 					fillS(6);
 
-					if (GUILayout.Button("Default Values For All Planets", GUILayout.Width(200)))
+					if (GUILayout.Button(textWithTT("Default Values For All Planets", colorResourceHelpDefaultAll), GUILayout.Width(200)))
 					{
 						currentResource.MinColor = currentResource.DefaultLowColor;
 						currentResource.MaxColor = currentResource.DefaultHighColor;
@@ -1038,7 +1104,7 @@ namespace SCANsat.SCAN_UI
 			fillS(8);
 			if (!dropDown)
 			{
-				if (GUILayout.Button("Save Values To Config", GUILayout.Width(180)))
+				if (GUILayout.Button(textWithTT("Save Values To Config", colorHelpSaveToConfig), GUILayout.Width(180)))
 				{
 					dropDown = true;
 					saveWarning = true;
@@ -1185,7 +1251,7 @@ namespace SCANsat.SCAN_UI
 				highRCutoff = currentResource.CurrentBody.MaxValue;
 				rTrans = currentResource.Transparency;
 
-				resourceColorPicker = new SCANuiColorPicker(currentResource.MinColor, currentResource.MaxColor, resourceColorPicker.LowColorChange);
+				resourceColorPicker = new SCANuiColorPicker(currentResource.MinColor, currentResource.MaxColor, colorPickerHelpLow, colorPickerHelpHigh, colorPickerHelpValue, resourceColorPicker.LowColorChange);
 
 				resourceColorPicker.updateOldSwatches();
 

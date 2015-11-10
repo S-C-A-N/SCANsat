@@ -151,7 +151,7 @@ namespace SCANsat.SCAN_Platform
 		private Rect _TooltipPosition = new Rect();
 
 		public bool TooltipsEnabled = false;
-		internal Int32 TooltipDisplayForSecs = 15;
+		protected Int32 TooltipDisplayForSecs = 15;
 		protected Int32 TooltipMaxWidth = 250;
 		private string strToolTipText = "";
 		private string strLastTooltipText = "";

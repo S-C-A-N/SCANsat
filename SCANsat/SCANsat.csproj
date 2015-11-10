@@ -99,6 +99,8 @@
     <Compile Include="SCAN_UI\SCANresourceSettings.cs" />
     <Compile Include="SCAN_UI\SCANzoomHiDef.cs" />
     <Compile Include="SCAN_UI\SCANzoomWindow.cs" />
+    <Compile Include="SCAN_UI\UI_Framework\SCANlanguagePack.cs" />
+    <Compile Include="SCAN_UI\UI_Framework\SCAN_Localization.cs" />
     <Compile Include="SCAN_UI\UI_Framework\SCANremoteView.cs" />
     <Compile Include="SCANcontroller.cs" />
     <Compile Include="SCAN_UI\UI_Framework\SCANicon.cs" />
@@ -129,7 +131,7 @@
   </ProjectExtensions>
   <ItemGroup>
     <Reference Include="Assembly-CSharp">
-      <HintPath>..\..\..\KSP Dev Build\Kerbal Space Program\KSP_Data\Managed\Assembly-CSharp.dll</HintPath>
+      <HintPath>..\..\KSP Dev\Kerbal Space Program\KSP_Data\Managed\Assembly-CSharp.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="System">
@@ -139,7 +141,7 @@
       <HintPath>..\..\..\KSP_Data\Managed\mscorlib.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine">
-      <HintPath>..\..\..\KSP Dev Build\Kerbal Space Program\KSP_Data\Managed\UnityEngine.dll</HintPath>
+      <HintPath>..\..\KSP Dev\Kerbal Space Program\KSP_Data\Managed\UnityEngine.dll</HintPath>
       <Private>False</Private>
     </Reference>
   </ItemGroup>

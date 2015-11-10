@@ -19,6 +19,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 	{
 		private float valSlider, oldValSlider;
 		private bool lowColorChange, oldColorState;
+		private string lowToolTip, highToolTip, valueToolTip;
 		private Color c = new Color();
 		private Color colorLow = new Color();
 		private Color colorHigh = new Color();
@@ -42,11 +43,14 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			get { return lowColorChange; }
 		}
 
-		internal SCANuiColorPicker (Color low, Color high, bool changeLow)
+		internal SCANuiColorPicker (Color low, Color high, string tipLow, string tipHigh, string tipValue, bool changeLow)
 		{
 			colorLow = c= low;
 			c = colorLow.maxBright();
 			colorHigh = high;
+			lowToolTip = tipLow;
+			highToolTip = tipHigh;
+			valueToolTip = tipValue;
 			lowColorChange = oldColorState = changeLow;
 			valSlider = oldValSlider = colorLow.Brightness().Mathf_Round(2) * 100f;
 		}
@@ -64,12 +68,15 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			GUILayout.EndVertical();
 
 			Rect s = new Rect(r.x + 170, r.y + 100, 80, 30);
-			GUI.Label(s, "Value: " + valSlider.ToString("N0") + "%", SCANskins.SCAN_whiteReadoutLabel);
+			GUI.Label(s, new GUIContent("Value: " + valSlider.ToString("N0") + "%", valueToolTip), SCANskins.SCAN_whiteReadoutLabel);
 
 			s.x += 80;
 			s.y -= 90;
 			s.width = 30;
 			s.height = 200;
+
+			GUI.Label(s, new GUIContent("", valueToolTip));
+
 			valSlider = GUI.VerticalSlider(s, valSlider, 100, 0, SCANskins.SCAN_vertSlider, SCANskins.SCAN_sliderThumb).Mathf_Round(0);
 
 			SCANuiUtil.drawVerticalSliderLabel(s, "0%", "100%");
@@ -92,10 +99,10 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			r.width = 60;
 			r.height = 30;
 
-			colorSwatches(r, "Low", ref lowColorChange, true, minColorPreview, minColorOld, colorLow);
+			colorSwatches(r, "Low", lowToolTip, ref lowColorChange, true, minColorPreview, minColorOld, colorLow);
 
 			r.x += 150;
-			colorSwatches(r, "High", ref lowColorChange, false, maxColorPreview, maxColorOld, colorHigh);
+			colorSwatches(r, "High", highToolTip, ref lowColorChange, false, maxColorPreview, maxColorOld, colorHigh);
 
 			r.x -= 60;
 			r.y += 30;
@@ -105,7 +112,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			GUI.Label(r, "Old", SCANskins.SCAN_headlineSmall);
 		}
 
-		private void colorSwatches(Rect R, string Title, ref bool Active, bool Low, Texture2D Preview, Texture2D Current, Color New)
+		private void colorSwatches(Rect R, string Title, string ToolTip, ref bool Active, bool Low, Texture2D Preview, Texture2D Current, Color New)
 		{
 			bool active;
 			if (Low)
@@ -113,7 +120,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			else
 				active = !Active;
 
-			active = GUI.Toggle(R, active, Title);
+			active = GUI.Toggle(R, active, new GUIContent(Title, ToolTip));
 
 			if (Low)
 				Active = active;

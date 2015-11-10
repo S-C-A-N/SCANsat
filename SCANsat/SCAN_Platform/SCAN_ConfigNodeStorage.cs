@@ -62,6 +62,31 @@ namespace SCANsat.SCAN_Platform
 			}
 		}
 
+		public bool LoadSavedCopy()
+		{
+			try
+			{
+				Log.Debug("Loading ConfigNode");
+				if (FileExists)
+				{
+					ConfigNode cnToLoad = ConfigNode.Load(FilePath);
+					ConfigNode cnUnwrapped = cnToLoad.GetNode(this.GetType().Name);
+					ConfigNode.LoadObjectFromConfig(this, cnUnwrapped);
+					return true;
+				}
+				else
+				{
+					Log.Now("File could not be found to load after saving new copy ({0})", FilePath);
+					return false;
+				}
+			}
+			catch (Exception ex)
+			{
+				Log.Now("Failed to Load ConfigNode from file after saving ({0}) - Error:{1}", FilePath, ex.Message);
+				return false;
+			}
+		}
+
 		public bool Save()
 		{
 			Log.Debug("Saving ConfigNode");
