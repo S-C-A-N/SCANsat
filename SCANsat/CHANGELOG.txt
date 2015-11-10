@@ -18,6 +18,7 @@ Version 14.3 - 2015-11-10
 	- Fix some problems with the background terrain height map generator
 	- Power usage works correctly up to 10000X time warp, instead of 1000X
 	- Remove debug log messages during planetary overlay map generation
+	- Change the default anomaly marker and close box icons to standard text
 
 Version 14.2 - 2015-8-29
 ------------------------
