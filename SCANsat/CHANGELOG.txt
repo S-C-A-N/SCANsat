@@ -1,3 +1,19 @@
+Version 14.4 - 2015
+------------------------
+
+- New export functions
+	- Option to sse a true grey-scale color scheme
+	- Option to export a .csv file with coordinates and terrain height for each pixel
+	- Option to manually specify the big map width
+	
+- Stock resource scan threshold
+	- Active when stock resource scanning is disabled
+	- Set a SCANsat resource scanning threshold level above which the stock resource scan will apply for each celestial body
+
+- Misc and Bug Fixes
+	- Fix science data return on transmission failure
+	
+
 Version 14.3 - 2015-11-10
 ------------------------
 - Update for KSP 1.0.5
