@@ -859,6 +859,16 @@ namespace SCANsat
 			}
 			if (useStockAppLauncher)
 				appLauncher = gameObject.AddComponent<SCANappLauncher>();
+
+			if (disableStockResource)
+			{
+				for (int i = 0; i < FlightGlobals.Bodies.Count; i++)
+				{
+					CelestialBody b = FlightGlobals.Bodies[i];
+
+					checkResourceScanStatus(b);
+				}
+			}
 		}
 
 		private void Update()
@@ -923,6 +933,23 @@ namespace SCANsat
 				data.fillResourceMap();
 				bodyScanned = true;
 			}
+		}
+
+		public void checkResourceScanStatus(CelestialBody body)
+		{
+			if (body == null)
+				return;
+
+			if (ResourceMap.Instance.IsPlanetScanned(body.flightGlobalsIndex))
+				return;
+
+			SCANdata data = getData(body.name);
+
+			if (data == null)
+				return;
+
+			if (SCANUtil.getCoveragePercentage(data, SCANtype.FuzzyResources) > (scanThreshold * 100))
+				ResourceMap.Instance.UnlockPlanet(body.flightGlobalsIndex);
 		}
 
 		private int dataStep, dataStart;

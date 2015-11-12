@@ -247,6 +247,13 @@ namespace SCANsat.SCAN_UI
 								f = 1;
 
 							SCANcontroller.controller.scanThreshold = f;
+
+							for (int i = 0; i < FlightGlobals.Bodies.Count; i++)
+							{
+								CelestialBody b = FlightGlobals.Bodies[i];
+
+								SCANcontroller.controller.checkResourceScanStatus(b);
+							}
 						}
 					}
 					fillS();
