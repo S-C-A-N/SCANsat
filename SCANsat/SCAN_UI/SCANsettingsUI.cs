@@ -39,6 +39,9 @@ namespace SCANsat.SCAN_UI
 		private string settingsHelpResetPlanetData = "";
 		private string settingsHelpResetAllData = "";
 		private string settingsHelpVessels = "";
+		private string settingsHelpGreyScale = "";
+		private string settingsHelpExportCSV = "";
+		private string settingsHelpSetMapWidth = "";
 
 		/* UI: a list of glyphs that are used for something */
 		private string[] exmarks = { "✗", "✘", "×", "✖", "x", "X", "∇", "☉", "★", "*", "•", "º", "+" };
@@ -50,6 +53,7 @@ namespace SCANsat.SCAN_UI
 		private Rect warningRect;
 		private const string lockID = "settingLockID";
 		private bool oldTooltips, stockToolbar;
+		private string exportSize = "";
 
 		internal readonly static Rect defaultRect = new Rect(Screen.width - (Screen.width / 2) - 180, 100, 360, 300);
 
@@ -108,6 +112,9 @@ namespace SCANsat.SCAN_UI
 			settingsHelpResetPlanetData = SCANconfigLoader.languagePack.settingsHelpResetPlanetData;
 			settingsHelpResetAllData = SCANconfigLoader.languagePack.settingsHelpResetAllData;
 			settingsHelpVessels = SCANconfigLoader.languagePack.settingsHelpVesselsSensorsPasses;
+			settingsHelpGreyScale = SCANconfigLoader.languagePack.settingsHelpGreyScale;
+			settingsHelpExportCSV = SCANconfigLoader.languagePack.settingsHelpExportCSV;
+			settingsHelpSetMapWidth = SCANconfigLoader.languagePack.settingsHelpSetMapWidth;
 		}
 
 		protected override void DrawWindowPre(int id)
@@ -164,6 +171,7 @@ namespace SCANsat.SCAN_UI
 				gui_settings_timewarp(id);				/* time warp resolution settings */
 				gui_settings_numbers(id);				/* sensor/scanning		statistics */
 				gui_settings_window_resets_tooltips(id);/* reset windows and positions and toggle tooltips*/
+				gui_settings_export_options(id);
 				gui_settings_data_resets(id);			/* reset data and/or reset resources */
 				# if DEBUG
 					gui_settings_window_mapFill(id);	/* debug option to fill in maps */
@@ -317,6 +325,42 @@ namespace SCANsat.SCAN_UI
 			fillS(16);
 		}
 
+		//Export options
+		private void gui_settings_export_options(int id)
+		{
+			GUILayout.Label("Export Options", SCANskins.SCAN_headline);
+
+			growE();
+				fillS();
+				GUILayout.Label(textWithTT("Map Width: " + SCANcontroller.controller.map_width, settingsHelpSetMapWidth), SCANskins.SCAN_settingsGreyLabel, GUILayout.Width(110));
+
+				exportSize = GUILayout.TextField(exportSize, 4, GUILayout.Width(75));
+
+				if (GUILayout.Button(textWithTT("Set", settingsHelpSetMapWidth), GUILayout.Width(50)))
+				{
+					if (SCANcontroller.controller.BigMap == null)
+						return;
+
+					int i = 0;
+
+					if (int.TryParse(exportSize, out i))
+					{
+						if (i <= SCANcontroller.controller.BigMap._WindowSize_Min.x)
+							i = (int)SCANcontroller.controller.BigMap._WindowSize_Min.x;
+
+						SCANcontroller.controller.BigMap.setMapWidth(i);
+					}
+				}
+				fillS();
+			stopE();
+
+			growE();
+				SCANcontroller.controller.trueGreyScale = GUILayout.Toggle(SCANcontroller.controller.trueGreyScale, textWithTT("Use True Grey Scale", settingsHelpGreyScale), SCANskins.SCAN_settingsToggle);
+
+				SCANcontroller.controller.exportCSV = GUILayout.Toggle(SCANcontroller.controller.exportCSV, textWithTT("Export .csv Data File", settingsHelpExportCSV), SCANskins.SCAN_settingsToggle);
+			stopE();
+		}
+
 		//Reset databases
 		private void gui_settings_data_resets(int id)
 		{
@@ -352,12 +396,9 @@ namespace SCANsat.SCAN_UI
 		//Resets all window positions, tooltip toggle
 		private void gui_settings_window_resets_tooltips(int id)
 		{
-#if DEBUG
 			GUILayout.Label("Settings", SCANskins.SCAN_headline);
-			SCANcontroller.controller.trueGreyScale = GUILayout.Toggle(SCANcontroller.controller.trueGreyScale, "Use True Grey Scale", SCANskins.SCAN_settingsToggle);
-#endif
 			growE();
-			SCANcontroller.controller.groundTracks = GUILayout.Toggle(SCANcontroller.controller.groundTracks, textWithTT("Show Ground Tracks", settingsHelpGroundTracks), SCANskins.SCAN_settingsToggle);
+				SCANcontroller.controller.groundTracks = GUILayout.Toggle(SCANcontroller.controller.groundTracks, textWithTT("Show Ground Tracks", settingsHelpGroundTracks), SCANskins.SCAN_settingsToggle);
 
 				if (SCANcontroller.controller.groundTracks)
 					SCANcontroller.controller.groundTrackActiveOnly = GUILayout.Toggle(SCANcontroller.controller.groundTrackActiveOnly, textWithTT("Active Vessel Only", settingsHelpGroundTracksActive), SCANskins.SCAN_settingsToggle);
