@@ -124,6 +124,10 @@ namespace SCANsat
 		public bool groundTracks = true;
 		[KSPField(isPersistant = true)]
 		public bool groundTrackActiveOnly = true;
+		[KSPField(isPersistant = true)]
+		public bool exportCSV = false;
+		[KSPField(isPersistant = true)]
+		public float scanThreshold = 0.90f;
 
 		/* Biome and slope colors can't be serialized properly as a KSP Field */
 		public Color lowBiomeColor = new Color(0, 0.46f, 0.02345098f, 1);
