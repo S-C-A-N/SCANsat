@@ -41,6 +41,12 @@ namespace SCANsat.SCAN_UI.UI_Framework
 		public string settingsHelpResetAllData = "Resets all SCANsat data for all celestial bodies. A confirmation window will open before activating. Cannot be reversed.";
 		[Persistent]
 		public string settingsHelpVesselsSensorsPasses = "Information about the currently active SCANsat sensors. Vessels indicates the number of vessels with active sensors. Sensors indicates the total number of sensors; instruments with multiple sensor types count each individual sensor. Passes indicates the number of sensor updates performed per second This value is affected by the TimeWarp Resolution setting.";
+		[Persistent]
+		public string settingsHelpGreyScale = "Use a true grey-scale color spectrum for black-and-white SCANsat maps. Pixels on the altitude map will interpolate between black and white; the min and max terrain heights for each celestial body define the limits.";
+		[Persistent]
+		public string settingsHelpExportCSV = "Export a .csv file along with map texture when using the Export button on the big map. The file contains coordinates and the terrain height for each pixel. Pixels are labeled from left to right and from top to bottom.";
+		[Persistent]
+		public string settingsHelpSetMapWidth = "Enter an exact value for the SCANsat big map texture width. Values are limited to 550 - 9999 pixels wide. Press the Set button to apply the value.";
 
 		//Resource Settings Window Help Tooltips
 		[Persistent]
@@ -65,6 +71,8 @@ namespace SCANsat.SCAN_UI.UI_Framework
 		public string resourceSettingsHelpOverlayBiomeHeight = "Change the texture size (map width is 2XHeight) used in constructing the planetary overlay biome map. Increase the value to increase the quality and accuracy of the map. Higher values will result in slower map generation.";
 		[Persistent]
 		public string resourceSettingsHelpOverlayTransparency = "Create a grey background for planetary overlay resource maps. Used to make clear which sections of the celestial body have been scanned but contain no resources.";
+		[Persistent]
+		public string resourceSettingsHelpScanThreshold = "A threshold level used to apply the stock resource scan to a celestial body after scanning with SCANsat sensors. This is useful when contracts or other addons require that a stock resource scan be performed. Set a value from 0-100 in the text box and click on the Set button. The current celestial body will be checked immediately; other celestial bodies will be checked upon loading or upon entering another body's SOI.";
 
 		//Color Config Window Help Tooltips
 		[Persistent]
