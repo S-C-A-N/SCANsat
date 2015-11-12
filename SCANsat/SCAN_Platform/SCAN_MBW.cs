@@ -167,6 +167,16 @@ namespace SCANsat.SCAN_Platform
 		protected Texture2D MapTexture;
 		protected float dW, dH;
 
+		public Vector2 _WindowSize_Min
+		{
+			get { return WindowSize_Min; }
+		}
+
+		public Vector2 _WindowSize_Max
+		{
+			get { return WindowSize_Max; }
+		}
+
 		internal void resetWindowPos(Rect r)
 		{
 			WindowRect = r;
