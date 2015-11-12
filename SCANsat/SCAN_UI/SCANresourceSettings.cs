@@ -30,6 +30,7 @@ namespace SCANsat.SCAN_UI
 		private bool popup, warningResource, warningStockResource, controlLock, oldNarrowBand;
 		private const string lockID = "resourceSettingLockID";
 		private Rect warningRect;
+		private string scanThreshold = "";
 
 		private string resourceSettingsHelpOverlayWindow = "";
 		private string resourceSettingsHelpBiomeLock = "";
@@ -42,6 +43,7 @@ namespace SCANsat.SCAN_UI
 		private string resourceSettingsHelpOverlayHeight = "";
 		private string resourceSettingsHelpOverlayBiomeHeight = "";
 		private string resourceSettingsHelpOverlayTransparency = "";
+		private string resourceSettingsHelpScanThreshold = "";
 
 		protected override void Awake()
 		{
@@ -87,6 +89,7 @@ namespace SCANsat.SCAN_UI
 			resourceSettingsHelpOverlayHeight = SCANconfigLoader.languagePack.resourceSettingsHelpOverlayHeight;
 			resourceSettingsHelpOverlayBiomeHeight = SCANconfigLoader.languagePack.resourceSettingsHelpOverlayBiomeHeight;
 			resourceSettingsHelpOverlayTransparency = SCANconfigLoader.languagePack.resourceSettingsHelpOverlayTransparency;
+			resourceSettingsHelpScanThreshold = SCANconfigLoader.languagePack.resourceSettingsHelpScanThreshold;
 		}
 
 		internal void removeControlLocks()
@@ -222,6 +225,33 @@ namespace SCANsat.SCAN_UI
 				SCANcontroller.controller.disableStockResource = GUILayout.Toggle(SCANcontroller.controller.disableStockResource, textWithTT("Disable Stock Scanning", resourceSettingsHelpDisableStock), SCANskins.SCAN_settingsToggle);
 				fillS();
 			stopE();
+			if (SCANcontroller.controller.disableStockResource)
+			{
+				growE();
+					fillS();
+					GUILayout.Label(textWithTT("Stock Scan Threshold: " + SCANcontroller.controller.scanThreshold.ToString("P0"), resourceSettingsHelpScanThreshold), SCANskins.SCAN_settingsGreyLabel, GUILayout.Width	(180));
+
+					scanThreshold = GUILayout.TextField(scanThreshold, 3, GUILayout.Width(40));
+
+					if (GUILayout.Button(textWithTT("Set", resourceSettingsHelpScanThreshold), GUILayout.Width(45)))
+					{
+						float f = 0;
+
+						if (float.TryParse(scanThreshold, out f))
+						{
+							f /= 100;
+
+							if (f <= 0f)
+								f = 0;
+							else if (f >= 1)
+								f = 1;
+
+							SCANcontroller.controller.scanThreshold = f;
+						}
+					}
+					fillS();
+				stopE();
+			}
 			GUILayout.Label("Resource Scan Data", SCANskins.SCAN_headline);
 			if (popup)
 			{
