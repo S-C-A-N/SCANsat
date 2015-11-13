@@ -559,17 +559,55 @@ namespace SCANsat.SCAN_Map
 				mode += "-" + SCANcontroller.controller.resourceSelection;
 			if (SCANcontroller.controller.colours == 1)
 				mode += "-grey";
-			string filename = string.Format("{0}_{1}_{2}x{3}", body.name, mode, map.width, map.height);
+			string baseFileName = string.Format("{0}_{1}_{2}x{3}", body.name, mode, map.width, map.height);
+
 			if (projection != MapProjection.Rectangular)
-				filename += "_" + projection.ToString();
+				baseFileName += "_" + projection.ToString();
+
+			string filename = baseFileName;
+
 			filename += ".png";
 
 			string fullPath = Path.Combine(path, filename);
-			System.IO.File.WriteAllBytes(fullPath, map.EncodeToPNG());
+			File.WriteAllBytes(fullPath, map.EncodeToPNG());
 
 			ScreenMessages.PostScreenMessage("Map saved: GameData/SCANsat/PluginData/" + filename, 8, ScreenMessageStyle.UPPER_CENTER);
 
-			SCANUtil.SCANdebugLog("Map of [{0}] saved\nMap Size: {1} X {2}\nMinimum Altitude: {3:F0}m; Maximum Altitude: {4:F0}m\nPixel Width At Equator: {5:F6}m", body.theName, map.width, map.height, data.TerrainConfig.MinTerrain, data.TerrainConfig.MaxTerrain, (body.Radius * 2 * Math.PI) / (map.width * 1f));
+			SCANUtil.SCANlog("Map of [{0}] saved\nMap Size: {1} X {2}\nMinimum Altitude: {3:F0}m; Maximum Altitude: {4:F0}m\nPixel Width At Equator: {5:F6}m", body.theName, map.width, map.height, data.TerrainConfig.MinTerrain, data.TerrainConfig.MaxTerrain, (body.Radius * 2 * Math.PI) / (map.width * 1f));
+
+			if (SCANcontroller.controller.exportCSV && mType == mapType.Altimetry)
+			{
+				SCANUtil.SCANlog("Export CSV Detected...");
+
+				if (data == null)
+					return;
+
+				using (StreamWriter w = new StreamWriter(Path.Combine(path, baseFileName + "_data" + ".csv")))
+				{
+					SCANUtil.SCANlog("Writing Data File");
+					for (int i = 0; i < map.height; i++)
+					{
+						for (int j = 0; j < map.width; j++)
+						{
+							double lat = (i * 1.0f / mapscale) - 90f;
+							double lon = (j * 1.0f / mapscale) - 180f;
+							double la = lat, lo = lon;
+							lat = unprojectLatitude(lo, la);
+							lon = unprojectLongitude(lo, la);
+
+							int placeHolder;
+
+							float terrain = terrainElevation(lon, lat, data, out placeHolder);
+
+							string line = string.Format("{0},{1},{2:F3},{3:F3},{4:F3}", i, j, lon, lat, terrain);
+
+							w.WriteLine(line);
+							w.Flush();
+						}
+					}
+					SCANUtil.SCANlog("Data File Complete");
+				}
+			}
 		}
 
 		#endregion
