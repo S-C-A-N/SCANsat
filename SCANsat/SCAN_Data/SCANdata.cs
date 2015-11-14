@@ -195,7 +195,7 @@ namespace SCANsat.SCAN_Data
 			if (waypoints.Any(a => a.LandingTarget))
 				waypoints.RemoveAll(a => a.LandingTarget);
 
-			waypoints.Add(w);
+			waypoints.Insert(0, w);
 		}
 
 		public void removeTargetWaypoint()
