@@ -62,6 +62,7 @@ namespace SCANsat.SCAN_UI
 			WindowCaption = "Map of ";
 			WindowRect = defaultRect;
 			WindowSize_Min = new Vector2(550, 225);
+			WindowSize_Max = new Vector2(8192, 4096);
 			WindowOptions = new GUILayoutOption[2] { GUILayout.Width(600), GUILayout.Height(300) };
 			WindowStyle = SCANskins.SCAN_window;
 			Visible = false;
@@ -180,6 +181,8 @@ namespace SCANsat.SCAN_UI
 					IsResizing = false;
 					if (resizeW < WindowSize_Min.x)
 						resizeW = WindowSize_Min.x;
+					else if (resizeW > WindowSize_Max.x)
+						resizeW = WindowSize_Max.x;
 					if ((int)resizeW % 2 != 0)
 						resizeW += 1;
 					bigmap.setWidth((int)resizeW);
@@ -525,6 +528,8 @@ namespace SCANsat.SCAN_UI
 				dW = resizeW;
 				if (dW < WindowSize_Min.x)
 					dW = WindowSize_Min.x;
+				else if (dW > WindowSize_Max.x)
+					dW = WindowSize_Max.x;
 				dH = dW / 2f;
 				GUILayout.Label("", GUILayout.Width(dW), GUILayout.Height(dH));
 			}
