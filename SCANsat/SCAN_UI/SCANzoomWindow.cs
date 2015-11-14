@@ -234,7 +234,7 @@ namespace SCANsat.SCAN_UI
 
 		protected void calcTerrainLimits()
 		{
-			if (spotmap.MType != mapType.Altimetry)
+			if (spotmap.MType == mapType.Slope)
 				return;
 
 			int w = spotmap.MapWidth / 4;
