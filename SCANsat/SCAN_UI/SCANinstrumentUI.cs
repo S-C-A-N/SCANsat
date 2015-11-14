@@ -240,10 +240,13 @@ namespace SCANsat.SCAN_UI
 				switch (v.situation)
 				{
 					case Vessel.Situations.LANDED:
-					case Vessel.Situations.SPLASHED:
 					case Vessel.Situations.PRELAUNCH:
 						infoLabel += string.Format("\nTerrain: {0:N1}m", pqs);
 						drawSlope = true;
+						break;
+					case Vessel.Situations.SPLASHED:
+						infoLabel += string.Format("\nDepth: {0:N1}m", Math.Abs(pqs));
+						drawSlope = false;
 						break;
 					default:
 						if (h < 1000 || (sensors & SCANtype.AltimetryHiRes) != SCANtype.Nothing)
