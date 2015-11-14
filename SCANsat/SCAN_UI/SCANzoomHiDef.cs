@@ -125,6 +125,9 @@ namespace SCANsat.SCAN_UI
 			spotmap.MapScale = 10;
 
 			spotmap.centerAround(lon, lat);
+
+			calcTerrainLimits();
+
 			spotmap.resetMap(mapType.Altimetry, false, resourceOverlay);
 
 			mapGenerated = false;
@@ -145,6 +148,8 @@ namespace SCANsat.SCAN_UI
 			}
 
 			spotmap.centerAround(SCANUtil.fixLonShift(v.longitude), SCANUtil.fixLatShift(v.latitude));
+
+			calcTerrainLimits();
 
 			spotmap.resetMap(spotmap.MType, false, resourceOverlay);
 
