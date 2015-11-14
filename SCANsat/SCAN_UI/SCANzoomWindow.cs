@@ -550,15 +550,15 @@ namespace SCANsat.SCAN_UI
 				resetMap();
 			}
 
-			r.x += 30;
-			r.width = 50;
+			r.x += 26;
+			r.width = 58;
 
 			if (GUI.Button(r, textWithTT(spotmap.MapScale.ToString("N1") + " X", "Sync To Big Map"), SCANskins.SCAN_buttonBorderless))
 			{
 				resyncMap();
 			}
 
-			r.x += 54;
+			r.x += 60;
 			r.width = 26;
 
 			if (GUI.Button(r, iconWithTT(SCANskins.SCAN_ZoomInIcon, "Zoom In"), SCANskins.SCAN_buttonBorderless))
