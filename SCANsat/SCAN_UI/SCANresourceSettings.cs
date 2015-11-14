@@ -233,6 +233,10 @@ namespace SCANsat.SCAN_UI
 
 					scanThreshold = GUILayout.TextField(scanThreshold, 3, GUILayout.Width(40));
 
+					Rect r = GUILayoutUtility.GetLastRect();
+
+					GUI.Label(r, textWithTT("", resourceSettingsHelpScanThreshold));
+
 					if (GUILayout.Button(textWithTT("Set", resourceSettingsHelpScanThreshold), GUILayout.Width(45)))
 					{
 						float f = 0;

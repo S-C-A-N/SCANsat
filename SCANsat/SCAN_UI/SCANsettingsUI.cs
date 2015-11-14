@@ -26,7 +26,7 @@ namespace SCANsat.SCAN_UI
 {
 	class SCANsettingsUI: SCAN_MBW
 	{
-		private string settingsHelpAnomalies = "";
+		private string settingsHelpAnomalies = "Select the marker used to display anomalies on the map.";
 		private string settingsHelpBackground = "";
 		private string settingsHelpTimeWarp = "";
 		private string settingsHelpGroundTracks = "";
@@ -335,6 +335,10 @@ namespace SCANsat.SCAN_UI
 				GUILayout.Label(textWithTT("Map Width: " + SCANcontroller.controller.map_width, settingsHelpSetMapWidth), SCANskins.SCAN_settingsGreyLabel, GUILayout.Width(110));
 
 				exportSize = GUILayout.TextField(exportSize, 4, GUILayout.Width(75));
+
+				Rect r = GUILayoutUtility.GetLastRect();
+
+				GUI.Label(r, textWithTT("", settingsHelpSetMapWidth));
 
 				if (GUILayout.Button(textWithTT("Set", settingsHelpSetMapWidth), GUILayout.Width(50)))
 				{
