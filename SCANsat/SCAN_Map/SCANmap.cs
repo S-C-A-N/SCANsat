@@ -567,12 +567,9 @@ namespace SCANsat.SCAN_Map
 		{
 			if (exporter == null)
 			{
-				SCANUtil.SCANdebugLog("Initializing exporter object...");
 				UnityEngine.GameObject obj = new GameObject();
 
 				exporter = obj.gameObject.AddComponent<SCANmapExporter>();
-
-				SCANUtil.SCANdebugLog("Exporter object created...");
 			}
 
 			if (exporter.Exporting)

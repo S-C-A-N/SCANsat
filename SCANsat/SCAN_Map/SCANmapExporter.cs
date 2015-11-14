@@ -87,7 +87,7 @@ namespace SCANsat.SCAN_Map
 				yield return null;
 			}
 
-			SCANUtil.SCANlog(".csv data file export complete; {0} frames used", timer);
+			SCANUtil.SCANlog(".csv data file export complete; exported over {0} frames\nFile saved to GameData/SCANsat/PluginData/{1}_data.csv", timer, fileName);
 
 			copy = null;
 			copyHeightMap = null;
