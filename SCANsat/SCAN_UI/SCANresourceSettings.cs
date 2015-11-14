@@ -32,18 +32,18 @@ namespace SCANsat.SCAN_UI
 		private Rect warningRect;
 		private string scanThreshold = "";
 
-		private string resourceSettingsHelpOverlayWindow = "";
-		private string resourceSettingsHelpBiomeLock = "";
-		private string resourceSettingsHelpInstant = "";
-		private string resourceSettingsHelpNarrowBand = "";
-		private string resourceSettingsHelpDisableStock = "";
-		private string resourceSettingsHelpResetSCANsatResource = "";
-		private string resourceSettingsHelpResetStockResource = "";
-		private string resourceSettingsHelpOverlayInterpolation = "";
-		private string resourceSettingsHelpOverlayHeight = "";
-		private string resourceSettingsHelpOverlayBiomeHeight = "";
-		private string resourceSettingsHelpOverlayTransparency = "";
-		private string resourceSettingsHelpScanThreshold = "";
+		private string resourceSettingsHelpOverlayWindow = "Open the planetary overlay map control window.";
+		private string resourceSettingsHelpBiomeLock = "Circumvents the requirement for stock surface biome scans. SCANsat displays will show the full accuracy for resource abundance with or without any surface biome scans.";
+		private string resourceSettingsHelpInstant = "By default, the stock M700 resource scanner's orbital survey will fill in all SCANsat resource maps. This can be disabled, requiring standard SCANsat methods for all resource scanning. Disabled automatically when stock resource scanning is disabled.";
+		private string resourceSettingsHelpNarrowBand = "Numerous SCANsat functions require a Narrow-Band resource scanner on-board the current vessel or in orbit of a celestial body for fully accurate resource abundance data.\nDisable this to circumvent these restrictions.";
+		private string resourceSettingsHelpDisableStock = "Disables all stock resource scanning functions. SCANsat scanning methods will be required for all resource data. Replaces several stock resource functions with SCANsat tools. These include The right-click readouts, the high resolution narrow-band scanner map, and the planetary overlay maps.";
+		private string resourceSettingsHelpResetSCANsatResource = "Resets all SCANsat resource data for the current celestial body. Other SCANsat data is not affected.\nA confirmation window will open before activating.\nCannot be reversed.";
+		private string resourceSettingsHelpResetStockResource = "Resets the stock resource scanning coverage for the current celestial body. A reload or scene change may be required for all changes to take effect.\nA confirmation window will open before activating.\nCannot be reversed.";
+		private string resourceSettingsHelpOverlayInterpolation = "Change the number of resource abundance measurements used in constructing the planetary overlay and big map resource overlay. Decrease the value to increase the accuracy of the map. Lower values will result in slower map generation.";
+		private string resourceSettingsHelpOverlayHeight = "Change the texture size (map width is 2XHeight) used in constructing the planetary overlay and big map resource overlay. Increase the value to increase the quality and accuracy of the map. Higher values will result in slower map generation.";
+		private string resourceSettingsHelpOverlayBiomeHeight = "Change the texture size (map width is 2XHeight) used in constructing the planetary overlay biome map. Increase the value to increase the quality and accuracy of the map. Higher values will result in slower map generation.";
+		private string resourceSettingsHelpOverlayTransparency = "Create a grey background for planetary overlay resource maps. Used to make clear which sections of the celestial body have been\nscanned but contain no resources.";
+		private string resourceSettingsHelpScanThreshold = "A threshold level used to apply the stock resource scan to a celestial body after scanning with SCANsat sensors. This is useful when contracts or other addons require that a stock resource scan be performed. Set a value from 0-100 in the text box and click on the Set button. All celestial bodies will be checked immediately; celestial bodies will also be checked upon loading or a scene change. A reload may be required for the changes to take effect.";
 
 		protected override void Awake()
 		{

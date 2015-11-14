@@ -26,22 +26,22 @@ namespace SCANsat.SCAN_UI
 {
 	class SCANsettingsUI: SCAN_MBW
 	{
-		private string settingsHelpAnomalies = "Select the marker used to display anomalies on the map.";
-		private string settingsHelpBackground = "";
-		private string settingsHelpTimeWarp = "";
-		private string settingsHelpGroundTracks = "";
-		private string settingsHelpGroundTracksActive = "";
-		private string settingsHelpOverlayTooltips = "";
-		private string settingsHelpWindowTooltips = "";
-		private string settingsHelpStockToolbar = "";
-		private string settingsHelpMechJeb = "";
-		private string settingsHelpResetWindows = "";
-		private string settingsHelpResetPlanetData = "";
-		private string settingsHelpResetAllData = "";
-		private string settingsHelpVessels = "";
-		private string settingsHelpGreyScale = "";
-		private string settingsHelpExportCSV = "";
-		private string settingsHelpSetMapWidth = "";
+		private string settingsHelpAnomalies = "Select the marker used to display\nanomalies on the map.";
+		private string settingsHelpBackground = "Toggle background scanning on\nsome or all celestial bodies.";
+		private string settingsHelpTimeWarp = "Adjust the scanning frequency during TimeWarp.\nHigher settings result in fewer gaps in the maps but may have a performance impact at high TimeWarp.";
+		private string settingsHelpGroundTracks = "Display a visible indicator of\nscanning activity in map mode.";
+		private string settingsHelpGroundTracksActive = "The ground track indicator can be limited to only be displayed for the active vessel.";
+		private string settingsHelpOverlayTooltips = "Displays tooltips for the current mouse position when a planetary overlay map is activated. These tooltips include The cursor coordinates, terrain height, slope, biome name, and resource abundance, depending on scanning coverage.";
+		private string settingsHelpWindowTooltips = "Display tooltips on some map window buttons. These are primarily used to identify icon buttons.";
+		private string settingsHelpStockToolbar = "Use the stock toolbar.\nOnly one stock button is available. Can be used concurrently with the Blizzy78 Toolbar.";
+		private string settingsHelpMechJeb = "The SCANsat zoom map target selection mode can be used to select a MechJeb landing site.";
+		private string settingsHelpResetWindows = "Reset all window positions. Use this in case a window has been dragged completely off screen or if any windows are not visible.";
+		private string settingsHelpResetPlanetData = "Resets all SCANsat data for the current celestial body.\nA confirmation window will open before activating.\nCannot be reversed.";
+		private string settingsHelpResetAllData = "Resets all SCANsat data for all celestial bodies.       \nA confirmation window will open before activating.\nCannot be reversed.";
+		private string settingsHelpVessels = "Information about the currently active SCANsat sensors. Vessels indicates the number of vessels with active sensors. Sensors indicates the total number of sensors; instruments with multiple sensor types count each individual sensor. Passes indicates the number of sensor updates performed per second.\nThis value is affected by the\nTimeWarp Resolution setting.";
+		private string settingsHelpGreyScale = "Use a true grey-scale color spectrum for black-and-white SCANsat maps. Pixels on the altitude map will interpolate between black and white; the min and max terrain heights for each celestial body\ndefine the limits.";
+		private string settingsHelpExportCSV = "Export a .csv file along with map texture when using the Export button on the big map. The file contains coordinates and the terrain height for each pixel. Pixels are labeled from left to right\nand from top to bottom.";
+		private string settingsHelpSetMapWidth = "Enter an exact value for the SCANsat big map texture width. Values are limited to 550 - 8192 pixels wide. Press the Set button to apply the value.";
 
 		/* UI: a list of glyphs that are used for something */
 		private string[] exmarks = { "✗", "✘", "×", "✖", "x", "X", "∇", "☉", "★", "*", "•", "º", "+" };
