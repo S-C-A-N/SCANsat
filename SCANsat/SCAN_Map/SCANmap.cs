@@ -133,6 +133,26 @@ namespace SCANsat.SCAN_Map
 			get { return big_heightmap; }
 		}
 
+		public bool UseCustomRange
+		{
+			get { return useCustomRange; }
+		}
+
+		public float CustomMin
+		{
+			get { return customMin; }
+		}
+
+		public float CustomMax
+		{
+			get { return customMax; }
+		}
+
+		public float CustomRange
+		{
+			get { return customRange; }
+		}
+
 		#endregion
 
 		#region Big Map methods and fields
@@ -808,7 +828,10 @@ namespace SCANsat.SCAN_Map
 										else if (SCANUtil.isCovered(lon, lat, data, SCANtype.Altimetry))
 										{
 											projVal = terrainElevation(lon, lat, big_heightmap, data, out scheme);
-											elevation = palette.lerp(palette.black, palette.white, Mathf.Clamp(projVal + (-1f * data.TerrainConfig.TerrainRange), 0, data.TerrainConfig.TerrainRange) / data.TerrainConfig.TerrainRange);
+											if (useCustomRange)
+												elevation = palette.lerp(palette.black, palette.white, Mathf.Clamp(projVal + (-1f * customRange), 0, customRange) / customRange);
+											else
+												elevation = palette.lerp(palette.black, palette.white, Mathf.Clamp(projVal + (-1f * data.TerrainConfig.TerrainRange), 0, data.TerrainConfig.TerrainRange) / data.TerrainConfig.TerrainRange);
 										}
 									}
 
