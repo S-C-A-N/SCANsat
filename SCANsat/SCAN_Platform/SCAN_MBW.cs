@@ -290,7 +290,7 @@ namespace SCANsat.SCAN_Platform
 				{
 					float minwidth, maxwidth;
 					SCAN_SkinsLibrary.CurrentTooltip.CalcMinMaxWidth(contTooltip, out minwidth, out maxwidth); // figure out how wide one line would be
-					_TooltipPosition.width = Math.Min(TooltipMaxWidth - SCAN_SkinsLibrary.CurrentTooltip.padding.horizontal, maxwidth); // then work out the height with a max width
+					_TooltipPosition.width = Math.Min(TooltipMaxWidth - SCAN_SkinsLibrary.CurrentTooltip.padding.horizontal, maxwidth + SCAN_SkinsLibrary.CurrentTooltip.padding.horizontal + 10); // then work out the height with a max width
 					_TooltipPosition.height = SCAN_SkinsLibrary.CurrentTooltip.CalcHeight(contTooltip, TooltipPosition.width); // heres the result
 				}
 				else
