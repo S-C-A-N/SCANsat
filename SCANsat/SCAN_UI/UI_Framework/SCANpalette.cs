@@ -180,13 +180,25 @@ namespace SCANsat.SCAN_UI.UI_Framework
 					if (clamp > max - 10f)
 						clamp = max - 10f;
 				}
+
 				if (val <= (float)clamp)
 				{
+					float newRange;
+
+					if (useCustomRange)
+					{
+						if (max < (float)clamp)
+							newRange = max - min;
+						else
+							newRange = (float)clamp - min;
+					}
+					else
+						newRange = (float)clamp - min;
+
 					val -= min;
 
-					float newRange = (float)clamp - min;
-
 					val = Mathf.Clamp(val, 0, newRange) / newRange;
+
 					if (discrete)
 						c = p[(int)Math.Round(val)];
 					else
@@ -194,28 +206,36 @@ namespace SCANsat.SCAN_UI.UI_Framework
 				}
 				else
 				{
-					val -= (float)clamp;
-					if (discrete)
+					float newRange;
+
+					if (useCustomRange)
 					{
-						float newRange = max - (float)clamp;
-
-						if (useCustomRange)
+						if (min > (float)clamp)
 						{
-							if (min > (float)clamp)
-								newRange = max - min;
+							newRange = max - min;
+							val -= min;
 						}
-
-						val = (p.Length - 2) * Mathf.Clamp(val, 0, newRange) / newRange;
-						if (Math.Floor(val) > p.Length - 3)
-							val = p.Length - 0.01f;
-
-						int level = (int)Math.Floor(val) + 2;
-
-						c = p[level > p.Length - 1 ? p.Length - 1 : level];
+						else
+						{
+							newRange = max - (float)clamp;
+							val -= (float)clamp;
+						}
 					}
 					else
 					{
-						float newRange = max - (float)clamp;
+						newRange = max - (float)clamp;
+						val -= (float)clamp;
+					}
+
+					if (discrete)
+					{
+						val = (p.Length - 2) * Mathf.Clamp(val, 0, newRange) / newRange;
+						if (Math.Floor(val) > p.Length - 3)
+							val = p.Length - 2.01f;
+						c = p[(int)Math.Floor(val) + 2];
+					}
+					else
+					{
 						val = (p.Length - 3) * Mathf.Clamp(val, 0, newRange) / newRange;
 						if (Math.Floor(val) > p.Length - 4)
 							val = p.Length - 3.01f;
