@@ -180,11 +180,11 @@ namespace SCANsat.SCAN_UI.UI_Framework
 
 					if (resources)
 					{
-						info += palette.colored(mapObj.Resource.MaxColor, getResourceAbundance(mapObj.Body, lat, lon, fuzzy, mapObj.Resource));
+						info += palette.colored(mapObj.Resource.MaxColor, getResourceAbundance(mapObj.Body, lat, lon, fuzzy, mapObj.Resource)) + " ";
 					}
 				}
 
-				if (SCANcontroller.controller.map_waypoints && WaypointManager.Instance() != null)
+				if (SCANcontroller.controller.map_waypoints)
 				{
 					double range = ContractDefs.Survey.MaximumTriggerRange;
 					foreach (SCANwaypoint p in data.Waypoints)
@@ -202,7 +202,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 									continue;
 							}
 
-							if (WaypointManager.Instance().Distance(lat, lon, 1000, p.Latitude, p.Longitude, 1000, body) <= range)
+							if (SCANUtil.waypointDistance(lat, lon, 1000, p.Latitude, p.Longitude, 1000, body) <= range)
 							{
 								info += p.Name + " ";
 								break;
@@ -281,7 +281,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 					}
 				}
 
-				if (SCANcontroller.controller.map_waypoints && WaypointManager.Instance() != null)
+				if (SCANcontroller.controller.map_waypoints)
 				{
 					double range = ContractDefs.Survey.MaximumTriggerRange;
 					foreach (SCANwaypoint p in data.Waypoints)
@@ -299,7 +299,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 									continue;
 							}
 
-							if (WaypointManager.Instance().Distance(lat, lon, 1000, p.Latitude, p.Longitude, 1000, body) <= range)
+							if (SCANUtil.waypointDistance(lat, lon, 1000, p.Latitude, p.Longitude, 1000, body) <= range)
 							{
 								info += p.Name + " ";
 								break;
@@ -1499,6 +1499,9 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			if (Vector3d.Distance(pos, body.position) < body.Radius - 100)
 				return true;
 
+			if (!body.scaledBody.renderer.isVisible)
+				return true;
+
 			Vector3d camPos = ScaledSpace.ScaledToLocalSpace(PlanetariumCamera.Camera.transform.position);
 
 			if (Vector3d.Angle(camPos - pos, body.position - pos) > 90)
@@ -1974,7 +1977,10 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			{
 				for (int j = 0; j < height; j++)
 				{
-					pix[j * width + i] = palette.heightToColor(values[i, j], 1, data.TerrainConfig);
+					if (map.UseCustomRange)
+						pix[j * width + i] = palette.heightToColor(values[i, j], 1, data.TerrainConfig, map.CustomMin, map.CustomMax, map.CustomRange, true);
+					else
+						pix[j * width + i] = palette.heightToColor(values[i, j], 1, data.TerrainConfig);
 				}
 			}
 

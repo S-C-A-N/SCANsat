@@ -124,6 +124,10 @@ namespace SCANsat
 		public bool groundTracks = true;
 		[KSPField(isPersistant = true)]
 		public bool groundTrackActiveOnly = true;
+		[KSPField(isPersistant = true)]
+		public bool exportCSV = false;
+		[KSPField(isPersistant = true)]
+		public float scanThreshold = 0.90f;
 
 		/* Biome and slope colors can't be serialized properly as a KSP Field */
 		public Color lowBiomeColor = new Color(0, 0.46f, 0.02345098f, 1);
@@ -855,6 +859,16 @@ namespace SCANsat
 			}
 			if (useStockAppLauncher)
 				appLauncher = gameObject.AddComponent<SCANappLauncher>();
+
+			if (disableStockResource)
+			{
+				for (int i = 0; i < FlightGlobals.Bodies.Count; i++)
+				{
+					CelestialBody b = FlightGlobals.Bodies[i];
+
+					checkResourceScanStatus(b);
+				}
+			}
 		}
 
 		private void Update()
@@ -918,6 +932,26 @@ namespace SCANsat
 				}
 				data.fillResourceMap();
 				bodyScanned = true;
+			}
+		}
+
+		public void checkResourceScanStatus(CelestialBody body)
+		{
+			if (body == null)
+				return;
+
+			if (ResourceMap.Instance.IsPlanetScanned(body.flightGlobalsIndex))
+				return;
+
+			SCANdata data = getData(body.name);
+
+			if (data == null)
+				return;
+
+			if (SCANUtil.getCoveragePercentage(data, SCANtype.FuzzyResources) > (scanThreshold * 100))
+			{
+				SCANUtil.SCANlog("SCANsat resource scanning for {0} meets threshold value [{1:P0}]\nConducting stock orbital resource scan...", body.theName, scanThreshold);
+				ResourceMap.Instance.UnlockPlanet(body.flightGlobalsIndex);
 			}
 		}
 

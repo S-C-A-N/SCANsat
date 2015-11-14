@@ -170,6 +170,8 @@ namespace SCANsat.SCAN_UI
 
 			spotmap.centerAround(lon, lat);
 
+			calcTerrainLimits();
+
 			spotmap.resetMap(bigmap.MType, false, resourceOverlay, narrowBand);
 		}
 
@@ -185,6 +187,8 @@ namespace SCANsat.SCAN_UI
 
 			if (checkScanner && SCANcontroller.controller.needsNarrowBand && resourceOverlay)
 				checkForScanners();
+
+			calcTerrainLimits();
 
 			spotmap.resetMap(resourceOverlay, narrowBand || !checkScanner);
 		}
@@ -223,7 +227,49 @@ namespace SCANsat.SCAN_UI
 			if (SCANcontroller.controller.needsNarrowBand && resourceOverlay)
 				checkForScanners();
 
+			calcTerrainLimits();
+
 			spotmap.resetMap(bigmap.MType, false, resourceOverlay, narrowBand);
+		}
+
+		protected void calcTerrainLimits()
+		{
+			if (spotmap.MType == mapType.Slope)
+				return;
+
+			int w = spotmap.MapWidth / 4;
+			int h = spotmap.MapHeight / 4;
+
+			float max = -200000;
+			float min = 100000;
+			float terrain = 0;
+
+			for (int i = 0; i < spotmap.MapHeight; i += 4)
+			{
+				for (int j = 0; j < spotmap.MapWidth; j += 4)
+				{
+					double lat = (i * 1.0f / spotmap.MapScale) - 90f + spotmap.Lat_Offset;
+					double lon = (j * 1.0f / spotmap.MapScale) - 180f + spotmap.Lon_Offset;
+					double la = lat, lo = lon;
+					lat = spotmap.unprojectLatitude(lo, la);
+					lon = spotmap.unprojectLongitude(lo, la);
+
+					terrain = (float)SCANUtil.getElevation(b, lon, lat);
+
+					if (terrain < min)
+						min = terrain;
+					if (terrain > max)
+						max = terrain;
+				}
+			}
+
+			if (min > max)
+				min = max - 1f;
+
+			if (min == max)
+				min = max - 1f;
+
+			spotmap.setCustomRange(min, max);
 		}
 
 		public SCANmap SpotMap
@@ -505,15 +551,15 @@ namespace SCANsat.SCAN_UI
 				resetMap();
 			}
 
-			r.x += 30;
-			r.width = 50;
+			r.x += 26;
+			r.width = 58;
 
 			if (GUI.Button(r, textWithTT(spotmap.MapScale.ToString("N1") + " X", "Sync To Big Map"), SCANskins.SCAN_buttonBorderless))
 			{
 				resyncMap();
 			}
 
-			r.x += 54;
+			r.x += 60;
 			r.width = 26;
 
 			if (GUI.Button(r, iconWithTT(SCANskins.SCAN_ZoomInIcon, "Zoom In"), SCANskins.SCAN_buttonBorderless))

@@ -118,15 +118,25 @@ namespace SCANsat.SCAN_UI.UI_Framework
 
 		public static Color[] small_redline;
 
-		public static Color heightToColor(float val, int scheme, SCANterrainConfig terrain)
+		public static Color heightToColor(float val, int scheme, SCANterrainConfig terrain, float min = 0, float max = 0, float range = 0, bool useCustomRange = false)
 		{
 			Color32[] c = terrain.ColorPal.colors;
 			if (terrain.PalRev)
 				c = terrain.ColorPal.colorsReverse;
-			if (scheme == 0)
-				return heightToColor(val, terrain.MaxTerrain, terrain.MinTerrain, terrain.TerrainRange, terrain.ClampTerrain, terrain.PalDis, c);
+			if (useCustomRange)
+			{
+				if (scheme == 0)
+					return heightToColor(val, max, min, range, terrain.ClampTerrain, terrain.PalDis, c, true);
+				else
+					return heightToColor(val, max, min, range, terrain.PalDis);
+			}
 			else
-				return heightToColor(val, terrain.MaxTerrain, terrain.MinTerrain, terrain.TerrainRange, terrain.PalDis);
+			{
+				if (scheme == 0)
+					return heightToColor(val, terrain.MaxTerrain, terrain.MinTerrain, terrain.TerrainRange, terrain.ClampTerrain, terrain.PalDis, c);
+				else
+					return heightToColor(val, terrain.MaxTerrain, terrain.MinTerrain, terrain.TerrainRange, terrain.PalDis);
+			}
 		}
 
 		private static Color heightToColor(float val, float max, float min, float range, bool discrete)
@@ -158,19 +168,37 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			return c;
 		}
 
-		internal static Color heightToColor(float val, float max, float min, float range, float? clamp, bool discrete, Color32[] p)
+		internal static Color heightToColor(float val, float max, float min, float range, float? clamp, bool discrete, Color32[] p, bool useCustomRange = false)
 		{
 			Color c = black;
 			if (clamp != null)
 			{
-				if (clamp < min + 10f)
-					clamp = min + 10f;
-				if (clamp > max - 10f)
-					clamp = max - 10f;
+				if (!useCustomRange)
+				{
+					if (clamp < min + 10f)
+						clamp = min + 10f;
+					if (clamp > max - 10f)
+						clamp = max - 10f;
+				}
+
 				if (val <= (float)clamp)
 				{
+					float newRange;
+
+					if (useCustomRange)
+					{
+						if (max < (float)clamp)
+							newRange = max - min;
+						else
+							newRange = (float)clamp - min;
+					}
+					else
+						newRange = (float)clamp - min;
+
 					val -= min;
-					val = Mathf.Clamp(val, 0, (float)clamp - min) / ((float)clamp - min);
+
+					val = Mathf.Clamp(val, 0, newRange) / newRange;
+
 					if (discrete)
 						c = p[(int)Math.Round(val)];
 					else
@@ -178,13 +206,32 @@ namespace SCANsat.SCAN_UI.UI_Framework
 				}
 				else
 				{
-					float newRange = max - (float)clamp;
-					val -= (float)clamp;
+					float newRange;
+
+					if (useCustomRange)
+					{
+						if (min > (float)clamp)
+						{
+							newRange = max - min;
+							val -= min;
+						}
+						else
+						{
+							newRange = max - (float)clamp;
+							val -= (float)clamp;
+						}
+					}
+					else
+					{
+						newRange = max - (float)clamp;
+						val -= (float)clamp;
+					}
+
 					if (discrete)
 					{
 						val = (p.Length - 2) * Mathf.Clamp(val, 0, newRange) / newRange;
 						if (Math.Floor(val) > p.Length - 3)
-							val = p.Length - 0.01f;
+							val = p.Length - 2.01f;
 						c = p[(int)Math.Floor(val) + 2];
 					}
 					else

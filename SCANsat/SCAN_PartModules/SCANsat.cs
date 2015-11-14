@@ -515,7 +515,7 @@ namespace SCANsat.SCAN_PartModules
 
 			if (notZero && science <= 0) science = 0.00001f;
 
-			sd = new ScienceData(science * su.dataScale, 1f, 0f, su.id, se.experimentTitle + " of " + vessel.mainBody.theName);
+			sd = new ScienceData(science * su.dataScale, 1f, 0f, su.id, se.experimentTitle + " of " + vessel.mainBody.theName, false, part.flightID);
 			su.title = sd.title;
 			return sd;
 		}

@@ -57,6 +57,7 @@
     <Compile Include="SCAN_Data\SCANtype.cs" />
     <Compile Include="SCAN_Data\SCANwaypoint.cs" />
     <Compile Include="SCAN_Map\SCANmap.cs" />
+    <Compile Include="SCAN_Map\SCANmapExporter.cs" />
     <Compile Include="SCAN_Map\SCANmapLegend.cs" />
     <Compile Include="SCAN_Map\SCANmapProjection.cs" />
     <Compile Include="SCAN_Map\SCANmapType.cs" />

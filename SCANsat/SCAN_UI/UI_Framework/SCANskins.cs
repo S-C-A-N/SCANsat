@@ -79,6 +79,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 		internal static GUIStyle SCAN_sliderThumb;
 		internal static GUIStyle SCAN_colorWheelButton;
 		internal static GUIStyle SCAN_headerLabel;
+		internal static GUIStyle SCAN_settingsGreyLabel;
 
 		//Styles for map overlay icons
 		internal static GUIStyle SCAN_orbitalLabelOn;
@@ -377,6 +378,8 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			SCAN_settingsToggle.onNormal.background.wrapMode = TextureWrapMode.Clamp;
 			SCAN_settingsToggle.onHover.background.wrapMode = TextureWrapMode.Clamp;
 			SCAN_settingsToggle.border = new RectOffset(15, 0, 1, 1);
+
+			SCAN_settingsGreyLabel = new GUIStyle(SCAN_SkinsLibrary.DefUnitySkin.label);
 
 			SCAN_boldToggle = new GUIStyle(SCAN_settingsToggle);
 			SCAN_boldToggle.name = "SCAN_BoldToggle";

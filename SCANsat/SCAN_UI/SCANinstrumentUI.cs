@@ -177,35 +177,37 @@ namespace SCANsat.SCAN_UI
 		{
 			infoLabel += string.Format("Lat: {0:F2}°, Lon: {1:F2}°", vlat, vlon);
 
-			if (WaypointManager.Instance() != null)
+			foreach (SCANwaypoint p in data.Waypoints)
 			{
-				foreach (SCANwaypoint p in data.Waypoints)
+				if (p.LandingTarget)
 				{
-					if (p.LandingTarget)
+					double distance = SCANUtil.waypointDistance(vlat, vlon, v.altitude, p.Latitude, p.Longitude, v.altitude, data.Body);
+					if (distance <= 15000)
+						infoLabel += string.Format("\nTarget Dist: {0:N1}m", distance);
+					continue;
+				}
+
+				if (p.Band == FlightBand.NONE)
+					continue;
+
+				if (p.Root != null)
+				{
+					if (p.Root.ContractState != Contracts.Contract.State.Active)
 						continue;
+				}
 
-					if (p.Band == FlightBand.NONE)
+				if (p.Param != null)
+				{
+					if (p.Param.State != Contracts.ParameterState.Incomplete)
 						continue;
+				}
 
-					if (p.Root != null)
-					{
-						if (p.Root.ContractState != Contracts.Contract.State.Active)
-							continue;
-					}
+				double range = waypointRange(p);
 
-					if (p.Param != null)
-					{
-						if (p.Param.State != Contracts.ParameterState.Incomplete)
-							continue;
-					}
-
-					double range = waypointRange(p);
-
-					if (WaypointManager.Instance().Distance(vlat, vlon, v.altitude, p.Latitude, p.Longitude, v.altitude, data.Body) <= range)
-					{
-						infoLabel += string.Format("\nWaypoint: {0}", p.Name);
-						break;
-					}
+				if (SCANUtil.waypointDistance(vlat, vlon, v.altitude, p.Latitude, p.Longitude, v.altitude, data.Body) <= range)
+				{
+					infoLabel += string.Format("\nWaypoint: {0}", p.Name);
+					break;
 				}
 			}
 		}
@@ -240,10 +242,13 @@ namespace SCANsat.SCAN_UI
 				switch (v.situation)
 				{
 					case Vessel.Situations.LANDED:
-					case Vessel.Situations.SPLASHED:
 					case Vessel.Situations.PRELAUNCH:
 						infoLabel += string.Format("\nTerrain: {0:N1}m", pqs);
 						drawSlope = true;
+						break;
+					case Vessel.Situations.SPLASHED:
+						infoLabel += string.Format("\nDepth: {0:N1}m", Math.Abs(pqs));
+						drawSlope = false;
 						break;
 					default:
 						if (h < 1000 || (sensors & SCANtype.AltimetryHiRes) != SCANtype.Nothing)

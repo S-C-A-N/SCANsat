@@ -66,28 +66,28 @@ namespace SCANsat.SCAN_UI
 		private static SCANmap bigMap;
 		private CelestialBody body;
 
-		private string colorTerrainHelpMin = "";
-		private string colorTerrainHelpMax = "";
-		private string colorTerrainHelpClampToggle = "";
-		private string colorTerrainHelpClamp = "";
-		private string colorTerrainHelpReverse = "";
-		private string colorTerrainHelpDiscrete = "";
-		private string colorTerrainHelpPaletteSize = "";
-		private string colorBiomeHelpStock = "";
-		private string colorBiomeHelpWhiteBorder = "";
-		private string colorBiomeHelpTransparency = "";
-		private string colorPickerHelpLow = "";
-		private string colorPickerHelpHigh = "";
-		private string colorPickerHelpValue = "";
-		private string colorResourceHelpFineControl = "";
-		private string colorResourceHelpMin = "";
-		private string colorResourceHelpMax = "";
-		private string colorResourceHelpTransparency = "";
-		private string colorResourceHelpApply = "";
-		private string colorResourceHelpApplyAll = "";
-		private string colorResourceHelpDefault = "";
-		private string colorResourceHelpDefaultAll = "";
-		private string colorHelpSaveToConfig = "";
+		private string colorTerrainHelpMin = "Defines the low altitude cutoff for the terrain color palette. Anything below this altitude will be shown with the lowest color.";
+		private string colorTerrainHelpMax = "Defines the high altitude cutoff for the terrain color palette. Anything above this altitude will be shown with the highest color.";
+		private string colorTerrainHelpClampToggle = "Used to define a cutoff between the low and high altitude values. This is particularly useful for ocean planets where it helps to define a sharp distinction between land and ocean.";
+		private string colorTerrainHelpClamp = "Defines the clamp altitude cutoff. Anything below the cutoff will be represented by the first two colors in the selected color palette. Anything above the cutoff will be represented with the remaining colors.";
+		private string colorTerrainHelpReverse = "Reverses the order of the currently\nselected color palette.";
+		private string colorTerrainHelpDiscrete = "Draws the map using only the specific colors defined by each palette, instead of smoothly interpolating between them.";
+		private string colorTerrainHelpPaletteSize = "Adjust the number of colors available in the currently selected color palette.";
+		private string colorBiomeHelpStock = "Use the stock biome color scheme for\nSCANsat biome maps.";
+		private string colorBiomeHelpWhiteBorder = "Draw a white border between biomes. Does not apply to the planetary overlay biome maps.";
+		private string colorBiomeHelpTransparency = "Adjust the transparency of biome maps. Terrain elevation is shown behind the biome maps. Set to 0% to disable terrain drawing.";
+		private string colorPickerHelpLow = "The top color swatch shows the updated color selection for the low end of this color spectrum. The bottom color swatch shows the currently active color.";
+		private string colorPickerHelpHigh = "The top color swatch shows the updated color selection for the high end of this color spectrum. The bottom color swatch shows the currently active color.";
+		private string colorPickerHelpValue = "This slider adjusts the Value (in HSV color terms) or Brightness for the currently selected color.";
+		private string colorResourceHelpFineControl = "Activates Fine Control Mode where the sliders will only show values within 5% of the current selection.";
+		private string colorResourceHelpMin = "The low cutoff for resource concentration on the selected celestial body. Resource deposits at this level will be displayed using the low end of the current resource overlay color spectrum. Resource deposits below this value will not be shown.";
+		private string colorResourceHelpMax = "The high cutoff for resource concentration on the selected celestial body. Resource deposits above this value will be shown using the high end of the current resource overlay color spectrum.";
+		private string colorResourceHelpTransparency = "Defines the level of transparency for resource overlays. Increase to allow more of the underlying terrain, slope, or biome map to be visible. This also affect the transparency of resource deposits on the planetary overlay resource map.";
+		private string colorResourceHelpApply = "Applies the current values for the selected resource and celestial body only.";
+		private string colorResourceHelpApplyAll = "Applies the current values for the selected resource for all celestial bodies.";
+		private string colorResourceHelpDefault = "Reverts to the default values for the selected resource and celestial body only.";
+		private string colorResourceHelpDefaultAll = "Reverts to the default values for the selected resource for all celestial bodies.";
+		private string colorHelpSaveToConfig = "Save all color configuration values to the config file found in your SCANsat/Resources folder. These values serve as the defaults for new saves and for all Revert To Default buttons. Values do not need to be saved to the config file to be applied for this save file.";
 
 		protected override void Awake()
 		{
