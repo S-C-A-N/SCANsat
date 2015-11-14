@@ -52,19 +52,19 @@ namespace SCANsat.SCAN_UI.UI_Framework
 		[Persistent]
 		public string resourceSettingsHelpOverlayWindow = "Open the planetary overlay map control window.";
 		[Persistent]
-		public string resourceSettingsHelpBiomeLock = "Circumvents the requirement for stock surface biome scans SCANsat displays will show the full accuracy for resource abundance with or without any surface biome scans.";
+		public string resourceSettingsHelpBiomeLock = "Circumvents the requirement for stock surface biome scans. SCANsat displays will show the full accuracy for resource abundance with or without any surface biome scans.";
 		[Persistent]
-		public string resourceSettingsHelpInstant = "By default, the stock M700 resource scanner's orbital survey will fill in all SCANsat resource maps this can be disabled, requiring standard SCANsat methods for all resource scanning Disabled automatically when stock resource scanning is disabled.";
+		public string resourceSettingsHelpInstant = "By default, the stock M700 resource scanner's orbital survey will fill in all SCANsat resource maps. This can be disabled, requiring standard SCANsat methods for all resource scanning. Disabled automatically when stock resource scanning is disabled.";
 		[Persistent]
 		public string resourceSettingsHelpNarrowBand = "Numerous SCANsat functions require a Narrow-Band resource scanner on-board the current vessel or in orbit of a celestial body for fully accurate resource abundance data.\nDisable this to circumvent these restrictions.";
 		[Persistent]
-		public string resourceSettingsHelpDisableStock = "Disables all stock resource scanning functions SCANsat scanning methods will be required for all resource data. Replaces several stock resource functions with SCANsat tools. These include The right-click readouts, the high resolution narrow-band scanner map, and the planetary overlay maps.";
+		public string resourceSettingsHelpDisableStock = "Disables all stock resource scanning functions. SCANsat scanning methods will be required for all resource data. Replaces several stock resource functions with SCANsat tools. These include The right-click readouts, the high resolution narrow-band scanner map, and the planetary overlay maps.";
 		[Persistent]
 		public string resourceSettingsHelpResetSCANsatResource = "Resets all SCANsat resource data for the current celestial body. Other SCANsat data is not affected.\nA confirmation window will open before activating.\nCannot be reversed.";
 		[Persistent]
 		public string resourceSettingsHelpResetStockResource = "Resets the stock resource scanning coverage for the current celestial body. A reload or scene change may be required for all changes to take effect.\nA confirmation window will open before activating.\nCannot be reversed.";
 		[Persistent]
-		public string resourceSettingsHelpOverlayInterpolation = "Change the number of resource abundance measurements used in constructing the planetary overlay and big map resource overlay. Decrease the value to increase the accuracy of the map Lower values will result in slower map generation.";
+		public string resourceSettingsHelpOverlayInterpolation = "Change the number of resource abundance measurements used in constructing the planetary overlay and big map resource overlay. Decrease the value to increase the accuracy of the map. Lower values will result in slower map generation.";
 		[Persistent]
 		public string resourceSettingsHelpOverlayHeight = "Change the texture size (map width is 2XHeight) used in constructing the planetary overlay and big map resource overlay. Increase the value to increase the quality and accuracy of the map. Higher values will result in slower map generation.";
 		[Persistent]
@@ -94,17 +94,17 @@ namespace SCANsat.SCAN_UI.UI_Framework
 		[Persistent]
 		public string colorBiomeHelpWhiteBorder = "Draw a white border between biomes. Does not apply to the planetary overlay biome maps.";
 		[Persistent]
-		public string colorBiomeHelpTransparency = "Adjust the transparency of biome maps. Terrain elevation is shown behind the biome maps Set to 0% to disable terrain drawing.";
+		public string colorBiomeHelpTransparency = "Adjust the transparency of biome maps. Terrain elevation is shown behind the biome maps. Set to 0% to disable terrain drawing.";
 		[Persistent]
 		public string colorPickerHelpLow = "The top color swatch shows the updated color selection for the low end of this color spectrum. The bottom color swatch shows the currently active color.";
 		[Persistent]
 		public string colorPickerHelpHigh = "The top color swatch shows the updated color selection for the high end of this color spectrum. The bottom color swatch shows the currently active color.";
 		[Persistent]
-		public string colorPickerHelpValue = "This slider adjusts the Value (in HSV color terms) or. Brightness for the currently selected color.";
+		public string colorPickerHelpValue = "This slider adjusts the Value (in HSV color terms) or Brightness for the currently selected color.";
 		[Persistent]
 		public string colorResourceHelpFineControl = "Activates Fine Control Mode where the sliders will only show values within 5% of the current selection.";
 		[Persistent]
-		public string colorResourceHelpMin = "The low cutoff for resource concentration on the selected celestial body. Resource deposits at this level will be displayed using the low end of the current resource overlay color spectrum Resource deposits below this value will not be shown.";
+		public string colorResourceHelpMin = "The low cutoff for resource concentration on the selected celestial body. Resource deposits at this level will be displayed using the low end of the current resource overlay color spectrum. Resource deposits below this value will not be shown.";
 		[Persistent]
 		public string colorResourceHelpMax = "The high cutoff for resource concentration on the selected celestial body. Resource deposits above this value will be shown using the high end of the current resource overlay color spectrum.";
 		[Persistent]
@@ -118,7 +118,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 		[Persistent]
 		public string colorResourceHelpDefaultAll = "Reverts to the default values for the selected resource for all celestial bodies.";
 		[Persistent]
-		public string colorHelpSaveToConfig = "Save all color configuration values to the config file found in your SCANsat/Resources folder These values serve as the defaults for new saves and for all. Revert To Default buttons Values do not need to be saved to the config file to be applied for this save file.";
+		public string colorHelpSaveToConfig = "Save all color configuration values to the config file found in your SCANsat/Resources folder. These values serve as the defaults for new saves and for all Revert To Default buttons. Values do not need to be saved to the config file to be applied for this save file.";
 
 		public override void OnDecodeFromConfigNode()
 		{
