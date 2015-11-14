@@ -1,4 +1,4 @@
-Version 14.4 - 2015
+Version 14.4 - 2015-11-14
 ------------------------
 
 - New export functions
@@ -16,6 +16,7 @@ Version 14.4 - 2015
 	- Add an ocean depth indicator to the instruments window
 	- Add a distance-to-landing-target indicator on instruments window when within 15km
 	- Fix drawing the terrain height behind the biome map
+	- Fix some errors in ground track drawing
 	
 
 Version 14.3 - 2015-11-10
