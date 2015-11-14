@@ -234,6 +234,9 @@ namespace SCANsat.SCAN_UI
 
 		protected void calcTerrainLimits()
 		{
+			if (spotmap.MType != mapType.Altimetry)
+				return;
+
 			int w = spotmap.MapWidth / 4;
 			int h = spotmap.MapHeight / 4;
 
@@ -253,20 +256,18 @@ namespace SCANsat.SCAN_UI
 
 					terrain = (float)SCANUtil.getElevation(b, lon, lat);
 
-					//SCANUtil.SCANdebugLog("Height for [{0:N2}]*[{1:N2}] = {2:N2}m", lat, lon, terrain);
-
 					if (terrain < min)
-					{
-						//SCANUtil.SCANdebugLog("New Minimum terrain value - New = {0:N2} - Old = {1:N2}", terrain, min);
 						min = terrain;
-					}
 					if (terrain > max)
-					{
-						//SCANUtil.SCANdebugLog("New Maximum terrain value - New = {0:N2} - Old = {1:N2}", terrain, max);
 						max = terrain;
-					}
 				}
 			}
+
+			if (min > max)
+				min = max - 1f;
+
+			if (min == max)
+				min = max - 1f;
 
 			spotmap.setCustomRange(min, max);
 		}
