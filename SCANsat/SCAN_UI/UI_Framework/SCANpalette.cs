@@ -118,15 +118,25 @@ namespace SCANsat.SCAN_UI.UI_Framework
 
 		public static Color[] small_redline;
 
-		public static Color heightToColor(float val, int scheme, SCANterrainConfig terrain)
+		public static Color heightToColor(float val, int scheme, SCANterrainConfig terrain, float min = 0, float max = 0, float range = 0, bool useCustomRange = false)
 		{
 			Color32[] c = terrain.ColorPal.colors;
 			if (terrain.PalRev)
 				c = terrain.ColorPal.colorsReverse;
-			if (scheme == 0)
-				return heightToColor(val, terrain.MaxTerrain, terrain.MinTerrain, terrain.TerrainRange, terrain.ClampTerrain, terrain.PalDis, c);
+			if (useCustomRange)
+			{
+				if (scheme == 0)
+					return heightToColor(val, max, min, range, terrain.ClampTerrain, terrain.PalDis, c, true);
+				else
+					return heightToColor(val, max, min, range, terrain.PalDis);
+			}
 			else
-				return heightToColor(val, terrain.MaxTerrain, terrain.MinTerrain, terrain.TerrainRange, terrain.PalDis);
+			{
+				if (scheme == 0)
+					return heightToColor(val, terrain.MaxTerrain, terrain.MinTerrain, terrain.TerrainRange, terrain.ClampTerrain, terrain.PalDis, c);
+				else
+					return heightToColor(val, terrain.MaxTerrain, terrain.MinTerrain, terrain.TerrainRange, terrain.PalDis);
+			}
 		}
 
 		private static Color heightToColor(float val, float max, float min, float range, bool discrete)
@@ -158,15 +168,18 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			return c;
 		}
 
-		internal static Color heightToColor(float val, float max, float min, float range, float? clamp, bool discrete, Color32[] p)
+		internal static Color heightToColor(float val, float max, float min, float range, float? clamp, bool discrete, Color32[] p, bool useCustomRange = false)
 		{
 			Color c = black;
 			if (clamp != null)
 			{
-				if (clamp < min + 10f)
-					clamp = min + 10f;
-				if (clamp > max - 10f)
-					clamp = max - 10f;
+				if (!useCustomRange)
+				{
+					if (clamp < min + 10f)
+						clamp = min + 10f;
+					if (clamp > max - 10f)
+						clamp = max - 10f;
+				}
 				if (val <= (float)clamp)
 				{
 					val -= min;
