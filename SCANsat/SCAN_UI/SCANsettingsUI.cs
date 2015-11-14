@@ -347,6 +347,11 @@ namespace SCANsat.SCAN_UI
 					{
 						if (i <= SCANcontroller.controller.BigMap._WindowSize_Min.x)
 							i = (int)SCANcontroller.controller.BigMap._WindowSize_Min.x;
+						else if (i > SCANcontroller.controller.BigMap._WindowSize_Max.x)
+							i = (int)SCANcontroller.controller.BigMap._WindowSize_Max.x;
+
+						if (i % 2 != 0)
+							i += 1;
 
 						SCANcontroller.controller.BigMap.setMapWidth(i);
 					}
