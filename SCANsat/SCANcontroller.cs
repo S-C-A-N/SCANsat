@@ -949,7 +949,10 @@ namespace SCANsat
 				return;
 
 			if (SCANUtil.getCoveragePercentage(data, SCANtype.FuzzyResources) > (scanThreshold * 100))
+			{
+				SCANUtil.SCANlog("SCANsat resource scanning for {0} meets threshold value [{1:P0}]\nConducting stock orbital resource scan...", body.theName, scanThreshold);
 				ResourceMap.Instance.UnlockPlanet(body.flightGlobalsIndex);
+			}
 		}
 
 		private int dataStep, dataStart;
