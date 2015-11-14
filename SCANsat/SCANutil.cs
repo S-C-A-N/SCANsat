@@ -424,6 +424,13 @@ namespace SCANsat
 			}
 		}
 
+		internal static double waypointDistance(double lat1, double lon1, double alt1, double lat2, double lon2, double alt2, CelestialBody body)
+		{
+			Vector3d pos1 = body.GetWorldSurfacePosition(lat1, lon1, alt1);
+			Vector3d pos2 = body.GetWorldSurfacePosition(lat2, lon2, alt2);
+			return (float)Vector3d.Distance(pos1, pos2);
+		}
+
 		internal static double slope(double centerElevation, CelestialBody body, double lon, double lat, double offset)
 		{
 			/* Slope is calculated using a nine point grid centered 5m around the vessel location
