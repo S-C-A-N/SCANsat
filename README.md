@@ -12,7 +12,7 @@
 [![][shield:support-toolbar]][toolbar:release]&nbsp;
 [![][shield:support-karbonite]][karbonite:release]&nbsp;
 [![][shield:support-usi]][usi:release]&nbsp;
-[![][shield:support-epl]][epl:release]&nbsp;
+[![][shield:support-kopernicus]][kopernicus:release]&nbsp;
 [![][shield:support-ccfg]][cconfig:release]&nbsp;
 [![][shield:support-mechjeb]][mechjeb:release]&nbsp;
 
@@ -854,7 +854,7 @@ sneaky then they can of course be sneaky.
 [shield:jenkins-dev]: http://img.shields.io/jenkins/s/https/ksp.sarbian.com/jenkins/SCANsat-dev.svg
 [shield:jenkins-rel]: http://img.shields.io/jenkins/s/https/ksp.sarbian.com/jenkins/SCANsat-release.svg
 [shield:support-ksp]: http://img.shields.io/badge/for%20KSP-v1.0.5-bad455.svg
-[shield:support-rpm]: http://img.shields.io/badge/works%20with%20RPM-v0.20.x-a31f34.svg
+[shield:support-rpm]: http://img.shields.io/badge/works%20with%20RPM-v0.24.x-a31f34.svg
 [shield:support-mm]: http://img.shields.io/badge/works%20with%20MM-v2.6.x-40b7c0.svg
 [shield:support-toolbar]: http://img.shields.io/badge/works%20with%20Blizzy's%20Toolbar-1.7.x-7c69c0.svg
 [shield:support-alcor]: http://img.shields.io/badge/works%20with%20ALCOR-0.9-299bc7.svg
@@ -865,6 +865,7 @@ sneaky then they can of course be sneaky.
 [shield:support-ccfg]: https://img.shields.io/badge/works%20with%20Contract%20Configurator-1.x-yellowgreen.svg
 [shield:ckan]: https://img.shields.io/badge/CKAN-Indexed-brightgreen.svg
 [shield:support-mechjeb]: http://img.shields.io/badge/works%20with%20MechJeb-2.5.2-lightgrey.svg
+[shield:support-kopernicus]: http://img.shields.io/badge/works%20with%20Kopernicus-0.4-ff8c00.svg
 
 [shield:gittip-tg-img]: http://img.shields.io/gittip/technogeeky.png
 [shield:gittip-tg]: https://www.gittip.com/technogeeky/
@@ -957,3 +958,5 @@ sneaky then they can of course be sneaky.
 [ccfgSCANsat:release]: http://forum.kerbalspaceprogram.com/threads/108097
 
 [mechjeb:release]: http://forum.kerbalspaceprogram.com/threads/124336
+
+[kopernicus:release]: http://forum.kerbalspaceprogram.com/threads/114649
