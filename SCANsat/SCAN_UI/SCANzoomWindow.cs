@@ -170,6 +170,8 @@ namespace SCANsat.SCAN_UI
 
 			spotmap.centerAround(lon, lat);
 
+			calcTerrainLimits();
+
 			spotmap.resetMap(bigmap.MType, false, resourceOverlay, narrowBand);
 		}
 
@@ -185,6 +187,8 @@ namespace SCANsat.SCAN_UI
 
 			if (checkScanner && SCANcontroller.controller.needsNarrowBand && resourceOverlay)
 				checkForScanners();
+
+			calcTerrainLimits();
 
 			spotmap.resetMap(resourceOverlay, narrowBand || !checkScanner);
 		}
@@ -223,7 +227,48 @@ namespace SCANsat.SCAN_UI
 			if (SCANcontroller.controller.needsNarrowBand && resourceOverlay)
 				checkForScanners();
 
+			calcTerrainLimits();
+
 			spotmap.resetMap(bigmap.MType, false, resourceOverlay, narrowBand);
+		}
+
+		protected void calcTerrainLimits()
+		{
+			int w = spotmap.MapWidth / 4;
+			int h = spotmap.MapHeight / 4;
+
+			float max = -200000;
+			float min = 100000;
+			float terrain = 0;
+
+			for (int i = 0; i < spotmap.MapHeight; i += 4)
+			{
+				for (int j = 0; j < spotmap.MapWidth; j += 4)
+				{
+					double lat = (i * 1.0f / spotmap.MapScale) - 90f + spotmap.Lat_Offset;
+					double lon = (j * 1.0f / spotmap.MapScale) - 180f + spotmap.Lon_Offset;
+					double la = lat, lo = lon;
+					lat = spotmap.unprojectLatitude(lo, la);
+					lon = spotmap.unprojectLongitude(lo, la);
+
+					terrain = (float)SCANUtil.getElevation(b, lon, lat);
+
+					//SCANUtil.SCANdebugLog("Height for [{0:N2}]*[{1:N2}] = {2:N2}m", lat, lon, terrain);
+
+					if (terrain < min)
+					{
+						//SCANUtil.SCANdebugLog("New Minimum terrain value - New = {0:N2} - Old = {1:N2}", terrain, min);
+						min = terrain;
+					}
+					if (terrain > max)
+					{
+						//SCANUtil.SCANdebugLog("New Maximum terrain value - New = {0:N2} - Old = {1:N2}", terrain, max);
+						max = terrain;
+					}
+				}
+			}
+
+			spotmap.setCustomRange(min, max);
 		}
 
 		public SCANmap SpotMap
