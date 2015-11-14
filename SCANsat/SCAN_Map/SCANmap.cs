@@ -829,9 +829,9 @@ namespace SCANsat.SCAN_Map
 										{
 											projVal = terrainElevation(lon, lat, big_heightmap, data, out scheme);
 											if (useCustomRange)
-												elevation = palette.lerp(palette.black, palette.white, Mathf.Clamp(projVal + (-1f * customRange), 0, customRange) / customRange);
+												elevation = palette.lerp(palette.black, palette.white, Mathf.Clamp(projVal + (-1f * customMin), 0, customRange) / customRange);
 											else
-												elevation = palette.lerp(palette.black, palette.white, Mathf.Clamp(projVal + (-1f * data.TerrainConfig.TerrainRange), 0, data.TerrainConfig.TerrainRange) / data.TerrainConfig.TerrainRange);
+												elevation = palette.lerp(palette.black, palette.white, Mathf.Clamp(projVal + (-1f * data.TerrainConfig.MinTerrain), 0, data.TerrainConfig.TerrainRange) / data.TerrainConfig.TerrainRange);
 										}
 									}
 
