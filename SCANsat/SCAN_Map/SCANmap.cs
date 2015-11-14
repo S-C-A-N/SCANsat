@@ -128,6 +128,11 @@ namespace SCANsat.SCAN_Map
 			get { return zoom; }
 		}
 
+		internal float[,] Big_HeightMap
+		{
+			get { return big_heightmap; }
+		}
+
 		#endregion
 
 		#region Big Map methods and fields
@@ -458,6 +463,10 @@ namespace SCANsat.SCAN_Map
 		private double[] mapline; // all refs are below
 		private bool pqs;
 		private bool biomeMap;
+		private float customMin;
+		private float customMax;
+		private float customRange;
+		private bool useCustomRange;
 
 		/* MAP: nearly trivial functions */
 		public void setBody(CelestialBody b)
@@ -485,6 +494,14 @@ namespace SCANsat.SCAN_Map
 					resource = SCANcontroller.GetFirstResource;
 				resource.CurrentBodyConfig(body.name);
 			}
+		}
+
+		public void setCustomRange(float min, float max)
+		{
+			useCustomRange = true;
+			customMin = min;
+			customMax = max;
+			customRange = max - min;
 		}
 
 		internal bool isMapComplete()
@@ -544,70 +561,24 @@ namespace SCANsat.SCAN_Map
 		}
 
 		/* MAP: export: PNG file */
+		private SCANmapExporter exporter;
+
 		internal void exportPNG()
 		{
-			string path = Path.Combine(new DirectoryInfo(KSPUtil.ApplicationRootPath).FullName, "GameData/SCANsat/PluginData/").Replace("\\", "/");
-			string mode = "";
-
-			switch (mType)
+			if (exporter == null)
 			{
-				case mapType.Altimetry: mode = "elevation"; break;
-				case mapType.Slope: mode = "slope"; break;
-				case mapType.Biome: mode = "biome"; break;
+				SCANUtil.SCANdebugLog("Initializing exporter object...");
+				UnityEngine.GameObject obj = new GameObject();
+
+				exporter = obj.gameObject.AddComponent<SCANmapExporter>();
+
+				SCANUtil.SCANdebugLog("Exporter object created...");
 			}
-			if (resourceActive && SCANconfigLoader.GlobalResource && !string.IsNullOrEmpty(SCANcontroller.controller.resourceSelection))
-				mode += "-" + SCANcontroller.controller.resourceSelection;
-			if (SCANcontroller.controller.colours == 1)
-				mode += "-grey";
-			string baseFileName = string.Format("{0}_{1}_{2}x{3}", body.name, mode, map.width, map.height);
 
-			if (projection != MapProjection.Rectangular)
-				baseFileName += "_" + projection.ToString();
+			if (exporter.Exporting)
+				return;
 
-			string filename = baseFileName;
-
-			filename += ".png";
-
-			string fullPath = Path.Combine(path, filename);
-			File.WriteAllBytes(fullPath, map.EncodeToPNG());
-
-			ScreenMessages.PostScreenMessage("Map saved: GameData/SCANsat/PluginData/" + filename, 8, ScreenMessageStyle.UPPER_CENTER);
-
-			SCANUtil.SCANlog("Map of [{0}] saved\nMap Size: {1} X {2}\nMinimum Altitude: {3:F0}m; Maximum Altitude: {4:F0}m\nPixel Width At Equator: {5:F6}m", body.theName, map.width, map.height, data.TerrainConfig.MinTerrain, data.TerrainConfig.MaxTerrain, (body.Radius * 2 * Math.PI) / (map.width * 1f));
-
-			if (SCANcontroller.controller.exportCSV && mType == mapType.Altimetry)
-			{
-				SCANUtil.SCANlog("Export CSV Detected...");
-
-				if (data == null)
-					return;
-
-				using (StreamWriter w = new StreamWriter(Path.Combine(path, baseFileName + "_data" + ".csv")))
-				{
-					SCANUtil.SCANlog("Writing Data File");
-					for (int i = 0; i < map.height; i++)
-					{
-						for (int j = 0; j < map.width; j++)
-						{
-							double lat = (i * 1.0f / mapscale) - 90f;
-							double lon = (j * 1.0f / mapscale) - 180f;
-							double la = lat, lo = lon;
-							lat = unprojectLatitude(lo, la);
-							lon = unprojectLongitude(lo, la);
-
-							int placeHolder;
-
-							float terrain = terrainElevation(lon, lat, data, out placeHolder);
-
-							string line = string.Format("{0},{1},{2:F3},{3:F3},{4:F3}", i, j, lon, lat, terrain);
-
-							w.WriteLine(line);
-							w.Flush();
-						}
-					}
-					SCANUtil.SCANlog("Data File Complete");
-				}
-			}
+			exporter.exportPNG(this, data);
 		}
 
 		#endregion
@@ -760,8 +731,11 @@ namespace SCANsat.SCAN_Map
 							}
 							else if (SCANUtil.isCovered(lon, lat, data, SCANtype.Altimetry))
 							{
-								projVal = terrainElevation(lon, lat, data, out scheme);
-								baseColor = palette.heightToColor(projVal, scheme, data.TerrainConfig);
+								projVal = terrainElevation(lon, lat, big_heightmap, data, out scheme);
+								if (useCustomRange)
+									baseColor = palette.heightToColor(projVal, scheme, data.TerrainConfig, customMin, customMax, customRange, useCustomRange);
+								else
+									baseColor = palette.heightToColor(projVal, scheme, data.TerrainConfig);
 							}
 							break;
 						}
@@ -773,7 +747,7 @@ namespace SCANsat.SCAN_Map
 							}
 							else if (SCANUtil.isCovered(lon, lat, data, SCANtype.Altimetry))
 							{
-								projVal = terrainElevation(lon, lat, data, out scheme);
+								projVal = terrainElevation(lon, lat, big_heightmap, data, out scheme);
 								if (mapstep >= 0)
 								{
 									// This doesn't actually calculate the slope per se, but it's faster
@@ -836,7 +810,7 @@ namespace SCANsat.SCAN_Map
 										}
 										else if (SCANUtil.isCovered(lon, lat, data, SCANtype.Altimetry))
 										{
-											projVal = terrainElevation(lon, lat, data, out scheme);
+											projVal = terrainElevation(lon, lat, big_heightmap, data, out scheme);
 											elevation = palette.lerp(palette.black, palette.white, Mathf.Clamp(projVal + (-1f * data.TerrainConfig.TerrainRange), 0, data.TerrainConfig.TerrainRange) / data.TerrainConfig.TerrainRange);
 										}
 									}
@@ -909,7 +883,7 @@ namespace SCANsat.SCAN_Map
 		}
 
 		/* Calculates the terrain elevation based on scanning coverage; fetches data from elevation cache if possible */
-		private float terrainElevation(double Lon, double Lat, SCANdata Data, out int Scheme)
+		private float terrainElevation(double Lon, double Lat, float[,] heightMap, SCANdata Data, out int Scheme)
 		{
 			float elevation = 0f;
 			Scheme = SCANcontroller.controller.colours;
@@ -919,8 +893,8 @@ namespace SCANsat.SCAN_Map
 				{
 					double lon = fixUnscale(unScaleLongitude(Lon), mapwidth);
 					double lat = fixUnscale(unScaleLatitude(Lat), mapheight);
-					elevation = big_heightmap[Mathf.RoundToInt((float)lon), Mathf.RoundToInt((float)lat)];
-					if (elevation== 0f)
+					elevation = heightMap[Mathf.RoundToInt((float)lon), Mathf.RoundToInt((float)lat)];
+					if (elevation == 0f)
 						elevation = (float)SCANUtil.getElevation(body, Lon, Lat);
 				}
 				else
@@ -932,7 +906,7 @@ namespace SCANsat.SCAN_Map
 				{
 					double lon = fixUnscale(unScaleLongitude(Lon), mapwidth);
 					double lat = fixUnscale(unScaleLatitude(Lat), mapheight);
-					elevation = big_heightmap[((int)(lon * 5)) / 5, ((int)(lat * 5)) / 5];
+					elevation = heightMap[((int)(lon * 5)) / 5, ((int)(lat * 5)) / 5];
 					if (elevation == 0f)
 						elevation = (float)SCANUtil.getElevation(body, ((int)(Lon * 5)) / 5, ((int)(Lat * 5)) / 5);
 				}
@@ -942,6 +916,13 @@ namespace SCANsat.SCAN_Map
 			}
 
 			return elevation;
+		}
+
+		public float terrainElevation(double Lon, double Lat, float[,] heightMap, SCANdata Data)
+		{
+			int i = 0;
+
+			return terrainElevation(Lon, Lat, heightMap, Data, out i);
 		}
 
 		private float getResoureCache(double Lon, double Lat)
