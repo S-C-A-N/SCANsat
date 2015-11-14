@@ -76,7 +76,11 @@ namespace SCANsat.SCAN_Map
 
 			Array.Copy(map.Big_HeightMap, copyHeightMap, map.MapWidth * map.MapHeight);
 
-			Thread t = new Thread(() => exportThread(filePath, fileName, map, copy, copyHeightMap));
+			int width = map.MapWidth;
+			int height = map.MapHeight;
+			double scale = map.MapScale;
+
+			Thread t = new Thread(() => exportThread(filePath, fileName, width, height, scale, map, copy, copyHeightMap));
 			threadFinished = false;
 			threadRunning = true;
 			t.Start();
@@ -95,7 +99,7 @@ namespace SCANsat.SCAN_Map
 
 			if (timer >= 2000)
 			{
-				Debug.LogError("[SCANsat] Something went wrong while exporting .csv data file/nCanceling export thread...");
+				Debug.LogError("[SCANsat] Something went wrong while exporting .csv data file\nCanceling export thread...");
 				t.Abort();
 				threadRunning = false;
 				yield break;
@@ -103,25 +107,25 @@ namespace SCANsat.SCAN_Map
 
 			if (!threadFinished)
 			{
-				Debug.LogError("[SCANsat] Something went wrong while exporting .csv data file/nExport thread has been interrupted...");
+				Debug.LogError("[SCANsat] Something went wrong while exporting .csv data file\nExport thread has been interrupted...");
 				yield break;
 			}
 		}
 
-		private void exportThread(string path, string fileName, SCANmap map, SCANdata copyData, float[,] copyMap)
+		private void exportThread(string path, string fileName, int w, int h, double s, SCANmap map, SCANdata copyData, float[,] copyMap)
 		{
 			try
 			{
-				using (StreamWriter w = new StreamWriter(Path.Combine(path, fileName + "_data" + ".csv")))
+				using (StreamWriter writer = new StreamWriter(Path.Combine(path, fileName + "_data" + ".csv")))
 				{
 					string line = "Row,Column,Lat,Long,Height";
-					w.WriteLine(line);
-					for (int i = 0; i < map.Map.height; i++)
+					writer.WriteLine(line);
+					for (int i = 0; i < w; i++)
 					{
-						for (int j = 0; j < map.Map.width; j++)
+						for (int j = 0; j < h; j++)
 						{
-							double lat = (i * 1.0f / map.MapScale) - 90f;
-							double lon = (j * 1.0f / map.MapScale) - 180f;
+							double lat = (i * 1.0f / s) - 90f;
+							double lon = (j * 1.0f / s) - 180f;
 							double la = lat, lo = lon;
 							lat = map.unprojectLatitude(lo, la);
 							lon = map.unprojectLongitude(lo, la);
@@ -132,13 +136,13 @@ namespace SCANsat.SCAN_Map
 							if (!SCANUtil.isCovered(lon, lat, copyData, SCANtype.Altimetry))
 								continue;
 
-							float terrain = map.terrainElevation(lon, lat, copyMap, copyData);
+							float terrain = map.terrainElevation(lon, lat, w, h, copyMap, copyData);
 
 							line = string.Format("{0},{1},{2:F3},{3:F3},{4:F3}", i, j, lat, lon, terrain);
 
-							w.WriteLine(line);
+							writer.WriteLine(line);
 						}
-						w.Flush();
+						writer.Flush();
 					}
 				}
 				threadFinished = true;
