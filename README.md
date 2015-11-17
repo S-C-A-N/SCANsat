@@ -283,7 +283,7 @@ Resource overlays will work in IVA, too:
 
 #### [:top:][top] 3c. Resource Settings
 
-A number of options are available in the **Resource Settings Menu** for SCANsat resource scanning.
+A number of options are available in the **Resource Settings Menu** for SCANsat resource scanning; this window has an in-game help function activated by selecting the **?** icon in the top-right corner.
 
 > ![][resource-settings]
 
@@ -303,6 +303,10 @@ A number of options are available in the **Resource Settings Menu** for SCANsat 
    * Disables the stock orbital survey
    * Replaces the resource concentration readout from scanners with SCANsat modules
    * Right-click menu resource concentration readout dependent on SCANsat scanning coverage
+* **Stock Scan Threshold**
+   * Sets a threshold value for SCANsat M700 resource scans when stock scanning is disabled
+   * Once this value is reached a default, stock resource scan for that planet will be conducted
+   * Enter a new value, from 0-100 in the text box
 * **Reset SCANsat Resource Coverage**
    * This button will erase all resource scanning data for the current planet
    * Regular SCANsat data will not be affected
@@ -434,7 +438,7 @@ Each available resource can be selected for the planetary overlay maps, along wi
 
 > ![][bigmap-zoom-open]
 
-A separate, small map can be opened from the big map by right-clicking somewhere within the big map. This new window will be centered on the mouse cursor's location and zoomed in by a factor of 10. Icons on the zoom map can be used to zoom in or out, to a minimum of 2X zoom.
+A separate, small map can be opened from the big map by right-clicking somewhere within the big map. This new window will be centered on the mouse cursor's location and zoomed in by a factor of 10. Icons on the zoom map can be used to zoom in or out, to a minimum of 2X zoom. The terrain coloring limits will are modified to use the local minimum and maximum terrain height within the zoom map's field of view; the full color spectrum will always be used in zoom maps.
 
 The zoom scale and map center can be controlled by clicking within the zoom map.
 * Left-click to zoom out and re-center the map at the mouse cursor.
@@ -497,8 +501,9 @@ Landing sites selected through MechJeb will automatically show up as a waypoint 
 The instruments window provides a readout of several types of data based on current scanning coverage.
 
 * **Location** Shows the vessel's current coordinates; not dependent on scanning coverage
+* **Target Dist.** Shows the vessel's distance to the SCANsat or MechJeb landing target; only shown when within 15km
 * **Waypoint** Shows if the vessel is inside of a current FinePrint waypoint; not dependent on scanning coverage
-* **Altitude** Shows the vessel's current altitude above the terrain; shows the current terrain altitude when landed
+* **Altitude** Shows the vessel's current altitude above the terrain; shows the current terrain altitude when landed; shows ocean depth when splashed down
 * **Slope** Shows a highly localized slope based on a 3X3 grid centered 5m around the vessel
 * **Biome** Shows the biome that the current vessel is in or over
 * **Resource** Shows the resource abundance at the current location; when more than one resource is available buttons along the sides allow for switching between these resources
@@ -577,7 +582,7 @@ SCANsat includes Contract Configurator contracts for scanning each planet.
 
 > ![][color-window]
 
-SCANsat provides multiple options for map color configurations and terrain level changes.
+SCANsat provides multiple options for map color configurations and terrain level changes; this window has an in-game help function activated by selecting the **?** icon in the top-right corner.
 
 The color management window can be accessed from the big or small map with the color palette icon, or from the toolbar menu.
 
@@ -655,7 +660,7 @@ Notice that the only gaps in coverage are those at the poles (ie, the selected i
 
 > ![][settings-window]
 
-The settings menu has a various general options
+The settings menu has a various general options; this window has an in-game help function activated by selecting the **?** icon in the top-right corner.
 * The **Resource Settings Window** can be opened
 * The marker used for **Anomalies** can be specified
 * **Background scanning** can be controlled for each planet
@@ -669,6 +674,10 @@ The settings menu has a various general options
     * **Vessels:** The number of vessels with any active SCANsat sensors present
 	* **Sensors:** The total number of SCANsat sensors on all vessels; note that all combination sensors are separated into their invidual components, i.e. the Multi-Spectral scanner consists of two sensors, Biomes and Anomalies.
 	* **Passes:** The number of scanning passes recorded per second, this number can easily be in the tens of thousands at high time warp with multiple vessels and sensors active.
+* There are several options related to map exports
+	* **Use Grey Scale** This option uses a true, black-to-white, grey scale for the black and white maps, it affects maps in-game and exports
+	* **Set Map Width** This allows for manually setting the size of the big map; values between 560 and 8192 are acceptable
+	* **Export .csv File** This allows for a .csv file to be exported along with the map texture; this file includes the pixel row, column, latitude, longitude, terrain height
 
 ### [:top:][top] 16. Note Concerning Data Sources
 ------------------------------------------
