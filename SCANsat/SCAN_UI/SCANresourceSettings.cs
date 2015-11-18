@@ -228,37 +228,40 @@ namespace SCANsat.SCAN_UI
 			if (SCANcontroller.controller.disableStockResource)
 			{
 				growE();
-					fillS();
-					GUILayout.Label(textWithTT("Stock Scan Threshold: " + SCANcontroller.controller.scanThreshold.ToString("P0"), resourceSettingsHelpScanThreshold), SCANskins.SCAN_settingsGreyLabel, GUILayout.Width	(180));
+					fillS(20);
+					SCANcontroller.controller.useScanThreshold = GUILayout.Toggle(SCANcontroller.controller.useScanThreshold, textWithTT("Stock Scan Threshold: " + SCANcontroller.controller.scanThreshold.ToString("P0"), resourceSettingsHelpScanThreshold), SCANskins.SCAN_settingsToggle, GUILayout.Width(190));
 
-					scanThreshold = GUILayout.TextField(scanThreshold, 3, GUILayout.Width(40));
-
-					Rect r = GUILayoutUtility.GetLastRect();
-
-					GUI.Label(r, textWithTT("", resourceSettingsHelpScanThreshold));
-
-					if (GUILayout.Button(textWithTT("Set", resourceSettingsHelpScanThreshold), GUILayout.Width(45)))
+					if (SCANcontroller.controller.useScanThreshold)
 					{
-						float f = 0;
+						scanThreshold = GUILayout.TextField(scanThreshold, 3, GUILayout.Width(40));
 
-						if (float.TryParse(scanThreshold, out f))
+						Rect r = GUILayoutUtility.GetLastRect();
+
+						GUI.Label(r, textWithTT("", resourceSettingsHelpScanThreshold));
+
+						if (GUILayout.Button(textWithTT("Set", resourceSettingsHelpScanThreshold), GUILayout.Width(45)))
 						{
-							f /= 100;
+							float f = 0;
 
-							if (f <= 0f)
-								f = 0;
-							else if (f >= 1)
-								f = 1;
-
-							SCANcontroller.controller.scanThreshold = f;
-
-							for (int i = 0; i < FlightGlobals.Bodies.Count; i++)
+							if (float.TryParse(scanThreshold, out f))
 							{
-								CelestialBody b = FlightGlobals.Bodies[i];
+								f /= 100;
 
-								SCANcontroller.controller.checkResourceScanStatus(b);
+								if (f <= 0f)
+									f = 0;
+								else if (f >= 1)
+									f = 1;
+
+								SCANcontroller.controller.scanThreshold = f;
+
+								for (int i = 0; i < FlightGlobals.Bodies.Count; i++)
+								{
+									CelestialBody b = FlightGlobals.Bodies[i];
+
+									SCANcontroller.controller.checkResourceScanStatus(b);
+								}
 							}
-						}
+						}						
 					}
 					fillS();
 				stopE();

@@ -128,6 +128,8 @@ namespace SCANsat
 		public bool exportCSV = false;
 		[KSPField(isPersistant = true)]
 		public float scanThreshold = 0.90f;
+		[KSPField(isPersistant = true)]
+		public bool useScanThreshold = true;
 
 		/* Biome and slope colors can't be serialized properly as a KSP Field */
 		public Color lowBiomeColor = new Color(0, 0.46f, 0.02345098f, 1);
@@ -860,7 +862,7 @@ namespace SCANsat
 			if (useStockAppLauncher)
 				appLauncher = gameObject.AddComponent<SCANappLauncher>();
 
-			if (disableStockResource)
+			if (disableStockResource && useScanThreshold)
 			{
 				for (int i = 0; i < FlightGlobals.Bodies.Count; i++)
 				{
@@ -937,6 +939,9 @@ namespace SCANsat
 
 		public void checkResourceScanStatus(CelestialBody body)
 		{
+			if (!useScanThreshold)
+				return;
+
 			if (body == null)
 				return;
 
