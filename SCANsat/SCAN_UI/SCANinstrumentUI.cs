@@ -266,10 +266,20 @@ namespace SCANsat.SCAN_UI
 			}
 			else if (h < 1000)
 			{
-				if (v.situation == Vessel.Situations.LANDED || v.situation == Vessel.Situations.SPLASHED || v.situation == Vessel.Situations.PRELAUNCH)
-					infoLabel += string.Format("\nTerrain: {0:N1}m", pqs);
-				else
-					infoLabel += string.Format("\nAltitude: {0}", SCANuiUtil.distanceString(h, 100000));
+				switch (v.situation)
+				{
+					case Vessel.Situations.LANDED:
+					case Vessel.Situations.PRELAUNCH:
+						infoLabel += string.Format("\nTerrain: {0:N1}m", pqs);
+						break;
+					case Vessel.Situations.SPLASHED:
+						double d = ((int)(pqs / 100)) * 100;
+						infoLabel += string.Format("\nDepth: {0:N1}m", Math.Abs(d));
+						break;
+					default:
+						infoLabel += string.Format("\nAltitude: {0}", SCANuiUtil.distanceString(h, 100000));
+						break;
+				}
 
 				drawSlope = true;
 			}
