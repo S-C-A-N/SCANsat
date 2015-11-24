@@ -4,6 +4,10 @@ Version 14.5 - 2015
 - Misc and Bug Fixes
 	- Fix some .csv export related issues
 	- Allow for disabling the stock resource scan threshold
+	- Fix ocean depth indicator
+	- Fix multi spectral sensor normal map
+	- Fix some potential issues when using multiple different sensors of the same type
+	- Add new survey waypoints as they are generated
 
 Version 14.4 - 2015-11-14
 ------------------------
