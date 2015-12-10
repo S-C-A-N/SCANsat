@@ -1429,8 +1429,9 @@ namespace SCANsat
 
 			public SCANsensor() { }
 
-			public SCANsensor(double f, double min, double max, double best)
+			public SCANsensor(SCANtype t, double f, double min, double max, double best)
 			{
+				sensor = t;
 				fov = f;
 				min_alt = min;
 				max_alt = max;
@@ -1505,7 +1506,7 @@ namespace SCANsat
 					}
 				}
 				if (!sv.sensors.ContainsKey(sensor))
-					sv.sensors[sensor] = new SCANsensor(this_fov, this_min_alt, this_max_alt, this_best_alt);
+					sv.sensors[sensor] = new SCANsensor(sensor, this_fov, this_min_alt, this_max_alt, this_best_alt);
 				else
 				{
 					SCANsensor s = sv.sensors[sensor];
