@@ -17,6 +17,7 @@ using SCANsat.SCAN_Platform;
 using SCANsat.SCAN_Platform.Palettes;
 using SCANsat.SCAN_Platform.Palettes.ColorBrewer;
 using SCANsat.SCAN_Platform.Palettes.FixedColors;
+using SCANsat.SCAN_UI.UI_Framework;
 using UnityEngine;
 using palette = SCANsat.SCAN_UI.UI_Framework.SCANpalette;
 
@@ -30,11 +31,20 @@ namespace SCANsat
 		private const string configFile = "SCANsat/Resources/SCANcolors";
 		private const string configNodeName = "SCAN_Color_Config";
 
+		private const string localizationFile = "SCANsat/Resources/SCANlocalization";
+		private const string localizationNode = "SCAN_Localization";
+
 		private static SCAN_Color_Config SCANnode;
+		private static SCAN_Localization localNode;
 
 		public static SCAN_Color_Config SCANNode
 		{
 			get { return SCANnode; }
+		}
+
+		public static SCANlanguagePack languagePack
+		{
+			get { return localNode.ActivePack; }
 		}
 
 		public static bool GlobalResource
@@ -54,6 +64,8 @@ namespace SCANsat
 			SCANnode = new SCAN_Color_Config(configFile, configNodeName);
 
 			loadResources();
+
+			localNode = new SCAN_Localization(localizationFile, localizationNode);
 		}
 
 		private static void loadSCANtypes()

@@ -26,6 +26,23 @@ namespace SCANsat.SCAN_UI
 {
 	class SCANsettingsUI: SCAN_MBW
 	{
+		private string settingsHelpAnomalies = "Select the marker used to display\nanomalies on the map.";
+		private string settingsHelpBackground = "Toggle background scanning on\nsome or all celestial bodies.";
+		private string settingsHelpTimeWarp = "Adjust the scanning frequency during TimeWarp.\nHigher settings result in fewer gaps in the maps but may have a performance impact at high TimeWarp.";
+		private string settingsHelpGroundTracks = "Display a visible indicator of\nscanning activity in map mode.";
+		private string settingsHelpGroundTracksActive = "The ground track indicator can be limited to only be displayed for the active vessel.";
+		private string settingsHelpOverlayTooltips = "Displays tooltips for the current mouse position when a planetary overlay map is activated. These tooltips include The cursor coordinates, terrain height, slope, biome name, and resource abundance, depending on scanning coverage.";
+		private string settingsHelpWindowTooltips = "Display tooltips on some map window buttons. These are primarily used to identify icon buttons.";
+		private string settingsHelpStockToolbar = "Use the stock toolbar.\nOnly one stock button is available. Can be used concurrently with the Blizzy78 Toolbar.";
+		private string settingsHelpMechJeb = "The SCANsat zoom map target selection mode can be used to select a MechJeb landing site.";
+		private string settingsHelpResetWindows = "Reset all window positions. Use this in case a window has been dragged completely off screen or if any windows are not visible.";
+		private string settingsHelpResetPlanetData = "Resets all SCANsat data for the current celestial body.\nA confirmation window will open before activating.\nCannot be reversed.";
+		private string settingsHelpResetAllData = "Resets all SCANsat data for all celestial bodies.       \nA confirmation window will open before activating.\nCannot be reversed.";
+		private string settingsHelpVessels = "Information about the currently active SCANsat sensors. Vessels indicates the number of vessels with active sensors. Sensors indicates the total number of sensors; instruments with multiple sensor types count each individual sensor. Passes indicates the number of sensor updates performed per second.\nThis value is affected by the\nTimeWarp Resolution setting.";
+		private string settingsHelpGreyScale = "Use a true grey-scale color spectrum for black-and-white SCANsat maps. Pixels on the altitude map will interpolate between black and white; the min and max terrain heights for each celestial body\ndefine the limits.";
+		private string settingsHelpExportCSV = "Export a .csv file along with map texture when using the Export button on the big map. The file contains coordinates and the terrain height for each pixel. Pixels are labeled from left to right\nand from top to bottom.";
+		private string settingsHelpSetMapWidth = "Enter an exact value for the SCANsat big map texture width. Values are limited to 550 - 8192 pixels wide. Press the Set button to apply the value.";
+
 		/* UI: a list of glyphs that are used for something */
 		private string[] exmarks = { "✗", "✘", "×", "✖", "x", "X", "∇", "☉", "★", "*", "•", "º", "+" };
 
@@ -36,6 +53,7 @@ namespace SCANsat.SCAN_UI
 		private Rect warningRect;
 		private const string lockID = "settingLockID";
 		private bool oldTooltips, stockToolbar;
+		private string exportSize = "";
 
 		internal readonly static Rect defaultRect = new Rect(Screen.width - (Screen.width / 2) - 180, 100, 360, 300);
 
@@ -48,6 +66,8 @@ namespace SCANsat.SCAN_UI
 			Visible = false;
 			DragEnabled = true;
 			TooltipMouseOffset = new Vector2d(-10, -25);
+			TooltipMaxWidth = 350;
+			TooltipDisplayForSecs = 60;
 			ClampToScreenOffset = new RectOffset(-280, -280, -600, -600);
 
 			SCAN_SkinsLibrary.SetCurrent("SCAN_Unity");
@@ -58,6 +78,7 @@ namespace SCANsat.SCAN_UI
 		protected override void OnDestroy()
 		{
 			removeControlLocks();
+			TooltipsEnabled = false;
 		}
 
 		internal void removeControlLocks()
@@ -68,8 +89,32 @@ namespace SCANsat.SCAN_UI
 
 		protected override void Start()
 		{
-			oldTooltips = TooltipsEnabled = SCANcontroller.controller.toolTips;
+			oldTooltips = SCANcontroller.controller.toolTips;
+			TooltipsEnabled = false;
 			stockToolbar = SCANcontroller.controller.useStockAppLauncher;
+
+			if (SCANconfigLoader.languagePack != null)
+				loadStrings();
+		}
+
+		private void loadStrings()
+		{
+			settingsHelpAnomalies = SCANconfigLoader.languagePack.settingsHelpAnomalies;
+			settingsHelpBackground = SCANconfigLoader.languagePack.settingsHelpBackground;
+			settingsHelpTimeWarp = SCANconfigLoader.languagePack.settingsHelpTimeWarp;
+			settingsHelpGroundTracks = SCANconfigLoader.languagePack.settingsHelpGroundTracks;
+			settingsHelpGroundTracksActive = SCANconfigLoader.languagePack.settingsHelpGroundTracksActive;
+			settingsHelpOverlayTooltips = SCANconfigLoader.languagePack.settingsHelpOverlayTooltips;
+			settingsHelpWindowTooltips = SCANconfigLoader.languagePack.settingsHelpWindowTooltips;
+			settingsHelpStockToolbar = SCANconfigLoader.languagePack.settingsHelpStockToolbar;
+			settingsHelpMechJeb = SCANconfigLoader.languagePack.settingsHelpMechJeb;
+			settingsHelpResetWindows = SCANconfigLoader.languagePack.settingsHelpResetWindows;
+			settingsHelpResetPlanetData = SCANconfigLoader.languagePack.settingsHelpResetPlanetData;
+			settingsHelpResetAllData = SCANconfigLoader.languagePack.settingsHelpResetAllData;
+			settingsHelpVessels = SCANconfigLoader.languagePack.settingsHelpVesselsSensorsPasses;
+			settingsHelpGreyScale = SCANconfigLoader.languagePack.settingsHelpGreyScale;
+			settingsHelpExportCSV = SCANconfigLoader.languagePack.settingsHelpExportCSV;
+			settingsHelpSetMapWidth = SCANconfigLoader.languagePack.settingsHelpSetMapWidth;
 		}
 
 		protected override void DrawWindowPre(int id)
@@ -126,6 +171,7 @@ namespace SCANsat.SCAN_UI
 				gui_settings_timewarp(id);				/* time warp resolution settings */
 				gui_settings_numbers(id);				/* sensor/scanning		statistics */
 				gui_settings_window_resets_tooltips(id);/* reset windows and positions and toggle tooltips*/
+				gui_settings_export_options(id);
 				gui_settings_data_resets(id);			/* reset data and/or reset resources */
 				# if DEBUG
 					gui_settings_window_mapFill(id);	/* debug option to fill in maps */
@@ -181,11 +227,19 @@ namespace SCANsat.SCAN_UI
 		//Draw the close button in the upper right corner
 		private void closeBox(int id)
 		{
-			Rect r = new Rect(WindowRect.width - 20, 1, 18, 18);
+			Rect r = new Rect(WindowRect.width - 42, 1, 18, 18);
+			if (GUI.Button(r, textWithTT("?", "Show Help Tips"), SCANskins.SCAN_closeButton))
+			{
+				TooltipsEnabled = !TooltipsEnabled;
+			}
+
+			r.x += 22;
+
 			if (GUI.Button(r, SCANcontroller.controller.closeBox, SCANskins.SCAN_closeButton))
 			{
 				removeControlLocks();
 				Visible = false;
+				TooltipsEnabled = false;
 			}
 		}
 
@@ -193,18 +247,18 @@ namespace SCANsat.SCAN_UI
 		private void gui_settings_xmarks(int id)
 		{
 			fillS(8);
-			GUILayout.Label("Anomaly Marker", SCANskins.SCAN_headline);
+			GUILayout.Label(textWithTT("Anomaly Marker", settingsHelpAnomalies), SCANskins.SCAN_headline);
 			growE();
 			for (int i = 0; i < exmarks.Length; ++i)
 			{
 				if (SCANcontroller.controller.anomalyMarker == exmarks[i])
 				{
-					if (GUILayout.Button(exmarks[i], SCANskins.SCAN_closeButton))
+					if (GUILayout.Button(textWithTT(exmarks[i], settingsHelpAnomalies), SCANskins.SCAN_closeButton))
 						SCANcontroller.controller.anomalyMarker = exmarks[i];
 				}
 				else
 				{
-					if (GUILayout.Button(exmarks[i], SCANskins.SCAN_buttonBorderless))
+					if (GUILayout.Button(textWithTT(exmarks[i], settingsHelpAnomalies), SCANskins.SCAN_buttonBorderless))
 						SCANcontroller.controller.anomalyMarker = exmarks[i];
 				}
 			}
@@ -216,16 +270,16 @@ namespace SCANsat.SCAN_UI
 		private void gui_settings_toggle_body_scanning(int id)
 		{
 
-			GUILayout.Label("Background Scanning", SCANskins.SCAN_headline);
+			GUILayout.Label(textWithTT("Background Scanning", settingsHelpBackground), SCANskins.SCAN_headline);
 			// scan background
-			SCANcontroller.controller.scan_background = GUILayout.Toggle(SCANcontroller.controller.scan_background, "Scan all active celestials", SCANskins.SCAN_settingsToggle);
+			SCANcontroller.controller.scan_background = GUILayout.Toggle(SCANcontroller.controller.scan_background, textWithTT("Scan all active celestials", settingsHelpBackground), SCANskins.SCAN_settingsToggle);
 			// scanning for individual SoIs
 			growE();
 			int count = 0;
 			foreach (SCANdata data in SCANcontroller.controller.GetAllData)
 			{
 				if (count == 0) growS();
-					data.Disabled = !GUILayout.Toggle(!data.Disabled, string.Format("{0} ({1:N1}%)", data.Body.name, SCANUtil.getCoveragePercentage(data, SCANtype.Nothing)), SCANskins.SCAN_settingsToggle);
+				data.Disabled = !GUILayout.Toggle(!data.Disabled, textWithTT(string.Format("{0} ({1:N1}%)", data.Body.name, SCANUtil.getCoveragePercentage(data, SCANtype.Nothing)), settingsHelpBackground), SCANskins.SCAN_settingsToggle);
 				switch (count)
 				{
 					case 5: stopS(); count = 0; break;
@@ -240,19 +294,19 @@ namespace SCANsat.SCAN_UI
 		//Control scanning resolution
 		private void gui_settings_timewarp(int id)
 		{
-			GUILayout.Label("Time Warp Resolution", SCANskins.SCAN_headline);
+			GUILayout.Label(textWithTT("Time Warp Resolution", settingsHelpTimeWarp), SCANskins.SCAN_headline);
 			growE();
 
 			for (int i = 0; i < twnames.Length; ++i)
 			{
 				if (SCANcontroller.controller.timeWarpResolution == twvals[i])
 				{
-					if (GUILayout.Button(twnames[i], SCANskins.SCAN_buttonActive))
+					if (GUILayout.Button(textWithTT(twnames[i], settingsHelpTimeWarp), SCANskins.SCAN_buttonActive))
 						SCANcontroller.controller.timeWarpResolution = twvals[i];
 				}
 				else
 				{
-					if (GUILayout.Button(twnames[i]))
+					if (GUILayout.Button(textWithTT(twnames[i], settingsHelpTimeWarp)))
 						SCANcontroller.controller.timeWarpResolution = twvals[i];
 				}
 			}
@@ -267,8 +321,53 @@ namespace SCANsat.SCAN_UI
 			string s = 	"Vessels: " + SCANcontroller.controller.ActiveVessels.ToString() +
 						" Sensors: " + SCANcontroller.controller.ActiveSensors +
 						" Passes: " + SCANcontroller.controller.ActualPasses.ToString();
-			GUILayout.Label(s, SCANskins.SCAN_whiteReadoutLabel);
+			GUILayout.Label(textWithTT(s, settingsHelpVessels), SCANskins.SCAN_whiteReadoutLabel);
 			fillS(16);
+		}
+
+		//Export options
+		private void gui_settings_export_options(int id)
+		{
+			GUILayout.Label("Export Options", SCANskins.SCAN_headline);
+
+			growE();
+				fillS();
+				GUILayout.Label(textWithTT("Map Width: " + SCANcontroller.controller.map_width, settingsHelpSetMapWidth), SCANskins.SCAN_settingsGreyLabel, GUILayout.Width(110));
+
+				exportSize = GUILayout.TextField(exportSize, 4, GUILayout.Width(75));
+
+				Rect r = GUILayoutUtility.GetLastRect();
+
+				GUI.Label(r, textWithTT("", settingsHelpSetMapWidth));
+
+				if (GUILayout.Button(textWithTT("Set", settingsHelpSetMapWidth), GUILayout.Width(50)))
+				{
+					if (SCANcontroller.controller.BigMap == null)
+						return;
+
+					int i = 0;
+
+					if (int.TryParse(exportSize, out i))
+					{
+						if (i <= SCANcontroller.controller.BigMap._WindowSize_Min.x)
+							i = (int)SCANcontroller.controller.BigMap._WindowSize_Min.x;
+						else if (i > SCANcontroller.controller.BigMap._WindowSize_Max.x)
+							i = (int)SCANcontroller.controller.BigMap._WindowSize_Max.x;
+
+						if (i % 2 != 0)
+							i += 1;
+
+						SCANcontroller.controller.BigMap.setMapWidth(i);
+					}
+				}
+				fillS();
+			stopE();
+
+			growE();
+				SCANcontroller.controller.trueGreyScale = GUILayout.Toggle(SCANcontroller.controller.trueGreyScale, textWithTT("Use True Grey Scale", settingsHelpGreyScale), SCANskins.SCAN_settingsToggle);
+
+				SCANcontroller.controller.exportCSV = GUILayout.Toggle(SCANcontroller.controller.exportCSV, textWithTT("Export .csv Data File", settingsHelpExportCSV), SCANskins.SCAN_settingsToggle);
+			stopE();
 		}
 
 		//Reset databases
@@ -288,12 +387,12 @@ namespace SCANsat.SCAN_UI
 			}
 			else
 			{
-				if (GUILayout.Button("Reset map of " + thisBody.theName))
+				if (GUILayout.Button(textWithTT("Reset map of " + thisBody.theName, settingsHelpResetPlanetData)))
 				{
 					popup = !popup;
 					warningBoxOne = !warningBoxOne;
 				}
-				if (GUILayout.Button("Reset <b>all</b> data"))
+				if (GUILayout.Button(textWithTT("Reset <b>all</b> data", settingsHelpResetAllData)))
 				{
 					popup = !popup;
 					warningBoxAll = !warningBoxAll;
@@ -306,27 +405,24 @@ namespace SCANsat.SCAN_UI
 		//Resets all window positions, tooltip toggle
 		private void gui_settings_window_resets_tooltips(int id)
 		{
-#if DEBUG
 			GUILayout.Label("Settings", SCANskins.SCAN_headline);
-			SCANcontroller.controller.trueGreyScale = GUILayout.Toggle(SCANcontroller.controller.trueGreyScale, "Use True Grey Scale", SCANskins.SCAN_settingsToggle);
-#endif
 			growE();
-				SCANcontroller.controller.groundTracks = GUILayout.Toggle(SCANcontroller.controller.groundTracks, "Show Ground Tracks", SCANskins.SCAN_settingsToggle);
+				SCANcontroller.controller.groundTracks = GUILayout.Toggle(SCANcontroller.controller.groundTracks, textWithTT("Show Ground Tracks", settingsHelpGroundTracks), SCANskins.SCAN_settingsToggle);
 
 				if (SCANcontroller.controller.groundTracks)
-					SCANcontroller.controller.groundTrackActiveOnly = GUILayout.Toggle(SCANcontroller.controller.groundTrackActiveOnly, "Active Vessel Only", SCANskins.SCAN_settingsToggle);
+					SCANcontroller.controller.groundTrackActiveOnly = GUILayout.Toggle(SCANcontroller.controller.groundTrackActiveOnly, textWithTT("Active Vessel Only", settingsHelpGroundTracksActive), SCANskins.SCAN_settingsToggle);
 			stopE();
 			growE();
-				SCANcontroller.controller.planetaryOverlayTooltips = GUILayout.Toggle(SCANcontroller.controller.planetaryOverlayTooltips, "Planetary Overlay Tooltips", SCANskins.SCAN_settingsToggle);
+				SCANcontroller.controller.planetaryOverlayTooltips = GUILayout.Toggle(SCANcontroller.controller.planetaryOverlayTooltips, textWithTT("Planetary Overlay Tooltips", settingsHelpOverlayTooltips), SCANskins.SCAN_settingsToggle);
 
-				SCANcontroller.controller.toolTips = GUILayout.Toggle(SCANcontroller.controller.toolTips, "Window Tooltips", SCANskins.SCAN_settingsToggle);
+				SCANcontroller.controller.toolTips = GUILayout.Toggle(SCANcontroller.controller.toolTips, textWithTT("Window Tooltips", settingsHelpWindowTooltips), SCANskins.SCAN_settingsToggle);
 			stopE();
 
 			growE();
-				SCANcontroller.controller.useStockAppLauncher = GUILayout.Toggle(SCANcontroller.controller.useStockAppLauncher, "Stock Toolbar", SCANskins.SCAN_settingsToggle);
+				SCANcontroller.controller.useStockAppLauncher = GUILayout.Toggle(SCANcontroller.controller.useStockAppLauncher, textWithTT("Stock Toolbar", settingsHelpStockToolbar), SCANskins.SCAN_settingsToggle);
 
 				if (SCANmainMenuLoader.MechJebLoaded)
-					SCANcontroller.controller.mechJebTargetSelection = GUILayout.Toggle(SCANcontroller.controller.mechJebTargetSelection, "MechJeb Target Selection", SCANskins.SCAN_settingsToggle);
+					SCANcontroller.controller.mechJebTargetSelection = GUILayout.Toggle(SCANcontroller.controller.mechJebTargetSelection, textWithTT("MechJeb Target Selection", settingsHelpMechJeb), SCANskins.SCAN_settingsToggle);
 			stopE();
 			fillS(8);
 			if (popup)
@@ -335,7 +431,7 @@ namespace SCANsat.SCAN_UI
 			}
 			else
 			{
-				if (GUILayout.Button("Reset window positions"))
+				if (GUILayout.Button(textWithTT("Reset window positions", settingsHelpResetWindows)))
 				{
 					if (HighLogic.LoadedSceneIsFlight)
 					{

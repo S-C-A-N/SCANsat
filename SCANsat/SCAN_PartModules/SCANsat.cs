@@ -112,7 +112,10 @@ namespace SCANsat.SCAN_PartModules
 			Events["stopScan"].active = scanning;
 			if (sensorType != 32)
 				Fields["alt_indicator"].guiActive = scanning;
+		}
 
+		public override void OnFixedUpdate()
+		{
 			if (powerIsProblem)
 			{
 				addStatic();
@@ -130,9 +133,9 @@ namespace SCANsat.SCAN_PartModules
 				{
 					if (sensorType != 0 || SCANcontroller.controller.isVesselKnown(vessel.id, (SCANtype)sensorType))
 					{
-						if (TimeWarp.CurrentRate < 1500)
+						if (TimeWarp.CurrentRate < 15000)
 						{
-							float p = power * TimeWarp.deltaTime;
+							float p = power * TimeWarp.fixedDeltaTime;
 							float e = part.RequestResource("ElectricCharge", p);
 							if (e < p)
 							{
@@ -141,7 +144,6 @@ namespace SCANsat.SCAN_PartModules
 							}
 							else
 							{
-								registerScanner();
 								powerIsProblem = false;
 							}
 						}
@@ -153,6 +155,7 @@ namespace SCANsat.SCAN_PartModules
 					}
 					else
 						unregisterScanner();
+
 					alt_indicator = scanAlt();
 				}
 			}
@@ -512,7 +515,7 @@ namespace SCANsat.SCAN_PartModules
 
 			if (notZero && science <= 0) science = 0.00001f;
 
-			sd = new ScienceData(science * su.dataScale, 1f, 0f, su.id, se.experimentTitle + " of " + vessel.mainBody.theName);
+			sd = new ScienceData(science * su.dataScale, 1f, 0f, su.id, se.experimentTitle + " of " + vessel.mainBody.theName, false, part.flightID);
 			su.title = sd.title;
 			return sd;
 		}
@@ -520,6 +523,16 @@ namespace SCANsat.SCAN_PartModules
 		public ScienceData[] GetData()
 		{
 			return storedData.ToArray();
+		}
+
+		public void ReturnData(ScienceData data)
+		{
+			if (data == null)
+				return;
+
+			storedData.Clear();
+
+			storedData.Add(data);
 		}
 
 		private void KeepData(ScienceData data)

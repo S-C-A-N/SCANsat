@@ -151,7 +151,7 @@ namespace SCANsat.SCAN_Platform
 		private Rect _TooltipPosition = new Rect();
 
 		public bool TooltipsEnabled = false;
-		internal Int32 TooltipDisplayForSecs = 15;
+		protected Int32 TooltipDisplayForSecs = 15;
 		protected Int32 TooltipMaxWidth = 250;
 		private string strToolTipText = "";
 		private string strLastTooltipText = "";
@@ -166,6 +166,16 @@ namespace SCANsat.SCAN_Platform
 		protected Rect TextureRect;
 		protected Texture2D MapTexture;
 		protected float dW, dH;
+
+		public Vector2 _WindowSize_Min
+		{
+			get { return WindowSize_Min; }
+		}
+
+		public Vector2 _WindowSize_Max
+		{
+			get { return WindowSize_Max; }
+		}
 
 		internal void resetWindowPos(Rect r)
 		{
@@ -280,7 +290,7 @@ namespace SCANsat.SCAN_Platform
 				{
 					float minwidth, maxwidth;
 					SCAN_SkinsLibrary.CurrentTooltip.CalcMinMaxWidth(contTooltip, out minwidth, out maxwidth); // figure out how wide one line would be
-					_TooltipPosition.width = Math.Min(TooltipMaxWidth - SCAN_SkinsLibrary.CurrentTooltip.padding.horizontal, maxwidth); // then work out the height with a max width
+					_TooltipPosition.width = Math.Min(TooltipMaxWidth - SCAN_SkinsLibrary.CurrentTooltip.padding.horizontal, maxwidth + SCAN_SkinsLibrary.CurrentTooltip.padding.horizontal + 10); // then work out the height with a max width
 					_TooltipPosition.height = SCAN_SkinsLibrary.CurrentTooltip.CalcHeight(contTooltip, TooltipPosition.width); // heres the result
 				}
 				else

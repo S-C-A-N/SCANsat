@@ -1,3 +1,46 @@
+Version 14.4 - 2015-11-14
+------------------------
+
+- New export functions
+	- Option to sse a true grey-scale color scheme
+	- Option to export a .csv file with coordinates and terrain height for each pixel
+	- Option to manually specify the big map width
+	
+- Stock resource scan threshold
+	- Active when stock resource scanning is disabled
+	- Set a SCANsat resource scanning threshold level above which the stock resource scan will apply for each celestial body
+
+- Misc and Bug Fixes
+	- Fix science data return on transmission failure
+	- Zoom maps use variable terrain hieght ranges based on the local min and max terrain height
+	- Add an ocean depth indicator to the instruments window
+	- Add a distance-to-landing-target indicator on instruments window when within 15km
+	- Fix drawing the terrain height behind the biome map
+	- Fix some errors in ground track drawing
+	
+
+Version 14.3 - 2015-11-10
+------------------------
+- Update for KSP 1.0.5
+
+- In-Game Help Function
+	- Help section for Settings window, Resource Settings window, and Color Selection window
+	- Activate help mode with the question mark button in the top right
+	
+- Localization project
+	- All help function strings are included in a config file
+	- Local translations can be added to this file to replace the English text
+
+- Misc and Bug Fixes
+	- Fix bug while switching vessels from the small map vessel list
+	- Fix planetary overlay tooltips while in the tracking station
+	- Fix a potential loading error
+	- Fix bug generating terrain height maps on planets with PQS errors; prevents endless NRE spam
+	- Fix some problems with the background terrain height map generator
+	- Power usage works correctly up to 10000X time warp, instead of 1000X
+	- Remove debug log messages during planetary overlay map generation
+	- Change the default anomaly marker and close box icons to standard text
+
 Version 14.2 - 2015-8-29
 ------------------------
 

@@ -36,7 +36,7 @@ namespace SCANsat.SCAN_Data
 		private Int32[,] coverage;
 		private CelestialBody body;
 		private SCANterrainConfig terrainConfig;
-		private bool building, externalBuilding, built;
+		private bool mapBuilding, overlayBuilding, controllerBuilding, built;
 
 		private float[,] tempHeightMap;
 
@@ -96,6 +96,9 @@ namespace SCANsat.SCAN_Data
 			if (body.pqsController == null)
 				return 0;
 
+			if (heightMaps[i].Length < 10)
+				return 0;
+
 			return heightMaps[i][lon, lat];
 		}
 
@@ -116,16 +119,22 @@ namespace SCANsat.SCAN_Data
 			internal set { disabled = value; }
 		}
 
-		public bool Building
+		public bool MapBuilding
 		{
-			get { return building; }
-			internal set { building = value; }
+			get { return mapBuilding; }
+			internal set { mapBuilding = value; }
 		}
 
-		public bool ExternalBuilding
+		public bool OverlayBuilding
 		{
-			get { return externalBuilding; }
-			internal set { externalBuilding = value; }
+			get { return overlayBuilding; }
+			internal set { overlayBuilding = value; }
+		}
+
+		public bool ControllerBuilding
+		{
+			get { return controllerBuilding; }
+			internal set { controllerBuilding = value; }
 		}
 
 		public bool Built
@@ -186,7 +195,7 @@ namespace SCANsat.SCAN_Data
 			if (waypoints.Any(a => a.LandingTarget))
 				waypoints.RemoveAll(a => a.LandingTarget);
 
-			waypoints.Add(w);
+			waypoints.Insert(0, w);
 		}
 
 		public void removeTargetWaypoint()
@@ -247,7 +256,7 @@ namespace SCANsat.SCAN_Data
 							if (orbit == null)
 								continue;
 
-							if (orbit.targetBody == body)
+							if (orbit.TargetBody == body)
 							{
 								for (int j = 0; j < stationary[i].AllParameters.Count(); j++)
 								{
@@ -377,11 +386,31 @@ namespace SCANsat.SCAN_Data
 			if (body.pqsController == null)
 			{
 				built = true;
-				building = false;
-				externalBuilding = false;
+				mapBuilding = false;
+				overlayBuilding = false;
+				controllerBuilding = false;
 				if (!heightMaps.ContainsKey(body.flightGlobalsIndex))
 					heightMaps.Add(body.flightGlobalsIndex, new float[1, 1]);
 				return;
+			}
+
+			if (step <= 0)
+			{
+				try
+				{
+					double d = SCANUtil.getElevation(body, 0, 0);
+				}
+				catch (Exception e)
+				{
+					Debug.LogError("[SCANsat] Error In Detecting Terrain Height Map; Stopping Height Map Generator\n" + e);
+					built = true;
+					mapBuilding = false;
+					overlayBuilding = false;
+					controllerBuilding = false;
+					if (!heightMaps.ContainsKey(body.flightGlobalsIndex))
+						heightMaps.Add(body.flightGlobalsIndex, new float[1, 1]);
+					return;
+				}
 			}
 
 			if (tempHeightMap == null)
@@ -394,8 +423,9 @@ namespace SCANsat.SCAN_Data
 				step = 0;
 				xStart = 0;
 				built = true;
-				building = false;
-				externalBuilding = false;
+				mapBuilding = false;
+				overlayBuilding = false;
+				controllerBuilding = false;
 				if (!heightMaps.ContainsKey(body.flightGlobalsIndex))
 					heightMaps.Add(body.flightGlobalsIndex, tempHeightMap);
 				tempHeightMap = null;

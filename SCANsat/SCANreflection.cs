@@ -22,28 +22,11 @@ namespace SCANsat
 {
 	static class SCANreflection
 	{
-		private static bool FinePrintWaypointRun = false;
 		private static bool FinePrintFlightBandRun = false;
 		private static bool FinePrintStationaryWaypointRun = false;
 
-		private static FieldInfo _FinePrintWaypoint;
 		private static FieldInfo _FinePrintFlightBand;
 		private static FieldInfo _FinePrintStationaryWaypoint;
-
-		internal static Waypoint FinePrintWaypointObject(SurveyWaypointParameter p)
-		{
-			Waypoint w = null;
-			try
-			{
-				w = (Waypoint)_FinePrintWaypoint.GetValue(p);
-			}
-			catch (Exception e)
-			{
-				SCANUtil.SCANlog("Error in detecting FinePrint Waypoint object: {0}", e);
-			}
-
-			return w;
-		}
 
 		internal static Waypoint FinePrintStationaryWaypointObject(StationaryPointParameter p)
 		{
@@ -75,42 +58,6 @@ namespace SCANsat
 			return b;
 		}
 
-		internal static bool FinePrintWaypointReflection()
-		{
-			if (_FinePrintWaypoint != null)
-				return true;
-
-			if (FinePrintWaypointRun)
-				return false;
-
-			FinePrintWaypointRun = true;
-
-			try
-			{
-				Type sType = typeof(SurveyWaypointParameter);
-
-				var field = sType.GetFields(BindingFlags.NonPublic | BindingFlags.Instance);
-
-				_FinePrintWaypoint = field[0];
-
-				if (_FinePrintWaypoint == null)
-				{
-					SCANUtil.SCANlog("FinePrint Waypoint Field Not Found");
-					return false;
-				}
-
-				SCANUtil.SCANlog("FinePrint Waypoint Field Assigned");
-
-				return _FinePrintWaypoint != null;
-			}
-			catch (Exception e)
-			{
-				SCANUtil.SCANlog("Error in assigning FinePrint Waypoint method: {0}", e);
-			}
-
-			return false;
-		}
-
 		internal static bool FinePrintStationaryWaypointReflection()
 		{
 			if (_FinePrintStationaryWaypoint != null)
@@ -137,7 +84,7 @@ namespace SCANsat
 
 				SCANUtil.SCANlog("FinePrint Stationary Waypoint Field Assigned");
 
-				return _FinePrintWaypoint != null;
+				return _FinePrintStationaryWaypoint != null;
 			}
 			catch (Exception e)
 			{
@@ -163,7 +110,7 @@ namespace SCANsat
 
 				var field = sType.GetFields(BindingFlags.NonPublic | BindingFlags.Instance);
 
-				_FinePrintFlightBand = field[3];
+				_FinePrintFlightBand = field[2];
 
 				if (_FinePrintFlightBand == null)
 				{

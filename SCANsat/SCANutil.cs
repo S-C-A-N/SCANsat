@@ -424,6 +424,13 @@ namespace SCANsat
 			}
 		}
 
+		internal static double waypointDistance(double lat1, double lon1, double alt1, double lat2, double lon2, double alt2, CelestialBody body)
+		{
+			Vector3d pos1 = body.GetWorldSurfacePosition(lat1, lon1, alt1);
+			Vector3d pos2 = body.GetWorldSurfacePosition(lat2, lon2, alt2);
+			return (float)Vector3d.Distance(pos1, pos2);
+		}
+
 		internal static double slope(double centerElevation, CelestialBody body, double lon, double lat, double offset)
 		{
 			/* Slope is calculated using a nine point grid centered 5m around the vessel location
@@ -499,24 +506,43 @@ namespace SCANsat
 
 			Vector2 pos = new Vector2(Input.mousePosition.x, Screen.height - Input.mousePosition.y);
 
-			if (SCANcontroller.controller.mainMapVisible && SCANcontroller.controller.mainMap.GetWindowRect.Contains(pos))
-				return true;
-			else if (SCANcontroller.controller.bigMapVisible && SCANcontroller.controller.BigMap.GetWindowRect.Contains(pos))
-				return true;
-			else if (SCANcontroller.controller.BigMap.spotMap != null && SCANcontroller.controller.BigMap.spotMap.Visible && SCANcontroller.controller.BigMap.spotMap.GetWindowRect.Contains(pos))
-				return true;
-			else if (SCANcontroller.controller.hiDefMap != null && SCANcontroller.controller.hiDefMap.Visible && SCANcontroller.controller.hiDefMap.GetWindowRect.Contains(pos))
-				return true;
-			else if (SCANcontroller.controller.settingsWindow.Visible && SCANcontroller.controller.settingsWindow.GetWindowRect.Contains(pos))
-				return true;
-			else if (SCANcontroller.controller.resourceSettings.Visible && SCANcontroller.controller.resourceSettings.GetWindowRect.Contains(pos))
-				return true;
-			else if (SCANcontroller.controller.instrumentsWindow.Visible && SCANcontroller.controller.instrumentsWindow.GetWindowRect.Contains(pos))
-				return true;
-			else if (SCANcontroller.controller.resourceOverlay.Visible && SCANcontroller.controller.resourceOverlay.GetWindowRect.Contains(pos))
-				return true;
-			else if (SCANcontroller.controller.colorManager.Visible && SCANcontroller.controller.colorManager.GetWindowRect.Contains(pos))
-				return true;
+			switch (HighLogic.LoadedScene)
+			{
+				case GameScenes.FLIGHT:
+					if (SCANcontroller.controller.mainMapVisible && SCANcontroller.controller.mainMap != null && SCANcontroller.controller.mainMap.GetWindowRect.Contains(pos))
+						return true;
+					else if (SCANcontroller.controller.bigMapVisible && SCANcontroller.controller.BigMap != null && SCANcontroller.controller.BigMap.GetWindowRect.Contains(pos))
+						return true;
+					else if (SCANcontroller.controller.BigMap != null && SCANcontroller.controller.BigMap.spotMap != null && SCANcontroller.controller.BigMap.spotMap.Visible && SCANcontroller.controller.BigMap.spotMap.GetWindowRect.Contains(pos))
+						return true;
+					else if (SCANcontroller.controller.hiDefMap != null && SCANcontroller.controller.hiDefMap.Visible && SCANcontroller.controller.hiDefMap.GetWindowRect.Contains(pos))
+						return true;
+					else if (SCANcontroller.controller.settingsWindow != null && SCANcontroller.controller.settingsWindow.Visible && SCANcontroller.controller.settingsWindow.GetWindowRect.Contains(pos))
+						return true;
+					else if (SCANcontroller.controller.resourceSettings != null && SCANcontroller.controller.resourceSettings.Visible && SCANcontroller.controller.resourceSettings.GetWindowRect.Contains(pos))
+						return true;
+					else if (SCANcontroller.controller.instrumentsWindow != null && SCANcontroller.controller.instrumentsWindow.Visible && SCANcontroller.controller.instrumentsWindow.GetWindowRect.Contains(pos))
+						return true;
+					else if (SCANcontroller.controller.resourceOverlay != null && SCANcontroller.controller.resourceOverlay.Visible && SCANcontroller.controller.resourceOverlay.GetWindowRect.Contains(pos))
+						return true;
+					else if (SCANcontroller.controller.colorManager != null && SCANcontroller.controller.colorManager.Visible && SCANcontroller.controller.colorManager.GetWindowRect.Contains(pos))
+						return true;
+					break;
+				case GameScenes.TRACKSTATION:
+					if (SCANcontroller.controller.kscMapVisible && SCANcontroller.controller.kscMap != null && SCANcontroller.controller.kscMap.GetWindowRect.Contains(pos))
+						return true;
+					else if (SCANcontroller.controller.kscMap != null && SCANcontroller.controller.kscMap.spotMap != null && SCANcontroller.controller.kscMap.spotMap.Visible && SCANcontroller.controller.kscMap.spotMap.GetWindowRect.Contains(pos))
+						return true;
+					else if (SCANcontroller.controller.settingsWindow != null && SCANcontroller.controller.settingsWindow.Visible && SCANcontroller.controller.settingsWindow.GetWindowRect.Contains(pos))
+						return true;
+					else if (SCANcontroller.controller.resourceSettings != null && SCANcontroller.controller.resourceSettings.Visible && SCANcontroller.controller.resourceSettings.GetWindowRect.Contains(pos))
+						return true;
+					else if (SCANcontroller.controller.resourceOverlay != null && SCANcontroller.controller.resourceOverlay.Visible && SCANcontroller.controller.resourceOverlay.GetWindowRect.Contains(pos))
+						return true;
+					else if (SCANcontroller.controller.colorManager != null && SCANcontroller.controller.colorManager.Visible && SCANcontroller.controller.colorManager.GetWindowRect.Contains(pos))
+						return true;
+					break;
+			}
 
 			return false;
 		}

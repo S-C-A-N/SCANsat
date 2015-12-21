@@ -12,7 +12,7 @@
 [![][shield:support-toolbar]][toolbar:release]&nbsp;
 [![][shield:support-karbonite]][karbonite:release]&nbsp;
 [![][shield:support-usi]][usi:release]&nbsp;
-[![][shield:support-epl]][epl:release]&nbsp;
+[![][shield:support-kopernicus]][kopernicus:release]&nbsp;
 [![][shield:support-ccfg]][cconfig:release]&nbsp;
 [![][shield:support-mechjeb]][mechjeb:release]&nbsp;
 
@@ -31,7 +31,7 @@
 * [3. Resource Scanning][3]
   * [a. Stock Scanning Mode][3a]
   * [b. SCANsat Scanning Mode][3b]
-  * [c. Resource Setting][3c]
+  * [c. Resource Settings][3c]
 * [4. Basic Usage][4]
   * [a. FAQ: Finding a Good Altitude][4a]
   * [b. Mismatched Scanners][4b]
@@ -122,6 +122,8 @@ For licensing information, please see the [included LICENSE.txt][SCANsat:rel-lic
 
 ### [:top:][top] 0a. FAQs
 
+  * For some basic scanning strategies, as well as a description of resource scanning, check out the [SCANsat wiki][SCANsat:wiki]
+
   * What does SCANsat do?
     * It allows you to scan planetary bodies for terrain, biome, and resource information and generate various kinds of maps.
   * How does SCANsat affect gameplay?
@@ -207,7 +209,7 @@ on custom parts, but this is not a requirement.
 
 #### [:top:][top] 2a. SCANsat Scans
 
-Without any resource scanning mods installed, **SCANsat** can scan for a few basic types of data. All of these (non-resource) scans are shown as indicators on the Small Map.
+**SCANsat** can scan for a few basic types of data. All of these (non-resource) scans are shown as indicators on the Small Map. For more information about basic SCANsat scanning checkout the [wiki][SCANsat:wiki]
 
 > ![][small-newMap1]
 
@@ -229,7 +231,7 @@ Anomaly | **Been There, Done That(tm)** | **BTDT**
 ### [:top:][top] 3. Resource Scanning
 ------------------------------------------
 
-**SCANsat** will scan celestial bodies for resources using the new stock resource system.
+**SCANsat** will scan celestial bodies for resources using the new stock resource system. For a full description of both stack and SCANsat resource scanning methods check out the [SCANsat wiki][SCANsat:wiki].
 
 #### [:top:][top] 3a. Stock Scanning Mode
 
@@ -279,9 +281,9 @@ If a vessel with a narrow-band scanner is not present, or its inclination is not
 Resource overlays will work in IVA, too:
 > ![][resource-iva]
 
-#### [:top:][top] 3c. Resource Setting
+#### [:top:][top] 3c. Resource Settings
 
-A number of options are available in the **Resource Settings Menu** for SCANsat resource scanning.
+A number of options are available in the **Resource Settings Menu** for SCANsat resource scanning; this window has an in-game help function activated by selecting the **?** icon in the top-right corner.
 
 > ![][resource-settings]
 
@@ -301,6 +303,10 @@ A number of options are available in the **Resource Settings Menu** for SCANsat 
    * Disables the stock orbital survey
    * Replaces the resource concentration readout from scanners with SCANsat modules
    * Right-click menu resource concentration readout dependent on SCANsat scanning coverage
+* **Stock Scan Threshold**
+   * Sets a threshold value for SCANsat M700 resource scans when stock scanning is disabled
+   * Once this value is reached a default, stock resource scan for that planet will be conducted
+   * Enter a new value, from 0-100 in the text box
 * **Reset SCANsat Resource Coverage**
    * This button will erase all resource scanning data for the current planet
    * Regular SCANsat data will not be affected
@@ -432,7 +438,7 @@ Each available resource can be selected for the planetary overlay maps, along wi
 
 > ![][bigmap-zoom-open]
 
-A separate, small map can be opened from the big map by right-clicking somewhere within the big map. This new window will be centered on the mouse cursor's location and zoomed in by a factor of 10. Icons on the zoom map can be used to zoom in or out, to a minimum of 2X zoom.
+A separate, small map can be opened from the big map by right-clicking somewhere within the big map. This new window will be centered on the mouse cursor's location and zoomed in by a factor of 10. Icons on the zoom map can be used to zoom in or out, to a minimum of 2X zoom. The terrain coloring limits will are modified to use the local minimum and maximum terrain height within the zoom map's field of view; the full color spectrum will always be used in zoom maps.
 
 The zoom scale and map center can be controlled by clicking within the zoom map.
 * Left-click to zoom out and re-center the map at the mouse cursor.
@@ -495,8 +501,9 @@ Landing sites selected through MechJeb will automatically show up as a waypoint 
 The instruments window provides a readout of several types of data based on current scanning coverage.
 
 * **Location** Shows the vessel's current coordinates; not dependent on scanning coverage
+* **Target Dist.** Shows the vessel's distance to the SCANsat or MechJeb landing target; only shown when within 15km
 * **Waypoint** Shows if the vessel is inside of a current FinePrint waypoint; not dependent on scanning coverage
-* **Altitude** Shows the vessel's current altitude above the terrain; shows the current terrain altitude when landed
+* **Altitude** Shows the vessel's current altitude above the terrain; shows the current terrain altitude when landed; shows ocean depth when splashed down
 * **Slope** Shows a highly localized slope based on a 3X3 grid centered 5m around the vessel
 * **Biome** Shows the biome that the current vessel is in or over
 * **Resource** Shows the resource abundance at the current location; when more than one resource is available buttons along the sides allow for switching between these resources
@@ -575,7 +582,7 @@ SCANsat includes Contract Configurator contracts for scanning each planet.
 
 > ![][color-window]
 
-SCANsat provides multiple options for map color configurations and terrain level changes.
+SCANsat provides multiple options for map color configurations and terrain level changes; this window has an in-game help function activated by selecting the **?** icon in the top-right corner.
 
 The color management window can be accessed from the big or small map with the color palette icon, or from the toolbar menu.
 
@@ -653,7 +660,7 @@ Notice that the only gaps in coverage are those at the poles (ie, the selected i
 
 > ![][settings-window]
 
-The settings menu has a various general options
+The settings menu has a various general options; this window has an in-game help function activated by selecting the **?** icon in the top-right corner.
 * The **Resource Settings Window** can be opened
 * The marker used for **Anomalies** can be specified
 * **Background scanning** can be controlled for each planet
@@ -667,6 +674,10 @@ The settings menu has a various general options
     * **Vessels:** The number of vessels with any active SCANsat sensors present
 	* **Sensors:** The total number of SCANsat sensors on all vessels; note that all combination sensors are separated into their invidual components, i.e. the Multi-Spectral scanner consists of two sensors, Biomes and Anomalies.
 	* **Passes:** The number of scanning passes recorded per second, this number can easily be in the tens of thousands at high time warp with multiple vessels and sensors active.
+* There are several options related to map exports
+	* **Use Grey Scale** This option uses a true, black-to-white, grey scale for the black and white maps, it affects maps in-game and exports
+	* **Set Map Width** This allows for manually setting the size of the big map; values between 560 and 8192 are acceptable
+	* **Export .csv File** This allows for a .csv file to be exported along with the map texture; this file includes the pixel row, column, latitude, longitude, terrain height
 
 ### [:top:][top] 16. Note Concerning Data Sources
 ------------------------------------------
@@ -748,7 +759,7 @@ sneaky then they can of course be sneaky.
 [resource-walkthrough]: http://i.imgur.com/KS4FTh0.gif
 [resource-scanner]: http://i.imgur.com/mY0fFjr.gif
 [resource-bigmap]: http://i.imgur.com/JYKG6f5.gif
-[resource-settings]: http://i.imgur.com/yWYbgOM.png
+[resource-settings]: http://i.imgur.com/hgZFXIO.png
 [resource-zoom-map-covered]: http://i.imgur.com/7YuYMGW.png
 [resource-zoom-map-uncovered]: http://i.imgur.com/cJ9JtdW.png
 [resource-instant]: http://i.imgur.com/mfIMBEP.gif
@@ -791,7 +802,7 @@ sneaky then they can of course be sneaky.
 [instruments-small]: http://i.imgur.com/tpjveyn.gif
 [instruments-btdt]: http://i.imgur.com/tybbDap.gif
 
-[settings-window]: http://i.imgur.com/zD1bNVc.png
+[settings-window]: http://i.imgur.com/5vqEUhX.png
 
 [tinypirate-video-screen]: http://img.youtube.com/vi/UY7eBuReSYU/0.jpg
 [tinypirate-video]: https://www.youtube.com/watch?v=UY7eBuReSYU
@@ -809,7 +820,7 @@ sneaky then they can of course be sneaky.
 [3]: #top-3-resource-scanning
 [3a]: #top-3a-stock-scanning-mode
 [3b]: #top-3b-scansat-scanning-mode
-[3c]: #top-3c-resource-setting
+[3c]: #top-3c-resource-settings
 [4]: #top-4-basic-usage
 [4a]: #top-4a-faq-finding-a-good-altitude
 [4b]: #top-4b-mismatched-scanners
@@ -851,8 +862,8 @@ sneaky then they can of course be sneaky.
  
 [shield:jenkins-dev]: http://img.shields.io/jenkins/s/https/ksp.sarbian.com/jenkins/SCANsat-dev.svg
 [shield:jenkins-rel]: http://img.shields.io/jenkins/s/https/ksp.sarbian.com/jenkins/SCANsat-release.svg
-[shield:support-ksp]: http://img.shields.io/badge/for%20KSP-v1.0.4-bad455.svg
-[shield:support-rpm]: http://img.shields.io/badge/works%20with%20RPM-v0.20.x-a31f34.svg
+[shield:support-ksp]: http://img.shields.io/badge/for%20KSP-v1.0.5-bad455.svg
+[shield:support-rpm]: http://img.shields.io/badge/works%20with%20RPM-v0.24.x-a31f34.svg
 [shield:support-mm]: http://img.shields.io/badge/works%20with%20MM-v2.6.x-40b7c0.svg
 [shield:support-toolbar]: http://img.shields.io/badge/works%20with%20Blizzy's%20Toolbar-1.7.x-7c69c0.svg
 [shield:support-alcor]: http://img.shields.io/badge/works%20with%20ALCOR-0.9-299bc7.svg
@@ -863,6 +874,7 @@ sneaky then they can of course be sneaky.
 [shield:support-ccfg]: https://img.shields.io/badge/works%20with%20Contract%20Configurator-1.x-yellowgreen.svg
 [shield:ckan]: https://img.shields.io/badge/CKAN-Indexed-brightgreen.svg
 [shield:support-mechjeb]: http://img.shields.io/badge/works%20with%20MechJeb-2.5.2-lightgrey.svg
+[shield:support-kopernicus]: http://img.shields.io/badge/works%20with%20Kopernicus-0.4-ff8c00.svg
 
 [shield:gittip-tg-img]: http://img.shields.io/gittip/technogeeky.png
 [shield:gittip-tg]: https://www.gittip.com/technogeeky/
@@ -879,6 +891,7 @@ sneaky then they can of course be sneaky.
 [SCANsat:best-orbits-table]: https://www.example.com
 [SCANsat:email]: mailto:SCANscansat@gmail.com
 [SCANsat:gamedata]: http://i.imgur.com/cS1Lu5w.jpg
+[SCANsat:wiki]: https://github.com/S-C-A-N/SCANsat/wiki
 
 [SCANsat:dev-readme]: https://github.com/S-C-A-N/SCANsat/tree/dev/#table-of-contents
 [SCANsat:rel-readme]: https://github.com/S-C-A-N/SCANsat/#table-of-contents
@@ -954,3 +967,5 @@ sneaky then they can of course be sneaky.
 [ccfgSCANsat:release]: http://forum.kerbalspaceprogram.com/threads/108097
 
 [mechjeb:release]: http://forum.kerbalspaceprogram.com/threads/124336
+
+[kopernicus:release]: http://forum.kerbalspaceprogram.com/threads/114649

@@ -30,6 +30,20 @@ namespace SCANsat.SCAN_UI
 		private bool popup, warningResource, warningStockResource, controlLock, oldNarrowBand;
 		private const string lockID = "resourceSettingLockID";
 		private Rect warningRect;
+		private string scanThreshold = "";
+
+		private string resourceSettingsHelpOverlayWindow = "Open the planetary overlay map control window.";
+		private string resourceSettingsHelpBiomeLock = "Circumvents the requirement for stock surface biome scans. SCANsat displays will show the full accuracy for resource abundance with or without any surface biome scans.";
+		private string resourceSettingsHelpInstant = "By default, the stock M700 resource scanner's orbital survey will fill in all SCANsat resource maps. This can be disabled, requiring standard SCANsat methods for all resource scanning. Disabled automatically when stock resource scanning is disabled.";
+		private string resourceSettingsHelpNarrowBand = "Numerous SCANsat functions require a Narrow-Band resource scanner on-board the current vessel or in orbit of a celestial body for fully accurate resource abundance data.\nDisable this to circumvent these restrictions.";
+		private string resourceSettingsHelpDisableStock = "Disables all stock resource scanning functions. SCANsat scanning methods will be required for all resource data. Replaces several stock resource functions with SCANsat tools. These include The right-click readouts, the high resolution narrow-band scanner map, and the planetary overlay maps.";
+		private string resourceSettingsHelpResetSCANsatResource = "Resets all SCANsat resource data for the current celestial body. Other SCANsat data is not affected.\nA confirmation window will open before activating.\nCannot be reversed.";
+		private string resourceSettingsHelpResetStockResource = "Resets the stock resource scanning coverage for the current celestial body. A reload or scene change may be required for all changes to take effect.\nA confirmation window will open before activating.\nCannot be reversed.";
+		private string resourceSettingsHelpOverlayInterpolation = "Change the number of resource abundance measurements used in constructing the planetary overlay and big map resource overlay. Decrease the value to increase the accuracy of the map. Lower values will result in slower map generation.";
+		private string resourceSettingsHelpOverlayHeight = "Change the texture size (map width is 2XHeight) used in constructing the planetary overlay and big map resource overlay. Increase the value to increase the quality and accuracy of the map. Higher values will result in slower map generation.";
+		private string resourceSettingsHelpOverlayBiomeHeight = "Change the texture size (map width is 2XHeight) used in constructing the planetary overlay biome map. Increase the value to increase the quality and accuracy of the map. Higher values will result in slower map generation.";
+		private string resourceSettingsHelpOverlayTransparency = "Create a grey background for planetary overlay resource maps. Used to make clear which sections of the celestial body have been\nscanned but contain no resources.";
+		private string resourceSettingsHelpScanThreshold = "A threshold level used to apply the stock resource scan to a celestial body after scanning with SCANsat sensors. This is useful when contracts or other addons require that a stock resource scan be performed. Set a value from 0-100 in the text box and click on the Set button. All celestial bodies will be checked immediately; celestial bodies will also be checked upon loading or a scene change. A reload may be required for the changes to take effect.";
 
 		protected override void Awake()
 		{
@@ -39,6 +53,9 @@ namespace SCANsat.SCAN_UI
 			WindowOptions = new GUILayoutOption[2] { GUILayout.Width(300), GUILayout.Height(270) };
 			Visible = false;
 			DragEnabled = true;
+			TooltipMouseOffset = new Vector2d(-10, -25);
+			TooltipMaxWidth = 350;
+			TooltipDisplayForSecs = 60;
 			ClampToScreenOffset = new RectOffset(-200, -200, -200, -200);
 
 			SCAN_SkinsLibrary.SetCurrent("SCAN_Unity");
@@ -52,6 +69,27 @@ namespace SCANsat.SCAN_UI
 			mapHeight = SCANcontroller.controller.overlayMapHeight;
 			transparency = SCANcontroller.controller.overlayTransparency;
 			interpolationScale = SCANcontroller.controller.overlayInterpolation;
+
+			TooltipsEnabled = false;
+
+			if (SCANconfigLoader.languagePack != null)
+				loadStrings();
+		}
+
+		private void loadStrings()
+		{
+			resourceSettingsHelpOverlayWindow = SCANconfigLoader.languagePack.resourceSettingsHelpOverlayWindow;
+			resourceSettingsHelpBiomeLock = SCANconfigLoader.languagePack.resourceSettingsHelpBiomeLock;
+			resourceSettingsHelpInstant = SCANconfigLoader.languagePack.resourceSettingsHelpInstant;
+			resourceSettingsHelpNarrowBand = SCANconfigLoader.languagePack.resourceSettingsHelpNarrowBand;
+			resourceSettingsHelpDisableStock = SCANconfigLoader.languagePack.resourceSettingsHelpDisableStock;
+			resourceSettingsHelpResetSCANsatResource = SCANconfigLoader.languagePack.resourceSettingsHelpResetSCANsatResource;
+			resourceSettingsHelpResetStockResource = SCANconfigLoader.languagePack.resourceSettingsHelpResetStockResource;
+			resourceSettingsHelpOverlayInterpolation = SCANconfigLoader.languagePack.resourceSettingsHelpOverlayInterpolation;
+			resourceSettingsHelpOverlayHeight = SCANconfigLoader.languagePack.resourceSettingsHelpOverlayHeight;
+			resourceSettingsHelpOverlayBiomeHeight = SCANconfigLoader.languagePack.resourceSettingsHelpOverlayBiomeHeight;
+			resourceSettingsHelpOverlayTransparency = SCANconfigLoader.languagePack.resourceSettingsHelpOverlayTransparency;
+			resourceSettingsHelpScanThreshold = SCANconfigLoader.languagePack.resourceSettingsHelpScanThreshold;
 		}
 
 		internal void removeControlLocks()
@@ -141,11 +179,18 @@ namespace SCANsat.SCAN_UI
 		//Draw the close button in the upper right corner
 		private void closeBox(int id)
 		{
-			Rect r = new Rect(WindowRect.width - 20, 1, 18, 18);
+			Rect r = new Rect(WindowRect.width - 42, 1, 18, 18);
+			if (GUI.Button(r, textWithTT("?", "Show Help Tips"), SCANskins.SCAN_closeButton))
+			{
+				TooltipsEnabled = !TooltipsEnabled;
+			}
+
+			r.x += 22;
 			if (GUI.Button(r, SCANcontroller.controller.closeBox, SCANskins.SCAN_closeButton))
 			{
 				removeControlLocks();
 				Visible = false;
+				TooltipsEnabled = false;
 			}
 		}
 
@@ -154,7 +199,7 @@ namespace SCANsat.SCAN_UI
 			if (SCANcontroller.controller.resourceOverlay == null)
 				return;
 
-			if (GUILayout.Button("Planetary Overlay Window"))
+			if (GUILayout.Button(textWithTT("Planetary Overlay Window", resourceSettingsHelpOverlayWindow)))
 			{
 				SCANcontroller.controller.resourceOverlay.Visible = !SCANcontroller.controller.resourceOverlay.Visible;
 			}
@@ -164,22 +209,60 @@ namespace SCANsat.SCAN_UI
 		{
 			GUILayout.Label("Resource Settings", SCANskins.SCAN_headline);
 			growE();
-				SCANcontroller.controller.resourceBiomeLock = GUILayout.Toggle(SCANcontroller.controller.resourceBiomeLock, "Resource Biome Lock", SCANskins.SCAN_settingsToggle);
+				SCANcontroller.controller.resourceBiomeLock = GUILayout.Toggle(SCANcontroller.controller.resourceBiomeLock, textWithTT("Resource Biome Lock", resourceSettingsHelpBiomeLock), SCANskins.SCAN_settingsToggle);
 				if (SCANcontroller.controller.disableStockResource)
-					GUILayout.Toggle(false, "Instant Resource Scan", SCANskins.SCAN_settingsToggle);
+					GUILayout.Toggle(false, textWithTT("Instant Resource Scan", resourceSettingsHelpInstant + "[Disabled]"), SCANskins.SCAN_settingsToggle);
 				else
-					SCANcontroller.controller.easyModeScanning = GUILayout.Toggle(SCANcontroller.controller.easyModeScanning, "Instant Resource Scan", SCANskins.SCAN_settingsToggle);
+					SCANcontroller.controller.easyModeScanning = GUILayout.Toggle(SCANcontroller.controller.easyModeScanning, textWithTT("Instant Resource Scan", resourceSettingsHelpInstant), SCANskins.SCAN_settingsToggle);
 			stopE();
 			growE();
 				fillS();
-				SCANcontroller.controller.needsNarrowBand = GUILayout.Toggle(SCANcontroller.controller.needsNarrowBand, "Requires Narrow Band Scanner", SCANskins.SCAN_settingsToggle);
+				SCANcontroller.controller.needsNarrowBand = GUILayout.Toggle(SCANcontroller.controller.needsNarrowBand, textWithTT("Requires Narrow Band Scanner", resourceSettingsHelpNarrowBand), SCANskins.SCAN_settingsToggle);
 				fillS();
 			stopE();
 			growE();
 				fillS();
-				SCANcontroller.controller.disableStockResource = GUILayout.Toggle(SCANcontroller.controller.disableStockResource, "Disable Stock Scanning", SCANskins.SCAN_settingsToggle);
+				SCANcontroller.controller.disableStockResource = GUILayout.Toggle(SCANcontroller.controller.disableStockResource, textWithTT("Disable Stock Scanning", resourceSettingsHelpDisableStock), SCANskins.SCAN_settingsToggle);
 				fillS();
 			stopE();
+			if (SCANcontroller.controller.disableStockResource)
+			{
+				growE();
+					fillS();
+					GUILayout.Label(textWithTT("Stock Scan Threshold: " + SCANcontroller.controller.scanThreshold.ToString("P0"), resourceSettingsHelpScanThreshold), SCANskins.SCAN_settingsGreyLabel, GUILayout.Width	(180));
+
+					scanThreshold = GUILayout.TextField(scanThreshold, 3, GUILayout.Width(40));
+
+					Rect r = GUILayoutUtility.GetLastRect();
+
+					GUI.Label(r, textWithTT("", resourceSettingsHelpScanThreshold));
+
+					if (GUILayout.Button(textWithTT("Set", resourceSettingsHelpScanThreshold), GUILayout.Width(45)))
+					{
+						float f = 0;
+
+						if (float.TryParse(scanThreshold, out f))
+						{
+							f /= 100;
+
+							if (f <= 0f)
+								f = 0;
+							else if (f >= 1)
+								f = 1;
+
+							SCANcontroller.controller.scanThreshold = f;
+
+							for (int i = 0; i < FlightGlobals.Bodies.Count; i++)
+							{
+								CelestialBody b = FlightGlobals.Bodies[i];
+
+								SCANcontroller.controller.checkResourceScanStatus(b);
+							}
+						}
+					}
+					fillS();
+				stopE();
+			}
 			GUILayout.Label("Resource Scan Data", SCANskins.SCAN_headline);
 			if (popup)
 			{
@@ -192,7 +275,7 @@ namespace SCANsat.SCAN_UI
 			}
 			else
 			{
-				if (GUILayout.Button("Reset SCANsat Resource Coverage"))
+				if (GUILayout.Button(textWithTT("Reset SCANsat Resource Coverage", resourceSettingsHelpResetSCANsatResource)))
 				{
 					popup = !popup;
 					warningResource = !warningResource;
@@ -200,7 +283,7 @@ namespace SCANsat.SCAN_UI
 				if (SCANcontroller.controller.disableStockResource)
 				{
 					fillS(8);
-					if (GUILayout.Button("Reset Stock Resource Scanning"))
+					if (GUILayout.Button(textWithTT("Reset Stock Resource Scanning", resourceSettingsHelpResetStockResource)))
 					{
 						popup = !popup;
 						warningStockResource = !warningStockResource;
@@ -213,17 +296,17 @@ namespace SCANsat.SCAN_UI
 		{
 			GUILayout.Label("Overlay Map Quality", SCANskins.SCAN_headline);
 			growE();
-				GUILayout.Label("Interpolation:", SCANskins.SCAN_labelSmallLeft);
+				GUILayout.Label(textWithTT("Interpolation:", resourceSettingsHelpOverlayInterpolation), SCANskins.SCAN_labelSmallLeft);
 
 				fillS();
 
-				if (GUILayout.Button("-", SCANskins.SCAN_buttonSmall, GUILayout.Width(18)))
+				if (GUILayout.Button(textWithTT("-", resourceSettingsHelpOverlayInterpolation), SCANskins.SCAN_buttonSmall, GUILayout.Width(18)))
 				{
 					interpolationScale = Math.Max(2, interpolationScale / 2);
 					refreshMap();
 				}
-				GUILayout.Label(interpolationScale.ToString(), SCANskins.SCAN_labelSmall, GUILayout.Width(36));
-				if (GUILayout.Button("+", SCANskins.SCAN_buttonSmall, GUILayout.Width(18)))
+				GUILayout.Label(textWithTT(interpolationScale.ToString(), resourceSettingsHelpOverlayInterpolation), SCANskins.SCAN_labelSmall, GUILayout.Width(36));
+				if (GUILayout.Button(textWithTT("+", resourceSettingsHelpOverlayInterpolation), SCANskins.SCAN_buttonSmall, GUILayout.Width(18)))
 				{
 					interpolationScale = Math.Min(32, interpolationScale * 2);
 					refreshMap();
@@ -231,17 +314,17 @@ namespace SCANsat.SCAN_UI
 			stopE();
 
 			growE();
-				GUILayout.Label("Map Height:", SCANskins.SCAN_labelSmallLeft);
+				GUILayout.Label(textWithTT("Map Height:", resourceSettingsHelpOverlayHeight), SCANskins.SCAN_labelSmallLeft);
 
 				fillS();
 
-				if (GUILayout.Button("-", SCANskins.SCAN_buttonSmall, GUILayout.Width(18)))
+				if (GUILayout.Button(textWithTT("-", resourceSettingsHelpOverlayHeight), SCANskins.SCAN_buttonSmall, GUILayout.Width(18)))
 				{
 					mapHeight = Math.Max(64, mapHeight / 2);
 					refreshMap();
 				}
-				GUILayout.Label(mapHeight.ToString(), SCANskins.SCAN_labelSmall, GUILayout.Width(36));
-				if (GUILayout.Button("+", SCANskins.SCAN_buttonSmall, GUILayout.Width(18)))
+				GUILayout.Label(textWithTT(mapHeight.ToString(), resourceSettingsHelpOverlayHeight), SCANskins.SCAN_labelSmall, GUILayout.Width(36));
+				if (GUILayout.Button(textWithTT("+", resourceSettingsHelpOverlayHeight), SCANskins.SCAN_buttonSmall, GUILayout.Width(18)))
 				{
 					mapHeight = Math.Min(1024, mapHeight * 2);
 					refreshMap();
@@ -249,17 +332,17 @@ namespace SCANsat.SCAN_UI
 			stopE();
 
 			growE();
-				GUILayout.Label("Coverage Transparency:", SCANskins.SCAN_labelSmallLeft);
+				GUILayout.Label(textWithTT("Coverage Transparency:", resourceSettingsHelpOverlayTransparency), SCANskins.SCAN_labelSmallLeft);
 
 				fillS();
 
-				if (GUILayout.Button("-", SCANskins.SCAN_buttonSmall, GUILayout.Width(18)))
+				if (GUILayout.Button(textWithTT("-", resourceSettingsHelpOverlayTransparency), SCANskins.SCAN_buttonSmall, GUILayout.Width(18)))
 				{
 					transparency = Mathf.Max(0f, transparency - 0.1f);
 					refreshMap();
 				}
-				GUILayout.Label(transparency.ToString("P0"), SCANskins.SCAN_labelSmall, GUILayout.Width(36));
-				if (GUILayout.Button("+", SCANskins.SCAN_buttonSmall, GUILayout.Width(18)))
+				GUILayout.Label(textWithTT(transparency.ToString("P0"), resourceSettingsHelpOverlayTransparency), SCANskins.SCAN_labelSmall, GUILayout.Width(36));
+				if (GUILayout.Button(textWithTT("+", resourceSettingsHelpOverlayTransparency), SCANskins.SCAN_buttonSmall, GUILayout.Width(18)))
 				{
 					transparency = Mathf.Min(1f, transparency + 0.1f);
 					refreshMap();
@@ -267,17 +350,17 @@ namespace SCANsat.SCAN_UI
 			stopE();
 
 			growE();
-				GUILayout.Label("Biome Map Height:", SCANskins.SCAN_labelSmallLeft);
+				GUILayout.Label(textWithTT("Biome Map Height:", resourceSettingsHelpOverlayBiomeHeight), SCANskins.SCAN_labelSmallLeft);
 
 				fillS();
 
-				if (GUILayout.Button("-", SCANskins.SCAN_buttonSmall, GUILayout.Width(18)))
+				if (GUILayout.Button(textWithTT("-", resourceSettingsHelpOverlayBiomeHeight), SCANskins.SCAN_buttonSmall, GUILayout.Width(18)))
 				{
 					biomeMapHeight = Math.Max(256, biomeMapHeight / 2);
 					refreshMap();
 				}
-				GUILayout.Label(biomeMapHeight.ToString(), SCANskins.SCAN_labelSmall, GUILayout.Width(36));
-				if (GUILayout.Button("+", SCANskins.SCAN_buttonSmall, GUILayout.Width(18)))
+				GUILayout.Label(textWithTT(biomeMapHeight.ToString(), resourceSettingsHelpOverlayBiomeHeight), SCANskins.SCAN_labelSmall, GUILayout.Width(36));
+				if (GUILayout.Button(textWithTT("+", resourceSettingsHelpOverlayBiomeHeight), SCANskins.SCAN_buttonSmall, GUILayout.Width(18)))
 				{
 					biomeMapHeight = Math.Min(1024, biomeMapHeight * 2);
 					refreshMap();

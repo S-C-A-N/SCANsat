@@ -26,7 +26,6 @@ namespace SCANsat
 		private string[] Assemblies = new string[7] { "SCANsatKethane", "RasterPropMonitor", "MechJebRPM", "MechJeb2", "ContractConfigurator", "CC_SCANsat", "SCANmechjeb" };
 
 		internal static string SCANsatVersion = "";
-		internal static bool FinePrintWaypoint = false;
 		internal static bool FinePrintFlightBand = false;
 		internal static bool FinePrintStationaryWaypoint = false;
 		public static bool MechJebLoaded = false;
@@ -36,7 +35,6 @@ namespace SCANsat
 		private void Start()
 		{
 			findAssemblies(Assemblies);
-			FinePrintWaypoint = SCANreflection.FinePrintWaypointReflection();
 			FinePrintStationaryWaypoint = SCANreflection.FinePrintStationaryWaypointReflection();
 			FinePrintFlightBand = SCANreflection.FinePrintFlightBandReflection();
 			SCANconfigLoader.configLoader();
