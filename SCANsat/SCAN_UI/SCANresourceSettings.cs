@@ -27,7 +27,7 @@ namespace SCANsat.SCAN_UI
 		private int mapHeight, biomeMapHeight;
 		private float transparency;
 		private int interpolationScale;
-		private bool popup, warningResource, warningStockResource, controlLock, oldNarrowBand;
+		private bool popup, warningResource, warningStockResource, controlLock, oldNarrowBand, oldStockScanThreshold;
 		private const string lockID = "resourceSettingLockID";
 		private Rect warningRect;
 		private string scanThreshold = "";
@@ -64,6 +64,7 @@ namespace SCANsat.SCAN_UI
 		protected override void Start()
 		{
 			oldNarrowBand = SCANcontroller.controller.needsNarrowBand;
+			oldStockScanThreshold = SCANcontroller.controller.useScanThreshold;
 
 			biomeMapHeight = SCANcontroller.controller.overlayBiomeHeight;
 			mapHeight = SCANcontroller.controller.overlayMapHeight;
@@ -164,6 +165,20 @@ namespace SCANsat.SCAN_UI
 				oldNarrowBand = SCANcontroller.controller.needsNarrowBand;
 				if (SCANcontroller.controller.instrumentsWindow != null && oldNarrowBand)
 					SCANcontroller.controller.instrumentsWindow.resetResourceList();
+			}
+
+			if (oldStockScanThreshold != SCANcontroller.controller.useScanThreshold)
+			{
+				oldStockScanThreshold = SCANcontroller.controller.useScanThreshold;
+				if (oldStockScanThreshold)
+				{
+					for (int i = 0; i < FlightGlobals.Bodies.Count; i++)
+					{
+						CelestialBody b = FlightGlobals.Bodies[i];
+
+						SCANcontroller.controller.checkResourceScanStatus(b);
+					}
+				}
 			}
 
 			sessionRect = WindowRect;
