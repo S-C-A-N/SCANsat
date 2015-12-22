@@ -304,7 +304,7 @@ A number of options are available in the **Resource Settings Menu** for SCANsat 
    * Replaces the resource concentration readout from scanners with SCANsat modules
    * Right-click menu resource concentration readout dependent on SCANsat scanning coverage
 * **Stock Scan Threshold**
-   * Sets a threshold value for SCANsat M700 resource scans when stock scanning is disabled
+   * Sets a threshold value for SCANsat M700 resource scans when stock scanning is disabled; can be disabled
    * Once this value is reached a default, stock resource scan for that planet will be conducted
    * Enter a new value, from 0-100 in the text box
 * **Reset SCANsat Resource Coverage**
