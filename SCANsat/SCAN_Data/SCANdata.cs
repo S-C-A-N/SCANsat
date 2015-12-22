@@ -209,6 +209,36 @@ namespace SCANsat.SCAN_Data
 			SCANcontroller.controller.LandingTarget = null;
 		}
 
+		public void addSurveyWaypoints(CelestialBody b, SurveyContract c)
+		{
+			if (!waypointsLoaded)
+				return;
+
+			if (b != body)
+				return;
+
+			if (c == null)
+				return;
+
+			for (int i = 0; i < c.AllParameters.Count(); i++)
+			{
+				if (c.AllParameters.ElementAt(i).GetType() == typeof(SurveyWaypointParameter))
+				{
+					SurveyWaypointParameter s = (SurveyWaypointParameter)c.AllParameters.ElementAt(i);
+					if (s.State == ParameterState.Incomplete)
+					{
+						if (waypoints.Any(w => w.Way == s.wp))
+							continue;
+
+						SCANwaypoint p = new SCANwaypoint(s);
+						if (p.Way != null)
+							waypoints.Add(p);
+					}
+				}
+			}
+
+		}
+
 		public List<SCANwaypoint> Waypoints
 		{
 			get

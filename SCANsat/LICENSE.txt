@@ -225,4 +225,8 @@ CLZF2:
  The contract pack is based on the SCANsatLite Contract Configurator pack by severedSolo
  
  Released under the Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International license (see above)
+ 
+ The original pack can be found here: 
+ 
+ https://github.com/severedsolo/ScanSatLite
 

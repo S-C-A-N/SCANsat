@@ -17,6 +17,8 @@ using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Contracts;
+using FinePrint.Contracts;
 using SCANsat.SCAN_UI;
 using SCANsat.SCAN_UI.UI_Framework;
 using SCANsat.SCAN_Data;
@@ -128,6 +130,8 @@ namespace SCANsat
 		public bool exportCSV = false;
 		[KSPField(isPersistant = true)]
 		public float scanThreshold = 0.90f;
+		[KSPField(isPersistant = true)]
+		public bool useScanThreshold = true;
 
 		/* Biome and slope colors can't be serialized properly as a KSP Field */
 		public Color lowBiomeColor = new Color(0, 0.46f, 0.02345098f, 1);
@@ -817,6 +821,7 @@ namespace SCANsat
 			GameEvents.onVesselCreate.Add(newVesselCheck);
 			GameEvents.onPartCouple.Add(dockingCheck);
 			GameEvents.Contract.onContractsLoaded.Add(contractsCheck);
+			GameEvents.Contract.onParameterChange.Add(onParamChange);
 			if (HighLogic.LoadedSceneIsFlight)
 			{
 				if (!body_data.ContainsKey(FlightGlobals.currentMainBody.name))
@@ -860,7 +865,7 @@ namespace SCANsat
 			if (useStockAppLauncher)
 				appLauncher = gameObject.AddComponent<SCANappLauncher>();
 
-			if (disableStockResource)
+			if (disableStockResource && useScanThreshold)
 			{
 				for (int i = 0; i < FlightGlobals.Bodies.Count; i++)
 				{
@@ -937,6 +942,9 @@ namespace SCANsat
 
 		public void checkResourceScanStatus(CelestialBody body)
 		{
+			if (!useScanThreshold)
+				return;
+
 			if (body == null)
 				return;
 
@@ -1016,6 +1024,7 @@ namespace SCANsat
 			GameEvents.onVesselCreate.Remove(newVesselCheck);
 			GameEvents.onPartCouple.Remove(dockingCheck);
 			GameEvents.Contract.onContractsLoaded.Remove(contractsCheck);
+			GameEvents.Contract.onParameterChange.Remove(onParamChange);
 			if (mainMap != null)
 				Destroy(mainMap);
 			if (settingsWindow != null)
@@ -1258,6 +1267,23 @@ namespace SCANsat
 			contractsLoaded = true;
 		}
 
+		private void onParamChange(Contract c, ContractParameter p)
+		{
+			if (c.GetType() != typeof(SurveyContract))
+				return;
+
+			SurveyContract s = c as SurveyContract;
+
+			CelestialBody b = s.targetBody;
+
+			SCANdata data = getData(b.name);
+
+			if (data == null)
+				return;
+
+			data.addSurveyWaypoints(b, s);
+		}
+
 		private void SOIChange(GameEvents.HostedFromToAction<Vessel, CelestialBody> VC)
 		{
 			if (!body_data.ContainsKey(VC.to.name))
@@ -1400,6 +1426,17 @@ namespace SCANsat
 
 			public bool inRange;
 			public bool bestRange;
+
+			public SCANsensor() { }
+
+			public SCANsensor(SCANtype t, double f, double min, double max, double best)
+			{
+				sensor = t;
+				fov = f;
+				min_alt = min;
+				max_alt = max;
+				best_alt = best;
+			}
 		}
 
 		public class SCANvessel
@@ -1469,13 +1506,19 @@ namespace SCANsat
 					}
 				}
 				if (!sv.sensors.ContainsKey(sensor))
-					sv.sensors[sensor] = new SCANsensor();
-				SCANsensor s = sv.sensors[sensor];
-				s.sensor = sensor;
-				s.fov = this_fov;
-				s.min_alt = this_min_alt;
-				s.max_alt = this_max_alt;
-				s.best_alt = this_best_alt;
+					sv.sensors[sensor] = new SCANsensor(sensor, this_fov, this_min_alt, this_max_alt, this_best_alt);
+				else
+				{
+					SCANsensor s = sv.sensors[sensor];
+					s.sensor = sensor;
+					if (this_fov > s.fov)
+						s.fov = this_fov;
+					if (this_min_alt < s.min_alt)
+						s.min_alt = this_min_alt;
+					if (this_max_alt > s.max_alt)
+						s.max_alt = this_max_alt;
+					s.best_alt = this_best_alt;
+				}
 			}
 		}
 

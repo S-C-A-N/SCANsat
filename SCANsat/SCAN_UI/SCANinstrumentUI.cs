@@ -237,41 +237,37 @@ namespace SCANsat.SCAN_UI
 
 			bool drawSlope = false;
 
-			if ((sensors & SCANtype.Altimetry) != SCANtype.Nothing)
+			switch (v.situation)
 			{
-				switch (v.situation)
-				{
-					case Vessel.Situations.LANDED:
-					case Vessel.Situations.PRELAUNCH:
-						infoLabel += string.Format("\nTerrain: {0:N1}m", pqs);
-						drawSlope = true;
-						break;
-					case Vessel.Situations.SPLASHED:
-						infoLabel += string.Format("\nDepth: {0:N1}m", Math.Abs(pqs));
-						drawSlope = false;
-						break;
-					default:
-						if (h < 1000 || (sensors & SCANtype.AltimetryHiRes) != SCANtype.Nothing)
-						{
-							infoLabel += string.Format("\nAltitude: {0}", SCANuiUtil.distanceString(h, 100000));
-							drawSlope = true;
-						}
-						else
-						{
-							h = ((int)(h / 500)) * 500;
-							infoLabel += string.Format("\nAltitude: {0}", SCANuiUtil.distanceString(h, 100000));
-						}
-						break;
-				}
-			}
-			else if (h < 1000)
-			{
-				if (v.situation == Vessel.Situations.LANDED || v.situation == Vessel.Situations.SPLASHED || v.situation == Vessel.Situations.PRELAUNCH)
+				case Vessel.Situations.LANDED:
+				case Vessel.Situations.PRELAUNCH:
 					infoLabel += string.Format("\nTerrain: {0:N1}m", pqs);
-				else
-					infoLabel += string.Format("\nAltitude: {0}", SCANuiUtil.distanceString(h, 100000));
-
-				drawSlope = true;
+					drawSlope = true;
+					break;
+				case Vessel.Situations.SPLASHED:
+					double d = Math.Abs(pqs) - Math.Abs(h);
+					if ((sensors & SCANtype.Altimetry) != SCANtype.Nothing)
+						infoLabel += string.Format("\nDepth: {0}", SCANuiUtil.distanceString(Math.Abs(d), 10000));
+					else
+					{
+						d = ((int)(d / 100)) * 100;
+						infoLabel += string.Format("\nDepth: {0}", SCANuiUtil.distanceString(Math.Abs(d), 10000));
+					}
+					drawSlope = false;
+					break;
+				default:
+					if (h < 1000 || (sensors & SCANtype.AltimetryHiRes) != SCANtype.Nothing)
+					{
+						infoLabel += string.Format("\nAltitude: {0}", SCANuiUtil.distanceString(h, 100000));
+						drawSlope = true;
+					}
+					else if ((sensors & SCANtype.AltimetryLoRes) != SCANtype.Nothing)
+					{
+						h = ((int)(h / 500)) * 500;
+						infoLabel += string.Format("\nAltitude: {0}", SCANuiUtil.distanceString(h, 100000));
+						drawSlope = false;
+					}
+					break;
 			}
 
 			if (drawSlope)
