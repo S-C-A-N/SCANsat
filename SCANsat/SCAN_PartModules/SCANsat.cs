@@ -101,8 +101,14 @@ namespace SCANsat.SCAN_PartModules
 			print("[SCANsat] sensorType: " + sensorType.ToString() + " fov: " + fov.ToString() + " min_alt: " + min_alt.ToString() + " max_alt: " + max_alt.ToString() + " best_alt: " + best_alt.ToString() + " power: " + power.ToString());
 		}
 
-		public override void OnUpdate()
+		private void Update()
 		{
+			if (!HighLogic.LoadedSceneIsFlight)
+				return;
+
+			if (!FlightGlobals.ready)
+				return;
+
 			if (sensorType == 0)
 				return;
 
@@ -112,10 +118,19 @@ namespace SCANsat.SCAN_PartModules
 			Events["stopScan"].active = scanning;
 			if (sensorType != 32)
 				Fields["alt_indicator"].guiActive = scanning;
+
+			if (scanning)
+				alt_indicator = scanAlt();
 		}
 
-		public override void OnFixedUpdate()
+		private void FixedUpdate()
 		{
+			if (!HighLogic.LoadedSceneIsFlight)
+				return;
+
+			if (!FlightGlobals.ready)
+				return;
+
 			if (powerIsProblem)
 			{
 				addStatic();
@@ -155,8 +170,6 @@ namespace SCANsat.SCAN_PartModules
 					}
 					else
 						unregisterScanner();
-
-					alt_indicator = scanAlt();
 				}
 			}
 		}
@@ -546,7 +559,6 @@ namespace SCANsat.SCAN_PartModules
 			List<IScienceDataTransmitter> tranList = vessel.FindPartModulesImplementing<IScienceDataTransmitter>();
 			if (tranList.Count > 0 && storedData.Count > 0)
 			{
-				makeScienceData(false);
 				tranList.OrderBy(ScienceUtil.GetTransmitterScore).First().TransmitData(storedData);
 				DumpData(storedData[0]);
 			}
