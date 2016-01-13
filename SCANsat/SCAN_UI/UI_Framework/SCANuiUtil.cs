@@ -321,8 +321,12 @@ namespace SCANsat.SCAN_UI.UI_Framework
 		{
 			string label = "";
 
-			if (narrowBandInOrbit(ref label, Body, lat, resource))
-				label = resourceLabel(fuzzy, lat, lon, resource, Body);
+			if (fuzzy)
+				label = resourceLabel(true, lat, lon, resource, Body);
+			else if (narrowBandInOrbit(ref label, Body, lat, resource))
+				label = resourceLabel(false, lat, lon, resource, Body);
+			else
+				label = resourceLabel(true, lat, lon, resource, Body);
 
 			return label;
 		}
