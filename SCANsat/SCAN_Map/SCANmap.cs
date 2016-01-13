@@ -12,6 +12,7 @@
 #endregion
 
 using System;
+using System.Linq;
 using System.IO;
 using UnityEngine;
 using SCANsat.SCAN_Platform.Palettes;
@@ -475,7 +476,7 @@ namespace SCANsat.SCAN_Map
 		private mapType mType;
 		private bool zoom;
 		private Texture2D map; // refs above: 214,215,216,232, below, and JSISCANsatRPM.
-		private CelestialBody body; // all refs are below
+		private CelestialBody body = null; // all refs are below
 		private SCANresourceGlobal resource;
 		private SCANdata data;
 		private SCANmapLegend mapLegend;
@@ -487,10 +488,12 @@ namespace SCANsat.SCAN_Map
 		private float customMax;
 		private float customRange;
 		private bool useCustomRange;
+		private PQSMod KopernicusOnDemand = null;
 
 		/* MAP: nearly trivial functions */
 		public void setBody(CelestialBody b)
 		{
+			loadPQS(body, b);
 			body = b;
 			pqs = body.pqsController != null;
 			biomeMap = body.BiomeMap != null;
@@ -514,6 +517,59 @@ namespace SCANsat.SCAN_Map
 					resource = SCANcontroller.GetFirstResource;
 				resource.CurrentBodyConfig(body.name);
 			}
+		}
+
+		public void unloadPQS()
+		{
+			if (!SCANmainMenuLoader.KopernicusLoaded || KopernicusOnDemand == null)
+				return;
+
+			switch (HighLogic.LoadedScene)
+			{
+				case GameScenes.SPACECENTER:
+					if (body != Planetarium.fetch.Home)
+						KopernicusOnDemand.OnSphereInactive();
+					break;
+				case GameScenes.TRACKSTATION:
+					KopernicusOnDemand.OnSphereInactive();
+					break;
+				case GameScenes.FLIGHT:
+					if (body != FlightGlobals.currentMainBody)
+						KopernicusOnDemand.OnSphereInactive();
+					break;
+			}
+
+			KopernicusOnDemand = null;
+		}
+
+		public void loadPQS(CelestialBody oldBody, CelestialBody newBody)
+		{
+			if (!SCANmainMenuLoader.KopernicusLoaded)
+				return;
+
+			if (KopernicusOnDemand != null && oldBody != null)
+			{
+				switch (HighLogic.LoadedScene)
+				{
+					case GameScenes.SPACECENTER:
+						if (oldBody != Planetarium.fetch.Home)
+							KopernicusOnDemand.OnSphereInactive();
+						break;
+					case GameScenes.TRACKSTATION:
+						KopernicusOnDemand.OnSphereInactive();
+						break;
+					case GameScenes.FLIGHT:
+						if (oldBody != FlightGlobals.currentMainBody)
+							KopernicusOnDemand.OnSphereInactive();
+						break;
+				}
+
+				KopernicusOnDemand = null;
+			}
+
+			KopernicusOnDemand = newBody.GetComponentsInChildren<PQSMod>(true).Where(p => p.GetType().Name == "PQSMod_OnDemandHandler").FirstOrDefault();
+			if (KopernicusOnDemand != null)
+				KopernicusOnDemand.OnQuadPreBuild(null);
 		}
 
 		public void setCustomRange(float min, float max)

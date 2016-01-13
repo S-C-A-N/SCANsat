@@ -124,6 +124,8 @@ namespace SCANsat.SCAN_UI
 		{
 			if (spotMap != null)
 				Destroy(spotMap);
+
+			bigmap.unloadPQS();
 		}
 
 		protected override void Update()
