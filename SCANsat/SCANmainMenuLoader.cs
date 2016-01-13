@@ -23,12 +23,14 @@ namespace SCANsat
 	[KSPAddon(KSPAddon.Startup.MainMenu, true)]
 	public class SCANmainMenuLoader : MonoBehaviour
 	{
-		private string[] Assemblies = new string[7] { "SCANsatKethane", "RasterPropMonitor", "MechJebRPM", "MechJeb2", "ContractConfigurator", "CC_SCANsat", "SCANmechjeb" };
+		private string[] Assemblies = new string[9] { "SCANsatKethane", "RasterPropMonitor", "MechJeb2", "ContractConfigurator", "CC_SCANsat", "SCANmechjeb", "ModuleManager", "Kopernicus", "Kopernicus.OnDemand" };
 
 		internal static string SCANsatVersion = "";
 		internal static bool FinePrintFlightBand = false;
 		internal static bool FinePrintStationaryWaypoint = false;
 		public static bool MechJebLoaded = false;
+		public static bool MMLoaded = false;
+		public static bool KopernicusLoaded = false;
 
 		private List<AssemblyLog> assemblyList = new List<AssemblyLog>();
 
@@ -45,9 +47,15 @@ namespace SCANsat
 			assemblyList.Add(new AssemblyLog(AssemblyLoader.loadedAssemblies.GetByAssembly(Assembly.GetExecutingAssembly()))); //More reliable method for SCANsat.dll
 			foreach (string name in assemblies)
 			{ //Search for the relevant plugins among the loaded assemblies
-				var assembly = AssemblyLoader.loadedAssemblies.FirstOrDefault(a => a.assembly.GetName().Name == name);
+				var assembly = AssemblyLoader.loadedAssemblies.FirstOrDefault(a => a.assembly.GetName().Name.StartsWith(name));
 				if (assembly != null)
+				{
 					assemblyList.Add(new AssemblyLog(assembly));
+					if (name == "ModuleManager")
+						MMLoaded = true;
+					else if (name == "Kopernicus.OnDemand")
+						KopernicusLoaded = true;
+				}
 			}
 			if (assemblyList.Count > 0)
 			{
