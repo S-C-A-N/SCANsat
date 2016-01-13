@@ -27,10 +27,11 @@ namespace SCANsat.SCAN_UI
 		private int mapHeight, biomeMapHeight;
 		private float transparency;
 		private int interpolationScale;
-		private bool popup, warningResource, warningStockResource, controlLock, oldNarrowBand, oldStockScanThreshold;
+		private bool popup, warningResource, warningStockResource, warningMMLoaded, controlLock, oldNarrowBand, oldStockScanThreshold, oldInstantScan, oldDisableScan;
 		private const string lockID = "resourceSettingLockID";
 		private Rect warningRect;
 		private string scanThreshold = "";
+		private static bool MMWarned = false;
 
 		private string resourceSettingsHelpOverlayWindow = "Open the planetary overlay map control window.";
 		private string resourceSettingsHelpBiomeLock = "Circumvents the requirement for stock surface biome scans. SCANsat displays will show the full accuracy for resource abundance with or without any surface biome scans.";
@@ -44,6 +45,7 @@ namespace SCANsat.SCAN_UI
 		private string resourceSettingsHelpOverlayBiomeHeight = "Change the texture size (map width is 2XHeight) used in constructing the planetary overlay biome map. Increase the value to increase the quality and accuracy of the map. Higher values will result in slower map generation.";
 		private string resourceSettingsHelpOverlayTransparency = "Create a grey background for planetary overlay resource maps. Used to make clear which sections of the celestial body have been\nscanned but contain no resources.";
 		private string resourceSettingsHelpScanThreshold = "A threshold level used to apply the stock resource scan to a celestial body after scanning with SCANsat sensors. This is useful when contracts or other addons require that a stock resource scan be performed. Set a value from 0-100 in the text box and click on the Set button. All celestial bodies will be checked immediately; celestial bodies will also be checked upon loading or a scene change. A reload may be required for the changes to take effect.";
+		private string MMwarning = "Warning:\nModule Manager is required for all non-stock SCANsat resource scanning";
 
 		protected override void Awake()
 		{
@@ -65,11 +67,15 @@ namespace SCANsat.SCAN_UI
 		{
 			oldNarrowBand = SCANcontroller.controller.needsNarrowBand;
 			oldStockScanThreshold = SCANcontroller.controller.useScanThreshold;
+			oldInstantScan = SCANcontroller.controller.easyModeScanning;
+			oldDisableScan = SCANcontroller.controller.disableStockResource;
 
 			biomeMapHeight = SCANcontroller.controller.overlayBiomeHeight;
 			mapHeight = SCANcontroller.controller.overlayMapHeight;
 			transparency = SCANcontroller.controller.overlayTransparency;
 			interpolationScale = SCANcontroller.controller.overlayInterpolation;
+
+			scanThreshold = (SCANcontroller.controller.scanThreshold * 100f).ToString("F0");
 
 			TooltipsEnabled = false;
 
@@ -91,6 +97,7 @@ namespace SCANsat.SCAN_UI
 			resourceSettingsHelpOverlayBiomeHeight = SCANconfigLoader.languagePack.resourceSettingsHelpOverlayBiomeHeight;
 			resourceSettingsHelpOverlayTransparency = SCANconfigLoader.languagePack.resourceSettingsHelpOverlayTransparency;
 			resourceSettingsHelpScanThreshold = SCANconfigLoader.languagePack.resourceSettingsHelpScanThreshold;
+			MMwarning = SCANconfigLoader.languagePack.resourceSettingsModuleManagerWarning;
 		}
 
 		internal void removeControlLocks()
@@ -158,6 +165,25 @@ namespace SCANsat.SCAN_UI
 			if (popup && Event.current.type == EventType.mouseDown && !warningRect.Contains(Event.current.mousePosition))
 			{
 				popup = false;
+			}
+
+			if (!MMWarned && !SCANmainMenuLoader.MMLoaded)
+			{
+				if (oldInstantScan != SCANcontroller.controller.easyModeScanning)
+				{
+					oldInstantScan = SCANcontroller.controller.easyModeScanning;
+					MMWarned = true;
+					popup = !popup;
+					warningMMLoaded = !warningMMLoaded;
+				}
+
+				if (oldDisableScan != SCANcontroller.controller.disableStockResource)
+				{
+					oldDisableScan = SCANcontroller.controller.disableStockResource;
+					MMWarned = true;
+					popup = !popup;
+					warningMMLoaded = !warningMMLoaded;
+				}
 			}
 
 			if (oldNarrowBand != SCANcontroller.controller.needsNarrowBand)
@@ -391,7 +417,23 @@ namespace SCANsat.SCAN_UI
 		{
 			if (popup)
 			{
-				if (warningResource)
+				if (warningMMLoaded)
+				{
+					warningRect = new Rect(WindowRect.width - (WindowRect.width / 2) - 150, WindowRect.height - 125, 300, 90);
+					GUI.Box(warningRect, "");
+					Rect r = new Rect(warningRect.x + 10, warningRect.y + 5, 280, 40);
+					GUI.Label(r, MMwarning, SCANskins.SCAN_headlineSmall);
+					r.x += 90;
+					r.y += 45;
+					r.width = 80;
+					r.height = 30;
+					if (GUI.Button(r, "OK", SCANskins.SCAN_buttonWarning))
+					{
+						popup = false;
+						warningMMLoaded = false;
+					}
+				}
+				else if (warningResource)
 				{
 					CelestialBody thisBody = getTargetBody();
 
