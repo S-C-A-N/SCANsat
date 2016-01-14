@@ -344,14 +344,14 @@ namespace SCANsat.SCAN_UI
 			{
 				infoLabel += string.Format("\n{0}: {1:P0}", r.Name, SCANUtil.ResourceOverlay(vlat, vlon, r.Name, v.mainBody, SCANcontroller.controller.resourceBiomeLock));
 			}
-			else if (high)
-			{
-				infoLabel += string.Format("\n{0}: Too High", resources[currentResource].Name);
-			}
-			else if (!onboard)
-			{
-				infoLabel += string.Format("\n{0}: No Scanner", resources[currentResource].Name);
-			}
+			//else if (high)
+			//{
+			//	infoLabel += string.Format("\n{0}: Too High", resources[currentResource].Name);
+			//}
+			//else if (!onboard)
+			//{
+			//	infoLabel += string.Format("\n{0}: No Scanner", resources[currentResource].Name);
+			//}
 			else
 			{
 				infoLabel += string.Format("\n{0}: No Data", r.Name);
