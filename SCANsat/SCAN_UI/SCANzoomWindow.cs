@@ -95,10 +95,7 @@ namespace SCANsat.SCAN_UI
 			}
 
 			if (spotmap == null)
-			{
 				spotmap = new SCANmap(b, false, true);
-				bigmap.loadPQS(null, b);
-			}
 
 			showOrbit = SCANcontroller.controller.map_orbit;
 			showAnomaly = SCANcontroller.controller.map_markers;
@@ -123,7 +120,7 @@ namespace SCANsat.SCAN_UI
 		{
 			removeControlLocks();
 
-			spotmap.unloadPQS();
+			SCANcontroller.controller.unloadPQS(spotmap.Body, true);
 		}
 
 		internal void removeControlLocks()

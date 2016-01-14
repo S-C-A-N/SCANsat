@@ -411,8 +411,6 @@ namespace SCANsat.SCAN_Data
 
 		#region Height Map
 
-		private PQSMod KopernicusOnDemand = null;
-
 		internal void generateHeightMap(ref int step, ref int xStart, int width)
 		{
 			if (body.pqsController == null)
@@ -430,13 +428,9 @@ namespace SCANsat.SCAN_Data
 			{
 				try
 				{
+					SCANcontroller.controller.loadPQS(body, false);
+
 					double d = SCANUtil.getElevation(body, 0, 0);
-					if (SCANmainMenuLoader.KopernicusLoaded)
-					{
-						KopernicusOnDemand = body.GetComponentsInChildren<PQSMod>(true).Where(p => p.GetType().Name == "PQSMod_OnDemandHandler").FirstOrDefault();
-						if (KopernicusOnDemand != null)
-							KopernicusOnDemand.OnQuadPreBuild(null);
-					}
 				}
 				catch (Exception e)
 				{
@@ -458,24 +452,7 @@ namespace SCANsat.SCAN_Data
 
 			if (step >= 179)
 			{
-				if (SCANmainMenuLoader.KopernicusLoaded && KopernicusOnDemand != null)
-				{
-					switch (HighLogic.LoadedScene)
-					{
-						case GameScenes.SPACECENTER:
-							if (body != Planetarium.fetch.Home)
-								KopernicusOnDemand.OnSphereInactive();
-							break;
-						case GameScenes.TRACKSTATION:
-							KopernicusOnDemand.OnSphereInactive();
-							break;
-						case GameScenes.FLIGHT:
-							if (body != FlightGlobals.currentMainBody)
-								KopernicusOnDemand.OnSphereInactive();
-							break;
-					}
-				}
-
+				SCANcontroller.controller.unloadPQS(body, false);
 				step = 0;
 				xStart = 0;
 				built = true;
@@ -485,7 +462,6 @@ namespace SCANsat.SCAN_Data
 				if (!heightMaps.ContainsKey(body.flightGlobalsIndex))
 					heightMaps.Add(body.flightGlobalsIndex, tempHeightMap);
 				tempHeightMap = null;
-				KopernicusOnDemand = null;
 				SCANUtil.SCANlog("Height Map Of [{0}] Completed...", body.theName);
 				return;
 			}

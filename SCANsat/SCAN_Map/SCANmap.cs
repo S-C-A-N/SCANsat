@@ -327,10 +327,10 @@ namespace SCANsat.SCAN_Map
 		private Color[] pix;
 		private bool resourceActive;
 		private float[,] resourceCache;
-		private int resourceInterpolation;
-		private int resourceMapWidth;
-		private int resourceMapHeight;
-		private double resourceMapScale;
+		private int resourceInterpolation = 4;
+		private int resourceMapWidth = 4;
+		private int resourceMapHeight = 2;
+		private double resourceMapScale = 1;
 		private bool randomEdges = true;
 		private double[] biomeIndex;
 		private Color[] stockBiomeColor;
@@ -488,13 +488,13 @@ namespace SCANsat.SCAN_Map
 		private float customMax;
 		private float customRange;
 		private bool useCustomRange;
-		private PQSMod KopernicusOnDemand = null;
 
 		/* MAP: nearly trivial functions */
 		public void setBody(CelestialBody b)
 		{
-			loadPQS(body, b);
+			SCANcontroller.controller.unloadPQS(body, true);
 			body = b;
+			SCANcontroller.controller.loadPQS(body, true);
 			pqs = body.pqsController != null;
 			biomeMap = body.BiomeMap != null;
 			data = SCANUtil.getData(body);
@@ -517,60 +517,7 @@ namespace SCANsat.SCAN_Map
 					resource = SCANcontroller.GetFirstResource;
 				resource.CurrentBodyConfig(body.name);
 			}
-		}
-
-		public void unloadPQS()
-		{
-			if (!SCANmainMenuLoader.KopernicusLoaded || KopernicusOnDemand == null)
-				return;
-
-			switch (HighLogic.LoadedScene)
-			{
-				case GameScenes.SPACECENTER:
-					if (body != Planetarium.fetch.Home)
-						KopernicusOnDemand.OnSphereInactive();
-					break;
-				case GameScenes.TRACKSTATION:
-					KopernicusOnDemand.OnSphereInactive();
-					break;
-				case GameScenes.FLIGHT:
-					if (body != FlightGlobals.currentMainBody)
-						KopernicusOnDemand.OnSphereInactive();
-					break;
-			}
-
-			KopernicusOnDemand = null;
-		}
-
-		public void loadPQS(CelestialBody oldBody, CelestialBody newBody)
-		{
-			if (!SCANmainMenuLoader.KopernicusLoaded)
-				return;
-
-			if (KopernicusOnDemand != null && oldBody != null)
-			{
-				switch (HighLogic.LoadedScene)
-				{
-					case GameScenes.SPACECENTER:
-						if (oldBody != Planetarium.fetch.Home)
-							KopernicusOnDemand.OnSphereInactive();
-						break;
-					case GameScenes.TRACKSTATION:
-						KopernicusOnDemand.OnSphereInactive();
-						break;
-					case GameScenes.FLIGHT:
-						if (oldBody != FlightGlobals.currentMainBody)
-							KopernicusOnDemand.OnSphereInactive();
-						break;
-				}
-
-				KopernicusOnDemand = null;
-			}
-
-			KopernicusOnDemand = newBody.GetComponentsInChildren<PQSMod>(true).Where(p => p.GetType().Name == "PQSMod_OnDemandHandler").FirstOrDefault();
-			if (KopernicusOnDemand != null)
-				KopernicusOnDemand.OnQuadPreBuild(null);
-		}
+		}		
 
 		public void setCustomRange(float min, float max)
 		{
