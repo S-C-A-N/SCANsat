@@ -101,7 +101,7 @@ namespace SCANsat.SCAN_PartModules
 			print("[SCANsat] sensorType: " + sensorType.ToString() + " fov: " + fov.ToString() + " min_alt: " + min_alt.ToString() + " max_alt: " + max_alt.ToString() + " best_alt: " + best_alt.ToString() + " power: " + power.ToString());
 		}
 
-		private void Update()
+		protected virtual void Update()
 		{
 			if (!HighLogic.LoadedSceneIsFlight)
 				return;
@@ -123,12 +123,15 @@ namespace SCANsat.SCAN_PartModules
 				alt_indicator = scanAlt();
 		}
 
-		private void FixedUpdate()
+		protected virtual void FixedUpdate()
 		{
 			if (!HighLogic.LoadedSceneIsFlight)
 				return;
 
 			if (!FlightGlobals.ready)
+				return;
+
+			if (SCANcontroller.controller == null)
 				return;
 
 			if (powerIsProblem)
@@ -139,38 +142,30 @@ namespace SCANsat.SCAN_PartModules
 
 			if (scanning)
 			{
-				if (SCANcontroller.controller == null)
+				if (sensorType != 0 || SCANcontroller.controller.isVesselKnown(vessel.id, (SCANtype)sensorType))
 				{
-					scanning = false;
-					Debug.LogError("[SCANsat] Warning: SCANsat scenario module not initialized; Shutting down");
-				}
-				else
-				{
-					if (sensorType != 0 || SCANcontroller.controller.isVesselKnown(vessel.id, (SCANtype)sensorType))
+					if (TimeWarp.CurrentRate < 15000)
 					{
-						if (TimeWarp.CurrentRate < 15000)
+						float p = power * TimeWarp.fixedDeltaTime;
+						float e = part.RequestResource("ElectricCharge", p);
+						if (e < p)
 						{
-							float p = power * TimeWarp.fixedDeltaTime;
-							float e = part.RequestResource("ElectricCharge", p);
-							if (e < p)
-							{
-								unregisterScanner();
-								powerIsProblem = true;
-							}
-							else
-							{
-								powerIsProblem = false;
-							}
+							unregisterScanner();
+							powerIsProblem = true;
 						}
-						else if (powerIsProblem)
+						else
 						{
-							registerScanner();
 							powerIsProblem = false;
 						}
 					}
-					else
-						unregisterScanner();
+					else if (powerIsProblem)
+					{
+						registerScanner();
+						powerIsProblem = false;
+					}
 				}
+				else
+					unregisterScanner();
 			}
 		}
 
