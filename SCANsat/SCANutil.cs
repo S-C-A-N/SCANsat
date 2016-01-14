@@ -106,7 +106,7 @@ namespace SCANsat
 			catch (ArgumentException e)
 			{
 				throw new ArgumentException("An invalid SCANtype name was provided.  Valid values are: " +
-					string.Join(", ", ((IEnumerable<SCANtype>)Enum.GetValues(typeof(SCANtype))).Select<SCANtype, string>(x => x.ToString()).ToArray()));
+					string.Join(", ", ((IEnumerable<SCANtype>)Enum.GetValues(typeof(SCANtype))).Select<SCANtype, string>(x => x.ToString()).ToArray()) + "\n" + e.ToString());
 			}
 		}
 
