@@ -32,7 +32,7 @@ namespace SCANsat.SCAN_UI
 		private SCANdata data;
 		private SCANresourceGlobal currentResource;
 		private List<SCANresourceGlobal> resources;
-		private List<PResource.Resource> resourceFractions;
+		//private List<PResource.Resource> resourceFractions;
 		private bool drawOverlay;
 		private bool oldOverlay;
 
