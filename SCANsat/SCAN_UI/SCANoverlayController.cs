@@ -544,6 +544,12 @@ namespace SCANsat.SCAN_UI
 				mapGenerating = true;
 				if (!data.ControllerBuilding && !data.MapBuilding)
 				{
+					if (!data.OverlayBuilding)
+					{
+						mapStep = 0;
+						mapStart = 0;
+					}
+
 					data.OverlayBuilding = true;
 					data.generateHeightMap(ref mapStep, ref mapStart, 360);
 				}

@@ -284,6 +284,12 @@ namespace SCANsat.SCAN_UI
 
 			if (!data.Built)
 			{
+				if (!data.MapBuilding)
+				{
+					scanline = 0;
+					scanstep = 0;
+				}
+
 				data.MapBuilding = true;
 				data.generateHeightMap(ref scanline, ref scanstep, 360);
 				return map_small;
