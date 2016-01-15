@@ -36,7 +36,7 @@ namespace SCANsat.SCAN_Data
 		Aquifer = 1 << 14,        // Aquifer - Regolith & K-type - MKS
 		Minerals = 1 << 15,       // Minerals - Regolith & K-type - MKS
 		Substrate = 1 << 16,      // Substrate - Regolith & K-type - MKS
-		KEEZO = 1 << 17,          // KEEZO - Regolith - Kass Effect
+		MetalOre = 1 << 17,          // Metal Ore - EPL
 		Karbonite = 1 << 18,    // Karbonite - Regolith
 		FuzzyResources = 1 << 19,         // Low Detail Resource
 		Regolith_11 = 1<< 20,		// Reserved - Regolith
