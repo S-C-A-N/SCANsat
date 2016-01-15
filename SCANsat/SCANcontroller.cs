@@ -271,10 +271,17 @@ namespace SCANsat
 			{
 				SCANUtil.SCANlog("Error while loading SCANsat terrain config settings: {0}", e);
 			}
+		}
 
+		public static void checkLoadedTerrainNodes()
+		{
 			for (int i = 0; i < FlightGlobals.Bodies.Count; i++)
 			{
 				CelestialBody b = FlightGlobals.Bodies[i];
+
+				if (b == null)
+					continue;
+
 				if (getTerrainNode(b.name) == null)
 				{
 					float? clamp = null;
