@@ -424,7 +424,7 @@ namespace SCANsat.SCAN_Data
 				return;
 			}
 
-			if (step <= 0)
+			if (step <= 0 && xStart <= 0)
 			{
 				SCANcontroller.controller.loadPQS(body, false);
 
