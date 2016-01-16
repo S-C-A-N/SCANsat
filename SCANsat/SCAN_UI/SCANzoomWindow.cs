@@ -95,7 +95,10 @@ namespace SCANsat.SCAN_UI
 			}
 
 			if (spotmap == null)
+			{
 				spotmap = new SCANmap(b, false, true);
+				spotmap.setSize(320, 240);
+			}
 
 			showOrbit = SCANcontroller.controller.map_orbit;
 			showAnomaly = SCANcontroller.controller.map_markers;
