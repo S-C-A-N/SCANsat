@@ -45,7 +45,7 @@ namespace SCANsat.SCAN_UI
 		private string resourceSettingsHelpOverlayBiomeHeight = "Change the texture size (map width is 2XHeight) used in constructing the planetary overlay biome map. Increase the value to increase the quality and accuracy of the map. Higher values will result in slower map generation.";
 		private string resourceSettingsHelpOverlayTransparency = "Create a grey background for planetary overlay resource maps. Used to make clear which sections of the celestial body have been\nscanned but contain no resources.";
 		private string resourceSettingsHelpScanThreshold = "A threshold level used to apply the stock resource scan to a celestial body after scanning with SCANsat sensors. This is useful when contracts or other addons require that a stock resource scan be performed. Set a value from 0-100 in the text box and click on the Set button. All celestial bodies will be checked immediately; celestial bodies will also be checked upon loading or a scene change. A reload may be required for the changes to take effect.";
-		private string MMwarning = "Warning:\nModule Manager is required for all non-stock SCANsat resource scanning";
+		private string MMwarning = "Warning:\nModule Manager is required for all SCANsat resource scanning";
 
 		protected override void Awake()
 		{
@@ -419,12 +419,12 @@ namespace SCANsat.SCAN_UI
 			{
 				if (warningMMLoaded)
 				{
-					warningRect = new Rect(WindowRect.width - (WindowRect.width / 2) - 150, WindowRect.height - 125, 300, 90);
+					warningRect = new Rect(WindowRect.width - (WindowRect.width / 2) - 150, WindowRect.height - 125, 300, 115);
 					GUI.Box(warningRect, "");
-					Rect r = new Rect(warningRect.x + 10, warningRect.y + 5, 280, 40);
+					Rect r = new Rect(warningRect.x + 10, warningRect.y + 5, 280, 70);
 					GUI.Label(r, MMwarning, SCANskins.SCAN_headlineSmall);
 					r.x += 90;
-					r.y += 45;
+					r.y += 70;
 					r.width = 80;
 					r.height = 30;
 					if (GUI.Button(r, "OK", SCANskins.SCAN_buttonWarning))

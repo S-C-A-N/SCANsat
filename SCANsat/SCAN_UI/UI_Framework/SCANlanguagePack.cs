@@ -74,7 +74,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 		[Persistent]
 		public string resourceSettingsHelpScanThreshold = "A threshold level used to apply the stock resource scan to a celestial body after scanning with SCANsat sensors. This is useful when contracts or other addons require that a stock resource scan be performed. Set a value from 0-100 in the text box and click on the Set button. All celestial bodies will be checked immediately; celestial bodies will also be checked upon loading or a scene change. A reload may be required for the changes to take effect.";
 		[Persistent]
-		public string resourceSettingsModuleManagerWarning = "Warning:\nModule Manager is required for all non-stock SCANsat resource scanning";
+		public string resourceSettingsModuleManagerWarning = "Warning:\nModule Manager is required for all SCANsat resource scanning";
 
 		//Color Config Window Help Tooltips
 		[Persistent]
