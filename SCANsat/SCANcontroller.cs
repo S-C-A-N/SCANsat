@@ -172,6 +172,11 @@ namespace SCANsat
 		private CelestialBody landingTargetBody;
 		private SCANwaypoint landingTarget;
 
+		/* Kopernicus On Demand Loading Data */
+		private CelestialBody dataBody;
+		private CelestialBody mapBody;
+		private PQSMod KopernicusOnDemand;
+
 		/* UI window objects */
 		internal SCANmainMap mainMap;
 		internal SCANsettingsUI settingsWindow;
@@ -266,10 +271,17 @@ namespace SCANsat
 			{
 				SCANUtil.SCANlog("Error while loading SCANsat terrain config settings: {0}", e);
 			}
+		}
 
+		public static void checkLoadedTerrainNodes()
+		{
 			for (int i = 0; i < FlightGlobals.Bodies.Count; i++)
 			{
 				CelestialBody b = FlightGlobals.Bodies[i];
+
+				if (b == null)
+					continue;
+
 				if (getTerrainNode(b.name) == null)
 				{
 					float? clamp = null;
@@ -1043,6 +1055,101 @@ namespace SCANsat
 				Destroy(appLauncher);
 			if (hiDefMap != null)
 				Destroy(hiDefMap);
+
+			if (!heightMapsBuilt)
+				unloadPQS(dataBody, false);
+		}
+
+		internal void loadPQS(CelestialBody b, bool map)
+		{
+			if (!SCANmainMenuLoader.KopernicusLoaded)
+				return;
+
+			if (map)
+			{
+				mapBody = b;
+
+				if (dataBody != null && b == dataBody)
+					return;
+			}
+			else
+			{
+				dataBody = b;
+
+				if (mapBody != null && b == mapBody)
+					return;
+			}
+
+			KopernicusOnDemand = b.GetComponentsInChildren<PQSMod>(true).Where(p => p.GetType().Name == "PQSMod_OnDemandHandler").FirstOrDefault();
+
+			if (KopernicusOnDemand == null)
+				return;
+
+			KopernicusOnDemand.OnQuadPreBuild(null);
+
+			KopernicusOnDemand = null;
+
+			SCANUtil.SCANlog("Loading Kopernicus On Demand PQSMod For {0}", b.theName);
+		}
+
+		internal void unloadPQS(CelestialBody b, bool map)
+		{
+			if (!SCANmainMenuLoader.KopernicusLoaded)
+				return;
+
+			if (map)
+			{
+				if (mapBody == null)
+					return;
+
+				if (dataBody != null && b == dataBody)
+				{
+					mapBody = null;
+					return;
+				}
+			}
+			else
+			{
+				if (dataBody == null)
+					return;
+
+				if (mapBody != null && b == mapBody)
+				{
+					dataBody = null;
+					return;
+				}
+			}
+
+			bool setInactive = false;
+
+			switch(HighLogic.LoadedScene)
+			{
+				case GameScenes.SPACECENTER:
+					if (b != Planetarium.fetch.Home)
+						setInactive = true;
+					break;
+				case GameScenes.TRACKSTATION:
+					setInactive = true;
+					break;
+				case GameScenes.FLIGHT:
+					if (b != FlightGlobals.currentMainBody)
+						setInactive = true;
+					break;
+			}
+
+			if (!setInactive)
+				return;
+
+			KopernicusOnDemand = b.GetComponentsInChildren<PQSMod>(true).Where(p => p.GetType().Name == "PQSMod_OnDemandHandler").FirstOrDefault();
+
+			if (KopernicusOnDemand == null)
+				return;
+
+			KopernicusOnDemand.OnSphereInactive();
+
+			KopernicusOnDemand = null;
+
+			SCANUtil.SCANlog("Unloading Kopernicus On Demand PQSMod For {0}", b.theName);
 		}
 
 		private void drawTarget()

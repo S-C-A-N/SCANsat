@@ -98,6 +98,8 @@ namespace SCANsat.SCAN_UI
 			removeControlLocks();
 			if (spotMap != null)
 				Destroy(spotMap);
+
+			SCANcontroller.controller.unloadPQS(bigmap.Body, true);
 		}
 
 		protected override void Update()

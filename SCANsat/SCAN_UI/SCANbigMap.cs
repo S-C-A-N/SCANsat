@@ -43,11 +43,6 @@ namespace SCANsat.SCAN_UI
 		private Rect pos_spotmap_x = new Rect(10f, 10f, 25f, 25f);
 		internal static Rect defaultRect = new Rect(250, 60, 780, 460);
 
-		private string exportSize = "";
-
-		//private bool overlay = false;
-		//private int step = 0;
-
 		internal SCANzoomWindow spotMap;
 
 		private List<SCANresourceGlobal> loadedResources = new List<SCANresourceGlobal>();
@@ -124,6 +119,8 @@ namespace SCANsat.SCAN_UI
 		{
 			if (spotMap != null)
 				Destroy(spotMap);
+
+			SCANcontroller.controller.unloadPQS(bigmap.Body, true);
 		}
 
 		protected override void Update()

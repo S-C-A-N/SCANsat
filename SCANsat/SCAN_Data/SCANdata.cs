@@ -396,7 +396,7 @@ namespace SCANsat.SCAN_Data
 				uncov += coverage_count[15];
 			if ((type & SCANtype.Substrate) != SCANtype.Nothing)
 				uncov += coverage_count[16];
-			if ((type & SCANtype.KEEZO) != SCANtype.Nothing)
+			if ((type & SCANtype.MetalOre) != SCANtype.Nothing)
 				uncov += coverage_count[17];
 			if ((type & SCANtype.Karbonite) != SCANtype.Nothing)
 				uncov += coverage_count[18];
@@ -424,8 +424,10 @@ namespace SCANsat.SCAN_Data
 				return;
 			}
 
-			if (step <= 0)
+			if (step <= 0 && xStart <= 0)
 			{
+				SCANcontroller.controller.loadPQS(body, false);
+
 				try
 				{
 					double d = SCANUtil.getElevation(body, 0, 0);
@@ -450,6 +452,7 @@ namespace SCANsat.SCAN_Data
 
 			if (step >= 179)
 			{
+				SCANcontroller.controller.unloadPQS(body, false);
 				step = 0;
 				xStart = 0;
 				built = true;

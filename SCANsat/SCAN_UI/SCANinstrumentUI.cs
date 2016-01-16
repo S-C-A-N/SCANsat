@@ -323,35 +323,35 @@ namespace SCANsat.SCAN_UI
 					break;
 				}
 
-				if (tooHigh)
-				{
-					infoLabel += string.Format("\n{0}: Too High", resources[currentResource].Name);
-				}
-				else if (!scanner)
-				{
-					infoLabel += string.Format("\n{0}: No Scanner", resources[currentResource].Name);
-				}
-				else
-				{
-					resourceLabel(resources[currentResource]);
-				}
+				resourceLabel(resources[currentResource], tooHigh, scanner);
 			}
 			else
 			{
-				resourceLabel(resources[currentResource]);
+				resourceLabel(resources[currentResource], false, false);
 			}
 		}
 
-		private void resourceLabel(SCANresourceGlobal r)
+		private void resourceLabel(SCANresourceGlobal r, bool high, bool onboard)
 		{
 			if ((sensors & r.SType) != SCANtype.Nothing)
 			{
-				infoLabel += string.Format("\n{0}: {1:P2}", r.Name, SCANUtil.ResourceOverlay(vlat, vlon, r.Name, v.mainBody, SCANcontroller.controller.resourceBiomeLock));
+				if (high || !onboard)
+					infoLabel += string.Format("\n{0}: {1:P0}", r.Name, SCANUtil.ResourceOverlay(vlat, vlon, r.Name, v.mainBody, SCANcontroller.controller.resourceBiomeLock));
+				else
+					infoLabel += string.Format("\n{0}: {1:P2}", r.Name, SCANUtil.ResourceOverlay(vlat, vlon, r.Name, v.mainBody, SCANcontroller.controller.resourceBiomeLock));
 			}
 			else if ((sensors & SCANtype.FuzzyResources) != SCANtype.Nothing)
 			{
 				infoLabel += string.Format("\n{0}: {1:P0}", r.Name, SCANUtil.ResourceOverlay(vlat, vlon, r.Name, v.mainBody, SCANcontroller.controller.resourceBiomeLock));
 			}
+			//else if (high)
+			//{
+			//	infoLabel += string.Format("\n{0}: Too High", resources[currentResource].Name);
+			//}
+			//else if (!onboard)
+			//{
+			//	infoLabel += string.Format("\n{0}: No Scanner", resources[currentResource].Name);
+			//}
 			else
 			{
 				infoLabel += string.Format("\n{0}: No Data", r.Name);

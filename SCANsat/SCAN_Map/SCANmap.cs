@@ -12,6 +12,7 @@
 #endregion
 
 using System;
+using System.Linq;
 using System.IO;
 using UnityEngine;
 using SCANsat.SCAN_Platform.Palettes;
@@ -326,10 +327,10 @@ namespace SCANsat.SCAN_Map
 		private Color[] pix;
 		private bool resourceActive;
 		private float[,] resourceCache;
-		private int resourceInterpolation;
-		private int resourceMapWidth;
-		private int resourceMapHeight;
-		private double resourceMapScale;
+		private int resourceInterpolation = 4;
+		private int resourceMapWidth = 4;
+		private int resourceMapHeight = 2;
+		private double resourceMapScale = 1;
 		private bool randomEdges = true;
 		private double[] biomeIndex;
 		private Color[] stockBiomeColor;
@@ -475,7 +476,7 @@ namespace SCANsat.SCAN_Map
 		private mapType mType;
 		private bool zoom;
 		private Texture2D map; // refs above: 214,215,216,232, below, and JSISCANsatRPM.
-		private CelestialBody body; // all refs are below
+		private CelestialBody body = null; // all refs are below
 		private SCANresourceGlobal resource;
 		private SCANdata data;
 		private SCANmapLegend mapLegend;
@@ -491,7 +492,9 @@ namespace SCANsat.SCAN_Map
 		/* MAP: nearly trivial functions */
 		public void setBody(CelestialBody b)
 		{
+			SCANcontroller.controller.unloadPQS(body, true);
 			body = b;
+			SCANcontroller.controller.loadPQS(body, true);
 			pqs = body.pqsController != null;
 			biomeMap = body.BiomeMap != null;
 			data = SCANUtil.getData(body);
@@ -514,7 +517,7 @@ namespace SCANsat.SCAN_Map
 					resource = SCANcontroller.GetFirstResource;
 				resource.CurrentBodyConfig(body.name);
 			}
-		}
+		}		
 
 		public void setCustomRange(float min, float max)
 		{

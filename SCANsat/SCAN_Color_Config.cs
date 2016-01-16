@@ -63,7 +63,8 @@ namespace SCANsat
 			FilePath = filepath;
 			TopNodeName = filepath + "/" + node;
 
-			Load();
+			if (Load())
+				SCANUtil.SCANlog("Color File Loaded...");
 		}
 
 		public override void OnDecodeFromConfigNode()

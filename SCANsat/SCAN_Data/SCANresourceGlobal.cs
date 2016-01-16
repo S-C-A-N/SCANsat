@@ -104,6 +104,9 @@ namespace SCANsat.SCAN_Data
 		public override void OnDecodeFromConfigNode()
 		{
 			resourceType = SCANcontroller.getResourceType(name);
+			if (resourceType == null)
+				return;
+
 			sType = resourceType.Type;
 
 			lowColor32 = (Color32)lowResourceColor;

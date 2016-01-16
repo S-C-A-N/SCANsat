@@ -1,3 +1,14 @@
+Version 14.6 - 2016-1-15
+------------------------
+
+- Fix Kopernicus compatibility (Thanks ThomasKerman)
+- Allow mouse-over info and overlay tooltips to fall back to low resolution resource data in some cases
+- Add a warning when stock resource scanning is disabled without having Module Manager installed
+- Fixed some issues affecting scanner power usage and scanning altitude indicators
+- Allow for included contracts to be disabled through the ScanSatOfficial Contract Type (Thanks DBT85)
+- Fix a bug that was preventing loading of the color config file when additional planets are installed
+- Add MetalOre as a SCANsat resource and MetalOre scanner modules to EPL scanner parts
+
 Version 14.5 - 2015-12-22
 ------------------------
 
