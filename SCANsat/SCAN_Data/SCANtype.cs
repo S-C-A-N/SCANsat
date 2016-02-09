@@ -42,12 +42,13 @@ namespace SCANsat.SCAN_Data
 		Hydrates = 1 << 20,		// Hydrates - CRP
 		Gypsum = 1 << 21,		// Gypsum - CRP
 		ExoticMinerals = 1 << 22, // Exotic Minerals - CRP
-		CRP_Reserved_1 = 1 << 23,
-		CRP_Reserved_2 = 1 << 24,
+		Dirt = 1 << 23,			// Dirt - CRP
+		RareMetals = 1 << 24,	// Rare Metals - CRP
+		CRP_Reserved = 1 << 25,
 
 		Everything_SCAN = (1 << 6) - 1,	// All default SCANsat scanners
 		AllResources = 2147483584,		// All resource types
-		DefinedResources = 33030016,		// All defined resource types
+		DefinedResources = 66584448,		// All defined resource types
 		MKSResources = 107648,			// All standard MKS/USI resources
 		Everything = Int32.MaxValue      // All scanner types
 	}
