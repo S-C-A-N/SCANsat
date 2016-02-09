@@ -402,8 +402,16 @@ namespace SCANsat.SCAN_Data
 				uncov += coverage_count[18];
 			if ((type & SCANtype.FuzzyResources) != SCANtype.Nothing)
 				uncov += coverage_count[19];
-			if ((type & SCANtype.Regolith_11) != SCANtype.Nothing)
+			if ((type & SCANtype.Hydrates) != SCANtype.Nothing)
 				uncov += coverage_count[20];
+			if ((type & SCANtype.Gypsum) != SCANtype.Nothing)
+				uncov += coverage_count[21];
+			if ((type & SCANtype.ExoticMinerals) != SCANtype.Nothing)
+				uncov += coverage_count[22];
+			if ((type & SCANtype.CRP_Reserved_1) != SCANtype.Nothing)
+				uncov += coverage_count[23];
+			if ((type & SCANtype.CRP_Reserved_2) != SCANtype.Nothing)
+				uncov += coverage_count[24];
 			return uncov;
 		}
 		
@@ -426,7 +434,7 @@ namespace SCANsat.SCAN_Data
 
 			if (step <= 0 && xStart <= 0)
 			{
-				SCANcontroller.controller.loadPQS(body, false);
+				SCANcontroller.controller.loadPQS(body);
 
 				try
 				{
@@ -452,7 +460,7 @@ namespace SCANsat.SCAN_Data
 
 			if (step >= 179)
 			{
-				SCANcontroller.controller.unloadPQS(body, false);
+				SCANcontroller.controller.unloadPQS(body);
 				step = 0;
 				xStart = 0;
 				built = true;
