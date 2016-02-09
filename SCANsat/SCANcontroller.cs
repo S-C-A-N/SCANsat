@@ -177,7 +177,6 @@ namespace SCANsat
 		private List<CelestialBody> dataBodies = new List<CelestialBody>();
 		private CelestialBody bigMapBody;
 		private CelestialBody zoomMapBody;
-		private CelestialBody RPMMapBody;
 		private PQSMod KopernicusOnDemand;
 
 		/* UI window objects */
@@ -1087,9 +1086,6 @@ namespace SCANsat
 
 					if (zoomMapBody != null && zoomMapBody == b)
 						return;
-
-					if (RPMMapBody != null && RPMMapBody == b)
-						return;
 					break;
 				case mapSource.BigMap:
 					if (bigMapBody != null && bigMapBody == b)
@@ -1098,9 +1094,6 @@ namespace SCANsat
 					bigMapBody = b;
 
 					if (zoomMapBody != null && zoomMapBody == b)
-						return;
-
-					if (RPMMapBody != null && RPMMapBody == b)
 						return;
 
 					if (dataBodies.Contains(b))
@@ -1114,29 +1107,13 @@ namespace SCANsat
 					zoomMapBody = b;
 
 					if (bigMapBody != null && bigMapBody == b)
-						return;				
-
-					if (RPMMapBody != null && RPMMapBody == b)
 						return;
 
 					if (dataBodies.Contains(b))
 						return;
 					break;
 				case mapSource.RPM:
-					if (RPMMapBody != null && RPMMapBody == b)
-						return;
-
-					RPMMapBody = b;
-
-					if (zoomMapBody != null && zoomMapBody == b)
-						return;
-
-					if (bigMapBody != null && bigMapBody == b)
-						return;		
-
-					if (dataBodies.Contains(b))
-						return;
-					break;
+					return;
 			}
 
 			KopernicusOnDemand = b.GetComponentsInChildren<PQSMod>(true).Where(p => p.GetType().Name == "PQSMod_OnDemandHandler").FirstOrDefault();
@@ -1170,17 +1147,11 @@ namespace SCANsat
 
 					if (zoomMapBody != null && zoomMapBody == b)
 						return;
-
-					if (RPMMapBody != null && RPMMapBody == b)
-						return;
 					break;
 				case mapSource.BigMap:
 					bigMapBody = null;
 
 					if (zoomMapBody != null && zoomMapBody == b)
-						return;
-
-					if (RPMMapBody != null && RPMMapBody == b)
 						return;
 
 					if (dataBodies.Contains(b))
@@ -1193,24 +1164,11 @@ namespace SCANsat
 					if (bigMapBody != null && bigMapBody == b)
 						return;
 
-					if (RPMMapBody != null && RPMMapBody == b)
-						return;
-
 					if (dataBodies.Contains(b))
 						return;
 					break;
 				case mapSource.RPM:
-					RPMMapBody = null;
-
-					if (zoomMapBody != null && zoomMapBody == b)
-						return;
-
-					if (bigMapBody != null && bigMapBody == b)
-						return;
-
-					if (dataBodies.Contains(b))
-						return;
-					break;
+					return;
 			}
 
 			bool setInactive = false;
