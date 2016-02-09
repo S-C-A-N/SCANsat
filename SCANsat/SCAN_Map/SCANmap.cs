@@ -25,12 +25,12 @@ namespace SCANsat.SCAN_Map
 {
 	public class SCANmap
 	{
-		internal SCANmap(CelestialBody Body, bool Cache, bool zoomMap = false)
+		internal SCANmap(CelestialBody Body, bool Cache, mapSource s)
 		{
 			body = Body;
+			mSource = s;
 			pqs = body.pqsController != null;
 			biomeMap = body.BiomeMap != null;
-			zoom = zoomMap;
 			data = SCANUtil.getData(body);
 			if (data == null)
 			{
@@ -91,6 +91,11 @@ namespace SCANsat.SCAN_Map
 			get { return mType; }
 		}
 
+		public mapSource MSource
+		{
+			get { return mSource; }
+		}
+
 		public Texture2D Map
 		{
 			get { return map; }
@@ -122,11 +127,6 @@ namespace SCANsat.SCAN_Map
 		public MapProjection Projection
 		{
 			get { return projection; }
-		}
-
-		public bool Zoom
-		{
-			get { return zoom; }
 		}
 
 		internal float[,] Big_HeightMap
@@ -474,7 +474,7 @@ namespace SCANsat.SCAN_Map
 
 		/* MAP: internal state */
 		private mapType mType;
-		private bool zoom;
+		private mapSource mSource;
 		private Texture2D map; // refs above: 214,215,216,232, below, and JSISCANsatRPM.
 		private CelestialBody body = null; // all refs are below
 		private SCANresourceGlobal resource;
@@ -492,9 +492,9 @@ namespace SCANsat.SCAN_Map
 		/* MAP: nearly trivial functions */
 		public void setBody(CelestialBody b)
 		{
-			SCANcontroller.controller.unloadPQS(body, true);
+			SCANcontroller.controller.unloadPQS(body, mSource);
 			body = b;
-			SCANcontroller.controller.loadPQS(body, true);
+			SCANcontroller.controller.loadPQS(body, mSource);
 			pqs = body.pqsController != null;
 			biomeMap = body.BiomeMap != null;
 			data = SCANUtil.getData(body);
@@ -560,7 +560,7 @@ namespace SCANsat.SCAN_Map
 
 		public void resetResourceMap()
 		{
-			if (!zoom)
+			if (mSource != mapSource.ZoomMap)
 			{
 				if (SCANcontroller.controller.overlayMapHeight != resourceMapHeight)
 				{
@@ -654,9 +654,9 @@ namespace SCANsat.SCAN_Map
 				{
 					for (int i = resourceInterpolation / 2; i >= 1; i /= 2)
 					{
-						SCANuiUtil.interpolate(resourceCache, resourceMapHeight, resourceMapWidth, i, i, i, r, randomEdges, zoom);
-						SCANuiUtil.interpolate(resourceCache, resourceMapHeight, resourceMapWidth, 0, i, i, r, randomEdges, zoom);
-						SCANuiUtil.interpolate(resourceCache, resourceMapHeight, resourceMapWidth, i, 0, i, r, randomEdges, zoom);
+						SCANuiUtil.interpolate(resourceCache, resourceMapHeight, resourceMapWidth, i, i, i, r, randomEdges, mSource == mapSource.ZoomMap);
+						SCANuiUtil.interpolate(resourceCache, resourceMapHeight, resourceMapWidth, 0, i, i, r, randomEdges, mSource == mapSource.ZoomMap);
+						SCANuiUtil.interpolate(resourceCache, resourceMapHeight, resourceMapWidth, i, 0, i, r, randomEdges, mSource == mapSource.ZoomMap);
 					}
 				}
 			}
@@ -876,7 +876,7 @@ namespace SCANsat.SCAN_Map
 							}
 						case MapProjection.Polar:
 							{
-								if (zoom)
+								if (mSource == mapSource.ZoomMap)
 									abundance = resourceCache[Mathf.RoundToInt(i * (resourceMapWidth / mapwidth)), Mathf.RoundToInt(mapstep * (resourceMapWidth / mapwidth))];
 								else
 									abundance = getResoureCache(lon, lat);

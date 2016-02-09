@@ -71,7 +71,7 @@ namespace SCANsat.SCAN_UI
 				b = Planetarium.fetch.Home;
 			if (bigmap == null)
 			{
-				bigmap = new SCANmap(b, true);
+				bigmap = new SCANmap(b, true, mapSource.BigMap);
 				bigmap.setProjection((MapProjection)SCANcontroller.controller.projection);
 				bigmap.setWidth(720);
 			}
@@ -99,7 +99,7 @@ namespace SCANsat.SCAN_UI
 			if (spotMap != null)
 				Destroy(spotMap);
 
-			SCANcontroller.controller.unloadPQS(bigmap.Body, true);
+			SCANcontroller.controller.unloadPQS(bigmap.Body, mapSource.BigMap);
 		}
 
 		protected override void Update()
