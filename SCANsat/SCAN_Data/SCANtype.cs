@@ -41,15 +41,15 @@ namespace SCANsat.SCAN_Data
 		FuzzyResources = 1 << 19,         // Low Detail Resource
 		Hydrates = 1 << 20,		// Hydrates - CRP
 		Gypsum = 1 << 21,		// Gypsum - CRP
-		ExoticMinerals = 1 << 22, // Exotic Minerals - CRP
-		Dirt = 1 << 23,			// Dirt - CRP
-		RareMetals = 1 << 24,	// Rare Metals - CRP
+		RareMetals = 1 << 22, // Exotic Minerals - CRP
+		ExoticMinerals = 1 << 23,			// Dirt - CRP
+		Dirt = 1 << 24,	// Rare Metals - CRP
 		CRP_Reserved = 1 << 25,
 
 		Everything_SCAN = (1 << 6) - 1,	// All default SCANsat scanners
 		AllResources = 2147483584,		// All resource types
 		DefinedResources = 66584448,		// All defined resource types
-		MKSResources = 107648,			// All standard MKS/USI resources
+		MKSResources = 32613504,			// All standard MKS/USI resources
 		Everything = Int32.MaxValue      // All scanner types
 	}
 }
