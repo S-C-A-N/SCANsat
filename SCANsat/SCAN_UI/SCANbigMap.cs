@@ -97,7 +97,7 @@ namespace SCANsat.SCAN_UI
 
 			if (bigmap == null)
 			{
-				bigmap = new SCANmap(b, true);
+				bigmap = new SCANmap(b, true, mapSource.BigMap);
 				bigmap.setProjection((MapProjection)SCANcontroller.controller.projection);
 				if (SCANcontroller.controller.map_width % 2 != 0)
 					SCANcontroller.controller.map_width += 1;
@@ -120,7 +120,7 @@ namespace SCANsat.SCAN_UI
 			if (spotMap != null)
 				Destroy(spotMap);
 
-			SCANcontroller.controller.unloadPQS(bigmap.Body, true);
+			SCANcontroller.controller.unloadPQS(bigmap.Body, mapSource.BigMap);
 		}
 
 		protected override void Update()

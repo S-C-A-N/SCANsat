@@ -1,3 +1,9 @@
+Version 14.8 - 2016-2-10
+------------------------
+
+- Fix RPM and Kopernicus incompatibility
+- Add new CRP resources and configs
+
 Version 14.7 - 2016-1-16
 ------------------------
 

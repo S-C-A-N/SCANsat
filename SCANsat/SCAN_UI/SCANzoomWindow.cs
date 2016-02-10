@@ -96,7 +96,7 @@ namespace SCANsat.SCAN_UI
 
 			if (spotmap == null)
 			{
-				spotmap = new SCANmap(b, false, true);
+				spotmap = new SCANmap(b, false, mapSource.ZoomMap);
 				spotmap.setSize(320, 240);
 			}
 
@@ -123,7 +123,7 @@ namespace SCANsat.SCAN_UI
 		{
 			removeControlLocks();
 
-			SCANcontroller.controller.unloadPQS(spotmap.Body, true);
+			SCANcontroller.controller.unloadPQS(spotmap.Body, mapSource.ZoomMap);
 		}
 
 		internal void removeControlLocks()

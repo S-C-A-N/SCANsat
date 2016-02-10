@@ -35,4 +35,12 @@ namespace SCANsat.SCAN_Map
 		Slope = 1,
 		Biome = 2,
 	}
+
+	public enum mapSource
+	{
+		Data = 0,
+		BigMap = 1,
+		ZoomMap = 2,
+		RPM = 3,
+	}
 }

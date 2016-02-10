@@ -49,7 +49,7 @@ namespace SCANsat.SCAN_UI
 
 			if (spotmap == null)
 			{
-				spotmap = new SCANmap(b, false, true);
+				spotmap = new SCANmap(b, false, mapSource.ZoomMap);
 				spotmap.setSize(320, 240);
 			}
 

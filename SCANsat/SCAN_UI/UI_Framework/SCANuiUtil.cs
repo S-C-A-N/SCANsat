@@ -2031,7 +2031,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 				for (int i = 0; i < width; i += stepScale)
 				{
 					Vector2d coords;
-					if (map.Zoom && map.Projection == MapProjection.Polar)
+					if (map.MSource == mapSource.ZoomMap && map.Projection == MapProjection.Polar)
 					{
 						double rLon = (i * 1.0f / scale) - 180f + map.Lon_Offset;
 						double rLat = (j * 1.0f / scale) - 90f + map.Lat_Offset;

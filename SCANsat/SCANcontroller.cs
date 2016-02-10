@@ -22,6 +22,7 @@ using FinePrint.Contracts;
 using SCANsat.SCAN_UI;
 using SCANsat.SCAN_UI.UI_Framework;
 using SCANsat.SCAN_Data;
+using SCANsat.SCAN_Map;
 using SCANsat.SCAN_PartModules;
 using SCANsat.SCAN_Platform;
 using SCANsat.SCAN_Platform.Palettes;
@@ -173,8 +174,9 @@ namespace SCANsat
 		private SCANwaypoint landingTarget;
 
 		/* Kopernicus On Demand Loading Data */
-		private CelestialBody dataBody;
-		private CelestialBody mapBody;
+		private List<CelestialBody> dataBodies = new List<CelestialBody>();
+		private CelestialBody bigMapBody;
+		private CelestialBody zoomMapBody;
 		private PQSMod KopernicusOnDemand;
 
 		/* UI window objects */
@@ -1057,26 +1059,64 @@ namespace SCANsat
 				Destroy(hiDefMap);
 
 			if (!heightMapsBuilt)
-				unloadPQS(dataBody, false);
+			{
+				for (int i = dataBodies.Count - 1; i >= 0; i--)
+				{
+					CelestialBody b = dataBodies[i];
+
+					unloadPQS(b);
+				}
+			}
 		}
 
-		internal void loadPQS(CelestialBody b, bool map)
+		internal void loadPQS(CelestialBody b, mapSource s = mapSource.Data)
 		{
 			if (!SCANmainMenuLoader.KopernicusLoaded)
 				return;
 
-			if (map)
-			{
-				mapBody = b;
+			if (b == null)
+				return;
 
-				if (dataBody != null && b == dataBody)
-					return;
-			}
-			else
+			switch (s)
 			{
-				dataBody = b;
+				case mapSource.Data:
+					if (dataBodies.Contains(b))
+						return;
 
-				if (mapBody != null && b == mapBody)
+					dataBodies.Add(b);
+
+					if (bigMapBody != null && bigMapBody == b)
+						return;
+
+					if (zoomMapBody != null && zoomMapBody == b)
+						return;
+					break;
+				case mapSource.BigMap:
+					if (bigMapBody != null && bigMapBody == b)
+						return;
+
+					bigMapBody = b;
+
+					if (zoomMapBody != null && zoomMapBody == b)
+						return;
+
+					if (dataBodies.Contains(b))
+						return;
+					break;
+
+				case mapSource.ZoomMap:
+					if (zoomMapBody != null && zoomMapBody == b)
+						return;
+
+					zoomMapBody = b;
+
+					if (bigMapBody != null && bigMapBody == b)
+						return;
+
+					if (dataBodies.Contains(b))
+						return;
+					break;
+				case mapSource.RPM:
 					return;
 			}
 
@@ -1092,32 +1132,47 @@ namespace SCANsat
 			SCANUtil.SCANlog("Loading Kopernicus On Demand PQSMod For {0}", b.theName);
 		}
 
-		internal void unloadPQS(CelestialBody b, bool map)
+		internal void unloadPQS(CelestialBody b, mapSource s = mapSource.Data)
 		{
 			if (!SCANmainMenuLoader.KopernicusLoaded)
 				return;
 
-			if (map)
-			{
-				if (mapBody == null)
-					return;
+			if (b == null)
+				return;
 
-				if (dataBody != null && b == dataBody)
-				{
-					mapBody = null;
-					return;
-				}
-			}
-			else
+			switch (s)
 			{
-				if (dataBody == null)
-					return;
+				case mapSource.Data:
+					if (dataBodies.Contains(b))
+						dataBodies.RemoveAll(a => a == b);
 
-				if (mapBody != null && b == mapBody)
-				{
-					dataBody = null;
+					if (bigMapBody != null && bigMapBody == b)
+						return;
+
+					if (zoomMapBody != null && zoomMapBody == b)
+						return;
+					break;
+				case mapSource.BigMap:
+					bigMapBody = null;
+
+					if (zoomMapBody != null && zoomMapBody == b)
+						return;
+
+					if (dataBodies.Contains(b))
+						return;
+					break;
+
+				case mapSource.ZoomMap:
+					zoomMapBody = null;
+
+					if (bigMapBody != null && bigMapBody == b)
+						return;
+
+					if (dataBodies.Contains(b))
+						return;
+					break;
+				case mapSource.RPM:
 					return;
-				}
 			}
 
 			bool setInactive = false;
