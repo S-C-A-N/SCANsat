@@ -670,6 +670,7 @@ The settings menu has a various general options; this window has an in-game help
 * If MechJeb is installed an additional option is available to toggle the MechJeb Landing Guidance interface
 * If the windows are ever dragged off screen there is an option to **Reset All Windows** to their default positions
 * **Scanning Data** can be deleted for any or all planets; a confirmation box will appear when these options are selected
+* **Time Warp Resolution** affects the scanning frequency of background scanning. Decreasing this value may result in gaps in maps while scanning at high time warp, but may alleviate some performance issues.
 * The numbers under the **Time Warp Resolution** indicate the following
     * **Vessels:** The number of vessels with any active SCANsat sensors present
 	* **Sensors:** The total number of SCANsat sensors on all vessels; note that all combination sensors are separated into their invidual components, i.e. the Multi-Spectral scanner consists of two sensors, Biomes and Anomalies.
