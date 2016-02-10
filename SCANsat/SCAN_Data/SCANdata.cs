@@ -406,11 +406,11 @@ namespace SCANsat.SCAN_Data
 				uncov += coverage_count[20];
 			if ((type & SCANtype.Gypsum) != SCANtype.Nothing)
 				uncov += coverage_count[21];
-			if ((type & SCANtype.ExoticMinerals) != SCANtype.Nothing)
-				uncov += coverage_count[22];
-			if ((type & SCANtype.Dirt) != SCANtype.Nothing)
-				uncov += coverage_count[23];
 			if ((type & SCANtype.RareMetals) != SCANtype.Nothing)
+				uncov += coverage_count[22];
+			if ((type & SCANtype.ExoticMinerals) != SCANtype.Nothing)
+				uncov += coverage_count[23];
+			if ((type & SCANtype.Dirt) != SCANtype.Nothing)
 				uncov += coverage_count[24];
 			if ((type & SCANtype.CRP_Reserved) != SCANtype.Nothing)
 				uncov += coverage_count[25];
