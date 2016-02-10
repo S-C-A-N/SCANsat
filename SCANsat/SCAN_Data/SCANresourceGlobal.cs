@@ -256,7 +256,7 @@ namespace SCANsat.SCAN_Data
 
 		public SCANresourceBody getBodyConfig (int i)
 		{
-			if (masterBodyConfigs.Count >= i)
+			if (masterBodyConfigs.Count > i)
 				return masterBodyConfigs.ElementAt(i).Value;
 			else
 				SCANUtil.SCANlog("SCANsat resource celestial body config is empty; something probably went wrong here");
