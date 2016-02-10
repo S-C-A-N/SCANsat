@@ -1060,8 +1060,12 @@ namespace SCANsat
 
 			if (!heightMapsBuilt)
 			{
-				foreach (CelestialBody b in dataBodies)
+				for (int i = dataBodies.Count - 1; i >= 0; i--)
+				{
+					CelestialBody b = dataBodies[i];
+
 					unloadPQS(b);
+				}
 			}
 		}
 
