@@ -69,6 +69,7 @@
     <Compile Include="SCAN_Platform\Extensions\Colors\UnityEngine.Color_.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="SCAN_Platform\Extensions\ConfigNodes\ConfigExtensions.cs" />
     <Compile Include="SCAN_Platform\Extensions\GUI\UnityEngine.GUILayout_.cs" />
     <Compile Include="SCAN_Platform\Extensions\GUI\UnityEngine.GUISkin_.cs" />
     <Compile Include="SCAN_Platform\Extensions\GUI\UnityEngine.GUIStyleState_.cs" />
