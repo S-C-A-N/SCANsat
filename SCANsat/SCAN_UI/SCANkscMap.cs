@@ -590,7 +590,7 @@ namespace SCANsat.SCAN_UI
 							{
 								spotMap = gameObject.AddComponent<SCANzoomWindow>();
 							}
-							spotMap.setMapCenter(mlat, mlon, true, bigmap);
+							spotMap.setMapCenter(mlat, mlon, true, bigmap, true);
 						}
 					}
 					Event.current.Use();

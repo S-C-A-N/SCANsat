@@ -107,7 +107,7 @@ namespace SCANsat.SCAN_PartModules
 
 			if (!SCANcontroller.controller.hiDefMap.Visible)
 			{
-				SCANcontroller.controller.hiDefMap.setMapCenter(SCANUtil.fixLatShift(vessel.latitude), SCANUtil.fixLonShift(vessel.longitude), hiDetailOnly || SCANcontroller.controller.hiDetailZoomMap, null, this);
+				SCANcontroller.controller.hiDefMap.setMapCenter(SCANUtil.fixLatShift(vessel.latitude), SCANUtil.fixLonShift(vessel.longitude), hiDetailOnly || SCANcontroller.controller.hiDetailZoomMap, null, false, this);
 			}
 			else
 				SCANcontroller.controller.hiDefMap.closeMap();
@@ -121,7 +121,7 @@ namespace SCANsat.SCAN_PartModules
 			if (SCANcontroller.controller.hiDefMap == null)
 				return;
 
-			SCANcontroller.controller.hiDefMap.setMapCenter(SCANUtil.fixLatShift(vessel.latitude), SCANUtil.fixLonShift(vessel.longitude), hiDetailOnly || SCANcontroller.controller.hiDetailZoomMap, null, this);
+			SCANcontroller.controller.hiDefMap.setMapCenter(SCANUtil.fixLatShift(vessel.latitude), SCANUtil.fixLonShift(vessel.longitude), hiDetailOnly || SCANcontroller.controller.hiDetailZoomMap, null, false, this);
 		}
 
 		private void enableConnectedModules()
