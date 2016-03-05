@@ -19,6 +19,7 @@ using SCANsat.SCAN_Map;
 using SCANsat.SCAN_UI.UI_Framework;
 using SCANsat.SCAN_Platform;
 using SCANsat.SCAN_Platform.Palettes;
+using FinePrint.Utilities;
 using palette = SCANsat.SCAN_UI.UI_Framework.SCANpalette;
 using UnityEngine;
 
@@ -1364,7 +1365,19 @@ namespace SCANsat.SCAN_UI
 				if (body.ocean)
 					clamp = 0;
 
-				bodyTerrain = new SCANterrainConfig(SCANconfigLoader.SCANNode.DefaultMinHeightRange, SCANconfigLoader.SCANNode.DefaultMaxHeightRange, clamp, SCANUtil.paletteLoader(SCANconfigLoader.SCANNode.DefaultPalette, 7), 7, false, false, body);
+				float newMax;
+
+				try
+				{
+					newMax = (float)CelestialUtilities.GetHighestPeak(body);
+				}
+				catch
+				{
+					SCANUtil.SCANlog("Error in calculating Max Height for {0}; using default value", body.theName);
+					newMax = SCANconfigLoader.SCANNode.DefaultMaxHeightRange;
+				}
+
+				bodyTerrain = new SCANterrainConfig(SCANconfigLoader.SCANNode.DefaultMinHeightRange, newMax, clamp, SCANUtil.paletteLoader(SCANconfigLoader.SCANNode.DefaultPalette, 7), 7, false, false, body);
 
 				SCANcontroller.addToTerrainConfigData(body.name, bodyTerrain);
 			}
