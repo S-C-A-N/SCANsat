@@ -19,6 +19,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using Contracts;
 using FinePrint.Contracts;
+using FinePrint.Utilities;
 using SCANsat.SCAN_UI;
 using SCANsat.SCAN_UI.UI_Framework;
 using SCANsat.SCAN_Data;
@@ -189,6 +190,7 @@ namespace SCANsat
 		internal SCANoverlayController resourceOverlay;
 		internal SCANresourceSettings resourceSettings;
 		internal SCANzoomHiDef hiDefMap;
+		internal SCANzoomWindow zoomMap;
 
 		/* App launcher object */
 		internal SCANappLauncher appLauncher;
@@ -290,7 +292,19 @@ namespace SCANsat
 					if (b.ocean)
 						clamp = 0;
 
-					addToTerrainConfigData(b.name, new SCANterrainConfig(SCANconfigLoader.SCANNode.DefaultMinHeightRange, SCANconfigLoader.SCANNode.DefaultMaxHeightRange, clamp, SCANUtil.paletteLoader(SCANconfigLoader.SCANNode.DefaultPalette, 7), 7, false, false, b));
+					float newMax;
+
+					try
+					{
+						newMax = (float)CelestialUtilities.GetHighestPeak(b);
+					}
+					catch
+					{
+						SCANUtil.SCANlog("Error in calculating Max Height for {0}; using default value", b.theName);
+						newMax = SCANconfigLoader.SCANNode.DefaultMaxHeightRange;
+					}
+
+					addToTerrainConfigData(b.name, new SCANterrainConfig(SCANconfigLoader.SCANNode.DefaultMinHeightRange, newMax, clamp, SCANUtil.paletteLoader(SCANconfigLoader.SCANNode.DefaultPalette, 7), 7, false, false, b));
 				}
 			}
 		}
@@ -548,6 +562,8 @@ namespace SCANsat
 			set { landingTarget = value; }
 		}
 		#endregion
+
+		#region save/load
 
 		public override void OnLoad(ConfigNode node)
 		{
@@ -829,6 +845,8 @@ namespace SCANsat
 			}
 		}
 
+		#endregion
+
 		private void Start()
 		{
 			GameEvents.onVesselSOIChanged.Add(SOIChange);
@@ -850,6 +868,7 @@ namespace SCANsat
 					BigMap = gameObject.AddComponent<SCANBigMap>();
 					resourceOverlay = gameObject.AddComponent<SCANoverlayController>();
 					resourceSettings = gameObject.AddComponent<SCANresourceSettings>();
+					zoomMap = gameObject.AddComponent<SCANzoomWindow>();
 				}
 				catch (Exception e)
 				{
