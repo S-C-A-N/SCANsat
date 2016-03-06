@@ -19,6 +19,8 @@ namespace SCANsat.SCAN_UI.UI_Framework
 	{
 		private float minValue, maxValue, currentValue;
 		private float oldValue;
+		private float width;
+		private float extraLabelWidth;
 		private string title, units, tooltip;
 		private int precision;
 
@@ -48,7 +50,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 		//	internal set { currentValue = value; }
 		//}
 
-		public SCANuiSlider(float Min, float Max, float Value, string Title, string Units, string Tooltip, int Prec)
+		public SCANuiSlider(float Min, float Max, float Value, string Title, string Units, string Tooltip, int Prec, float w = 260, float extraLabel = 0)
 		{
 			minValue = Min;
 			maxValue = Max;
@@ -58,6 +60,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			units = Units;
 			tooltip = Tooltip;
 			precision = Prec;
+			width = w;
 		}
 
 		public float drawSlider(bool under, ref float value)
@@ -66,8 +69,8 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			GUILayout.Label(under ? new GUIContent(s) : new GUIContent(s, tooltip), SCANskins.SCAN_whiteReadoutLabel);
 
 			Rect r = GUILayoutUtility.GetLastRect();
-			r.x += 110;
-			r.width = 260;
+			r.x += 110 + extraLabelWidth;
+			r.width = width;
 
 			if (under)
 				GUI.Label(r, "", SCANskins.SCAN_horSlider);
