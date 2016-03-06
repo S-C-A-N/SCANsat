@@ -785,13 +785,13 @@ namespace SCANsat.SCAN_Map
 									}
 									else
 									{
-										if (v < 1)
+										if (v < SCANcontroller.controller.slopeCutoff)
 										{
-											baseColor = palette.lerp(SCANcontroller.controller.lowSlopeColorOne, SCANcontroller.controller.highSlopeColorOne, v);
+											baseColor = palette.lerp(SCANcontroller.controller.lowSlopeColorOne, SCANcontroller.controller.highSlopeColorOne, v / SCANcontroller.controller.slopeCutoff);
 										}
 										else
 										{
-											baseColor = palette.lerp(SCANcontroller.controller.lowSlopeColorTwo, SCANcontroller.controller.highSlopeColorTwo, v - 1);
+											baseColor = palette.lerp(SCANcontroller.controller.lowSlopeColorTwo, SCANcontroller.controller.highSlopeColorTwo, (v - SCANcontroller.controller.slopeCutoff) / (2 -SCANcontroller.controller.slopeCutoff));
 										}
 									}
 								}
