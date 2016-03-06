@@ -1,3 +1,25 @@
+Version 14.9 - 2016-3-6
+------------------------
+
+- Add new zoom map buttons to small map, big map and toolbar
+- Improved zoom map functionality
+    - When zoom map is first opened it targets the active vessel
+	- Added re-sync to vessel button in the top-right corner
+
+- Added slope cutoff slider to color management window
+    - Adjusts the cutoff between the two color pairs
+	- Lower cutoff to make slope map better in the zoom map
+
+- Color Management window button removed from small map and big map in flight scene
+    - Added Color Management window button to the top of the settings menu
+
+- Added GeoEnergy resource support for PathFinder
+- When a new planet is detected SCANsat tries to determine its highest elevation point
+    - Used for planets that don't have a terrain config defined in the SCANcolors.cfg file; ie Kopernicus planets
+	- Max elevation point used to set the max height used for SCANsat maps
+	- Max elevation sometimes returns values too high; adjust values in the color management window
+- Some changes in how data is loaded from the save file; no end-user effect
+
 Version 14.8 - 2016-2-10
 ------------------------
 
