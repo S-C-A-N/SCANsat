@@ -94,6 +94,44 @@ namespace SCANsat.SCAN_Platform.Extensions.ConfigNodes
 			return original;
 		}
 
+		public static Color parse(this ConfigNode node, string name, Color original)
+		{
+			if (!node.HasValue(name))
+				return original;
+
+			Color c = original;
+
+			try
+			{
+				c = ConfigNode.ParseColor(node.GetValue(name));
+			}
+			catch (Exception e)
+			{
+				Debug.LogError("[SCANsat] Error while reading Color value; using default value...\n" + e);
+			}
+
+			return c;
+		}
+
+		public static Color32 parse(this ConfigNode node, string name, Color32 original)
+		{
+			if (!node.HasValue(name))
+				return original;
+
+			Color32 c = original;
+
+			try
+			{
+				c = ConfigNode.ParseColor32(node.GetValue(name));
+			}
+			catch (Exception e)
+			{
+				Debug.LogError("[SCANsat] Error while reading Color32 value; using default value...\n" + e);
+			}
+
+			return c;
+		}
+
 		public static List<string> parse(this ConfigNode node, string name, char separator, List<string> original)
 		{
 			if (!node.HasValue(name))
