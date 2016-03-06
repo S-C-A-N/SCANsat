@@ -481,13 +481,6 @@ namespace SCANsat.SCAN_UI
 
 			s.x += 36;
 
-			if (GUI.Button(s, iconWithTT(SCANskins.SCAN_SettingsIcon, "Settings Menu"), SCANskins.SCAN_windowButton))
-			{
-				SCANcontroller.controller.settingsWindow.Visible = !SCANcontroller.controller.settingsWindow.Visible;
-			}
-
-			s.x += 36;
-
 			if (GUI.Button(s, iconWithTT(SCANskins.SCAN_ZoomMapIcon, "Zoom Map"), SCANskins.SCAN_windowButton))
 			{
 				SCANcontroller.controller.zoomMap.Visible = !SCANcontroller.controller.zoomMap.Visible;
@@ -500,6 +493,13 @@ namespace SCANsat.SCAN_UI
 			if (GUI.Button(s, iconWithTT(SCANskins.SCAN_OverlayIcon, "Overlay Control"), SCANskins.SCAN_windowButton))
 			{
 				SCANcontroller.controller.resourceOverlay.Visible = !SCANcontroller.controller.resourceOverlay.Visible;
+			}
+
+			s.x += 36;
+
+			if (GUI.Button(s, iconWithTT(SCANskins.SCAN_SettingsIcon, "Settings Menu"), SCANskins.SCAN_windowButton))
+			{
+				SCANcontroller.controller.settingsWindow.Visible = !SCANcontroller.controller.settingsWindow.Visible;
 			}
 
 			s.x = WindowRect.width - 66;
