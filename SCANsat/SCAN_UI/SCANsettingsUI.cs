@@ -460,6 +460,11 @@ namespace SCANsat.SCAN_UI
 			{
 				SCANcontroller.controller.resourceSettings.Visible = !SCANcontroller.controller.resourceSettings.Visible;
 			}
+
+			if (GUILayout.Button("Color Management Window"))
+			{
+				SCANcontroller.controller.colorManager.Visible = !SCANcontroller.controller.colorManager.Visible;
+			}
 		}
 
 		//Debugging option to fill in SCAN maps
