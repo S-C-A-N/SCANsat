@@ -513,7 +513,7 @@ namespace SCANsat
 						return true;
 					else if (SCANcontroller.controller.bigMapVisible && SCANcontroller.controller.BigMap != null && SCANcontroller.controller.BigMap.GetWindowRect.Contains(pos))
 						return true;
-					else if (SCANcontroller.controller.BigMap != null && SCANcontroller.controller.BigMap.spotMap != null && SCANcontroller.controller.BigMap.spotMap.Visible && SCANcontroller.controller.BigMap.spotMap.GetWindowRect.Contains(pos))
+					else if (SCANcontroller.controller.zoomMap != null && SCANcontroller.controller.zoomMap.Visible && SCANcontroller.controller.zoomMap.GetWindowRect.Contains(pos))
 						return true;
 					else if (SCANcontroller.controller.hiDefMap != null && SCANcontroller.controller.hiDefMap.Visible && SCANcontroller.controller.hiDefMap.GetWindowRect.Contains(pos))
 						return true;

@@ -19,6 +19,7 @@ using Contracts;
 using FinePrint;
 using FinePrint.Contracts;
 using FinePrint.Contracts.Parameters;
+using FinePrint.Utilities;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
 using SCANsat.SCAN_Platform;
@@ -61,7 +62,19 @@ namespace SCANsat.SCAN_Data
 				if (b.ocean)
 					clamp = 0;
 
-				terrainConfig = new SCANterrainConfig(SCANconfigLoader.SCANNode.DefaultMinHeightRange, SCANconfigLoader.SCANNode.DefaultMaxHeightRange, clamp, SCANUtil.paletteLoader(SCANconfigLoader.SCANNode.DefaultPalette, 7), 7, false, false, body);
+				float newMax;
+
+				try
+				{
+					newMax = ((float)CelestialUtilities.GetHighestPeak(b)).Mathf_Round(-2);
+				}
+				catch (Exception e)
+				{
+					SCANUtil.SCANlog("Error in calculating Max Height for {0}; using default value\n{1}", b.theName, e);
+					newMax = SCANconfigLoader.SCANNode.DefaultMaxHeightRange;
+				}
+
+				terrainConfig = new SCANterrainConfig(SCANconfigLoader.SCANNode.DefaultMinHeightRange, newMax, clamp, SCANUtil.paletteLoader(SCANconfigLoader.SCANNode.DefaultPalette, 7), 7, false, false, body);
 				SCANcontroller.addToTerrainConfigData(body.name, terrainConfig);
 			}
 		}
@@ -414,6 +427,8 @@ namespace SCANsat.SCAN_Data
 				uncov += coverage_count[24];
 			if ((type & SCANtype.CRP_Reserved) != SCANtype.Nothing)
 				uncov += coverage_count[25];
+			if ((type & SCANtype.GeoEnergy) != SCANtype.Nothing)
+				uncov += coverage_count[26];
 			
 			return uncov;
 		}

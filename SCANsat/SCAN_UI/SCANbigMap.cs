@@ -43,8 +43,6 @@ namespace SCANsat.SCAN_UI
 		private Rect pos_spotmap_x = new Rect(10f, 10f, 25f, 25f);
 		internal static Rect defaultRect = new Rect(250, 60, 780, 460);
 
-		internal SCANzoomWindow spotMap;
-
 		private List<SCANresourceGlobal> loadedResources = new List<SCANresourceGlobal>();
 
 		//Values used for the orbit overlay - Need to fix this
@@ -117,9 +115,6 @@ namespace SCANsat.SCAN_UI
 
 		protected override void OnDestroy()
 		{
-			if (spotMap != null)
-				Destroy(spotMap);
-
 			SCANcontroller.controller.unloadPQS(bigmap.Body, mapSource.BigMap);
 		}
 
@@ -486,16 +481,11 @@ namespace SCANsat.SCAN_UI
 
 			s.x += 36;
 
-			if (GUI.Button(s, iconWithTT(SCANskins.SCAN_SettingsIcon, "Settings Menu"), SCANskins.SCAN_windowButton))
+			if (GUI.Button(s, iconWithTT(SCANskins.SCAN_ZoomMapIcon, "Zoom Map"), SCANskins.SCAN_windowButton))
 			{
-				SCANcontroller.controller.settingsWindow.Visible = !SCANcontroller.controller.settingsWindow.Visible;
-			}
-
-			s.x += 36;
-
-			if (GUI.Button(s, iconWithTT(SCANskins.SCAN_ColorIcon, "Color Control"), SCANskins.SCAN_windowButton))
-			{
-				SCANcontroller.controller.colorManager.Visible = !SCANcontroller.controller.colorManager.Visible;
+				SCANcontroller.controller.zoomMap.Visible = !SCANcontroller.controller.zoomMap.Visible;
+				if (SCANcontroller.controller.zoomMap.Visible && !SCANcontroller.controller.zoomMap.Initialized)
+					SCANcontroller.controller.zoomMap.initializeMap();
 			}
 
 			s.x += 36;
@@ -503,6 +493,13 @@ namespace SCANsat.SCAN_UI
 			if (GUI.Button(s, iconWithTT(SCANskins.SCAN_OverlayIcon, "Overlay Control"), SCANskins.SCAN_windowButton))
 			{
 				SCANcontroller.controller.resourceOverlay.Visible = !SCANcontroller.controller.resourceOverlay.Visible;
+			}
+
+			s.x += 36;
+
+			if (GUI.Button(s, iconWithTT(SCANskins.SCAN_SettingsIcon, "Settings Menu"), SCANskins.SCAN_windowButton))
+			{
+				SCANcontroller.controller.settingsWindow.Visible = !SCANcontroller.controller.settingsWindow.Visible;
 			}
 
 			s.x = WindowRect.width - 66;
@@ -628,11 +625,7 @@ namespace SCANsat.SCAN_UI
 					{
 						if (in_map)
 						{
-							if (spotMap == null)
-							{
-								spotMap = gameObject.AddComponent<SCANzoomWindow>();
-							}
-							spotMap.setMapCenter(mlat, mlon, true, bigmap);
+							SCANcontroller.controller.zoomMap.setMapCenter(mlat, mlon, true, bigmap, true);
 						}
 						Event.current.Use();
 					}

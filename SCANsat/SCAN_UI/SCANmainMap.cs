@@ -181,17 +181,19 @@ namespace SCANsat.SCAN_UI
 			{
 				SCANcontroller.controller.instrumentsWindow.Visible = !SCANcontroller.controller.instrumentsWindow.Visible;
 			}
-			if (GUILayout.Button(iconWithTT(SCANskins.SCAN_SettingsIcon, "Settings Menu"), SCANskins.SCAN_windowButton, GUILayout.Height(32), GUILayout.Width(32)))
+			if (GUILayout.Button(iconWithTT(SCANskins.SCAN_ZoomMapIcon, "Zoom Map"), SCANskins.SCAN_windowButton, GUILayout.Height(32), GUILayout.Width(32)))
 			{
-				SCANcontroller.controller.settingsWindow.Visible = !SCANcontroller.controller.settingsWindow.Visible;
-			}
-			if (GUILayout.Button(iconWithTT(SCANskins.SCAN_ColorIcon, "Color Control"), SCANskins.SCAN_windowButton, GUILayout.Height(32), GUILayout.Width(32)))
-			{
-				SCANcontroller.controller.colorManager.Visible = !SCANcontroller.controller.colorManager.Visible;
+				SCANcontroller.controller.zoomMap.Visible = !SCANcontroller.controller.zoomMap.Visible;
+				if (SCANcontroller.controller.zoomMap.Visible && !SCANcontroller.controller.zoomMap.Initialized)
+					SCANcontroller.controller.zoomMap.initializeMap();
 			}
 			if (GUILayout.Button(iconWithTT(SCANskins.SCAN_OverlayIcon, "Overlay Contral"), SCANskins.SCAN_windowButton, GUILayout.Height(32), GUILayout.Width(32)))
 			{
 				SCANcontroller.controller.resourceOverlay.Visible = !SCANcontroller.controller.resourceOverlay.Visible;
+			}
+			if (GUILayout.Button(iconWithTT(SCANskins.SCAN_SettingsIcon, "Settings Menu"), SCANskins.SCAN_windowButton, GUILayout.Height(32), GUILayout.Width(32)))
+			{
+				SCANcontroller.controller.settingsWindow.Visible = !SCANcontroller.controller.settingsWindow.Visible;
 			}
 		}
 

@@ -88,16 +88,16 @@ namespace SCANsat.SCAN_UI
 				dropDown = false;
 		}
 
-		protected override void resetMap(bool checkScanner = false, double lon = 0, double lat = 0, bool withCenter = false)
+		protected override void resetMap(bool checkScanner = false, double lat = 0, double lon = 0, bool withCenter = false)
 		{
 			mapGenerated = false;
 
-			base.resetMap(false, SCANUtil.fixLonShift(v.longitude), SCANUtil.fixLatShift(v.latitude), true);
+			base.resetMap(false, SCANUtil.fixLatShift(v.latitude), SCANUtil.fixLonShift(v.longitude), true);
 		}
 
-		public override void setMapCenter(double lat, double lon, bool centering, SCANmap big = null, SCANhiDefCamera camera = null)
+		public override void setMapCenter(double lat, double lon, bool hi, SCANmap big = null, bool mapBody = true, SCANhiDefCamera camera = null)
 		{
-			highDetail = centering;
+			highDetail = hi;
 			Visible = true;
 
 			SCANcontroller.controller.TargetSelecting = false;

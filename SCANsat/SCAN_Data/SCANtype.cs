@@ -45,6 +45,7 @@ namespace SCANsat.SCAN_Data
 		ExoticMinerals = 1 << 23,			// Dirt - CRP
 		Dirt = 1 << 24,	// Rare Metals - CRP
 		CRP_Reserved = 1 << 25,
+		GeoEnergy = 1 << 26,
 
 		Everything_SCAN = (1 << 6) - 1,	// All default SCANsat scanners
 		AllResources = 2147483584,		// All resource types

@@ -121,6 +121,8 @@ namespace SCANsat.SCAN_UI.UI_Framework
 		public string colorResourceHelpDefaultAll = "Reverts to the default values for the selected resource for all celestial bodies.";
 		[Persistent]
 		public string colorHelpSaveToConfig = "Save all color configuration values to the config file found in your SCANsat/Resources folder. These values serve as the defaults for new saves and for all Revert To Default buttons. Values do not need to be saved to the config file to be applied for this save file.";
+		[Persistent]
+		public string colorSlopeHelpCutoff = "Adjust the cutoff level between the two selected slope color pairs.";
 
 		public override void OnDecodeFromConfigNode()
 		{
