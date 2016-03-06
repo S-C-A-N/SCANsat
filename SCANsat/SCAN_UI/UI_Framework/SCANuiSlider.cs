@@ -61,6 +61,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			tooltip = Tooltip;
 			precision = Prec;
 			width = w;
+			extraLabelWidth = extraLabel;
 		}
 
 		public float drawSlider(bool under, ref float value)
