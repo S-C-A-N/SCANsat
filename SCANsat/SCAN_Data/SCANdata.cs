@@ -427,6 +427,8 @@ namespace SCANsat.SCAN_Data
 				uncov += coverage_count[24];
 			if ((type & SCANtype.CRP_Reserved) != SCANtype.Nothing)
 				uncov += coverage_count[25];
+			if ((type & SCANtype.GeoEnergy) != SCANtype.Nothing)
+				uncov += coverage_count[26];
 			
 			return uncov;
 		}
