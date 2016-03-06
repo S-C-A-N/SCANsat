@@ -667,7 +667,7 @@ namespace SCANsat.SCAN_UI
 			{
 				r.x += 22;
 
-				if (GUI.Button(r, textWithTT("V", "Sync To Vessel"), SCANskins.SCAN_buttonBorderless))
+				if (GUI.Button(r, iconWithTT(SCANskins.SCAN_SmallMapIcon, "Sync To Vessel"), SCANskins.SCAN_buttonBorderless))
 				{
 					setToVessel(false);
 				}
