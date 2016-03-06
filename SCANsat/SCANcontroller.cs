@@ -134,6 +134,8 @@ namespace SCANsat
 		public float scanThreshold = 0.90f;
 		[KSPField(isPersistant = true)]
 		public bool useScanThreshold = true;
+		[KSPField(isPersistant = true)]
+		public float slopeCutoff = 1f;
 
 		/* Biome and slope colors can't be serialized properly as a KSP Field */
 		public Color lowBiomeColor = new Color(0, 0.46f, 0.02345098f, 1);
