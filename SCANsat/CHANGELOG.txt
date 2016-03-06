@@ -19,6 +19,7 @@ Version 14.9 - 2016-3-6
 	- Max elevation point used to set the max height used for SCANsat maps
 	- Max elevation sometimes returns values too high; adjust values in the color management window
 - Some changes in how data is loaded from the save file; no end-user effect
+- Fixed error that prevented SCANsat contracts from generating before the player left the Kerbin system
 
 Version 14.8 - 2016-2-10
 ------------------------
