@@ -13,6 +13,7 @@
  */
 #endregion
 
+using System;
 using System.Collections.Generic;
 using SCANsat.SCAN_Data;
 using SCANsat.SCAN_Map;
@@ -1380,11 +1381,11 @@ namespace SCANsat.SCAN_UI
 
 				try
 				{
-					newMax = (float)CelestialUtilities.GetHighestPeak(body);
+					newMax = ((float)CelestialUtilities.GetHighestPeak(body)).Mathf_Round(-2);
 				}
-				catch
+				catch (Exception e)
 				{
-					SCANUtil.SCANlog("Error in calculating Max Height for {0}; using default value", body.theName);
+					SCANUtil.SCANlog("Error in calculating Max Height for {0}; using default value\n{1}", body.theName, e);
 					newMax = SCANconfigLoader.SCANNode.DefaultMaxHeightRange;
 				}
 

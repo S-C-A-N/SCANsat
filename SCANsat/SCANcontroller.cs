@@ -299,13 +299,15 @@ namespace SCANsat
 
 					try
 					{
-						newMax = (float)CelestialUtilities.GetHighestPeak(b);
+						newMax = ((float)CelestialUtilities.GetHighestPeak(b)).Mathf_Round(-2);
 					}
-					catch
+					catch (Exception e)
 					{
-						SCANUtil.SCANlog("Error in calculating Max Height for {0}; using default value", b.theName);
+						SCANUtil.SCANlog("Error in calculating Max Height for {0}; using default value/n{1}", b.theName, e);
 						newMax = SCANconfigLoader.SCANNode.DefaultMaxHeightRange;
 					}
+
+					SCANUtil.SCANlog("Generating new SCANsat Terrain Config for [{0}] - Max Height: [{1:F0}m]", b.bodyName, newMax);
 
 					addToTerrainConfigData(b.name, new SCANterrainConfig(SCANconfigLoader.SCANNode.DefaultMinHeightRange, newMax, clamp, SCANUtil.paletteLoader(SCANconfigLoader.SCANNode.DefaultPalette, 7), 7, false, false, b));
 				}
@@ -710,12 +712,7 @@ namespace SCANsat
 
 							float min = node_body.parse("MinHeightRange", data.TerrainConfig.DefaultMinHeight);
 							float max = node_body.parse("MaxHeightRange", data.TerrainConfig.DefaultMaxHeight);
-
-							string clampHeight = node_body.parse("ClampHeight", "");
-
-							float? clampState = null;
-							if (!string.IsNullOrEmpty(clampHeight))
-								clampState = node_body.parse(clampHeight, (float?)null);
+							float? clampState = node_body.parse("ClampHeight", (float?)null);
 
 							int pSize = node_body.parse("PaletteSize", data.TerrainConfig.DefaultPaletteSize);
 							bool pRev = node_body.parse("PaletteReverse", data.TerrainConfig.DefaultReverse);
@@ -769,26 +766,6 @@ namespace SCANsat
 				{
 					if (node_resource_type != null)
 					{
-						//string name = node_resource_type.parse("Resource", "");
-						//if (string.IsNullOrEmpty(name))
-						//	continue;
-
-						//string lowColor = node_resource_type.parse("MinColor", "");
-						//if (string.IsNullOrEmpty(lowColor))
-						//	continue;
-
-						//string highColor = node_resource_type.parse("MaxColor", "");
-						//if (string.IsNullOrEmpty(highColor))
-						//	continue;
-
-						//string transparent = node_resource_type.parse("Transparency", "");
-						//if (string.IsNullOrEmpty(transparent))
-						//	continue;
-
-						//string minMaxValues = node_resource_type.parse("MinMaxValues", "");
-						//if (string.IsNullOrEmpty(minMaxValues))
-						//	continue;
-
 						loadCustomResourceValues(node_resource_type);
 					}
 				}

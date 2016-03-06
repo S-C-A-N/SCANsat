@@ -66,11 +66,11 @@ namespace SCANsat.SCAN_Data
 
 				try
 				{
-					newMax = (float)CelestialUtilities.GetHighestPeak(b);
+					newMax = ((float)CelestialUtilities.GetHighestPeak(b)).Mathf_Round(-2);
 				}
-				catch
+				catch (Exception e)
 				{
-					SCANUtil.SCANlog("Error in calculating Max Height for {0}; using default value", b.theName);
+					SCANUtil.SCANlog("Error in calculating Max Height for {0}; using default value\n{1}", b.theName, e);
 					newMax = SCANconfigLoader.SCANNode.DefaultMaxHeightRange;
 				}
 
