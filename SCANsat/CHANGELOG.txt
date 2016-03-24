@@ -1,3 +1,59 @@
+Version 14.9 - 2016-3-6
+------------------------
+
+- Add new zoom map buttons to small map, big map and toolbar
+- Improved zoom map functionality
+    - When zoom map is first opened it targets the active vessel
+	- Added re-sync to vessel button in the top-right corner
+
+- Added slope cutoff slider to color management window
+    - Adjusts the cutoff between the two color pairs
+	- Lower cutoff to make slope map better in the zoom map
+
+- Color Management window button removed from small map and big map in flight scene
+    - Added Color Management window button to the top of the settings menu
+
+- Added GeoEnergy resource support for PathFinder
+- When a new planet is detected SCANsat tries to determine its highest elevation point
+    - Used for planets that don't have a terrain config defined in the SCANcolors.cfg file; ie Kopernicus planets
+	- Max elevation point used to set the max height used for SCANsat maps
+	- Max elevation sometimes returns values too high; adjust values in the color management window
+- Some changes in how data is loaded from the save file; no end-user effect
+- Fixed error that prevented SCANsat contracts from generating before the player left the Kerbin system
+
+Version 14.8 - 2016-2-10
+------------------------
+
+- Fix RPM and Kopernicus incompatibility
+- Add new CRP resources and configs
+
+Version 14.7 - 2016-1-16
+------------------------
+
+-Fix Contract config error
+
+Version 14.6 - 2016-1-15
+------------------------
+
+- Fix Kopernicus compatibility (Thanks ThomasKerman)
+- Allow mouse-over info and overlay tooltips to fall back to low resolution resource data in some cases
+- Add a warning when stock resource scanning is disabled without having Module Manager installed
+- Fixed some issues affecting scanner power usage and scanning altitude indicators
+- Allow for included contracts to be disabled through the ScanSatOfficial Contract Type (Thanks DBT85)
+- Fix a bug that was preventing loading of the color config file when additional planets are installed
+- Add MetalOre as a SCANsat resource and MetalOre scanner modules to EPL scanner parts
+
+Version 14.5 - 2015-12-22
+------------------------
+
+- Misc and Bug Fixes
+	- Fix some .csv export related issues
+	- Allow for disabling the stock resource scan threshold
+	- Fix ocean depth indicator
+	- Fix multi spectral sensor normal map
+	- Fix some potential issues when using multiple different sensors of the same type
+	- Add new survey waypoints as they are generated
+
 Version 14.4 - 2015-11-14
 ------------------------
 

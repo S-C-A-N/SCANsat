@@ -32,7 +32,7 @@ namespace SCANsat.SCAN_UI
 		private SCANdata data;
 		private SCANresourceGlobal currentResource;
 		private List<SCANresourceGlobal> resources;
-		private List<PResource.Resource> resourceFractions;
+		//private List<PResource.Resource> resourceFractions;
 		private bool drawOverlay;
 		private bool oldOverlay;
 
@@ -544,6 +544,12 @@ namespace SCANsat.SCAN_UI
 				mapGenerating = true;
 				if (!data.ControllerBuilding && !data.MapBuilding)
 				{
+					if (!data.OverlayBuilding)
+					{
+						mapStep = 0;
+						mapStart = 0;
+					}
+
 					data.OverlayBuilding = true;
 					data.generateHeightMap(ref mapStep, ref mapStart, 360);
 				}

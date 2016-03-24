@@ -79,7 +79,7 @@ namespace SCANsat.SCAN_PartModules
 			base.Events["stopScan"].active = scanning;
 		}
 
-		public void Update()
+		override protected void Update()
 		{
 			if (!activated)
 			{
@@ -96,7 +96,7 @@ namespace SCANsat.SCAN_PartModules
 			if (SCANcontroller.controller == null)
 				return;
 
-			base.OnUpdate();
+			base.Update();
 
 			if (refreshState)
 			{

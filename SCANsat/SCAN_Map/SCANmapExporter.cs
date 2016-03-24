@@ -85,7 +85,7 @@ namespace SCANsat.SCAN_Map
 			threadRunning = true;
 			t.Start();
 
-			while (threadRunning && timer < 2000)
+			while (threadRunning && timer < 20000)
 			{
 				timer++;
 				yield return null;
@@ -97,7 +97,7 @@ namespace SCANsat.SCAN_Map
 			copyHeightMap = null;
 			exporting = false;
 
-			if (timer >= 2000)
+			if (timer >= 20000)
 			{
 				Debug.LogError("[SCANsat] Something went wrong while exporting .csv data file\nCanceling export thread...");
 				t.Abort();
@@ -120,9 +120,9 @@ namespace SCANsat.SCAN_Map
 				{
 					string line = "Row,Column,Lat,Long,Height";
 					writer.WriteLine(line);
-					for (int i = 0; i < w; i++)
+					for (int i = 0; i < h; i++)
 					{
-						for (int j = 0; j < h; j++)
+						for (int j = 0; j < w; j++)
 						{
 							double lat = (i * 1.0f / s) - 90f;
 							double lon = (j * 1.0f / s) - 180f;

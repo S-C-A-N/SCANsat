@@ -19,6 +19,7 @@ using Contracts;
 using FinePrint;
 using FinePrint.Contracts;
 using FinePrint.Contracts.Parameters;
+using FinePrint.Utilities;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
 using SCANsat.SCAN_Platform;
@@ -61,7 +62,19 @@ namespace SCANsat.SCAN_Data
 				if (b.ocean)
 					clamp = 0;
 
-				terrainConfig = new SCANterrainConfig(SCANconfigLoader.SCANNode.DefaultMinHeightRange, SCANconfigLoader.SCANNode.DefaultMaxHeightRange, clamp, SCANUtil.paletteLoader(SCANconfigLoader.SCANNode.DefaultPalette, 7), 7, false, false, body);
+				float newMax;
+
+				try
+				{
+					newMax = ((float)CelestialUtilities.GetHighestPeak(b)).Mathf_Round(-2);
+				}
+				catch (Exception e)
+				{
+					SCANUtil.SCANlog("Error in calculating Max Height for {0}; using default value\n{1}", b.theName, e);
+					newMax = SCANconfigLoader.SCANNode.DefaultMaxHeightRange;
+				}
+
+				terrainConfig = new SCANterrainConfig(SCANconfigLoader.SCANNode.DefaultMinHeightRange, newMax, clamp, SCANUtil.paletteLoader(SCANconfigLoader.SCANNode.DefaultPalette, 7), 7, false, false, body);
 				SCANcontroller.addToTerrainConfigData(body.name, terrainConfig);
 			}
 		}
@@ -207,6 +220,36 @@ namespace SCANsat.SCAN_Data
 				waypoints.RemoveAll(a => a.LandingTarget);
 
 			SCANcontroller.controller.LandingTarget = null;
+		}
+
+		public void addSurveyWaypoints(CelestialBody b, SurveyContract c)
+		{
+			if (!waypointsLoaded)
+				return;
+
+			if (b != body)
+				return;
+
+			if (c == null)
+				return;
+
+			for (int i = 0; i < c.AllParameters.Count(); i++)
+			{
+				if (c.AllParameters.ElementAt(i).GetType() == typeof(SurveyWaypointParameter))
+				{
+					SurveyWaypointParameter s = (SurveyWaypointParameter)c.AllParameters.ElementAt(i);
+					if (s.State == ParameterState.Incomplete)
+					{
+						if (waypoints.Any(w => w.Way == s.wp))
+							continue;
+
+						SCANwaypoint p = new SCANwaypoint(s);
+						if (p.Way != null)
+							waypoints.Add(p);
+					}
+				}
+			}
+
 		}
 
 		public List<SCANwaypoint> Waypoints
@@ -366,14 +409,27 @@ namespace SCANsat.SCAN_Data
 				uncov += coverage_count[15];
 			if ((type & SCANtype.Substrate) != SCANtype.Nothing)
 				uncov += coverage_count[16];
-			if ((type & SCANtype.KEEZO) != SCANtype.Nothing)
+			if ((type & SCANtype.MetalOre) != SCANtype.Nothing)
 				uncov += coverage_count[17];
 			if ((type & SCANtype.Karbonite) != SCANtype.Nothing)
 				uncov += coverage_count[18];
 			if ((type & SCANtype.FuzzyResources) != SCANtype.Nothing)
 				uncov += coverage_count[19];
-			if ((type & SCANtype.Regolith_11) != SCANtype.Nothing)
+			if ((type & SCANtype.Hydrates) != SCANtype.Nothing)
 				uncov += coverage_count[20];
+			if ((type & SCANtype.Gypsum) != SCANtype.Nothing)
+				uncov += coverage_count[21];
+			if ((type & SCANtype.RareMetals) != SCANtype.Nothing)
+				uncov += coverage_count[22];
+			if ((type & SCANtype.ExoticMinerals) != SCANtype.Nothing)
+				uncov += coverage_count[23];
+			if ((type & SCANtype.Dirt) != SCANtype.Nothing)
+				uncov += coverage_count[24];
+			if ((type & SCANtype.CRP_Reserved) != SCANtype.Nothing)
+				uncov += coverage_count[25];
+			if ((type & SCANtype.GeoEnergy) != SCANtype.Nothing)
+				uncov += coverage_count[26];
+			
 			return uncov;
 		}
 		
@@ -394,8 +450,10 @@ namespace SCANsat.SCAN_Data
 				return;
 			}
 
-			if (step <= 0)
+			if (step <= 0 && xStart <= 0)
 			{
+				SCANcontroller.controller.loadPQS(body);
+
 				try
 				{
 					double d = SCANUtil.getElevation(body, 0, 0);
@@ -420,6 +478,7 @@ namespace SCANsat.SCAN_Data
 
 			if (step >= 179)
 			{
+				SCANcontroller.controller.unloadPQS(body);
 				step = 0;
 				xStart = 0;
 				built = true;

@@ -685,10 +685,13 @@ namespace SCANsat.SCAN_UI
 
 		private void RedrawMap()
 		{
-			map = new SCANmap();
-			map.setProjection(MapProjection.Rectangular);
 			orbitingBody = vessel.mainBody;
-			map.setBody(vessel.mainBody);
+			if (map == null)
+			{
+				map = new SCANmap(orbitingBody, false, mapSource.RPM);
+				map.setProjection(MapProjection.Rectangular);
+			}
+			map.setBody(orbitingBody);
 			map.setSize(screenWidth / mapDivider, screenHeight / mapDivider, resourceInterpolation, startLine, stopLine);
 			map.MapScale *= (zoomLevel * zoomLevel + zoomModifier);
 			mapCenterLong = vessel.longitude;
@@ -700,7 +703,7 @@ namespace SCANsat.SCAN_UI
 			if (SCANconfigLoader.GlobalResource)
 			{
 				map.Resource = loadedResources[currentResource];
-				map.Resource.CurrentBodyConfig(vessel.mainBody.name);
+				map.Resource.CurrentBodyConfig(orbitingBody.name);
 			}
 			map.resetMap((mapType)mapMode, false, SCANconfigLoader.GlobalResource && resourceOverlay);
 
@@ -710,7 +713,7 @@ namespace SCANsat.SCAN_UI
 			mapSizeScale = new Vector2d(360.0 * map.MapScale / map.MapWidth, 180.0 * map.MapScale / map.MapHeight);
 			redrawDeviation = redrawEdge * 180 / (zoomLevel * zoomLevel + zoomModifier);
 			try {
-				SCANdata data = SCANUtil.getData(vessel.mainBody);
+				SCANdata data = SCANUtil.getData(orbitingBody);
 				if (data != null)
 				{
 					localAnomalies = data.Anomalies;

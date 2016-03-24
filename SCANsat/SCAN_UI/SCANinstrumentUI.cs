@@ -237,41 +237,37 @@ namespace SCANsat.SCAN_UI
 
 			bool drawSlope = false;
 
-			if ((sensors & SCANtype.Altimetry) != SCANtype.Nothing)
+			switch (v.situation)
 			{
-				switch (v.situation)
-				{
-					case Vessel.Situations.LANDED:
-					case Vessel.Situations.PRELAUNCH:
-						infoLabel += string.Format("\nTerrain: {0:N1}m", pqs);
-						drawSlope = true;
-						break;
-					case Vessel.Situations.SPLASHED:
-						infoLabel += string.Format("\nDepth: {0:N1}m", Math.Abs(pqs));
-						drawSlope = false;
-						break;
-					default:
-						if (h < 1000 || (sensors & SCANtype.AltimetryHiRes) != SCANtype.Nothing)
-						{
-							infoLabel += string.Format("\nAltitude: {0}", SCANuiUtil.distanceString(h, 100000));
-							drawSlope = true;
-						}
-						else
-						{
-							h = ((int)(h / 500)) * 500;
-							infoLabel += string.Format("\nAltitude: {0}", SCANuiUtil.distanceString(h, 100000));
-						}
-						break;
-				}
-			}
-			else if (h < 1000)
-			{
-				if (v.situation == Vessel.Situations.LANDED || v.situation == Vessel.Situations.SPLASHED || v.situation == Vessel.Situations.PRELAUNCH)
+				case Vessel.Situations.LANDED:
+				case Vessel.Situations.PRELAUNCH:
 					infoLabel += string.Format("\nTerrain: {0:N1}m", pqs);
-				else
-					infoLabel += string.Format("\nAltitude: {0}", SCANuiUtil.distanceString(h, 100000));
-
-				drawSlope = true;
+					drawSlope = true;
+					break;
+				case Vessel.Situations.SPLASHED:
+					double d = Math.Abs(pqs) - Math.Abs(h);
+					if ((sensors & SCANtype.Altimetry) != SCANtype.Nothing)
+						infoLabel += string.Format("\nDepth: {0}", SCANuiUtil.distanceString(Math.Abs(d), 10000));
+					else
+					{
+						d = ((int)(d / 100)) * 100;
+						infoLabel += string.Format("\nDepth: {0}", SCANuiUtil.distanceString(Math.Abs(d), 10000));
+					}
+					drawSlope = false;
+					break;
+				default:
+					if (h < 1000 || (sensors & SCANtype.AltimetryHiRes) != SCANtype.Nothing)
+					{
+						infoLabel += string.Format("\nAltitude: {0}", SCANuiUtil.distanceString(h, 100000));
+						drawSlope = true;
+					}
+					else if ((sensors & SCANtype.AltimetryLoRes) != SCANtype.Nothing)
+					{
+						h = ((int)(h / 500)) * 500;
+						infoLabel += string.Format("\nAltitude: {0}", SCANuiUtil.distanceString(h, 100000));
+						drawSlope = false;
+					}
+					break;
 			}
 
 			if (drawSlope)
@@ -327,35 +323,35 @@ namespace SCANsat.SCAN_UI
 					break;
 				}
 
-				if (tooHigh)
-				{
-					infoLabel += string.Format("\n{0}: Too High", resources[currentResource].Name);
-				}
-				else if (!scanner)
-				{
-					infoLabel += string.Format("\n{0}: No Scanner", resources[currentResource].Name);
-				}
-				else
-				{
-					resourceLabel(resources[currentResource]);
-				}
+				resourceLabel(resources[currentResource], tooHigh, scanner);
 			}
 			else
 			{
-				resourceLabel(resources[currentResource]);
+				resourceLabel(resources[currentResource], false, false);
 			}
 		}
 
-		private void resourceLabel(SCANresourceGlobal r)
+		private void resourceLabel(SCANresourceGlobal r, bool high, bool onboard)
 		{
 			if ((sensors & r.SType) != SCANtype.Nothing)
 			{
-				infoLabel += string.Format("\n{0}: {1:P2}", r.Name, SCANUtil.ResourceOverlay(vlat, vlon, r.Name, v.mainBody, SCANcontroller.controller.resourceBiomeLock));
+				if (high || !onboard)
+					infoLabel += string.Format("\n{0}: {1:P0}", r.Name, SCANUtil.ResourceOverlay(vlat, vlon, r.Name, v.mainBody, SCANcontroller.controller.resourceBiomeLock));
+				else
+					infoLabel += string.Format("\n{0}: {1:P2}", r.Name, SCANUtil.ResourceOverlay(vlat, vlon, r.Name, v.mainBody, SCANcontroller.controller.resourceBiomeLock));
 			}
 			else if ((sensors & SCANtype.FuzzyResources) != SCANtype.Nothing)
 			{
 				infoLabel += string.Format("\n{0}: {1:P0}", r.Name, SCANUtil.ResourceOverlay(vlat, vlon, r.Name, v.mainBody, SCANcontroller.controller.resourceBiomeLock));
 			}
+			//else if (high)
+			//{
+			//	infoLabel += string.Format("\n{0}: Too High", resources[currentResource].Name);
+			//}
+			//else if (!onboard)
+			//{
+			//	infoLabel += string.Format("\n{0}: No Scanner", resources[currentResource].Name);
+			//}
 			else
 			{
 				infoLabel += string.Format("\n{0}: No Data", r.Name);

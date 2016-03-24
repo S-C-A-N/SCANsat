@@ -37,6 +37,7 @@ namespace SCANsat.SCAN_UI
 		protected SCANresourceGlobal resource;
 		protected bool showOrbit, showAnomaly, showWaypoints;
 		private bool narrowBand, showInfo, controlLock;
+		private bool initialized;
 		protected float minZoom = 2;
 		protected float maxZoom = 1000;
 		private Vector2 dragStart;
@@ -53,6 +54,11 @@ namespace SCANsat.SCAN_UI
 		protected bool resourceOverlay;
 
 		protected bool highDetail;
+
+		public bool Initialized
+		{
+			get { return initialized; }
+		}
 
 		protected override void Awake()
 		{
@@ -83,9 +89,13 @@ namespace SCANsat.SCAN_UI
 
 			if (HighLogic.LoadedSceneIsFlight)
 			{
-				v = SCANcontroller.controller.BigMap.V;
-				b = SCANcontroller.controller.BigMap.Body;
-				data = SCANcontroller.controller.BigMap.Data;
+				b = FlightGlobals.currentMainBody;
+				data = SCANUtil.getData(b);
+				if (data == null)
+				{
+					data = new SCANdata(b);
+					SCANcontroller.controller.addToBodyData(b, data);
+				}
 			}
 			else if (HighLogic.LoadedSceneHasPlanetarium)
 			{
@@ -96,7 +106,7 @@ namespace SCANsat.SCAN_UI
 
 			if (spotmap == null)
 			{
-				spotmap = new SCANmap(b, false, true);
+				spotmap = new SCANmap(b, false, mapSource.ZoomMap);
 				spotmap.setSize(320, 240);
 			}
 
@@ -122,6 +132,8 @@ namespace SCANsat.SCAN_UI
 		protected override void OnDestroy()
 		{
 			removeControlLocks();
+
+			SCANcontroller.controller.unloadPQS(spotmap.Body, mapSource.ZoomMap);
 		}
 
 		internal void removeControlLocks()
@@ -130,11 +142,53 @@ namespace SCANsat.SCAN_UI
 			controlLock = false;
 		}
 
-		public virtual void setMapCenter(double lat, double lon, bool centering, SCANmap big = null, SCANhiDefCamera camera = null)
+		public void initializeMap()
 		{
-			highDetail = centering;
+			initialized = true;
+
+			SCANUtil.SCANdebugLog("Initializing Zoom Map...");
+
+			v = FlightGlobals.ActiveVessel;
+
+			setToVessel(true);
+		}
+
+		public void setToVessel(bool sync)
+		{
+			if (v == null)
+				return;
+
+			if (sync)
+			{
+				SCANUtil.SCANdebugLog("Syncing Vessel - Initial");
+				setMapCenter(SCANUtil.fixLatShift(v.latitude), SCANUtil.fixLonShift(v.longitude), true, SCANBigMap.BigMap, false);
+			}
+			else
+			{
+				SCANUtil.SCANdebugLog("Syncing Vessel - Reset");
+				if (v.mainBody != b)
+				{
+					SCANdata dat = SCANUtil.getData(v.mainBody);
+					if (dat == null)
+						dat = new SCANdata(v.mainBody);
+
+					data = dat;
+					b = data.Body;
+
+					spotmap.setBody(b);
+				}
+
+				resetMap(true, SCANUtil.fixLatShift(v.latitude), SCANUtil.fixLonShift(v.longitude), true);
+			}
+		}
+
+		public virtual void setMapCenter(double lat, double lon, bool hi, SCANmap big = null, bool mapBody = true, SCANhiDefCamera camera = null)
+		{
+			highDetail = hi;
 			Visible = true;
 			bigmap = big;
+
+			SCANUtil.SCANdebugLog("Setting Zoom Map Center");
 
 			SCANcontroller.controller.TargetSelecting = false;
 			SCANcontroller.controller.TargetSelectingActive = false;
@@ -144,16 +198,33 @@ namespace SCANsat.SCAN_UI
 			else
 				spotmap.setProjection(MapProjection.Rectangular);
 
-			if (bigmap.Body != b)
+			if (mapBody)
 			{
-				SCANdata dat = SCANUtil.getData(bigmap.Body);
-				if (dat == null)
-					dat = new SCANdata(bigmap.Body);
+				if (bigmap.Body != b)
+				{
+					SCANdata dat = SCANUtil.getData(bigmap.Body);
+					if (dat == null)
+						dat = new SCANdata(bigmap.Body);
 
-				data = dat;
-				b = data.Body;
+					data = dat;
+					b = data.Body;
 
-				spotmap.setBody(b);
+					spotmap.setBody(b);
+				}
+			}
+			else
+			{
+				if (v.mainBody != b)
+				{
+					SCANdata dat = SCANUtil.getData(v.mainBody);
+					if (dat == null)
+						dat = new SCANdata(v.mainBody);
+
+					data = dat;
+					b = data.Body;
+
+					spotmap.setBody(b);
+				}
 			}
 
 			if (SCANconfigLoader.GlobalResource)
@@ -175,7 +246,7 @@ namespace SCANsat.SCAN_UI
 			spotmap.resetMap(bigmap.MType, false, resourceOverlay, narrowBand);
 		}
 
-		protected virtual void resetMap(bool checkScanner = false, double lon = 0, double lat = 0, bool withCenter = false)
+		protected virtual void resetMap(bool checkScanner = false, double lat = 0, double lon = 0, bool withCenter = false)
 		{
 			if (withCenter)
 				spotmap.centerAround(lon, lat);
@@ -476,11 +547,11 @@ namespace SCANsat.SCAN_UI
 			{
 				if (v != null)
 				{
-					r = new Rect(6, 20, 16, 16);
+					r = new Rect(2, 22, 16, 16);
 
 					showOrbit = GUI.Toggle(r, showOrbit, textWithTT("", "Toggle Orbit"), SCANskins.SCAN_settingsToggle);
 
-					r.x += 16;
+					r.x += 12;
 					r.width = 40;
 					r.height = 20;
 
@@ -490,7 +561,7 @@ namespace SCANsat.SCAN_UI
 					}
 				}
 
-				r = new Rect(78, 20, 24, 24);
+				r = new Rect(58, 20, 24, 24);
 
 				if (SCANcontroller.controller.mechJebTargetSelection)
 				{
@@ -528,7 +599,7 @@ namespace SCANsat.SCAN_UI
 					GUI.color = old;
 				}
 
-				r = new Rect(WindowRect.width - 68, 20, 18, 18);
+				r = new Rect(86, 22, 18, 18);
 
 				showWaypoints = GUI.Toggle(r, showWaypoints, textWithTT("", "Toggle Waypoints"), SCANskins.SCAN_settingsToggle);
 
@@ -541,7 +612,7 @@ namespace SCANsat.SCAN_UI
 				}
 			}
 
-			r = new Rect(WindowRect.width / 2 - 58, 20, 26, 26);
+			r = new Rect(WindowRect.width / 2 - 46, 20, 26, 26);
 
 			if (GUI.Button(r, iconWithTT(SCANskins.SCAN_ZoomOutIcon, "Zoom Out"), SCANskins.SCAN_buttonBorderless))
 			{
@@ -551,7 +622,7 @@ namespace SCANsat.SCAN_UI
 				resetMap();
 			}
 
-			r.x += 26;
+			r.x += 24;
 			r.width = 58;
 
 			if (GUI.Button(r, textWithTT(spotmap.MapScale.ToString("N1") + " X", "Sync To Big Map"), SCANskins.SCAN_buttonBorderless))
@@ -559,7 +630,7 @@ namespace SCANsat.SCAN_UI
 				resyncMap();
 			}
 
-			r.x += 60;
+			r.x += 58;
 			r.width = 26;
 
 			if (GUI.Button(r, iconWithTT(SCANskins.SCAN_ZoomInIcon, "Zoom In"), SCANskins.SCAN_buttonBorderless))
@@ -572,7 +643,7 @@ namespace SCANsat.SCAN_UI
 
 			if (SCANconfigLoader.GlobalResource)
 			{
-				r = new Rect(WindowRect.width - 100, 20, 24, 24);
+				r = new Rect(WindowRect.width - 96, 20, 24, 24);
 
 				if (GUI.Button(r, iconWithTT(SCANskins.SCAN_ResourceIcon, "Resources"), SCANskins.SCAN_buttonBorderless))
 				{
@@ -580,16 +651,26 @@ namespace SCANsat.SCAN_UI
 				}
 			}
 
-			r = new Rect(WindowRect.width - 35, 20, 18, 18);
+			r = new Rect(WindowRect.width - 62, 22, 18, 18);
 
 			showAnomaly = GUI.Toggle(r, showAnomaly, textWithTT("", "Toggle Anomalies"), SCANskins.SCAN_settingsToggle);
 
-			r.x += 13;
+			r.x += 12;
 			r.width = r.height = 20;
 
 			if (GUI.Button(r, textWithTT(SCANcontroller.controller.anomalyMarker, "Toggle Anomalies"), SCANskins.SCAN_buttonBorderless))
 			{
 				showAnomaly = !showAnomaly;
+			}
+
+			if (v != null)
+			{
+				r.x += 22;
+
+				if (GUI.Button(r, iconWithTT(SCANskins.SCAN_SmallMapIcon, "Sync To Vessel"), SCANskins.SCAN_buttonBorderless))
+				{
+					setToVessel(false);
+				}
 			}
 		}
 
@@ -709,7 +790,7 @@ namespace SCANsat.SCAN_UI
 					{
 						if (in_map)
 						{
-							resetMap(true, mlon, mlat, highDetail);
+							resetMap(true, mlat, mlon, highDetail);
 						}
 					}
 					//Right click zoom in
@@ -720,7 +801,7 @@ namespace SCANsat.SCAN_UI
 							spotmap.MapScale = spotmap.MapScale * 1.25f;
 							if (spotmap.MapScale > maxZoom)
 								spotmap.MapScale = maxZoom;
-							resetMap(true, mlon, mlat, highDetail);
+							resetMap(true, mlat, mlon, highDetail);
 						}
 					}
 					//Left click zoom out
@@ -731,7 +812,7 @@ namespace SCANsat.SCAN_UI
 							spotmap.MapScale = spotmap.MapScale / 1.25f;
 							if (spotmap.MapScale < minZoom)
 								spotmap.MapScale = minZoom;
-							resetMap(true, mlon, mlat, highDetail);
+							resetMap(true, mlat, mlon, highDetail);
 						}
 					}
 					Event.current.Use();

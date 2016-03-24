@@ -13,12 +13,14 @@
  */
 #endregion
 
+using System;
 using System.Collections.Generic;
 using SCANsat.SCAN_Data;
 using SCANsat.SCAN_Map;
 using SCANsat.SCAN_UI.UI_Framework;
 using SCANsat.SCAN_Platform;
 using SCANsat.SCAN_Platform.Palettes;
+using FinePrint.Utilities;
 using palette = SCANsat.SCAN_UI.UI_Framework.SCANpalette;
 using UnityEngine;
 
@@ -38,10 +40,10 @@ namespace SCANsat.SCAN_UI
 		private SCANterrainConfig bodyTerrain;
 		private float minT, maxT, clampT, pSize;
 
-		private SCANuiSlider minTerrainSlider, maxTerrainSlider, clampTerrainSlider, paletteSizeSlider, resourceMinSlider, resourceMaxSlider, resourceTransSlider, biomeTransSlider;
+		private SCANuiSlider minTerrainSlider, maxTerrainSlider, clampTerrainSlider, paletteSizeSlider, resourceMinSlider, resourceMaxSlider, resourceTransSlider, biomeTransSlider, slopeSlider;
 
 		private SCANuiColorPicker slopeColorPickerLow, slopeColorPickerHigh, biomeColorPicker, resourceColorPicker;
-		private float bTrans, rTrans;
+		private float bTrans, rTrans, sCutoff;
 
 		private bool stockBiomes = false;
 		private bool biomeBorders = true;
@@ -88,6 +90,7 @@ namespace SCANsat.SCAN_UI
 		private string colorResourceHelpDefault = "Reverts to the default values for the selected resource and celestial body only.";
 		private string colorResourceHelpDefaultAll = "Reverts to the default values for the selected resource for all celestial bodies.";
 		private string colorHelpSaveToConfig = "Save all color configuration values to the config file found in your SCANsat/Resources folder. These values serve as the defaults for new saves and for all Revert To Default buttons. Values do not need to be saved to the config file to be applied for this save file.";
+		private string colorSlopeHelpCutoff = "Adjust the cutoff level between the two selected slope color pairs.";
 
 		protected override void Awake()
 		{
@@ -146,6 +149,9 @@ namespace SCANsat.SCAN_UI
 			maxTerrainSlider = new SCANuiSlider(currentTerrain.MinTerrain + 100, currentTerrain.DefaultMaxHeight + SCANconfigLoader.SCANNode.RangeAboveMaxHeight, currentTerrain.MaxTerrain, "Max: ", "m", colorTerrainHelpMax, -2);
 			clampTerrainSlider = new SCANuiSlider(currentTerrain.MinTerrain + 10, currentTerrain.MaxTerrain - 10, currentTerrain.ClampTerrain ?? currentTerrain.MinTerrain + 10, "Clamp: ", "m", colorTerrainHelpClamp, -1);
 			paletteSizeSlider = new SCANuiSlider(3, 12, currentTerrain.PalSize, "Palette Size: ", "", colorTerrainHelpPaletteSize, 0);
+
+			sCutoff = SCANcontroller.controller.slopeCutoff;
+			slopeSlider = new SCANuiSlider(0.2f, 1.8f, sCutoff, "Slope Cutoff: ", "", colorSlopeHelpCutoff, 2, 180, 10);
 
 			slopeColorPickerLow = new SCANuiColorPicker(SCANcontroller.controller.lowSlopeColorOne, SCANcontroller.controller.highSlopeColorOne, colorPickerHelpLow, colorPickerHelpHigh, colorPickerHelpValue, true);
 			slopeColorPickerHigh = new SCANuiColorPicker(SCANcontroller.controller.lowSlopeColorTwo, SCANcontroller.controller.highSlopeColorTwo, colorPickerHelpLow, colorPickerHelpHigh, colorPickerHelpValue, true);
@@ -208,6 +214,7 @@ namespace SCANsat.SCAN_UI
 			colorResourceHelpDefault = SCANconfigLoader.languagePack.colorResourceHelpDefault;
 			colorResourceHelpDefaultAll = SCANconfigLoader.languagePack.colorResourceHelpDefaultAll;
 			colorHelpSaveToConfig = SCANconfigLoader.languagePack.colorHelpSaveToConfig;
+			colorSlopeHelpCutoff = SCANconfigLoader.languagePack.colorSlopeHelpCutoff;
 		}
 
 		protected override void OnDestroy()
@@ -341,7 +348,6 @@ namespace SCANsat.SCAN_UI
 					stopE();
 					fillS(100);
 					growE();
-						fillS(140);
 						slopeOptions(id);
 						slopeConfirm(id);
 					stopE();
@@ -792,7 +798,7 @@ namespace SCANsat.SCAN_UI
 
 		private void slopeOptions(int id)
 		{
-
+			slopeSlider.drawSlider(false, ref sCutoff);
 		}
 
 		private void resourceOptions(int id)
@@ -931,6 +937,8 @@ namespace SCANsat.SCAN_UI
 		{
 			if (!dropDown)
 			{
+				fillS(20);
+				
 				if (GUILayout.Button("Apply Values", GUILayout.Width(110)))
 				{
 					SCANcontroller.controller.lowSlopeColorOne = slopeColorPickerLow.ColorLow;
@@ -941,6 +949,7 @@ namespace SCANsat.SCAN_UI
 					SCANcontroller.controller.highSlopeColorOne32 = slopeColorPickerLow.ColorHigh;
 					SCANcontroller.controller.lowSlopeColorTwo32 = slopeColorPickerHigh.ColorLow;
 					SCANcontroller.controller.highSlopeColorTwo32 = slopeColorPickerHigh.ColorHigh;
+					SCANcontroller.controller.slopeCutoff = sCutoff;
 
 					slopeColorPickerLow.updateOldSwatches();
 					slopeColorPickerHigh.updateOldSwatches();
@@ -965,9 +974,12 @@ namespace SCANsat.SCAN_UI
 					SCANcontroller.controller.highSlopeColorOne32 = SCANconfigLoader.SCANNode.BottomHighSlopeColor;
 					SCANcontroller.controller.lowSlopeColorTwo32 = SCANconfigLoader.SCANNode.TopLowSlopeColor;
 					SCANcontroller.controller.highSlopeColorTwo32 = SCANconfigLoader.SCANNode.TopHighSlopeColor;
+					SCANcontroller.controller.slopeCutoff = SCANconfigLoader.SCANNode.SlopeCutoff;
 
 					slopeColorPickerLow = new SCANuiColorPicker(SCANcontroller.controller.lowSlopeColorOne, SCANcontroller.controller.highSlopeColorOne, colorPickerHelpLow, colorPickerHelpHigh, colorPickerHelpValue, slopeColorPickerLow.LowColorChange);
 					slopeColorPickerHigh = new SCANuiColorPicker(SCANcontroller.controller.lowSlopeColorTwo, SCANcontroller.controller.highSlopeColorTwo, colorPickerHelpLow, colorPickerHelpHigh, colorPickerHelpValue, slopeColorPickerHigh.LowColorChange);
+
+					sCutoff = SCANcontroller.controller.slopeCutoff;
 
 					slopeColorPickerLow.updateOldSwatches();
 					slopeColorPickerHigh.updateOldSwatches();
@@ -979,7 +991,7 @@ namespace SCANsat.SCAN_UI
 					}
 				}
 
-				fillS(80);
+				fillS(20);
 
 				if (GUILayout.Button(textWithTT("Save Values To Config", colorHelpSaveToConfig), GUILayout.Width(180)))
 				{
@@ -989,10 +1001,11 @@ namespace SCANsat.SCAN_UI
 			}
 			else
 			{
+				fillS(20);
 				GUILayout.Label("Apply Values", SCANskins.SCAN_button, GUILayout.Width(110));
 				fillS(8);
 				GUILayout.Label("Default Values", SCANskins.SCAN_button, GUILayout.Width(110));
-				fillS(80);
+				fillS(20);
 				GUILayout.Label("Save Values To Config", SCANskins.SCAN_button, GUILayout.Width(180));
 			}
 		}
@@ -1364,7 +1377,19 @@ namespace SCANsat.SCAN_UI
 				if (body.ocean)
 					clamp = 0;
 
-				bodyTerrain = new SCANterrainConfig(SCANconfigLoader.SCANNode.DefaultMinHeightRange, SCANconfigLoader.SCANNode.DefaultMaxHeightRange, clamp, SCANUtil.paletteLoader(SCANconfigLoader.SCANNode.DefaultPalette, 7), 7, false, false, body);
+				float newMax;
+
+				try
+				{
+					newMax = ((float)CelestialUtilities.GetHighestPeak(body)).Mathf_Round(-2);
+				}
+				catch (Exception e)
+				{
+					SCANUtil.SCANlog("Error in calculating Max Height for {0}; using default value\n{1}", body.theName, e);
+					newMax = SCANconfigLoader.SCANNode.DefaultMaxHeightRange;
+				}
+
+				bodyTerrain = new SCANterrainConfig(SCANconfigLoader.SCANNode.DefaultMinHeightRange, newMax, clamp, SCANUtil.paletteLoader(SCANconfigLoader.SCANNode.DefaultPalette, 7), 7, false, false, body);
 
 				SCANcontroller.addToTerrainConfigData(body.name, bodyTerrain);
 			}

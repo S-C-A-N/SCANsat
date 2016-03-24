@@ -14,9 +14,9 @@ using System.Runtime.CompilerServices;
 // The assembly version has the format "{Major}.{Minor}.{Build}.{Revision}".
 // The form "{Major}.{Minor}.*" will automatically update the build and revision,
 // and "{Major}.{Minor}.{Build}.*" will update just the revision.
-[assembly: AssemblyVersion ("1.4.0.4")]
-[assembly: AssemblyFileVersion ("1.4.0.4")]
-[assembly: AssemblyInformationalVersion ("v14.4")]
+[assembly: AssemblyVersion ("1.4.0.9")]
+[assembly: AssemblyFileVersion ("1.4.0.9")]
+[assembly: AssemblyInformationalVersion ("v14.9")]
 
 [assembly: KSPAssembly ("SCANsat", 1, 4)]
 

@@ -196,8 +196,7 @@ namespace SCANsat.SCAN_UI
 				{
 					SCANcontroller.controller.BigMap.TooltipsEnabled = SCANcontroller.controller.toolTips;
 					SCANcontroller.controller.mainMap.TooltipsEnabled = SCANcontroller.controller.toolTips;
-					if (SCANcontroller.controller.BigMap.spotMap != null)
-						SCANcontroller.controller.BigMap.spotMap.TooltipsEnabled = SCANcontroller.controller.toolTips;
+					SCANcontroller.controller.zoomMap.TooltipsEnabled = SCANcontroller.controller.toolTips;
 				}
 				if (HighLogic.LoadedScene == GameScenes.SPACECENTER || HighLogic.LoadedScene == GameScenes.TRACKSTATION)
 				{
@@ -460,6 +459,11 @@ namespace SCANsat.SCAN_UI
 			if (GUILayout.Button("Resource Settings Window"))
 			{
 				SCANcontroller.controller.resourceSettings.Visible = !SCANcontroller.controller.resourceSettings.Visible;
+			}
+
+			if (GUILayout.Button("Color Management Window"))
+			{
+				SCANcontroller.controller.colorManager.Visible = !SCANcontroller.controller.colorManager.Visible;
 			}
 		}
 

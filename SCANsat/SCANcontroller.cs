@@ -17,11 +17,16 @@ using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Contracts;
+using FinePrint.Contracts;
+using FinePrint.Utilities;
 using SCANsat.SCAN_UI;
 using SCANsat.SCAN_UI.UI_Framework;
 using SCANsat.SCAN_Data;
+using SCANsat.SCAN_Map;
 using SCANsat.SCAN_PartModules;
 using SCANsat.SCAN_Platform;
+using SCANsat.SCAN_Platform.Extensions.ConfigNodes;
 using SCANsat.SCAN_Platform.Palettes;
 using SCANsat.SCAN_Platform.Palettes.ColorBrewer;
 using SCANsat.SCAN_Platform.Palettes.FixedColors;
@@ -128,6 +133,10 @@ namespace SCANsat
 		public bool exportCSV = false;
 		[KSPField(isPersistant = true)]
 		public float scanThreshold = 0.90f;
+		[KSPField(isPersistant = true)]
+		public bool useScanThreshold = true;
+		[KSPField(isPersistant = true)]
+		public float slopeCutoff = 1f;
 
 		/* Biome and slope colors can't be serialized properly as a KSP Field */
 		public Color lowBiomeColor = new Color(0, 0.46f, 0.02345098f, 1);
@@ -168,6 +177,12 @@ namespace SCANsat
 		private CelestialBody landingTargetBody;
 		private SCANwaypoint landingTarget;
 
+		/* Kopernicus On Demand Loading Data */
+		private List<CelestialBody> dataBodies = new List<CelestialBody>();
+		private CelestialBody bigMapBody;
+		private CelestialBody zoomMapBody;
+		private PQSMod KopernicusOnDemand;
+
 		/* UI window objects */
 		internal SCANmainMap mainMap;
 		internal SCANsettingsUI settingsWindow;
@@ -178,6 +193,7 @@ namespace SCANsat
 		internal SCANoverlayController resourceOverlay;
 		internal SCANresourceSettings resourceSettings;
 		internal SCANzoomHiDef hiDefMap;
+		internal SCANzoomWindow zoomMap;
 
 		/* App launcher object */
 		internal SCANappLauncher appLauncher;
@@ -262,17 +278,38 @@ namespace SCANsat
 			{
 				SCANUtil.SCANlog("Error while loading SCANsat terrain config settings: {0}", e);
 			}
+		}
 
+		public static void checkLoadedTerrainNodes()
+		{
 			for (int i = 0; i < FlightGlobals.Bodies.Count; i++)
 			{
 				CelestialBody b = FlightGlobals.Bodies[i];
+
+				if (b == null)
+					continue;
+
 				if (getTerrainNode(b.name) == null)
 				{
 					float? clamp = null;
 					if (b.ocean)
 						clamp = 0;
 
-					addToTerrainConfigData(b.name, new SCANterrainConfig(SCANconfigLoader.SCANNode.DefaultMinHeightRange, SCANconfigLoader.SCANNode.DefaultMaxHeightRange, clamp, SCANUtil.paletteLoader(SCANconfigLoader.SCANNode.DefaultPalette, 7), 7, false, false, b));
+					float newMax;
+
+					try
+					{
+						newMax = ((float)CelestialUtilities.GetHighestPeak(b)).Mathf_Round(-2);
+					}
+					catch (Exception e)
+					{
+						SCANUtil.SCANlog("Error in calculating Max Height for {0}; using default value/n{1}", b.theName, e);
+						newMax = SCANconfigLoader.SCANNode.DefaultMaxHeightRange;
+					}
+
+					SCANUtil.SCANlog("Generating new SCANsat Terrain Config for [{0}] - Max Height: [{1:F0}m]", b.bodyName, newMax);
+
+					addToTerrainConfigData(b.name, new SCANterrainConfig(SCANconfigLoader.SCANNode.DefaultMinHeightRange, newMax, clamp, SCANUtil.paletteLoader(SCANconfigLoader.SCANNode.DefaultPalette, 7), 7, false, false, b));
 				}
 			}
 		}
@@ -531,31 +568,25 @@ namespace SCANsat
 		}
 		#endregion
 
+		#region save/load
+
 		public override void OnLoad(ConfigNode node)
 		{
 			instance = this;
 
-			try
-			{
-				lowBiomeColor = ConfigNode.ParseColor(node.GetValue("lowBiomeColor"));
-				highBiomeColor = ConfigNode.ParseColor(node.GetValue("highBiomeColor"));
-				lowSlopeColorOne = ConfigNode.ParseColor(node.GetValue("lowSlopeColorOne"));
-				highSlopeColorOne = ConfigNode.ParseColor(node.GetValue("highSlopeColorOne"));
-				lowSlopeColorTwo = ConfigNode.ParseColor(node.GetValue("lowSlopeColorTwo"));
-				highSlopeColorTwo = ConfigNode.ParseColor(node.GetValue("highSlopeColorTwo"));
-
-				lowBiomeColor32 = lowBiomeColor;
-				highBiomeColor32 = highBiomeColor;
-				lowSlopeColorOne32 = lowSlopeColorOne;
-				highSlopeColorOne32 = highSlopeColorOne;
-				lowSlopeColorTwo32 = lowSlopeColorTwo;
-				highSlopeColorTwo32 = highSlopeColorTwo;
-			}
-			catch (Exception e)
-			{
-				SCANUtil.SCANlog("Error While Loading SCANsat Colors: {0}", e);
-			}
-
+			lowBiomeColor = node.parse("lowBiomeColor", lowBiomeColor);
+			highBiomeColor = node.parse("highBiomeColor", highBiomeColor);
+			lowSlopeColorOne = node.parse("lowSlopeColorOne", lowSlopeColorOne);
+			highSlopeColorOne = node.parse("highSlopeColorOne", highSlopeColorOne);
+			lowSlopeColorTwo = node.parse("lowSlopeColorTwo", lowSlopeColorTwo);
+			highSlopeColorTwo = node.parse("highSlopeColorTwo", highSlopeColorTwo);
+			
+			lowBiomeColor32 = lowBiomeColor;
+			highBiomeColor32 = highBiomeColor;
+			lowSlopeColorOne32 = lowSlopeColorOne;
+			highSlopeColorOne32 = highSlopeColorOne;
+			lowSlopeColorTwo32 = lowSlopeColorTwo;
+			highSlopeColorTwo32 = highSlopeColorTwo;
 
 			ConfigNode node_vessels = node.GetNode("Scanners");
 			if (node_vessels != null)
@@ -563,30 +594,22 @@ namespace SCANsat
 				SCANUtil.SCANlog("SCANsat Controller: Loading {0} known vessels", node_vessels.CountNodes);
 				foreach (ConfigNode node_vessel in node_vessels.GetNodes("Vessel"))
 				{
-					Guid id;
-					try
+					Guid id = node_vessel.parse("guid", new Guid());
+
+					if (id == new Guid())
 					{
-						id = new Guid(node_vessel.GetValue("guid"));
-					}
-					catch (Exception e)
-					{
-						SCANUtil.SCANlog("Something Went Wrong Loading This SCAN Vessel; Moving On To The Next: {0}", e);
+						SCANUtil.SCANlog("Something Went Wrong Loading This SCAN Vessel; Moving On To The Next");
 						continue;
 					}
+
 					foreach (ConfigNode node_sensor in node_vessel.GetNodes("Sensor"))
 					{
-						int sensor;
-						double fov, min_alt, max_alt, best_alt;
-						if (!int.TryParse(node_sensor.GetValue("type"), out sensor))
-							sensor = 0;
-						if (!double.TryParse(node_sensor.GetValue("fov"), out fov))
-							fov = 3;
-						if (!double.TryParse(node_sensor.GetValue("min_alt"), out min_alt))
-							min_alt = minScanAlt;
-						if (!double.TryParse(node_sensor.GetValue("max_alt"), out max_alt))
-							max_alt = maxScanAlt;
-						if (!double.TryParse(node_sensor.GetValue("best_alt"), out best_alt))
-							best_alt = bestScanAlt;
+						int sensor = node_sensor.parse("type", (int)0);
+						double fov = node_sensor.parse("fov", 3d);
+						double min_alt = node_sensor.parse("min_alt", (double)minScanAlt);
+						double max_alt = node_sensor.parse("max_alt", (double)maxScanAlt);
+						double best_alt = node_sensor.parse("best_alt", (double)bestScanAlt);
+
 						registerSensor(id, (SCANtype)sensor, fov, min_alt, max_alt, best_alt);
 					}
 				}
@@ -620,16 +643,27 @@ namespace SCANsat
 			{
 				foreach (ConfigNode node_body in node_progress.GetNodes("Body"))
 				{
-					float min, max, clamp;
-					float? clampState = null;
-					Palette dataPalette;
-					SCANwaypoint target = null;
-					string paletteName = "";
-					int pSize;
-					bool pRev, pDis, disabled;
-					string body_name = node_body.GetValue("Name");
+					string body_name = node_body.parse("Name", "");
+
+					if (string.IsNullOrEmpty(body_name))
+					{
+						SCANUtil.SCANlog("SCANsat Controller: Error while loading Celestial Body data; skipping value...");
+						continue;
+					}
+
 					SCANUtil.SCANlog("SCANsat Controller: Loading map for {0}", body_name);
-					CelestialBody body = FlightGlobals.Bodies.FirstOrDefault(b => b.name == body_name);
+
+					CelestialBody body;
+					try
+					{
+						body = FlightGlobals.Bodies.FirstOrDefault(b => b.name == body_name);
+					}
+					catch (Exception e)
+					{
+						Debug.LogError(string.Format("[SCANsat] Error in loading Celestial Body [{0}]...\n{1}", body_name, e));
+						continue;
+					}
+
 					if (body != null)
 					{
 						SCANdata data = getData(body.name);
@@ -639,9 +673,17 @@ namespace SCANsat
 							body_data.Add(body_name, data);
 						else
 							body_data[body_name] = data;
+
 						try
 						{
-							string mapdata = node_body.GetValue("Map");
+							string mapdata = node_body.parse("Map", "");
+							
+							if (string.IsNullOrEmpty(mapdata))
+							{
+								SCANUtil.SCANlog("SCANsat Controller: Error while loading Celestial Body map data; skipping value...");
+								continue;
+							}
+							
 							if (dataRebuild)
 							{ //On the first load deserialize the "Map" value to both coverage arrays
 								data.integerDeserialize(mapdata, true);
@@ -657,31 +699,32 @@ namespace SCANsat
 							data.reset();
 							// fail somewhat gracefully; don't make the save unloadable 
 						}
-						try // Make doubly sure that nothing here can interupt the Scenario Module loading process
+
+						try
 						{
-							//Verify that saved data types can be converted, revert to default values otherwise
-							if (node_body.HasValue("LandingTarget"))
-								target = loadWaypoint(node_body.GetValue("LandingTarget"));
-							if (bool.TryParse(node_body.GetValue("Disabled"), out disabled))
-								data.Disabled = disabled;
-							if (!float.TryParse(node_body.GetValue("MinHeightRange"), out min))
-								min = data.TerrainConfig.DefaultMinHeight;
-							if (!float.TryParse(node_body.GetValue("MaxHeightRange"), out max))
-								max = data.TerrainConfig.DefaultMaxHeight;
-							if (node_body.HasValue("ClampHeight"))
-							{
-								if (float.TryParse(node_body.GetValue("ClampHeight"), out clamp))
-									clampState = clamp;
-							}
-							if (!int.TryParse(node_body.GetValue("PaletteSize"), out pSize))
-								pSize = data.TerrainConfig.DefaultPaletteSize;
-							if (!bool.TryParse(node_body.GetValue("PaletteReverse"), out pRev))
-								pRev = data.TerrainConfig.DefaultReverse;
-							if (!bool.TryParse(node_body.GetValue("PaletteDiscrete"), out pDis))
-								pDis = data.TerrainConfig.DefaultDiscrete;
-							if (node_body.HasValue("PaletteName"))
-								paletteName = node_body.GetValue("PaletteName");
-							dataPalette = SCANUtil.paletteLoader(paletteName, pSize);
+							SCANwaypoint target = null;
+							string targetName = node_body.parse("LandingTarget", "");
+
+							if (!string.IsNullOrEmpty(targetName))
+								target = loadWaypoint(targetName);
+
+							data.Disabled = node_body.parse("Disabled", false);
+
+							float min = node_body.parse("MinHeightRange", data.TerrainConfig.DefaultMinHeight);
+							float max = node_body.parse("MaxHeightRange", data.TerrainConfig.DefaultMaxHeight);
+							float? clampState = node_body.parse("ClampHeight", (float?)null);
+
+							int pSize = node_body.parse("PaletteSize", data.TerrainConfig.DefaultPaletteSize);
+							bool pRev = node_body.parse("PaletteReverse", data.TerrainConfig.DefaultReverse);
+							bool pDis = node_body.parse("PaletteDiscrete", data.TerrainConfig.DefaultDiscrete);
+
+							string paletteName = node_body.parse("PaletteName", "");
+
+							if (string.IsNullOrEmpty(paletteName))
+								paletteName = data.TerrainConfig.DefaultPalette.name;
+
+							Palette dataPalette = SCANUtil.paletteLoader(paletteName, pSize);
+
 							if (dataPalette.hash == PaletteLoader.defaultPalette.hash)
 							{
 								paletteName = "Default";
@@ -723,12 +766,7 @@ namespace SCANsat
 				{
 					if (node_resource_type != null)
 					{
-						string name = node_resource_type.GetValue("Resource");
-						string lowColor = node_resource_type.GetValue("MinColor");
-						string highColor = node_resource_type.GetValue("MaxColor");
-						string transparent = node_resource_type.GetValue("Transparency");
-						string minMaxValues = node_resource_type.GetValue("MinMaxValues");
-						loadCustomResourceValues(minMaxValues, name, lowColor, highColor, transparent);
+						loadCustomResourceValues(node_resource_type);
 					}
 				}
 			}
@@ -811,12 +849,15 @@ namespace SCANsat
 			}
 		}
 
+		#endregion
+
 		private void Start()
 		{
 			GameEvents.onVesselSOIChanged.Add(SOIChange);
 			GameEvents.onVesselCreate.Add(newVesselCheck);
 			GameEvents.onPartCouple.Add(dockingCheck);
 			GameEvents.Contract.onContractsLoaded.Add(contractsCheck);
+			GameEvents.Contract.onParameterChange.Add(onParamChange);
 			if (HighLogic.LoadedSceneIsFlight)
 			{
 				if (!body_data.ContainsKey(FlightGlobals.currentMainBody.name))
@@ -831,6 +872,7 @@ namespace SCANsat
 					BigMap = gameObject.AddComponent<SCANBigMap>();
 					resourceOverlay = gameObject.AddComponent<SCANoverlayController>();
 					resourceSettings = gameObject.AddComponent<SCANresourceSettings>();
+					zoomMap = gameObject.AddComponent<SCANzoomWindow>();
 				}
 				catch (Exception e)
 				{
@@ -860,7 +902,7 @@ namespace SCANsat
 			if (useStockAppLauncher)
 				appLauncher = gameObject.AddComponent<SCANappLauncher>();
 
-			if (disableStockResource)
+			if (disableStockResource && useScanThreshold)
 			{
 				for (int i = 0; i < FlightGlobals.Bodies.Count; i++)
 				{
@@ -937,6 +979,9 @@ namespace SCANsat
 
 		public void checkResourceScanStatus(CelestialBody body)
 		{
+			if (!useScanThreshold)
+				return;
+
 			if (body == null)
 				return;
 
@@ -1016,6 +1061,7 @@ namespace SCANsat
 			GameEvents.onVesselCreate.Remove(newVesselCheck);
 			GameEvents.onPartCouple.Remove(dockingCheck);
 			GameEvents.Contract.onContractsLoaded.Remove(contractsCheck);
+			GameEvents.Contract.onParameterChange.Remove(onParamChange);
 			if (mainMap != null)
 				Destroy(mainMap);
 			if (settingsWindow != null)
@@ -1034,6 +1080,154 @@ namespace SCANsat
 				Destroy(appLauncher);
 			if (hiDefMap != null)
 				Destroy(hiDefMap);
+
+			if (!heightMapsBuilt)
+			{
+				for (int i = dataBodies.Count - 1; i >= 0; i--)
+				{
+					CelestialBody b = dataBodies[i];
+
+					unloadPQS(b);
+				}
+			}
+		}
+
+		internal void loadPQS(CelestialBody b, mapSource s = mapSource.Data)
+		{
+			if (!SCANmainMenuLoader.KopernicusLoaded)
+				return;
+
+			if (b == null)
+				return;
+
+			switch (s)
+			{
+				case mapSource.Data:
+					if (dataBodies.Contains(b))
+						return;
+
+					dataBodies.Add(b);
+
+					if (bigMapBody != null && bigMapBody == b)
+						return;
+
+					if (zoomMapBody != null && zoomMapBody == b)
+						return;
+					break;
+				case mapSource.BigMap:
+					if (bigMapBody != null && bigMapBody == b)
+						return;
+
+					bigMapBody = b;
+
+					if (zoomMapBody != null && zoomMapBody == b)
+						return;
+
+					if (dataBodies.Contains(b))
+						return;
+					break;
+
+				case mapSource.ZoomMap:
+					if (zoomMapBody != null && zoomMapBody == b)
+						return;
+
+					zoomMapBody = b;
+
+					if (bigMapBody != null && bigMapBody == b)
+						return;
+
+					if (dataBodies.Contains(b))
+						return;
+					break;
+				case mapSource.RPM:
+					return;
+			}
+
+			KopernicusOnDemand = b.GetComponentsInChildren<PQSMod>(true).Where(p => p.GetType().Name == "PQSMod_OnDemandHandler").FirstOrDefault();
+
+			if (KopernicusOnDemand == null)
+				return;
+
+			KopernicusOnDemand.OnQuadPreBuild(null);
+
+			KopernicusOnDemand = null;
+
+			SCANUtil.SCANlog("Loading Kopernicus On Demand PQSMod For {0}", b.theName);
+		}
+
+		internal void unloadPQS(CelestialBody b, mapSource s = mapSource.Data)
+		{
+			if (!SCANmainMenuLoader.KopernicusLoaded)
+				return;
+
+			if (b == null)
+				return;
+
+			switch (s)
+			{
+				case mapSource.Data:
+					if (dataBodies.Contains(b))
+						dataBodies.RemoveAll(a => a == b);
+
+					if (bigMapBody != null && bigMapBody == b)
+						return;
+
+					if (zoomMapBody != null && zoomMapBody == b)
+						return;
+					break;
+				case mapSource.BigMap:
+					bigMapBody = null;
+
+					if (zoomMapBody != null && zoomMapBody == b)
+						return;
+
+					if (dataBodies.Contains(b))
+						return;
+					break;
+
+				case mapSource.ZoomMap:
+					zoomMapBody = null;
+
+					if (bigMapBody != null && bigMapBody == b)
+						return;
+
+					if (dataBodies.Contains(b))
+						return;
+					break;
+				case mapSource.RPM:
+					return;
+			}
+
+			bool setInactive = false;
+
+			switch(HighLogic.LoadedScene)
+			{
+				case GameScenes.SPACECENTER:
+					if (b != Planetarium.fetch.Home)
+						setInactive = true;
+					break;
+				case GameScenes.TRACKSTATION:
+					setInactive = true;
+					break;
+				case GameScenes.FLIGHT:
+					if (b != FlightGlobals.currentMainBody)
+						setInactive = true;
+					break;
+			}
+
+			if (!setInactive)
+				return;
+
+			KopernicusOnDemand = b.GetComponentsInChildren<PQSMod>(true).Where(p => p.GetType().Name == "PQSMod_OnDemandHandler").FirstOrDefault();
+
+			if (KopernicusOnDemand == null)
+				return;
+
+			KopernicusOnDemand.OnSphereInactive();
+
+			KopernicusOnDemand = null;
+
+			SCANUtil.SCANlog("Unloading Kopernicus On Demand PQSMod For {0}", b.theName);
 		}
 
 		private void drawTarget()
@@ -1258,6 +1452,23 @@ namespace SCANsat
 			contractsLoaded = true;
 		}
 
+		private void onParamChange(Contract c, ContractParameter p)
+		{
+			if (c.GetType() != typeof(SurveyContract))
+				return;
+
+			SurveyContract s = c as SurveyContract;
+
+			CelestialBody b = s.targetBody;
+
+			SCANdata data = getData(b.name);
+
+			if (data == null)
+				return;
+
+			data.addSurveyWaypoints(b, s);
+		}
+
 		private void SOIChange(GameEvents.HostedFromToAction<Vessel, CelestialBody> VC)
 		{
 			if (!body_data.ContainsKey(VC.to.name))
@@ -1294,45 +1505,29 @@ namespace SCANsat
 			return string.Join(",", sL.ToArray());
 		}
 
-		private void loadCustomResourceValues(string s, string resource, string low, string high, string trans)
+		private void loadCustomResourceValues(ConfigNode node)
 		{
 			SCANresourceGlobal r;
+
+			string resource = node.parse("Resource", "");
+
+			if (string.IsNullOrEmpty(resource))
+				return;
 
 			if (masterResourceNodes.ContainsKey(resource))
 				r = masterResourceNodes[resource];
 			else
 				return;
 
-			Color lowColor = new Color();
-			Color highColor = new Color();
-			float transparent = 0;
-
-			try
-			{
-				lowColor = ConfigNode.ParseColor(low);
-			}
-			catch (Exception e)
-			{
-				lowColor = r.DefaultLowColor;
-				SCANUtil.SCANlog("Error in parsing low color for resource [{0}]: ", resource, e);
-			}
-
-			try
-			{
-				highColor = ConfigNode.ParseColor(high);
-			}
-			catch (Exception e)
-			{
-				highColor = r.DefaultHighColor;
-				SCANUtil.SCANlog("Error in parsing high color for resource [{0}]: ", resource, e);
-			}
-
-			if (!float.TryParse(trans, out transparent))
-				transparent = r.DefaultTrans;
+			Color lowColor = node.parse("MinColor", r.DefaultLowColor);
+			Color highColor = node.parse("MaxColor", r.DefaultHighColor);
+			float transparent = node.parse("Transparency", r.DefaultTrans);
 
 			r.MinColor = lowColor;
 			r.MaxColor = highColor;
 			r.Transparency = transparent;
+
+			string s = node.parse("MinMaxValues", "");
 
 			if (!string.IsNullOrEmpty(s))
 			{
@@ -1347,8 +1542,20 @@ namespace SCANsat
 						float max = 0;
 						if (!int.TryParse(sB[0], out j))
 							continue;
-						CelestialBody b;
-						if ((b = FlightGlobals.Bodies.FirstOrDefault(a => a.flightGlobalsIndex == j)) != null)
+
+						CelestialBody b = null;
+
+						try
+						{
+							b = FlightGlobals.Bodies.FirstOrDefault(a => a.flightGlobalsIndex == j);
+						}
+						catch (Exception e)
+						{
+							Debug.LogError("[SCANsat] Error in loading Celestial Body...\n" + e);
+							return;
+						}
+
+						if (b != null)
 						{
 							SCANresourceBody res = r.getBodyConfig(b.name);
 							if (res != null)
@@ -1400,6 +1607,17 @@ namespace SCANsat
 
 			public bool inRange;
 			public bool bestRange;
+
+			public SCANsensor() { }
+
+			public SCANsensor(SCANtype t, double f, double min, double max, double best)
+			{
+				sensor = t;
+				fov = f;
+				min_alt = min;
+				max_alt = max;
+				best_alt = best;
+			}
 		}
 
 		public class SCANvessel
@@ -1469,13 +1687,19 @@ namespace SCANsat
 					}
 				}
 				if (!sv.sensors.ContainsKey(sensor))
-					sv.sensors[sensor] = new SCANsensor();
-				SCANsensor s = sv.sensors[sensor];
-				s.sensor = sensor;
-				s.fov = this_fov;
-				s.min_alt = this_min_alt;
-				s.max_alt = this_max_alt;
-				s.best_alt = this_best_alt;
+					sv.sensors[sensor] = new SCANsensor(sensor, this_fov, this_min_alt, this_max_alt, this_best_alt);
+				else
+				{
+					SCANsensor s = sv.sensors[sensor];
+					s.sensor = sensor;
+					if (this_fov > s.fov)
+						s.fov = this_fov;
+					if (this_min_alt < s.min_alt)
+						s.min_alt = this_min_alt;
+					if (this_max_alt > s.max_alt)
+						s.max_alt = this_max_alt;
+					s.best_alt = this_best_alt;
+				}
 			}
 		}
 

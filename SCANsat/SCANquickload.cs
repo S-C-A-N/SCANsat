@@ -31,10 +31,11 @@ public class Debug_AutoLoadPersistentSaveOnStartup : MonoBehaviour {
 		if (first) {
 			first = false;
 			HighLogic.SaveFolder = "Testing";
-			var game = GamePersistence.LoadGame ("persistent" , HighLogic.SaveFolder , true , false);
-			if (game != null && game.flightState != null && game.compatible) {
-                     
-				List<ProtoVessel> allVessels = game.flightState.protoVessels;
+			HighLogic.CurrentGame = GamePersistence.LoadGame("persistent", HighLogic.SaveFolder, true, false);
+			if (HighLogic.CurrentGame != null && HighLogic.CurrentGame.flightState != null && HighLogic.CurrentGame.compatible)
+			{
+
+				List<ProtoVessel> allVessels = HighLogic.CurrentGame.flightState.protoVessels;
 				int suitableVessel = 0;
 
 				for (vId = 0; vId < allVessels.Count; vId++) {
@@ -50,8 +51,11 @@ public class Debug_AutoLoadPersistentSaveOnStartup : MonoBehaviour {
                       *   will want to do it here.
                       */
                     }
-
-				FlightDriver.StartAndFocusVessel(game, suitableVessel);
+				GamePersistence.UpdateScenarioModules(HighLogic.CurrentGame);
+				//HighLogic.CurrentGame.startScene = GameScenes.SPACECENTER;
+				//HighLogic.CurrentGame.Start();
+				string save = GamePersistence.SaveGame(HighLogic.CurrentGame, "persistent", HighLogic.SaveFolder, SaveMode.OVERWRITE);
+				FlightDriver.StartAndFocusVessel(save, suitableVessel);
 				CheatOptions.InfiniteFuel = true;
                }
           }

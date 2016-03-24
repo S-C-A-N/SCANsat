@@ -27,6 +27,7 @@ namespace SCANsat.SCAN_Toolbar
 		private IButton SmallButton;
 		private IButton OverlayButton;
 		private IButton KSCButton;
+		private IButton ZoomButton;
 
 		internal SCANtoolbar()
 		{
@@ -38,6 +39,7 @@ namespace SCANsat.SCAN_Toolbar
 				MapButton = ToolbarManager.Instance.add("SCANsat", "BigMap");
 				SmallButton = ToolbarManager.Instance.add("SCANsat", "SmallMap");
 				OverlayButton = ToolbarManager.Instance.add("SCANsat", "Overlay");
+				ZoomButton = ToolbarManager.Instance.add("SCANsat", "ZoomMap");
 
 				//Fall back to some default toolbar icons if someone deletes the SCANsat icons or puts them in the wrong folder
 				if (File.Exists(Path.Combine(new DirectoryInfo(KSPUtil.ApplicationRootPath).FullName, "GameData/SCANsat/Icons/SCANsat_Icon.png").Replace("\\", "/")))
@@ -56,13 +58,18 @@ namespace SCANsat.SCAN_Toolbar
 					OverlayButton.TexturePath = "SCANsat/Icons/SCANsat_OverlayToolbar_Icon";
 				else
 					OverlayButton.TexturePath = "000_Toolbar/resize-cursor";
+				if (File.Exists(Path.Combine(new DirectoryInfo(KSPUtil.ApplicationRootPath).FullName, "GameData/SCANsat/Icons/SCANsat_ZoomToolbar_Icon.png").Replace("\\", "/")))
+					ZoomButton.TexturePath = "SCANsat/Icons/SCANsat_ZoomToolbar_Icon";
+				else
+					ZoomButton.TexturePath = "000_Toolbar/resize-cursor";
 
 				SCANButton.ToolTip = "SCANsat";
 				MapButton.ToolTip = "SCANsat Big Map";
 				SmallButton.ToolTip = "SCANsat Small Map";
 				OverlayButton.ToolTip = "SCANsat Overlay Controller";
+				ZoomButton.ToolTip = "SCANsat Zoom Map";
 
-				SCANButton.OnClick += (e) => 
+				SCANButton.OnClick += (e) =>
 					{
 						if (SCANcontroller.controller != null)
 						{
@@ -70,28 +77,37 @@ namespace SCANsat.SCAN_Toolbar
 						}
 					};
 				MapButton.OnClick += (e) =>
-				{
-					if (SCANcontroller.controller != null)
 					{
-						SCANcontroller.controller.BigMap.Visible = !SCANcontroller.controller.BigMap.Visible;
-						SCANcontroller.controller.bigMapVisible = !SCANcontroller.controller.bigMapVisible;
-					}
-				};
+						if (SCANcontroller.controller != null)
+						{
+							SCANcontroller.controller.BigMap.Visible = !SCANcontroller.controller.BigMap.Visible;
+							SCANcontroller.controller.bigMapVisible = !SCANcontroller.controller.bigMapVisible;
+						}
+					};
 				SmallButton.OnClick += (e) =>
-				{
-					if (SCANcontroller.controller != null)
 					{
-						SCANcontroller.controller.mainMap.Visible = !SCANcontroller.controller.mainMap.Visible;
-						SCANcontroller.controller.mainMapVisible = !SCANcontroller.controller.mainMapVisible;
-					}
-				};
+						if (SCANcontroller.controller != null)
+						{
+							SCANcontroller.controller.mainMap.Visible = !SCANcontroller.controller.mainMap.Visible;
+							SCANcontroller.controller.mainMapVisible = !SCANcontroller.controller.mainMapVisible;
+						}
+					};
 				OverlayButton.OnClick += (e) =>
-				{
-					if (SCANcontroller.controller != null)
 					{
-						SCANcontroller.controller.resourceOverlay.Visible = !SCANcontroller.controller.resourceOverlay.Visible;
-					}
-				};
+						if (SCANcontroller.controller != null)
+						{
+							SCANcontroller.controller.resourceOverlay.Visible = !SCANcontroller.controller.resourceOverlay.Visible;
+						}
+					};
+				ZoomButton.OnClick += (e) =>
+					{
+						if (SCANcontroller.controller != null)
+						{
+							SCANcontroller.controller.zoomMap.Visible = !SCANcontroller.controller.zoomMap.Visible;
+							if (SCANcontroller.controller.zoomMap.Visible && !SCANcontroller.controller.zoomMap.Initialized)
+								SCANcontroller.controller.zoomMap.initializeMap();
+						}
+					};
 			}
 			else if (HighLogic.LoadedScene == GameScenes.SPACECENTER || HighLogic.LoadedScene == GameScenes.TRACKSTATION)
 			{
@@ -133,6 +149,7 @@ namespace SCANsat.SCAN_Toolbar
 			IButton smallMap = list.AddOption("Small Map");
 			IButton instrument = list.AddOption("Instruments");
 			IButton bigMap = list.AddOption("Big Map");
+			IButton zoomMap = list.AddOption("Zoom Map");
 			IButton settings = list.AddOption("Settings");
 			IButton color = list.AddOption("Color Options");
 			IButton resource = list.AddOption("Planetary Overlay");
@@ -151,6 +168,12 @@ namespace SCANsat.SCAN_Toolbar
 				{
 					SCANcontroller.controller.BigMap.Visible = !SCANcontroller.controller.BigMap.Visible;
 					SCANcontroller.controller.bigMapVisible = !SCANcontroller.controller.bigMapVisible;
+				};
+			zoomMap.OnClick += (e2) =>
+				{
+					SCANcontroller.controller.zoomMap.Visible = !SCANcontroller.controller.zoomMap.Visible;
+					if (SCANcontroller.controller.zoomMap.Visible && !SCANcontroller.controller.zoomMap.Initialized)
+						SCANcontroller.controller.zoomMap.initializeMap();
 				};
 			settings.OnClick += (e2) =>
 				{
@@ -192,6 +215,8 @@ namespace SCANsat.SCAN_Toolbar
 				KSCButton.Destroy();
 			if (OverlayButton != null)
 				OverlayButton.Destroy();
+			if (ZoomButton != null)
+				ZoomButton.Destroy();
 		}
 
 	}

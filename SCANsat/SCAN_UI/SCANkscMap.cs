@@ -71,7 +71,7 @@ namespace SCANsat.SCAN_UI
 				b = Planetarium.fetch.Home;
 			if (bigmap == null)
 			{
-				bigmap = new SCANmap(b, true);
+				bigmap = new SCANmap(b, true, mapSource.BigMap);
 				bigmap.setProjection((MapProjection)SCANcontroller.controller.projection);
 				bigmap.setWidth(720);
 			}
@@ -98,6 +98,8 @@ namespace SCANsat.SCAN_UI
 			removeControlLocks();
 			if (spotMap != null)
 				Destroy(spotMap);
+
+			SCANcontroller.controller.unloadPQS(bigmap.Body, mapSource.BigMap);
 		}
 
 		protected override void Update()
@@ -588,7 +590,7 @@ namespace SCANsat.SCAN_UI
 							{
 								spotMap = gameObject.AddComponent<SCANzoomWindow>();
 							}
-							spotMap.setMapCenter(mlat, mlon, true, bigmap);
+							spotMap.setMapCenter(mlat, mlon, true, bigmap, true);
 						}
 					}
 					Event.current.Use();

@@ -26,25 +26,31 @@ namespace SCANsat.SCAN_Data
 		Anomaly = 1 << 4,		    // anomalies (position of anomaly)
 		AnomalyDetail = 1 << 5,	// anomaly detail (name of anomaly, etc.)
 		Kethane = 1 << 6,         // Kethane
-		MetallicOre = 1 << 7,             // CRP Ore - Regolith
+		MetallicOre = 1 << 7,             // CRP Ore
 		Ore = 1 << 8,				//Stock Ore
 		Helium3 = 1 << 9,       // Helium 3
-		Uraninite = 1 << 10,        // Uranium - Regolith - KSPI
-		Thorium = 1 << 11,        // Thorium - Regolith - KSPI
-		Alumina = 1 << 12,        // Alumina - Regolith - KSPI
-		Water = 1 << 13,          // Water - Regolith - KSPI
-		Aquifer = 1 << 14,        // Aquifer - Regolith & K-type - MKS
-		Minerals = 1 << 15,       // Minerals - Regolith & K-type - MKS
-		Substrate = 1 << 16,      // Substrate - Regolith & K-type - MKS
-		KEEZO = 1 << 17,          // KEEZO - Regolith - Kass Effect
-		Karbonite = 1 << 18,    // Karbonite - Regolith
+		Uraninite = 1 << 10,        // Uranium - CRP
+		Thorium = 1 << 11,        // Thorium - CRP
+		Alumina = 1 << 12,        // Alumina - CRP
+		Water = 1 << 13,          // Water - CRP
+		Aquifer = 1 << 14,        // Aquifer - CRP
+		Minerals = 1 << 15,       // Minerals - CRP
+		Substrate = 1 << 16,      // Substrate - CRP
+		MetalOre = 1 << 17,          // Metal Ore - EPL
+		Karbonite = 1 << 18,    // Karbonite - CRP
 		FuzzyResources = 1 << 19,         // Low Detail Resource
-		Regolith_11 = 1<< 20,		// Reserved - Regolith
+		Hydrates = 1 << 20,		// Hydrates - CRP
+		Gypsum = 1 << 21,		// Gypsum - CRP
+		RareMetals = 1 << 22, // Exotic Minerals - CRP
+		ExoticMinerals = 1 << 23,			// Dirt - CRP
+		Dirt = 1 << 24,	// Rare Metals - CRP
+		CRP_Reserved = 1 << 25,
+		GeoEnergy = 1 << 26,
 
 		Everything_SCAN = (1 << 6) - 1,	// All default SCANsat scanners
 		AllResources = 2147483584,		// All resource types
-		DefinedResources = 917376,		// All defined resource types
-		MKSResources = 107648,			// All standard MKS/USI resources
+		DefinedResources = 66584448,		// All defined resource types
+		MKSResources = 32613504,			// All standard MKS/USI resources
 		Everything = Int32.MaxValue      // All scanner types
 	}
 }

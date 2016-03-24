@@ -73,6 +73,8 @@ namespace SCANsat.SCAN_UI.UI_Framework
 		public string resourceSettingsHelpOverlayTransparency = "Create a grey background for planetary overlay resource maps. Used to make clear which sections of the celestial body have been\nscanned but contain no resources.";
 		[Persistent]
 		public string resourceSettingsHelpScanThreshold = "A threshold level used to apply the stock resource scan to a celestial body after scanning with SCANsat sensors. This is useful when contracts or other addons require that a stock resource scan be performed. Set a value from 0-100 in the text box and click on the Set button. All celestial bodies will be checked immediately; celestial bodies will also be checked upon loading or a scene change. A reload may be required for the changes to take effect.";
+		[Persistent]
+		public string resourceSettingsModuleManagerWarning = "Warning:\nModule Manager is required for all SCANsat resource scanning";
 
 		//Color Config Window Help Tooltips
 		[Persistent]
@@ -119,6 +121,8 @@ namespace SCANsat.SCAN_UI.UI_Framework
 		public string colorResourceHelpDefaultAll = "Reverts to the default values for the selected resource for all celestial bodies.";
 		[Persistent]
 		public string colorHelpSaveToConfig = "Save all color configuration values to the config file found in your SCANsat/Resources folder. These values serve as the defaults for new saves and for all Revert To Default buttons. Values do not need to be saved to the config file to be applied for this save file.";
+		[Persistent]
+		public string colorSlopeHelpCutoff = "Adjust the cutoff level between the two selected slope color pairs.";
 
 		public override void OnDecodeFromConfigNode()
 		{

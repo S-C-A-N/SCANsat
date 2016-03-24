@@ -52,7 +52,6 @@ namespace SCANsat.SCAN_Platform
 		public static event SkinChangedEvent OnSkinChanged;
 
 		public delegate void TooltipChangedEvent();
-		public static event TooltipChangedEvent OnTooltipChanged;	//FIXME: unused
 
 		internal static void InitSkinList()
 		{
