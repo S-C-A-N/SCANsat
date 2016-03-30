@@ -1,3 +1,14 @@
+Version 15.0 - 2016-3-30
+------------------------
+
+- Update to KSP 1.1 and Unity 5
+
+- Known issues
+   - Ground tracks don't function
+   - MechJeb integration removed
+   - SCANsat resource scanning requires Module Manager; it won't work without it and hasn't been tested in KSP 1.1
+
+
 Version 14.9 - 2016-3-6
 ------------------------
 
