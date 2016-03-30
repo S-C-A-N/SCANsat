@@ -304,7 +304,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			SCAN_anomalyOverlay = new GUIStyle(SCAN_SkinsLibrary.DefUnitySkin.label);
 			SCAN_anomalyOverlay.name = "SCAN_AnomalyOverlay";
 			SCAN_anomalyOverlay.font = dotty;
-			SCAN_anomalyOverlay.fontSize = 32;
+			SCAN_anomalyOverlay.fontSize = 20;
 			SCAN_anomalyOverlay.fontStyle = FontStyle.Bold;
 			SCAN_anomalyOverlay.normal.textColor = palette.cb_skyBlue;
 
@@ -335,7 +335,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			SCAN_headline.name = "SCAN_Headline";
 			SCAN_headline.normal.textColor = palette.xkcd_YellowGreen;
 			SCAN_headline.alignment = TextAnchor.MiddleCenter;
-			SCAN_headline.fontSize = 30;
+			SCAN_headline.fontSize = 20;
 			SCAN_headline.font = dotty;
 
 			SCAN_headerButton = new GUIStyle(SCAN_SkinsLibrary.DefUnitySkin.button);
@@ -348,7 +348,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 
 			SCAN_headlineSmall = new GUIStyle(SCAN_headline);
 			SCAN_headlineSmall.name = "SCAN_HeadlineSmall";
-			SCAN_headlineSmall.fontSize = 30;
+			SCAN_headlineSmall.fontSize = 16;
 
 			SCAN_labelSmallLeft = new GUIStyle(SCAN_whiteReadoutLabel);
 			SCAN_labelSmallLeft.name = "SCAN_LabelSmallLeft";
@@ -369,7 +369,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			SCAN_toggle.name = "SCAN_Toggle";
 			SCAN_toggle.font = dotty;
 			SCAN_toggle.onNormal.textColor = palette.xkcd_YellowGreen;
-			SCAN_toggle.fontSize = 30;
+			SCAN_toggle.fontSize = 20;
 			SCAN_toggle.fixedHeight = 28;
 			SCAN_toggle.fixedWidth = 28;
 
