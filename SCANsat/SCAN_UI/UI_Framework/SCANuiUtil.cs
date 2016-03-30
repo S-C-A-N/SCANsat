@@ -926,8 +926,8 @@ namespace SCANsat.SCAN_UI.UI_Framework
 
 		#region Overlays
 
-		internal static Color32 lineColor = new Color(1f, 1f, 1f, 1f);
-		internal static Color32 blackLineColor = new Color(0f, 0f, 0f, 0.9f);
+		internal static Color lineColor = new Color(1f, 1f, 1f, 1f);
+		internal static Color blackLineColor = new Color(0f, 0f, 0f, 0.9f);
 		private static Material lineMat = JUtil.DrawLineMaterial();
 
 		internal static Dictionary<int, List<List<Vector2d>>> drawGridLine(Rect maprect, SCANmap map)
@@ -1540,7 +1540,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 		private static void GLVertexMap(Vector3d pos)
 		{
 			Vector3 screenPoint = PlanetariumCamera.Camera.WorldToScreenPoint(ScaledSpace.LocalToScaledSpace(pos));
-			GL.Vertex3(screenPoint.x / Camera.main.pixelWidth, screenPoint.y / Camera.main.pixelHeight, 0);
+			GL.Vertex3(screenPoint.x, screenPoint.y, 0);
 		}
 
 		#endregion
