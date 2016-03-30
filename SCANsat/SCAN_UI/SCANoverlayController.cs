@@ -72,6 +72,8 @@ namespace SCANsat.SCAN_UI
 
 		protected override void Start()
 		{
+			base.Start();
+
 			GameEvents.onShowUI.Add(showUI);
 			GameEvents.onHideUI.Add(hideUI);
 			GameEvents.onGameSceneSwitchRequested.Add(switchScene);
@@ -107,6 +109,8 @@ namespace SCANsat.SCAN_UI
 
 		protected override void OnDestroy()
 		{
+			base.OnDestroy();
+
 			GameEvents.onShowUI.Remove(showUI);
 			GameEvents.onHideUI.Remove(hideUI);
 			GameEvents.onGameSceneSwitchRequested.Remove(switchScene);

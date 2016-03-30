@@ -131,6 +131,8 @@ namespace SCANsat.SCAN_UI
 
 		protected override void OnDestroy()
 		{
+			base.OnDestroy();
+
 			removeControlLocks();
 
 			SCANcontroller.controller.unloadPQS(spotmap.Body, mapSource.ZoomMap);

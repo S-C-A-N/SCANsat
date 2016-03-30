@@ -77,6 +77,8 @@ namespace SCANsat.SCAN_UI
 
 		protected override void OnDestroy()
 		{
+			base.OnDestroy();
+
 			removeControlLocks();
 			TooltipsEnabled = false;
 		}
@@ -89,6 +91,8 @@ namespace SCANsat.SCAN_UI
 
 		protected override void Start()
 		{
+			base.Start();
+
 			oldTooltips = SCANcontroller.controller.toolTips;
 			TooltipsEnabled = false;
 			stockToolbar = SCANcontroller.controller.useStockAppLauncher;

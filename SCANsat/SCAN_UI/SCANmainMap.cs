@@ -59,6 +59,8 @@ namespace SCANsat.SCAN_UI
 
 		protected override void Start()
 		{
+			base.Start();
+
 			Visible = SCANcontroller.controller.mainMapVisible;
 			v = FlightGlobals.ActiveVessel;
 			data = SCANUtil.getData(v.mainBody);
