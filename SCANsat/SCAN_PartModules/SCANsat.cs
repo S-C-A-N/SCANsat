@@ -16,6 +16,7 @@ using System.Linq;
 using SCANsat.SCAN_Data;
 using SCANsat.SCAN_Toolbar;
 using SCANsat.SCAN_UI;
+using KSP.UI.Screens.Flight.Dialogs;
 
 using UnityEngine;
 using palette = SCANsat.SCAN_UI.UI_Framework.SCANpalette;
@@ -581,7 +582,7 @@ namespace SCANsat.SCAN_PartModules
 			if (expDialog != null)
 				DestroyImmediate(expDialog);
 			ScienceData sd = storedData[0];
-			expDialog = ExperimentsResultDialog.DisplayResult(new ExperimentResultDialogPage(part, sd, 1f, 0f, false, "", true, false, DumpData, KeepData, TransmitData, null));
+			expDialog = ExperimentsResultDialog.DisplayResult(new ExperimentResultDialogPage(part, sd, 1f, 0f, false, "", true, new ScienceLabSearch(vessel, sd), DumpData, KeepData, TransmitData, null));
 		}
 
 		public bool IsRerunnable()

@@ -56,7 +56,7 @@ public class Debug_AutoLoadPersistentSaveOnStartup : MonoBehaviour {
 				//HighLogic.CurrentGame.Start();
 				string save = GamePersistence.SaveGame(HighLogic.CurrentGame, "persistent", HighLogic.SaveFolder, SaveMode.OVERWRITE);
 				FlightDriver.StartAndFocusVessel(save, suitableVessel);
-				CheatOptions.InfiniteFuel = true;
+				CheatOptions.InfinitePropellant = true;
                }
           }
      }

@@ -413,11 +413,11 @@ namespace SCANsat
 		{
 			switch (target.type)
 			{
-				case MapObject.MapObjectType.CELESTIALBODY:
+				case MapObject.ObjectType.CelestialBody:
 					return target.celestialBody;
-				case MapObject.MapObjectType.MANEUVERNODE:
+				case MapObject.ObjectType.ManeuverNode:
 					return target.maneuverNode.patch.referenceBody;
-				case MapObject.MapObjectType.VESSEL:
+				case MapObject.ObjectType.Vessel:
 					return target.vessel.mainBody;
 				default:
 					return null;

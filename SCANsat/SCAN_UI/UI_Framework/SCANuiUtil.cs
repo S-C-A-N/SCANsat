@@ -1503,7 +1503,9 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			if (Vector3d.Distance(pos, body.position) < body.Radius - 100)
 				return true;
 
-			if (!body.scaledBody.renderer.isVisible)
+			Renderer scaledR = body.scaledBody.GetComponent<Renderer>();
+
+			if (!scaledR.isVisible)
 				return true;
 
 			Vector3d camPos = ScaledSpace.ScaledToLocalSpace(PlanetariumCamera.Camera.transform.position);

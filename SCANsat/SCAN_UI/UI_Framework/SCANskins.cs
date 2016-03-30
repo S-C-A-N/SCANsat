@@ -181,8 +181,8 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			SCAN_skin = SCAN_SkinsLibrary.CopySkin("Unity");
 			SCAN_SkinsLibrary.AddSkin("SCAN_Unity", SCAN_skin);
 
-			ScreenMessages SM = (ScreenMessages)GameObject.FindObjectOfType(typeof(ScreenMessages));
-			dotty = SM.textStyles[1].font;
+			//ScreenMessages SM = (ScreenMessages)GameObject.FindObjectOfType(typeof(ScreenMessages));
+			//dotty = SM.textStyles[1].font;
 
 			SCAN_window = new GUIStyle(SCAN_SkinsLibrary.DefUnitySkin.window);
 			SCAN_window.name = "SCAN_Window";
