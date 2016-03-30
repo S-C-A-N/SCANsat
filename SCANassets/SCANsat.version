@@ -1,31 +1,31 @@
 {
      "NAME":"SCANsat",
-	 "URL":"https://raw.githubusercontent.com/S-C-A-N/SCANsat/release/SCANassets/SCANsat.version",
+	 "URL":"https://raw.githubusercontent.com/S-C-A-N/SCANsat/dev/SCANassets/SCANsat.version",
      "DOWNLOAD":"https://github.com/S-C-A-N/SCANsat/releases",
      "GITHUB":{
          "USERNAME":"S-C-A-N",
          "REPOSITORY":"SCANsat",
-         "ALLOW_PRE_RELEASE":false
+         "ALLOW_PRE_RELEASE":true
      },
      "VERSION":{
          "MAJOR":1,
          "MINOR":1,
-         "PATCH":4,
-         "BUILD":9
+         "PATCH":5,
+         "BUILD":0
      },
      "KSP_VERSION":{
          "MAJOR":1,
-         "MINOR":0,
-         "PATCH":5
+         "MINOR":1,
+         "PATCH":0
      },
      "KSP_VERSION_MIN":{
          "MAJOR":1,
-         "MINOR":0,
-         "PATCH":5
+         "MINOR":1,
+         "PATCH":0
      },
      "KSP_VERSION_MAX":{
          "MAJOR":1,
-         "MINOR":0,
-         "PATCH":5
+         "MINOR":1,
+         "PATCH":0
      }
 }

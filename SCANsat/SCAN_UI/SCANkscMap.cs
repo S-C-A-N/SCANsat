@@ -66,6 +66,8 @@ namespace SCANsat.SCAN_UI
 
 		protected override void Start()
 		{
+			base.Start();
+
 			Visible = SCANcontroller.controller.kscMapVisible;
 			if (b == null)
 				b = Planetarium.fetch.Home;
@@ -95,6 +97,8 @@ namespace SCANsat.SCAN_UI
 
 		protected override void OnDestroy()
 		{
+			base.OnDestroy();
+
 			removeControlLocks();
 			if (spotMap != null)
 				Destroy(spotMap);
@@ -112,7 +116,7 @@ namespace SCANsat.SCAN_UI
 			
 			MapObject target = PlanetariumCamera.fetch.target;
 
-			if (target.type != MapObject.MapObjectType.VESSEL)
+			if (target.type != MapObject.ObjectType.Vessel)
 			{
 				v = null;
 				return;

@@ -131,6 +131,8 @@ namespace SCANsat.SCAN_UI
 
 		protected override void OnDestroy()
 		{
+			base.OnDestroy();
+
 			removeControlLocks();
 
 			SCANcontroller.controller.unloadPQS(spotmap.Body, mapSource.ZoomMap);
@@ -383,7 +385,7 @@ namespace SCANsat.SCAN_UI
 				{
 					MapObject target = PlanetariumCamera.fetch.target;
 
-					if (target.type == MapObject.MapObjectType.VESSEL)
+					if (target.type == MapObject.ObjectType.Vessel)
 						v = target.vessel;
 					else
 						v = null;

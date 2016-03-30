@@ -413,11 +413,11 @@ namespace SCANsat
 		{
 			switch (target.type)
 			{
-				case MapObject.MapObjectType.CELESTIALBODY:
+				case MapObject.ObjectType.CelestialBody:
 					return target.celestialBody;
-				case MapObject.MapObjectType.MANEUVERNODE:
+				case MapObject.ObjectType.ManeuverNode:
 					return target.maneuverNode.patch.referenceBody;
-				case MapObject.MapObjectType.VESSEL:
+				case MapObject.ObjectType.Vessel:
 					return target.vessel.mainBody;
 				default:
 					return null;
@@ -803,17 +803,27 @@ namespace SCANsat
 						return angle;
 				}
 
+				public static Material LineMat;
+
 				public static Material DrawLineMaterial()
 				{
-						var lineMaterial = new Material("Shader \"Lines/Colored Blended\" {" +
-								"SubShader { Pass {" +
-								"   BindChannels { Bind \"Color\",color }" +
-								"   Blend SrcAlpha OneMinusSrcAlpha" +
-								"   ZWrite Off Cull Off Fog { Mode Off }" +
-								"} } }");
+					if (LineMat == null)
+					{
+						//var lineMaterial = new Material("Shader \"Lines/Colored Blended\" {" +
+						//		"SubShader { Pass {" +
+						//		"   BindChannels {" + 
+						//		"     Bind \"color\", color }" +
+						//		"   Blend SrcAlpha OneMinusSrcAlpha" +
+						//		"   ZWrite Off Cull Off Fog { Mode Off }" +
+						//		"} } }");
+						var lineMaterial = new Material(Shader.Find("Particles/Alpha Blended"));
 						lineMaterial.hideFlags = HideFlags.HideAndDontSave;
 						lineMaterial.shader.hideFlags = HideFlags.HideAndDontSave;
-						return lineMaterial;
+
+						LineMat = lineMaterial;
+					}
+
+					return LineMat;
 				}
 
 				public static bool IsActiveVessel(Vessel thatVessel)

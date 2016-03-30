@@ -855,14 +855,13 @@ namespace SCANsat
 		{
 			GameEvents.onVesselSOIChanged.Add(SOIChange);
 			GameEvents.onVesselCreate.Add(newVesselCheck);
-			GameEvents.onPartCouple.Add(dockingCheck);
+			GameEvents.onPartCouple.Add(dockingEventCheck);
 			GameEvents.Contract.onContractsLoaded.Add(contractsCheck);
 			GameEvents.Contract.onParameterChange.Add(onParamChange);
 			if (HighLogic.LoadedSceneIsFlight)
 			{
 				if (!body_data.ContainsKey(FlightGlobals.currentMainBody.name))
 					body_data.Add(FlightGlobals.currentMainBody.name, new SCANdata(FlightGlobals.currentMainBody));
-				RenderingManager.AddToPostDrawQueue(5, drawTarget);
 				try
 				{
 					mainMap = gameObject.AddComponent<SCANmainMap>();
@@ -939,7 +938,7 @@ namespace SCANsat
 				{
 					MapObject target = PlanetariumCamera.fetch.target;
 
-					if (target.type != MapObject.MapObjectType.CELESTIALBODY)
+					if (target.type != MapObject.ObjectType.CelestialBody)
 					{
 						body = null;
 						return;
@@ -1059,7 +1058,7 @@ namespace SCANsat
 		{
 			GameEvents.onVesselSOIChanged.Remove(SOIChange);
 			GameEvents.onVesselCreate.Remove(newVesselCheck);
-			GameEvents.onPartCouple.Remove(dockingCheck);
+			GameEvents.onPartCouple.Remove(dockingEventCheck);
 			GameEvents.Contract.onContractsLoaded.Remove(contractsCheck);
 			GameEvents.Contract.onParameterChange.Remove(onParamChange);
 			if (mainMap != null)
@@ -1230,6 +1229,11 @@ namespace SCANsat
 			SCANUtil.SCANlog("Unloading Kopernicus On Demand PQSMod For {0}", b.theName);
 		}
 
+		private void OnGUI()
+		{
+			drawTarget();
+		}
+
 		private void drawTarget()
 		{
 			if (!MapView.MapIsEnabled)
@@ -1379,7 +1383,7 @@ namespace SCANsat
 			}
 		}
 
-		private void dockingCheck(GameEvents.FromToAction<Part, Part> Parts)
+		private void dockingEventCheck(GameEvents.FromToAction<Part, Part> Parts)
 		{
 			StartCoroutine(dockingCheckCoRoutine(Parts.to.vessel, Parts.from.vessel));
 		}
