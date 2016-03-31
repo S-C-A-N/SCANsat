@@ -285,8 +285,10 @@ namespace SCANsat.SCAN_Platform
 				_Visible = value;
 			}
 		}
-		private void OnGUI()
+		protected override void OnGUIEvery()
 		{
+			base.OnGUIEvery();
+
 			if (!showUI)
 				return;
 
