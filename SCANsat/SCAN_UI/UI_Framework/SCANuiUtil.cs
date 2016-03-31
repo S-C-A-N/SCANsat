@@ -1462,13 +1462,13 @@ namespace SCANsat.SCAN_UI.UI_Framework
 
 			radius = body.Radius / 15;
 
-			GLTriangleMap(new Vector3d[] { center, center + radius * (QuaternionD.AngleAxis(rotation - 55, up) * north), center + radius * (QuaternionD.AngleAxis(rotation -35, up) * north) }, c);
+			GLTriangleMap(new Vector3d[3] { center, center + radius * (QuaternionD.AngleAxis(rotation - 55, up) * north), center + radius * (QuaternionD.AngleAxis(rotation -35, up) * north) }, c);
 
-			GLTriangleMap(new Vector3d[] { center, center + radius * (QuaternionD.AngleAxis(rotation + 55, up) * north), center + radius * (QuaternionD.AngleAxis(rotation + 35, up) * north) }, c);
+			GLTriangleMap(new Vector3d[3] { center, center + radius * (QuaternionD.AngleAxis(rotation + 55, up) * north), center + radius * (QuaternionD.AngleAxis(rotation + 35, up) * north) }, c);
 
-			GLTriangleMap(new Vector3d[] { center, center + radius * (QuaternionD.AngleAxis(rotation - 145, up) * north), center + radius * (QuaternionD.AngleAxis(rotation - 125, up) * north) }, c);
+			GLTriangleMap(new Vector3d[3] { center, center + radius * (QuaternionD.AngleAxis(rotation - 145, up) * north), center + radius * (QuaternionD.AngleAxis(rotation - 125, up) * north) }, c);
 
-			GLTriangleMap(new Vector3d[] { center, center + radius * (QuaternionD.AngleAxis(rotation + 145, up) * north), center + radius * (QuaternionD.AngleAxis(rotation + 125, up) * north) }, c);
+			GLTriangleMap(new Vector3d[3] { center, center + radius * (QuaternionD.AngleAxis(rotation + 145, up) * north), center + radius * (QuaternionD.AngleAxis(rotation + 125, up) * north) }, c);
 		}
 
 		internal static void drawGroundTrackTris(CelestialBody body, Vessel v, double width, Color c)
@@ -1495,7 +1495,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			Vector3d left = srfCenter + width * vesselPerp;
 			Vector3d right = srfCenter - width * vesselPerp;
 
-			GLTriangleMap(new Vector3d[] { center, left , right }, c);
+			GLTriangleMap(new Vector3d[3] { center, left , right }, c);
 		}
 
 		private static bool occluded(Vector3d pos, CelestialBody body)
@@ -1539,6 +1539,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 
 		private static void GLVertexMap(Vector3d pos)
 		{
+			SCANUtil.SCANdebugLog("Draw vertex map...");
 			Vector3 screenPoint = PlanetariumCamera.Camera.WorldToScreenPoint(ScaledSpace.LocalToScaledSpace(pos));
 			GL.Vertex3(screenPoint.x, screenPoint.y, 0);
 		}

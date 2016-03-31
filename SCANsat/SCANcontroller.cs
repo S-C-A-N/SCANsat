@@ -166,7 +166,7 @@ namespace SCANsat
 		private static List<string> loadedResources = new List<string>();
 
 		/* Primary SCANsat vessel dictionary; loaded every time */
-		private Dictionary<Guid, SCANvessel> knownVessels = new Dictionary<Guid, SCANvessel>();
+		public Dictionary<Guid, SCANvessel> knownVessels = new Dictionary<Guid, SCANvessel>();
 
 		/* Primary SCANdata dictionary; loaded every time*/
 		private Dictionary<string, SCANdata> body_data = new Dictionary<string,SCANdata>();
@@ -194,6 +194,8 @@ namespace SCANsat
 		internal SCANresourceSettings resourceSettings;
 		internal SCANzoomHiDef hiDefMap;
 		internal SCANzoomWindow zoomMap;
+
+		private SCANGLUtil glUtil;
 
 		/* App launcher object */
 		internal SCANappLauncher appLauncher;
@@ -872,6 +874,7 @@ namespace SCANsat
 					resourceOverlay = gameObject.AddComponent<SCANoverlayController>();
 					resourceSettings = gameObject.AddComponent<SCANresourceSettings>();
 					zoomMap = gameObject.AddComponent<SCANzoomWindow>();
+					glUtil = gameObject.AddComponent<SCANGLUtil>();
 				}
 				catch (Exception e)
 				{
@@ -891,6 +894,7 @@ namespace SCANsat
 					if (HighLogic.LoadedScene == GameScenes.TRACKSTATION)
 					{
 						resourceOverlay = gameObject.AddComponent<SCANoverlayController>();
+						glUtil = gameObject.AddComponent<SCANGLUtil>();
 					}
 				}
 				catch (Exception e)
@@ -1231,7 +1235,8 @@ namespace SCANsat
 
 		private void OnGUI()
 		{
-			drawTarget();
+			//if (HighLogic.LoadedSceneIsFlight || HighLogic.LoadedScene == GameScenes.TRACKSTATION)
+			//	drawTarget();
 		}
 
 		private void drawTarget()
@@ -1743,7 +1748,7 @@ namespace SCANsat
 			return (all & sensor) != SCANtype.Nothing;
 		}
 
-		private bool isVesselKnown(Guid id)
+		public bool isVesselKnown(Guid id)
 		{
 			if (!knownVessels.ContainsKey(id))
 				return false;
@@ -1751,7 +1756,7 @@ namespace SCANsat
 			return knownVessels[id].sensors.Count > 0;
 		}
 
-		private bool isVesselKnown(Vessel v)
+		public bool isVesselKnown(Vessel v)
 		{
 			if (v.vesselType == VesselType.Debris)
 				return false;
