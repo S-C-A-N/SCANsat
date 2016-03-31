@@ -25,9 +25,11 @@ namespace SCANsat.SCAN_UI.UI_Framework
 		// 	(these are here just so that all references to some color are the same throughout
 		//		SCANsat)
 		public static Color black 	= Color.black;
+		public static Color32 Black = (Color32)black;
 		public static Color white 	= Color.white;
 		public static Color32 White = (Color32)white;
 		public static Color red		= Color.red;
+		public static Color32 Red = (Color32)red;
 		public static Color grey		= Color.grey;
 		public static Color32 Grey = (Color32)grey;
 		public static Color clear	= Color.clear;
@@ -112,13 +114,13 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			xkcd_White
 		};
 
-		public static Color[] redline;
+		public static Color32[] redline;
         	public static Color gridFull; // resource colors
         	public static Color gridEmpty; //empty resource color
 
-		public static Color[] small_redline;
+		public static Color32[] small_redline;
 
-		public static Color heightToColor(float val, int scheme, SCANterrainConfig terrain, float min = 0, float max = 0, float range = 0, bool useCustomRange = false)
+		public static Color32 heightToColor(float val, int scheme, SCANterrainConfig terrain, float min = 0, float max = 0, float range = 0, bool useCustomRange = false)
 		{
 			Color32[] c = terrain.ColorPal.colors;
 			if (terrain.PalRev)
@@ -139,14 +141,14 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			}
 		}
 
-		private static Color heightToColor(float val, float max, float min, float range, bool discrete)
+		private static Color32 heightToColor(float val, float max, float min, float range, bool discrete)
 		{
-			Color c = black;
+			Color32 c = Black;
 			val -= min;
 			if (SCANcontroller.controller.trueGreyScale)
 			{
 				val = Mathf.Clamp(val, 0, range) / range;
-				c = lerp(black, white, val);
+				c = lerp(Black, White, val);
 			}
 			else
 			{
@@ -168,9 +170,9 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			return c;
 		}
 
-		internal static Color heightToColor(float val, float max, float min, float range, float? clamp, bool discrete, Color32[] p, bool useCustomRange = false)
+		internal static Color32 heightToColor(float val, float max, float min, float range, float? clamp, bool discrete, Color32[] p, bool useCustomRange = false)
 		{
-			Color c = black;
+			Color32 c = Black;
 			if (clamp != null)
 			{
 				if (!useCustomRange)

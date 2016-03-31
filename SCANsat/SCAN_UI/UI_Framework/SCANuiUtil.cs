@@ -1674,7 +1674,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			return map;
 		}
 
-		internal static Texture2D drawBiomeMap(ref Texture2D map, ref Color[] pix, SCANdata data, float transparency, int height = 256, bool useStock = false, bool whiteBorder = false)
+		internal static Texture2D drawBiomeMap(ref Texture2D map, ref Color32[] pix, SCANdata data, float transparency, int height = 256, bool useStock = false, bool whiteBorder = false)
 		{
 			if (!useStock && !whiteBorder)
 				return drawBiomeMap(ref map, ref pix, data, height);
@@ -1686,7 +1686,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			if (map == null || pix == null || map.height != height)
 			{
 				map = new Texture2D(width, height, TextureFormat.ARGB32, true);
-				pix = new Color[width * height];
+				pix = new Color32[width * height];
 			}
 
 			for (int j = 0; j < height; j++)
@@ -1719,13 +1719,13 @@ namespace SCANsat.SCAN_UI.UI_Framework
 				}
 			}
 
-			map.SetPixels(pix);
+			map.SetPixels32(pix);
 			map.Apply();
 
 			return map;
 		}
 
-		private static Texture2D drawBiomeMap(ref Texture2D m, ref Color[] p, SCANdata d, int h)
+		private static Texture2D drawBiomeMap(ref Texture2D m, ref Color32[] p, SCANdata d, int h)
 		{
 			if (d.Body.BiomeMap == null)
 				return null;
@@ -1737,7 +1737,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 
 			if (p == null || p.Length != h * 2)
 			{
-				p = new Color[m.width];
+				p = new Color32[m.width];
 			}
 
 			float scale = m.width / 360f;
@@ -1750,12 +1750,12 @@ namespace SCANsat.SCAN_UI.UI_Framework
 					double lon = fixLon(i / scale);
 
 					if (SCANUtil.isCovered(lon, lat, d, SCANtype.Biome))
-						p[i] = SCANUtil.getBiome(d.Body, lon, lat).mapColor;
+						p[i] = (Color32)SCANUtil.getBiome(d.Body, lon, lat).mapColor;
 					else
-						p[i] = palette.clear;
+						p[i] = palette.Clear;
 				}
 
-				m.SetPixels(0, j, m.width, 1, p);
+				m.SetPixels32(0, j, m.width, 1, p);
 			}
 
 			m.Apply();
