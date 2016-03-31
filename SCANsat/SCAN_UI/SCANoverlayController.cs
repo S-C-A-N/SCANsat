@@ -154,6 +154,8 @@ namespace SCANsat.SCAN_UI
 
 		protected override void OnGUIEvery()
 		{
+			base.OnGUIEvery();
+
 			if (enableUI)
 				mouseOverToolTip();
 		}
