@@ -833,7 +833,6 @@ namespace SCANsat
 				{
 					if (r != null)
 					{
-						SCANUtil.SCANdebugLog("Saving Resource: {0}", r.Name);
 						ConfigNode node_resource_type = new ConfigNode("ResourceType");
 						node_resource_type.AddValue("Resource", r.Name);
 						node_resource_type.AddValue("MinColor", ConfigNode.WriteColor(r.MinColor));
