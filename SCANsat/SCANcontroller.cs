@@ -195,8 +195,6 @@ namespace SCANsat
 		internal SCANzoomHiDef hiDefMap;
 		internal SCANzoomWindow zoomMap;
 
-		private SCANGLUtil glUtil;
-
 		/* App launcher object */
 		internal SCANappLauncher appLauncher;
 
@@ -874,7 +872,6 @@ namespace SCANsat
 					resourceOverlay = gameObject.AddComponent<SCANoverlayController>();
 					resourceSettings = gameObject.AddComponent<SCANresourceSettings>();
 					zoomMap = gameObject.AddComponent<SCANzoomWindow>();
-					glUtil = gameObject.AddComponent<SCANGLUtil>();
 				}
 				catch (Exception e)
 				{
@@ -894,7 +891,6 @@ namespace SCANsat
 					if (HighLogic.LoadedScene == GameScenes.TRACKSTATION)
 					{
 						resourceOverlay = gameObject.AddComponent<SCANoverlayController>();
-						glUtil = gameObject.AddComponent<SCANGLUtil>();
 					}
 				}
 				catch (Exception e)
@@ -1235,8 +1231,8 @@ namespace SCANsat
 
 		private void OnGUI()
 		{
-			//if (HighLogic.LoadedSceneIsFlight || HighLogic.LoadedScene == GameScenes.TRACKSTATION)
-			//	drawTarget();
+			if (HighLogic.LoadedSceneIsFlight || HighLogic.LoadedScene == GameScenes.TRACKSTATION)
+				drawTarget();
 		}
 
 		private void drawTarget()
@@ -1252,20 +1248,19 @@ namespace SCANsat
 			SCANdata d = getData(b.name);
 
 			if (d == null)
-				return;
+				return;			
 
 			if (groundTracks)
 				drawGroundTracks(b);
 
-			if (mechJebTargetSelection)
-				return;
-
-			SCANwaypoint target = d.Waypoints.FirstOrDefault(a => a.LandingTarget);
-
-			if (target == null)
-				return;
-
-			SCANuiUtil.drawTargetOverlay(b, target.Latitude, target.Longitude, XKCDColors.DarkGreen);
+			if (!mechJebTargetSelection)
+			{
+				SCANwaypoint target = d.Waypoints.FirstOrDefault(a => a.LandingTarget);
+				if (target != null)
+				{
+					SCANuiUtil.drawTargetOverlay(b, target.Latitude, target.Longitude, XKCDColors.DarkGreen);
+				}
+			}
 		}
 
 		private void drawGroundTracks(CelestialBody body)
