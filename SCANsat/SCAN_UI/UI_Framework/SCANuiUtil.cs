@@ -1539,8 +1539,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 
 		private static void GLVertexMap(Vector3d pos)
 		{
-			SCANUtil.SCANdebugLog("Draw vertex map...");
-			Vector3 screenPoint = PlanetariumCamera.Camera.WorldToScreenPoint(ScaledSpace.LocalToScaledSpace(pos));
+			Vector3 screenPoint = PlanetariumCamera.Camera.WorldToViewportPoint(ScaledSpace.LocalToScaledSpace(pos));
 			GL.Vertex3(screenPoint.x, screenPoint.y, 0);
 		}
 
