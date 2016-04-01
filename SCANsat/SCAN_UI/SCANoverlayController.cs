@@ -52,7 +52,7 @@ namespace SCANsat.SCAN_UI
 
 		private Texture2D mapOverlay;
 		private Color32[] resourcePixels;
-		private Color[] biomePixels;
+		private Color32[] biomePixels;
 		private Color32[] terrainPixels;
 		private float[,] abundanceValues;
 		private float[,] terrainValues;
@@ -154,6 +154,8 @@ namespace SCANsat.SCAN_UI
 
 		protected override void OnGUIEvery()
 		{
+			base.OnGUIEvery();
+
 			if (enableUI)
 				mouseOverToolTip();
 		}

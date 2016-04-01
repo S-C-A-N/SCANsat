@@ -166,7 +166,7 @@ namespace SCANsat
 		private static List<string> loadedResources = new List<string>();
 
 		/* Primary SCANsat vessel dictionary; loaded every time */
-		private Dictionary<Guid, SCANvessel> knownVessels = new Dictionary<Guid, SCANvessel>();
+		public Dictionary<Guid, SCANvessel> knownVessels = new Dictionary<Guid, SCANvessel>();
 
 		/* Primary SCANdata dictionary; loaded every time*/
 		private Dictionary<string, SCANdata> body_data = new Dictionary<string,SCANdata>();
@@ -833,7 +833,6 @@ namespace SCANsat
 				{
 					if (r != null)
 					{
-						SCANUtil.SCANdebugLog("Saving Resource: {0}", r.Name);
 						ConfigNode node_resource_type = new ConfigNode("ResourceType");
 						node_resource_type.AddValue("Resource", r.Name);
 						node_resource_type.AddValue("MinColor", ConfigNode.WriteColor(r.MinColor));
@@ -1231,7 +1230,8 @@ namespace SCANsat
 
 		private void OnGUI()
 		{
-			drawTarget();
+			if (HighLogic.LoadedSceneIsFlight || HighLogic.LoadedScene == GameScenes.TRACKSTATION)
+				drawTarget();
 		}
 
 		private void drawTarget()
@@ -1247,20 +1247,19 @@ namespace SCANsat
 			SCANdata d = getData(b.name);
 
 			if (d == null)
-				return;
+				return;			
 
 			if (groundTracks)
 				drawGroundTracks(b);
 
-			if (mechJebTargetSelection)
-				return;
-
-			SCANwaypoint target = d.Waypoints.FirstOrDefault(a => a.LandingTarget);
-
-			if (target == null)
-				return;
-
-			SCANuiUtil.drawTargetOverlay(b, target.Latitude, target.Longitude, XKCDColors.DarkGreen);
+			if (!mechJebTargetSelection)
+			{
+				SCANwaypoint target = d.Waypoints.FirstOrDefault(a => a.LandingTarget);
+				if (target != null)
+				{
+					SCANuiUtil.drawTargetOverlay(b, target.Latitude, target.Longitude, XKCDColors.DarkGreen);
+				}
+			}
 		}
 
 		private void drawGroundTracks(CelestialBody body)
@@ -1743,7 +1742,7 @@ namespace SCANsat
 			return (all & sensor) != SCANtype.Nothing;
 		}
 
-		private bool isVesselKnown(Guid id)
+		public bool isVesselKnown(Guid id)
 		{
 			if (!knownVessels.ContainsKey(id))
 				return false;
@@ -1751,7 +1750,7 @@ namespace SCANsat
 			return knownVessels[id].sensors.Count > 0;
 		}
 
-		private bool isVesselKnown(Vessel v)
+		public bool isVesselKnown(Vessel v)
 		{
 			if (v.vesselType == VesselType.Debris)
 				return false;

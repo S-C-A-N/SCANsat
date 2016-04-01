@@ -46,9 +46,9 @@ namespace SCANsat.SCAN_UI
 		private List<SCANresourceGlobal> loadedResources = new List<SCANresourceGlobal>();
 
 		//Values used for the orbit overlay - Need to fix this
-		internal static int[] eq_an_map, eq_dn_map;
-		internal static Texture2D eq_map;
-		internal static int eq_frame;
+		//internal static int[] eq_an_map, eq_dn_map;
+		//internal static Texture2D eq_map;
+		//internal static int eq_frame;
 
 		protected override void Awake()
 		{
