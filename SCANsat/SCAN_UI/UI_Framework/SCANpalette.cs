@@ -86,6 +86,14 @@ namespace SCANsat.SCAN_UI.UI_Framework
 		public static Color cb_reddishPurple	= new Color(0.8f, 0.6f, 0.7f);		// reddish purple
 		public static Color cb_orange 		= new Color(0.9f, 0.6f, 0f);		// orange
 
+		public static Color32 CB_skyBlue = (Color32)cb_skyBlue;
+		public static Color32 CB_bluishGreen = (Color32)cb_bluishGreen;
+		public static Color32 CB_yellow = (Color32)cb_yellow;
+		public static Color32 CB_blue = (Color32)cb_blue;
+		public static Color32 CB_vermillion = (Color32)cb_vermillion;
+		public static Color32 CB_reddishPurple = (Color32)cb_reddishPurple;
+		public static Color32 CB_orange = (Color32)cb_orange;
+
 		/* SOLARIZED colors: currently unused, so commented out */
 		/*
 		public static Color sol_base03 	= new Color32(0,43,54,255);
