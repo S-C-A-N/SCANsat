@@ -425,6 +425,10 @@ namespace SCANsat.SCAN_Map
 
 		internal double scaleLongitude(double lon)
 		{
+			if (lon_offset < 0 && Math.Abs(lon_offset) < lon)
+				lon -= 360;
+			else if (lon_offset > 0 && Math.Abs(lon_offset) > lon)
+				lon += 360;
 			lon -= lon_offset;
 			lon *= 360f / (mapwidth / mapscale);
 			return lon;
