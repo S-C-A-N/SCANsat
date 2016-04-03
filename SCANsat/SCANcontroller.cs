@@ -1249,7 +1249,7 @@ namespace SCANsat
 			if (d == null)
 				return;			
 
-			if (groundTracks)
+			if (groundTracks && HighLogic.LoadedSceneIsFlight)
 				drawGroundTracks(b);
 
 			if (!mechJebTargetSelection)
