@@ -911,7 +911,7 @@ namespace SCANsat.SCAN_Map
 		}
 
 		/* Calculates the terrain elevation based on scanning coverage; fetches data from elevation cache if possible */
-		private float terrainElevation(double Lon, double Lat, int w, int h, float[,] heightMap, bool c, SCANdata Data, out int Scheme)
+		private float terrainElevation(double Lon, double Lat, int w, int h, float[,] heightMap, bool c, SCANdata Data, out int Scheme, bool exporting = false)
 		{
 			float elevation = 0f;
 			Scheme = SCANcontroller.controller.colours;
@@ -922,7 +922,7 @@ namespace SCANsat.SCAN_Map
 					double lon = fixUnscale(unScaleLongitude(Lon), w);
 					double lat = fixUnscale(unScaleLatitude(Lat), h);
 					elevation = heightMap[Mathf.RoundToInt((float)lon), Mathf.RoundToInt((float)lat)];
-					if (elevation == 0f)
+					if (elevation == 0f && !exporting)
 						elevation = (float)SCANUtil.getElevation(body, Lon, Lat);
 				}
 				else
@@ -935,7 +935,7 @@ namespace SCANsat.SCAN_Map
 					double lon = fixUnscale(unScaleLongitude(Lon), w);
 					double lat = fixUnscale(unScaleLatitude(Lat), h);
 					elevation = heightMap[((int)(lon * 5)) / 5, ((int)(lat * 5)) / 5];
-					if (elevation == 0f)
+					if (elevation == 0f && !exporting)
 						elevation = (float)SCANUtil.getElevation(body, ((int)(Lon * 5)) / 5, ((int)(Lat * 5)) / 5);
 				}
 				else
@@ -946,11 +946,11 @@ namespace SCANsat.SCAN_Map
 			return elevation;
 		}
 
-		public float terrainElevation(double Lon, double Lat, int W, int H, float[,] heightMap, SCANdata Data)
+		public float terrainElevation(double Lon, double Lat, int W, int H, float[,] heightMap, SCANdata Data, bool export = false)
 		{
 			int i = 0;
 
-			return terrainElevation(Lon, Lat, W, H, heightMap, true, Data, out i);
+			return terrainElevation(Lon, Lat, W, H, heightMap, true, Data, out i, export);
 		}
 
 		private float getResoureCache(double Lon, double Lat)
