@@ -148,8 +148,6 @@ namespace SCANsat.SCAN_UI
 		{
 			initialized = true;
 
-			SCANUtil.SCANdebugLog("Initializing Zoom Map...");
-
 			v = FlightGlobals.ActiveVessel;
 
 			setToVessel(true);
@@ -162,12 +160,10 @@ namespace SCANsat.SCAN_UI
 
 			if (sync)
 			{
-				SCANUtil.SCANdebugLog("Syncing Vessel - Initial");
 				setMapCenter(SCANUtil.fixLatShift(v.latitude), SCANUtil.fixLonShift(v.longitude), true, SCANBigMap.BigMap, false);
 			}
 			else
 			{
-				SCANUtil.SCANdebugLog("Syncing Vessel - Reset");
 				if (v.mainBody != b)
 				{
 					SCANdata dat = SCANUtil.getData(v.mainBody);
@@ -189,8 +185,6 @@ namespace SCANsat.SCAN_UI
 			highDetail = hi;
 			Visible = true;
 			bigmap = big;
-
-			SCANUtil.SCANdebugLog("Setting Zoom Map Center");
 
 			SCANcontroller.controller.TargetSelecting = false;
 			SCANcontroller.controller.TargetSelectingActive = false;
