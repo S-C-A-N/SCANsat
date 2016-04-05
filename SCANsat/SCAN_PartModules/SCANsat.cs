@@ -183,34 +183,6 @@ namespace SCANsat.SCAN_PartModules
 					storedData.Add(data);
 				}
 			}
-			if (node.HasNode("SCANsatRPM"))
-			{
-				ConfigNode RPMPersistence = node.GetNode("SCANsatRPM");
-				foreach (ConfigNode RPMNode in RPMPersistence.GetNodes("Prop"))
-				{
-					string id = RPMNode.GetValue("Prop ID");
-					int m = 0;
-					int c = 0;
-					int z = 0;
-					int r = 0;
-					bool lines = true;
-					bool anom = true;
-					bool resource = true;
-
-					int.TryParse(RPMNode.GetValue("Mode"), out m);
-					int.TryParse(RPMNode.GetValue("Color"), out c);
-					int.TryParse(RPMNode.GetValue("Zoom"), out z);
-					int.TryParse(RPMNode.GetValue("Resource"), out r);
-					if (!bool.TryParse(RPMNode.GetValue("Lines"), out lines))
-						lines = true;
-					if (!bool.TryParse(RPMNode.GetValue("Anomalies"), out anom))
-						anom = true;
-					if (!bool.TryParse(RPMNode.GetValue("DrawResource"), out resource))
-						resource = true;
-
-					RPMList.Add(new RPMPersistence(id, m, c, z, lines, anom, resource, r));
-				}
-			}
 		}
 
 		public override void OnSave(ConfigNode node)
@@ -220,24 +192,6 @@ namespace SCANsat.SCAN_PartModules
 			{
 				ConfigNode storedDataNode = node.AddNode("ScienceData");
 				SCANData.Save(storedDataNode);
-			}
-			if (RPMList.Count > 0)
-			{
-				ConfigNode RPMPersistence = new ConfigNode("SCANsatRPM");
-				foreach (RPMPersistence RPMMFD in RPMList)
-				{
-					ConfigNode RPMProp = new ConfigNode("Prop");
-					RPMProp.AddValue("Prop ID", RPMMFD.RPMID);
-					RPMProp.AddValue("Mode", RPMMFD.RPMMode);
-					RPMProp.AddValue("Color", RPMMFD.RPMColor);
-					RPMProp.AddValue("Zoom", RPMMFD.RPMZoom);
-					RPMProp.AddValue("Resource", RPMMFD.RPMResource);
-					RPMProp.AddValue("Lines", RPMMFD.RPMLines);
-					RPMProp.AddValue("Anomalies", RPMMFD.RPMAnomaly);
-					RPMProp.AddValue("DrawResource", RPMMFD.RPMDrawResource);
-					RPMPersistence.AddNode(RPMProp);
-				}
-				node.AddNode(RPMPersistence);
 			}
 		}
 
@@ -286,7 +240,6 @@ namespace SCANsat.SCAN_PartModules
 		public string animationName;
 		[KSPField(guiName = "SCANsat Altitude", guiActive = false)]
 		public string alt_indicator;
-		internal List<RPMPersistence> RPMList = new List<RPMPersistence>();
 
 		/* SCAN: all of these fields and only scanning is persistant */
 		[KSPField(isPersistant = true)]
