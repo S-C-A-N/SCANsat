@@ -48,6 +48,7 @@ namespace SCANsat.SCAN_Data
 		GeoEnergy = 1 << 26,
 
 		Everything_SCAN = (1 << 6) - 1,	// All default SCANsat scanners
+		Science = 524299,				// All science collection types
 		AllResources = 2147483584,		// All resource types
 		DefinedResources = 66584448,		// All defined resource types
 		MKSResources = 32613504,			// All standard MKS/USI resources

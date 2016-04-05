@@ -61,20 +61,28 @@ namespace SCANsat.SCAN_PartModules
 				{
 					Events["startScan"].guiName = "Start " + scanName;
 					Events["stopScan"].guiName = "Stop " + scanName;
-					Events["analyze"].active = false;
 					Actions["startScanAction"].guiName = "Start " + scanName;
 					Actions["stopScanAction"].guiName = "Stop " + scanName;
 					Actions["toggleScanAction"].guiName = "Toggle " + scanName;
-					Actions["analyzeData"].active = false;
 				}
 				else
 				{
 					Events["startScan"].guiName = "Start " + scanName;
 					Events["stopScan"].guiName = "Stop " + scanName;
-					Events["analyze"].active = true;
 					Actions["startScanAction"].guiName = "Start " + scanName;
 					Actions["stopScanAction"].guiName = "Stop " + scanName;
 					Actions["toggleScanAction"].guiName = "Toggle " + scanName;
+				}
+
+				if ((sensorType & (int)SCANtype.Science) == 0)
+				{
+					Events["analyze"].active = false;
+					Actions["analyzeData"].active = false;
+				}
+				else
+				{
+					Events["analyze"].active = true;
+					Actions["analyzeData"].active = false;
 				}
 			}
 
@@ -91,12 +99,7 @@ namespace SCANsat.SCAN_PartModules
 				Actions["toggleScanAction"].active = false;
 				Actions["analyzeData"].active = false;
 			}
-			else if (sensorType == 32)
-			{
-				// here, we only disable analyze; BTDT has good labels
-				Events["analyze"].active = false;
-				Actions["analyzeData"].active = false;
-			}
+
 			if (scanning) animate(1, 1);
 			powerIsProblem = false;
 			print("[SCANsat] sensorType: " + sensorType.ToString() + " fov: " + fov.ToString() + " min_alt: " + min_alt.ToString() + " max_alt: " + max_alt.ToString() + " best_alt: " + best_alt.ToString() + " power: " + power.ToString());
@@ -495,6 +498,14 @@ namespace SCANsat.SCAN_PartModules
 					multiplier = 0.5f;
 				id = "SCANsatBiomeAnomaly";
 				coverage = SCANUtil.getCoveragePercentage(data, SCANtype.Biome);
+			}
+			else if (!found && (sensor & SCANtype.FuzzyResources) != SCANtype.Nothing)
+			{
+				found = true;
+				if (vessel.mainBody.pqsController == null)
+					multiplier = 0.5f;
+				id = "SCANsatResources";
+				coverage = SCANUtil.getCoveragePercentage(data, SCANtype.FuzzyResources);
 			}
 			if (!found) return null;
 			se = ResearchAndDevelopment.GetExperiment(id);

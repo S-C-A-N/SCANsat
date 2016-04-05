@@ -33,6 +33,7 @@ namespace SCANsat.SCAN_PartModules
 			Actions["startScanAction"].active = false;
 			Actions["stopScanAction"].active = false;
 			Actions["toggleScanAction"].active = false;
+			Actions["analyzeData"].active = false;
 			Actions["startResourceScanAction"].guiName = "Start " + scanName;
 			Actions["stopResourceScanAction"].guiName = "Stop " + scanName;
 			Actions["toggleResourceScanAction"].guiName = "Toggle " + scanName;
@@ -85,6 +86,7 @@ namespace SCANsat.SCAN_PartModules
 			{
 				base.Events["startScan"].active = false;
 				base.Events["stopScan"].active = false;
+				base.Events["analyze"].active = false;
 				if (scanning && loaded)
 					unregisterScanner();
 				return;
@@ -125,6 +127,7 @@ namespace SCANsat.SCAN_PartModules
 			{
 				base.Events["startScan"].active = false;
 				base.Events["stopScan"].active = false;
+				base.Events["analyze"].active = false;
 				if (scanning)
 					unregisterScanner();
 			}
@@ -168,6 +171,7 @@ namespace SCANsat.SCAN_PartModules
 			activated = false;
 			base.Events["startScan"].active = false;
 			base.Events["stopScan"].active = false;
+			base.Events["analyze"].active = false;
 			if (scanning && loaded)
 				unregisterScanner();
 
@@ -192,6 +196,8 @@ namespace SCANsat.SCAN_PartModules
 			activated = true;
 			if (SCANcontroller.controller != null && SCANcontroller.controller.disableStockResource)
 			{
+				base.Events["analyze"].active = (sensorType & (int)SCANtype.FuzzyResources) != 0;
+
 				if (mSurvey != null)
 				{
 					foreach (ModuleOrbitalSurveyor m in mSurvey)
