@@ -126,7 +126,7 @@ namespace SCANsat.SCAN_UI
 		private SCANanomaly[] localAnomalies;
 		private List<SCANwaypoint> localWaypoints;
 		private Material iconMaterial;
-		private SCANsat.SCAN_PartModules.SCANsat sat;
+		private SCANsat.SCAN_PartModules.SCANRPMStorage sat;
 		internal RPMPersistence persist;
 		private string persistentVarName;
 		private double pixelsPerKm;
@@ -759,10 +759,10 @@ namespace SCANsat.SCAN_UI
 			persistentVarName = "scansat" + internalProp.propID;
 
 			try {
-				sat = part.FindModulesImplementing<SCANsat.SCAN_PartModules.SCANsat>().FirstOrDefault();
+				sat = part.FindModulesImplementing<SCANsat.SCAN_PartModules.SCANRPMStorage>().FirstOrDefault();
 			}
 			catch {
-				Debug.LogWarning("[SCANsatRPM] SCANsat module not attached to this IVA, check for Module Manager problems and make sure the RPMMapTraq.cfg file is in the SCANsat/MMconfigs folder");
+				Debug.LogWarning("[SCANsatRPM] SCANsat RPM Storage Module not attached to this IVA, check for Module Manager problems and make sure the RPMMapTraq.cfg file is in the SCANsat/MMconfigs folder");
 				sat = null;
 			}
 
