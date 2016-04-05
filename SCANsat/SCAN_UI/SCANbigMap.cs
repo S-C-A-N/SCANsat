@@ -347,7 +347,7 @@ namespace SCANsat.SCAN_UI
 		//Draw the overlay options along the left side of the map texture
 		private void toggleBar(int id)
 		{
-			Rect r = new Rect(58, 20, 24, 24);
+			Rect r = new Rect(32, 24, 24, 24);
 
 			if (SCANcontroller.controller.mechJebTargetSelection)
 			{
