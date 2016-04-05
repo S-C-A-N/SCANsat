@@ -3,7 +3,7 @@ Version 15.2 - 2016-4-5
 
 - Add KSPedia entry
 - Add target selection button to big map
-- Add science experiment for low resolution rsource scan (M700 scanner)
+- Add science experiment for low resolution resource scan (M700 scanner)
     - Adjust science reward amounts
 - Add new RPM storage module; Module Manager config edited to add this module to any part with an internal space
 - Fix error that prevented orbit lines from crossing the East/West border in zoom maps
