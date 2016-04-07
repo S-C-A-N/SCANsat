@@ -26,7 +26,7 @@ namespace SCANsat.SCAN_UI
 {
 	class SCANoverlayController : SCAN_MBW
 	{
-		internal readonly static Rect defaultRect = new Rect(Screen.width - 280, 200, 175, 100);
+		internal static Rect defaultRect = new Rect(Screen.width - 320, 200, 175, 100);
 		private static Rect sessionRect = defaultRect;
 		private CelestialBody body;
 		private SCANdata data;
@@ -72,8 +72,6 @@ namespace SCANsat.SCAN_UI
 
 		protected override void Start()
 		{
-			base.Start();
-
 			GameEvents.onShowUI.Add(showUI);
 			GameEvents.onHideUI.Add(hideUI);
 			GameEvents.onGameSceneSwitchRequested.Add(switchScene);
@@ -109,8 +107,6 @@ namespace SCANsat.SCAN_UI
 
 		protected override void OnDestroy()
 		{
-			base.OnDestroy();
-
 			GameEvents.onShowUI.Remove(showUI);
 			GameEvents.onHideUI.Remove(hideUI);
 			GameEvents.onGameSceneSwitchRequested.Remove(switchScene);
@@ -154,8 +150,6 @@ namespace SCANsat.SCAN_UI
 
 		protected override void OnGUIEvery()
 		{
-			base.OnGUIEvery();
-
 			if (enableUI)
 				mouseOverToolTip();
 		}
