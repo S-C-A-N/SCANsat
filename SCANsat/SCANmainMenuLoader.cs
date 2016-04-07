@@ -32,10 +32,20 @@ namespace SCANsat
 		public static bool MMLoaded = false;
 		public static bool KopernicusLoaded = false;
 
+		private static bool loaded;
+
 		private List<AssemblyLog> assemblyList = new List<AssemblyLog>();
 
 		private void Start()
 		{
+			if (loaded)
+			{
+				Destroy(gameObject);
+				return;
+			}
+
+			loaded = true;
+
 			findAssemblies(Assemblies);
 			FinePrintStationaryWaypoint = SCANreflection.FinePrintStationaryWaypointReflection();
 			FinePrintFlightBand = SCANreflection.FinePrintFlightBandReflection();
