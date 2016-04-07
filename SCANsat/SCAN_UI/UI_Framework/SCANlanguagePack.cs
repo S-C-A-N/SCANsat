@@ -34,7 +34,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 		[Persistent]
 		public string settingsHelpMechJeb = "The SCANsat zoom map target selection mode can be used to select a MechJeb landing site.";
 		[Persistent]
-		public string settingsHelpResetWindows = "Reset all window positions. Use this in case a window has been dragged completely off screen or if any windows are not visible.";
+		public string settingsHelpResetWindows = "Reset all window positions and scale. Use this in case a window has been dragged completely off screen or if any windows are not visible.";
 		[Persistent]
 		public string settingsHelpResetPlanetData = "Resets all SCANsat data for the current celestial body.\nA confirmation window will open before activating.\nCannot be reversed.";
 		[Persistent]
@@ -47,6 +47,8 @@ namespace SCANsat.SCAN_UI.UI_Framework
 		public string settingsHelpExportCSV = "Export a .csv file along with map texture when using the Export button on the big map. The file contains coordinates and the terrain height for each pixel. Pixels are labeled from left to right\nand from top to bottom.";
 		[Persistent]
 		public string settingsHelpSetMapWidth = "Enter an exact value for the SCANsat big map texture width. Values are limited to 550 - 8192 pixels wide. Press the Set button to apply the value.";
+		[Persistent]
+		public string settingsHelpWindowScale = "Adjust all SCANsat window scales; buttons adjust scale in increments of 5%.";
 
 		//Resource Settings Window Help Tooltips
 		[Persistent]
