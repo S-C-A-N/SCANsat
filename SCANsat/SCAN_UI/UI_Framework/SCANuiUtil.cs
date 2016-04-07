@@ -559,32 +559,82 @@ namespace SCANsat.SCAN_UI.UI_Framework
 		//Reset window positions;
 		internal static void resetMainMapPos()
 		{
+			if (SCANcontroller.controller.mainMap == null)
+				return;
+
 			SCANcontroller.controller.mainMap.resetWindowPos(SCANmainMap.defaultRect);
 		}
 
 		internal static void resetSettingsUIPos()
 		{
+			if (SCANcontroller.controller.settingsWindow == null)
+				return;
+
 			SCANcontroller.controller.settingsWindow.resetWindowPos(SCANsettingsUI.defaultRect);
 		}
 
 		internal static void resetInstUIPos()
 		{
+			if (SCANcontroller.controller.instrumentsWindow == null)
+				return;
+
 			SCANcontroller.controller.instrumentsWindow.resetWindowPos(SCANinstrumentUI.defaultRect);
 		}
 
 		internal static void resetBigMapPos()
 		{
+			if (SCANcontroller.controller.BigMap == null)
+				return;
+
 			SCANcontroller.controller.BigMap.resetWindowPos(SCANBigMap.defaultRect);
 		}
 
 		internal static void resetKSCMapPos()
 		{
+			if (SCANcontroller.controller.kscMap == null)
+				return;
+
 			SCANcontroller.controller.kscMap.resetWindowPos(SCANkscMap.defaultRect);
 		}
 
 		internal static void resetColorMapPos()
 		{
+			if (SCANcontroller.controller.colorManager == null)
+				return;
+
 			SCANcontroller.controller.colorManager.resetWindowPos(SCANcolorSelection.defaultRect);
+		}
+
+		internal static void resetOverlayControllerPos()
+		{
+			if (SCANcontroller.controller.resourceOverlay == null)
+				return;
+
+			SCANcontroller.controller.resourceOverlay.resetWindowPos(SCANoverlayController.defaultRect);
+		}
+
+		internal static void resetResourceSettingPos()
+		{
+			if (SCANcontroller.controller.resourceSettings == null)
+				return;
+
+			SCANcontroller.controller.resourceSettings.resetWindowPos(SCANresourceSettings.defaultRect);
+		}
+
+		internal static void resetZoomMapPos()
+		{
+			if (SCANcontroller.controller.zoomMap == null)
+				return;
+
+			SCANcontroller.controller.zoomMap.resetWindowPos(SCANzoomWindow.defaultRect);
+		}
+
+		internal static void resetHiDefMapPos()
+		{
+			if (SCANcontroller.controller.hiDefMap == null)
+				return;
+
+			SCANcontroller.controller.hiDefMap.resetWindowPos(SCANzoomHiDef.defaultRect);
 		}
 
 		#endregion
