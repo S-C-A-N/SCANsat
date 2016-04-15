@@ -1,3 +1,14 @@
+Version 15.3 - 2016-4-15
+------------------------
+
+- Additional KSPedia pages
+- Add window scaling function
+    - Adjust scale in the Settings window
+- Window reset button will now reset all window positions and scale
+- Fix bug in instruments window resource readout
+- Make sure new save files apply all SCANsat default values and options
+
+
 Version 15.2 - 2016-4-5
 ------------------------
 
