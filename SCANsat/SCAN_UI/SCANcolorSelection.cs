@@ -112,8 +112,6 @@ namespace SCANsat.SCAN_UI
 
 		protected override void Start()
 		{
-			base.Start();
-
 			TooltipsEnabled = false;
 
 			if (SCANconfigLoader.languagePack != null)
@@ -221,8 +219,6 @@ namespace SCANsat.SCAN_UI
 
 		protected override void OnDestroy()
 		{
-			base.OnDestroy();
-
 			removeControlLocks();
 			TooltipsEnabled = false;
 		}

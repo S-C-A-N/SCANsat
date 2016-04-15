@@ -65,8 +65,6 @@ namespace SCANsat.SCAN_UI
 
 		protected override void Start()
 		{
-			base.Start();
-
 			oldNarrowBand = SCANcontroller.controller.needsNarrowBand;
 			oldStockScanThreshold = SCANcontroller.controller.useScanThreshold;
 			oldInstantScan = SCANcontroller.controller.easyModeScanning;

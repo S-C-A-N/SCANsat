@@ -66,8 +66,6 @@ namespace SCANsat.SCAN_UI
 
 		protected override void Start()
 		{
-			base.Start();
-
 			GameEvents.onVesselSOIChanged.Add(soiChange);
 			GameEvents.onVesselChange.Add(vesselChange);
 			GameEvents.onVesselWasModified.Add(vesselChange);
@@ -86,8 +84,6 @@ namespace SCANsat.SCAN_UI
 
 		protected override void OnDestroy()
 		{
-			base.OnDestroy();
-
 			GameEvents.onVesselSOIChanged.Remove(soiChange);
 			GameEvents.onVesselChange.Remove(vesselChange);
 			GameEvents.onVesselWasModified.Remove(vesselChange);
@@ -331,7 +327,7 @@ namespace SCANsat.SCAN_UI
 			}
 			else
 			{
-				resourceLabel(resources[currentResource], false, false);
+				resourceLabel(resources[currentResource], false, true);
 			}
 		}
 

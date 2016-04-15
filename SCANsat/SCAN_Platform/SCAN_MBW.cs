@@ -122,51 +122,7 @@ namespace SCANsat.SCAN_Platform
 			}
 		}
 		#endregion
-
-		protected override void Start()
-		{
-			base.Start();
-
-			GameEvents.onShowUI.Add(UIOn);
-			GameEvents.onHideUI.Add(UIOff);
-			GameEvents.onGUIMissionControlSpawn.Add(UIOff);
-			GameEvents.onGUIMissionControlDespawn.Add(UIOff);
-			GameEvents.onGUIRnDComplexSpawn.Add(UIOff);
-			GameEvents.onGUIRnDComplexDespawn.Add(UIOn);
-			GameEvents.onGUIAdministrationFacilitySpawn.Add(UIOff);
-			GameEvents.onGUIAdministrationFacilityDespawn.Add(UIOn);
-			GameEvents.onGUIAstronautComplexSpawn.Add(UIOff);
-			GameEvents.onGUIAstronautComplexDespawn.Add(UIOn);
-		}
-
-		protected override void OnDestroy()
-		{
-			base.OnDestroy();
-
-			GameEvents.onShowUI.Remove(UIOn);
-			GameEvents.onHideUI.Remove(UIOff);
-			GameEvents.onGUIMissionControlSpawn.Remove(UIOff);
-			GameEvents.onGUIMissionControlDespawn.Remove(UIOff);
-			GameEvents.onGUIRnDComplexSpawn.Remove(UIOff);
-			GameEvents.onGUIRnDComplexDespawn.Remove(UIOn);
-			GameEvents.onGUIAdministrationFacilitySpawn.Remove(UIOff);
-			GameEvents.onGUIAdministrationFacilityDespawn.Remove(UIOn);
-			GameEvents.onGUIAstronautComplexSpawn.Remove(UIOff);
-			GameEvents.onGUIAstronautComplexDespawn.Remove(UIOn);
-		}
-
-		private void UIOn()
-		{
-			showUI = true;
-		}
-
-		private void UIOff()
-		{
-			showUI = false;
-		}
-
-		private bool showUI = true;
-
+		
 		internal Int32 WindowID { get; private set; }
 		internal TimeSpan DrawWindowInternalDuration { get; private set; }
 		private bool _Visible;
@@ -271,32 +227,23 @@ namespace SCANsat.SCAN_Platform
 			get { return _Visible; }
 			set
 			{
-				//if (_Visible != value)
-				//{
-				//	if (value)
-				//	{
-				//		Log.Debug("Adding Window to PostDrawQueue-{0}", WindowID); RenderingManager.AddToPostDrawQueue(5, this.DrawGUI);
-				//	}
-				//	else
-				//	{
-				//		Log.Debug("Removing Window from PostDrawQueue", WindowID); RenderingManager.RemoveFromPostDrawQueue(5, this.DrawGUI);
-				//	}
-				//}
+				if (_Visible != value)
+				{
+					if (value)
+					{
+						Log.Debug("Adding Window to PostDrawQueue-{0}", WindowID);
+						SCANcontroller.controller.addToDrawQueue(WindowID, this.DrawGUI);
+					}
+					else
+					{
+						Log.Debug("Removing Window from PostDrawQueue", WindowID);
+						SCANcontroller.controller.removeFromDrawQueue(WindowID);
+					}
+				}
 				_Visible = value;
 			}
 		}
-		protected override void OnGUIEvery()
-		{
-			base.OnGUIEvery();
 
-			if (!showUI)
-				return;
-
-			if (!_Visible)
-				return;
-
-			this.DrawGUI();
-		}
 		protected void DrawGUI()
 		{
 			string cc = "";

@@ -70,8 +70,6 @@ namespace SCANsat.SCAN_UI
 
 		protected override void Start()
 		{
-			base.Start();
-
 			//Initialize the map object
 			Visible = SCANcontroller.controller.bigMapVisible;
 			WindowRect.x = SCANcontroller.controller.map_x;
@@ -118,8 +116,6 @@ namespace SCANsat.SCAN_UI
 
 		protected override void OnDestroy()
 		{
-			base.OnDestroy();
-
 			SCANcontroller.controller.unloadPQS(bigmap.Body, mapSource.BigMap);
 		}
 
