@@ -61,6 +61,8 @@ namespace SCANsat.SCAN_UI
 		{
 			WindowCaption = "  S.C.A.N. Overlay";
 			WindowRect = sessionRect;
+			if ((WindowRect.x * SCANcontroller.controller.windowScale) > (Screen.width - 100))
+				WindowRect.x /= SCANcontroller.controller.windowScale;
 			WindowStyle = SCANskins.SCAN_window;
 			WindowOptions = new GUILayoutOption[2] { GUILayout.Width(175), GUILayout.Height(100) };
 			Visible = false;
