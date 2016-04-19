@@ -3,47 +3,26 @@ Versoin 16.0 - 2016-4-29
 
 - Update for KSP 1.1 final release
 - Update for MechJeb 2.5.7
-- Make scanners easier to turn off when they run out of power
 
-
-Version 15.3 - 2016-4-15
-------------------------
-
-- Additional KSPedia pages
+- KSPedia Entry
+	- 17 New KSPedia pages covering SCANsat basics and features
+	
+- Add science experiment for low resolution resource scan (M700 scanner)
+    - Adjust other science reward amounts
+	
 - Add window scaling function
     - Adjust scale in the Settings window
-- Window reset button will now reset all window positions and scale
-- Fix bug in instruments window resource readout
-- Make sure new save files apply all SCANsat default values and options
 
-
-Version 15.2 - 2016-4-5
-------------------------
-
-- Add KSPedia entry
-- Add target selection button to big map
-- Add science experiment for low resolution resource scan (M700 scanner)
-    - Adjust science reward amounts
-- Add new RPM storage module; Module Manager config edited to add this module to any part with an internal space
-- Fix error that prevented orbit lines from crossing the East/West border in zoom maps
-- Fixed potential error with ground tracks
-- Fixed potential error with .csv exporter
-
-Version 15.1 - 2016-4-1
-------------------------
-
-- Fix ground tracks and landing target drawing
-- Several minor Unity 5 performance updates
-
-Version 15.0 - 2016-3-30
-------------------------
-
-- Update to KSP 1.1 and Unity 5
-
-- Known issues
-   - Ground tracks don't function
-   - MechJeb integration removed
-   - SCANsat resource scanning requires Module Manager; it won't work without it and hasn't been tested in KSP 1.1
+- Misc and Bug Fixes
+	- Add target selection button to big map
+	- Add new RPM storage module; Module Manager config edited to add this module to any part with an internal space
+	- Make scanners easier to turn off when they run out of power
+	- Fix error that prevented orbit lines from crossing the East/West border in zoom maps
+	- Window reset button will now reset all window positions and scale
+	- Fix bug in instruments window resource readout
+	- Make sure new save files apply all SCANsat default values and options
+	- Fixed potential error with ground tracks
+	- Fixed potential error with .csv exporter
 
 
 Version 14.9 - 2016-3-6
