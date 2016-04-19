@@ -1,3 +1,11 @@
+Versoin 16.0 - 2016-4-29
+------------------------
+
+- Update for KSP 1.1 final release
+- Update for MechJeb 2.5.7
+- Make scanners easier to turn off when they run out of power
+
+
 Version 15.3 - 2016-4-15
 ------------------------
 
