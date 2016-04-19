@@ -172,7 +172,7 @@ namespace SCANmechjeb
 				return;
 			}
 
-			if (!(target.Target is PositionTarget))
+			if ((target.Target is DirectionTarget))
 			{
 				way = null;
 				return;
