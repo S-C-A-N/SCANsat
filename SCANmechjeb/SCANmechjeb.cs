@@ -26,7 +26,7 @@ namespace SCANmechjeb
 	{
 		private const string siteName = "MechJeb Landing Target";
 		private Vessel v;
-		private MechJebCore core;
+		private MechJebCore mjCore;
 		private MechJebModuleTargetController target;
 		private DisplayModule guidanceModule;
 		private SCANwaypoint way;
@@ -82,9 +82,9 @@ namespace SCANmechjeb
 				return;
 			}
 
-			core = v.GetMasterMechJeb();
+			mjCore = v.GetMasterMechJeb();
 
-			if (core == null)
+			if (mjCore == null)
 			{
 				SCANcontroller.controller.MechJebLoaded = false;
 				way = null;
@@ -94,7 +94,7 @@ namespace SCANmechjeb
 			if (HighLogic.CurrentGame.Mode != Game.Modes.SANDBOX)
 			{
 				if (guidanceModule == null)
-					guidanceModule = (DisplayModule)core.GetComputerModule("MechJebModuleLandingGuidance");
+					guidanceModule = (DisplayModule)mjCore.GetComputerModule("MechJebModuleLandingGuidance");
 
 				if (guidanceModule == null)
 				{
@@ -115,7 +115,7 @@ namespace SCANmechjeb
 				}
 			}
 
-			target = core.target;
+			target = mjCore.target;
 
 			if (target == null)
 			{
@@ -127,7 +127,6 @@ namespace SCANmechjeb
 			if (!SCANcontroller.controller.MechJebLoaded)
 			{
 				SCANcontroller.controller.MechJebLoaded = true;
-				RenderingManager.AddToPostDrawQueue(1, drawTarget);
 			}
 
 			if (SCANcontroller.controller.LandingTarget != null)
@@ -173,7 +172,7 @@ namespace SCANmechjeb
 				return;
 			}
 
-			if (!(target.Target is PositionTarget))
+			if ((target.Target is DirectionTarget))
 			{
 				way = null;
 				return;
@@ -199,6 +198,20 @@ namespace SCANmechjeb
 			}
 		}
 
+		protected override void OnGUIEvery()
+		{
+			if (SCANcontroller.controller == null)
+				return;
+
+			if (!SCANcontroller.controller.MechJebLoaded)
+				return;
+
+			if (!selectingInMap)
+				return;
+
+			drawTarget();
+		}
+
 		//Draw the mapview MechJeb target arrows
 		private void drawTarget()
 		{
@@ -209,10 +222,10 @@ namespace SCANmechjeb
 
 			if (!MapView.MapIsEnabled)
 				return;
-			if (!v.isActiveVessel || v.GetMasterMechJeb() != core)
+			if (!v.isActiveVessel || v.GetMasterMechJeb() != mjCore)
 				return;
 
-			GLUtils.DrawMapViewGroundMarker(SCANcontroller.controller.LandingTargetBody, coords.y, coords.x, palette.mechjebYellow);
+			GLUtils.DrawGroundMarker(SCANcontroller.controller.LandingTargetBody, coords.y, coords.x, palette.mechjebYellow, true);
 		}
 	}
 }
