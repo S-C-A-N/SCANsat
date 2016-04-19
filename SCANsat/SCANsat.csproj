@@ -64,6 +64,7 @@
     <Compile Include="SCAN_PartModules\SCANhiDefCamera.cs" />
     <Compile Include="SCAN_PartModules\SCANresourceDisplay.cs" />
     <Compile Include="SCAN_PartModules\SCANresourceScanner.cs" />
+    <Compile Include="SCAN_PartModules\SCANRPMStorage.cs" />
     <Compile Include="SCAN_PartModules\SCANsat.cs" />
     <Compile Include="SCAN_Platform\Attributes\Bounds.cs" />
     <Compile Include="SCAN_Platform\Extensions\Colors\UnityEngine.Color_.cs">
