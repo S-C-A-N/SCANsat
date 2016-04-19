@@ -119,11 +119,8 @@ namespace SCANsat.SCAN_PartModules
 
 			Events["reviewEvent"].active = storedData.Count > 0;
 			Events["EVACollect"].active = storedData.Count > 0;
-			if (!powerIsProblem)
-			{
-				Events["startScan"].active = !scanning;
-				Events["stopScan"].active = scanning;
-			}
+			Events["startScan"].active = !scanning && !powerIsProblem;
+			Events["stopScan"].active = scanning || powerIsProblem;
 			if (sensorType != 32)
 				Fields["alt_indicator"].guiActive = scanning;
 
@@ -147,8 +144,6 @@ namespace SCANsat.SCAN_PartModules
 				if (powerTimer < 30)
 				{
 					powerTimer++;
-					Events["startScan"].active = false;
-					Events["stopScan"].active = true;
 					return;
 				}
 
