@@ -137,6 +137,8 @@ namespace SCANsat
 		public bool useScanThreshold = true;
 		[KSPField(isPersistant = true)]
 		public float slopeCutoff = 1f;
+		[KSPField(isPersistant = true)]
+		public float windowScale = 1f;
 
 		/* Biome and slope colors can't be serialized properly as a KSP Field */
 		public Color lowBiomeColor = new Color(0, 0.46f, 0.02345098f, 1);
@@ -166,10 +168,14 @@ namespace SCANsat
 		private static List<string> loadedResources = new List<string>();
 
 		/* Primary SCANsat vessel dictionary; loaded every time */
-		private Dictionary<Guid, SCANvessel> knownVessels = new Dictionary<Guid, SCANvessel>();
+		public Dictionary<Guid, SCANvessel> knownVessels = new Dictionary<Guid, SCANvessel>();
 
 		/* Primary SCANdata dictionary; loaded every time*/
 		private Dictionary<string, SCANdata> body_data = new Dictionary<string,SCANdata>();
+
+		/* GUI draw function callbacks */
+		private Dictionary<int, Callback> drawQueue = new Dictionary<int, Callback>();
+		private bool showUI = true;
 
 		/* MechJeb Landing Target Integration */
 		private bool mechjebLoaded, targetSelecting, targetSelectingActive;
@@ -212,6 +218,18 @@ namespace SCANsat
 		private static SCANcontroller instance;
 
 		#region Public Accessors
+
+		public void addToDrawQueue(int id, Callback c)
+		{
+			if (!drawQueue.ContainsKey(id))
+				drawQueue.Add(id, c);
+		}
+
+		public void removeFromDrawQueue(int id)
+		{
+			if (drawQueue.ContainsKey(id))
+				drawQueue.Remove(id);
+		}
 
 		public SCANdata getData(string bodyName)
 		{
@@ -572,8 +590,6 @@ namespace SCANsat
 
 		public override void OnLoad(ConfigNode node)
 		{
-			instance = this;
-
 			lowBiomeColor = node.parse("lowBiomeColor", lowBiomeColor);
 			highBiomeColor = node.parse("highBiomeColor", highBiomeColor);
 			lowSlopeColorOne = node.parse("lowSlopeColorOne", lowSlopeColorOne);
@@ -833,7 +849,6 @@ namespace SCANsat
 				{
 					if (r != null)
 					{
-						SCANUtil.SCANdebugLog("Saving Resource: {0}", r.Name);
 						ConfigNode node_resource_type = new ConfigNode("ResourceType");
 						node_resource_type.AddValue("Resource", r.Name);
 						node_resource_type.AddValue("MinColor", ConfigNode.WriteColor(r.MinColor));
@@ -851,18 +866,60 @@ namespace SCANsat
 
 		#endregion
 
+		public override void OnAwake()
+		{
+			SCANUtil.SCANdebugLog("Awakening SCANcontroller...");
+
+			instance = this;
+
+			if (SCANconfigLoader.SCANNode == null)
+				return;
+
+			biomeTransparency = SCANconfigLoader.SCANNode.BiomeTransparency;
+			biomeBorder = SCANconfigLoader.SCANNode.BiomeBorder;
+			useStockBiomes = SCANconfigLoader.SCANNode.StockBiomeMap;
+
+			slopeCutoff = SCANconfigLoader.SCANNode.SlopeCutoff;
+
+			windowScale = SCANconfigLoader.SCANNode.WindowScale;
+
+			lowBiomeColor = SCANconfigLoader.SCANNode.LowBiomeColor;
+			highBiomeColor = SCANconfigLoader.SCANNode.HighBiomeColor;
+			lowSlopeColorOne = SCANconfigLoader.SCANNode.BottomLowSlopeColor;
+			highSlopeColorOne = SCANconfigLoader.SCANNode.BottomHighSlopeColor;
+			lowSlopeColorTwo = SCANconfigLoader.SCANNode.TopLowSlopeColor;
+			highSlopeColorTwo = SCANconfigLoader.SCANNode.TopHighSlopeColor;
+
+			lowBiomeColor32 = lowBiomeColor;
+			highBiomeColor32 = highBiomeColor;
+			lowSlopeColorOne32 = lowSlopeColorOne;
+			highSlopeColorOne32 = highSlopeColorOne;
+			lowSlopeColorTwo32 = lowSlopeColorTwo;
+			highSlopeColorTwo32 = highSlopeColorTwo;
+		}
+
 		private void Start()
 		{
+			GameEvents.onShowUI.Add(UIOn);
+			GameEvents.onHideUI.Add(UIOff);
+			GameEvents.onGUIMissionControlSpawn.Add(UIOff);
+			GameEvents.onGUIMissionControlDespawn.Add(UIOff);
+			GameEvents.onGUIRnDComplexSpawn.Add(UIOff);
+			GameEvents.onGUIRnDComplexDespawn.Add(UIOn);
+			GameEvents.onGUIAdministrationFacilitySpawn.Add(UIOff);
+			GameEvents.onGUIAdministrationFacilityDespawn.Add(UIOn);
+			GameEvents.onGUIAstronautComplexSpawn.Add(UIOff);
+			GameEvents.onGUIAstronautComplexDespawn.Add(UIOn);
+
 			GameEvents.onVesselSOIChanged.Add(SOIChange);
 			GameEvents.onVesselCreate.Add(newVesselCheck);
-			GameEvents.onPartCouple.Add(dockingCheck);
+			GameEvents.onPartCouple.Add(dockingEventCheck);
 			GameEvents.Contract.onContractsLoaded.Add(contractsCheck);
 			GameEvents.Contract.onParameterChange.Add(onParamChange);
 			if (HighLogic.LoadedSceneIsFlight)
 			{
 				if (!body_data.ContainsKey(FlightGlobals.currentMainBody.name))
 					body_data.Add(FlightGlobals.currentMainBody.name, new SCANdata(FlightGlobals.currentMainBody));
-				RenderingManager.AddToPostDrawQueue(5, drawTarget);
 				try
 				{
 					mainMap = gameObject.AddComponent<SCANmainMap>();
@@ -939,7 +996,7 @@ namespace SCANsat
 				{
 					MapObject target = PlanetariumCamera.fetch.target;
 
-					if (target.type != MapObject.MapObjectType.CELESTIALBODY)
+					if (target.type != MapObject.ObjectType.CelestialBody)
 					{
 						body = null;
 						return;
@@ -1057,9 +1114,20 @@ namespace SCANsat
 
 		private void OnDestroy()
 		{
+			GameEvents.onShowUI.Remove(UIOn);
+			GameEvents.onHideUI.Remove(UIOff);
+			GameEvents.onGUIMissionControlSpawn.Remove(UIOff);
+			GameEvents.onGUIMissionControlDespawn.Remove(UIOff);
+			GameEvents.onGUIRnDComplexSpawn.Remove(UIOff);
+			GameEvents.onGUIRnDComplexDespawn.Remove(UIOn);
+			GameEvents.onGUIAdministrationFacilitySpawn.Remove(UIOff);
+			GameEvents.onGUIAdministrationFacilityDespawn.Remove(UIOn);
+			GameEvents.onGUIAstronautComplexSpawn.Remove(UIOff);
+			GameEvents.onGUIAstronautComplexDespawn.Remove(UIOn);
+
 			GameEvents.onVesselSOIChanged.Remove(SOIChange);
 			GameEvents.onVesselCreate.Remove(newVesselCheck);
-			GameEvents.onPartCouple.Remove(dockingCheck);
+			GameEvents.onPartCouple.Remove(dockingEventCheck);
 			GameEvents.Contract.onContractsLoaded.Remove(contractsCheck);
 			GameEvents.Contract.onParameterChange.Remove(onParamChange);
 			if (mainMap != null)
@@ -1090,6 +1158,16 @@ namespace SCANsat
 					unloadPQS(b);
 				}
 			}
+		}
+
+		private void UIOn()
+		{
+			showUI = true;
+		}
+
+		private void UIOff()
+		{
+			showUI = false;
 		}
 
 		internal void loadPQS(CelestialBody b, mapSource s = mapSource.Data)
@@ -1230,6 +1308,25 @@ namespace SCANsat
 			SCANUtil.SCANlog("Unloading Kopernicus On Demand PQSMod For {0}", b.theName);
 		}
 
+		private void OnGUI()
+		{
+			if (showUI)
+			{
+				Matrix4x4 previousGuiMatrix = GUI.matrix;
+				GUI.matrix = Matrix4x4.TRS(Vector3.zero, Quaternion.identity, new Vector3(windowScale, windowScale, 1));
+
+				for (int i = 0; i < drawQueue.Count; i++)
+				{
+					drawQueue.ElementAt(i).Value();
+				}
+
+				GUI.matrix = previousGuiMatrix;
+			}
+
+			if (HighLogic.LoadedSceneIsFlight || HighLogic.LoadedScene == GameScenes.TRACKSTATION)
+				drawTarget();
+		}
+
 		private void drawTarget()
 		{
 			if (!MapView.MapIsEnabled)
@@ -1243,20 +1340,19 @@ namespace SCANsat
 			SCANdata d = getData(b.name);
 
 			if (d == null)
-				return;
+				return;			
 
-			if (groundTracks)
+			if (groundTracks && HighLogic.LoadedSceneIsFlight)
 				drawGroundTracks(b);
 
-			if (mechJebTargetSelection)
-				return;
-
-			SCANwaypoint target = d.Waypoints.FirstOrDefault(a => a.LandingTarget);
-
-			if (target == null)
-				return;
-
-			SCANuiUtil.drawTargetOverlay(b, target.Latitude, target.Longitude, XKCDColors.DarkGreen);
+			if (!mechJebTargetSelection)
+			{
+				SCANwaypoint target = d.Waypoints.FirstOrDefault(a => a.LandingTarget);
+				if (target != null)
+				{
+					SCANuiUtil.drawTargetOverlay(b, target.Latitude, target.Longitude, XKCDColors.DarkGreen);
+				}
+			}
 		}
 
 		private void drawGroundTracks(CelestialBody body)
@@ -1379,7 +1475,7 @@ namespace SCANsat
 			}
 		}
 
-		private void dockingCheck(GameEvents.FromToAction<Part, Part> Parts)
+		private void dockingEventCheck(GameEvents.FromToAction<Part, Part> Parts)
 		{
 			StartCoroutine(dockingCheckCoRoutine(Parts.to.vessel, Parts.from.vessel));
 		}
@@ -1739,7 +1835,7 @@ namespace SCANsat
 			return (all & sensor) != SCANtype.Nothing;
 		}
 
-		private bool isVesselKnown(Guid id)
+		public bool isVesselKnown(Guid id)
 		{
 			if (!knownVessels.ContainsKey(id))
 				return false;
@@ -1747,7 +1843,7 @@ namespace SCANsat
 			return knownVessels[id].sensors.Count > 0;
 		}
 
-		private bool isVesselKnown(Vessel v)
+		public bool isVesselKnown(Vessel v)
 		{
 			if (v.vesselType == VesselType.Debris)
 				return false;

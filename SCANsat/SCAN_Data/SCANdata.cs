@@ -320,7 +320,7 @@ namespace SCANsat.SCAN_Data
 
 					if (WaypointManager.Instance() != null)
 					{
-						var remaining = WaypointManager.Instance().AllWaypoints();
+						var remaining = WaypointManager.Instance().Waypoints;
 						for (int i = 0; i < remaining.Count; i++)
 						{
 							Waypoint p = remaining[i];

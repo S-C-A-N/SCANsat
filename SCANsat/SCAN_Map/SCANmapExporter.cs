@@ -136,7 +136,7 @@ namespace SCANsat.SCAN_Map
 							if (!SCANUtil.isCovered(lon, lat, copyData, SCANtype.Altimetry))
 								continue;
 
-							float terrain = map.terrainElevation(lon, lat, w, h, copyMap, copyData);
+							float terrain = map.terrainElevation(lon, lat, w, h, copyMap, copyData, true);
 
 							line = string.Format("{0},{1},{2:F3},{3:F3},{4:F3}", i, j, lat, lon, terrain);
 

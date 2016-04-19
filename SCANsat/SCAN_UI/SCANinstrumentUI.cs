@@ -327,7 +327,7 @@ namespace SCANsat.SCAN_UI
 			}
 			else
 			{
-				resourceLabel(resources[currentResource], false, false);
+				resourceLabel(resources[currentResource], false, true);
 			}
 		}
 

@@ -30,7 +30,7 @@ public class Debug_AutoLoadPersistentSaveOnStartup : MonoBehaviour {
             
 		if (first) {
 			first = false;
-			HighLogic.SaveFolder = "Testing";
+			HighLogic.SaveFolder = "Testing_Off";
 			HighLogic.CurrentGame = GamePersistence.LoadGame("persistent", HighLogic.SaveFolder, true, false);
 			if (HighLogic.CurrentGame != null && HighLogic.CurrentGame.flightState != null && HighLogic.CurrentGame.compatible)
 			{
@@ -56,7 +56,7 @@ public class Debug_AutoLoadPersistentSaveOnStartup : MonoBehaviour {
 				//HighLogic.CurrentGame.Start();
 				string save = GamePersistence.SaveGame(HighLogic.CurrentGame, "persistent", HighLogic.SaveFolder, SaveMode.OVERWRITE);
 				FlightDriver.StartAndFocusVessel(save, suitableVessel);
-				CheatOptions.InfiniteFuel = true;
+				CheatOptions.InfinitePropellant = true;
                }
           }
      }

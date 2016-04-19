@@ -324,7 +324,7 @@ namespace SCANsat.SCAN_Map
 		/* MAP: scaling, centering (setting origin), translating, etc */
 		private double mapscale, lon_offset, lat_offset;
 		private int mapwidth, mapheight;
-		private Color[] pix;
+		private Color32[] pix;
 		private bool resourceActive;
 		private float[,] resourceCache;
 		private int resourceInterpolation = 4;
@@ -333,7 +333,7 @@ namespace SCANsat.SCAN_Map
 		private double resourceMapScale = 1;
 		private bool randomEdges = true;
 		private double[] biomeIndex;
-		private Color[] stockBiomeColor;
+		private Color32[] stockBiomeColor;
 		private int startLine;
 		private int stopLine;
 
@@ -344,9 +344,9 @@ namespace SCANsat.SCAN_Map
 			if (w > 360 * 4)
 				w = 360 * 4;
 			mapwidth = w;
-			pix = new Color[mapwidth];
+			pix = new Color32[mapwidth];
 			biomeIndex = new double[mapwidth];
-			stockBiomeColor = new Color[mapwidth];
+			stockBiomeColor = new Color32[mapwidth];
 			mapscale = mapwidth / 360f;
 			if (h <= 0)
 				h = (int)(180 * mapscale);
@@ -379,9 +379,9 @@ namespace SCANsat.SCAN_Map
 			if (mapwidth == w)
 				return;
 			mapwidth = w;
-			pix = new Color[w];
+			pix = new Color32[w];
 			biomeIndex = new double[w];
-			stockBiomeColor = new Color[w];
+			stockBiomeColor = new Color32[w];
 			resourceMapHeight = SCANcontroller.controller.overlayMapHeight;
 			resourceMapWidth = resourceMapHeight * 2;
 			resourceInterpolation = SCANcontroller.controller.overlayInterpolation;
@@ -425,6 +425,10 @@ namespace SCANsat.SCAN_Map
 
 		internal double scaleLongitude(double lon)
 		{
+			if (lon_offset < 0 && Math.Abs(lon_offset) < lon)
+				lon -= 360;
+			else if (lon_offset > 0 && Math.Abs(lon_offset) > lon)
+				lon += 360;
 			lon -= lon_offset;
 			lon *= 360f / (mapwidth / mapscale);
 			return lon;
@@ -619,11 +623,12 @@ namespace SCANsat.SCAN_Map
 			if (map == null)
 			{
 				map = new Texture2D(mapwidth, mapheight, TextureFormat.ARGB32, false);
-				pix = map.GetPixels();
+				pix = map.GetPixels32();
 				for (int i = 0; i < pix.Length; ++i)
-					pix[i] = palette.clear;
-				map.SetPixels(pix);
+					pix[i] = palette.Clear;
+				map.SetPixels32(pix);
 				mapline = new double[map.width];
+				pix = new Color32[mapwidth];
 			}
 			else if (mapstep >= map.height)
 			{
@@ -632,9 +637,9 @@ namespace SCANsat.SCAN_Map
 
 			if (palette.redline == null || palette.redline.Length != map.width)
 			{
-				palette.redline = new Color[map.width];
+				palette.redline = new Color32[map.width];
 				for (int i = 0; i < palette.redline.Length; ++i)
-					palette.redline[i] = palette.red;
+					palette.redline[i] = palette.Red;
 			}
 
 			resourceOn = resourceActive && SCANconfigLoader.GlobalResource && resource != null;
@@ -721,11 +726,11 @@ namespace SCANsat.SCAN_Map
 			{
 				if (mapHidden)
 				{
-					pix[i] = palette.clear;
+					pix[i] = palette.Clear;
 					continue;
 				}
 
-				Color baseColor = palette.grey;
+				Color32 baseColor = palette.Grey;
 				pix[i] = baseColor;
 				int scheme = SCANcontroller.controller.colours;
 				float projVal = 0f;
@@ -737,7 +742,7 @@ namespace SCANsat.SCAN_Map
 
 				if (double.IsNaN(lat) || double.IsNaN(lon) || lat < -90 || lat > 90 || lon < -180 || lon > 180)
 				{
-					pix[i] = palette.clear;
+					pix[i] = palette.Clear;
 					continue;
 				}
 
@@ -747,7 +752,7 @@ namespace SCANsat.SCAN_Map
 						{
 							if (!pqs)
 							{
-								baseColor = palette.lerp(palette.black, palette.white, UnityEngine.Random.value);
+								baseColor = palette.lerp(palette.Black, palette.White, UnityEngine.Random.value);
 							}
 							else if (SCANUtil.isCovered(lon, lat, data, SCANtype.Altimetry))
 							{
@@ -763,7 +768,7 @@ namespace SCANsat.SCAN_Map
 						{
 							if (!pqs)
 							{
-								baseColor = palette.lerp(palette.black, palette.white, UnityEngine.Random.value);
+								baseColor = palette.lerp(palette.Black, palette.White, UnityEngine.Random.value);
 							}
 							else if (SCANUtil.isCovered(lon, lat, data, SCANtype.Altimetry))
 							{
@@ -781,7 +786,7 @@ namespace SCANsat.SCAN_Map
 									float v = Mathf.Clamp((float)Math.Abs(projVal - v1) / 1000f, 0, 2f);
 									if (SCANcontroller.controller.colours == 1)
 									{
-										baseColor = palette.lerp(palette.black, palette.white, v / 2f);
+										baseColor = palette.lerp(palette.Black, palette.White, v / 2f);
 									}
 									else
 									{
@@ -803,44 +808,44 @@ namespace SCANsat.SCAN_Map
 						{
 							if (!biomeMap)
 							{
-								baseColor = palette.lerp(palette.black, palette.white, UnityEngine.Random.value);
+								baseColor = palette.lerp(palette.Black, palette.White, UnityEngine.Random.value);
 							}
 							else if (SCANUtil.isCovered(lon, lat, data, SCANtype.Biome))
 							{
-								Color biome = palette.grey;
+								Color32 biome = palette.Grey;
 								if (SCANcontroller.controller.colours == 1)
 								{
 									if ((i > 0 && mapline[i - 1] != biomeIndex[i]) || (mapstep > 0 && mapline[i] != biomeIndex[i]))
 									{
-										biome = palette.white;
+										biome = palette.White;
 									}
 									else
 									{
-										biome = palette.lerp(palette.black, palette.white, (float)biomeIndex[i]);
+										biome = palette.lerp(palette.Black, palette.White, (float)biomeIndex[i]);
 									}
 								}
 								else
 								{
-									Color elevation = palette.grey;
+									Color32 elevation = palette.Grey;
 									if (SCANcontroller.controller.biomeTransparency > 0)
 									{
 										if (!pqs)
 										{
-											elevation = palette.grey;
+											elevation = palette.Grey;
 										}
 										else if (SCANUtil.isCovered(lon, lat, data, SCANtype.Altimetry))
 										{
 											projVal = terrainElevation(lon, lat, mapwidth, mapheight, big_heightmap, cache, data, out scheme);
 											if (useCustomRange)
-												elevation = palette.lerp(palette.black, palette.white, Mathf.Clamp(projVal + (-1f * customMin), 0, customRange) / customRange);
+												elevation = palette.lerp(palette.Black, palette.White, Mathf.Clamp(projVal + (-1f * customMin), 0, customRange) / customRange);
 											else
-												elevation = palette.lerp(palette.black, palette.white, Mathf.Clamp(projVal + (-1f * data.TerrainConfig.MinTerrain), 0, data.TerrainConfig.TerrainRange) / data.TerrainConfig.TerrainRange);
+												elevation = palette.lerp(palette.Black, palette.White, Mathf.Clamp(projVal + (-1f * data.TerrainConfig.MinTerrain), 0, data.TerrainConfig.TerrainRange) / data.TerrainConfig.TerrainRange);
 										}
 									}
 
 									if (SCANcontroller.controller.biomeBorder && ((i > 0 && mapline[i - 1] != biomeIndex[i]) || (mapstep > 0 && mapline[i] != biomeIndex[i])))
 									{
-										biome = palette.white;
+										biome = palette.White;
 									}
 									else if (SCANcontroller.controller.useStockBiomes)
 									{
@@ -848,7 +853,7 @@ namespace SCANsat.SCAN_Map
 									}
 									else
 									{
-										biome = palette.lerp(palette.lerp(SCANcontroller.controller.lowBiomeColor, SCANcontroller.controller.highBiomeColor, (float)biomeIndex[i]), elevation, SCANcontroller.controller.biomeTransparency / 100f);
+										biome = palette.lerp(palette.lerp(SCANcontroller.controller.lowBiomeColor32, SCANcontroller.controller.highBiomeColor32, (float)biomeIndex[i]), elevation, SCANcontroller.controller.biomeTransparency / 100f);
 									}
 								}
 
@@ -890,14 +895,14 @@ namespace SCANsat.SCAN_Map
 			}
 
 			if (mapstep >= 0)
-				map.SetPixels(0, mapstep, map.width, 1, pix);
+				map.SetPixels32(0, mapstep, map.width, 1, pix);
 
 			mapstep++;
 
 			if (mapstep % 10 == 0 || mapstep >= map.height)
 			{
 				if (mapstep < map.height - 1)
-					map.SetPixels(0, mapstep, map.width, 1, palette.redline);
+					map.SetPixels32(0, mapstep, map.width, 1, palette.redline);
 
 				map.Apply();
 			}
@@ -906,7 +911,7 @@ namespace SCANsat.SCAN_Map
 		}
 
 		/* Calculates the terrain elevation based on scanning coverage; fetches data from elevation cache if possible */
-		private float terrainElevation(double Lon, double Lat, int w, int h, float[,] heightMap, bool c, SCANdata Data, out int Scheme)
+		private float terrainElevation(double Lon, double Lat, int w, int h, float[,] heightMap, bool c, SCANdata Data, out int Scheme, bool exporting = false)
 		{
 			float elevation = 0f;
 			Scheme = SCANcontroller.controller.colours;
@@ -917,7 +922,7 @@ namespace SCANsat.SCAN_Map
 					double lon = fixUnscale(unScaleLongitude(Lon), w);
 					double lat = fixUnscale(unScaleLatitude(Lat), h);
 					elevation = heightMap[Mathf.RoundToInt((float)lon), Mathf.RoundToInt((float)lat)];
-					if (elevation == 0f)
+					if (elevation == 0f && !exporting)
 						elevation = (float)SCANUtil.getElevation(body, Lon, Lat);
 				}
 				else
@@ -930,7 +935,7 @@ namespace SCANsat.SCAN_Map
 					double lon = fixUnscale(unScaleLongitude(Lon), w);
 					double lat = fixUnscale(unScaleLatitude(Lat), h);
 					elevation = heightMap[((int)(lon * 5)) / 5, ((int)(lat * 5)) / 5];
-					if (elevation == 0f)
+					if (elevation == 0f && !exporting)
 						elevation = (float)SCANUtil.getElevation(body, ((int)(Lon * 5)) / 5, ((int)(Lat * 5)) / 5);
 				}
 				else
@@ -941,11 +946,11 @@ namespace SCANsat.SCAN_Map
 			return elevation;
 		}
 
-		public float terrainElevation(double Lon, double Lat, int W, int H, float[,] heightMap, SCANdata Data)
+		public float terrainElevation(double Lon, double Lat, int W, int H, float[,] heightMap, SCANdata Data, bool export = false)
 		{
 			int i = 0;
 
-			return terrainElevation(Lon, Lat, W, H, heightMap, true, Data, out i);
+			return terrainElevation(Lon, Lat, W, H, heightMap, true, Data, out i, export);
 		}
 
 		private float getResoureCache(double Lon, double Lat)

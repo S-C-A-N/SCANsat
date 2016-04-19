@@ -112,7 +112,7 @@ namespace SCANsat.SCAN_UI
 			
 			MapObject target = PlanetariumCamera.fetch.target;
 
-			if (target.type != MapObject.MapObjectType.VESSEL)
+			if (target.type != MapObject.ObjectType.Vessel)
 			{
 				v = null;
 				return;

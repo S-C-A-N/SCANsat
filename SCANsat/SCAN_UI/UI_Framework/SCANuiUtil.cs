@@ -559,32 +559,82 @@ namespace SCANsat.SCAN_UI.UI_Framework
 		//Reset window positions;
 		internal static void resetMainMapPos()
 		{
+			if (SCANcontroller.controller.mainMap == null)
+				return;
+
 			SCANcontroller.controller.mainMap.resetWindowPos(SCANmainMap.defaultRect);
 		}
 
 		internal static void resetSettingsUIPos()
 		{
+			if (SCANcontroller.controller.settingsWindow == null)
+				return;
+
 			SCANcontroller.controller.settingsWindow.resetWindowPos(SCANsettingsUI.defaultRect);
 		}
 
 		internal static void resetInstUIPos()
 		{
+			if (SCANcontroller.controller.instrumentsWindow == null)
+				return;
+
 			SCANcontroller.controller.instrumentsWindow.resetWindowPos(SCANinstrumentUI.defaultRect);
 		}
 
 		internal static void resetBigMapPos()
 		{
+			if (SCANcontroller.controller.BigMap == null)
+				return;
+
 			SCANcontroller.controller.BigMap.resetWindowPos(SCANBigMap.defaultRect);
 		}
 
 		internal static void resetKSCMapPos()
 		{
+			if (SCANcontroller.controller.kscMap == null)
+				return;
+
 			SCANcontroller.controller.kscMap.resetWindowPos(SCANkscMap.defaultRect);
 		}
 
 		internal static void resetColorMapPos()
 		{
+			if (SCANcontroller.controller.colorManager == null)
+				return;
+
 			SCANcontroller.controller.colorManager.resetWindowPos(SCANcolorSelection.defaultRect);
+		}
+
+		internal static void resetOverlayControllerPos()
+		{
+			if (SCANcontroller.controller.resourceOverlay == null)
+				return;
+
+			SCANcontroller.controller.resourceOverlay.resetWindowPos(SCANoverlayController.defaultRect);
+		}
+
+		internal static void resetResourceSettingPos()
+		{
+			if (SCANcontroller.controller.resourceSettings == null)
+				return;
+
+			SCANcontroller.controller.resourceSettings.resetWindowPos(SCANresourceSettings.defaultRect);
+		}
+
+		internal static void resetZoomMapPos()
+		{
+			if (SCANcontroller.controller.zoomMap == null)
+				return;
+
+			SCANcontroller.controller.zoomMap.resetWindowPos(SCANzoomWindow.defaultRect);
+		}
+
+		internal static void resetHiDefMapPos()
+		{
+			if (SCANcontroller.controller.hiDefMap == null)
+				return;
+
+			SCANcontroller.controller.hiDefMap.resetWindowPos(SCANzoomHiDef.defaultRect);
 		}
 
 		#endregion
@@ -926,8 +976,8 @@ namespace SCANsat.SCAN_UI.UI_Framework
 
 		#region Overlays
 
-		internal static Color32 lineColor = new Color(1f, 1f, 1f, 1f);
-		internal static Color32 blackLineColor = new Color(0f, 0f, 0f, 0.9f);
+		internal static Color lineColor = new Color(1f, 1f, 1f, 1f);
+		internal static Color blackLineColor = new Color(0f, 0f, 0f, 0.9f);
 		private static Material lineMat = JUtil.DrawLineMaterial();
 
 		internal static Dictionary<int, List<List<Vector2d>>> drawGridLine(Rect maprect, SCANmap map)
@@ -1120,6 +1170,11 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			GL.Vertex(end);
 		}
 
+		private static int[] eq_an_map, eq_dn_map;
+		private static Texture2D eq_map;
+		private static int eq_frame;
+		private static Color32[] eq_pix;
+
 		//Draw the orbit overlay
 		internal static void drawOrbit(Rect maprect, SCANmap map, Vessel vessel, CelestialBody body, bool lite = false)
 		{
@@ -1279,7 +1334,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			if (map.Projection == MapProjection.Polar)
 				return;
 
-			if (SCANBigMap.eq_frame <= 0)
+			if (eq_frame <= 0)
 			{
 				// predict equatorial crossings for the next 100 loops
 				double TAAN = 360f - o.argumentOfPeriapsis;	// true anomaly at ascending node
@@ -1289,19 +1344,23 @@ namespace SCANsat.SCAN_UI.UI_Framework
 				double tAN = (((MAAN - o.meanAnomaly * Mathf.Rad2Deg + 360) % 360) / 360f * o.period + startUT);
 				double tDN = (((MADN - o.meanAnomaly * Mathf.Rad2Deg + 360) % 360) / 360f * o.period + startUT);
 
-				if (SCANBigMap.eq_an_map == null || SCANBigMap.eq_dn_map == null || SCANBigMap.eq_an_map.Length != maprect.width)
+				if (eq_an_map == null || eq_dn_map == null || eq_an_map.Length != maprect.width)
 				{
-					SCANBigMap.eq_an_map = new int[(int)maprect.width];
-					SCANBigMap.eq_dn_map = new int[(int)maprect.width];
+					eq_an_map = new int[(int)maprect.width];
+					eq_dn_map = new int[(int)maprect.width];
 				}
-				if (SCANBigMap.eq_map == null || SCANBigMap.eq_map.width != SCANBigMap.eq_an_map.Length)
+				if (eq_map == null || eq_map.width != eq_an_map.Length)
 				{
-					SCANBigMap.eq_map = new Texture2D(SCANBigMap.eq_an_map.Length, eqh, TextureFormat.ARGB32, false);
+					eq_map = new Texture2D(eq_an_map.Length, eqh, TextureFormat.ARGB32, false);
 				}
-				for (int i = 0; i < SCANBigMap.eq_an_map.Length; ++i)
+				if (eq_pix == null || eq_pix.Length != eq_an_map.Length)
 				{
-					SCANBigMap.eq_an_map[i] = 0;
-					SCANBigMap.eq_dn_map[i] = 0;
+					eq_pix = new Color32[eq_an_map.Length * eqh];
+				}
+				for (int i = 0; i < eq_an_map.Length; ++i)
+				{
+					eq_an_map[i] = 0;
+					eq_dn_map[i] = 0;
 				}
 				for (int i = 0; i < 100; ++i)
 				{
@@ -1319,31 +1378,31 @@ namespace SCANsat.SCAN_UI.UI_Framework
 					}
 					double loAN = vessel.mainBody.GetLongitude(pAN) - rotAN;
 					double loDN = vessel.mainBody.GetLongitude(pDN) - rotDN;
-					int lonAN = (int)(((map.projectLongitude(loAN, 0) + 180) % 360) * SCANBigMap.eq_an_map.Length / 360f);
-					int lonDN = (int)(((map.projectLongitude(loDN, 0) + 180) % 360) * SCANBigMap.eq_dn_map.Length / 360f);
-					if (lonAN >= 0 && lonAN < SCANBigMap.eq_an_map.Length)
-						SCANBigMap.eq_an_map[lonAN] += 1;
-					if (lonDN >= 0 && lonDN < SCANBigMap.eq_dn_map.Length)
-						SCANBigMap.eq_dn_map[lonDN] += 1;
+					int lonAN = (int)(((map.projectLongitude(loAN, 0) + 180) % 360) * eq_an_map.Length / 360f);
+					int lonDN = (int)(((map.projectLongitude(loDN, 0) + 180) % 360) * eq_dn_map.Length / 360f);
+					if (lonAN >= 0 && lonAN < eq_an_map.Length)
+						eq_an_map[lonAN] += 1;
+					if (lonDN >= 0 && lonDN < eq_dn_map.Length)
+						eq_dn_map[lonDN] += 1;
 				}
-				Color[] pix = SCANBigMap.eq_map.GetPixels(0, 0, SCANBigMap.eq_an_map.Length, eqh);
-				Color cAN = palette.cb_skyBlue, cDN = palette.cb_orange;
+				//Color[] pix = SCANBigMap.eq_map.GetPixels(0, 0, SCANBigMap.eq_an_map.Length, eqh);
+				Color32 cAN = palette.CB_skyBlue, cDN = palette.CB_orange;
 				for (int y = 0; y < eqh; ++y)
 				{
-					Color lc = palette.clear;
-					for (int x = 0; x < SCANBigMap.eq_an_map.Length; ++x)
+					Color32 lc = palette.Clear;
+					for (int x = 0; x < eq_an_map.Length; ++x)
 					{
-						Color c = palette.clear;
+						Color32 c = palette.Clear;
 						float scale = 0;
 						if (y < eqh / 2)
 						{
 							c = cDN;
-							scale = SCANBigMap.eq_dn_map[x];
+							scale = eq_dn_map[x];
 						}
 						else
 						{
 							c = cAN;
-							scale = SCANBigMap.eq_an_map[x];
+							scale = eq_an_map[x];
 						}
 						if (scale >= 1)
 						{
@@ -1354,37 +1413,37 @@ namespace SCANsat.SCAN_UI.UI_Framework
 							else
 							{
 								if (lc == palette.clear)
-									pix[y * SCANBigMap.eq_an_map.Length + x - 1] = palette.black;
+									eq_pix[y * eq_an_map.Length + x - 1] = palette.Black;
 								scale = Mathf.Clamp(scale - 1, 0, 10) / 10f;
-								c = palette.lerp(c, palette.white, scale);
+								c = palette.lerp(c, palette.White, scale);
 							}
 						}
 						else
 						{
-							c = palette.clear;
-							if (lc != palette.clear && lc != palette.black)
-								c = palette.black;
+							c = palette.Clear;
+							if (lc.r != palette.Clear.r && lc.r != palette.Black.r)
+								c = palette.Black;
 						}
-						pix[y * SCANBigMap.eq_an_map.Length + x] = c;
+						eq_pix[y * eq_an_map.Length + x] = c;
 						lc = c;
 					}
 				}
-				SCANBigMap.eq_map.SetPixels(0, 0, SCANBigMap.eq_an_map.Length, eqh, pix);
-				SCANBigMap.eq_map.Apply();
-				SCANBigMap.eq_frame = 4;
+				eq_map.SetPixels32(0, 0, eq_an_map.Length, eqh, eq_pix);
+				eq_map.Apply();
+				eq_frame = 4;
 			}
 			else
 			{
-				SCANBigMap.eq_frame -= 1;
+				eq_frame -= 1;
 			}
 
-			if (SCANBigMap.eq_map != null)
+			if (eq_map != null)
 			{
 				r.x = maprect.x;
-				r.y = maprect.y + maprect.height / 2 + -SCANBigMap.eq_map.height / 2;
-				r.width = SCANBigMap.eq_map.width;
-				r.height = SCANBigMap.eq_map.height;
-				GUI.DrawTexture(r, SCANBigMap.eq_map);
+				r.y = maprect.y + maprect.height / 2 - eq_map.height / 2;
+				r.width = eq_map.width;
+				r.height = eq_map.height;
+				GUI.DrawTexture(r, eq_map);
 			}
 		}
 
@@ -1462,13 +1521,13 @@ namespace SCANsat.SCAN_UI.UI_Framework
 
 			radius = body.Radius / 15;
 
-			GLTriangleMap(new Vector3d[] { center, center + radius * (QuaternionD.AngleAxis(rotation - 55, up) * north), center + radius * (QuaternionD.AngleAxis(rotation -35, up) * north) }, c);
+			GLTriangleMap(new Vector3d[3] { center, center + radius * (QuaternionD.AngleAxis(rotation - 55, up) * north), center + radius * (QuaternionD.AngleAxis(rotation -35, up) * north) }, c);
 
-			GLTriangleMap(new Vector3d[] { center, center + radius * (QuaternionD.AngleAxis(rotation + 55, up) * north), center + radius * (QuaternionD.AngleAxis(rotation + 35, up) * north) }, c);
+			GLTriangleMap(new Vector3d[3] { center, center + radius * (QuaternionD.AngleAxis(rotation + 55, up) * north), center + radius * (QuaternionD.AngleAxis(rotation + 35, up) * north) }, c);
 
-			GLTriangleMap(new Vector3d[] { center, center + radius * (QuaternionD.AngleAxis(rotation - 145, up) * north), center + radius * (QuaternionD.AngleAxis(rotation - 125, up) * north) }, c);
+			GLTriangleMap(new Vector3d[3] { center, center + radius * (QuaternionD.AngleAxis(rotation - 145, up) * north), center + radius * (QuaternionD.AngleAxis(rotation - 125, up) * north) }, c);
 
-			GLTriangleMap(new Vector3d[] { center, center + radius * (QuaternionD.AngleAxis(rotation + 145, up) * north), center + radius * (QuaternionD.AngleAxis(rotation + 125, up) * north) }, c);
+			GLTriangleMap(new Vector3d[3] { center, center + radius * (QuaternionD.AngleAxis(rotation + 145, up) * north), center + radius * (QuaternionD.AngleAxis(rotation + 125, up) * north) }, c);
 		}
 
 		internal static void drawGroundTrackTris(CelestialBody body, Vessel v, double width, Color c)
@@ -1495,7 +1554,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			Vector3d left = srfCenter + width * vesselPerp;
 			Vector3d right = srfCenter - width * vesselPerp;
 
-			GLTriangleMap(new Vector3d[] { center, left , right }, c);
+			GLTriangleMap(new Vector3d[3] { center, left , right }, c);
 		}
 
 		private static bool occluded(Vector3d pos, CelestialBody body)
@@ -1503,7 +1562,9 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			if (Vector3d.Distance(pos, body.position) < body.Radius - 100)
 				return true;
 
-			if (!body.scaledBody.renderer.isVisible)
+			Renderer scaledR = body.scaledBody.GetComponent<Renderer>();
+
+			if (!scaledR.isVisible)
 				return true;
 
 			Vector3d camPos = ScaledSpace.ScaledToLocalSpace(PlanetariumCamera.Camera.transform.position);
@@ -1537,8 +1598,8 @@ namespace SCANsat.SCAN_UI.UI_Framework
 
 		private static void GLVertexMap(Vector3d pos)
 		{
-			Vector3 screenPoint = PlanetariumCamera.Camera.WorldToScreenPoint(ScaledSpace.LocalToScaledSpace(pos));
-			GL.Vertex3(screenPoint.x / Camera.main.pixelWidth, screenPoint.y / Camera.main.pixelHeight, 0);
+			Vector3 screenPoint = PlanetariumCamera.Camera.WorldToViewportPoint(ScaledSpace.LocalToScaledSpace(pos));
+			GL.Vertex3(screenPoint.x, screenPoint.y, 0);
 		}
 
 		#endregion
@@ -1672,7 +1733,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			return map;
 		}
 
-		internal static Texture2D drawBiomeMap(ref Texture2D map, ref Color[] pix, SCANdata data, float transparency, int height = 256, bool useStock = false, bool whiteBorder = false)
+		internal static Texture2D drawBiomeMap(ref Texture2D map, ref Color32[] pix, SCANdata data, float transparency, int height = 256, bool useStock = false, bool whiteBorder = false)
 		{
 			if (!useStock && !whiteBorder)
 				return drawBiomeMap(ref map, ref pix, data, height);
@@ -1684,7 +1745,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			if (map == null || pix == null || map.height != height)
 			{
 				map = new Texture2D(width, height, TextureFormat.ARGB32, true);
-				pix = new Color[width * height];
+				pix = new Color32[width * height];
 			}
 
 			for (int j = 0; j < height; j++)
@@ -1717,13 +1778,13 @@ namespace SCANsat.SCAN_UI.UI_Framework
 				}
 			}
 
-			map.SetPixels(pix);
+			map.SetPixels32(pix);
 			map.Apply();
 
 			return map;
 		}
 
-		private static Texture2D drawBiomeMap(ref Texture2D m, ref Color[] p, SCANdata d, int h)
+		private static Texture2D drawBiomeMap(ref Texture2D m, ref Color32[] p, SCANdata d, int h)
 		{
 			if (d.Body.BiomeMap == null)
 				return null;
@@ -1735,7 +1796,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 
 			if (p == null || p.Length != h * 2)
 			{
-				p = new Color[m.width];
+				p = new Color32[m.width];
 			}
 
 			float scale = m.width / 360f;
@@ -1748,12 +1809,12 @@ namespace SCANsat.SCAN_UI.UI_Framework
 					double lon = fixLon(i / scale);
 
 					if (SCANUtil.isCovered(lon, lat, d, SCANtype.Biome))
-						p[i] = SCANUtil.getBiome(d.Body, lon, lat).mapColor;
+						p[i] = (Color32)SCANUtil.getBiome(d.Body, lon, lat).mapColor;
 					else
-						p[i] = palette.clear;
+						p[i] = palette.Clear;
 				}
 
-				m.SetPixels(0, j, m.width, 1, p);
+				m.SetPixels32(0, j, m.width, 1, p);
 			}
 
 			m.Apply();

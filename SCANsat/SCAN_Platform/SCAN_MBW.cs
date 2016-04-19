@@ -122,7 +122,7 @@ namespace SCANsat.SCAN_Platform
 			}
 		}
 		#endregion
-
+		
 		internal Int32 WindowID { get; private set; }
 		internal TimeSpan DrawWindowInternalDuration { get; private set; }
 		private bool _Visible;
@@ -231,16 +231,19 @@ namespace SCANsat.SCAN_Platform
 				{
 					if (value)
 					{
-						Log.Debug("Adding Window to PostDrawQueue-{0}", WindowID); RenderingManager.AddToPostDrawQueue(5, this.DrawGUI);
+						Log.Debug("Adding Window to PostDrawQueue-{0}", WindowID);
+						SCANcontroller.controller.addToDrawQueue(WindowID, this.DrawGUI);
 					}
 					else
 					{
-						Log.Debug("Removing Window from PostDrawQueue", WindowID); RenderingManager.RemoveFromPostDrawQueue(5, this.DrawGUI);
+						Log.Debug("Removing Window from PostDrawQueue", WindowID);
+						SCANcontroller.controller.removeFromDrawQueue(WindowID);
 					}
 				}
 				_Visible = value;
 			}
 		}
+
 		protected void DrawGUI()
 		{
 			string cc = "";
