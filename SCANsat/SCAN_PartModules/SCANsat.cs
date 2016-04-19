@@ -147,7 +147,6 @@ namespace SCANsat.SCAN_PartModules
 				if (powerTimer < 30)
 				{
 					powerTimer++;
-					SCANUtil.SCANlog("Power Timer [{0}] For Sensor [{1}]", powerTimer, (SCANtype)sensorType);
 					Events["startScan"].active = false;
 					Events["stopScan"].active = true;
 					return;
