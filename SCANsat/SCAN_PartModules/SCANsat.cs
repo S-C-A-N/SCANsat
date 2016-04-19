@@ -26,6 +26,7 @@ namespace SCANsat.SCAN_PartModules
 	public class SCANsat : PartModule, IScienceDataContainer
 	{
 		private bool powerIsProblem;
+		private int powerTimer;
 		private Animation anim = null;
 		private List<ScienceData> storedData = new List<ScienceData>();
 		private ExperimentsResultDialog expDialog = null;
@@ -118,8 +119,11 @@ namespace SCANsat.SCAN_PartModules
 
 			Events["reviewEvent"].active = storedData.Count > 0;
 			Events["EVACollect"].active = storedData.Count > 0;
-			Events["startScan"].active = !scanning;
-			Events["stopScan"].active = scanning;
+			if (!powerIsProblem)
+			{
+				Events["startScan"].active = !scanning;
+				Events["stopScan"].active = scanning;
+			}
 			if (sensorType != 32)
 				Fields["alt_indicator"].guiActive = scanning;
 
@@ -140,6 +144,15 @@ namespace SCANsat.SCAN_PartModules
 
 			if (powerIsProblem)
 			{
+				if (powerTimer < 30)
+				{
+					powerTimer++;
+					SCANUtil.SCANlog("Power Timer [{0}] For Sensor [{1}]", powerTimer, (SCANtype)sensorType);
+					Events["startScan"].active = false;
+					Events["stopScan"].active = true;
+					return;
+				}
+
 				addStatic();
 				registerScanner();
 			}
@@ -156,6 +169,7 @@ namespace SCANsat.SCAN_PartModules
 						{
 							unregisterScanner();
 							powerIsProblem = true;
+							powerTimer = 0;
 						}
 						else
 						{
@@ -377,6 +391,7 @@ namespace SCANsat.SCAN_PartModules
 		private void registerScanner()
 		{
 			scanning = true;
+			powerTimer = 0;
 			if (sensorType > 0 && SCANcontroller.controller != null)
 				SCANcontroller.controller.registerSensor(vessel, (SCANtype)sensorType, fov, min_alt, max_alt, best_alt);
 		}
