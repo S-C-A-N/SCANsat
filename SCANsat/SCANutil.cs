@@ -200,10 +200,10 @@ namespace SCANsat
 			if (prefab == null)
 				return false;
 
-			if (!prefab.Modules.Contains<SCANsat.SCAN_PartModules.SCANsat>() || !prefab.Modules.Contains<ModuleSCANresourceScanner>())
+			if (!(prefab.Modules.Contains<SCANsat.SCAN_PartModules.SCANsat>() || prefab.Modules.Contains<ModuleSCANresourceScanner>()))
 				return false;
 
-			if (m.moduleName != "SCANsat" || m.moduleName != "ModuleSCANresourceScanner")
+			if (!(m.moduleName == "SCANsat" || m.moduleName == "ModuleSCANresourceScanner"))
 				return false;
 
 			if (SCANcontroller.controller == null)
@@ -240,10 +240,10 @@ namespace SCANsat
 			if (prefab == null)
 				return false;
 
-			if (!prefab.Modules.Contains<SCANsat.SCAN_PartModules.SCANsat>() || !prefab.Modules.Contains<ModuleSCANresourceScanner>())
+			if (!(prefab.Modules.Contains<SCANsat.SCAN_PartModules.SCANsat>() || prefab.Modules.Contains<ModuleSCANresourceScanner>()))
 				return false;
 
-			if (m.moduleName != "SCANsat" || m.moduleName != "ModuleSCANresourceScanner")
+			if (!(m.moduleName == "SCANsat" || m.moduleName == "ModuleSCANresourceScanner"))
 				return false;
 
 			if (SCANcontroller.controller == null)
