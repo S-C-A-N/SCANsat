@@ -903,7 +903,7 @@ namespace SCANsat
 			GameEvents.onShowUI.Add(UIOn);
 			GameEvents.onHideUI.Add(UIOff);
 			GameEvents.onGUIMissionControlSpawn.Add(UIOff);
-			GameEvents.onGUIMissionControlDespawn.Add(UIOff);
+			GameEvents.onGUIMissionControlDespawn.Add(UIOn);
 			GameEvents.onGUIRnDComplexSpawn.Add(UIOff);
 			GameEvents.onGUIRnDComplexDespawn.Add(UIOn);
 			GameEvents.onGUIAdministrationFacilitySpawn.Add(UIOff);
@@ -1117,7 +1117,7 @@ namespace SCANsat
 			GameEvents.onShowUI.Remove(UIOn);
 			GameEvents.onHideUI.Remove(UIOff);
 			GameEvents.onGUIMissionControlSpawn.Remove(UIOff);
-			GameEvents.onGUIMissionControlDespawn.Remove(UIOff);
+			GameEvents.onGUIMissionControlDespawn.Remove(UIOn);
 			GameEvents.onGUIRnDComplexSpawn.Remove(UIOff);
 			GameEvents.onGUIRnDComplexDespawn.Remove(UIOn);
 			GameEvents.onGUIAdministrationFacilitySpawn.Remove(UIOff);
