@@ -1,11 +1,19 @@
-Versoin 16.0 - 2016-4-29
+Version 16.1 - 2016-5-2
+------------------------
+
+- Update for KSP 1.1.2
+
+- Update API for Kerbalism support
+- Fixed an error that prevented the UI from opening after exiting the Mission Control building
+
+Version 16.0 - 2016-4-19
 ------------------------
 
 - Update for KSP 1.1 final release
 - Update for MechJeb 2.5.7
 
 - KSPedia Entry
-	- 17 New KSPedia pages covering SCANsat basics and features
+    - 17 New KSPedia pages covering SCANsat basics and features
 	
 - Add science experiment for low resolution resource scan (M700 scanner)
     - Adjust other science reward amounts
