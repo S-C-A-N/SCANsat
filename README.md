@@ -863,7 +863,7 @@ sneaky then they can of course be sneaky.
  
 [shield:jenkins-dev]: http://img.shields.io/jenkins/s/https/ksp.sarbian.com/jenkins/SCANsat-dev.svg
 [shield:jenkins-rel]: http://img.shields.io/jenkins/s/https/ksp.sarbian.com/jenkins/SCANsat-release.svg
-[shield:support-ksp]: http://img.shields.io/badge/for%20KSP-v1.1-bad455.svg
+[shield:support-ksp]: http://img.shields.io/badge/for%20KSP-v1.1.2-bad455.svg
 [shield:support-rpm]: http://img.shields.io/badge/works%20with%20RPM-v0.25.x-a31f34.svg
 [shield:support-mm]: http://img.shields.io/badge/works%20with%20MM-v2.6.x-40b7c0.svg
 [shield:support-toolbar]: http://img.shields.io/badge/works%20with%20Blizzy's%20Toolbar-1.7.x-7c69c0.svg
@@ -875,7 +875,7 @@ sneaky then they can of course be sneaky.
 [shield:support-ccfg]: https://img.shields.io/badge/works%20with%20Contract%20Configurator-1.9.x-yellowgreen.svg
 [shield:ckan]: https://img.shields.io/badge/CKAN-Indexed-brightgreen.svg
 [shield:support-mechjeb]: http://img.shields.io/badge/works%20with%20MechJeb-2.5.7-lightgrey.svg
-[shield:support-kopernicus]: http://img.shields.io/badge/works%20with%20Kopernicus-0.6.x-ff8c00.svg
+[shield:support-kopernicus]: http://img.shields.io/badge/works%20with%20Kopernicus-1.x-ff8c00.svg
 
 [shield:gittip-tg-img]: http://img.shields.io/gittip/technogeeky.png
 [shield:gittip-tg]: https://www.gittip.com/technogeeky/
