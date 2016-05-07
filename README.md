@@ -177,7 +177,7 @@ S.C.A.N. is proud to collaborate with other KSP mods and modding teams. Followin
 [**RasterPropMonitor**][rpm:release]  | 
 
 * **SCANsat**
-  * [x] [**v14.0**][SCANsat:rel-thread] SCANsat Release **version: v14.0**
+  * [x] [**v16.0**][SCANsat:rel-thread] SCANsat Release **version: v16.0**
   * [x] [**v15.0**][SCANsat:dev-thread] SCANsat Dev **version: v15.0**
 
  **MM**, **RPM**, **MechJeb**, and **Toolbar** are all **soft** dependencies. This means your experience with SCANsat will be enhanced if you are using these mods, but they are not necessary.
@@ -863,19 +863,19 @@ sneaky then they can of course be sneaky.
  
 [shield:jenkins-dev]: http://img.shields.io/jenkins/s/https/ksp.sarbian.com/jenkins/SCANsat-dev.svg
 [shield:jenkins-rel]: http://img.shields.io/jenkins/s/https/ksp.sarbian.com/jenkins/SCANsat-release.svg
-[shield:support-ksp]: http://img.shields.io/badge/for%20KSP-v1.0.5-bad455.svg
-[shield:support-rpm]: http://img.shields.io/badge/works%20with%20RPM-v0.24.x-a31f34.svg
+[shield:support-ksp]: http://img.shields.io/badge/for%20KSP-v1.1.2-bad455.svg
+[shield:support-rpm]: http://img.shields.io/badge/works%20with%20RPM-v0.25.x-a31f34.svg
 [shield:support-mm]: http://img.shields.io/badge/works%20with%20MM-v2.6.x-40b7c0.svg
 [shield:support-toolbar]: http://img.shields.io/badge/works%20with%20Blizzy's%20Toolbar-1.7.x-7c69c0.svg
 [shield:support-alcor]: http://img.shields.io/badge/works%20with%20ALCOR-0.9-299bc7.svg
 [shield:support-kspi]: http://img.shields.io/badge/works%20with%20Interstellar-0.13-a62374.svg
-[shield:support-usi]:http://img.shields.io/badge/works%20with%20USI-0.33.x-34c566.svg
-[shield:support-karbonite]: http://img.shields.io/badge/works%20with%20Karbonite-0.6.x-ff8c00.svg
+[shield:support-usi]:http://img.shields.io/badge/works%20with%20USI-0.40.x-34c566.svg
+[shield:support-karbonite]: http://img.shields.io/badge/works%20with%20Karbonite-0.7.x-ff8c00.svg
 [shield:support-epl]: http://img.shields.io/badge/works%20with%20EPL-4.2.3-ff8c00.svg
 [shield:support-ccfg]: https://img.shields.io/badge/works%20with%20Contract%20Configurator-1.9.x-yellowgreen.svg
 [shield:ckan]: https://img.shields.io/badge/CKAN-Indexed-brightgreen.svg
-[shield:support-mechjeb]: http://img.shields.io/badge/works%20with%20MechJeb-2.5.2-lightgrey.svg
-[shield:support-kopernicus]: http://img.shields.io/badge/works%20with%20Kopernicus-0.6.x-ff8c00.svg
+[shield:support-mechjeb]: http://img.shields.io/badge/works%20with%20MechJeb-2.5.7-lightgrey.svg
+[shield:support-kopernicus]: http://img.shields.io/badge/works%20with%20Kopernicus-1.x-ff8c00.svg
 
 [shield:gittip-tg-img]: http://img.shields.io/gittip/technogeeky.png
 [shield:gittip-tg]: https://www.gittip.com/technogeeky/

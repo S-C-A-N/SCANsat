@@ -15,6 +15,7 @@ using System.Collections;
 using SCANsat.SCAN_Platform;
 using SCANsat.SCAN_UI;
 using SCANsat.SCAN_UI.UI_Framework;
+using KSP.UI.Screens;
 
 namespace SCANsat.SCAN_Toolbar
 {

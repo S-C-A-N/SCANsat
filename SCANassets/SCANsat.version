@@ -10,22 +10,22 @@
      "VERSION":{
          "MAJOR":1,
          "MINOR":1,
-         "PATCH":4,
-         "BUILD":9
+         "PATCH":6,
+         "BUILD":1
      },
      "KSP_VERSION":{
          "MAJOR":1,
-         "MINOR":0,
-         "PATCH":5
+         "MINOR":1,
+         "PATCH":2
      },
      "KSP_VERSION_MIN":{
          "MAJOR":1,
-         "MINOR":0,
-         "PATCH":5
+         "MINOR":1,
+         "PATCH":2
      },
      "KSP_VERSION_MAX":{
          "MAJOR":1,
-         "MINOR":0,
-         "PATCH":5
+         "MINOR":1,
+         "PATCH":2
      }
 }

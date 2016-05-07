@@ -56,6 +56,8 @@ namespace SCANsat
 		[Persistent]
 		private Color topHighSlopeColor = palette.xkcd_OrangeRed;
 		[Persistent]
+		private float windowScale = 1f;
+		[Persistent]
 		private List<SCANterrainConfig> SCANsat_Altimetry = new List<SCANterrainConfig>();
 		[Persistent]
 		private List<SCANresourceGlobal> SCANsat_Resources = new List<SCANresourceGlobal>();
@@ -94,6 +96,7 @@ namespace SCANsat
 				bottemHighSlopeColor = SCANcontroller.controller.highSlopeColorOne;
 				topLowSlopeColor = SCANcontroller.controller.lowSlopeColorTwo;
 				topHighSlopeColor = SCANcontroller.controller.highSlopeColorTwo;
+				windowScale = SCANcontroller.controller.windowScale;
 			}
 		}
 
@@ -170,6 +173,11 @@ namespace SCANsat
 		public Color TopHighSlopeColor
 		{
 			get { return topHighSlopeColor; }
+		}
+
+		public float WindowScale
+		{
+			get { return windowScale; }
 		}
 	}
 }

@@ -34,7 +34,7 @@ namespace SCANsat.SCAN_UI
 		private static Rect sessionRect = defaultRect;
 		private bool flash;
 		private Texture2D map_small = new Texture2D(360, 180, TextureFormat.ARGB32, false);
-		private Color[] cols_height_map_small = new Color[360];
+		private Color32[] cols_height_map_small = new Color32[360];
 		private Color32[] biomeCache = new Color32[360 * 180];
 		private bool biomeBuilding;
 		private bool drawBiome;
@@ -59,6 +59,8 @@ namespace SCANsat.SCAN_UI
 
 		protected override void Start()
 		{
+			base.Start();
+
 			Visible = SCANcontroller.controller.mainMapVisible;
 			v = FlightGlobals.ActiveVessel;
 			data = SCANUtil.getData(v.mainBody);
@@ -71,9 +73,9 @@ namespace SCANsat.SCAN_UI
 
 			if (palette.small_redline == null)
 			{
-				palette.small_redline = new Color[360];
+				palette.small_redline = new Color32[360];
 				for (int i = 0; i < 360; i++)
-					palette.small_redline[i] = palette.red;
+					palette.small_redline[i] = palette.Red;
 			}
 
 			resetImages();
@@ -307,7 +309,7 @@ namespace SCANsat.SCAN_UI
 					continue;
 				}
 
-				Color c = palette.grey;
+				Color32 c = palette.Grey;
 				float val = data.HeightMapValue(data.Body.flightGlobalsIndex, ilon, scanline);
 				if (SCANUtil.isCovered(ilon, scanline, data, SCANtype.Altimetry))
 				{
@@ -320,11 +322,11 @@ namespace SCANsat.SCAN_UI
 				{
 					if (scanline % 30 == 0 && ilon % 3 == 0)
 					{
-						c = palette.white;
+						c = palette.White;
 					}
 					else if (ilon % 30 == 0 && scanline % 3 == 0)
 					{
-						c = palette.white;
+						c = palette.White;
 					}
 				}
 
@@ -332,17 +334,17 @@ namespace SCANsat.SCAN_UI
 				{
 					if (!SCANUtil.isCoveredByAll(ilon, scanline, data, type))
 					{
-						c = palette.lerp(c, palette.black, 0.5f);
+						c = palette.lerp(c, palette.Black, 0.5f);
 					}
 				}
 
 				cols_height_map_small[ilon] = c;
 			}
 
-			map_small.SetPixels(0, scanline, 360, 1, cols_height_map_small);
+			map_small.SetPixels32(0, scanline, 360, 1, cols_height_map_small);
 
 			if (scanline < 179)
-				map_small.SetPixels(0, scanline + 1, 360, 1, palette.small_redline);
+				map_small.SetPixels32(0, scanline + 1, 360, 1, palette.small_redline);
 
 			scanline++;
 
@@ -371,27 +373,27 @@ namespace SCANsat.SCAN_UI
 					continue;
 				}
 
-				Color c = biomeCache[scanline * 360 + ilon];
+				Color32 c = biomeCache[scanline * 360 + ilon];
 				if (!SCANUtil.isCovered(ilon, scanline, data, SCANtype.Biome))
 				{
-					c = palette.grey;
+					c = palette.Grey;
 				}
 
 				if (type != SCANtype.Nothing)
 				{
 					if (!SCANUtil.isCoveredByAll(ilon, scanline, data, type))
 					{
-						c = palette.lerp(c, palette.black, 0.5f);
+						c = palette.lerp(c, palette.Black, 0.5f);
 					}
 				}
 
 				cols_height_map_small[ilon] = c;
 			}
 
-			map_small.SetPixels(0, scanline, 360, 1, cols_height_map_small);
+			map_small.SetPixels32(0, scanline, 360, 1, cols_height_map_small);
 
 			if (scanline < 179)
-				map_small.SetPixels(0, scanline + 1, 360, 1, palette.small_redline);
+				map_small.SetPixels32(0, scanline + 1, 360, 1, palette.small_redline);
 
 			scanline++;
 
@@ -408,11 +410,11 @@ namespace SCANsat.SCAN_UI
 			for (int i = 0; i < 360; i++)
 			{
 				double index = SCANUtil.getBiomeIndexFraction(data.Body, i - 180, scanline - 90);
-				Color c = palette.grey;
+				Color32 c = palette.Grey;
 
 				if (SCANcontroller.controller.biomeBorder && ((i > 0 && biomeIndex[i - 1] != index) || (scanline > 0 && biomeIndex[i] != index)))
 				{
-					c = palette.white;
+					c = palette.White;
 				}
 				else if (SCANcontroller.controller.useStockBiomes)
 				{
@@ -420,7 +422,7 @@ namespace SCANsat.SCAN_UI
 				}
 				else
 				{
-					c = palette.lerp(SCANcontroller.controller.lowBiomeColor, SCANcontroller.controller.highBiomeColor, (float)index);
+					c = palette.lerp(SCANcontroller.controller.lowBiomeColor32, SCANcontroller.controller.highBiomeColor32, (float)index);
 				}
 
 				biomeCache[scanline * 360 + i] = c;

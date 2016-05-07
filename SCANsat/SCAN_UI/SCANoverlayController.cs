@@ -26,7 +26,7 @@ namespace SCANsat.SCAN_UI
 {
 	class SCANoverlayController : SCAN_MBW
 	{
-		internal readonly static Rect defaultRect = new Rect(Screen.width - 280, 200, 175, 100);
+		internal static Rect defaultRect = new Rect(Screen.width - 320, 200, 175, 100);
 		private static Rect sessionRect = defaultRect;
 		private CelestialBody body;
 		private SCANdata data;
@@ -52,7 +52,7 @@ namespace SCANsat.SCAN_UI
 
 		private Texture2D mapOverlay;
 		private Color32[] resourcePixels;
-		private Color[] biomePixels;
+		private Color32[] biomePixels;
 		private Color32[] terrainPixels;
 		private float[,] abundanceValues;
 		private float[,] terrainValues;
@@ -61,6 +61,8 @@ namespace SCANsat.SCAN_UI
 		{
 			WindowCaption = "  S.C.A.N. Overlay";
 			WindowRect = sessionRect;
+			if ((WindowRect.x * SCANcontroller.controller.windowScale) > (Screen.width - 100))
+				WindowRect.x /= SCANcontroller.controller.windowScale;
 			WindowStyle = SCANskins.SCAN_window;
 			WindowOptions = new GUILayoutOption[2] { GUILayout.Width(175), GUILayout.Height(100) };
 			Visible = false;

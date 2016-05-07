@@ -64,6 +64,7 @@
     <Compile Include="SCAN_PartModules\SCANhiDefCamera.cs" />
     <Compile Include="SCAN_PartModules\SCANresourceDisplay.cs" />
     <Compile Include="SCAN_PartModules\SCANresourceScanner.cs" />
+    <Compile Include="SCAN_PartModules\SCANRPMStorage.cs" />
     <Compile Include="SCAN_PartModules\SCANsat.cs" />
     <Compile Include="SCAN_Platform\Attributes\Bounds.cs" />
     <Compile Include="SCAN_Platform\Extensions\Colors\UnityEngine.Color_.cs">
@@ -96,7 +97,7 @@
     <Compile Include="SCAN_Toolbar\SCANtoolbar.cs" />
     <Compile Include="SCAN_Toolbar\SCANtoolbarwrapper.cs" />
     <Compile Include="SCAN_UI\SCANcolorSelection.cs" />
-    <Compile Include="SCAN_UI\SCANBigMap.cs" />
+    <Compile Include="SCAN_UI\SCANbigMap.cs" />
     <Compile Include="SCAN_UI\SCANoverlayController.cs" />
     <Compile Include="SCAN_UI\SCANresourceSettings.cs" />
     <Compile Include="SCAN_UI\SCANzoomHiDef.cs" />
@@ -133,7 +134,16 @@
   </ProjectExtensions>
   <ItemGroup>
     <Reference Include="Assembly-CSharp">
-      <HintPath>..\..\KSP Dev\Kerbal Space Program\KSP_Data\Managed\Assembly-CSharp.dll</HintPath>
+      <HintPath>..\..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Kerbal Space Program\KSP_x64_Data\Managed\Assembly-CSharp.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Assembly-CSharp-firstpass, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Kerbal Space Program\KSP_x64_Data\Managed\Assembly-CSharp-firstpass.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="KSPUtil">
+      <HintPath>..\..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Kerbal Space Program\KSP_x64_Data\Managed\KSPUtil.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="System">
@@ -143,7 +153,11 @@
       <HintPath>..\..\..\KSP_Data\Managed\mscorlib.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine">
-      <HintPath>..\..\KSP Dev\Kerbal Space Program\KSP_Data\Managed\UnityEngine.dll</HintPath>
+      <HintPath>..\..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Kerbal Space Program\KSP_x64_Data\Managed\UnityEngine.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.UI">
+      <HintPath>..\..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Kerbal Space Program\KSP_x64_Data\Managed\UnityEngine.UI.dll</HintPath>
       <Private>False</Private>
     </Reference>
   </ItemGroup>

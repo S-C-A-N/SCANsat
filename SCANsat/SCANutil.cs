@@ -18,6 +18,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
+using SCANsat.SCAN_PartModules;
 using SCANsat.SCAN_Platform;
 using SCANsat.SCAN_Platform.Palettes;
 using SCANsat.SCAN_Platform.Palettes.ColorBrewer;
@@ -179,6 +180,82 @@ namespace SCANsat
 				return true;
 
 			return SCANcontroller.controller.needsNarrowBand;
+		}
+
+		/// <summary>
+		/// Registers a SCANsat sensor externally
+		/// </summary>
+		/// <param name="v">Scanning vessel</param>
+		/// <param name="m">ProtoPartModuleSnapshot, should be of type SCANsat or ModuleSCANresourceScanner</param>
+		/// <param name="prefab">Part Prefab, must contain either a SCANsat module or a ModuleSCANresourceScanner</param>
+		/// <returns>Returns true if the sensor is successfully registered</returns>
+		public static bool registerSensorExternal(Vessel v, ProtoPartModuleSnapshot m, Part prefab)
+		{
+			if (v == null)
+				return false;
+
+			if (m == null)
+				return false;
+
+			if (prefab == null)
+				return false;
+
+			if (!(prefab.Modules.Contains<SCANsat.SCAN_PartModules.SCANsat>() || prefab.Modules.Contains<ModuleSCANresourceScanner>()))
+				return false;
+
+			if (!(m.moduleName == "SCANsat" || m.moduleName == "ModuleSCANresourceScanner"))
+				return false;
+
+			if (SCANcontroller.controller == null)
+				return false;
+
+			int sensor = prefab.Fields.GetValue<int>("sensorType");
+			double fov = prefab.Fields.GetValue<double>("fov");
+			double min = prefab.Fields.GetValue<double>("min_alt");
+			double max = prefab.Fields.GetValue<double>("max_alt");
+			double best = prefab.Fields.GetValue<double>("best_alt");
+
+			SCANcontroller.controller.registerSensor(v, (SCANtype)sensor, fov, min, max, best);
+
+			m.moduleValues.SetValue("scanning", true.ToString());
+
+			return true;
+		}
+
+		/// <summary>
+		/// Unregisters a SCANsat sensor externally
+		/// </summary>
+		/// <param name="v">Scanning vessel</param>
+		/// <param name="m">ProtoPartModuleSnapshot, should be of type SCANsat or ModuleSCANresourceScanner<</param>
+		/// <param name="prefab">Part Prefab, must contain either a SCANsat module or a ModuleSCANresourceScanner</param>
+		/// <returns>Returns true if the sensor is successfully registered</returns>
+		public static bool unregisterSensorExternal(Vessel v, ProtoPartModuleSnapshot m, Part prefab)
+		{
+			if (v == null)
+				return false;
+
+			if (m == null)
+				return false;
+
+			if (prefab == null)
+				return false;
+
+			if (!(prefab.Modules.Contains<SCANsat.SCAN_PartModules.SCANsat>() || prefab.Modules.Contains<ModuleSCANresourceScanner>()))
+				return false;
+
+			if (!(m.moduleName == "SCANsat" || m.moduleName == "ModuleSCANresourceScanner"))
+				return false;
+
+			if (SCANcontroller.controller == null)
+				return false;
+
+			int sensor = prefab.Fields.GetValue<int>("sensorType");
+
+			SCANcontroller.controller.unregisterSensor(v, (SCANtype)sensor);
+
+			m.moduleValues.SetValue("scanning", false.ToString());
+
+			return true;
 		}
 
 		#endregion
@@ -413,11 +490,11 @@ namespace SCANsat
 		{
 			switch (target.type)
 			{
-				case MapObject.MapObjectType.CELESTIALBODY:
+				case MapObject.ObjectType.CelestialBody:
 					return target.celestialBody;
-				case MapObject.MapObjectType.MANEUVERNODE:
+				case MapObject.ObjectType.ManeuverNode:
 					return target.maneuverNode.patch.referenceBody;
-				case MapObject.MapObjectType.VESSEL:
+				case MapObject.ObjectType.Vessel:
 					return target.vessel.mainBody;
 				default:
 					return null;
@@ -803,17 +880,27 @@ namespace SCANsat
 						return angle;
 				}
 
+				public static Material LineMat;
+
 				public static Material DrawLineMaterial()
 				{
-						var lineMaterial = new Material("Shader \"Lines/Colored Blended\" {" +
-								"SubShader { Pass {" +
-								"   BindChannels { Bind \"Color\",color }" +
-								"   Blend SrcAlpha OneMinusSrcAlpha" +
-								"   ZWrite Off Cull Off Fog { Mode Off }" +
-								"} } }");
+					if (LineMat == null)
+					{
+						//var lineMaterial = new Material("Shader \"Lines/Colored Blended\" {" +
+						//		"SubShader { Pass {" +
+						//		"   BindChannels {" + 
+						//		"     Bind \"color\", color }" +
+						//		"   Blend SrcAlpha OneMinusSrcAlpha" +
+						//		"   ZWrite Off Cull Off Fog { Mode Off }" +
+						//		"} } }");
+						var lineMaterial = new Material(Shader.Find("Particles/Alpha Blended"));
 						lineMaterial.hideFlags = HideFlags.HideAndDontSave;
 						lineMaterial.shader.hideFlags = HideFlags.HideAndDontSave;
-						return lineMaterial;
+
+						LineMat = lineMaterial;
+					}
+
+					return LineMat;
 				}
 
 				public static bool IsActiveVessel(Vessel thatVessel)

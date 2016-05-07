@@ -16,6 +16,7 @@ using System.Linq;
 using SCANsat.SCAN_Data;
 using SCANsat.SCAN_Toolbar;
 using SCANsat.SCAN_UI;
+using KSP.UI.Screens.Flight.Dialogs;
 
 using UnityEngine;
 using palette = SCANsat.SCAN_UI.UI_Framework.SCANpalette;
@@ -25,6 +26,7 @@ namespace SCANsat.SCAN_PartModules
 	public class SCANsat : PartModule, IScienceDataContainer
 	{
 		private bool powerIsProblem;
+		private int powerTimer;
 		private Animation anim = null;
 		private List<ScienceData> storedData = new List<ScienceData>();
 		private ExperimentsResultDialog expDialog = null;
@@ -60,20 +62,28 @@ namespace SCANsat.SCAN_PartModules
 				{
 					Events["startScan"].guiName = "Start " + scanName;
 					Events["stopScan"].guiName = "Stop " + scanName;
-					Events["analyze"].active = false;
 					Actions["startScanAction"].guiName = "Start " + scanName;
 					Actions["stopScanAction"].guiName = "Stop " + scanName;
 					Actions["toggleScanAction"].guiName = "Toggle " + scanName;
-					Actions["analyzeData"].active = false;
 				}
 				else
 				{
 					Events["startScan"].guiName = "Start " + scanName;
 					Events["stopScan"].guiName = "Stop " + scanName;
-					Events["analyze"].active = true;
 					Actions["startScanAction"].guiName = "Start " + scanName;
 					Actions["stopScanAction"].guiName = "Stop " + scanName;
 					Actions["toggleScanAction"].guiName = "Toggle " + scanName;
+				}
+
+				if ((sensorType & (int)SCANtype.Science) == 0)
+				{
+					Events["analyze"].active = false;
+					Actions["analyzeData"].active = false;
+				}
+				else
+				{
+					Events["analyze"].active = true;
+					Actions["analyzeData"].active = false;
 				}
 			}
 
@@ -90,12 +100,7 @@ namespace SCANsat.SCAN_PartModules
 				Actions["toggleScanAction"].active = false;
 				Actions["analyzeData"].active = false;
 			}
-			else if (sensorType == 32)
-			{
-				// here, we only disable analyze; BTDT has good labels
-				Events["analyze"].active = false;
-				Actions["analyzeData"].active = false;
-			}
+
 			if (scanning) animate(1, 1);
 			powerIsProblem = false;
 			print("[SCANsat] sensorType: " + sensorType.ToString() + " fov: " + fov.ToString() + " min_alt: " + min_alt.ToString() + " max_alt: " + max_alt.ToString() + " best_alt: " + best_alt.ToString() + " power: " + power.ToString());
@@ -114,8 +119,8 @@ namespace SCANsat.SCAN_PartModules
 
 			Events["reviewEvent"].active = storedData.Count > 0;
 			Events["EVACollect"].active = storedData.Count > 0;
-			Events["startScan"].active = !scanning;
-			Events["stopScan"].active = scanning;
+			Events["startScan"].active = !scanning && !powerIsProblem;
+			Events["stopScan"].active = scanning || powerIsProblem;
 			if (sensorType != 32)
 				Fields["alt_indicator"].guiActive = scanning;
 
@@ -136,6 +141,12 @@ namespace SCANsat.SCAN_PartModules
 
 			if (powerIsProblem)
 			{
+				if (powerTimer < 30)
+				{
+					powerTimer++;
+					return;
+				}
+
 				addStatic();
 				registerScanner();
 			}
@@ -152,6 +163,7 @@ namespace SCANsat.SCAN_PartModules
 						{
 							unregisterScanner();
 							powerIsProblem = true;
+							powerTimer = 0;
 						}
 						else
 						{
@@ -179,34 +191,6 @@ namespace SCANsat.SCAN_PartModules
 					storedData.Add(data);
 				}
 			}
-			if (node.HasNode("SCANsatRPM"))
-			{
-				ConfigNode RPMPersistence = node.GetNode("SCANsatRPM");
-				foreach (ConfigNode RPMNode in RPMPersistence.GetNodes("Prop"))
-				{
-					string id = RPMNode.GetValue("Prop ID");
-					int m = 0;
-					int c = 0;
-					int z = 0;
-					int r = 0;
-					bool lines = true;
-					bool anom = true;
-					bool resource = true;
-
-					int.TryParse(RPMNode.GetValue("Mode"), out m);
-					int.TryParse(RPMNode.GetValue("Color"), out c);
-					int.TryParse(RPMNode.GetValue("Zoom"), out z);
-					int.TryParse(RPMNode.GetValue("Resource"), out r);
-					if (!bool.TryParse(RPMNode.GetValue("Lines"), out lines))
-						lines = true;
-					if (!bool.TryParse(RPMNode.GetValue("Anomalies"), out anom))
-						anom = true;
-					if (!bool.TryParse(RPMNode.GetValue("DrawResource"), out resource))
-						resource = true;
-
-					RPMList.Add(new RPMPersistence(id, m, c, z, lines, anom, resource, r));
-				}
-			}
 		}
 
 		public override void OnSave(ConfigNode node)
@@ -216,24 +200,6 @@ namespace SCANsat.SCAN_PartModules
 			{
 				ConfigNode storedDataNode = node.AddNode("ScienceData");
 				SCANData.Save(storedDataNode);
-			}
-			if (RPMList.Count > 0)
-			{
-				ConfigNode RPMPersistence = new ConfigNode("SCANsatRPM");
-				foreach (RPMPersistence RPMMFD in RPMList)
-				{
-					ConfigNode RPMProp = new ConfigNode("Prop");
-					RPMProp.AddValue("Prop ID", RPMMFD.RPMID);
-					RPMProp.AddValue("Mode", RPMMFD.RPMMode);
-					RPMProp.AddValue("Color", RPMMFD.RPMColor);
-					RPMProp.AddValue("Zoom", RPMMFD.RPMZoom);
-					RPMProp.AddValue("Resource", RPMMFD.RPMResource);
-					RPMProp.AddValue("Lines", RPMMFD.RPMLines);
-					RPMProp.AddValue("Anomalies", RPMMFD.RPMAnomaly);
-					RPMProp.AddValue("DrawResource", RPMMFD.RPMDrawResource);
-					RPMPersistence.AddNode(RPMProp);
-				}
-				node.AddNode(RPMPersistence);
 			}
 		}
 
@@ -282,7 +248,6 @@ namespace SCANsat.SCAN_PartModules
 		public string animationName;
 		[KSPField(guiName = "SCANsat Altitude", guiActive = false)]
 		public string alt_indicator;
-		internal List<RPMPersistence> RPMList = new List<RPMPersistence>();
 
 		/* SCAN: all of these fields and only scanning is persistant */
 		[KSPField(isPersistant = true)]
@@ -420,6 +385,7 @@ namespace SCANsat.SCAN_PartModules
 		private void registerScanner()
 		{
 			scanning = true;
+			powerTimer = 0;
 			if (sensorType > 0 && SCANcontroller.controller != null)
 				SCANcontroller.controller.registerSensor(vessel, (SCANtype)sensorType, fov, min_alt, max_alt, best_alt);
 		}
@@ -494,6 +460,14 @@ namespace SCANsat.SCAN_PartModules
 					multiplier = 0.5f;
 				id = "SCANsatBiomeAnomaly";
 				coverage = SCANUtil.getCoveragePercentage(data, SCANtype.Biome);
+			}
+			else if (!found && (sensor & SCANtype.FuzzyResources) != SCANtype.Nothing)
+			{
+				found = true;
+				if (vessel.mainBody.pqsController == null)
+					multiplier = 0.5f;
+				id = "SCANsatResources";
+				coverage = SCANUtil.getCoveragePercentage(data, SCANtype.FuzzyResources);
 			}
 			if (!found) return null;
 			se = ResearchAndDevelopment.GetExperiment(id);
@@ -581,7 +555,7 @@ namespace SCANsat.SCAN_PartModules
 			if (expDialog != null)
 				DestroyImmediate(expDialog);
 			ScienceData sd = storedData[0];
-			expDialog = ExperimentsResultDialog.DisplayResult(new ExperimentResultDialogPage(part, sd, 1f, 0f, false, "", true, false, DumpData, KeepData, TransmitData, null));
+			expDialog = ExperimentsResultDialog.DisplayResult(new ExperimentResultDialogPage(part, sd, 1f, 0f, false, "", true, new ScienceLabSearch(vessel, sd), DumpData, KeepData, TransmitData, null));
 		}
 
 		public bool IsRerunnable()

@@ -39,6 +39,7 @@ namespace SCANsat.SCAN_UI
 		private Rect ddRect, zoomCloseRect;
 		private Rect rc = new Rect(0, 0, 20, 20);
 		private Vector2 scrollP, scrollR;
+		private Vector2d mjTarget = new Vector2d();
 		private Rect pos_spotmap = new Rect(10f, 10f, 10f, 10f);
 		private Rect pos_spotmap_x = new Rect(10f, 10f, 25f, 25f);
 		internal static Rect defaultRect = new Rect(250, 60, 780, 460);
@@ -46,9 +47,9 @@ namespace SCANsat.SCAN_UI
 		private List<SCANresourceGlobal> loadedResources = new List<SCANresourceGlobal>();
 
 		//Values used for the orbit overlay - Need to fix this
-		internal static int[] eq_an_map, eq_dn_map;
-		internal static Texture2D eq_map;
-		internal static int eq_frame;
+		//internal static int[] eq_an_map, eq_dn_map;
+		//internal static Texture2D eq_map;
+		//internal static int eq_frame;
 
 		protected override void Awake()
 		{
@@ -234,6 +235,13 @@ namespace SCANsat.SCAN_UI
 			if (drop_down_open && Event.current.type == EventType.mouseDown && !ddRect.Contains(Event.current.mousePosition))
 				drop_down_open = false;
 
+			if (SCANcontroller.controller.TargetSelecting && Event.current.type == EventType.mouseDown && !TextureRect.Contains(Event.current.mousePosition))
+			{
+				SCANcontroller.controller.TargetSelecting = false;
+				SCANcontroller.controller.TargetSelectingActive = false;
+				data.removeTargetWaypoint();
+			}
+
 			//Update black and white/color statuse
 			if (lastColor != currentColor)
 			{
@@ -289,18 +297,24 @@ namespace SCANsat.SCAN_UI
 				fillS(100);
 				if (GUILayout.Button("Projection", GUILayout.MaxWidth(100)))
 				{
+					SCANcontroller.controller.TargetSelecting = false;
+					SCANcontroller.controller.TargetSelectingActive = false;
 					projection_drop_down = !projection_drop_down;
 					drop_down_open = !drop_down_open;
 				}
 				fillS(40);
 				if (GUILayout.Button("Map Type", GUILayout.MaxWidth(90)))
 				{
+					SCANcontroller.controller.TargetSelecting = false;
+					SCANcontroller.controller.TargetSelectingActive = false;
 					mapType_drop_down = !mapType_drop_down;
 					drop_down_open = !drop_down_open;
 				}
 				fillS();
 				if (GUILayout.Button(iconWithTT(SCANskins.SCAN_RefreshIcon, "Refresh Map"), SCANskins.SCAN_buttonBorderless, GUILayout.MaxWidth(34), GUILayout.MaxHeight(28)))
 				{
+					SCANcontroller.controller.TargetSelecting = false;
+					SCANcontroller.controller.TargetSelectingActive = false;
 					bigmap.resetMap(SCANcontroller.controller.map_ResourceOverlay);
 				}
 				fillS();
@@ -308,6 +322,8 @@ namespace SCANsat.SCAN_UI
 				{
 					if (GUILayout.Button("Resources", GUILayout.MaxWidth(90)))
 					{
+						SCANcontroller.controller.TargetSelecting = false;
+						SCANcontroller.controller.TargetSelectingActive = false;
 						resources_drop_down = !resources_drop_down;
 						drop_down_open = !drop_down_open;
 					}
@@ -315,6 +331,8 @@ namespace SCANsat.SCAN_UI
 				}
 				if (GUILayout.Button("Celestial Body", GUILayout.MaxWidth(110)))
 				{
+					SCANcontroller.controller.TargetSelecting = false;
+					SCANcontroller.controller.TargetSelectingActive = false;
 					planetoid_drop_down = !planetoid_drop_down;
 					drop_down_open = !drop_down_open;
 				}
@@ -325,6 +343,44 @@ namespace SCANsat.SCAN_UI
 		//Draw the overlay options along the left side of the map texture
 		private void toggleBar(int id)
 		{
+			Rect r = new Rect(32, 24, 24, 24);
+
+			if (SCANcontroller.controller.mechJebTargetSelection)
+			{
+				if (SCANcontroller.controller.MechJebLoaded && SCANcontroller.controller.LandingTargetBody == b)
+				{
+					if (GUI.Button(r, textWithTT("", "Set MechJeb Target"), SCANskins.SCAN_buttonBorderless))
+					{
+						SCANcontroller.controller.TargetSelecting = !SCANcontroller.controller.TargetSelecting;
+					}
+
+					r.x += 1;
+					r.y += 1;
+					r.width = r.height = 22;
+
+					Color old = GUI.color;
+					GUI.color = palette.red;
+					GUI.DrawTexture(r, SCANskins.SCAN_MechJebIcon);
+					GUI.color = old;
+				}
+			}
+			else
+			{
+				if (GUI.Button(r, textWithTT("", "Set Landing Target"), SCANskins.SCAN_buttonBorderless))
+				{
+					SCANcontroller.controller.TargetSelecting = !SCANcontroller.controller.TargetSelecting;
+				}
+
+				r.x += 1;
+				r.y += 1;
+				r.width = r.height = 22;
+
+				Color old = GUI.color;
+				GUI.color = palette.xkcd_PukeGreen;
+				GUI.DrawTexture(r, SCANskins.SCAN_TargetIcon);
+				GUI.color = old;
+			}
+
 			growS();
 
 				currentColor = GUILayout.Toggle(currentColor, textWithTT("", "Toggle Color"));
@@ -469,6 +525,8 @@ namespace SCANsat.SCAN_UI
 
 			if (GUI.Button(s, iconWithTT(SCANskins.SCAN_SmallMapIcon, "Small Map"), SCANskins.SCAN_windowButton))
 			{
+				SCANcontroller.controller.TargetSelecting = false;
+				SCANcontroller.controller.TargetSelectingActive = false;
 				SCANcontroller.controller.mainMap.Visible = !SCANcontroller.controller.mainMap.Visible;
 			}
 
@@ -476,6 +534,8 @@ namespace SCANsat.SCAN_UI
 
 			if (GUI.Button(s, iconWithTT(SCANskins.SCAN_InstrumentIcon, "Instrument Window"), SCANskins.SCAN_windowButton))
 			{
+				SCANcontroller.controller.TargetSelecting = false;
+				SCANcontroller.controller.TargetSelectingActive = false;
 				SCANcontroller.controller.instrumentsWindow.Visible = !SCANcontroller.controller.instrumentsWindow.Visible;
 			}
 
@@ -483,6 +543,8 @@ namespace SCANsat.SCAN_UI
 
 			if (GUI.Button(s, iconWithTT(SCANskins.SCAN_ZoomMapIcon, "Zoom Map"), SCANskins.SCAN_windowButton))
 			{
+				SCANcontroller.controller.TargetSelecting = false;
+				SCANcontroller.controller.TargetSelectingActive = false;
 				SCANcontroller.controller.zoomMap.Visible = !SCANcontroller.controller.zoomMap.Visible;
 				if (SCANcontroller.controller.zoomMap.Visible && !SCANcontroller.controller.zoomMap.Initialized)
 					SCANcontroller.controller.zoomMap.initializeMap();
@@ -492,6 +554,8 @@ namespace SCANsat.SCAN_UI
 
 			if (GUI.Button(s, iconWithTT(SCANskins.SCAN_OverlayIcon, "Overlay Control"), SCANskins.SCAN_windowButton))
 			{
+				SCANcontroller.controller.TargetSelecting = false;
+				SCANcontroller.controller.TargetSelectingActive = false;
 				SCANcontroller.controller.resourceOverlay.Visible = !SCANcontroller.controller.resourceOverlay.Visible;
 			}
 
@@ -499,6 +563,8 @@ namespace SCANsat.SCAN_UI
 
 			if (GUI.Button(s, iconWithTT(SCANskins.SCAN_SettingsIcon, "Settings Menu"), SCANskins.SCAN_windowButton))
 			{
+				SCANcontroller.controller.TargetSelecting = false;
+				SCANcontroller.controller.TargetSelectingActive = false;
 				SCANcontroller.controller.settingsWindow.Visible = !SCANcontroller.controller.settingsWindow.Visible;
 			}
 
@@ -506,6 +572,8 @@ namespace SCANsat.SCAN_UI
 
 			if (GUI.Button(s, iconWithTT(SCANskins.SCAN_ScreenshotIcon, "Export Map"), SCANskins.SCAN_windowButton))
 			{
+				SCANcontroller.controller.TargetSelecting = false;
+				SCANcontroller.controller.TargetSelectingActive = false;
 				if (bigmap.isMapComplete())
 					bigmap.exportPNG();
 			}
@@ -613,15 +681,38 @@ namespace SCANsat.SCAN_UI
 				if (mlon >= -180 && mlon <= 180 && mlat >= -90 && mlat <= 90)
 				{
 					in_map = true;
+					if (SCANcontroller.controller.TargetSelecting)
+					{
+						SCANcontroller.controller.TargetSelectingActive = true;
+						mjTarget.x = mlon;
+						mjTarget.y = mlat;
+						SCANcontroller.controller.LandingTargetCoords = mjTarget;
+						Rect r = new Rect(mx + TextureRect.x - 11, my + TextureRect.y - 13, 24, 24);
+						SCANuiUtil.drawMapIcon(r, SCANcontroller.controller.mechJebTargetSelection ? SCANskins.SCAN_MechJebIcon : SCANskins.SCAN_TargetIcon, true, palette.yellow, true);
+					}
 				}
+				else if (SCANcontroller.controller.TargetSelecting)
+					SCANcontroller.controller.TargetSelectingActive = false;
 			}
+			else if (SCANcontroller.controller.TargetSelecting)
+				SCANcontroller.controller.TargetSelectingActive = false;
 
 			//Handles mouse click while inside map; opens zoom map
 			if (Event.current.isMouse && !ddRect.Contains(Event.current.mousePosition) && !zoomCloseRect.Contains(Event.current.mousePosition))
 			{
 				if (Event.current.type == EventType.MouseUp)
 				{
-					if (Event.current.button == 1)
+					//Generate waypoint for MechJeb target
+					if (SCANcontroller.controller.TargetSelecting && SCANcontroller.controller.TargetSelectingActive && Event.current.button == 0 && in_map)
+					{
+						string s = SCANcontroller.controller.mechJebTargetSelection ? "MechJeb Landing Target" : "Landing Target Site";
+						SCANwaypoint w = new SCANwaypoint(mlat, mlon, s);
+						SCANcontroller.controller.LandingTarget = w;
+						data.addToWaypoints();
+						SCANcontroller.controller.TargetSelecting = false;
+						SCANcontroller.controller.TargetSelectingActive = false;
+					}
+					else if (Event.current.button == 1)
 					{
 						if (in_map)
 						{
@@ -644,7 +735,15 @@ namespace SCANsat.SCAN_UI
 			}
 
 			//Draw the actual mouse over info label below the map
-			SCANuiUtil.mouseOverInfo(mlon, mlat, bigmap, data, bigmap.Body, in_map);
+			if (SCANcontroller.controller.TargetSelecting)
+			{
+				growE();
+				SCANuiUtil.readableLabel(SCANcontroller.controller.mechJebTargetSelection ? "MechJeb Landing Guidance Targeting..." : "Landing Site Targeting...", false);
+				SCANuiUtil.mouseOverInfo(mlon, mlat, bigmap, data, bigmap.Body, in_map);
+				stopE();
+			}
+			else
+				SCANuiUtil.mouseOverInfo(mlon, mlat, bigmap, data, bigmap.Body, in_map);
 		}
 
 		//Draw the altitude legend bar along the bottom
