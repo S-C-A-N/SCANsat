@@ -13,6 +13,7 @@
  */
 #endregion
 
+using System.Text;
 using SCANsat.SCAN_Platform;
 using SCANsat.SCAN_Data;
 using SCANsat.SCAN_UI.UI_Framework;
@@ -23,7 +24,6 @@ namespace SCANsat.SCAN_UI
 {
 	class SCANmainMap: SCAN_MBW
 	{
-		private string infoText;
 		private Vessel v;
 		private SCANdata data;
 		private SCANtype sensors;
@@ -41,6 +41,8 @@ namespace SCANsat.SCAN_UI
 		private double[] biomeIndex = new double[360];
 		private int scanline;
 		private int scanstep;
+		private StringBuilder vesselText;
+		private StringBuilder infoText;
 
 		protected override void Awake()
 		{
@@ -52,6 +54,8 @@ namespace SCANsat.SCAN_UI
 			DragEnabled = true;
 			TooltipMouseOffset = new Vector2d(-10, -25);
 			ClampToScreenOffset = new RectOffset(-300, -300, -200, -200);
+			vesselText = new StringBuilder();
+			infoText = new StringBuilder();
 
 			SCAN_SkinsLibrary.SetCurrent("SCAN_Unity");
 			SCAN_SkinsLibrary.SetCurrentTooltip();
@@ -163,12 +167,10 @@ namespace SCANsat.SCAN_UI
 		//Draw the active scanner display
 		private void scannerInfo(int id)
 		{
-			bool repainting = Event.current.type == EventType.Repaint;
-			if (!repainting)
-				infoText = SCANuiUtil.InfoText(v, data, notMappingToday);
-
-			if (!string.IsNullOrEmpty(infoText))
-				SCANuiUtil.readableLabel(infoText, false);
+			if (Event.current.type == EventType.Layout)
+				SCANuiUtil.InfoText(v, data, notMappingToday, ref infoText);
+			
+			SCANuiUtil.readableLabel(infoText.ToString(), false);
 		}
 
 		//Draw the SCANsat window buttons with icons
@@ -204,14 +206,37 @@ namespace SCANsat.SCAN_UI
 		{
 			if (!notMappingToday)
 			{
-				int count = 2;
-				vesselInfo(v, mapRect, 1, true);
-				foreach (SCANcontroller.SCANvessel sV in SCANcontroller.controller.Known_Vessels)
+				if (Event.current.type == EventType.Layout)
 				{
-					if (sV.vessel == FlightGlobals.ActiveVessel)
-						continue;
-					if (vesselInfo(sV.vessel, mapRect, count, false))
-						count++;
+					int count = 2;
+					vesselText.Length = 0;
+					vesselInfo(v, mapRect, 1, true);
+
+					foreach (SCANcontroller.SCANvessel sV in SCANcontroller.controller.Known_Vessels)
+					{
+						if (sV.vessel == FlightGlobals.ActiveVessel)
+							continue;
+						if (sV.vessel.mainBody != v.mainBody)
+							continue;
+
+						vesselText.AppendLine();
+
+						if (vesselInfo(sV.vessel, mapRect, count, false))
+							count++;
+					}
+				}
+
+				if (showVesselInfo)
+				{
+					if (SCANuiUtil.readableLabel(vesselText.ToString(), false))
+					{
+						if (Event.current.clickCount > 1)
+						{
+							//Event.current.Use();
+							//FlightGlobals.SetActiveVessel(scanV);
+							//ScreenMessages.PostScreenMessage(scanV.vesselName, 5, ScreenMessageStyle.UPPER_CENTER);
+						}
+					}
 				}
 			}
 		}
@@ -221,60 +246,61 @@ namespace SCANsat.SCAN_UI
 		{
 			if (scanV == null)
 				return false;
-			if (scanV.mainBody == v.mainBody)
+
+			if (!showVesselInfo)
 			{
-				if (!showVesselInfo)
-				{
-					SCANuiUtil.drawVesselLabel(r, null, -1, scanV);
-					return true;
-				}
-				float lon = (float)SCANUtil.fixLonShift(scanV.longitude);
-				float lat = (float)SCANUtil.fixLatShift(scanV.latitude);
-
-				string units = "";
-				if (drawBiome)
-				{
-					if (SCANUtil.isCovered(lon, lat, data, SCANtype.Biome))
-						units = "; " + SCANUtil.getBiomeName(data.Body, lon, lat);
-				}
-				else
-				{
-					if (SCANUtil.isCovered(lon, lat, data, SCANtype.Altimetry))
-					{
-						if (SCANUtil.isCovered(lon, lat, data, SCANtype.AltimetryHiRes))
-						{
-							float alt = scanV.heightFromTerrain;
-							if (alt < 0)
-								alt = (float)scanV.altitude;
-							units = "; " + SCANuiUtil.distanceString(alt, 100000);
-						}
-						else
-						{
-							float alt = scanV.heightFromTerrain;
-							if (alt < 0)
-								alt = (float)scanV.altitude;
-
-							alt = ((int)(alt / 500)) * 500;
-							units = "; " + SCANuiUtil.distanceString(alt, 100000);
-						}
-					}
-				}
-
-				string text = string.Format("[{0}] {1} ({2:F1}°,{3:F1}°{4})", i, scanV.vesselName, lat, lon, units);
-				if (SCANuiUtil.readableLabel(text, b))
-				{
-					if (Event.current.clickCount > 1)
-					{
-						Event.current.Use();
-						FlightGlobals.SetActiveVessel(scanV);
-						ScreenMessages.PostScreenMessage(scanV.vesselName, 5, ScreenMessageStyle.UPPER_CENTER);
-					}
-				}
-				SCANuiUtil.drawVesselLabel(r, null, i, scanV);
-				fillS(-10);
+				SCANuiUtil.drawVesselLabel(r, null, -1, scanV);
 				return true;
 			}
-			return false;
+
+			float lon = (float)SCANUtil.fixLonShift(scanV.longitude);
+			float lat = (float)SCANUtil.fixLatShift(scanV.latitude);
+
+			string units = "";
+			if (drawBiome)
+			{
+				if (SCANUtil.isCovered(lon, lat, data, SCANtype.Biome))
+					units = string.Format("; {0}", SCANUtil.getBiomeName(data.Body, lon, lat));
+			}
+			else
+			{
+				if (SCANUtil.isCovered(lon, lat, data, SCANtype.Altimetry))
+				{
+					if (SCANUtil.isCovered(lon, lat, data, SCANtype.AltimetryHiRes))
+					{
+						float alt = scanV.heightFromTerrain;
+						if (alt < 0)
+							alt = (float)scanV.altitude;
+						units = string.Format("; {0}", SCANuiUtil.distanceString(alt, 100000));
+					}
+					else
+					{
+						float alt = scanV.heightFromTerrain;
+						if (alt < 0)
+							alt = (float)scanV.altitude;
+
+						alt = ((int)(alt / 500)) * 500;
+						units = string.Format("; {0}", SCANuiUtil.distanceString(alt, 100000));
+					}
+				}
+			}
+
+			if (b)
+				vesselText.Append(palette.colored(palette.xkcd_PukeGreen, string.Format("[{0}] {1} ({2:F1}°,{3:F1}°{4})", i, !string.IsNullOrEmpty(scanV.vesselName) && scanV.vesselName.Length > 30 ? scanV.vesselName.Substring(0, 30) : scanV.vesselName, lat, lon, units)));
+			else
+				vesselText.Append(string.Format("[{0}] {1} ({2:F1}°,{3:F1}°{4})", i, !string.IsNullOrEmpty(scanV.vesselName) && scanV.vesselName.Length > 30 ? scanV.vesselName.Substring(0, 30) : scanV.vesselName, lat, lon, units));
+			//if (SCANuiUtil.readableLabel(text, b))
+			//{
+			//	if (Event.current.clickCount > 1)
+			//	{
+			//		Event.current.Use();
+			//		FlightGlobals.SetActiveVessel(scanV);
+			//		ScreenMessages.PostScreenMessage(scanV.vesselName, 5, ScreenMessageStyle.UPPER_CENTER);
+			//	}
+			//}
+			SCANuiUtil.drawVesselLabel(r, null, i, scanV);
+			//fillS(-10);
+			return true;
 		}
 
 		private Texture2D drawPartialMap(SCANtype type)
