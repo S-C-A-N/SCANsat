@@ -461,7 +461,7 @@ namespace SCANsat
 			{
 				try
 				{
-					if (name == "blackForest" || name == "departure" || name == "northRhine" || name == "mars" || name == "wiki2" || name == "plumbago" || name == "cw1_013" || name == "arctic")
+					if (name == "blackForest" || name == "departure" || name == "northRhine" || name == "mars" || name == "wiki2" || name == "plumbago" || name == "cw1_013" || name == "arctic" || name == "mercury" || name == "venus")
 					{
 						//Load the fixed size color palette by name through reflection
 						var fixedPallete = typeof(FixedColorPalettes);
