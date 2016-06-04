@@ -18,7 +18,9 @@ namespace SCANsat.SCAN_UI.UI_Framework
 		[Persistent]
 		public string settingsHelpAnomalies = "Select the marker used to display\nanomalies on the map.";
 		[Persistent]
-		public string settingsHelpBackground = "Toggle background scanning on\nsome or all celestial bodies.";
+		public string settingsHelpScanningToggle = "Toggle all SCANsat scanning.";
+		[Persistent]
+		public string settingsHelpBackground = "Toggle background scanning on\nselected celestial bodies.";
 		[Persistent]
 		public string settingsHelpTimeWarp = "Adjust the scanning frequency during TimeWarp.\nHigher settings result in fewer gaps in the maps but may have a performance impact at high TimeWarp.";
 		[Persistent]
