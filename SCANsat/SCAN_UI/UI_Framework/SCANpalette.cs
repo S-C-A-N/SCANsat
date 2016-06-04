@@ -275,10 +275,10 @@ namespace SCANsat.SCAN_UI.UI_Framework
 		}
 
 		public static string colorHex ( Color32 c ) {
-			return "#" + c.r.ToString ("x2") + c.g.ToString ("x2") + c.b.ToString ("x2");
+			return string.Format("#{0:X2}{1:X2}{2:X2}", c.r, c.g, c.b);
 		}
 		public static string colored ( Color c , string text ) {
-			return "<color=\"" + colorHex (c) + "\">" + text + "</color>";
+			return string.Format("<color=\"{0}\">{1}</color>", colorHex(c), text);
 		}
 
 		internal static Color c_good {

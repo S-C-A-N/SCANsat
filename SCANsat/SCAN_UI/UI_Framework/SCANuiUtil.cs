@@ -17,6 +17,7 @@ using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using System.Linq;
+using System.Text;
 using FinePrint;
 using SCANsat.SCAN_Platform;
 using SCANsat.SCAN_Data;
@@ -457,66 +458,61 @@ namespace SCANsat.SCAN_UI.UI_Framework
 		}
 
 		//Method to handle active scanner display
-		internal static string InfoText(Vessel v, SCANdata data, bool b)
+		internal static void InfoText(Vessel v, SCANdata data, bool b, ref StringBuilder sb)
 		{
-			string infotext = "";
-
+			sb.Length = 0;
 			SCANcontroller.SCANsensor s;
 
 			//Check here for each sensor; if active, in range, and at the ideal altitude
 			s = SCANcontroller.controller.getSensorStatus(v, SCANtype.AltimetryLoRes);
 			if (s == null)
-				infotext += palette.colored(palette.grey, "LO");
+				sb.Append(palette.colored(palette.grey, "LO"));
 			else if (!s.inRange)
-				infotext += palette.colored(palette.c_bad, "LO");
+				sb.Append(palette.colored(palette.c_bad, "LO"));
 			else if (!s.bestRange && (Time.realtimeSinceStartup % 2 < 1))
-				infotext += palette.colored(palette.c_bad, "LO");
+				sb.Append(palette.colored(palette.c_bad, "LO"));
 			else
-				infotext += palette.colored(palette.c_good, "LO");
+				sb.Append(palette.colored(palette.c_good, "LO"));
 
 			s = SCANcontroller.controller.getSensorStatus(v, SCANtype.AltimetryHiRes);
 			if (s == null)
-				infotext += palette.colored(palette.grey, " HI");
+				sb.Append(palette.colored(palette.grey, " HI"));
 			else if (!s.inRange)
-				infotext += palette.colored(palette.c_bad, " HI");
+				sb.Append(palette.colored(palette.c_bad, " HI"));
 			else if (!s.bestRange && (Time.realtimeSinceStartup % 2 < 1))
-				infotext += palette.colored(palette.c_bad, " HI");
+				sb.Append(palette.colored(palette.c_bad, " HI"));
 			else
-				infotext += palette.colored(palette.c_good, " HI");
+				sb.Append(palette.colored(palette.c_good, " HI"));
 
 			s = SCANcontroller.controller.getSensorStatus(v, SCANtype.Biome);
 			if (s == null)
-				infotext += palette.colored(palette.grey, " MULTI");
+				sb.Append(palette.colored(palette.grey, " MULTI"));
 			else if (!s.inRange)
-				infotext += palette.colored(palette.c_bad, " MULTI");
+				sb.Append(palette.colored(palette.c_bad, " MULTI"));
 			else if (!s.bestRange && (Time.realtimeSinceStartup % 2 < 1))
-				infotext += palette.colored(palette.c_bad, " MULTI");
+				sb.Append(palette.colored(palette.c_bad, " MULTI"));
 			else
-				infotext += palette.colored(palette.c_good, " MULTI");
+				sb.Append(palette.colored(palette.c_good, " MULTI"));
 
 			s = SCANcontroller.controller.getSensorStatus(v, SCANtype.AnomalyDetail);
 			if (s == null)
-				infotext += palette.colored(palette.grey, " BTDT");
+				sb.Append(palette.colored(palette.grey, " BTDT"));
 			else if (!s.inRange)
-				infotext += palette.colored(palette.c_bad, " BTDT");
+				sb.Append(palette.colored(palette.c_bad, " BTDT"));
 			else if (!s.bestRange && (Time.realtimeSinceStartup % 2 < 1))
-				infotext += palette.colored(palette.c_bad, " BTDT");
+				sb.Append(palette.colored(palette.c_bad, " BTDT"));
 			else
-				infotext += palette.colored(palette.c_good, " BTDT");
+				sb.Append(palette.colored(palette.c_good, " BTDT"));
 
 			//Get coverage percentage for all active scanners on the vessel
 			SCANtype active = SCANcontroller.controller.activeSensorsOnVessel(v.id);
 			if (active != SCANtype.Nothing)
 			{
 				double cov = SCANUtil.getCoveragePercentage(data, active);
-				infotext += string.Format(" {0:N1}%", cov);
+				sb.Append(string.Format(" {0:N1}%", cov));
 				if (b)
-				{
-					infotext = palette.colored(palette.c_bad, "NO POWER");
-				}
+					sb.Append(palette.colored(palette.c_bad, "NO POWER"));
 			}
-
-			return infotext;
 		}
 
 		/* UI: conversions to and from DMS */
