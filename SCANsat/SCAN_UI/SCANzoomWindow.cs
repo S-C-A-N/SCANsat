@@ -48,6 +48,7 @@ namespace SCANsat.SCAN_UI
 		internal readonly static Rect defaultRect = new Rect(50f, 50f, 340f, 240f);
 		private static Rect sessionRect = defaultRect;
 		private StringBuilder infoString;
+		private StringBuilder infoString2;
 
 		protected bool dropDown;
 		protected Rect ddRect;
@@ -81,6 +82,7 @@ namespace SCANsat.SCAN_UI
 
 			removeControlLocks();
 			infoString = new StringBuilder();
+			infoString2 = new StringBuilder();
 
 			Startup();
 		}
@@ -835,10 +837,10 @@ namespace SCANsat.SCAN_UI
 			{
 				SCANuiUtil.readableLabel(SCANcontroller.controller.mechJebTargetSelection ? "MechJeb Landing Guidance Targeting..." : "Landing Site Targeting...", false);
 				fillS(-10);
-				SCANuiUtil.mouseOverInfoSimple(mlon, mlat, spotmap, data, spotmap.Body, in_map, ref infoString);
+				SCANuiUtil.mouseOverInfoSimple(mlon, mlat, spotmap, data, spotmap.Body, in_map, ref infoString, ref infoString2);
 			}
 			else if (showInfo)
-				SCANuiUtil.mouseOverInfoSimple(mlon, mlat, spotmap, data, spotmap.Body, in_map, ref infoString);
+				SCANuiUtil.mouseOverInfoSimple(mlon, mlat, spotmap, data, spotmap.Body, in_map, ref infoString, ref infoString2);
 			else
 				fillS(10);
 		}
