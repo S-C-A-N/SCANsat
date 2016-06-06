@@ -124,8 +124,13 @@ namespace SCANsat.SCAN_PartModules
 			if (sensorType != 32)
 				Fields["alt_indicator"].guiActive = scanning;
 
+			SCANdata data = SCANUtil.getData(vessel.mainBody);
+
+			if (data == null)
+				return;
+
 			if (scanning)
-				alt_indicator = scanAlt();
+				alt_indicator = scanAlt(data);
 		}
 
 		protected virtual void FixedUpdate()
@@ -397,10 +402,14 @@ namespace SCANsat.SCAN_PartModules
 				SCANcontroller.controller.unregisterSensor(vessel, (SCANtype)sensorType);
 		}
 
-		private string scanAlt()
+		private string scanAlt(SCANdata d)
 		{
 			string altitude = "Unknown";
-			if (vessel.altitude < min_alt)
+			if (!SCANcontroller.controller.scan_background)
+				altitude = "All Scanning Disabled";
+			else if (d.Disabled)
+				altitude = d.Body.name + " Scanning Disabled";
+			else if (vessel.altitude < min_alt)
 				altitude = "Too low";
 			else if (vessel.altitude < best_alt)
 				altitude = "Sub-optimal";
