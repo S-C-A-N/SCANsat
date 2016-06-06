@@ -54,8 +54,8 @@ namespace SCANsat.SCAN_UI
 			DragEnabled = true;
 			TooltipMouseOffset = new Vector2d(-10, -25);
 			ClampToScreenOffset = new RectOffset(-300, -300, -200, -200);
-			vesselText = new StringBuilder();
 			infoText = new StringBuilder();
+			vesselText = new StringBuilder();
 
 			SCAN_SkinsLibrary.SetCurrent("SCAN_Unity");
 			SCAN_SkinsLibrary.SetCurrentTooltip();
@@ -206,37 +206,18 @@ namespace SCANsat.SCAN_UI
 		{
 			if (!notMappingToday)
 			{
-				if (Event.current.type == EventType.Layout)
+				int count = 2;
+				vesselInfo(v, mapRect, 1, true);
+
+				foreach (SCANcontroller.SCANvessel sV in SCANcontroller.controller.Known_Vessels)
 				{
-					int count = 2;
-					vesselText.Length = 0;
-					vesselInfo(v, mapRect, 1, true);
+					if (sV.vessel == FlightGlobals.ActiveVessel)
+						continue;
+					if (sV.vessel.mainBody != v.mainBody)
+						continue;
 
-					foreach (SCANcontroller.SCANvessel sV in SCANcontroller.controller.Known_Vessels)
-					{
-						if (sV.vessel == FlightGlobals.ActiveVessel)
-							continue;
-						if (sV.vessel.mainBody != v.mainBody)
-							continue;
-
-						vesselText.AppendLine();
-
-						if (vesselInfo(sV.vessel, mapRect, count, false))
-							count++;
-					}
-				}
-
-				if (showVesselInfo)
-				{
-					if (SCANuiUtil.readableLabel(vesselText.ToString(), false))
-					{
-						if (Event.current.clickCount > 1)
-						{
-							//Event.current.Use();
-							//FlightGlobals.SetActiveVessel(scanV);
-							//ScreenMessages.PostScreenMessage(scanV.vesselName, 5, ScreenMessageStyle.UPPER_CENTER);
-						}
-					}
+					if (vesselInfo(sV.vessel, mapRect, count, false))
+						count++;
 				}
 			}
 		}
@@ -271,7 +252,7 @@ namespace SCANsat.SCAN_UI
 						float alt = scanV.heightFromTerrain;
 						if (alt < 0)
 							alt = (float)scanV.altitude;
-						units = string.Format("; {0}", SCANuiUtil.distanceString(alt, 100000));
+						units = string.Format("; {0}", SCANuiUtil.distanceString(alt, 100000, 100000000));
 					}
 					else
 					{
@@ -280,26 +261,25 @@ namespace SCANsat.SCAN_UI
 							alt = (float)scanV.altitude;
 
 						alt = ((int)(alt / 500)) * 500;
-						units = string.Format("; {0}", SCANuiUtil.distanceString(alt, 100000));
+						units = string.Format("; {0}", SCANuiUtil.distanceString(alt, 100000, 100000000));
 					}
 				}
 			}
 
-			if (b)
-				vesselText.Append(palette.colored(palette.xkcd_PukeGreen, string.Format("[{0}] {1} ({2:F1}°,{3:F1}°{4})", i, !string.IsNullOrEmpty(scanV.vesselName) && scanV.vesselName.Length > 30 ? scanV.vesselName.Substring(0, 30) : scanV.vesselName, lat, lon, units)));
-			else
-				vesselText.Append(string.Format("[{0}] {1} ({2:F1}°,{3:F1}°{4})", i, !string.IsNullOrEmpty(scanV.vesselName) && scanV.vesselName.Length > 30 ? scanV.vesselName.Substring(0, 30) : scanV.vesselName, lat, lon, units));
-			//if (SCANuiUtil.readableLabel(text, b))
-			//{
-			//	if (Event.current.clickCount > 1)
-			//	{
-			//		Event.current.Use();
-			//		FlightGlobals.SetActiveVessel(scanV);
-			//		ScreenMessages.PostScreenMessage(scanV.vesselName, 5, ScreenMessageStyle.UPPER_CENTER);
-			//	}
-			//}
+			vesselText.Length = 0;
+			vesselText.AppendFormat(string.Format("[{0}] {1} ({2:F1}°,{3:F1}°{4})", i, !string.IsNullOrEmpty(scanV.vesselName) && scanV.vesselName.Length > 26 ? scanV.vesselName.Substring(0, 26) : scanV.vesselName, lat, lon, units));
+
+			if (SCANuiUtil.readableLabel(vesselText.ToString(), b))
+			{
+				if (Event.current.clickCount > 1)
+				{
+					Event.current.Use();
+					FlightGlobals.SetActiveVessel(scanV);
+					ScreenMessages.PostScreenMessage(scanV.vesselName, 5, ScreenMessageStyle.UPPER_CENTER);
+				}
+			}
 			SCANuiUtil.drawVesselLabel(r, null, i, scanV);
-			//fillS(-10);
+			fillS(-10);
 			return true;
 		}
 
