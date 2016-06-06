@@ -14,6 +14,7 @@
 #endregion
 
 using System.Collections.Generic;
+using System.Text;
 using SCANsat.SCAN_Platform;
 using SCANsat;
 using SCANsat.SCAN_UI.UI_Framework;
@@ -42,6 +43,7 @@ namespace SCANsat.SCAN_UI
 		private Vector2d mjTarget = new Vector2d();
 		private Rect pos_spotmap = new Rect(10f, 10f, 10f, 10f);
 		private Rect pos_spotmap_x = new Rect(10f, 10f, 25f, 25f);
+		private StringBuilder infoString;
 		internal static Rect defaultRect = new Rect(250, 60, 780, 460);
 
 		private List<SCANresourceGlobal> loadedResources = new List<SCANresourceGlobal>();
@@ -76,6 +78,7 @@ namespace SCANsat.SCAN_UI
 			WindowRect.y = SCANcontroller.controller.map_y;
 			lastColor = currentColor = SCANcontroller.controller.colours == 0;
 			lastResource = SCANcontroller.controller.map_ResourceOverlay;
+			infoString = new StringBuilder();
 			if (SCANconfigLoader.GlobalResource)
 				loadedResources = SCANcontroller.setLoadedResourceList();
 			TooltipsEnabled = SCANcontroller.controller.toolTips;
@@ -737,13 +740,11 @@ namespace SCANsat.SCAN_UI
 			//Draw the actual mouse over info label below the map
 			if (SCANcontroller.controller.TargetSelecting)
 			{
-				growE();
 				SCANuiUtil.readableLabel(SCANcontroller.controller.mechJebTargetSelection ? "MechJeb Landing Guidance Targeting..." : "Landing Site Targeting...", false);
-				SCANuiUtil.mouseOverInfo(mlon, mlat, bigmap, data, bigmap.Body, in_map);
-				stopE();
+				SCANuiUtil.mouseOverInfo(mlon, mlat, bigmap, data, bigmap.Body, in_map, ref infoString);
 			}
 			else
-				SCANuiUtil.mouseOverInfo(mlon, mlat, bigmap, data, bigmap.Body, in_map);
+				SCANuiUtil.mouseOverInfo(mlon, mlat, bigmap, data, bigmap.Body, in_map, ref infoString);
 		}
 
 		//Draw the altitude legend bar along the bottom

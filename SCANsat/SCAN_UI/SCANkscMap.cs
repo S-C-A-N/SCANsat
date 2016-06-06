@@ -14,6 +14,7 @@
 #endregion
 
 using System.Collections.Generic;
+using System.Text;
 using SCANsat.SCAN_Platform;
 using SCANsat;
 using SCANsat.SCAN_UI.UI_Framework;
@@ -40,6 +41,7 @@ namespace SCANsat.SCAN_UI
 		private Vector2 scrollP, scrollR;
 		private Rect pos_spotmap = new Rect(10f, 10f, 10f, 10f);
 		private Rect pos_spotmap_x = new Rect(10f, 10f, 25f, 25f);
+		private StringBuilder infoString;
 		internal readonly static Rect defaultRect = new Rect(250, 60, 780, 460);
 		private static Rect sessionRect = defaultRect;
 		private const string lockID = "SCANksc_LOCK";
@@ -80,6 +82,7 @@ namespace SCANsat.SCAN_UI
 			lastResource = SCANcontroller.controller.map_ResourceOverlay;
 			WindowCaption = string.Format("Map of {0}", b.theName);
 			data = SCANUtil.getData(b);
+			infoString = new StringBuilder();
 			if (data == null)
 			{
 				data = new SCANdata(b);
@@ -598,7 +601,7 @@ namespace SCANsat.SCAN_UI
 			}
 
 			//Draw the actual mouse over info label below the map
-			SCANuiUtil.mouseOverInfo(mlon, mlat, bigmap, data, bigmap.Body, in_map);
+			SCANuiUtil.mouseOverInfo(mlon, mlat, bigmap, data, bigmap.Body, in_map, ref infoString);
 		}
 
 		//Draw the altitude legend bar along the bottom
