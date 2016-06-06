@@ -134,9 +134,9 @@ namespace SCANsat.SCAN_Data
 
 		private void setDefaultValues()
 		{
-			defaultMinHeight = minHeightRange;
-			defaultMaxHeight = maxHeightRange;
-			defaultClamp = clampTerrain;
+			defaultMinHeight = minHeightRange * internalMinHeightMult;
+			defaultMaxHeight = maxHeightRange * internalMaxHeightMult;
+			defaultClamp = clampTerrain * internalClampHeightMult;
 			defaultPalette = colorPal;
 			defaultPaletteSize = paletteSize;
 			defaultDiscrete = paletteDiscrete;
