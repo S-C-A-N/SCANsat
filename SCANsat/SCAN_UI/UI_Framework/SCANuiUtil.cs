@@ -110,11 +110,12 @@ namespace SCANsat.SCAN_UI.UI_Framework
 		#region UI Utilities
 
 		//Generates a string with info from mousing over the map
-		internal static void mouseOverInfo(double lon, double lat, SCANmap mapObj, SCANdata data, CelestialBody body, bool b, ref StringBuilder sb)
+		internal static void mouseOverInfo(double lon, double lat, SCANmap mapObj, SCANdata data, CelestialBody body, bool b, ref StringBuilder sb, ref StringBuilder sb2)
 		{
-			if (Event.current.type == EventType.Layout)
+			if (Event.current.type == EventType.Repaint)
 			{
 				sb.Length = 0;
+				sb2.Length = 0;
 				if (b)
 				{
 					if (SCANUtil.isCovered(lon, lat, data, SCANtype.AltimetryLoRes))
@@ -215,8 +216,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 						}
 					}
 
-					sb.AppendLine();
-					sb.AppendFormat("{0} (lat: {1:F2} lon: {2:F2})", toDMS(lat, lon), lat, lon);
+					sb2.AppendFormat("{0} (lat: {1:F2} lon: {2:F2})", toDMS(lat, lon), lat, lon);
 				}
 			}
 			//else
@@ -226,13 +226,16 @@ namespace SCANsat.SCAN_UI.UI_Framework
 
 			//Draw the readout info labels
 			readableLabel(sb.ToString(), false);
+			SCAN_MBW.fillS(-10);
+			readableLabel(sb2.ToString(), false);
 		}
 
-		internal static void mouseOverInfoSimple(double lon, double lat, SCANmap mapObj, SCANdata data, CelestialBody body, bool b, ref StringBuilder sb)
+		internal static void mouseOverInfoSimple(double lon, double lat, SCANmap mapObj, SCANdata data, CelestialBody body, bool b, ref StringBuilder sb, ref StringBuilder sb2)
 		{
-			if (Event.current.type == EventType.Layout)
+			if (Event.current.type == EventType.Repaint)
 			{
 				sb.Length = 0;
+				sb2.Length = 0;
 				if (b)
 				{
 					if (SCANUtil.isCovered(lon, lat, data, SCANtype.Altimetry))
@@ -314,13 +317,14 @@ namespace SCANsat.SCAN_UI.UI_Framework
 						}
 					}
 
-					sb.AppendLine();
-					sb.AppendFormat("{0} ({1:F2}°,{2:F2}°)", toDMS(lat, lon), lat, lon);
+					sb2.AppendFormat("{0} ({1:F2}°,{2:F2}°)", toDMS(lat, lon), lat, lon);
 				}
 			}
 
 			//Draw the readout info labels
 			readableLabel(sb.ToString(), false);
+			SCAN_MBW.fillS(-10);
+			readableLabel(sb2.ToString(), false);
 		}
 
 		internal static string getResourceAbundance(CelestialBody Body, double lat, double lon, bool fuzzy, SCANresourceGlobal resource)
@@ -542,11 +546,14 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			return string.Format("{0} {1}", toDMS(lat, "S", "N", precision), toDMS(lon, "W", "E", precision));
 		}
 
-		internal static string distanceString(double dist, double cutoff)
+		internal static string distanceString(double dist, double cutoff, double cutoff2 = double.MaxValue)
 		{
 			if (dist < cutoff)
 				return string.Format("{0:N1}m", dist);
-			return string.Format("{0:N2}km", dist / 1000d);
+			else if (dist < cutoff2)
+				return string.Format("{0:N2}km", dist / 1000d);
+			else
+				return string.Format("{0:N0}km", dist / 1000d);
 		}
 
 		internal static void clearTexture(Texture2D tex)
