@@ -30,6 +30,12 @@ namespace SCANsat.SCAN_Data
 		[Persistent]
 		private string clampHeight;
 		[Persistent]
+		private float maxHeightMultiplier = 1;
+		[Persistent]
+		private float minHeightMultiplier = 1;
+		[Persistent]
+		private float clampHeightMultiplier = 1;
+		[Persistent]
 		private string paletteName;
 		[Persistent]
 		private int paletteSize;
@@ -48,12 +54,15 @@ namespace SCANsat.SCAN_Data
 		private int defaultPaletteSize;
 		private bool defaultReverse, defaultDiscrete;
 		private float? defaultClamp;
+		private float internalMaxHeightMult = 1;
+		private float internalMinHeightMult = 1;
+		private float internalClampHeightMult = 1;
 
 		internal SCANterrainConfig(float min, float max, float? clamp, Palette color, int size, bool reverse, bool discrete, CelestialBody b)
 		{
 			minHeightRange = min;
 			maxHeightRange = max;
-			terrainRange = max - min;
+			terrainRange = max * maxHeightMultiplier - min * minHeightMultiplier;
 			clampTerrain = clamp;
 			if (clampTerrain == null)
 				clampHeight = "Null";
@@ -77,9 +86,15 @@ namespace SCANsat.SCAN_Data
 
 		internal SCANterrainConfig(SCANterrainConfig copy)
 		{
+			maxHeightMultiplier = copy.maxHeightMultiplier;
+			minHeightMultiplier = copy.minHeightMultiplier;
+			clampHeightMultiplier = copy.clampHeightMultiplier;
+			internalMaxHeightMult = maxHeightMultiplier;
+			internalMinHeightMult = minHeightMultiplier;
+			internalClampHeightMult = clampHeightMultiplier;
 			minHeightRange = copy.minHeightRange;
 			maxHeightRange = copy.maxHeightRange;
-			terrainRange = maxHeightRange - minHeightRange;
+			terrainRange = maxHeightRange * maxHeightMultiplier - minHeightRange * minHeightMultiplier;
 			clampTerrain = copy.clampTerrain;
 			clampHeight = copy.clampHeight;
 			colorPal = copy.colorPal;
@@ -109,7 +124,10 @@ namespace SCANsat.SCAN_Data
 			else
 				clampTerrain = null;
 
-			terrainRange = maxHeightRange - minHeightRange;
+			terrainRange = maxHeightRange * maxHeightMultiplier - minHeightRange * minHeightMultiplier;
+			internalMaxHeightMult = maxHeightMultiplier;
+			internalMinHeightMult = minHeightMultiplier;
+			internalClampHeightMult = clampHeightMultiplier;
 
 			setDefaultValues();
 		}
@@ -133,30 +151,63 @@ namespace SCANsat.SCAN_Data
 				clampHeight = clampTerrain.Value.ToString("F0");
 
 			paletteName = colorPal.name;
+
+			maxHeightMultiplier = 1;
+			minHeightMultiplier = 1;
+			clampHeightMultiplier = 1;
+		}
+
+		public override void onSavePost()
+		{
+			maxHeightMultiplier = internalMaxHeightMult;
+			minHeightMultiplier = internalMinHeightMult;
+			clampHeightMultiplier = internalClampHeightMult;
 		}
 
 		public float MinTerrain
 		{
-			get { return minHeightRange; }
+			get
+			{
+				float min = minHeightRange * internalMinHeightMult;
+
+				if (min < -250000)
+					return 200000;
+			
+				return min;
+			}
 			internal set
 			{
-				if (value < maxHeightRange)
+				if (value < -250000)
+					value = -250000;
+
+				if (value < maxHeightRange * internalMaxHeightMult)
 				{
-					terrainRange = maxHeightRange - value;
-					minHeightRange = value;
+					terrainRange = maxHeightRange * internalMaxHeightMult - value;
+					minHeightRange = value / internalMinHeightMult;
 				}
 			}
 		}
 
 		public float MaxTerrain
 		{
-			get { return maxHeightRange; }
+			get
+			{
+				float max = maxHeightRange * internalMaxHeightMult;
+
+				if (max > 500000)
+					return 500000;
+
+				return max;
+			}
 			internal set
 			{
-				if (value > minHeightRange)
+				if (value > 500000)
+					value = 500000;
+
+				if (value > minHeightRange * internalMinHeightMult)
 				{
-					terrainRange = value - minHeightRange;
-					maxHeightRange = value;
+					terrainRange = value - minHeightRange * internalMinHeightMult;
+					maxHeightRange = value / internalMaxHeightMult;
 				}
 			}
 		}
@@ -168,13 +219,13 @@ namespace SCANsat.SCAN_Data
 
 		public float? ClampTerrain
 		{
-			get { return clampTerrain; }
+			get { return clampTerrain * internalClampHeightMult; }
 			internal set
 			{
 				if (value == null)
 					clampTerrain = null;
-				else if (value > minHeightRange && value < maxHeightRange)
-					clampTerrain = value;
+				else if (value > minHeightRange * internalMinHeightMult && value < maxHeightRange * internalMaxHeightMult)
+					clampTerrain = value / internalClampHeightMult;
 			}
 		}
 
@@ -245,6 +296,21 @@ namespace SCANsat.SCAN_Data
 		public bool DefaultDiscrete
 		{
 			get { return defaultDiscrete; }
+		}
+
+		public float MaxHeightMultiplier
+		{
+			get { return internalMaxHeightMult; }
+		}
+
+		public float MinHeightMultiplier
+		{
+			get { return internalMinHeightMult; }
+		}
+
+		public float ClampHeightMultiplier
+		{
+			get { return internalClampHeightMult; }
 		}
 	}
 
