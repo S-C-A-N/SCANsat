@@ -415,8 +415,6 @@ namespace SCANsat.SCAN_PartModules
 		 * 	discard, review, count DATA */
 		private void makeScienceData(bool notZero)
 		{
-			if (expDialog != null)
-				DestroyImmediate(expDialog);
 			storedData.Clear();
 			ScienceData sd = getAvailableScience((SCANtype)sensorType, notZero);
 			if (sd == null)
@@ -552,8 +550,7 @@ namespace SCANsat.SCAN_PartModules
 		{
 			if (storedData.Count < 1)
 				return;
-			if (expDialog != null)
-				DestroyImmediate(expDialog);
+			expDialog = null;
 			ScienceData sd = storedData[0];
 			expDialog = ExperimentsResultDialog.DisplayResult(new ExperimentResultDialogPage(part, sd, 1f, 0f, false, "", true, new ScienceLabSearch(vessel, sd), DumpData, KeepData, TransmitData, null));
 		}
