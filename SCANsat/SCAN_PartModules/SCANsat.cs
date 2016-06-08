@@ -283,8 +283,14 @@ namespace SCANsat.SCAN_PartModules
 		[KSPEvent(guiActive = true, guiName = "Analyze Data", active = true)]
 		public void analyze()
 		{
+			gatherScienceData();
+		}
+
+		public void gatherScienceData(bool silent = false)
+		{
 			makeScienceData(true);
-			ReviewData();
+			if (!silent)
+				ReviewData();
 		}
 
 		[KSPEvent(guiActive = true, guiName = "Review Data", active = false)]
@@ -365,7 +371,7 @@ namespace SCANsat.SCAN_PartModules
 		public void analyzeData(KSPActionParam param)
 		{
 			//if (scanning) ** Always available
-			analyze();
+			gatherScienceData();
 		}
 
 		/* SCAN: add static (a warning that we're low on electric charge) */
