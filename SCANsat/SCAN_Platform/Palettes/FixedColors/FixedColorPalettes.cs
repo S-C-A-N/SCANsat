@@ -98,5 +98,23 @@ namespace SCANsat.SCAN_Platform.Palettes.FixedColors
 			return new Palette(c, "arctic", Palette.Kind.Fixed, (Palette.Is)3, (Palette.Is)3, (Palette.Is)3, (Palette.Is)3);
 		}
 
+		/* From the USGS Mercury MESSENGER topographic map
+		 * http://astrogeology.usgs.gov/search/map/Mercury/Topography/MESSENGER/Mercury-MESSENGER-DEM
+		 */
+		public static Palette mercury()
+		{
+			Color32[] c;
+			c = new[] { RGB(22, 22, 22), RGB(195, 130, 185), RGB(170, 120, 156), RGB(160, 120, 200), RGB(141, 96, 179), RGB(62, 30, 121), RGB(20, 0, 193), RGB(30, 50, 194), RGB(58, 102, 219), RGB(78, 135, 215), RGB(113, 196, 255), RGB(95, 210, 220), RGB(125, 213, 226), RGB(105, 188, 206), RGB(140, 185, 205), RGB(170, 181, 201), RGB(195, 203, 192), RGB(180, 205, 157), RGB(105, 195, 101), RGB(114, 171, 79), RGB(128, 156, 106), RGB(104, 106, 74), RGB(79, 46, 36), RGB(110, 71, 60), RGB(140, 94, 55), RGB(175, 137, 65), RGB(202, 166, 59), RGB(226, 211, 62), RGB(215, 136, 35), RGB(191, 75, 42), RGB(206, 20, 20), RGB(236, 75, 79), RGB(236, 178, 157), RGB(255, 255, 255) };
+			return new Palette(c, "mercury", Palette.Kind.Fixed, (Palette.Is)3, (Palette.Is)3, (Palette.Is)3, (Palette.Is)3);
+		}
+
+
+		public static Palette venus()
+		{
+			Color32[] c;
+			c = new[] { RGB(93, 61, 126), RGB(52, 52, 152), RGB(81, 164, 168), RGB(54, 156, 51), RGB(197, 199, 94), RGB(153, 95, 66), RGB(166, 69, 69), RGB(183, 88, 154) };
+			return new Palette(c, "venus", Palette.Kind.Fixed, (Palette.Is)3, (Palette.Is)3, (Palette.Is)3, (Palette.Is)3);
+		}
+
 	}
 }

@@ -829,10 +829,10 @@ namespace SCANsat
 					SCANwaypoint w = body_scan.Waypoints.FirstOrDefault(a => a.LandingTarget);
 					if (w != null)
 						node_body.AddValue("LandingTarget", string.Format("{0:N4},{1:N4}", w.Latitude, w.Longitude));
-					node_body.AddValue("MinHeightRange", body_scan.TerrainConfig.MinTerrain);
-					node_body.AddValue("MaxHeightRange", body_scan.TerrainConfig.MaxTerrain);
+					node_body.AddValue("MinHeightRange", body_scan.TerrainConfig.MinTerrain / body_scan.TerrainConfig.MinHeightMultiplier);
+					node_body.AddValue("MaxHeightRange", body_scan.TerrainConfig.MaxTerrain / body_scan.TerrainConfig.MaxHeightMultiplier);
 					if (body_scan.TerrainConfig.ClampTerrain != null)
-						node_body.AddValue("ClampHeight", body_scan.TerrainConfig.ClampTerrain);
+						node_body.AddValue("ClampHeight", body_scan.TerrainConfig.ClampTerrain / body_scan.TerrainConfig.ClampHeightMultiplier);
 					node_body.AddValue("PaletteName", body_scan.TerrainConfig.ColorPal.name);
 					node_body.AddValue("PaletteSize", body_scan.TerrainConfig.PalSize);
 					node_body.AddValue("PaletteReverse", body_scan.TerrainConfig.PalRev);
@@ -1340,9 +1340,9 @@ namespace SCANsat
 			SCANdata d = getData(b.name);
 
 			if (d == null)
-				return;			
+				return;
 
-			if (groundTracks && HighLogic.LoadedSceneIsFlight)
+			if (groundTracks && HighLogic.LoadedSceneIsFlight && !d.Disabled && scan_background)
 				drawGroundTracks(b);
 
 			if (!mechJebTargetSelection)
@@ -1576,9 +1576,9 @@ namespace SCANsat
 
 		private void setNewTerrainConfigValues(SCANterrainConfig terrain, float min, float max, float? clamp, Palette c, int size, bool reverse, bool discrete)
 		{
-			terrain.MinTerrain = min;
-			terrain.MaxTerrain = max;
-			terrain.ClampTerrain = clamp;
+			terrain.MinTerrain = min * terrain.MinHeightMultiplier;
+			terrain.MaxTerrain = max * terrain.MaxHeightMultiplier;
+			terrain.ClampTerrain = clamp * terrain.ClampHeightMultiplier;
 			terrain.ColorPal = c;
 			terrain.PalSize = size;
 			terrain.PalRev = reverse;

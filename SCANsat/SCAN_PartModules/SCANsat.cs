@@ -124,8 +124,13 @@ namespace SCANsat.SCAN_PartModules
 			if (sensorType != 32)
 				Fields["alt_indicator"].guiActive = scanning;
 
+			SCANdata data = SCANUtil.getData(vessel.mainBody);
+
+			if (data == null)
+				return;
+
 			if (scanning)
-				alt_indicator = scanAlt();
+				alt_indicator = scanAlt(data);
 		}
 
 		protected virtual void FixedUpdate()
@@ -278,8 +283,14 @@ namespace SCANsat.SCAN_PartModules
 		[KSPEvent(guiActive = true, guiName = "Analyze Data", active = true)]
 		public void analyze()
 		{
+			gatherScienceData();
+		}
+
+		public void gatherScienceData(bool silent = false)
+		{
 			makeScienceData(true);
-			ReviewData();
+			if (!silent)
+				ReviewData();
 		}
 
 		[KSPEvent(guiActive = true, guiName = "Review Data", active = false)]
@@ -360,7 +371,7 @@ namespace SCANsat.SCAN_PartModules
 		public void analyzeData(KSPActionParam param)
 		{
 			//if (scanning) ** Always available
-			analyze();
+			gatherScienceData();
 		}
 
 		/* SCAN: add static (a warning that we're low on electric charge) */
@@ -397,10 +408,14 @@ namespace SCANsat.SCAN_PartModules
 				SCANcontroller.controller.unregisterSensor(vessel, (SCANtype)sensorType);
 		}
 
-		private string scanAlt()
+		private string scanAlt(SCANdata d)
 		{
 			string altitude = "Unknown";
-			if (vessel.altitude < min_alt)
+			if (!SCANcontroller.controller.scan_background)
+				altitude = "All Scanning Disabled";
+			else if (d.Disabled)
+				altitude = d.Body.name + " Scanning Disabled";
+			else if (vessel.altitude < min_alt)
 				altitude = "Too low";
 			else if (vessel.altitude < best_alt)
 				altitude = "Sub-optimal";
@@ -415,8 +430,6 @@ namespace SCANsat.SCAN_PartModules
 		 * 	discard, review, count DATA */
 		private void makeScienceData(bool notZero)
 		{
-			if (expDialog != null)
-				DestroyImmediate(expDialog);
 			storedData.Clear();
 			ScienceData sd = getAvailableScience((SCANtype)sensorType, notZero);
 			if (sd == null)
@@ -552,8 +565,7 @@ namespace SCANsat.SCAN_PartModules
 		{
 			if (storedData.Count < 1)
 				return;
-			if (expDialog != null)
-				DestroyImmediate(expDialog);
+			expDialog = null;
 			ScienceData sd = storedData[0];
 			expDialog = ExperimentsResultDialog.DisplayResult(new ExperimentResultDialogPage(part, sd, 1f, 0f, false, "", true, new ScienceLabSearch(vessel, sd), DumpData, KeepData, TransmitData, null));
 		}
