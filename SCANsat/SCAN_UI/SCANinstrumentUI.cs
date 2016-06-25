@@ -16,6 +16,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using FinePrint;
 using FinePrint.Utilities;
 using SCANsat.SCAN_Platform;
@@ -47,7 +48,7 @@ namespace SCANsat.SCAN_UI
 		internal readonly static Rect defaultRect = new Rect(30, 600, 260, 60);
 		private static Rect sessionRect = defaultRect;
 
-		private string infoLabel = "";
+		private StringBuilder infoString;
 		SCANanomaly nearest = null;
 		private string slopeString = "";
 
@@ -80,6 +81,7 @@ namespace SCANsat.SCAN_UI
 			v = FlightGlobals.ActiveVessel;
 			resources = SCANcontroller.setLoadedResourceList();
 			resetResourceList();
+			infoString = new StringBuilder();
 		}
 
 		protected override void OnDestroy()
@@ -99,7 +101,6 @@ namespace SCANsat.SCAN_UI
 
 			if (true)
 			{
-				infoLabel = "";
 				//Check if region below the vessel is scanned
 				if (SCANUtil.isCovered(vlon, vlat, data, SCANtype.AltimetryLoRes))
 				{
@@ -133,10 +134,14 @@ namespace SCANsat.SCAN_UI
 			closeBox(id);
 
 			growS();
-				locationInfo(id);					/* always-on indicator for current lat/long */
-				altInfo(id);						/* show current altitude and slope */
-				biomeInfo(id);						/* show current biome info */
-				resourceInfo(id);					/* show current resource abundance */
+				if (Event.current.type == EventType.Layout)
+				{
+					infoString.Length = 0;
+					locationInfo(id);					/* always-on indicator for current lat/long */
+					altInfo(id);						/* show current altitude and slope */
+					biomeInfo(id);						/* show current biome info */
+					resourceInfo(id);					/* show current resource abundance */
+				}
 				drawInfoLabel(id);					/* method to actually draw the label */
 				drawResourceButtons(id);			/* draw the toggle buttons to change resources */
 				anomalyInfo(id);					/* show nearest anomaly detail */
@@ -169,13 +174,13 @@ namespace SCANsat.SCAN_UI
 
 		private void noData(int id)
 		{
-			infoLabel = "No Data";
+			infoString.Append("No Data");
 		}
 
 		//Displays current vessel location info
 		private void locationInfo(int id)
 		{
-			infoLabel += string.Format("Lat: {0:F2}°, Lon: {1:F2}°", vlat, vlon);
+			infoString.AppendFormat("Lat: {0:F2}°, Lon: {1:F2}°", vlat, vlon);
 
 			foreach (SCANwaypoint p in data.Waypoints)
 			{
@@ -183,7 +188,10 @@ namespace SCANsat.SCAN_UI
 				{
 					double distance = SCANUtil.waypointDistance(vlat, vlon, v.altitude, p.Latitude, p.Longitude, v.altitude, data.Body);
 					if (distance <= 15000)
-						infoLabel += string.Format("\nTarget Dist: {0:N1}m", distance);
+					{
+						infoString.AppendLine();
+						infoString.AppendFormat("Target Dist: {0:N1}m", distance);
+					}
 					continue;
 				}
 
@@ -206,7 +214,8 @@ namespace SCANsat.SCAN_UI
 
 				if (SCANUtil.waypointDistance(vlat, vlon, v.altitude, p.Latitude, p.Longitude, v.altitude, data.Body) <= range)
 				{
-					infoLabel += string.Format("\nWaypoint: {0}", p.Name);
+					infoString.AppendLine();
+					infoString.AppendFormat("Waypoint: {0}", p.Name);
 					break;
 				}
 			}
@@ -217,7 +226,8 @@ namespace SCANsat.SCAN_UI
 		{
 			if ((sensors & SCANtype.Biome) != SCANtype.Nothing && v.mainBody.BiomeMap != null)
 			{
-				infoLabel += string.Format("\nBiome: {0}", SCANUtil.getBiomeName(v.mainBody, vlon, vlat));
+				infoString.AppendLine();
+				infoString.AppendFormat("Biome: {0}", SCANUtil.getBiomeName(v.mainBody, vlon, vlat));
 			}
 		}
 
@@ -241,30 +251,37 @@ namespace SCANsat.SCAN_UI
 			{
 				case Vessel.Situations.LANDED:
 				case Vessel.Situations.PRELAUNCH:
-					infoLabel += string.Format("\nTerrain: {0:N1}m", pqs);
+					infoString.AppendLine();
+					infoString.AppendFormat("Terrain: {0:N1}m", pqs);
 					drawSlope = true;
 					break;
 				case Vessel.Situations.SPLASHED:
 					double d = Math.Abs(pqs) - Math.Abs(h);
 					if ((sensors & SCANtype.Altimetry) != SCANtype.Nothing)
-						infoLabel += string.Format("\nDepth: {0}", SCANuiUtil.distanceString(Math.Abs(d), 10000));
+					{
+						infoString.AppendLine();
+						infoString.AppendFormat("Depth: {0}", SCANuiUtil.distanceString(Math.Abs(d), 10000));
+					}
 					else
 					{
 						d = ((int)(d / 100)) * 100;
-						infoLabel += string.Format("\nDepth: {0}", SCANuiUtil.distanceString(Math.Abs(d), 10000));
+						infoString.AppendLine();
+						infoString.AppendFormat("Depth: {0}", SCANuiUtil.distanceString(Math.Abs(d), 10000));
 					}
 					drawSlope = false;
 					break;
 				default:
 					if (h < 1000 || (sensors & SCANtype.AltimetryHiRes) != SCANtype.Nothing)
 					{
-						infoLabel += string.Format("\nAltitude: {0}", SCANuiUtil.distanceString(h, 100000));
+						infoString.AppendLine();
+						infoString.AppendFormat("Altitude: {0}", SCANuiUtil.distanceString(h, 100000));
 						drawSlope = true;
 					}
 					else if ((sensors & SCANtype.AltimetryLoRes) != SCANtype.Nothing)
 					{
 						h = ((int)(h / 500)) * 500;
-						infoLabel += string.Format("\nAltitude: {0}", SCANuiUtil.distanceString(h, 100000));
+						infoString.AppendLine();
+						infoString.AppendFormat("Altitude: {0}", SCANuiUtil.distanceString(h, 100000));
 						drawSlope = false;
 					}
 					break;
@@ -285,10 +302,11 @@ namespace SCANsat.SCAN_UI
 						lastUpdate = Time.time;
 
 						slopeAVG = SCANUtil.slope(pqs, v.mainBody, vlon, vlat, degreeOffset);
-						slopeString = string.Format("\nSlope: {0:F2}°", slopeAVG);
+						slopeString = string.Format("Slope: {0:F2}°", slopeAVG);
 					}
 
-					infoLabel += slopeString;
+					infoString.AppendLine();
+					infoString.Append(slopeString);
 				}
 			}
 		}
@@ -336,13 +354,20 @@ namespace SCANsat.SCAN_UI
 			if ((sensors & r.SType) != SCANtype.Nothing)
 			{
 				if (high || !onboard)
-					infoLabel += string.Format("\n{0}: {1:P0}", r.Name, SCANUtil.ResourceOverlay(vlat, vlon, r.Name, v.mainBody, SCANcontroller.controller.resourceBiomeLock));
+				{
+					infoString.AppendLine();
+					infoString.AppendFormat("{0}: {1:P0}", r.Name, SCANUtil.ResourceOverlay(vlat, vlon, r.Name, v.mainBody, SCANcontroller.controller.resourceBiomeLock));
+				}
 				else
-					infoLabel += string.Format("\n{0}: {1:P2}", r.Name, SCANUtil.ResourceOverlay(vlat, vlon, r.Name, v.mainBody, SCANcontroller.controller.resourceBiomeLock));
+				{
+					infoString.AppendLine();
+					infoString.AppendFormat("{0}: {1:P2}", r.Name, SCANUtil.ResourceOverlay(vlat, vlon, r.Name, v.mainBody, SCANcontroller.controller.resourceBiomeLock));
+				}
 			}
 			else if ((sensors & SCANtype.FuzzyResources) != SCANtype.Nothing)
 			{
-				infoLabel += string.Format("\n{0}: {1:P0}", r.Name, SCANUtil.ResourceOverlay(vlat, vlon, r.Name, v.mainBody, SCANcontroller.controller.resourceBiomeLock));
+				infoString.AppendLine();
+				infoString.AppendFormat("{0}: {1:P0}", r.Name, SCANUtil.ResourceOverlay(vlat, vlon, r.Name, v.mainBody, SCANcontroller.controller.resourceBiomeLock));
 			}
 			//else if (high)
 			//{
@@ -354,13 +379,14 @@ namespace SCANsat.SCAN_UI
 			//}
 			else
 			{
-				infoLabel += string.Format("\n{0}: No Data", r.Name);
+				infoString.AppendLine();
+				infoString.AppendFormat("{0}: No Data", r.Name);
 			}
 		}
 
 		private void drawInfoLabel(int id)
 		{
-			GUILayout.Label(infoLabel, SCANskins.SCAN_insColorLabel);
+			GUILayout.Label(infoString.ToString(), SCANskins.SCAN_insColorLabel);
 		}
 
 		private void drawResourceButtons(int id)
@@ -395,7 +421,7 @@ namespace SCANsat.SCAN_UI
 			}
 		}
 
-		//Display info on the nearest anomaly *Need to separate the BTDT display*
+		//Display info on the nearest anomaly
 		private void anomalyInfo(int id)
 		{
 			if ((sensors & SCANtype.AnomalyDetail) != SCANtype.Nothing)

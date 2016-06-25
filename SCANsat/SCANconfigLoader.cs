@@ -131,7 +131,25 @@ namespace SCANsat
 				SCANresourceGlobal currentGlobal = SCANcontroller.getResourceNode(rsBody.ResourceName);
 
 				if (currentGlobal == null)
-					continue;
+				{
+					SCANresourceType t = OverlayResourceType(rsBody.ResourceName);
+
+					if (t == null)
+						continue;
+
+					SCANcontroller.addToResourceData(rsBody.ResourceName, new SCANresourceGlobal(rsBody.ResourceName, 20, 0, 0.001f, palette.magenta, palette.cb_orange, t));
+					currentGlobal = SCANcontroller.getResourceNode(rsBody.ResourceName);
+
+					foreach (CelestialBody body in FlightGlobals.Bodies)
+					{
+						SCANresourceBody newBody = currentGlobal.getBodyConfig(body.name, false);
+
+						if (newBody == null)
+							currentGlobal.addToBodyConfigs(body.name, new SCANresourceBody(rsBody.ResourceName, body, 0, 0.001f), false);
+					}
+
+					SCANcontroller.addToLoadedResourceNames(rsBody.ResourceName);
+				}
 
 				SCANresourceBody currentBody = currentGlobal.getBodyConfig(rsBody.PlanetName, false);
 

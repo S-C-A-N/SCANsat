@@ -50,6 +50,7 @@ namespace SCANsat.SCAN_Platform.Palettes
 					else if (paletteSize == 18) m = 126;
 					else if (paletteSize == 9) m = 117;
 					else if (paletteSize == 7) m = 119;
+					else if (paletteSize == 34) m = 136;
 					Texture2D t = new Texture2D(m, 1);
 					Color[] pix = t.GetPixels();
 					int sW = m / paletteSize;

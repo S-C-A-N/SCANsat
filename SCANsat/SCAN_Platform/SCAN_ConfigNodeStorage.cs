@@ -34,6 +34,7 @@ namespace SCANsat.SCAN_Platform
 
 		public virtual void OnDecodeFromConfigNode() { }
 		public virtual void OnEncodeToConfigNode() { }
+		public virtual void onSavePost() { }
 
 		public bool Load() { return Load(FilePath); }
 		public bool Load(string fileFullName)
@@ -100,6 +101,7 @@ namespace SCANsat.SCAN_Platform
 				ConfigNode cnSaveWrapper = new ConfigNode(GetType().Name);
 				cnSaveWrapper.AddNode(cnToSave);
 				cnSaveWrapper.Save(fileFullName);
+				onSavePost();
 				return true;
 			}
 			catch (Exception ex)

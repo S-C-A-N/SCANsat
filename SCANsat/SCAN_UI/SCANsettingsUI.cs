@@ -27,7 +27,8 @@ namespace SCANsat.SCAN_UI
 	class SCANsettingsUI: SCAN_MBW
 	{
 		private string settingsHelpAnomalies = "Select the marker used to display\nanomalies on the map.";
-		private string settingsHelpBackground = "Toggle background scanning on\nsome or all celestial bodies.";
+		private string settingsHelpScanningToggle = "Toggle all SCANsat scanning.";
+		private string settingsHelpBackground = "Toggle background scanning on\nselected celestial bodies.";
 		private string settingsHelpTimeWarp = "Adjust the scanning frequency during TimeWarp.\nHigher settings result in fewer gaps in the maps but may have a performance impact at high TimeWarp.";
 		private string settingsHelpGroundTracks = "Display a visible indicator of\nscanning activity in map mode.";
 		private string settingsHelpGroundTracksActive = "The ground track indicator can be limited to only be displayed for the active vessel.";
@@ -101,6 +102,7 @@ namespace SCANsat.SCAN_UI
 		private void loadStrings()
 		{
 			settingsHelpAnomalies = SCANconfigLoader.languagePack.settingsHelpAnomalies;
+			settingsHelpScanningToggle = SCANconfigLoader.languagePack.settingsHelpScanningToggle;
 			settingsHelpBackground = SCANconfigLoader.languagePack.settingsHelpBackground;
 			settingsHelpTimeWarp = SCANconfigLoader.languagePack.settingsHelpTimeWarp;
 			settingsHelpGroundTracks = SCANconfigLoader.languagePack.settingsHelpGroundTracks;
@@ -273,7 +275,7 @@ namespace SCANsat.SCAN_UI
 
 			GUILayout.Label(textWithTT("Background Scanning", settingsHelpBackground), SCANskins.SCAN_headline);
 			// scan background
-			SCANcontroller.controller.scan_background = GUILayout.Toggle(SCANcontroller.controller.scan_background, textWithTT("Scan all active celestials", settingsHelpBackground), SCANskins.SCAN_settingsToggle);
+			SCANcontroller.controller.scan_background = GUILayout.Toggle(SCANcontroller.controller.scan_background, textWithTT("All scanning active", settingsHelpScanningToggle), SCANskins.SCAN_settingsToggle);
 			// scanning for individual SoIs
 			growE();
 			int count = 0;

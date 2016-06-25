@@ -17,6 +17,7 @@ using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using System.Linq;
+using System.Text;
 using FinePrint;
 using SCANsat.SCAN_Platform;
 using SCANsat.SCAN_Data;
@@ -109,109 +110,114 @@ namespace SCANsat.SCAN_UI.UI_Framework
 		#region UI Utilities
 
 		//Generates a string with info from mousing over the map
-		internal static void mouseOverInfo(double lon, double lat, SCANmap mapObj, SCANdata data, CelestialBody body, bool b)
+		internal static void mouseOverInfo(double lon, double lat, SCANmap mapObj, SCANdata data, CelestialBody body, bool b, ref StringBuilder sb, ref StringBuilder sb2)
 		{
-			string info = "";
-			string posInfo = "";
-
-			if (b)
+			if (Event.current.type == EventType.Repaint)
 			{
-				if (SCANUtil.isCovered(lon, lat, data, SCANtype.AltimetryLoRes))
+				sb.Length = 0;
+				sb2.Length = 0;
+				if (b)
 				{
-					if (body.pqsController == null)
-						info += palette.colored(palette.c_ugly, "LO ");
+					if (SCANUtil.isCovered(lon, lat, data, SCANtype.AltimetryLoRes))
+					{
+						if (body.pqsController == null)
+							sb.Append(palette.colored(palette.c_ugly, "LO "));
+						else
+							sb.Append(palette.colored(palette.c_good, "LO "));
+					}
 					else
-						info += palette.colored(palette.c_good, "LO ");
-				}
-				else
-					info += palette.colored(palette.grey, "LO ");
-				if (SCANUtil.isCovered(lon, lat, data, SCANtype.AltimetryHiRes))
-				{
-					if (body.pqsController == null)
-						info += palette.colored(palette.c_ugly, "HI ");
-					else
-						info += palette.colored(palette.c_good, "HI ");
-				}
-				else
-					info += palette.colored(palette.grey, "HI ");
-				if (SCANUtil.isCovered(lon, lat, data, SCANtype.Biome))
-				{
-					if (body.BiomeMap == null)
-						info += palette.colored(palette.c_ugly, "MULTI ");
-					else
-						info += palette.colored(palette.c_good, "MULTI ");
-				}
-				else
-					info += palette.colored(palette.grey, "MULTI ");
-
-				if (SCANUtil.isCovered(lon, lat, data, SCANtype.Altimetry))
-				{
-					info += getMouseOverElevation(lon, lat, data, 2);
-
+						sb.Append(palette.colored(palette.grey, "LO "));
 					if (SCANUtil.isCovered(lon, lat, data, SCANtype.AltimetryHiRes))
 					{
-						double circum = body.Radius * 2 * Math.PI;
-						double eqDistancePerDegree = circum / 360;
-						double degreeOffset = 5 / eqDistancePerDegree;
-
-						info += string.Format(" {0:F1}° ", SCANUtil.slope(SCANUtil.getElevation(body, lon, lat), body, lon, lat, degreeOffset));
+						if (body.pqsController == null)
+							sb.Append(palette.colored(palette.c_ugly, "HI "));
+						else
+							sb.Append(palette.colored(palette.c_good, "HI "));
 					}
-				}
-
-				if (SCANUtil.isCovered(lon, lat, data, SCANtype.Biome))
-				{
-					info += SCANUtil.getBiomeName(body, lon, lat) + " ";
-				}
-
-				if (mapObj.ResourceActive && SCANconfigLoader.GlobalResource && mapObj.Resource != null) //Adds selected resource amount to big map legend
-				{
-					bool resources = false;
-					bool fuzzy = false;
-
-					if (SCANUtil.isCovered(lon, lat, data, mapObj.Resource.SType))
+					else
+						sb.Append(palette.colored(palette.grey, "HI "));
+					if (SCANUtil.isCovered(lon, lat, data, SCANtype.Biome))
 					{
-						resources = true;
+						if (body.BiomeMap == null)
+							sb.Append(palette.colored(palette.c_ugly, "MULTI "));
+						else
+							sb.Append(palette.colored(palette.c_good, "MULTI "));
 					}
-					else if (SCANUtil.isCovered(lon, lat, data, SCANtype.FuzzyResources))
-					{
-						resources = true;
-						fuzzy = true;
-					}
+					else
+						sb.Append(palette.colored(palette.grey, "MULTI "));
 
-					if (resources)
+					if (SCANUtil.isCovered(lon, lat, data, SCANtype.Altimetry))
 					{
-						info += palette.colored(mapObj.Resource.MaxColor, getResourceAbundance(mapObj.Body, lat, lon, fuzzy, mapObj.Resource)) + " ";
-					}
-				}
+						sb.Append(getMouseOverElevation(lon, lat, data, 2));
 
-				if (SCANcontroller.controller.map_waypoints)
-				{
-					double range = ContractDefs.Survey.MaximumTriggerRange;
-					foreach (SCANwaypoint p in data.Waypoints)
-					{
-						if (!p.LandingTarget)
+						if (SCANUtil.isCovered(lon, lat, data, SCANtype.AltimetryHiRes))
 						{
-							if (p.Root != null)
-							{
-								if (p.Root.ContractState != Contracts.Contract.State.Active)
-									continue;
-							}
-							if (p.Param != null)
-							{
-								if (p.Param.State != Contracts.ParameterState.Incomplete)
-									continue;
-							}
+							double circum = body.Radius * 2 * Math.PI;
+							double eqDistancePerDegree = circum / 360;
+							double degreeOffset = 5 / eqDistancePerDegree;
 
-							if (SCANUtil.waypointDistance(lat, lon, 1000, p.Latitude, p.Longitude, 1000, body) <= range)
+							sb.AppendFormat(" {0:F1}° ", SCANUtil.slope(SCANUtil.getElevation(body, lon, lat), body, lon, lat, degreeOffset));
+						}
+					}
+
+					if (SCANUtil.isCovered(lon, lat, data, SCANtype.Biome))
+					{
+						sb.Append(SCANUtil.getBiomeName(body, lon, lat));
+						sb.Append(" ");
+					}
+
+					if (mapObj.ResourceActive && SCANconfigLoader.GlobalResource && mapObj.Resource != null) //Adds selected resource amount to big map legend
+					{
+						bool resources = false;
+						bool fuzzy = false;
+
+						if (SCANUtil.isCovered(lon, lat, data, mapObj.Resource.SType))
+						{
+							resources = true;
+						}
+						else if (SCANUtil.isCovered(lon, lat, data, SCANtype.FuzzyResources))
+						{
+							resources = true;
+							fuzzy = true;
+						}
+
+						if (resources)
+						{
+							sb.Append(palette.colored(mapObj.Resource.MaxColor, getResourceAbundance(mapObj.Body, lat, lon, fuzzy, mapObj.Resource)));
+							sb.Append(" ");
+						}
+					}
+
+					if (SCANcontroller.controller.map_waypoints)
+					{
+						double range = ContractDefs.Survey.MaximumTriggerRange;
+						foreach (SCANwaypoint p in data.Waypoints)
+						{
+							if (!p.LandingTarget)
 							{
-								info += p.Name + " ";
-								break;
+								if (p.Root != null)
+								{
+									if (p.Root.ContractState != Contracts.Contract.State.Active)
+										continue;
+								}
+								if (p.Param != null)
+								{
+									if (p.Param.State != Contracts.ParameterState.Incomplete)
+										continue;
+								}
+
+								if (SCANUtil.waypointDistance(lat, lon, 1000, p.Latitude, p.Longitude, 1000, body) <= range)
+								{
+									sb.Append(p.Name);
+									sb.Append(" ");
+									break;
+								}
 							}
 						}
 					}
-				}
 
-				posInfo += string.Format("{0} (lat: {1:F2} lon: {2:F2})", toDMS(lat, lon), lat, lon);
+					sb2.AppendFormat("{0} (lat: {1:F2} lon: {2:F2})", toDMS(lat, lon), lat, lon);
+				}
 			}
 			//else
 			//{
@@ -219,102 +225,106 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			//}
 
 			//Draw the readout info labels
-			readableLabel(info, false);
+			readableLabel(sb.ToString(), false);
 			SCAN_MBW.fillS(-10);
-			readableLabel(posInfo, false);
+			readableLabel(sb2.ToString(), false);
 		}
 
-		internal static void mouseOverInfoSimple(double lon, double lat, SCANmap mapObj, SCANdata data, CelestialBody body, bool b)
+		internal static void mouseOverInfoSimple(double lon, double lat, SCANmap mapObj, SCANdata data, CelestialBody body, bool b, ref StringBuilder sb, ref StringBuilder sb2)
 		{
-			string info = "";
-			string posInfo = "";
-
-			if (b)
+			if (Event.current.type == EventType.Repaint)
 			{
-				if (SCANUtil.isCovered(lon, lat, data, SCANtype.Altimetry))
+				sb.Length = 0;
+				sb2.Length = 0;
+				if (b)
 				{
-					info += getMouseOverElevation(lon, lat, data, 0);
-
-					if (SCANUtil.isCovered(lon, lat, data, SCANtype.AltimetryHiRes))
+					if (SCANUtil.isCovered(lon, lat, data, SCANtype.Altimetry))
 					{
-						double circum = body.Radius * 2 * Math.PI;
-						double eqDistancePerDegree = circum / 360;
-						double degreeOffset = 5 / eqDistancePerDegree;
+						sb.Append(getMouseOverElevation(lon, lat, data, 0));
 
-						info += string.Format(" {0:F1}° ", SCANUtil.slope(SCANUtil.getElevation(body, lon, lat), body, lon, lat, degreeOffset));
-					}
-				}
-
-				if (SCANUtil.isCovered(lon, lat, data, SCANtype.Biome))
-				{
-					info += SCANUtil.getBiomeName(body, lon, lat) + " ";
-				}
-
-				if (mapObj.ResourceActive && SCANconfigLoader.GlobalResource && mapObj.Resource != null)
-				{
-					string label = "";
-					if (SCANUtil.isCovered(lon, lat, data, mapObj.Resource.SType))
-					{
-						double amount = SCANUtil.ResourceOverlay(lat, lon, mapObj.Resource.Name, mapObj.Body, SCANcontroller.controller.resourceBiomeLock);
-						if (amount < 0)
-							label = "Unknown";
-						else
+						if (SCANUtil.isCovered(lon, lat, data, SCANtype.AltimetryHiRes))
 						{
-							if (amount > 1)
-								amount = 1;
-							label = amount.ToString("P2");
-						}
-						info += palette.colored(mapObj.Resource.MaxColor, mapObj.Resource.Name + ": " + label + " ");
-					}
-					else if (SCANUtil.isCovered(lon, lat, data, SCANtype.FuzzyResources))
-					{
-						double amount = SCANUtil.ResourceOverlay(lat, lon, mapObj.Resource.Name, mapObj.Body, SCANcontroller.controller.resourceBiomeLock);
-						if (amount < 0)
-							label = "Unknown";
-						else
-						{
-							if (amount > 1)
-								amount = 1;
-							label = amount.ToString("P0");
-						}
-						info += palette.colored(mapObj.Resource.MaxColor, mapObj.Resource.Name + ": " + label + " ");
-					}
-				}
+							double circum = body.Radius * 2 * Math.PI;
+							double eqDistancePerDegree = circum / 360;
+							double degreeOffset = 5 / eqDistancePerDegree;
 
-				if (SCANcontroller.controller.map_waypoints)
-				{
-					double range = ContractDefs.Survey.MaximumTriggerRange;
-					foreach (SCANwaypoint p in data.Waypoints)
-					{
-						if (!p.LandingTarget)
-						{
-							if (p.Root != null)
-							{
-								if (p.Root.ContractState != Contracts.Contract.State.Active)
-									continue;
-							}
-							if (p.Param != null)
-							{
-								if (p.Param.State != Contracts.ParameterState.Incomplete)
-									continue;
-							}
-
-							if (SCANUtil.waypointDistance(lat, lon, 1000, p.Latitude, p.Longitude, 1000, body) <= range)
-							{
-								info += p.Name + " ";
-								break;
-							}
+							sb.AppendFormat(" {0:F1}° ", SCANUtil.slope(SCANUtil.getElevation(body, lon, lat), body, lon, lat, degreeOffset));
 						}
 					}
-				}
 
-				posInfo += string.Format("{0} ({1:F2}°,{2:F2}°)", toDMS(lat, lon), lat, lon);
+					if (SCANUtil.isCovered(lon, lat, data, SCANtype.Biome))
+					{
+						sb.Append(SCANUtil.getBiomeName(body, lon, lat));
+						sb.Append(" ");
+					}
+
+					if (mapObj.ResourceActive && SCANconfigLoader.GlobalResource && mapObj.Resource != null)
+					{
+						string label = "";
+						if (SCANUtil.isCovered(lon, lat, data, mapObj.Resource.SType))
+						{
+							double amount = SCANUtil.ResourceOverlay(lat, lon, mapObj.Resource.Name, mapObj.Body, SCANcontroller.controller.resourceBiomeLock);
+							if (amount < 0)
+								label = "Unknown";
+							else
+							{
+								if (amount > 1)
+									amount = 1;
+								label = amount.ToString("P2");
+							}
+							sb.Append(palette.colored(mapObj.Resource.MaxColor, string.Format("{0}: {1} ", mapObj.Resource.Name, label)));
+						}
+						else if (SCANUtil.isCovered(lon, lat, data, SCANtype.FuzzyResources))
+						{
+							double amount = SCANUtil.ResourceOverlay(lat, lon, mapObj.Resource.Name, mapObj.Body, SCANcontroller.controller.resourceBiomeLock);
+							if (amount < 0)
+								label = "Unknown";
+							else
+							{
+								if (amount > 1)
+									amount = 1;
+								label = amount.ToString("P0");
+							}
+							sb.Append(palette.colored(mapObj.Resource.MaxColor, string.Format("{0}: {1} ", mapObj.Resource.Name, label)));
+						}
+					}
+
+					if (SCANcontroller.controller.map_waypoints)
+					{
+						double range = ContractDefs.Survey.MaximumTriggerRange;
+						foreach (SCANwaypoint p in data.Waypoints)
+						{
+							if (!p.LandingTarget)
+							{
+								if (p.Root != null)
+								{
+									if (p.Root.ContractState != Contracts.Contract.State.Active)
+										continue;
+								}
+								if (p.Param != null)
+								{
+									if (p.Param.State != Contracts.ParameterState.Incomplete)
+										continue;
+								}
+
+								if (SCANUtil.waypointDistance(lat, lon, 1000, p.Latitude, p.Longitude, 1000, body) <= range)
+								{
+									sb.Append(p.Name);
+									sb.Append(" ");
+									break;
+								}
+							}
+						}
+					}
+
+					sb2.AppendFormat("{0} ({1:F2}°,{2:F2}°)", toDMS(lat, lon), lat, lon);
+				}
 			}
 
 			//Draw the readout info labels
-			readableLabel(info, false);
+			readableLabel(sb.ToString(), false);
 			SCAN_MBW.fillS(-10);
-			readableLabel(posInfo, false);
+			readableLabel(sb2.ToString(), false);
 		}
 
 		internal static string getResourceAbundance(CelestialBody Body, double lat, double lon, bool fuzzy, SCANresourceGlobal resource)
@@ -457,66 +467,61 @@ namespace SCANsat.SCAN_UI.UI_Framework
 		}
 
 		//Method to handle active scanner display
-		internal static string InfoText(Vessel v, SCANdata data, bool b)
+		internal static void InfoText(Vessel v, SCANdata data, bool b, ref StringBuilder sb)
 		{
-			string infotext = "";
-
+			sb.Length = 0;
 			SCANcontroller.SCANsensor s;
 
 			//Check here for each sensor; if active, in range, and at the ideal altitude
 			s = SCANcontroller.controller.getSensorStatus(v, SCANtype.AltimetryLoRes);
 			if (s == null)
-				infotext += palette.colored(palette.grey, "LO");
+				sb.Append(palette.colored(palette.grey, "LO"));
 			else if (!s.inRange)
-				infotext += palette.colored(palette.c_bad, "LO");
+				sb.Append(palette.colored(palette.c_bad, "LO"));
 			else if (!s.bestRange && (Time.realtimeSinceStartup % 2 < 1))
-				infotext += palette.colored(palette.c_bad, "LO");
+				sb.Append(palette.colored(palette.c_bad, "LO"));
 			else
-				infotext += palette.colored(palette.c_good, "LO");
+				sb.Append(palette.colored(palette.c_good, "LO"));
 
 			s = SCANcontroller.controller.getSensorStatus(v, SCANtype.AltimetryHiRes);
 			if (s == null)
-				infotext += palette.colored(palette.grey, " HI");
+				sb.Append(palette.colored(palette.grey, " HI"));
 			else if (!s.inRange)
-				infotext += palette.colored(palette.c_bad, " HI");
+				sb.Append(palette.colored(palette.c_bad, " HI"));
 			else if (!s.bestRange && (Time.realtimeSinceStartup % 2 < 1))
-				infotext += palette.colored(palette.c_bad, " HI");
+				sb.Append(palette.colored(palette.c_bad, " HI"));
 			else
-				infotext += palette.colored(palette.c_good, " HI");
+				sb.Append(palette.colored(palette.c_good, " HI"));
 
 			s = SCANcontroller.controller.getSensorStatus(v, SCANtype.Biome);
 			if (s == null)
-				infotext += palette.colored(palette.grey, " MULTI");
+				sb.Append(palette.colored(palette.grey, " MULTI"));
 			else if (!s.inRange)
-				infotext += palette.colored(palette.c_bad, " MULTI");
+				sb.Append(palette.colored(palette.c_bad, " MULTI"));
 			else if (!s.bestRange && (Time.realtimeSinceStartup % 2 < 1))
-				infotext += palette.colored(palette.c_bad, " MULTI");
+				sb.Append(palette.colored(palette.c_bad, " MULTI"));
 			else
-				infotext += palette.colored(palette.c_good, " MULTI");
+				sb.Append(palette.colored(palette.c_good, " MULTI"));
 
 			s = SCANcontroller.controller.getSensorStatus(v, SCANtype.AnomalyDetail);
 			if (s == null)
-				infotext += palette.colored(palette.grey, " BTDT");
+				sb.Append(palette.colored(palette.grey, " BTDT"));
 			else if (!s.inRange)
-				infotext += palette.colored(palette.c_bad, " BTDT");
+				sb.Append(palette.colored(palette.c_bad, " BTDT"));
 			else if (!s.bestRange && (Time.realtimeSinceStartup % 2 < 1))
-				infotext += palette.colored(palette.c_bad, " BTDT");
+				sb.Append(palette.colored(palette.c_bad, " BTDT"));
 			else
-				infotext += palette.colored(palette.c_good, " BTDT");
+				sb.Append(palette.colored(palette.c_good, " BTDT"));
 
 			//Get coverage percentage for all active scanners on the vessel
 			SCANtype active = SCANcontroller.controller.activeSensorsOnVessel(v.id);
 			if (active != SCANtype.Nothing)
 			{
 				double cov = SCANUtil.getCoveragePercentage(data, active);
-				infotext += string.Format(" {0:N1}%", cov);
+				sb.Append(string.Format(" {0:N1}%", cov));
 				if (b)
-				{
-					infotext = palette.colored(palette.c_bad, "NO POWER");
-				}
+					sb.Append(palette.colored(palette.c_bad, "NO POWER"));
 			}
-
-			return infotext;
 		}
 
 		/* UI: conversions to and from DMS */
@@ -541,11 +546,14 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			return string.Format("{0} {1}", toDMS(lat, "S", "N", precision), toDMS(lon, "W", "E", precision));
 		}
 
-		internal static string distanceString(double dist, double cutoff)
+		internal static string distanceString(double dist, double cutoff, double cutoff2 = double.MaxValue)
 		{
 			if (dist < cutoff)
 				return string.Format("{0:N1}m", dist);
-			return string.Format("{0:N2}km", dist / 1000d);
+			else if (dist < cutoff2)
+				return string.Format("{0:N2}km", dist / 1000d);
+			else
+				return string.Format("{0:N0}km", dist / 1000d);
 		}
 
 		internal static void clearTexture(Texture2D tex)

@@ -1,3 +1,18 @@
+Version 16.2 - 2016-6-21
+------------------------
+
+- Update for KSP 1.1.3
+
+- Updates and minor changes to KSPedia entry
+- Add terrain height multipliers for use with Module Manager when using planet rescaling mods (Sigma Dimensions)
+- Rename and clarify the background scanning toggle button
+- Clarify background scanning status in context menus and scanning indicators
+- Implement a silent science collection method (KOS support for not opening the results window)
+- Add new terrain color palettes and change some default palettes
+- Allow planetary resource configs to be loaded if no global config is defined
+- Some GUI performance and garbage creation optimizations
+
+
 Version 16.1 - 2016-5-2
 ------------------------
 

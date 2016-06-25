@@ -591,6 +591,8 @@ namespace SCANsat.SCAN_UI
 						j = 12;
 					else if (palette.CurrentPalettes.paletteType == Palette.Kind.Qualitative)
 						j = 8;
+					else if (palette.CurrentPalettes.paletteType == Palette.Kind.Fixed)
+						j = 11;
 					else if (palette.CurrentPalettes.paletteType == Palette.Kind.Invertable || palette.CurrentPalettes.paletteType == Palette.Kind.Unknown)
 						j = 0;
 					for (int i = 0; i < j; i++)

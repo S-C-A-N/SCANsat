@@ -87,6 +87,8 @@ namespace SCANsat.SCAN_Platform.Palettes
 				palettes.Add(FixedColors.FixedColorPalettes.plumbago());
 				palettes.Add(FixedColors.FixedColorPalettes.cw1_013());
 				palettes.Add(FixedColors.FixedColorPalettes.arctic());
+				palettes.Add(FixedColors.FixedColorPalettes.mercury());
+				palettes.Add(FixedColors.FixedColorPalettes.venus());
 			}
 		}
 	}
