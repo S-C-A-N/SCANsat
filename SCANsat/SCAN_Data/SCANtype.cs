@@ -28,10 +28,10 @@ namespace SCANsat.SCAN_Data
 		Kethane = 1 << 6,         // Kethane
 		MetallicOre = 1 << 7,             // CRP Ore
 		Ore = 1 << 8,				//Stock Ore
-		Helium3 = 1 << 9,       // Helium 3
+		SolarWind = 1 << 9,       // SolarWind - He-3 - KSPI
 		Uraninite = 1 << 10,        // Uranium - CRP
-		Thorium = 1 << 11,        // Thorium - CRP
-		Alumina = 1 << 12,        // Alumina - CRP
+		Monazite = 1 << 11,        // Monazite - Thorium - KSPI
+		Alumina = 1 << 12,        // Alumina - CRP - KSPI
 		Water = 1 << 13,          // Water - CRP
 		Aquifer = 1 << 14,        // Aquifer - CRP
 		Minerals = 1 << 15,       // Minerals - CRP
@@ -44,14 +44,17 @@ namespace SCANsat.SCAN_Data
 		RareMetals = 1 << 22, // Exotic Minerals - CRP
 		ExoticMinerals = 1 << 23,			// Dirt - CRP
 		Dirt = 1 << 24,	// Rare Metals - CRP
-		CRP_Reserved = 1 << 25,
-		GeoEnergy = 1 << 26,
+		Borate = 1 << 25,		// Borate - KSPI
+		GeoEnergy = 1 << 26,	// Geo Energy - Pathfinder
+		SaltWater = 1 << 27,	// Salt Water - KSPI
+		Silicates = 1 << 28,	// Silicates - KSPI
 
 		Everything_SCAN = (1 << 6) - 1,	// All default SCANsat scanners
 		Science = 524299,				// All science collection types
 		AllResources = 2147483584,		// All resource types
-		DefinedResources = 66584448,		// All defined resource types
+		DefinedResources = 536346496,		// All defined resource types
 		MKSResources = 32613504,			// All standard MKS/USI resources
+		KSPIResourece = 437272320,					// All KSPI standard resources
 		Everything = Int32.MaxValue      // All scanner types
 	}
 }
