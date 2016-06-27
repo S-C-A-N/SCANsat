@@ -393,11 +393,11 @@ namespace SCANsat.SCAN_Data
 				uncov += coverage_count[7];
 			if ((type & SCANtype.Ore) != SCANtype.Nothing)
 				uncov += coverage_count[8];
-			if ((type & SCANtype.Helium3) != SCANtype.Nothing)
+			if ((type & SCANtype.SolarWind) != SCANtype.Nothing)
 				uncov += coverage_count[9];
 			if ((type & SCANtype.Uraninite) != SCANtype.Nothing)
 				uncov += coverage_count[10];
-			if ((type & SCANtype.Thorium) != SCANtype.Nothing)
+			if ((type & SCANtype.Monazite) != SCANtype.Nothing)
 				uncov += coverage_count[11];
 			if ((type & SCANtype.Alumina) != SCANtype.Nothing)
 				uncov += coverage_count[12];
@@ -425,10 +425,14 @@ namespace SCANsat.SCAN_Data
 				uncov += coverage_count[23];
 			if ((type & SCANtype.Dirt) != SCANtype.Nothing)
 				uncov += coverage_count[24];
-			if ((type & SCANtype.CRP_Reserved) != SCANtype.Nothing)
+			if ((type & SCANtype.Borate) != SCANtype.Nothing)
 				uncov += coverage_count[25];
 			if ((type & SCANtype.GeoEnergy) != SCANtype.Nothing)
 				uncov += coverage_count[26];
+			if ((type & SCANtype.SaltWater) != SCANtype.Nothing)
+				uncov += coverage_count[27];
+			if ((type & SCANtype.Silicates) != SCANtype.Nothing)
+				uncov += coverage_count[28];
 			
 			return uncov;
 		}

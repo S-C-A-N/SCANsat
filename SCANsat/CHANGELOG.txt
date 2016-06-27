@@ -1,3 +1,12 @@
+Version 16.3 - 2016-6-27
+------------------------
+
+- Adds new resource types and Module Manager scanner configs for KSP Interstellar Extended Version 1.9
+     - Deprecated unused He-3 and Thorium resource types
+
+- Updated for Mechjeb 2.5.8
+
+
 Version 16.2 - 2016-6-21
 ------------------------
 
