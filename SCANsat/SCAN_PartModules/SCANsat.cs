@@ -30,6 +30,7 @@ namespace SCANsat.SCAN_PartModules
 		private Animation anim = null;
 		private List<ScienceData> storedData = new List<ScienceData>();
 		private ExperimentsResultDialog expDialog = null;
+		public List<ModuleResource> resourceInputs = new List<ModuleResource>();
 
 		/* SAT: KSP entry points */
 		public override void OnStart(StartState state)
@@ -103,7 +104,7 @@ namespace SCANsat.SCAN_PartModules
 
 			if (scanning) animate(1, 1);
 			powerIsProblem = false;
-			print("[SCANsat] sensorType: " + sensorType.ToString() + " fov: " + fov.ToString() + " min_alt: " + min_alt.ToString() + " max_alt: " + max_alt.ToString() + " best_alt: " + best_alt.ToString() + " power: " + power.ToString());
+			print("[SCANsat] sensorType: " + sensorType.ToString() + " fov: " + fov.ToString() + " min_alt: " + min_alt.ToString() + " max_alt: " + max_alt.ToString() + " best_alt: " + best_alt.ToString());
 		}
 
 		protected virtual void Update()
@@ -162,17 +163,22 @@ namespace SCANsat.SCAN_PartModules
 				{
 					if (TimeWarp.CurrentRate < 15000)
 					{
-						float p = power * TimeWarp.fixedDeltaTime;
-						float e = part.RequestResource("ElectricCharge", p);
-						if (e < p)
+						int l = resourceInputs.Count;
+
+						for (int i = 0; i < l; i++)
 						{
-							unregisterScanner();
-							powerIsProblem = true;
-							powerTimer = 0;
-						}
-						else
-						{
-							powerIsProblem = false;
+							ModuleResource resource = resourceInputs[i];
+							resource.currentRequest = resource.rate * TimeWarp.fixedDeltaTime;
+							resource.currentAmount = part.RequestResource(resource.id, resource.currentRequest);
+							if (resource.currentAmount < resource.currentRequest)
+							{
+								unregisterScanner();
+								powerIsProblem = true;
+								powerTimer = 0;
+								break;
+							}
+							else
+								powerIsProblem = false;
 						}
 					}
 					else if (powerIsProblem)
@@ -196,6 +202,23 @@ namespace SCANsat.SCAN_PartModules
 					storedData.Add(data);
 				}
 			}
+
+			if (node.HasNode("RESOURCE"))
+				resourceInputs = new List<ModuleResource>();
+			else
+				return;
+
+			ConfigNode[] resources = node.GetNodes("RESOURCE");
+
+			int l = resources.Length;
+
+			for (int i = 0; i < l; i++)
+			{
+				ConfigNode resource = resources[i];
+				ModuleResource mod = new ModuleResource();
+				mod.Load(resource);
+				resourceInputs.Add(mod);
+			}
 		}
 
 		public override void OnSave(ConfigNode node)
@@ -215,22 +238,15 @@ namespace SCANsat.SCAN_PartModules
 
 			string str = base.GetInfo();
 			if (min_alt != 0)
-			{
 				str += "Altitude ( min): " + (min_alt / 1000).ToString("F0") + " km\n";
-			}
 			if (best_alt != min_alt)
-			{
 				str += "Altitude (best): " + (best_alt / 1000).ToString("F0") + " km\n";
-			}
 			if (max_alt != 0)
-			{
 				str += "Altitude ( max): " + (max_alt / 1000).ToString("F0") + " km\n";
-			}
 			if (fov != 0)
-			{
 				str += "FOV: " + fov.ToString("F0") + " °\n";
-			}
-			str += "Power usage: " + power.ToString("F1") + " charge/s\n";
+			if (resourceInputs.Count > 0)
+				str += PartModuleUtil.PrintResourceRequirements("Requires:", resourceInputs.ToArray());
 			return str;
 		}
 
@@ -245,8 +261,6 @@ namespace SCANsat.SCAN_PartModules
 		public float max_alt;
 		[KSPField]
 		public float best_alt;
-		[KSPField]
-		public float power;
 		[KSPField]
 		public string scanName;
 		[KSPField]
