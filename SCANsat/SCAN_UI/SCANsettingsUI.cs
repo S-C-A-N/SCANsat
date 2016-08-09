@@ -177,9 +177,8 @@ namespace SCANsat.SCAN_UI
 				gui_settings_window_resets_tooltips(id);/* reset windows and positions and toggle tooltips*/
 				gui_settings_export_options(id);
 				gui_settings_data_resets(id);			/* reset data and/or reset resources */
-				# if DEBUG
+				if (SCANconfigLoader.SCANNode.CheatMapFill)
 					gui_settings_window_mapFill(id);	/* debug option to fill in maps */
-				#endif
 			stopS();
 
 			warningBox(id);						/* Warning box for deleting map data */
