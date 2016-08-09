@@ -1,3 +1,13 @@
+Version 16.4 - 2016-8-9
+------------------------
+
+- Update contracts for Contract Configurator 1.15+ (severedsolo)
+- Switch to using ModuleResource and RESOURCE nodes for all power consumption (NathanKell)
+- Calculate the local min and max terrain for RPM maps
+- Hidden map fill cheat option
+    - Add "cheatMapFill = True" to the SCANcolors.cfg file
+- Fix potential Toolbar related errors (bssthu)
+
 Version 16.3 - 2016-6-27
 ------------------------
 
