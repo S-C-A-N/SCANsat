@@ -175,8 +175,6 @@ namespace SCANsat.SCAN_PartModules
 								unregisterScanner();
 								powerIsProblem = true;
 								powerTimer = 0;
-								SCANUtil.SCANlog("Power is problem [{0}]", (SCANtype)sensorType);
-								SCANUtil.SCANlog("Current Request: {0:N3} - Current Amount: {1:N3}", resource.currentRequest, resource.currentAmount);
 								break;
 							}
 							else
