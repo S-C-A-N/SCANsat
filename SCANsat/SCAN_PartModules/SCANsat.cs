@@ -170,7 +170,7 @@ namespace SCANsat.SCAN_PartModules
 							ModuleResource resource = resourceInputs[i];
 							resource.currentRequest = resource.rate * TimeWarp.fixedDeltaTime;
 							resource.currentAmount = part.RequestResource(resource.id, resource.currentRequest);
-							if (resource.currentAmount < resource.currentRequest)
+							if (resource.currentAmount < resource.currentRequest * 0.9)
 							{
 								unregisterScanner();
 								powerIsProblem = true;
@@ -244,9 +244,9 @@ namespace SCANsat.SCAN_PartModules
 			if (max_alt != 0)
 				str += "Altitude ( max): " + (max_alt / 1000).ToString("F0") + " km\n";
 			if (fov != 0)
-				str += "FOV: " + fov.ToString("F0") + " °\n";
+				str += "FOV: " + fov.ToString("F0") + " °";
 			if (resourceInputs.Count > 0)
-				str += PartModuleUtil.PrintResourceRequirements("Requires:", resourceInputs.ToArray());
+				str += PartModuleUtil.PrintResourceRequirements("Requires:", resourceInputs.ToArray()) + "\n";
 			return str;
 		}
 

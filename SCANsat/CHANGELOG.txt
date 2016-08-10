@@ -1,3 +1,8 @@
+Version 16.5 - 2016-8-10
+------------------------
+
+- Fix bug in electricity usage that was preventing scanning
+
 Version 16.4 - 2016-8-9
 ------------------------
 
