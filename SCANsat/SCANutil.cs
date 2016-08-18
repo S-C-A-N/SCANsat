@@ -200,20 +200,46 @@ namespace SCANsat
 			if (prefab == null)
 				return false;
 
-			if (!(prefab.Modules.Contains<SCANsat.SCAN_PartModules.SCANsat>() || prefab.Modules.Contains<ModuleSCANresourceScanner>()))
+			if (!(m.moduleName == "SCANsat" || m.moduleName == "ModuleSCANresourceScanner"))
 				return false;
 
-			if (!(m.moduleName == "SCANsat" || m.moduleName == "ModuleSCANresourceScanner"))
+			int sensor = 0;
+			double fov = 0;
+			double min = 0;
+			double max = 0;
+			double best = 0;
+
+			if (prefab.Modules.Contains<SCANsat.SCAN_PartModules.SCANsat>())
+			{
+				SCANsat.SCAN_PartModules.SCANsat scan = prefab.Modules.GetModule<SCANsat.SCAN_PartModules.SCANsat>();
+
+				if (scan == null)
+					return false;
+
+				sensor = scan.sensorType;
+				fov = scan.fov;
+				min = scan.min_alt;
+				max = scan.max_alt;
+				best = scan.best_alt;
+			}
+			else if (prefab.Modules.Contains<ModuleSCANresourceScanner>())
+			{
+				SCANsat.SCAN_PartModules.ModuleSCANresourceScanner scan = prefab.Modules.GetModule<SCANsat.SCAN_PartModules.ModuleSCANresourceScanner>();
+
+				if (scan == null)
+					return false;
+
+				sensor = scan.sensorType;
+				fov = scan.fov;
+				min = scan.min_alt;
+				max = scan.max_alt;
+				best = scan.best_alt;
+			}
+			else
 				return false;
 
 			if (SCANcontroller.controller == null)
 				return false;
-
-			int sensor = prefab.Fields.GetValue<int>("sensorType");
-			double fov = prefab.Fields.GetValue<double>("fov");
-			double min = prefab.Fields.GetValue<double>("min_alt");
-			double max = prefab.Fields.GetValue<double>("max_alt");
-			double best = prefab.Fields.GetValue<double>("best_alt");
 
 			SCANcontroller.controller.registerSensor(v, (SCANtype)sensor, fov, min, max, best);
 
@@ -240,16 +266,34 @@ namespace SCANsat
 			if (prefab == null)
 				return false;
 
-			if (!(prefab.Modules.Contains<SCANsat.SCAN_PartModules.SCANsat>() || prefab.Modules.Contains<ModuleSCANresourceScanner>()))
+			if (!(m.moduleName == "SCANsat" || m.moduleName == "ModuleSCANresourceScanner"))
 				return false;
 
-			if (!(m.moduleName == "SCANsat" || m.moduleName == "ModuleSCANresourceScanner"))
+			int sensor = 0;
+
+			if (prefab.Modules.Contains<SCANsat.SCAN_PartModules.SCANsat>())
+			{
+				SCANsat.SCAN_PartModules.SCANsat scan = prefab.Modules.GetModule<SCANsat.SCAN_PartModules.SCANsat>();
+
+				if (scan == null)
+					return false;
+
+				sensor = scan.sensorType;
+			}
+			else if (prefab.Modules.Contains<ModuleSCANresourceScanner>())
+			{
+				SCANsat.SCAN_PartModules.ModuleSCANresourceScanner scan = prefab.Modules.GetModule<SCANsat.SCAN_PartModules.ModuleSCANresourceScanner>();
+
+				if (scan == null)
+					return false;
+
+				sensor = scan.sensorType;
+			}
+			else
 				return false;
 
 			if (SCANcontroller.controller == null)
 				return false;
-
-			int sensor = prefab.Fields.GetValue<int>("sensorType");
 
 			SCANcontroller.controller.unregisterSensor(v, (SCANtype)sensor);
 
