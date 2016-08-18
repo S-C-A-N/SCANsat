@@ -1,3 +1,8 @@
+Version 16.6 - 2016-8-18
+-----------------------
+
+- Fix compatibility with Kerbalism
+
 Version 16.5 - 2016-8-10
 ------------------------
 
