@@ -28,7 +28,7 @@ namespace SCANsat.SCAN_PartModules
 		[KSPField]
 		public bool hiDetailOnly;
 
-		private List<ModuleHighDefCamera> stockCameras;
+		//private List<ModuleHighDefCamera> stockCameras;
 
 		private bool activated;
 		private bool refreshState;
@@ -43,7 +43,7 @@ namespace SCANsat.SCAN_PartModules
 			activated = true;
 			refreshState = true;
 
-			stockCameras = findCameras();
+			//stockCameras = findCameras();
 
 			minZoom = clampValue(minZoom, 1, 10);
 			maxZoom = clampValue(maxZoom, 10, 1000);
@@ -57,10 +57,10 @@ namespace SCANsat.SCAN_PartModules
 			Events["resetCenter"].active = false;
 		}
 
-		private List<ModuleHighDefCamera> findCameras()
-		{
-			return part.FindModulesImplementing<ModuleHighDefCamera>().ToList();
-		}
+		//private List<ModuleHighDefCamera> findCameras()
+		//{
+		//	return part.FindModulesImplementing<ModuleHighDefCamera>().ToList();
+		//}
 
 		private float clampValue (float value, float min, float max)
 		{
@@ -126,24 +126,24 @@ namespace SCANsat.SCAN_PartModules
 
 		private void enableConnectedModules()
 		{
-			if (stockCameras != null)
-			{
-				foreach (ModuleHighDefCamera m in stockCameras)
-				{
-					m.EnableModule();
-				}
-			}
+			//if (stockCameras != null)
+			//{
+			//	foreach (ModuleHighDefCamera m in stockCameras)
+			//	{
+			//		m.EnableModule();
+			//	}
+			//}
 		}
 
 		private void disableConnectedModules()
 		{
-			if (stockCameras != null)
-			{
-				foreach (ModuleHighDefCamera m in stockCameras)
-				{
-					m.DisableModule();
-				}
-			}
+			//if (stockCameras != null)
+			//{
+			//	foreach (ModuleHighDefCamera m in stockCameras)
+			//	{
+			//		m.DisableModule();
+			//	}
+			//}
 		}
 
 		public void EnableModule()
