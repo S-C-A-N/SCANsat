@@ -185,10 +185,12 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			Debris = 6,
 			Planet = 7,
 			Mystery = 8,
+			Plane = 13,
 			Encounter = 10,
 			Exit = 11,
 			EVA = 12,
 			Ball = 13,
+			Relay = 14,
 			TargetTop = 15,
 			TargetBottom = 16,
 			ManeuverNode = 17,
@@ -214,8 +216,12 @@ namespace SCANsat.SCAN_UI.UI_Framework
 					return OrbitIcon.Flag;
 				case VesselType.Lander:
 					return OrbitIcon.Lander;
+				case VesselType.Plane:
+					return OrbitIcon.Plane;
 				case VesselType.Probe:
 					return OrbitIcon.Probe;
+				case VesselType.Relay:
+					return OrbitIcon.Relay;
 				case VesselType.Rover:
 					return OrbitIcon.Rover;
 				case VesselType.Ship:
