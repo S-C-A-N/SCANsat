@@ -1,3 +1,13 @@
+Version 16.8 - 2016-9-23
+-----------------------
+
+- Fix not loading background scanning vessels
+- Add support for displaying new vessel types
+- Detect new anomaly types
+- Garbage reduction and performance improvements
+     - Primarily in the background scanning mechanism
+
+
 Version 16.7 - 2016-9-13
 -----------------------
 

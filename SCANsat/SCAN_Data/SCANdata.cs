@@ -166,11 +166,12 @@ namespace SCANsat.SCAN_Data
 			{
 				if (anomalies == null)
 				{
-					PQSCity[] sites = body.GetComponentsInChildren<PQSCity>(true);
+					PQSSurfaceObject[] sites = body.pqsSurfaceObjects;
+					//PQSCity[] sites = body.GetComponentsInChildren<PQSCity>(true);
 					anomalies = new SCANanomaly[sites.Length];
 					for (int i = 0; i < sites.Length; ++i)
 					{
-						anomalies[i] = new SCANanomaly(sites[i].name, body.GetLongitude(sites[i].transform.position), body.GetLatitude(sites[i].transform.position), sites[i]);
+						anomalies[i] = new SCANanomaly(sites[i].SurfaceObjectName, body.GetLongitude(sites[i].transform.position), body.GetLatitude(sites[i].transform.position), sites[i]);
 					}
 				}
 				for (int i = 0; i < anomalies.Length; ++i)

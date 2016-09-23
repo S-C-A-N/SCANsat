@@ -32,6 +32,13 @@ namespace SCANsat
 		public static bool MMLoaded = false;
 		public static bool KopernicusLoaded = false;
 
+		private static Texture2D orbitIconsMap;
+
+		public static Texture2D OrbitIconsMap
+		{
+			get { return orbitIconsMap; }
+		}
+
 		private static bool loaded;
 
 		private List<AssemblyLog> assemblyList = new List<AssemblyLog>();
@@ -43,13 +50,27 @@ namespace SCANsat
 				Destroy(gameObject);
 				return;
 			}
-
 			loaded = true;
+
+			if (orbitIconsMap == null)
+				getOrbitIcons();
 
 			findAssemblies(Assemblies);
 			FinePrintStationaryWaypoint = SCANreflection.FinePrintStationaryWaypointReflection();
 			FinePrintFlightBand = SCANreflection.FinePrintFlightBandReflection();
 			SCANconfigLoader.configLoader();
+		}
+
+		private void getOrbitIcons()
+		{
+			foreach (Texture2D t in Resources.FindObjectsOfTypeAll<Texture2D>())
+			{
+				if (t.name == "OrbitIcons")
+				{
+					orbitIconsMap = t;
+					break;
+				}
+			}
 		}
 
 		private void findAssemblies(string[] assemblies)
