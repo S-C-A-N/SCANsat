@@ -37,7 +37,7 @@ namespace SCANsat.SCAN_Data
 		[Persistent]
 		private List<SCANresourceBody> Resource_Planetary_Config = new List<SCANresourceBody>();
 
-		private Dictionary<string, SCANresourceBody> masterBodyConfigs = new Dictionary<string,SCANresourceBody>();
+		private DictionaryValueList<string, SCANresourceBody> masterBodyConfigs = new DictionaryValueList<string, SCANresourceBody>();
 
 		private SCANtype sType;
 		private SCANresourceType resourceType;
@@ -88,13 +88,16 @@ namespace SCANsat.SCAN_Data
 			defaultMaxValue = copy.defaultMaxValue;
 		}
 
-		private Dictionary<string, SCANresourceBody> copyBodyConfigs(SCANresourceGlobal c)
+		private DictionaryValueList<string, SCANresourceBody> copyBodyConfigs(SCANresourceGlobal c)
 		{
-			Dictionary<string, SCANresourceBody> newCopy = new Dictionary<string, SCANresourceBody>();
-			foreach (SCANresourceBody r in c.masterBodyConfigs.Values)
+			DictionaryValueList<string, SCANresourceBody> newCopy = new DictionaryValueList<string, SCANresourceBody>();
+			int l = c.masterBodyConfigs.Count;
+
+			for (int i = 0; i < l; i++)
 			{
+				SCANresourceBody r = c.masterBodyConfigs.At(i);	
 				SCANresourceBody newR = new SCANresourceBody(r);
-				if (!newCopy.ContainsKey(newR.BodyName))
+				if (!newCopy.Contains(newR.BodyName))
 					newCopy.Add(newR.BodyName, newR);
 			}
 
@@ -115,7 +118,18 @@ namespace SCANsat.SCAN_Data
 			setDefaultValues();
 			try
 			{
-				masterBodyConfigs = Resource_Planetary_Config.ToDictionary(a => a.BodyName, a => a);
+				int l = Resource_Planetary_Config.Count;
+
+				for (int i = 0; i < l; i++)
+				{
+					SCANresourceBody r = Resource_Planetary_Config[i];
+
+					if (r == null)
+						continue;
+
+					if (!masterBodyConfigs.Contains(r.BodyName))
+						masterBodyConfigs.Add(r.BodyName, r);
+				}
 			}
 			catch (Exception e)
 			{
@@ -144,7 +158,7 @@ namespace SCANsat.SCAN_Data
 
 		public void addToBodyConfigs(string s, SCANresourceBody r, bool warn)
 		{
-			if (!masterBodyConfigs.ContainsKey(s))
+			if (!masterBodyConfigs.Contains(s))
 				masterBodyConfigs.Add(s, r);
 			else if (warn)
 				Debug.LogError(string.Format("[SCANsat] Warning: SCANresource Dictionary Already Contains Key Of This Type: [{0}] For Body: [{1}]", r.ResourceName, s));
@@ -246,7 +260,7 @@ namespace SCANsat.SCAN_Data
 
 		public SCANresourceBody getBodyConfig (string body, bool warn = true)
 		{
-			if (masterBodyConfigs.ContainsKey(body))
+			if (masterBodyConfigs.Contains(body))
 				return masterBodyConfigs[body];
 			else if (warn)
 				SCANUtil.SCANlog("SCANsat resource celestial body config: [{0}] is empty; something probably went wrong here", body);
@@ -257,7 +271,7 @@ namespace SCANsat.SCAN_Data
 		public SCANresourceBody getBodyConfig (int i)
 		{
 			if (masterBodyConfigs.Count > i)
-				return masterBodyConfigs.ElementAt(i).Value;
+				return masterBodyConfigs.At(i);
 			else
 				SCANUtil.SCANlog("SCANsat resource celestial body config is empty; something probably went wrong here");
 
@@ -266,10 +280,10 @@ namespace SCANsat.SCAN_Data
 
 		public void CurrentBodyConfig(string body)
 		{
-			if (masterBodyConfigs.ContainsKey(body))
+			if (masterBodyConfigs.Contains(body))
 				currentBody = masterBodyConfigs[body];
 			else
-				currentBody = masterBodyConfigs.ElementAt(0).Value;
+				currentBody = masterBodyConfigs.At(0);
 		}
 
 		public SCANresourceBody CurrentBody

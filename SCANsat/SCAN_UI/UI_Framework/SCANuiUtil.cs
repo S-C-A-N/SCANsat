@@ -694,20 +694,19 @@ namespace SCANsat.SCAN_UI.UI_Framework
 		internal static void drawMapLabels(Rect maprect, Vessel vessel, SCANmap map, SCANdata data, CelestialBody body, bool showAnom, bool showWaypoints)
 		{
 			//This section handles flag and asteroid labels
-			foreach (Vessel v in FlightGlobals.Vessels)
+			for (int i = FlightGlobals.Vessels.Count - 1; i >= 0; i--)
 			{
+				Vessel v = FlightGlobals.Vessels[i];
+
 				if (v.mainBody == body)
 				{
-					if (MapView.OrbitIconsMap != null)
+					if (v.vesselType == VesselType.Flag && SCANcontroller.controller.map_flags)
 					{
-						if (v.vesselType == VesselType.Flag && SCANcontroller.controller.map_flags)
-						{
-							drawVesselLabel(maprect, map, 0, v);
-						}
-						if (v.vesselType == VesselType.SpaceObject && SCANcontroller.controller.map_asteroids)
-						{
-							drawVesselLabel(maprect, map, 0, v);
-						}
+						drawVesselLabel(maprect, map, 0, v);
+					}
+					if (v.vesselType == VesselType.SpaceObject && SCANcontroller.controller.map_asteroids)
+					{
+						drawVesselLabel(maprect, map, 0, v);
 					}
 				}
 			}
