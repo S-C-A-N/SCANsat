@@ -1976,8 +1976,11 @@ namespace SCANsat
 		private static int currentActiveSensor, currentActiveVessel;
 		private void scanFromAllVessels()
 		{
-			if (Time.realtimeSinceStartup - last_scan_time < 1 && Time.realtimeSinceStartup > last_scan_time) return;
-			if (last_scan_frame == Time.frameCount) return;
+			if (Time.realtimeSinceStartup - last_scan_time < 1 && Time.realtimeSinceStartup > last_scan_time)
+				return;
+			if (last_scan_frame == Time.frameCount)
+				return;
+
 			last_scan_frame = Time.frameCount;
 			last_scan_time = Time.realtimeSinceStartup;
 			scan_UT = Planetarium.GetUniversalTime();
@@ -2002,14 +2005,11 @@ namespace SCANsat
 
 				if (!data.Disabled)
 				{
-					if (v.mainBody == FlightGlobals.currentMainBody || scan_background)
+					if (isVesselKnown(v))
 					{
-						if (isVesselKnown(v))
-						{
-							doScanPass(knownVessels[v.id], scan_UT, scan_UT, vessel.lastUT, vessel.latitude, vessel.longitude);
-							++currentActiveVessel;
-							currentActiveSensor += knownVessels[v.id].sensors.Count;
-						}
+						doScanPass(vessel, scan_UT, scan_UT, vessel.lastUT, vessel.latitude, vessel.longitude);
+						++currentActiveVessel;
+						currentActiveSensor += knownVessels[v.id].sensors.Count;
 					}
 				}
 
@@ -2031,40 +2031,60 @@ namespace SCANsat
 			SCANdata data = SCANUtil.getData(v.mainBody);
 			if (data == null)
 				return;
+
 			double soi_radius = v.mainBody.sphereOfInfluence - v.mainBody.Radius;
 			double alt = v.altitude, lat = SCANUtil.fixLatShift(v.latitude), lon = SCANUtil.fixLonShift(v.longitude);
 			double res = 0;
 			Orbit o = v.orbit;
 			bool uncovered;
 
-			if (scanQueue == null) scanQueue = new Queue<double>();
-			if (scanQueue.Count != 0) scanQueue.Clear();
+			if (scanQueue == null)
+				scanQueue = new Queue<double>();
+
+			if (scanQueue.Count != 0)
+				scanQueue.Clear();
 
 		loop: // don't look at me like that, I just unrolled the recursion
 			if (res > 0)
 			{
-				if (double.IsNaN(UT)) goto dequeue;
-				if (o.ObT <= 0) goto dequeue;
-				if (double.IsNaN(o.getObtAtUT(UT))) goto dequeue;
+				if (double.IsNaN(UT))
+					goto dequeue;
+
+				//if (o.ObT <= 0)
+				//{
+				//	SCANUtil.SCANlog("Dequeue {0}", 1);
+				//	goto dequeue;
+				//}
+
+				if (double.IsNaN(o.getObtAtUT(UT)))
+					goto dequeue;
+
 				Vector3d pos = o.getPositionAtUT(UT);
 				double rotation = 0;
+
 				if (v.mainBody.rotates)
-				{
 					rotation = (360 * ((UT - scan_UT) / v.mainBody.rotationPeriod)) % 360;
-				}
+
 				alt = v.mainBody.GetAltitude(pos);
 				lat = SCANUtil.fixLatShift(v.mainBody.GetLatitude(pos));
 				lon = SCANUtil.fixLonShift(v.mainBody.GetLongitude(pos) - rotation);
-				if (alt < 0) alt = 0;
-				if (res > maxRes) maxRes = (int)res;
+
+				if (alt < 0)
+					alt = 0;
+
+				if (res > maxRes)
+					maxRes = (int)res;
 			}
 			else
 			{
-				alt = v.heightFromTerrain;
-				if (alt < 0) alt = v.altitude;
+				alt = v.radarAltitude;
+				if (alt < 0)
+					alt = v.altitude;
 			}
 
-			if (Math.Abs(lat - llat) < 1 && Math.Abs(lon - llon) < 1 && res > 0) goto dequeue;
+			if (Math.Abs(lat - llat) < 1 && Math.Abs(lon - llon) < 1 && res > 0)
+				goto dequeue;
+			
 			actualPasses++;
 
 			uncovered = res <= 0;
@@ -2075,25 +2095,39 @@ namespace SCANsat
 
 				if (res <= 0)
 				{
-					if (data.getCoverage(sensor.sensor) > 0) uncovered = false;
+					if (data.getCoverage(sensor.sensor) > 0)
+						uncovered = false;
 				}
 
 				sensor.inRange = false;
 				sensor.bestRange = false;
-				if (alt < sensor.min_alt) continue;
-				if (alt > Math.Min(sensor.max_alt, soi_radius)) continue;
+
+				if (alt < sensor.min_alt)
+					continue;
+
+				if (alt > Math.Min(sensor.max_alt, soi_radius))
+					continue;
+
 				sensor.inRange = true;
 
 				double fov = sensor.fov;
 				double ba = Math.Min(sensor.best_alt, soi_radius);
-				if (alt < ba) fov = (alt / ba) * fov;
-				else sensor.bestRange = true;
+
+				if (alt < ba)
+					fov = (alt / ba) * fov;
+				else
+					sensor.bestRange = true;
 
 				double surfscale = Planetarium.fetch.Home.Radius / v.mainBody.Radius;
-				if (surfscale < 1) surfscale = 1;
+
+				if (surfscale < 1)
+					surfscale = 1;
+
 				surfscale = Math.Sqrt(surfscale);
 				fov *= surfscale;
-				if (fov > 20) fov = 20;
+
+				if (fov > 20)
+					fov = 20;
 
 				int f = (int)Math.Truncate(fov);
 				int f1 = f + (int)Math.Round(fov - f);
@@ -2119,7 +2153,8 @@ namespace SCANsat
 					}
 				}
 			}
-			if (uncovered) return;
+			if (uncovered)
+				return;
 			/* 
 			if(v.mainBody == FlightGlobals.currentMainBody) {
 				if(res > 0) data.map_small.SetPixel((int)Math.Round(lon) + 180, (int)Math.Round(lat) + 90, palette.magenta);
@@ -2127,10 +2162,14 @@ namespace SCANsat
 			}
 			*/
 
-			if (vessel.lastUT <= 0) return;
-			if (vessel.frame <= 0) return;
-			if (v.LandedOrSplashed) return;
-			if (res >= timeWarpResolution) goto dequeue;
+			if (vessel.lastUT <= 0)
+				return;
+			if (vessel.frame <= 0)
+				return;
+			if (v.LandedOrSplashed)
+				return;
+			if (res >= timeWarpResolution)
+				goto dequeue;
 
 			if (startUT > UT)
 			{
@@ -2149,7 +2188,8 @@ namespace SCANsat
 			goto loop;
 
 		dequeue:
-			if (scanQueue.Count <= 0) return;
+			if (scanQueue.Count <= 0)
+				return;
 			UT = scanQueue.Dequeue();
 			startUT = scanQueue.Dequeue();
 			lastUT = scanQueue.Dequeue();
