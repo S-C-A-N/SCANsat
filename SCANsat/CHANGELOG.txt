@@ -1,3 +1,9 @@
+Version 16.9 - 2016
+-----------------------
+
+- Fix intermittent background scanning gaps
+
+
 Version 16.8 - 2016-9-23
 -----------------------
 
