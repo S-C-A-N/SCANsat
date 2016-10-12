@@ -30,8 +30,6 @@ namespace SCANsat.SCAN_PartModules
 		private Animation anim = null;
 		private List<ScienceData> storedData = new List<ScienceData>();
 		private ExperimentsResultDialog expDialog = null;
-		private string error;
-		//public List<ModuleResource> resourceInputs = new List<ModuleResource>();
 
 		/* SAT: KSP entry points */
 		public override void OnStart(StartState state)
@@ -124,7 +122,7 @@ namespace SCANsat.SCAN_PartModules
 			Events["startScan"].active = !scanning && !powerIsProblem;
 			Events["stopScan"].active = scanning || powerIsProblem;
 			if (sensorType != 32)
-				Fields["alt_indicator"].guiActive = scanning;
+				Fields["alt_indicator"].guiActive = scanning || powerIsProblem;
 
 			SCANdata data = SCANUtil.getData(vessel.mainBody);
 
@@ -164,7 +162,7 @@ namespace SCANsat.SCAN_PartModules
 				{
 					if (TimeWarp.CurrentRate < 15000)
 					{
-						if (!resHandler.UpdateModuleResourceInputs(ref error, 1, 0.9, true, false))
+						if (!resHandler.UpdateModuleResourceInputs(ref alt_indicator, 1, 0.9, false, true))
 						{
 							unregisterScanner();
 							powerIsProblem = true;
@@ -172,24 +170,6 @@ namespace SCANsat.SCAN_PartModules
 						}
 						else
 							powerIsProblem = false;
-
-						//int l = resourceInputs.Count;
-
-						//for (int i = 0; i < l; i++)
-						//{
-						//	ModuleResource resource = resourceInputs[i];
-						//	resource.currentRequest = resource.rate * TimeWarp.fixedDeltaTime;
-						//	resource.currentAmount = part.RequestResource(resource.id, resource.currentRequest);
-						//	if (resource.currentAmount < resource.currentRequest * 0.9)
-						//	{
-						//		unregisterScanner();
-						//		powerIsProblem = true;
-						//		powerTimer = 0;
-						//		break;
-						//	}
-						//	else
-						//		powerIsProblem = false;
-						//}
 					}
 					else if (powerIsProblem)
 					{
@@ -212,23 +192,6 @@ namespace SCANsat.SCAN_PartModules
 					storedData.Add(data);
 				}
 			}
-
-			//if (node.HasNode("RESOURCE"))
-			//	resourceInputs = new List<ModuleResource>();
-			//else
-			//	return;
-
-			//ConfigNode[] resources = node.GetNodes("RESOURCE");
-
-			//int l = resources.Length;
-
-			//for (int i = 0; i < l; i++)
-			//{
-			//	ConfigNode resource = resources[i];
-			//	ModuleResource mod = new ModuleResource();
-			//	mod.Load(resource);
-			//	resourceInputs.Add(mod);
-			//}
 		}
 
 		public override void OnSave(ConfigNode node)
@@ -257,8 +220,6 @@ namespace SCANsat.SCAN_PartModules
 				str += "FOV: " + fov.ToString("F0") + " °";
 
 			str += resHandler.PrintModuleResources(1);
-			//if (resourceInputs.Count > 0)
-			//	str += PartModuleUtil.PrintResourceRequirements("Requires:", resourceInputs.ToArray()) + "\n";
 			return str;
 		}
 
