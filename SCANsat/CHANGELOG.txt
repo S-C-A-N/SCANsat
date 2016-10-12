@@ -1,6 +1,8 @@
-Version 16.9 - 2016
+Version 16.9 - 2016-10-
 -----------------------
 
+- Update for KSP 1.2 final
+- Update to new resource consumption system
 - Fix intermittent background scanning gaps
 
 
