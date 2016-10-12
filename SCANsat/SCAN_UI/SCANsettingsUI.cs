@@ -476,7 +476,7 @@ namespace SCANsat.SCAN_UI
 						SCANuiUtil.resetResourceSettingPos();
 						SCANuiUtil.resetOverlayControllerPos();
 						SCANuiUtil.resetZoomMapPos();
-						SCANuiUtil.resetHiDefMapPos();
+						//SCANuiUtil.resetHiDefMapPos();
 					}
 					else
 					{

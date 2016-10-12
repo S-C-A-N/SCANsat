@@ -196,7 +196,7 @@ namespace SCANsat
 		internal SCANcolorSelection colorManager;
 		internal SCANoverlayController resourceOverlay;
 		internal SCANresourceSettings resourceSettings;
-		internal SCANzoomHiDef hiDefMap;
+		//internal SCANzoomHiDef hiDefMap;
 		internal SCANzoomWindow zoomMap;
 
 		/* App launcher object */
@@ -803,7 +803,6 @@ namespace SCANsat
 
 			int l = knownVessels.Count;
 			ConfigNode node_vessels = new ConfigNode("Scanners");
-			SCANUtil.SCANlog("SCANsat Controller: Saving {0} known vessels", l);
 
 			for (int i = 0; i < l; i++)
 			{
@@ -876,8 +875,6 @@ namespace SCANsat
 
 		public override void OnAwake()
 		{
-			SCANUtil.SCANdebugLog("Awakening SCANcontroller...");
-
 			instance = this;
 
 			if (SCANconfigLoader.SCANNode == null)
@@ -1161,8 +1158,8 @@ namespace SCANsat
 				Destroy(resourceSettings);
 			if (appLauncher != null)
 				Destroy(appLauncher);
-			if (hiDefMap != null)
-				Destroy(hiDefMap);
+			//if (hiDefMap != null)
+			//	Destroy(hiDefMap);
 
 			if (!heightMapsBuilt)
 			{
@@ -1745,8 +1742,6 @@ namespace SCANsat
 
 		private void registerSensorTemp(Guid id, SCANtype sensors, double fov, double min_alt, double max_alt, double best_alt)
 		{
-			SCANUtil.SCANlog("Loading SCANsat Vessel...");
-
 			if (id == null)
 				return;
 			if (!knownVessels.Contains(id))
@@ -1825,8 +1820,6 @@ namespace SCANsat
 
 		private void registerSensor(Guid id, SCANtype sensors, double fov, double min_alt, double max_alt, double best_alt)
 		{
-			SCANUtil.SCANlog("Loading SCANsat Vessel...");
-
 			if (id == null)
 				return;
 			if (!knownVessels.Contains(id))
