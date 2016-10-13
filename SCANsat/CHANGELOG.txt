@@ -1,3 +1,27 @@
+Version 16.9 - 2016-10-13
+-----------------------
+
+- Update for KSP 1.2 final
+- Update to new resource consumption system
+- Fix intermittent background scanning gaps
+- Only show the manual map size input field in the flight scene
+- Adjust Ore concentration cutoff values
+
+Version 16.8 - 2016-9-23
+-----------------------
+
+- Fix not loading background scanning vessels
+- Add support for displaying new vessel types
+- Detect new anomaly types
+- Garbage reduction and performance improvements
+     - Primarily in the background scanning mechanism
+
+
+Version 16.7 - 2016-9-13
+-----------------------
+
+- Update for KSP 1.2
+
 Version 16.6 - 2016-8-18
 -----------------------
 
