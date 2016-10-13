@@ -332,38 +332,41 @@ namespace SCANsat.SCAN_UI
 		{
 			GUILayout.Label("Export Options", SCANskins.SCAN_headline);
 
-			growE();
-				fillS();
-				GUILayout.Label(textWithTT("Map Width: " + SCANcontroller.controller.map_width, settingsHelpSetMapWidth), SCANskins.SCAN_settingsGreyLabel, GUILayout.Width(110));
+			if (HighLogic.LoadedSceneIsFlight)
+			{
+				growE();
+					fillS();
+					GUILayout.Label(textWithTT("Map Width: " + SCANcontroller.controller.map_width, settingsHelpSetMapWidth), SCANskins.SCAN_settingsGreyLabel, GUILayout.Width(110));
 
-				exportSize = GUILayout.TextField(exportSize, 4, GUILayout.Width(75));
+					exportSize = GUILayout.TextField(exportSize, 4, GUILayout.Width(75));
 
-				Rect r = GUILayoutUtility.GetLastRect();
+					Rect r = GUILayoutUtility.GetLastRect();
 
-				GUI.Label(r, textWithTT("", settingsHelpSetMapWidth));
+					GUI.Label(r, textWithTT("", settingsHelpSetMapWidth));
 
-				if (GUILayout.Button(textWithTT("Set", settingsHelpSetMapWidth), GUILayout.Width(50)))
-				{
-					if (SCANcontroller.controller.BigMap == null)
-						return;
-
-					int i = 0;
-
-					if (int.TryParse(exportSize, out i))
+					if (GUILayout.Button(textWithTT("Set", settingsHelpSetMapWidth), GUILayout.Width(50)))
 					{
-						if (i <= SCANcontroller.controller.BigMap._WindowSize_Min.x)
-							i = (int)SCANcontroller.controller.BigMap._WindowSize_Min.x;
-						else if (i > SCANcontroller.controller.BigMap._WindowSize_Max.x)
-							i = (int)SCANcontroller.controller.BigMap._WindowSize_Max.x;
+						if (SCANcontroller.controller.BigMap == null)
+							return;
 
-						if (i % 2 != 0)
-							i += 1;
+						int i = 0;
 
-						SCANcontroller.controller.BigMap.setMapWidth(i);
+						if (int.TryParse(exportSize, out i))
+						{
+							if (i <= SCANcontroller.controller.BigMap._WindowSize_Min.x)
+								i = (int)SCANcontroller.controller.BigMap._WindowSize_Min.x;
+							else if (i > SCANcontroller.controller.BigMap._WindowSize_Max.x)
+								i = (int)SCANcontroller.controller.BigMap._WindowSize_Max.x;
+
+							if (i % 2 != 0)
+								i += 1;
+
+							SCANcontroller.controller.BigMap.setMapWidth(i);
+						}
 					}
-				}
-				fillS();
-			stopE();
+					fillS();
+				stopE();
+			}
 
 			growE();
 				SCANcontroller.controller.trueGreyScale = GUILayout.Toggle(SCANcontroller.controller.trueGreyScale, textWithTT("Use True Grey Scale", settingsHelpGreyScale), SCANskins.SCAN_settingsToggle);
@@ -476,7 +479,7 @@ namespace SCANsat.SCAN_UI
 						SCANuiUtil.resetResourceSettingPos();
 						SCANuiUtil.resetOverlayControllerPos();
 						SCANuiUtil.resetZoomMapPos();
-						SCANuiUtil.resetHiDefMapPos();
+						//SCANuiUtil.resetHiDefMapPos();
 					}
 					else
 					{

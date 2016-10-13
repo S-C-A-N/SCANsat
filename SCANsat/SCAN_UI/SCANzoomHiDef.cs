@@ -31,12 +31,12 @@ namespace SCANsat.SCAN_UI
 
 		private static Rect sessionRectHiDef = defaultRect;
 
-		protected override void Awake()
-		{
-			base.Awake();
+		//protected override void Awake()
+		//{
+		//	base.Awake();
 
-			WindowRect = sessionRectHiDef;
-		}
+		//	WindowRect = sessionRectHiDef;
+		//}
 
 		protected override void Startup()
 		{
@@ -115,12 +115,12 @@ namespace SCANsat.SCAN_UI
 				spotmap.setBody(b);
 			}
 
-			if (camera != null)
-			{
-				cameraModule = camera;
-				minZoom = camera.minZoom;
-				maxZoom = camera.maxZoom;
-			}
+			//if (camera != null)
+			//{
+			//	cameraModule = camera;
+			//	minZoom = camera.minZoom;
+			//	maxZoom = camera.maxZoom;
+			//}
 
 			spotmap.MapScale = 10;
 
@@ -172,14 +172,14 @@ namespace SCANsat.SCAN_UI
 			}
 		}
 
-		public override void closeMap()
-		{
-			base.closeMap();
+		//public override void closeMap()
+		//{
+		//	base.closeMap();
 
-			if (cameraModule == null)
-				return;
+		//	if (cameraModule == null)
+		//		return;
 
-			cameraModule.Events["resetCenter"].active = false;
-		}
+		//	cameraModule.Events["resetCenter"].active = false;
+		//}
 	}
 }

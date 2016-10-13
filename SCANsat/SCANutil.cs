@@ -482,6 +482,12 @@ namespace SCANsat
 			return body.BiomeMap.Attributes [i];
 		}
 
+		internal static CBAttributeMapSO.MapAttribute getBiomeCached(CelestialBody body, double lon, double lat)
+		{
+			if (body.BiomeMap == null) return null;
+			return body.BiomeMap.GetAtt(lat * Mathf.Deg2Rad, lon * Mathf.Deg2Rad);
+		}
+
 		internal static string getBiomeName(CelestialBody body, double lon , double lat)
 		{
 			CBAttributeMapSO.MapAttribute a = getBiome (body, lon , lat);
@@ -636,8 +642,8 @@ namespace SCANsat
 						return true;
 					else if (SCANcontroller.controller.zoomMap != null && SCANcontroller.controller.zoomMap.Visible && SCANcontroller.controller.zoomMap.GetWindowRect.Contains(pos))
 						return true;
-					else if (SCANcontroller.controller.hiDefMap != null && SCANcontroller.controller.hiDefMap.Visible && SCANcontroller.controller.hiDefMap.GetWindowRect.Contains(pos))
-						return true;
+					//else if (SCANcontroller.controller.hiDefMap != null && SCANcontroller.controller.hiDefMap.Visible && SCANcontroller.controller.hiDefMap.GetWindowRect.Contains(pos))
+					//	return true;
 					else if (SCANcontroller.controller.settingsWindow != null && SCANcontroller.controller.settingsWindow.Visible && SCANcontroller.controller.settingsWindow.GetWindowRect.Contains(pos))
 						return true;
 					else if (SCANcontroller.controller.resourceSettings != null && SCANcontroller.controller.resourceSettings.Visible && SCANcontroller.controller.resourceSettings.GetWindowRect.Contains(pos))
