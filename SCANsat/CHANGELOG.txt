@@ -1,3 +1,56 @@
+Version 16.9 - 2016-10-13
+-----------------------
+
+- Update for KSP 1.2 final
+- Update to new resource consumption system
+- Fix intermittent background scanning gaps
+- Only show the manual map size input field in the flight scene
+- Adjust Ore concentration cutoff values
+
+Version 16.8 - 2016-9-23
+-----------------------
+
+- Fix not loading background scanning vessels
+- Add support for displaying new vessel types
+- Detect new anomaly types
+- Garbage reduction and performance improvements
+     - Primarily in the background scanning mechanism
+
+
+Version 16.7 - 2016-9-13
+-----------------------
+
+- Update for KSP 1.2
+
+Version 16.6 - 2016-8-18
+-----------------------
+
+- Fix compatibility with Kerbalism
+
+Version 16.5 - 2016-8-10
+------------------------
+
+- Fix bug in electricity usage that was preventing scanning
+
+Version 16.4 - 2016-8-9
+------------------------
+
+- Update contracts for Contract Configurator 1.15+ (severedsolo)
+- Switch to using ModuleResource and RESOURCE nodes for all power consumption (NathanKell)
+- Calculate the local min and max terrain for RPM maps
+- Hidden map fill cheat option
+    - Add "cheatMapFill = True" to the SCANcolors.cfg file
+- Fix potential Toolbar related errors (bssthu)
+
+Version 16.3 - 2016-6-27
+------------------------
+
+- Adds new resource types and Module Manager scanner configs for KSP Interstellar Extended Version 1.9
+     - Deprecated unused He-3 and Thorium resource types
+
+- Updated for Mechjeb 2.5.8
+
+
 Version 16.2 - 2016-6-21
 ------------------------
 

@@ -637,13 +637,13 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			SCANcontroller.controller.zoomMap.resetWindowPos(SCANzoomWindow.defaultRect);
 		}
 
-		internal static void resetHiDefMapPos()
-		{
-			if (SCANcontroller.controller.hiDefMap == null)
-				return;
+		//internal static void resetHiDefMapPos()
+		//{
+		//	if (SCANcontroller.controller.hiDefMap == null)
+		//		return;
 
-			SCANcontroller.controller.hiDefMap.resetWindowPos(SCANzoomHiDef.defaultRect);
-		}
+		//	SCANcontroller.controller.hiDefMap.resetWindowPos(SCANzoomHiDef.defaultRect);
+		//}
 
 		#endregion
 
@@ -694,20 +694,19 @@ namespace SCANsat.SCAN_UI.UI_Framework
 		internal static void drawMapLabels(Rect maprect, Vessel vessel, SCANmap map, SCANdata data, CelestialBody body, bool showAnom, bool showWaypoints)
 		{
 			//This section handles flag and asteroid labels
-			foreach (Vessel v in FlightGlobals.Vessels)
+			for (int i = FlightGlobals.Vessels.Count - 1; i >= 0; i--)
 			{
+				Vessel v = FlightGlobals.Vessels[i];
+
 				if (v.mainBody == body)
 				{
-					if (MapView.OrbitIconsMap != null)
+					if (v.vesselType == VesselType.Flag && SCANcontroller.controller.map_flags)
 					{
-						if (v.vesselType == VesselType.Flag && SCANcontroller.controller.map_flags)
-						{
-							drawVesselLabel(maprect, map, 0, v);
-						}
-						if (v.vesselType == VesselType.SpaceObject && SCANcontroller.controller.map_asteroids)
-						{
-							drawVesselLabel(maprect, map, 0, v);
-						}
+						drawVesselLabel(maprect, map, 0, v);
+					}
+					if (v.vesselType == VesselType.SpaceObject && SCANcontroller.controller.map_asteroids)
+					{
+						drawVesselLabel(maprect, map, 0, v);
 					}
 				}
 			}
@@ -1771,7 +1770,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 
 					float biomeIndex = (float)SCANUtil.getBiomeIndexFraction(data.Body, lon, lat);
 
-					if (whiteBorder && ((i > 0 && mapline[i - 1] != biomeIndex) || (j > 0 && mapline[i] != biomeIndex)))
+					if (whiteBorder && i > 0 && mapline[i - 1] != biomeIndex || (j > 0 && mapline[i] != biomeIndex))
 					{
 						pix[j * width + i] = palette.White;
 					}
@@ -1802,8 +1801,9 @@ namespace SCANsat.SCAN_UI.UI_Framework
 				m = new Texture2D(h * 2, h, TextureFormat.RGBA32, true);
 			}
 
-			if (p == null || p.Length != h * 2)
+			if (p == null || p.Length != h * h * 2)
 			{
+				//p = new Color32[m.width * m.height];
 				p = new Color32[m.width];
 			}
 
@@ -1811,19 +1811,39 @@ namespace SCANsat.SCAN_UI.UI_Framework
 
 			for (int j = 0; j < m.height; j++)
 			{
+				//if (j % 2 != 0)
+				//	continue;
+
 				double lat = (j / scale) - 90;
 				for (int i = 0; i < m.width; i++)
 				{
+					//if (i % 2 != 0)
+					//	continue;
+
 					double lon = fixLon(i / scale);
 
+					//if (SCANUtil.isCovered(lon, lat, d, SCANtype.Biome))
+					//	p[j * m.width + i] = (Color32)SCANUtil.getBiomeCached(d.Body, lon, lat).mapColor;
+					//else
+					//	p[j * m.width + i] = palette.Clear;
+
 					if (SCANUtil.isCovered(lon, lat, d, SCANtype.Biome))
-						p[i] = (Color32)SCANUtil.getBiome(d.Body, lon, lat).mapColor;
+						p[i] = (Color32)SCANUtil.getBiomeCached(d.Body, lon, lat).mapColor;
 					else
 						p[i] = palette.Clear;
 				}
 
 				m.SetPixels32(0, j, m.width, 1, p);
 			}
+
+			//for (int i = 2 / 2; i >= 1; i /= 2)
+			//{
+			//	SCANuiUtil.interpolate(p, m.height, m.width, i, i, i, null);
+			//	SCANuiUtil.interpolate(p, m.height, m.width, 0, i, i, null);
+			//	SCANuiUtil.interpolate(p, m.height, m.width, i, 0, i, null);
+			//}
+
+			//m.SetPixels32(p);
 
 			m.Apply();
 
@@ -2135,6 +2155,50 @@ namespace SCANsat.SCAN_UI.UI_Framework
 				return 0.5f;
 			
 			return (float)l / 100f + (float)rand.Next(100 - (l / 2)) / 100f;
+		}
+
+		private static void interpolate(Color32[] c, int height, int width, int x, int y, int step, System.Random r)
+		{
+			for (int j = y; j < height + y; j+= 2 * step)
+			{
+				int ypos1 = j - step;
+				if (ypos1 < 0)
+					ypos1 = 0;
+				int ypos2 = j + step;
+				if (ypos2 >= height)
+					ypos2 = height - 1;
+
+				for (int i = x; i < width + x; i += 2 * step)
+				{
+					int xpos1 = i - step;
+					if (xpos1 < 0)
+						xpos1 = 0;
+
+					int xpos2 = i + step;
+					if (xpos2 >= width)
+						xpos2 = width - 1;
+
+					Color32 avgX = Color.clear;
+					Color32 avgY = Color.clear;
+
+					float lerp = 0.5f;
+
+					if (x == y)
+					{
+						avgX = Color32.Lerp(c[ypos1 * width + xpos1], c[ypos2 * width + xpos2], lerp); //Mathf.Lerp(v[xpos1, ypos1], v[xpos2, ypos2], lerp);
+						avgY = Color32.Lerp(c[ypos2 * width + xpos1], c[ypos1 * width + xpos2], lerp); //Mathf.Lerp(v[xpos1, ypos2], v[xpos2, ypos1], lerp);
+					}
+					else
+					{
+						avgX = Color32.Lerp(c[j * width + xpos1], c[j * width + xpos2], lerp); //Mathf.Lerp(v[xpos1, j], v[xpos2, j], lerp);
+						avgY = Color32.Lerp(c[ypos2 * width + i], c[ypos1 * width + i], lerp); //Mathf.Lerp(v[i, ypos2], v[i, ypos1], lerp);
+					}
+
+					Color32 avgFinal = Color32.Lerp(avgX, avgY, lerp);
+
+					c[j * width + i] = avgFinal;
+				}
+			}
 		}
 
 		internal static void interpolate(float[,] v, int height, int width, int x, int y, int step, System.Random r, bool softEdges, bool hardEdges = false)

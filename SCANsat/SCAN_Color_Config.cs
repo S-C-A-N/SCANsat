@@ -58,6 +58,8 @@ namespace SCANsat
 		[Persistent]
 		private float windowScale = 1f;
 		[Persistent]
+		private bool cheatMapFill = false;
+		[Persistent]
 		private List<SCANterrainConfig> SCANsat_Altimetry = new List<SCANterrainConfig>();
 		[Persistent]
 		private List<SCANresourceGlobal> SCANsat_Resources = new List<SCANresourceGlobal>();
@@ -148,6 +150,11 @@ namespace SCANsat
 		public bool BiomeBorder
 		{
 			get { return biomeBorder; }
+		}
+
+		public bool CheatMapFill
+		{
+			get { return cheatMapFill; }
 		}
 
 		public float SlopeCutoff

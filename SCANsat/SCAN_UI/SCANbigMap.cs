@@ -644,12 +644,14 @@ namespace SCANsat.SCAN_UI
 				if (gridLines.Count > 0 && inRepaint())
 				{
 					GL.PushMatrix();
-					foreach (List<Vector2d> points in gridLines[0])
+					for (int i = gridLines[0].Count - 1; i >= 0; i--)
 					{
+						List<Vector2d> points = gridLines[0][i];
 						SCANuiUtil.drawGridLines(points, bigmap.MapWidth, TextureRect.x, TextureRect.y, SCANuiUtil.blackLineColor);
 					}
-					foreach (List<Vector2d> points in gridLines[1])
+					for (int i = gridLines[1].Count - 1; i >= 0; i--)
 					{
+						List<Vector2d> points = gridLines[1][i];
 						SCANuiUtil.drawGridLines(points, bigmap.MapWidth, TextureRect.x, TextureRect.y, SCANuiUtil.lineColor);
 					}
 					GL.PopMatrix();

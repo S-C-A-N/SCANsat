@@ -106,7 +106,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			grid_pos.x = 0.2f * ((int)icon % 5);
 			grid_pos.y = 0.2f * (4 - (int)icon / 5);
 
-			SCANuiUtil.drawMapIcon(pos_icon, MapView.OrbitIconsMap, outline, c, true, grid_pos, true);
+			SCANuiUtil.drawMapIcon(pos_icon, SCANmainMenuLoader.OrbitIconsMap, outline, c, true, grid_pos, true);
 		}
 
 		internal static void drawOrbitIconGL(int x, int y, OrbitIcon icon, Color c, Color shadow, Material iconMat, int size = 32 /*px*/, bool outline = false)
@@ -125,7 +125,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			grid_pos.x = 0.2f * ((int)icon % 5);
 			grid_pos.y = 0.2f * (4 - (int)icon / 5);
 
-			SCANuiUtil.drawMapIconGL(pos_icon, MapView.OrbitIconsMap, c, iconMat, shadow, outline, grid_pos, true);
+			SCANuiUtil.drawMapIconGL(pos_icon, SCANmainMenuLoader.OrbitIconsMap, c, iconMat, shadow, outline, grid_pos, true);
 		}
 
 		public static void drawIcon(Color c, int size = 32 /*px*/, bool outline = false)
@@ -181,10 +181,12 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			Ap = 1,
 			AN = 2,
 			DN = 3,
+			Plane = 4,
 			Ship = 5,
 			Debris = 6,
 			Planet = 7,
 			Mystery = 8,
+			Relay = 9,
 			Encounter = 10,
 			Exit = 11,
 			EVA = 12,
@@ -214,8 +216,12 @@ namespace SCANsat.SCAN_UI.UI_Framework
 					return OrbitIcon.Flag;
 				case VesselType.Lander:
 					return OrbitIcon.Lander;
+				case VesselType.Plane:
+					return OrbitIcon.Plane;
 				case VesselType.Probe:
 					return OrbitIcon.Probe;
+				case VesselType.Relay:
+					return OrbitIcon.Relay;
 				case VesselType.Rover:
 					return OrbitIcon.Rover;
 				case VesselType.Ship:

@@ -705,6 +705,7 @@ namespace SCANsat.SCAN_UI
 				map.Resource = loadedResources[currentResource];
 				map.Resource.CurrentBodyConfig(orbitingBody.name);
 			}
+			calcTerrainLimits(orbitingBody);
 			map.resetMap((mapType)mapMode, false, SCANconfigLoader.GlobalResource && resourceOverlay);
 
 			// Compute and store the map scale factors in mapSizeScale.  We
@@ -726,6 +727,46 @@ namespace SCANsat.SCAN_UI
 			double kmPerDegreeLon = (2 * Math.PI * (orbitingBody.Radius / 1000d)) / 360d;
 			double pixelsPerDegree = Math.Abs(longitudeToPixels(mapCenterLong + (((mapCenterLong + 1) > 360) ? -1 : 1), mapCenterLat) - longitudeToPixels(mapCenterLong, mapCenterLat));
 			pixelsPerKm = pixelsPerDegree / kmPerDegreeLon;
+		}
+
+		private void calcTerrainLimits(CelestialBody b)
+		{
+			if (map.MType == mapType.Slope)
+				return;
+
+			int w = map.MapWidth / 4;
+			int h = map.MapHeight / 4;
+
+			float max = -200000;
+			float min = 100000;
+			float terrain = 0;
+
+			for (int i = 0; i < map.MapHeight; i += 4)
+			{
+				for (int j = 0; j < map.MapWidth; j += 4)
+				{
+					double lat = (i * 1.0f / map.MapScale) - 90f + map.Lat_Offset;
+					double lon = (j * 1.0f / map.MapScale) - 180f + map.Lon_Offset;
+					double la = lat, lo = lon;
+					lat = map.unprojectLatitude(lo, la);
+					lon = map.unprojectLongitude(lo, la);
+
+					terrain = (float)SCANUtil.getElevation(b, lon, lat);
+
+					if (terrain < min)
+						min = terrain;
+					if (terrain > max)
+						max = terrain;
+				}
+			}
+
+			if (min > max)
+				min = max - 1f;
+
+			if (min == max)
+				min = max - 1f;
+
+			map.setCustomRange(min, max);
 		}
 
 		private bool UpdateCheck()

@@ -61,13 +61,13 @@ namespace SCANsat
 		{
 			loadSCANtypes();
 
+			localNode = new SCAN_Localization(localizationFile, localizationNode);
+
 			SCANnode = new SCAN_Color_Config(configFile, configNodeName);
 
 			SCANcontroller.checkLoadedTerrainNodes();
 
 			loadResources();
-
-			localNode = new SCAN_Localization(localizationFile, localizationNode);
 		}
 
 		private static void loadSCANtypes()

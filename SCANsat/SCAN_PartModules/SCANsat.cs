@@ -103,7 +103,7 @@ namespace SCANsat.SCAN_PartModules
 
 			if (scanning) animate(1, 1);
 			powerIsProblem = false;
-			print("[SCANsat] sensorType: " + sensorType.ToString() + " fov: " + fov.ToString() + " min_alt: " + min_alt.ToString() + " max_alt: " + max_alt.ToString() + " best_alt: " + best_alt.ToString() + " power: " + power.ToString());
+			print("[SCANsat] sensorType: " + sensorType.ToString() + " fov: " + fov.ToString() + " min_alt: " + min_alt.ToString() + " max_alt: " + max_alt.ToString() + " best_alt: " + best_alt.ToString());
 		}
 
 		protected virtual void Update()
@@ -122,7 +122,7 @@ namespace SCANsat.SCAN_PartModules
 			Events["startScan"].active = !scanning && !powerIsProblem;
 			Events["stopScan"].active = scanning || powerIsProblem;
 			if (sensorType != 32)
-				Fields["alt_indicator"].guiActive = scanning;
+				Fields["alt_indicator"].guiActive = scanning || powerIsProblem;
 
 			SCANdata data = SCANUtil.getData(vessel.mainBody);
 
@@ -162,18 +162,14 @@ namespace SCANsat.SCAN_PartModules
 				{
 					if (TimeWarp.CurrentRate < 15000)
 					{
-						float p = power * TimeWarp.fixedDeltaTime;
-						float e = part.RequestResource("ElectricCharge", p);
-						if (e < p)
+						if (!resHandler.UpdateModuleResourceInputs(ref alt_indicator, 1, 0.9, false, true))
 						{
 							unregisterScanner();
 							powerIsProblem = true;
 							powerTimer = 0;
 						}
 						else
-						{
 							powerIsProblem = false;
-						}
 					}
 					else if (powerIsProblem)
 					{
@@ -215,22 +211,15 @@ namespace SCANsat.SCAN_PartModules
 
 			string str = base.GetInfo();
 			if (min_alt != 0)
-			{
 				str += "Altitude ( min): " + (min_alt / 1000).ToString("F0") + " km\n";
-			}
 			if (best_alt != min_alt)
-			{
 				str += "Altitude (best): " + (best_alt / 1000).ToString("F0") + " km\n";
-			}
 			if (max_alt != 0)
-			{
 				str += "Altitude ( max): " + (max_alt / 1000).ToString("F0") + " km\n";
-			}
 			if (fov != 0)
-			{
-				str += "FOV: " + fov.ToString("F0") + " °\n";
-			}
-			str += "Power usage: " + power.ToString("F1") + " charge/s\n";
+				str += "FOV: " + fov.ToString("F0") + " °";
+
+			str += resHandler.PrintModuleResources(1);
 			return str;
 		}
 
@@ -245,8 +234,6 @@ namespace SCANsat.SCAN_PartModules
 		public float max_alt;
 		[KSPField]
 		public float best_alt;
-		[KSPField]
-		public float power;
 		[KSPField]
 		public string scanName;
 		[KSPField]
