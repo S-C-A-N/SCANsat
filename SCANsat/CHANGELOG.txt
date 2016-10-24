@@ -4,6 +4,7 @@ Version 16.10 - 2016-10-24
 - Update Toolbar wrapper
 - Fix Unity initialization issues
 - Fix error in ground track display
+- Fix hiding windows in KSC scene
 
 Version 16.9 - 2016-10-13
 -----------------------
