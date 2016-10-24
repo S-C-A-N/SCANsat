@@ -39,10 +39,12 @@ namespace SCANsat.SCAN_Platform
 		//static SCAN_MBE()
 		//{
 		//	UnityEngine.Random.seed = (int)(DateTime.Now - DateTime.Now.Date).TotalSeconds;
+		//	Log.Now("Seed Generated...");
 		//}
 		//#endregion
 		internal T AddComponent<T>() where T : UnityEngine.Component { return gameObject.AddComponent<T>(); }
 
+		private static bool _seedGenerated;
 		private bool _RepeatRunning;
 		private bool _OnGUI_FirstRun;
 		private float _RepeatInitialWait;
@@ -129,7 +131,12 @@ namespace SCANsat.SCAN_Platform
 		{
 			Log.Debug("MBE Awakened");
 
-			UnityEngine.Random.InitState((int)(DateTime.Now - DateTime.Now.Date).TotalSeconds);
+			if (!_seedGenerated)
+			{
+				UnityEngine.Random.InitState((int)(DateTime.Now - DateTime.Now.Date).TotalSeconds);
+
+				_seedGenerated = true;
+			}
 		}		// 1.
 		//internal virtual void OnEnable()		{ }								// 2.
 		protected virtual void Start() { Log.Debug("MBE Started"); }		// 3.
