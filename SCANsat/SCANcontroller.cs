@@ -912,8 +912,8 @@ namespace SCANsat
 				finishRegistration(id);
 			}
 
-			GameEvents.onShowUI.Add(UIOn);
-			GameEvents.onHideUI.Add(UIOff);
+			GameEvents.onShowUI.Add(UIShow);
+			GameEvents.onHideUI.Add(UIHide);
 			GameEvents.onGUIMissionControlSpawn.Add(UIOff);
 			GameEvents.onGUIMissionControlDespawn.Add(UIOn);
 			GameEvents.onGUIRnDComplexSpawn.Add(UIOff);
@@ -1180,6 +1180,18 @@ namespace SCANsat
 		private void UIOff()
 		{
 			showUI = false;
+		}
+
+		private void UIShow()
+		{
+			if (HighLogic.LoadedSceneIsFlight)
+				showUI = true;
+		}
+
+		private void UIHide()
+		{
+			if (HighLogic.LoadedSceneIsFlight)
+				showUI = false;
 		}
 
 		internal void loadPQS(CelestialBody b, mapSource s = mapSource.Data)
