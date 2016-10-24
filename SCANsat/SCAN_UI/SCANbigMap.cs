@@ -38,11 +38,11 @@ namespace SCANsat.SCAN_UI
 		//private Texture2D overlay_static;
 		private Dictionary<int, List<List<Vector2d>>> gridLines = new Dictionary<int, List<List<Vector2d>>>();
 		private Rect ddRect, zoomCloseRect;
-		private Rect rc = new Rect(0, 0, 20, 20);
+		private Rect rc;
 		private Vector2 scrollP, scrollR;
 		private Vector2d mjTarget = new Vector2d();
-		private Rect pos_spotmap = new Rect(10f, 10f, 10f, 10f);
-		private Rect pos_spotmap_x = new Rect(10f, 10f, 25f, 25f);
+		private Rect pos_spotmap;
+		private Rect pos_spotmap_x;
 		private StringBuilder infoString;
 		private StringBuilder infoString2;
 		internal static Rect defaultRect = new Rect(250, 60, 780, 460);
@@ -56,6 +56,8 @@ namespace SCANsat.SCAN_UI
 
 		protected override void Awake()
 		{
+			base.Awake();
+
 			WindowCaption = "Map of ";
 			WindowRect = defaultRect;
 			WindowSize_Min = new Vector2(550, 225);
@@ -66,6 +68,9 @@ namespace SCANsat.SCAN_UI
 			DragEnabled = true;
 			ClampEnabled = false;
 			TooltipMouseOffset = new Vector2d(-10, -25);
+			pos_spotmap = new Rect(10f, 10f, 10f, 10f);
+			pos_spotmap_x = new Rect(10f, 10f, 25f, 25f);
+			rc = new Rect(0, 0, 20, 20);
 
 			SCAN_SkinsLibrary.SetCurrent("SCAN_Unity");
 			SCAN_SkinsLibrary.SetCurrentTooltip();

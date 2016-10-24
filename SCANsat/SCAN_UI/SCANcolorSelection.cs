@@ -94,6 +94,8 @@ namespace SCANsat.SCAN_UI
 
 		protected override void Awake()
 		{
+			base.Awake();
+
 			WindowCaption = "S.C.A.N. Color Management";
 			WindowRect = sessionRect;
 			WindowStyle = SCANskins.SCAN_window;

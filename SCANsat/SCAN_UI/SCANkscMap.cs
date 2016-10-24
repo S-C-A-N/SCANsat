@@ -38,10 +38,10 @@ namespace SCANsat.SCAN_UI
 		private List<SCANresourceGlobal> loadedResources = new List<SCANresourceGlobal>();
 		private Dictionary<int, List<List<Vector2d>>> gridLines = new Dictionary<int, List<List<Vector2d>>>();
 		private Rect ddRect, zoomCloseRect;
-		private Rect rc = new Rect(0, 0, 20, 20);
+		private Rect rc;
 		private Vector2 scrollP, scrollR;
-		private Rect pos_spotmap = new Rect(10f, 10f, 10f, 10f);
-		private Rect pos_spotmap_x = new Rect(10f, 10f, 25f, 25f);
+		private Rect pos_spotmap;
+		private Rect pos_spotmap_x;
 		private StringBuilder infoString;
 		private StringBuilder infoString2;
 		internal readonly static Rect defaultRect = new Rect(250, 60, 780, 460);
@@ -52,6 +52,8 @@ namespace SCANsat.SCAN_UI
 
 		protected override void Awake()
 		{
+			base.Awake();
+
 			WindowCaption = "Map of ";
 			WindowRect = sessionRect;
 			WindowOptions = new GUILayoutOption[2] { GUILayout.Width(740), GUILayout.Height(420) };
@@ -61,6 +63,9 @@ namespace SCANsat.SCAN_UI
 			TooltipMouseOffset = new Vector2d(-10, -25);
 			ClampToScreenOffset = new RectOffset(-600, -600, -400, -400);
 			waypoints = HighLogic.LoadedScene != GameScenes.SPACECENTER;
+			pos_spotmap = new Rect(10f, 10f, 10f, 10f);
+			pos_spotmap_x = new Rect(10f, 10f, 25f, 25f);
+			rc = new Rect(0, 0, 20, 20);
 
 			SCAN_SkinsLibrary.SetCurrent("SCAN_Unity");
 			SCAN_SkinsLibrary.SetCurrentTooltip();

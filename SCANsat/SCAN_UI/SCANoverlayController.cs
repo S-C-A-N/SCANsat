@@ -59,6 +59,8 @@ namespace SCANsat.SCAN_UI
 
 		protected override void Awake()
 		{
+			base.Awake();
+
 			WindowCaption = "  S.C.A.N. Overlay";
 			WindowRect = sessionRect;
 			if ((WindowRect.x * SCANcontroller.controller.windowScale) > (Screen.width - 100))

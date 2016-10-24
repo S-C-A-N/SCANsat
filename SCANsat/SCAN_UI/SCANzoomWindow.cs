@@ -65,6 +65,8 @@ namespace SCANsat.SCAN_UI
 
 		protected override void Awake()
 		{
+			base.Awake();
+
 			WindowRect = sessionRect;
 			WindowSize_Min = new Vector2(310, 180);
 			WindowSize_Max = new Vector2(540, 400);
