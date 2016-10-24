@@ -1414,7 +1414,9 @@ namespace SCANsat
 					if (sv.vessel.mainBody != body)
 						continue;
 
-					if (sv.vessel.situation == Vessel.Situations.LANDED || sv.vessel.situation == Vessel.Situations.PRELAUNCH || sv.vessel.situation == Vessel.Situations.SPLASHED)
+					Vessel.Situations sit = sv.vessel.loaded ? sv.vessel.situation : sv.vessel.protoVessel.situation;
+
+					if (sit == Vessel.Situations.LANDED || sit == Vessel.Situations.PRELAUNCH || sit == Vessel.Situations.SPLASHED)
 						continue;
 
 					Color col;
