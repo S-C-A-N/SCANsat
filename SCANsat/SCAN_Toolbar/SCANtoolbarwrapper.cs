@@ -727,22 +727,17 @@ namespace SCANsat.SCAN_Toolbar {
 			button = new ButtonTypes(iButtonType);
 		}
 
-		internal static Type getType(string name) {
-			foreach (AssemblyLoader.LoadedAssembly assembly in AssemblyLoader.loadedAssemblies)
+		internal static Type getType(string name)
+		{
+			Type type = null;
+			AssemblyLoader.loadedAssemblies.TypeOperation(t =>
 			{
-				try
+				if (t.FullName == name)
 				{
-					var type = assembly.assembly.GetExportedTypes().SingleOrDefault(t => t.FullName == name);
-					if (type != null)
-					{
-						return type;
-					}
+					type = t;
 				}
-				catch (InvalidOperationException)
-				{
-				}
-			}
-			return null;
+			});
+			return type;
 		}
 
 		internal static PropertyInfo getProperty(Type type, string name) {
