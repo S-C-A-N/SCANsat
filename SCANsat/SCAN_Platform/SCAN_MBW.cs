@@ -156,7 +156,6 @@ namespace SCANsat.SCAN_Platform
 		private string strToolTipText;
 		private string strLastTooltipText;
 		private float fltTooltipTime; // display dt for tooltip
-		internal bool TooltipStatic; // FIXME: unused
 
 		/* resizing windows */
 		internal bool IsResizing;
