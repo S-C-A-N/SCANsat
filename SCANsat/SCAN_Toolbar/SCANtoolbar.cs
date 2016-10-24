@@ -133,7 +133,6 @@ namespace SCANsat.SCAN_Toolbar
 
 		private void toggleMenu(IButton menu)
 		{
-			if (!ToolbarManager.ToolbarAvailable) return; // bail if we don't have a toolbar
 			if (menu.Drawable == null)
 				createMenu(menu);
 			else
@@ -197,14 +196,12 @@ namespace SCANsat.SCAN_Toolbar
 
 		private void destroyMenu(IButton menu)
 		{
-			if (!ToolbarManager.ToolbarAvailable) return; // bail if we don't have a toolbar
 			((PopupMenuDrawable)menu.Drawable).Destroy();
 			menu.Drawable = null;
 		}
 
 		internal void OnDestroy()
 		{
-			if (!ToolbarManager.ToolbarAvailable) return; // bail if we don't have a toolbar
 			if (SCANButton != null)
 				SCANButton.Destroy();
 			if (MapButton != null)
