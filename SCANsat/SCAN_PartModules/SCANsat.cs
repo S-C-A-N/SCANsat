@@ -160,22 +160,14 @@ namespace SCANsat.SCAN_PartModules
 			{
 				if (sensorType != 0 || SCANcontroller.controller.isVesselKnown(vessel.id, (SCANtype)sensorType))
 				{
-					if (TimeWarp.CurrentRate < 15000)
+					if (!resHandler.UpdateModuleResourceInputs(ref alt_indicator, 1, 0.9, false, true))
 					{
-						if (!resHandler.UpdateModuleResourceInputs(ref alt_indicator, 1, 0.9, false, true))
-						{
-							unregisterScanner();
-							powerIsProblem = true;
-							powerTimer = 0;
-						}
-						else
-							powerIsProblem = false;
+						unregisterScanner();
+						powerIsProblem = true;
+						powerTimer = 0;
 					}
-					else if (powerIsProblem)
-					{
-						registerScanner();
+					else
 						powerIsProblem = false;
-					}
 				}
 				else
 					unregisterScanner();
