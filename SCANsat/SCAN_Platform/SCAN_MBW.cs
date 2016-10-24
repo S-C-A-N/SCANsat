@@ -93,35 +93,35 @@ namespace SCANsat.SCAN_Platform
 		 * 		+ Ref: http://docs.unity3d.com/Manual/ExecutionOrder.html
 		 */
 
-		#region "Constructor"
-		protected SCAN_MBW()
-			: base()
-		{
-			//do the assembly name add so we get different windowIDs for multiple plugins
-			WindowID = UnityEngine.Random.Range(1000, 2000000) + Log._AssemblyName.GetHashCode();
-			_Visible = false;
-			Log.Debug("WindowID:{0}", WindowID);
+		//#region "Constructor"
+		//protected SCAN_MBW()
+		//	: base()
+		//{
+		//	//do the assembly name add so we get different windowIDs for multiple plugins
+		//	WindowID = UnityEngine.Random.Range(1000, 2000000) + Log._AssemblyName.GetHashCode();
+		//	_Visible = false;
+		//	Log.Debug("WindowID:{0}", WindowID);
 
-			//and look for any customattributes
-			WindowInitialsAttribute[] attrs = (WindowInitialsAttribute[])Attribute.GetCustomAttributes(GetType(), typeof(WindowInitialsAttribute));
-			foreach (WindowInitialsAttribute attr in attrs)
-			{
-				Visible = attr.Visible;
-				WindowCaption = attr.Caption;
+		//	//and look for any customattributes
+		//	WindowInitialsAttribute[] attrs = (WindowInitialsAttribute[])Attribute.GetCustomAttributes(GetType(), typeof(WindowInitialsAttribute));
+		//	foreach (WindowInitialsAttribute attr in attrs)
+		//	{
+		//		Visible = attr.Visible;
+		//		WindowCaption = attr.Caption;
 
-				IsDragging = attr.IsDragging;
-				DragEnabled = attr.DragEnabled;
-				ClampEnabled = attr.ClampEnabled;
+		//		IsDragging = attr.IsDragging;
+		//		DragEnabled = attr.DragEnabled;
+		//		ClampEnabled = attr.ClampEnabled;
 
-				TooltipsEnabled = attr.TooltipsEnabled;
+		//		TooltipsEnabled = attr.TooltipsEnabled;
 
-				IsResizing = attr.IsResizing;
+		//		IsResizing = attr.IsResizing;
 
-				WindowSize_Min = attr.MinSize;
-				WindowSize_Max = attr.MaxSize;
-			}
-		}
-		#endregion
+		//		WindowSize_Min = attr.MinSize;
+		//		WindowSize_Max = attr.MaxSize;
+		//	}
+		//}
+		//#endregion
 		
 		internal Int32 WindowID { get; private set; }
 		internal TimeSpan DrawWindowInternalDuration { get; private set; }
@@ -139,27 +139,26 @@ namespace SCANsat.SCAN_Platform
 		/* dragging and clamping */
 
 		internal Rect DragRect;
-		public bool DragEnabled = false;
-		public bool ClampEnabled = true;
-		internal bool IsDragging = false;
-		internal RectOffset ClampToScreenOffset = new RectOffset(0, 0, 0, 0);
+		public bool DragEnabled;
+		public bool ClampEnabled;
+		internal bool IsDragging;
+		internal RectOffset ClampToScreenOffset;
 
 		/* tooltips */
 		protected bool TooltipShown { get; set; }
 		internal Rect TooltipPosition { get { return _TooltipPosition; } }
-		internal Vector2d TooltipMouseOffset = new Vector2d();
-		private Rect _TooltipPosition = new Rect();
+		internal Vector2d TooltipMouseOffset;
+		private Rect _TooltipPosition;
 
-		public bool TooltipsEnabled = false;
-		protected Int32 TooltipDisplayForSecs = 15;
-		protected Int32 TooltipMaxWidth = 250;
-		private string strToolTipText = "";
-		private string strLastTooltipText = "";
-		private float fltTooltipTime = 0f; // display dt for tooltip
-		internal bool TooltipStatic = false; // FIXME: unused
+		public bool TooltipsEnabled;
+		protected Int32 TooltipDisplayForSecs;
+		protected Int32 TooltipMaxWidth;
+		private string strToolTipText;
+		private string strLastTooltipText;
+		private float fltTooltipTime; // display dt for tooltip
 
 		/* resizing windows */
-		internal bool IsResizing = false;
+		internal bool IsResizing;
 		protected Rect WindowRect_Default;
 		protected Vector2 WindowSize_Min;
 		protected Vector2 WindowSize_Max;
@@ -208,7 +207,44 @@ namespace SCANsat.SCAN_Platform
 		public static GUIContent textWithTT(string label, string tooltip) { return new GUIContent(label, tooltip); }
 		public static GUIContent iconWithTT(Texture tex, string tooltip) { return new GUIContent(tex, tooltip); }
 
-		protected override void Awake() { Log.Debug("New MBWindow Awakened"); }
+		protected override void Awake()
+		{
+			Log.Debug("New MBWindow Awakened");
+
+			base.Awake();
+
+			//do the assembly name add so we get different windowIDs for multiple plugins
+			WindowID = UnityEngine.Random.Range(1000, 2000000) + Log._AssemblyName.GetHashCode();
+			_Visible = false;
+			Log.Debug("WindowID:{0}", WindowID);
+
+			ClampToScreenOffset = new RectOffset(0, 0, 0, 0);
+			_TooltipPosition = new Rect();
+			ClampEnabled = true;
+			TooltipDisplayForSecs = 15;
+			TooltipMaxWidth = 250;
+			strToolTipText = "";
+			strLastTooltipText = "";
+
+			//and look for any customattributes
+			WindowInitialsAttribute[] attrs = (WindowInitialsAttribute[])Attribute.GetCustomAttributes(GetType(), typeof(WindowInitialsAttribute));
+			foreach (WindowInitialsAttribute attr in attrs)
+			{
+				Visible = attr.Visible;
+				WindowCaption = attr.Caption;
+
+				IsDragging = attr.IsDragging;
+				DragEnabled = attr.DragEnabled;
+				ClampEnabled = attr.ClampEnabled;
+
+				TooltipsEnabled = attr.TooltipsEnabled;
+
+				IsResizing = attr.IsResizing;
+
+				WindowSize_Min = attr.MinSize;
+				WindowSize_Max = attr.MaxSize;
+			}
+		}
 		protected virtual void DrawWindowPre(Int32 id) { }
 		protected abstract void DrawWindow(Int32 id);
 		protected virtual void DrawWindowPost(Int32 id) { }
@@ -283,6 +319,9 @@ namespace SCANsat.SCAN_Platform
 
 				// if the content of the tooltip changes then reset the counter
 				if (!TooltipShown || hasChanged()) fltTooltipTime = 0f;
+
+				if (TooltipMouseOffset == null)
+					TooltipMouseOffset = new Vector2d();
 
 				// Calc the size of the Tooltip
 				_TooltipPosition.x = Event.current.mousePosition.x + (float)TooltipMouseOffset.x;

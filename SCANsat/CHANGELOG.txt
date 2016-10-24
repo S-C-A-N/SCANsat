@@ -1,3 +1,11 @@
+Version 16.10 - 2016-10-24
+-----------------------
+
+- Update Toolbar wrapper
+- Fix Unity initialization issues
+- Fix error in ground track display
+- Fix hiding windows in KSC scene
+
 Version 16.9 - 2016-10-13
 -----------------------
 
@@ -5,7 +13,6 @@ Version 16.9 - 2016-10-13
 - Update to new resource consumption system
 - Fix intermittent background scanning gaps
 - Only show the manual map size input field in the flight scene
-- Adjust Ore concentration cutoff values
 
 Version 16.8 - 2016-9-23
 -----------------------

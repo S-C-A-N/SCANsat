@@ -33,9 +33,9 @@ namespace SCANsat.SCAN_UI
 		internal static readonly Rect defaultRect = new Rect(10, 55, 380, 230);
 		private static Rect sessionRect = defaultRect;
 		private bool flash;
-		private Texture2D map_small = new Texture2D(360, 180, TextureFormat.ARGB32, false);
-		private Color32[] cols_height_map_small = new Color32[360];
-		private Color32[] biomeCache = new Color32[360 * 180];
+		private Texture2D map_small;
+		private Color32[] cols_height_map_small;
+		private Color32[] biomeCache;
 		private bool biomeBuilding;
 		private bool drawBiome;
 		private double[] biomeIndex = new double[360];
@@ -46,6 +46,8 @@ namespace SCANsat.SCAN_UI
 
 		protected override void Awake()
 		{
+			base.Awake();
+
 			WindowCaption = "S.C.A.N. Planetary Mapping";
 			WindowRect = sessionRect;
 			WindowOptions = new GUILayoutOption[2] { GUILayout.Width(380), GUILayout.Height(230) };
@@ -56,6 +58,9 @@ namespace SCANsat.SCAN_UI
 			ClampToScreenOffset = new RectOffset(-300, -300, -200, -200);
 			infoText = new StringBuilder();
 			vesselText = new StringBuilder();
+			map_small = new Texture2D(360, 180, TextureFormat.ARGB32, false);
+			cols_height_map_small = new Color32[360];
+			biomeCache = new Color32[360 * 180];
 
 			SCAN_SkinsLibrary.SetCurrent("SCAN_Unity");
 			SCAN_SkinsLibrary.SetCurrentTooltip();

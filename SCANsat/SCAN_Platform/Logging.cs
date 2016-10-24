@@ -13,7 +13,7 @@ namespace SCANsat.SCAN_Platform.Logging
 		public static void Now(string message, params object[] strParams)
 		{
 			message = string.Format(message, strParams);															// This fills the params into the message
-			string strMessageLine = string.Format("{1},{0}", message, _AssemblyName);	// This adds our standardised wrapper to each line
+			string strMessageLine = string.Format("[{1}],{0}", message, _AssemblyName);	// This adds our standardised wrapper to each line
 			UnityEngine.Debug.Log(strMessageLine);                        				// And this puts it in the log
 		}
 
