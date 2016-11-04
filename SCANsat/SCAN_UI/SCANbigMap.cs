@@ -91,6 +91,8 @@ namespace SCANsat.SCAN_UI
 			TooltipsEnabled = SCANcontroller.controller.toolTips;
 
 			initializeMap();
+
+			GameEvents.OnCameraChange.Add(onCameraChange);
 		}
 
 		private void initializeMap()
@@ -126,6 +128,7 @@ namespace SCANsat.SCAN_UI
 
 		protected override void OnDestroy()
 		{
+			GameEvents.OnCameraChange.Remove(onCameraChange);
 			SCANcontroller.controller.unloadPQS(bigmap.Body, mapSource.BigMap);
 		}
 
@@ -133,6 +136,14 @@ namespace SCANsat.SCAN_UI
 		{
 			if (FlightGlobals.ready)
 				v = FlightGlobals.ActiveVessel;
+		}
+
+		private void onCameraChange(CameraManager.CameraMode cam)
+		{
+			if (cam == CameraManager.CameraMode.IVA)
+				DragEnabled = false;
+			else
+				DragEnabled = true;
 		}
 
 		//Properties used to sync with color selection window

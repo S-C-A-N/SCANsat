@@ -87,6 +87,8 @@ namespace SCANsat.SCAN_UI
 			infoString2 = new StringBuilder();
 
 			Startup();
+
+			GameEvents.OnCameraChange.Add(onCameraChange);
 		}
 
 		protected virtual void Startup()
@@ -140,7 +142,16 @@ namespace SCANsat.SCAN_UI
 		{
 			removeControlLocks();
 
+			GameEvents.OnCameraChange.Remove(onCameraChange);
 			SCANcontroller.controller.unloadPQS(spotmap.Body, mapSource.ZoomMap);
+		}
+
+		private void onCameraChange(CameraManager.CameraMode cam)
+		{
+			if (cam == CameraManager.CameraMode.IVA)
+				DragEnabled = false;
+			else
+				DragEnabled = true;
 		}
 
 		internal void removeControlLocks()
