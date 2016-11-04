@@ -187,6 +187,22 @@ namespace SCANsat.SCAN_UI
 					warningMMLoaded = !warningMMLoaded;
 				}
 			}
+			else
+			{
+				if (oldInstantScan != SCANcontroller.controller.easyModeScanning)
+				{
+					oldInstantScan = SCANcontroller.controller.easyModeScanning;
+					if (oldInstantScan)
+					{
+						for (int i = FlightGlobals.Bodies.Count - 1; i >= 0; i--)
+						{
+							CelestialBody b = FlightGlobals.Bodies[i];
+
+							SCANcontroller.controller.checkStockResourceScanStatus(b);
+						}
+					}
+				}
+			}
 
 			if (oldNarrowBand != SCANcontroller.controller.needsNarrowBand)
 			{
@@ -200,7 +216,7 @@ namespace SCANsat.SCAN_UI
 				oldStockScanThreshold = SCANcontroller.controller.useScanThreshold;
 				if (oldStockScanThreshold)
 				{
-					for (int i = 0; i < FlightGlobals.Bodies.Count; i++)
+					for (int i = FlightGlobals.Bodies.Count - 1; i >= 0; i--)
 					{
 						CelestialBody b = FlightGlobals.Bodies[i];
 

@@ -211,9 +211,6 @@ namespace SCANsat
 		/* Used as holder for vessel id's while loading */
 		private List<Guid> tempIDs = new List<Guid>();
 
-		private CelestialBody body = null;
-		private bool bodyScanned = false;
-		private bool bodyCoverage = false;
 		private bool heightMapsBuilt = false;
 
 		private static SCANcontroller instance;
@@ -923,6 +920,7 @@ namespace SCANsat
 			GameEvents.onGUIAstronautComplexSpawn.Add(UIOff);
 			GameEvents.onGUIAstronautComplexDespawn.Add(UIOn);
 
+			GameEvents.OnOrbitalSurveyCompleted.Add(onSurvey);
 			GameEvents.onVesselSOIChanged.Add(SOIChange);
 			GameEvents.onVesselCreate.Add(newVesselCheck);
 			GameEvents.onPartCouple.Add(dockingEventCheck);
@@ -973,11 +971,20 @@ namespace SCANsat
 
 			if (disableStockResource && useScanThreshold)
 			{
-				for (int i = 0; i < FlightGlobals.Bodies.Count; i++)
-				{
+				for (int i = FlightGlobals.Bodies.Count - 1; i >= 0; i--)
+				{					
 					CelestialBody b = FlightGlobals.Bodies[i];
 
 					checkResourceScanStatus(b);
+				}
+			}
+			else if (!disableStockResource && easyModeScanning)
+			{
+				for (int i = FlightGlobals.Bodies.Count - 1; i >= 0; i--)
+				{
+					CelestialBody b = FlightGlobals.Bodies[i];
+
+					checkStockResourceScanStatus(b);
 				}
 			}
 		}
@@ -989,61 +996,28 @@ namespace SCANsat
 
 			if (!heightMapsBuilt)
 				checkHeightMapStatus();
+		}
 
-			if (!HighLogic.LoadedSceneIsFlight && HighLogic.LoadedScene != GameScenes.TRACKSTATION)
-				return;
-
-			if (!easyModeScanning || disableStockResource)
+		public void checkStockResourceScanStatus(CelestialBody body)
+		{
+			if (disableStockResource || !easyModeScanning)
 				return;
 
 			if (body == null)
-			{
-				if (HighLogic.LoadedSceneIsFlight)
-				{
-					body = FlightGlobals.ActiveVessel.mainBody;
-					bodyScanned = false;
-					bodyCoverage = false;
-				}
-				else if (HighLogic.LoadedScene == GameScenes.TRACKSTATION)
-				{
-					MapObject target = PlanetariumCamera.fetch.target;
-
-					if (target.type != MapObject.ObjectType.CelestialBody)
-					{
-						body = null;
-						return;
-					}
-
-					body = target.celestialBody;
-					bodyScanned = false;
-					bodyCoverage = false;
-				}
-			}
-
-			if (bodyScanned)
 				return;
 
-			if (!bodyCoverage)
-			{
-				if (SCANUtil.GetCoverage((int)SCANtype.AllResources, body) >= 100)
-				{
-					bodyScanned = true;
-					return;
-				}
-				bodyCoverage = true;
-			}
+			if (!ResourceMap.Instance.IsPlanetScanned(body.flightGlobalsIndex))
+				return;
 
-			if (ResourceMap.Instance.IsPlanetScanned(body.flightGlobalsIndex))
-			{
-				SCANdata data = SCANUtil.getData(body);
-				if (data == null)
-				{
-					data = new SCANdata(body);
-					addToBodyData(body, data);
-				}
-				data.fillResourceMap();
-				bodyScanned = true;
-			}
+			if (SCANUtil.GetCoverage((int)SCANtype.AllResources, body) >= 100)
+				return;
+
+			SCANdata data = getData(body.name);
+
+			if (data == null)
+				return;
+
+			data.fillResourceMap();
 		}
 
 		public void checkResourceScanStatus(CelestialBody body)
@@ -1126,8 +1100,8 @@ namespace SCANsat
 
 		private void OnDestroy()
 		{
-			GameEvents.onShowUI.Remove(UIOn);
-			GameEvents.onHideUI.Remove(UIOff);
+			GameEvents.onShowUI.Remove(UIShow);
+			GameEvents.onHideUI.Remove(UIHide);
 			GameEvents.onGUIMissionControlSpawn.Remove(UIOff);
 			GameEvents.onGUIMissionControlDespawn.Remove(UIOn);
 			GameEvents.onGUIRnDComplexSpawn.Remove(UIOff);
@@ -1137,6 +1111,7 @@ namespace SCANsat
 			GameEvents.onGUIAstronautComplexSpawn.Remove(UIOff);
 			GameEvents.onGUIAstronautComplexDespawn.Remove(UIOn);
 
+			GameEvents.OnOrbitalSurveyCompleted.Remove(onSurvey);
 			GameEvents.onVesselSOIChanged.Remove(SOIChange);
 			GameEvents.onVesselCreate.Remove(newVesselCheck);
 			GameEvents.onPartCouple.Remove(dockingEventCheck);
@@ -1192,6 +1167,28 @@ namespace SCANsat
 		{
 			if (HighLogic.LoadedSceneIsFlight)
 				showUI = false;
+		}
+
+		private void onSurvey(Vessel v, CelestialBody b)
+		{
+			if (!easyModeScanning || disableStockResource)
+				return;
+
+			if (b == null)
+				return;
+
+			if (SCANUtil.GetCoverage((int)SCANtype.AllResources, b) >= 100)
+				return;
+
+			SCANdata data = SCANUtil.getData(b);
+
+			if (data == null)
+			{
+				data = new SCANdata(b);
+				addToBodyData(b, data);
+			}
+
+			data.fillResourceMap();
 		}
 
 		internal void loadPQS(CelestialBody b, mapSource s = mapSource.Data)
@@ -1595,9 +1592,6 @@ namespace SCANsat
 		{
 			if (!body_data.Contains(VC.to.name))
 				body_data.Add(VC.to.name, new SCANdata(VC.to));
-			body = VC.to;
-			bodyScanned = false;
-			bodyCoverage = false;
 		}
 
 		private void setNewTerrainConfigValues(SCANterrainConfig terrain, float min, float max, float? clamp, Palette c, int size, bool reverse, bool discrete)
