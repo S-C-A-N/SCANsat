@@ -217,7 +217,10 @@ namespace SCANsat.SCAN_UI
 				if (stockToolbar)
 					SCANcontroller.controller.appLauncher = gameObject.AddComponent<SCANappLauncher>();
 				else
+				{
 					Destroy(SCANcontroller.controller.appLauncher);
+					SCANcontroller.controller.appLauncher = null;
+				}
 			}
 		}
 
