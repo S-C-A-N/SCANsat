@@ -1,3 +1,13 @@
+Version 16.11 - 2016-11-4
+-----------------------
+
+- Update for KSP 1.2.1
+
+- Disable window dragging for big map and zoom map when in IVA
+- Most resource scanners now use the stock Narrow-Band for high resolution scanning
+     - The "Require Narrow-Band" option in the resource settings is slightly broken by this
+	 - Disable that option if using lots of CRP resources
+
 Version 16.10 - 2016-10-24
 -----------------------
 
