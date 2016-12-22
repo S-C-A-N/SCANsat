@@ -22,6 +22,7 @@ using FinePrint.Contracts;
 using FinePrint.Utilities;
 using SCANsat.SCAN_UI;
 using SCANsat.SCAN_UI.UI_Framework;
+using SCANsat.SCAN_Unity;
 using SCANsat.SCAN_Data;
 using SCANsat.SCAN_Map;
 using SCANsat.SCAN_PartModules;
@@ -84,9 +85,9 @@ namespace SCANsat
 		[KSPField(isPersistant = true)]
 		public bool dataRebuild = true;
 		[KSPField(isPersistant = true)]
-		public bool mainMapVisible = false;
+		public bool mainMapVisibleOld = false;
 		[KSPField(isPersistant = true)]
-		public bool bigMapVisible = false;
+		public bool bigMapVisibleOld = false;
 		[KSPField(isPersistant = true)]
 		public bool kscMapVisible = false;
 		[KSPField(isPersistant = true)]
@@ -138,6 +139,47 @@ namespace SCANsat
 		[KSPField(isPersistant = true)]
 		public float windowScale = 1f;
 
+
+		[KSPField(isPersistant = true)]
+		public bool mainMapVisible = false;
+		[KSPField(isPersistant = true)]
+		public bool mainMapColor = true;
+		[KSPField(isPersistant = true)]
+		public bool mainMapBiome = false;
+		[KSPField(isPersistant = true)]
+		public bool mainMapMinimized = false;
+		[KSPField(isPersistant = true)]
+		public bool bigMapVisible = false;
+		[KSPField(isPersistant = true)]
+		public bool bigMapColor = true;
+		[KSPField(isPersistant = true)]
+		public bool bigMapGrid = true;
+		[KSPField(isPersistant = true)]
+		public bool bigMapOrbit = true;
+		[KSPField(isPersistant = true)]
+		public bool bigMapWaypoint = true;
+		[KSPField(isPersistant = true)]
+		public bool bigMapAnomaly = true;
+		[KSPField(isPersistant = true)]
+		public bool bigMapAsteroid = true;
+		[KSPField(isPersistant = true)]
+		public bool bigMapFlag = true;
+		[KSPField(isPersistant = true)]
+		public bool bigMapResourceOn = true;
+		[KSPField(isPersistant = true)]
+		public string bigMapProjection = "Rectangular";
+		[KSPField(isPersistant = true)]
+		public string bigMapType = "Terrain";
+		[KSPField(isPersistant = true)]
+		public string bigMapResource = "Ore";
+		[KSPField(isPersistant = true)]
+		public string bigMapBody = "Kerbin";
+		[KSPField(isPersistant = true)]
+		public int bigMapWidth = 720;
+		[KSPField(isPersistant = true)]
+		public int overlaySelection = 0;
+
+
 		/* Biome and slope colors can't be serialized properly as a KSP Field */
 		public Color lowBiomeColor = new Color(0, 0.46f, 0.02345098f, 1);
 		public Color highBiomeColor = new Color(0.7f, 0.2388235f, 0, 1);
@@ -183,7 +225,7 @@ namespace SCANsat
 
 		/* Kopernicus On Demand Loading Data */
 		private List<CelestialBody> dataBodies = new List<CelestialBody>();
-		private CelestialBody bigMapBody;
+		private CelestialBody bigMapBodyPQS;
 		private CelestialBody zoomMapBody;
 		private PQSMod KopernicusOnDemand;
 
@@ -196,6 +238,13 @@ namespace SCANsat
 		internal SCANcolorSelection colorManager;
 		internal SCANoverlayController resourceOverlay;
 		internal SCANresourceSettings resourceSettings;
+
+		private SCAN_UI_MainMap _mainMap;
+		private SCAN_UI_Instruments _instruments;
+		private SCAN_UI_BigMap _bigMap;
+		private SCAN_UI_Overlay _overlay;
+		private SCAN_UI_Settings _settings;
+
 		//internal SCANzoomHiDef hiDefMap;
 		internal SCANzoomWindow zoomMap;
 
@@ -940,6 +989,13 @@ namespace SCANsat
 					resourceOverlay = gameObject.AddComponent<SCANoverlayController>();
 					resourceSettings = gameObject.AddComponent<SCANresourceSettings>();
 					zoomMap = gameObject.AddComponent<SCANzoomWindow>();
+
+					_mainMap = new SCAN_UI_MainMap();
+					_bigMap = new SCAN_UI_BigMap();
+					_instruments = new SCAN_UI_Instruments();
+					_overlay = new SCAN_UI_Overlay();
+					_settings = new SCAN_UI_Settings();
+
 				}
 				catch (Exception e)
 				{
@@ -956,9 +1012,15 @@ namespace SCANsat
 					settingsWindow = gameObject.AddComponent<SCANsettingsUI>();
 					colorManager = gameObject.AddComponent<SCANcolorSelection>();
 					resourceSettings = gameObject.AddComponent<SCANresourceSettings>();
+
+					_bigMap = new SCAN_UI_BigMap();
+					_settings = new SCAN_UI_Settings();
+
 					if (HighLogic.LoadedScene == GameScenes.TRACKSTATION)
 					{
 						resourceOverlay = gameObject.AddComponent<SCANoverlayController>();
+
+						_overlay = new SCAN_UI_Overlay();
 					}
 				}
 				catch (Exception e)
@@ -1136,6 +1198,20 @@ namespace SCANsat
 			//if (hiDefMap != null)
 			//	Destroy(hiDefMap);
 
+			if (_mainMap != null)
+				_mainMap.OnDestroy();
+			if (_bigMap != null)
+				_bigMap.OnDestroy();
+			if (_instruments != null)
+				_instruments.OnDestroy();
+			if (_overlay != null)
+				_overlay.OnDestroy();
+			if (_settings != null)
+				_settings.OnDestroy();
+
+			if (SCAN_Settings_Config.Instance != null)
+				SCAN_Settings_Config.Instance.Save();
+
 			if (!heightMapsBuilt)
 			{
 				for (int i = dataBodies.Count - 1; i >= 0; i--)
@@ -1207,17 +1283,17 @@ namespace SCANsat
 
 					dataBodies.Add(b);
 
-					if (bigMapBody != null && bigMapBody == b)
+					if (bigMapBodyPQS != null && bigMapBodyPQS == b)
 						return;
 
 					if (zoomMapBody != null && zoomMapBody == b)
 						return;
 					break;
 				case mapSource.BigMap:
-					if (bigMapBody != null && bigMapBody == b)
+					if (bigMapBodyPQS != null && bigMapBodyPQS == b)
 						return;
 
-					bigMapBody = b;
+					bigMapBodyPQS = b;
 
 					if (zoomMapBody != null && zoomMapBody == b)
 						return;
@@ -1232,7 +1308,7 @@ namespace SCANsat
 
 					zoomMapBody = b;
 
-					if (bigMapBody != null && bigMapBody == b)
+					if (bigMapBodyPQS != null && bigMapBodyPQS == b)
 						return;
 
 					if (dataBodies.Contains(b))
@@ -1268,14 +1344,14 @@ namespace SCANsat
 					if (dataBodies.Contains(b))
 						dataBodies.RemoveAll(a => a == b);
 
-					if (bigMapBody != null && bigMapBody == b)
+					if (bigMapBodyPQS != null && bigMapBodyPQS == b)
 						return;
 
 					if (zoomMapBody != null && zoomMapBody == b)
 						return;
 					break;
 				case mapSource.BigMap:
-					bigMapBody = null;
+					bigMapBodyPQS = null;
 
 					if (zoomMapBody != null && zoomMapBody == b)
 						return;
@@ -1287,7 +1363,7 @@ namespace SCANsat
 				case mapSource.ZoomMap:
 					zoomMapBody = null;
 
-					if (bigMapBody != null && bigMapBody == b)
+					if (bigMapBodyPQS != null && bigMapBodyPQS == b)
 						return;
 
 					if (dataBodies.Contains(b))
