@@ -636,9 +636,9 @@ namespace SCANsat
 			switch (HighLogic.LoadedScene)
 			{
 				case GameScenes.FLIGHT:
-					if (SCANcontroller.controller.mainMapVisible && SCANcontroller.controller.mainMap != null && SCANcontroller.controller.mainMap.GetWindowRect.Contains(pos))
+					if (SCANcontroller.controller.mainMapVisibleOld && SCANcontroller.controller.mainMap != null && SCANcontroller.controller.mainMap.GetWindowRect.Contains(pos))
 						return true;
-					else if (SCANcontroller.controller.bigMapVisible && SCANcontroller.controller.BigMap != null && SCANcontroller.controller.BigMap.GetWindowRect.Contains(pos))
+					else if (SCANcontroller.controller.bigMapVisibleOld && SCANcontroller.controller.BigMap != null && SCANcontroller.controller.BigMap.GetWindowRect.Contains(pos))
 						return true;
 					else if (SCANcontroller.controller.zoomMap != null && SCANcontroller.controller.zoomMap.Visible && SCANcontroller.controller.zoomMap.GetWindowRect.Contains(pos))
 						return true;

@@ -81,7 +81,7 @@ namespace SCANsat.SCAN_Toolbar
 						if (SCANcontroller.controller != null)
 						{
 							SCANcontroller.controller.BigMap.Visible = !SCANcontroller.controller.BigMap.Visible;
-							SCANcontroller.controller.bigMapVisible = !SCANcontroller.controller.bigMapVisible;
+							SCANcontroller.controller.bigMapVisibleOld = !SCANcontroller.controller.bigMapVisibleOld;
 						}
 					};
 				SmallButton.OnClick += (e) =>
@@ -89,7 +89,7 @@ namespace SCANsat.SCAN_Toolbar
 						if (SCANcontroller.controller != null)
 						{
 							SCANcontroller.controller.mainMap.Visible = !SCANcontroller.controller.mainMap.Visible;
-							SCANcontroller.controller.mainMapVisible = !SCANcontroller.controller.mainMapVisible;
+							SCANcontroller.controller.mainMapVisibleOld = !SCANcontroller.controller.mainMapVisibleOld;
 						}
 					};
 				OverlayButton.OnClick += (e) =>
@@ -157,7 +157,7 @@ namespace SCANsat.SCAN_Toolbar
 			smallMap.OnClick += (e2) =>
 				{
 					SCANcontroller.controller.mainMap.Visible = !SCANcontroller.controller.mainMap.Visible;
-					SCANcontroller.controller.mainMapVisible = !SCANcontroller.controller.mainMapVisible;
+					SCANcontroller.controller.mainMapVisibleOld = !SCANcontroller.controller.mainMapVisibleOld;
 				};
 			instrument.OnClick += (e2) =>
 				{
@@ -166,7 +166,7 @@ namespace SCANsat.SCAN_Toolbar
 			bigMap.OnClick += (e2) =>
 				{
 					SCANcontroller.controller.BigMap.Visible = !SCANcontroller.controller.BigMap.Visible;
-					SCANcontroller.controller.bigMapVisible = !SCANcontroller.controller.bigMapVisible;
+					SCANcontroller.controller.bigMapVisibleOld = !SCANcontroller.controller.bigMapVisibleOld;
 				};
 			zoomMap.OnClick += (e2) =>
 				{

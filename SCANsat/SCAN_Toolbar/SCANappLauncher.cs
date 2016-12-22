@@ -15,6 +15,7 @@ using System.Collections;
 using SCANsat.SCAN_Platform;
 using SCANsat.SCAN_UI;
 using SCANsat.SCAN_UI.UI_Framework;
+using SCANsat.SCAN_Unity;
 using KSP.UI.Screens;
 
 namespace SCANsat.SCAN_Toolbar
@@ -69,11 +70,16 @@ namespace SCANsat.SCAN_Toolbar
 
 		private void toggleFlight()
 		{
-			if (SCANcontroller.controller != null)
-			{
-				SCANcontroller.controller.mainMap.Visible = !SCANcontroller.controller.mainMap.Visible;
-				SCANcontroller.controller.mainMapVisible = !SCANcontroller.controller.mainMapVisible;
-			}
+			//if (SCANcontroller.controller != null)
+			//{
+			//	SCANcontroller.controller.mainMap.Visible = !SCANcontroller.controller.mainMap.Visible;
+			//	SCANcontroller.controller.mainMapVisible = !SCANcontroller.controller.mainMapVisible;
+			//}
+
+			if (SCAN_UI_MainMap.Instance.IsVisible)
+				SCAN_UI_MainMap.Instance.Close();
+			else
+				SCAN_UI_MainMap.Instance.Open();
 		}
 
 		private void toggleKSC()

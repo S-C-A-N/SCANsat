@@ -987,7 +987,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 		internal static Color blackLineColor = new Color(0f, 0f, 0f, 0.9f);
 		private static Material lineMat = JUtil.DrawLineMaterial();
 
-		internal static Dictionary<int, List<List<Vector2d>>> drawGridLine(Rect maprect, SCANmap map)
+		internal static Dictionary<int, List<List<Vector2d>>> drawGridLine(SCANmap map)
 		{
 			var lineDict = new Dictionary<int, List<List<Vector2d>>>();
 			var whiteLineList = new List<List<Vector2d>>();

@@ -79,7 +79,7 @@ namespace SCANsat.SCAN_UI
 		protected override void Start()
 		{
 			//Initialize the map object
-			Visible = SCANcontroller.controller.bigMapVisible;
+			Visible = SCANcontroller.controller.bigMapVisibleOld;
 			WindowRect.x = SCANcontroller.controller.map_x;
 			WindowRect.y = SCANcontroller.controller.map_y;
 			lastColor = currentColor = SCANcontroller.controller.colours == 0;
@@ -307,7 +307,7 @@ namespace SCANsat.SCAN_UI
 			if (GUI.Button(r, SCANcontroller.controller.closeBox, SCANskins.SCAN_closeButton))
 			{
 				Visible = false;
-				SCANcontroller.controller.bigMapVisible = Visible;
+				SCANcontroller.controller.bigMapVisibleOld = Visible;
 			}
 		}
 
@@ -629,7 +629,7 @@ namespace SCANsat.SCAN_UI
 			if (drawGrid)
 			{
 				gridLines = new Dictionary<int, List<List<Vector2d>>>();
-				gridLines = SCANuiUtil.drawGridLine(TextureRect, bigmap);
+				gridLines = SCANuiUtil.drawGridLine(bigmap);
 				drawGrid = false;
 			}
 

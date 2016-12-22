@@ -533,7 +533,7 @@ namespace SCANsat.SCAN_UI
 			if (drawGrid)
 			{
 				gridLines = new Dictionary<int, List<List<Vector2d>>>();
-				gridLines = SCANuiUtil.drawGridLine(TextureRect, bigmap);
+				gridLines = SCANuiUtil.drawGridLine(bigmap);
 				drawGrid = false;
 			}
 

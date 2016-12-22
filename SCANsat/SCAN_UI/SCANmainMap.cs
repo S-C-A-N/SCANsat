@@ -70,7 +70,7 @@ namespace SCANsat.SCAN_UI
 		{
 			base.Start();
 
-			Visible = SCANcontroller.controller.mainMapVisible;
+			Visible = SCANcontroller.controller.mainMapVisibleOld;
 			v = FlightGlobals.ActiveVessel;
 			data = SCANUtil.getData(v.mainBody);
 			if (data == null)
@@ -150,7 +150,7 @@ namespace SCANsat.SCAN_UI
 			if (GUI.Button(r, SCANcontroller.controller.closeBox, SCANskins.SCAN_closeButton))
 			{
 				Visible = false;
-				SCANcontroller.controller.mainMapVisible = Visible;
+				SCANcontroller.controller.mainMapVisibleOld = Visible;
 			}
 		}
 
@@ -184,7 +184,7 @@ namespace SCANsat.SCAN_UI
 			if (GUILayout.Button(iconWithTT(SCANskins.SCAN_BigMapIcon, "Big Map"), SCANskins.SCAN_windowButton, GUILayout.Height(32), GUILayout.Width(32)))
 			{
 				SCANcontroller.controller.BigMap.Visible = !SCANcontroller.controller.BigMap.Visible;
-				SCANcontroller.controller.bigMapVisible = !SCANcontroller.controller.bigMapVisible;
+				SCANcontroller.controller.bigMapVisibleOld = !SCANcontroller.controller.bigMapVisibleOld;
 			}
 			if (GUILayout.Button(iconWithTT(SCANskins.SCAN_InstrumentIcon, "Instrument Window"), SCANskins.SCAN_windowButton, GUILayout.Height(32), GUILayout.Width(32)))
 			{
