@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using UnityEngine;
 using SCANsat.Unity.Interfaces;
+using SCANsat.Unity;
 using SCANsat.Unity.Unity;
 using SCANsat.SCAN_Data;
 using SCANsat.SCAN_UI.UI_Framework;
@@ -105,6 +106,12 @@ namespace SCANsat.SCAN_Unity
 
 			if (uiElement != null)
 				uiElement.RefreshVessels();
+		}
+
+		public void SetScale(float scale)
+		{
+			if (uiElement != null)
+				uiElement.SetScale(scale);
 		}
 
 		public void Update()
@@ -277,21 +284,57 @@ namespace SCANsat.SCAN_Unity
 			set { SCANcontroller.controller.mainMapMinimized = value; }
 		}
 
+		public float Scale
+		{
+			get { return SCAN_Settings_Config.Instance.UIScale; }
+		}
+
 		public Vector2 Position
 		{
 			get { return SCAN_Settings_Config.Instance.MainMapPosition; }
 			set { SCAN_Settings_Config.Instance.MainMapPosition = value; }
 		}
 
-		public Dictionary<Guid, string> VesselInfoList
+		public Sprite VesselType(Guid id)
+		{
+			if (!SCANcontroller.controller.knownVessels.Contains(id))
+				return null;
+
+			Vessel sv = SCANcontroller.controller.knownVessels[id].vessel;
+
+			return null;
+		}
+
+		public Vector2 VesselPosition(Guid id)
+		{
+			if (!SCANcontroller.controller.knownVessels.Contains(id))
+				return new Vector2();
+
+			Vessel sv = SCANcontroller.controller.knownVessels[id].vessel;
+
+			double lon = SCANUtil.fixLon(sv.longitude);
+			double lat = SCANUtil.fixLat(sv.latitude);
+			
+			lon = lon * ((360 * Scale * GameSettings.UI_SCALE) / 360f);
+			lat = (180 * Scale * GameSettings.UI_SCALE) - lat * ((180 * Scale * GameSettings.UI_SCALE) / 180f);
+
+			return new Vector2((float)lon, (float)lat);
+		}
+
+		public Dictionary<Guid, MapLabelInfo> VesselInfoList
 		{
 			get
 			{
-				Dictionary<Guid, string> vessels = new Dictionary<Guid, string>();
+				Dictionary<Guid, MapLabelInfo> vessels = new Dictionary<Guid, MapLabelInfo>();
 
-				vessels.Add(v.id, v.vesselName);
+				vessels.Add(v.id, new MapLabelInfo()
+				{
+					label = "",
+					image = VesselType(v.id),
+					pos = new Vector2()
+				});
 
-				for (int i = SCANcontroller.controller.Known_Vessels.Count - 1; i >= 0 ; i--)
+				for (int i = SCANcontroller.controller.Known_Vessels.Count - 1; i >= 0; i--)
 				{
 					SCANcontroller.SCANvessel sv = SCANcontroller.controller.Known_Vessels[0];
 
@@ -301,10 +344,13 @@ namespace SCANsat.SCAN_Unity
 					if (sv.vessel.mainBody != v.mainBody)
 						continue;
 
-					vessels.Add(sv.vessel.id, sv.vessel.vesselName);
+					vessels.Add(sv.vessel.id, new MapLabelInfo()
+					{
+						label = "",
+						image = VesselType(sv.vessel.id),
+						pos = new Vector2()
+					});
 				}
-
-				SCANUtil.SCANlog("Returning {0} vessels...", vessels.Count);
 
 				return vessels;
 			}

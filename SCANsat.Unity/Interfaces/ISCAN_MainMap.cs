@@ -16,9 +16,11 @@ namespace SCANsat.Unity.Interfaces
 
 		bool Minimized { get; set; }
 
+		float Scale { get; }
+
 		Vector2 Position { get; set; }
 
-		Dictionary<Guid, string> VesselInfoList { get; }
+		Dictionary<Guid, MapLabelInfo> VesselInfoList { get; }
 
 		void ClampToScreen(RectTransform rect);
 
@@ -33,6 +35,10 @@ namespace SCANsat.Unity.Interfaces
 		void OpenOverlay();
 
 		string VesselInfo(Guid id);
+
+		Sprite VesselType(Guid id);
+
+		Vector2 VesselPosition(Guid id);
 
 		void Update();
 	}

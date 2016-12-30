@@ -40,6 +40,8 @@ namespace SCANsat.Unity.Unity
 		private GameObject m_VesselPrefab = null;
 		[SerializeField]
 		private Transform m_VesselTransform = null;
+		[SerializeField]
+		private GameObject m_MapPrefab = null;
 
 		private ISCAN_MainMap mapInterface;
 		private bool loaded;
@@ -47,6 +49,7 @@ namespace SCANsat.Unity.Unity
 		private Vector2 mouseStart;
 		private Vector3 windowStart;
 		private List<SCAN_VesselInfo> vessels = new List<SCAN_VesselInfo>();
+		private List<SCAN_MapLabel> mapLabels = new List<SCAN_MapLabel>();
 
 		private void Awake()
 		{
@@ -60,11 +63,21 @@ namespace SCANsat.Unity.Unity
 
 			mapInterface.Update();
 
-			for (int i = vessels.Count - 1; i >= 0; i--)
+			if (!mapInterface.Minimized)
 			{
-				SCAN_VesselInfo vessel = vessels[i];
+				for (int i = vessels.Count - 1; i >= 0; i--)
+				{
+					SCAN_VesselInfo vessel = vessels[i];
 
-				vessel.UpdateText(i, mapInterface.VesselInfo(vessel.ID));
+					vessel.UpdateText(mapInterface.VesselInfo(vessel.ID));
+				}
+			}
+
+			for (int i = mapLabels.Count - 1; i >= 0; i--)
+			{
+				SCAN_MapLabel mapLabel = mapLabels[i];
+
+				mapLabel.UpdatePosition(mapInterface.VesselPosition(mapLabel.ID));
 			}
 		}
 
@@ -87,6 +100,8 @@ namespace SCANsat.Unity.Unity
 
 			CreateVessels(map.VesselInfoList);
 
+			SetScale(map.Scale);
+
 			SetPosition(map.Position);
 
 			if (m_VesselTransform != null)
@@ -95,12 +110,30 @@ namespace SCANsat.Unity.Unity
 			loaded = true;
 		}
 
+		public void SetScale(float scale)
+		{
+			rect.localScale = Vector3.one * scale;
+		}
+
 		public void SetPosition(Vector2 pos)
 		{
 			if (rect == null)
 				return;
 
 			rect.anchoredPosition = new Vector3(pos.x, pos.y, 0);
+		}
+
+		public void RefreshVesselTypes()
+		{
+			if (mapInterface == null)
+				return;
+
+			for (int i = mapLabels.Count - 1; i >= 0; i--)
+			{
+				SCAN_MapLabel mapLabel = mapLabels[i];
+
+				mapLabel.UpdateImage(mapInterface.VesselType(mapLabel.ID));
+			}
 		}
 
 		public void RefreshVessels()
@@ -113,13 +146,22 @@ namespace SCANsat.Unity.Unity
 				Destroy(v.gameObject);
 			}
 
+			for (int i = mapLabels.Count - 1; i >= 0; i--)
+			{
+				SCAN_MapLabel m = mapLabels[i];
+
+				m.gameObject.SetActive(false);
+				Destroy(m.gameObject);
+			}
+
 			vessels.Clear();
+			mapLabels.Clear();
 
 			if (mapInterface != null)
 				CreateVessels(mapInterface.VesselInfoList);
 		}
 
-		private void CreateVessels(Dictionary<Guid, string> vessels)
+		private void CreateVessels(Dictionary<Guid, MapLabelInfo> vessels)
 		{
 			if (vessels == null)
 				return;
@@ -131,13 +173,15 @@ namespace SCANsat.Unity.Unity
 			{
 				Guid id = vessels.ElementAt(i).Key;
 
-				string name = vessels[id];
+				MapLabelInfo label = vessels[id];
 
-				CreateVessel(id, name);
+				CreateVessel(id, i + 1, label.label);
+
+				CreateMapLabel(id, i + 1, label);
 			}
 		}
 
-		private void CreateVessel(Guid id, string vessel)
+		private void CreateVessel(Guid id, int i, string vessel)
 		{
 			SCAN_VesselInfo vInfo = Instantiate(m_VesselPrefab).GetComponent<SCAN_VesselInfo>();
 
@@ -146,9 +190,25 @@ namespace SCANsat.Unity.Unity
 
 			vInfo.transform.SetParent(m_VesselTransform, false);
 
-			vInfo.SetVessel(id, vessel, mapInterface);
+			vInfo.SetVessel(id, i, vessel, mapInterface);
 
 			vessels.Add(vInfo);
+		}
+
+		private void CreateMapLabel(Guid id, int i, MapLabelInfo info)
+		{
+			SCAN_MapLabel mapLabel = Instantiate(m_MapPrefab).GetComponent<SCAN_MapLabel>();
+
+			if (mapLabel == null)
+				return;
+
+			mapLabel.transform.SetParent(m_MainMap.transform, false);
+
+			info.label = string.Format("[{0}]", i);
+
+			mapLabel.Setup(id, info.label, info.image, info.pos);
+
+			mapLabels.Add(mapLabel);
 		}
 
 		public void OnBeginDrag(PointerEventData eventData)
