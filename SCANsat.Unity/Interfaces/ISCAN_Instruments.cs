@@ -21,6 +21,8 @@ namespace SCANsat.Unity.Interfaces
 
 		bool Anomaly { get; }
 
+		float Scale { get; }
+
 		Texture AnomalyCamera { get; }
 
 		Vector2 Position { get; set; }

@@ -74,12 +74,19 @@ namespace SCANsat.SCAN_Unity
 				data = new SCANdata(b);
 				SCANcontroller.controller.addToBodyData(b, data);
 			}
+
 			bigmap.setBody(b);
 		}
 
 		public void OnDestroy()
 		{
 			SCANcontroller.controller.unloadPQS(bigmap.Body, mapSource.BigMap);
+		}
+
+		public void SetScale(float scale)
+		{
+			if (uiElement != null)
+				uiElement.SetScale(scale);
 		}
 
 		public void Update()
@@ -357,7 +364,7 @@ namespace SCANsat.SCAN_Unity
 
 		public float Scale
 		{
-			get { return 1; }
+			get { return SCAN_Settings_Config.Instance.UIScale; }
 		}
 
 		public Vector2 Position
@@ -368,8 +375,14 @@ namespace SCANsat.SCAN_Unity
 
 		public Vector2 Size
 		{
-			get { return new Vector2(1024, 512); }//return SCAN_Settings_Config.Instance.BigMapWidth; }
-			set { }
+			get
+			{
+				float width = SCAN_Settings_Config.Instance.BigMapWidth;
+				float height = width / 2;
+
+				return new Vector2(width, height);
+			}
+			set { SCAN_Settings_Config.Instance.BigMapWidth = (int)value.x; }
 		}
 
 		public IList<string> Projections

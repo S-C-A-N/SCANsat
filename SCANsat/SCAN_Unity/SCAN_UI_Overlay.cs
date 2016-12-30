@@ -74,6 +74,12 @@ namespace SCANsat.SCAN_Unity
 			removeOverlay();
 		}
 
+		public void SetScale(float scale)
+		{
+			if (uiElement != null)
+				uiElement.SetScale(scale);
+		}
+
 		public void Update()
 		{
 
@@ -188,6 +194,11 @@ namespace SCANsat.SCAN_Unity
 				else
 					removeOverlay();
 			}
+		}
+
+		public float Scale
+		{
+			get { return SCAN_Settings_Config.Instance.UIScale; }
 		}
 
 		public IList<string> Resources

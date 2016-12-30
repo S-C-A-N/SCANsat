@@ -62,9 +62,16 @@ namespace SCANsat.Unity.Unity
 
 			CreateResources(over.Resources);
 
+			SetScale(over.Scale);
+
 			SetPosition(over.Position);
 
 			loaded = true;
+		}
+
+		public void SetScale(float scale)
+		{
+			rect.localScale = Vector3.one * scale;
 		}
 
 		public void SetPosition(Vector2 pos)

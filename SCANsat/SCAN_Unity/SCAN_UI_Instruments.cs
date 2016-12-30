@@ -63,6 +63,12 @@ namespace SCANsat.SCAN_Unity
 			GameEvents.onVesselWasModified.Add(vesselChange);
 		}
 
+		public void SetScale(float scale)
+		{
+			if (uiElement != null)
+				uiElement.SetScale(scale);
+		}
+
 		public void Update()
 		{
 			if (!_isVisible || uiElement == null)
@@ -190,6 +196,11 @@ namespace SCANsat.SCAN_Unity
 		public bool Anomaly
 		{
 			get { return false; }
+		}
+
+		public float Scale
+		{
+			get { return SCAN_Settings_Config.Instance.UIScale; }
 		}
 
 		public Texture AnomalyCamera

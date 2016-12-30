@@ -125,9 +125,16 @@ namespace SCANsat.Unity.Unity
 			if (!map.ShowWaypoint && m_WaypointObject != null)
 				m_WaypointObject.SetActive(false);
 
+			SetScale(map.Scale);
+
 			SetPosition(map.Position);
 
 			loaded = true;
+		}
+
+		public void SetScale(float scale)
+		{
+			rect.localScale = Vector3.one * scale;
 		}
 
 		public void SetPosition(Vector2 pos)

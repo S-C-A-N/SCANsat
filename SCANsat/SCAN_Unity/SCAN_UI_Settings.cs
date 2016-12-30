@@ -125,7 +125,24 @@ namespace SCANsat.SCAN_Unity
 		public float UIScale
 		{
 			get { return SCAN_Settings_Config.Instance.UIScale; }
-			set { SCAN_Settings_Config.Instance.UIScale = value; }
+			set
+			{
+				SCAN_Settings_Config.Instance.UIScale = value;
+
+				uiElement.SetScale(value);
+
+				if (SCAN_UI_BigMap.Instance != null && SCAN_UI_BigMap.Instance.IsVisible)
+					SCAN_UI_BigMap.Instance.SetScale(value);
+
+				if (SCAN_UI_MainMap.Instance != null && SCAN_UI_MainMap.Instance.IsVisible)
+					SCAN_UI_MainMap.Instance.SetScale(value);
+
+				if (SCAN_UI_Instruments.Instance != null && SCAN_UI_Instruments.Instance.IsVisible)
+					SCAN_UI_Instruments.Instance.SetScale(value);
+
+				if (SCAN_UI_Overlay.Instance != null && SCAN_UI_Overlay.Instance.IsVisible)
+					SCAN_UI_Overlay.Instance.SetScale(value);
+			}
 		}
 
 		public bool IsVisible

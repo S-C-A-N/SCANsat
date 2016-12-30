@@ -20,6 +20,8 @@ namespace SCANsat.Unity.Interfaces
 
 		bool DrawTerrain { get; set; }
 
+		float Scale { get; }
+
 		IList<string> Resources { get; }
 
 		Vector2 Position { get; set; }

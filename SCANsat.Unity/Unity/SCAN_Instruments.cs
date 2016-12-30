@@ -53,7 +53,14 @@ namespace SCANsat.Unity.Unity
 			if (!ins.ResourceButtons && m_ResourceButtons != null)
 				m_ResourceButtons.gameObject.SetActive(false);
 
+			SetScale(ins.Scale);
+
 			SetPosition(ins.Position);
+		}
+
+		public void SetScale(float scale)
+		{
+			rect.localScale = Vector3.one * scale;
 		}
 
 		public void SetPosition(Vector2 pos)

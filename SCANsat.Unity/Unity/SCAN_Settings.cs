@@ -83,6 +83,13 @@ namespace SCANsat.Unity.Unity
 						m_GeneralToggle.isOn = true;
 					break;
 			}
+
+			SetScale(settings.UIScale);
+		}
+
+		public void SetScale(float scale)
+		{
+			rect.localScale = Vector3.one * scale;
 		}
 
 		public void OnBeginDrag(PointerEventData eventData)
