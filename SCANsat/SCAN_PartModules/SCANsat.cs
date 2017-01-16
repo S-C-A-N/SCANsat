@@ -535,6 +535,10 @@ namespace SCANsat.SCAN_PartModules
 			}
 		}
 
+		public void ReturnData(ScienceData data) {
+			storedData.Add(data);
+		}
+
 		public void ReviewDataItem(ScienceData sd)
 		{
 			ReviewData();
