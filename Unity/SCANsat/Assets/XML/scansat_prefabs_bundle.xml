@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<KSPBundleDefinition xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" UrlName="scansat_prefabs" Name="scansat_prefabs" CreatedTime="-8587191881827438731">
+<KSPBundleDefinition xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" UrlName="scansat_prefabs" Name="scansat_prefabs" CreatedTime="-8587162234914114400">
   <Author />
   <Info />
   <Assets>
@@ -14,6 +14,7 @@
     <Asset Name="SCAN_General" Path="Assets/Prefabs/SCAN_General.prefab" Type="GameObject" Url="Prefabs/SCAN_General" AutoLoad="false" />
     <Asset Name="SCAN_Instruments" Path="Assets/Prefabs/SCAN_Instruments.prefab" Type="GameObject" Url="Prefabs/SCAN_Instruments" AutoLoad="false" />
     <Asset Name="SCAN_MainMap" Path="Assets/Prefabs/SCAN_MainMap.prefab" Type="GameObject" Url="Prefabs/SCAN_MainMap" AutoLoad="false" />
+    <Asset Name="SCAN_MapLabel" Path="Assets/Prefabs/SCAN_MapLabel.prefab" Type="GameObject" Url="Prefabs/SCAN_MapLabel" AutoLoad="false" />
     <Asset Name="SCAN_Overlay" Path="Assets/Prefabs/SCAN_Overlay.prefab" Type="GameObject" Url="Prefabs/SCAN_Overlay" AutoLoad="false" />
     <Asset Name="SCAN_Resources" Path="Assets/Prefabs/SCAN_Resources.prefab" Type="GameObject" Url="Prefabs/SCAN_Resources" AutoLoad="false" />
     <Asset Name="SCAN_Settings" Path="Assets/Prefabs/SCAN_Settings.prefab" Type="GameObject" Url="Prefabs/SCAN_Settings" AutoLoad="false" />
