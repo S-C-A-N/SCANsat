@@ -178,8 +178,6 @@ namespace SCANsat.SCAN_UI
 					mapMode = loadedMode ?? 0;
 					int? loadedZoom = persist.RPMZoom;
 					zoomLevel = loadedZoom ?? 0;
-					int? loadedColors = persist.RPMColor;
-					SCANcontroller.controller.colours = loadedColors ?? 0;
 
 					if (SCANconfigLoader.GlobalResource)
 					{
@@ -503,7 +501,7 @@ namespace SCANsat.SCAN_UI
 			{
 				pos.x -= 8;
 				pos.y -= 8;
-				SCANuiUtil.drawMapIconGL(pos, SCANcontroller.controller.mechJebTargetSelection ? SCANskins.SCAN_MechJebIcon : SCANskins.SCAN_TargetIcon, iconColor, iconMaterial, iconColorShadowValue, true);
+				SCANuiUtil.drawMapIconGL(pos, SCAN_Settings_Config.Instance.MechJebTarget ? SCANskins.SCAN_MechJebIcon : SCANskins.SCAN_TargetIcon, iconColor, iconMaterial, iconColorShadowValue, true);
 			}
 		}
 
@@ -561,9 +559,9 @@ namespace SCANsat.SCAN_UI
 			}
 			else if (buttonID == buttonEsc) {
 				// Whatever possessed him to do THAT?
-				SCANcontroller.controller.colours = SCANcontroller.controller.colours == 0 ? 1 : 0;
 				if (satModuleFound)
-					persist.RPMColor = SCANcontroller.controller.colours;
+					persist.RPMColor = !persist.RPMColor;
+				map.ColorMap = persist.RPMColor;
 				RedrawMap();
 			}
 			else if (buttonID == buttonHome) {
@@ -689,6 +687,7 @@ namespace SCANsat.SCAN_UI
 			if (map == null)
 			{
 				map = new SCANmap(orbitingBody, false, mapSource.RPM);
+				map.ColorMap = persist.RPMColor;
 				map.setProjection(MapProjection.Rectangular);
 			}
 			map.setBody(orbitingBody);
@@ -924,8 +923,9 @@ namespace SCANsat.SCAN_UI
 
 	internal class RPMPersistence
 	{
-		internal int RPMMode, RPMColor, RPMZoom = 0;
+		internal int RPMMode, RPMZoom = 0;
 		internal int RPMResource = 0;
+		internal bool RPMColor = true;
 		internal bool RPMLines = true;
 		internal bool RPMAnomaly = true;
 		internal bool RPMDrawResource = true;
@@ -936,7 +936,7 @@ namespace SCANsat.SCAN_UI
 			RPMID = id;
 		}
 
-		internal RPMPersistence(string id, int mode, int color, int zoom, bool lines, bool anomaly, bool drawResource, int resource)
+		internal RPMPersistence(string id, int mode, bool color, int zoom, bool lines, bool anomaly, bool drawResource, int resource)
 		{
 			RPMID = id;
 			RPMMode = mode;

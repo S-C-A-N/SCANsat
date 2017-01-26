@@ -110,7 +110,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 		#region UI Utilities
 
 		//Generates a string with info from mousing over the map
-		internal static void mouseOverInfo(double lon, double lat, SCANmap mapObj, SCANdata data, CelestialBody body, bool b, ref StringBuilder sb, ref StringBuilder sb2)
+		internal static void mouseOverInfo(double lon, double lat, SCANmap mapObj, SCANdata data, CelestialBody body, bool b, bool waypoint, ref StringBuilder sb, ref StringBuilder sb2)
 		{
 			if (Event.current.type == EventType.Repaint)
 			{
@@ -148,7 +148,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 
 					if (SCANUtil.isCovered(lon, lat, data, SCANtype.Altimetry))
 					{
-						sb.Append(getMouseOverElevation(lon, lat, data, 2));
+						sb.Append(getMouseOverElevation(lon, lat, data, 2, SCANUtil.isCovered(lon, lat, data, SCANtype.AltimetryHiRes)));
 
 						if (SCANUtil.isCovered(lon, lat, data, SCANtype.AltimetryHiRes))
 						{
@@ -188,7 +188,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 						}
 					}
 
-					if (SCANcontroller.controller.map_waypoints)
+					if (waypoint)
 					{
 						double range = ContractDefs.Survey.MaximumTriggerRange;
 						foreach (SCANwaypoint p in data.Waypoints)
@@ -230,7 +230,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			readableLabel(sb2.ToString(), false);
 		}
 
-		internal static void mouseOverInfoSimple(double lon, double lat, SCANmap mapObj, SCANdata data, CelestialBody body, bool b, ref StringBuilder sb, ref StringBuilder sb2)
+		internal static void mouseOverInfoSimple(double lon, double lat, SCANmap mapObj, SCANdata data, CelestialBody body, bool b, bool waypoint, ref StringBuilder sb, ref StringBuilder sb2)
 		{
 			if (Event.current.type == EventType.Repaint)
 			{
@@ -240,7 +240,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 				{
 					if (SCANUtil.isCovered(lon, lat, data, SCANtype.Altimetry))
 					{
-						sb.Append(getMouseOverElevation(lon, lat, data, 0));
+						sb.Append(getMouseOverElevation(lon, lat, data, 0, SCANUtil.isCovered(lon, lat, data, SCANtype.AltimetryHiRes)));
 
 						if (SCANUtil.isCovered(lon, lat, data, SCANtype.AltimetryHiRes))
 						{
@@ -263,7 +263,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 						string label = "";
 						if (SCANUtil.isCovered(lon, lat, data, mapObj.Resource.SType))
 						{
-							double amount = SCANUtil.ResourceOverlay(lat, lon, mapObj.Resource.Name, mapObj.Body, SCANcontroller.controller.resourceBiomeLock);
+							double amount = SCANUtil.ResourceOverlay(lat, lon, mapObj.Resource.Name, mapObj.Body, SCAN_Settings_Config.Instance.BiomeLock);
 							if (amount < 0)
 								label = "Unknown";
 							else
@@ -276,7 +276,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 						}
 						else if (SCANUtil.isCovered(lon, lat, data, SCANtype.FuzzyResources))
 						{
-							double amount = SCANUtil.ResourceOverlay(lat, lon, mapObj.Resource.Name, mapObj.Body, SCANcontroller.controller.resourceBiomeLock);
+							double amount = SCANUtil.ResourceOverlay(lat, lon, mapObj.Resource.Name, mapObj.Body, SCAN_Settings_Config.Instance.BiomeLock);
 							if (amount < 0)
 								label = "Unknown";
 							else
@@ -289,7 +289,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 						}
 					}
 
-					if (SCANcontroller.controller.map_waypoints)
+					if (waypoint)
 					{
 						double range = ContractDefs.Survey.MaximumTriggerRange;
 						foreach (SCANwaypoint p in data.Waypoints)
@@ -343,7 +343,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 
 		internal static bool narrowBandInOrbit(ref string text, CelestialBody b, double lat, SCANresourceGlobal resource)
 		{
-			if (SCANcontroller.controller.needsNarrowBand)
+			if (SCAN_Settings_Config.Instance.RequireNarrowBand)
 			{
 				bool scanner = false;
 
@@ -435,9 +435,9 @@ namespace SCANsat.SCAN_UI.UI_Framework
 		internal static string resourceLabel(bool fuzz, double lat, double lon, SCANresourceGlobal resource, CelestialBody b)
 		{
 			if (fuzz)
-				return string.Format("{0}: {1:P0}", resource.Name, SCANUtil.ResourceOverlay(lat, lon, resource.Name, b, SCANcontroller.controller.resourceBiomeLock));
+				return string.Format("{0}: {1:P0}", resource.Name, SCANUtil.ResourceOverlay(lat, lon, resource.Name, b, SCAN_Settings_Config.Instance.BiomeLock));
 			else
-				return string.Format("{0}: {1:P2}", resource.Name, SCANUtil.ResourceOverlay(lat, lon, resource.Name, b, SCANcontroller.controller.resourceBiomeLock));
+				return string.Format("{0}: {1:P2}", resource.Name, SCANUtil.ResourceOverlay(lat, lon, resource.Name, b, SCAN_Settings_Config.Instance.BiomeLock));
 		}
 
 		private static double inc(double d)
@@ -450,11 +450,11 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			return d;
 		}
 
-		internal static string getMouseOverElevation(double Lon, double Lat, SCANdata d, int precision)
+		internal static string getMouseOverElevation(double Lon, double Lat, SCANdata d, int precision, bool high)
 		{
 			string s = " ";
 
-			if (SCANUtil.isCovered(Lon, Lat, d, SCANtype.AltimetryHiRes))
+			if (high)
 			{
 				s = SCANUtil.getElevation(d.Body, Lon, Lat).ToString("N" + precision) + "m ";
 			}
@@ -567,42 +567,26 @@ namespace SCANsat.SCAN_UI.UI_Framework
 		//Reset window positions;
 		internal static void resetMainMapPos()
 		{
-			if (SCANcontroller.controller.mainMap == null)
+			if (SCANcontroller.controller._mainMap == null)
 				return;
 
-			SCANcontroller.controller.mainMap.resetWindowPos(SCANmainMap.defaultRect);
-		}
-
-		internal static void resetSettingsUIPos()
-		{
-			if (SCANcontroller.controller.settingsWindow == null)
-				return;
-
-			SCANcontroller.controller.settingsWindow.resetWindowPos(SCANsettingsUI.defaultRect);
+			SCANcontroller.controller._mainMap.ResetPosition();
 		}
 
 		internal static void resetInstUIPos()
 		{
-			if (SCANcontroller.controller.instrumentsWindow == null)
+			if (SCANcontroller.controller._instruments == null)
 				return;
 
-			SCANcontroller.controller.instrumentsWindow.resetWindowPos(SCANinstrumentUI.defaultRect);
+			SCANcontroller.controller._instruments.ResetPosition();
 		}
 
 		internal static void resetBigMapPos()
 		{
-			if (SCANcontroller.controller.BigMap == null)
+			if (SCANcontroller.controller._bigMap == null)
 				return;
 
-			SCANcontroller.controller.BigMap.resetWindowPos(SCANBigMap.defaultRect);
-		}
-
-		internal static void resetKSCMapPos()
-		{
-			if (SCANcontroller.controller.kscMap == null)
-				return;
-
-			SCANcontroller.controller.kscMap.resetWindowPos(SCANkscMap.defaultRect);
+			SCANcontroller.controller._bigMap.ResetPosition();
 		}
 
 		internal static void resetColorMapPos()
@@ -615,18 +599,10 @@ namespace SCANsat.SCAN_UI.UI_Framework
 
 		internal static void resetOverlayControllerPos()
 		{
-			if (SCANcontroller.controller.resourceOverlay == null)
+			if (SCANcontroller.controller._overlay == null)
 				return;
 
-			SCANcontroller.controller.resourceOverlay.resetWindowPos(SCANoverlayController.defaultRect);
-		}
-
-		internal static void resetResourceSettingPos()
-		{
-			if (SCANcontroller.controller.resourceSettings == null)
-				return;
-
-			SCANcontroller.controller.resourceSettings.resetWindowPos(SCANresourceSettings.defaultRect);
+			SCANcontroller.controller._overlay.ResetPosition();
 		}
 
 		internal static void resetZoomMapPos()
@@ -637,20 +613,12 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			SCANcontroller.controller.zoomMap.resetWindowPos(SCANzoomWindow.defaultRect);
 		}
 
-		//internal static void resetHiDefMapPos()
-		//{
-		//	if (SCANcontroller.controller.hiDefMap == null)
-		//		return;
-
-		//	SCANcontroller.controller.hiDefMap.resetWindowPos(SCANzoomHiDef.defaultRect);
-		//}
-
 		#endregion
 
 		#region Texture/Icon labels
 
 		//Method to actually draw vessel labels on the map
-		internal static void drawVesselLabel(Rect maprect, SCANmap map, int num, Vessel vessel)
+		internal static void drawVesselLabel(Rect maprect, SCANmap map, int num, Vessel vessel, bool color)
 		{
 			bool flash = false;
 			double lon = SCANUtil.fixLon(vessel.longitude);
@@ -673,7 +641,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 				txt = "";
 			Rect r = new Rect(maprect.x + (float)lon, maprect.y + (float)lat, 250f, 25f);
 			Color col = palette.white;
-			if (SCANcontroller.controller.colours == 1 && vessel != FlightGlobals.ActiveVessel)
+			if (color && vessel != FlightGlobals.ActiveVessel)
 				col = palette.cb_skyBlue;
 			if (vessel == FlightGlobals.ActiveVessel && (int)(Time.realtimeSinceStartup % 2) == 0)
 			{
@@ -691,7 +659,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 		}
 
 		//Handles various map labels; probably should be split up into multiple methods
-		internal static void drawMapLabels(Rect maprect, Vessel vessel, SCANmap map, SCANdata data, CelestialBody body, bool showAnom, bool showWaypoints)
+		internal static void drawMapLabels(Rect maprect, Vessel vessel, SCANmap map, SCANdata data, CelestialBody body, bool showAnom, bool showWaypoints, bool flag, bool asteroid, bool color)
 		{
 			//This section handles flag and asteroid labels
 			for (int i = FlightGlobals.Vessels.Count - 1; i >= 0; i--)
@@ -700,13 +668,13 @@ namespace SCANsat.SCAN_UI.UI_Framework
 
 				if (v.mainBody == body)
 				{
-					if (v.vesselType == VesselType.Flag && SCANcontroller.controller.map_flags)
+					if (v.vesselType == VesselType.Flag && flag)
 					{
-						drawVesselLabel(maprect, map, 0, v);
+						drawVesselLabel(maprect, map, 0, v, color);
 					}
-					if (v.vesselType == VesselType.SpaceObject && SCANcontroller.controller.map_asteroids)
+					if (v.vesselType == VesselType.SpaceObject && asteroid)
 					{
-						drawVesselLabel(maprect, map, 0, v);
+						drawVesselLabel(maprect, map, 0, v, color);
 					}
 				}
 			}
@@ -742,7 +710,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			if (vessel != null)
 			{
 				if (vessel.mainBody == body)
-					drawVesselLabel(maprect, map, 0, vessel);
+					drawVesselLabel(maprect, map, 0, vessel, color);
 			}
 		}
 
@@ -764,9 +732,9 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			}
 			lon = lon * maprect.width / 360f;
 			lat = maprect.height - lat * maprect.height / 180f;
-			string txt = SCANcontroller.controller.anomalyMarker + " " + anomaly.Name;
+			string txt = "? " + anomaly.Name;
 			if (!anomaly.Detail)
-				txt = SCANcontroller.controller.anomalyMarker + " Anomaly";
+				txt = "? Anomaly";
 			Rect r = new Rect(maprect.x + (float)lon, maprect.y + (float)lat, 250f, 25f);
 			drawLabel(r, txt, SCANskins.SCAN_orbitalLabelOff, true, SCANskins.SCAN_shadowReadoutLabel, true, SCANskins.SCAN_orbitalLabelOn, true);
 		}
@@ -801,7 +769,8 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			{
 				r.x += 1;
 				r.y -= 13;
-				drawMapIcon(r, SCANcontroller.controller.mechJebTargetSelection ? SCANskins.SCAN_MechJebIcon : SCANskins.SCAN_TargetIcon, true, SCANcontroller.controller.mechJebTargetSelection ? palette.red : palette.xkcd_PukeGreen, true);
+				bool m = SCAN_Settings_Config.Instance.MechJebTarget;
+				drawMapIcon(r, m ? SCANskins.SCAN_MechJebIcon : SCANskins.SCAN_TargetIcon, true, m ? palette.red : palette.xkcd_PukeGreen, true);
 			}
 		}
 
@@ -1183,7 +1152,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 		private static Color32[] eq_pix;
 
 		//Draw the orbit overlay
-		internal static void drawOrbit(Rect maprect, SCANmap map, Vessel vessel, CelestialBody body, bool lite = false)
+		internal static void drawOrbit(Rect maprect, SCANmap map, Vessel vessel, CelestialBody body, bool color, bool lite = false)
 		{
 			if (vessel == null) return;
 			if (vessel.mainBody != body) return;
@@ -1299,7 +1268,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 					if (n.patch == vessel.orbit && n.nextPatch != null && n.nextPatch.activePatch && n.UT > startUT - o.period && mapPosAtT(maprect, map, ref r, vessel, o, n.UT - startUT, startUT))
 					{
 						col = palette.cb_reddishPurple;
-						if (SCANcontroller.controller.colours != 1)
+						if (!color)
 							col = palette.xkcd_PurplyPink;
 						SCANicon.drawOrbitIcon((int)r.x, (int)r.y, SCANicon.OrbitIcon.ManeuverNode, col, 32, true);
 						Orbit nuo = n.nextPatch;
@@ -1657,7 +1626,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 				{
 					double lon = fixLon(i / scale);
 
-					values[i, j] = SCANUtil.ResourceOverlay(lat, lon, resource.Name, data.Body, SCANcontroller.controller.resourceBiomeLock) * 100;
+					values[i, j] = SCANUtil.ResourceOverlay(lat, lon, resource.Name, data.Body, SCAN_Settings_Config.Instance.BiomeLock) * 100;
 				}
 			}
 		}
@@ -1712,7 +1681,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 				{
 					double lon = fixLon(i / scale);
 
-					values[i, j] = SCANUtil.ResourceOverlay(lat, lon, resource.Name, data.Body, SCANcontroller.controller.resourceBiomeLock) * 100;
+					values[i, j] = SCANUtil.ResourceOverlay(lat, lon, resource.Name, data.Body, SCAN_Settings_Config.Instance.BiomeLock) * 100;
 				}
 			}
 
@@ -1776,11 +1745,11 @@ namespace SCANsat.SCAN_UI.UI_Framework
 					}
 					else if (useStock)
 					{
-						pix[j * width + i] = palette.lerp((Color32)SCANUtil.getBiome(data.Body, lon, lat).mapColor, palette.Clear, SCANcontroller.controller.biomeTransparency / 100f);
+						pix[j * width + i] = palette.lerp((Color32)SCANUtil.getBiome(data.Body, lon, lat).mapColor, palette.Clear, SCAN_Settings_Config.Instance.BiomeTransparency);
 					}
 					else
 					{
-						pix[j * width + i] = palette.lerp(palette.lerp((Color32)SCANcontroller.controller.lowBiomeColor, (Color32)SCANcontroller.controller.highBiomeColor, biomeIndex), palette.Clear, SCANcontroller.controller.biomeTransparency / 100f);
+						pix[j * width + i] = palette.lerp(palette.lerp(SCANcontroller.controller.lowBiomeColor32, SCANcontroller.controller.highBiomeColor32, biomeIndex), palette.Clear, SCAN_Settings_Config.Instance.BiomeTransparency);
 					}
 				}
 			}
@@ -1872,14 +1841,14 @@ namespace SCANsat.SCAN_UI.UI_Framework
 					if (SCANUtil.isCovered(lon, lat, data, SCANtype.Altimetry))
 					{
 						if (SCANUtil.isCovered(lon, lat, data, SCANtype.AltimetryHiRes))
-							c = palette.heightToColor(values[i, j], 0, data.TerrainConfig);
+							c = palette.heightToColor(values[i, j], true, data.TerrainConfig);
 						else
 						{
 							int ilon = SCANUtil.icLON(unFixLon(lon));
 							int ilat = SCANUtil.icLAT(lat);
 							int lo = ((int)(ilon * scale * 5)) / 5;
 							int la = ((int)(ilat * scale * 5)) / 5;
-							c = palette.heightToColor(values[lo, la], 1, data.TerrainConfig);
+							c = palette.heightToColor(values[lo, la], false, data.TerrainConfig);
 						}
 
 						c = palette.lerp(c, palette.Clear, 0.1f);
@@ -2071,9 +2040,9 @@ namespace SCANsat.SCAN_UI.UI_Framework
 				for (int j = 0; j < height; j++)
 				{
 					if (map.UseCustomRange)
-						pix[j * width + i] = palette.heightToColor(values[i, j], 1, data.TerrainConfig, map.CustomMin, map.CustomMax, map.CustomRange, true);
+						pix[j * width + i] = palette.heightToColor(values[i, j], true, data.TerrainConfig, map.CustomMin, map.CustomMax, map.CustomRange, true);
 					else
-						pix[j * width + i] = palette.heightToColor(values[i, j], 1, data.TerrainConfig);
+						pix[j * width + i] = palette.heightToColor(values[i, j], true, data.TerrainConfig);
 				}
 			}
 
@@ -2144,7 +2113,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 						coords = SCANUtil.fixRetardCoordinates(new Vector2d(rLon, rLat));
 					}
 
-					values[i, j] = SCANUtil.ResourceOverlay(coords.y, coords.x, map.Resource.Name, map.Body, SCANcontroller.controller.resourceBiomeLock) * 100f;
+					values[i, j] = SCANUtil.ResourceOverlay(coords.y, coords.x, map.Resource.Name, map.Body, SCAN_Settings_Config.Instance.BiomeLock) * 100f;
 				}
 			}
 		}

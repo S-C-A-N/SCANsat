@@ -140,10 +140,10 @@ namespace SCANsat
 		/// <returns>Returns true if instant scan is enabled</returns>
 		public static bool instantResourceScanEnabled()
 		{
-			if (SCANcontroller.controller == null)
+			if (SCAN_Settings_Config.Instance == null)
 				return true;
 
-			return SCANcontroller.controller.easyModeScanning;
+			return SCAN_Settings_Config.Instance.InstantScan;
 		}
 
 		/// <summary>
@@ -152,10 +152,10 @@ namespace SCANsat
 		/// <returns>Returns true if stock resource scanning is available</returns>
 		public static bool stockResourceScanEnabled()
 		{
-			if (SCANcontroller.controller == null)
+			if (SCAN_Settings_Config.Instance == null)
 				return false;
 
-			return !SCANcontroller.controller.disableStockResource;
+			return !SCAN_Settings_Config.Instance.DisableStockResource;
 		}
 
 		/// <summary>
@@ -164,10 +164,10 @@ namespace SCANsat
 		/// <returns>Returns true if the biome lock is enabled</returns>
 		public static bool resourceBiomeLockEnabled()
 		{
-			if (SCANcontroller.controller == null)
+			if (SCAN_Settings_Config.Instance == null)
 				return true;
 
-			return SCANcontroller.controller.resourceBiomeLock;
+			return SCAN_Settings_Config.Instance.BiomeLock;
 		}
 
 		/// <summary>
@@ -176,10 +176,10 @@ namespace SCANsat
 		/// <returns>Returns true if a narrow-band scanner is required</returns>
 		public static bool narrowBandResourceRestrictionEnabled()
 		{
-			if (SCANcontroller.controller == null)
+			if (SCAN_Settings_Config.Instance == null)
 				return true;
 
-			return SCANcontroller.controller.needsNarrowBand;
+			return SCAN_Settings_Config.Instance.RequireNarrowBand;
 		}
 
 		/// <summary>
@@ -636,37 +636,13 @@ namespace SCANsat
 			switch (HighLogic.LoadedScene)
 			{
 				case GameScenes.FLIGHT:
-					if (SCANcontroller.controller.mainMapVisibleOld && SCANcontroller.controller.mainMap != null && SCANcontroller.controller.mainMap.GetWindowRect.Contains(pos))
-						return true;
-					else if (SCANcontroller.controller.bigMapVisibleOld && SCANcontroller.controller.BigMap != null && SCANcontroller.controller.BigMap.GetWindowRect.Contains(pos))
-						return true;
-					else if (SCANcontroller.controller.zoomMap != null && SCANcontroller.controller.zoomMap.Visible && SCANcontroller.controller.zoomMap.GetWindowRect.Contains(pos))
-						return true;
-					//else if (SCANcontroller.controller.hiDefMap != null && SCANcontroller.controller.hiDefMap.Visible && SCANcontroller.controller.hiDefMap.GetWindowRect.Contains(pos))
-					//	return true;
-					else if (SCANcontroller.controller.settingsWindow != null && SCANcontroller.controller.settingsWindow.Visible && SCANcontroller.controller.settingsWindow.GetWindowRect.Contains(pos))
-						return true;
-					else if (SCANcontroller.controller.resourceSettings != null && SCANcontroller.controller.resourceSettings.Visible && SCANcontroller.controller.resourceSettings.GetWindowRect.Contains(pos))
-						return true;
-					else if (SCANcontroller.controller.instrumentsWindow != null && SCANcontroller.controller.instrumentsWindow.Visible && SCANcontroller.controller.instrumentsWindow.GetWindowRect.Contains(pos))
-						return true;
-					else if (SCANcontroller.controller.resourceOverlay != null && SCANcontroller.controller.resourceOverlay.Visible && SCANcontroller.controller.resourceOverlay.GetWindowRect.Contains(pos))
+					if (SCANcontroller.controller.zoomMap != null && SCANcontroller.controller.zoomMap.Visible && SCANcontroller.controller.zoomMap.GetWindowRect.Contains(pos))
 						return true;
 					else if (SCANcontroller.controller.colorManager != null && SCANcontroller.controller.colorManager.Visible && SCANcontroller.controller.colorManager.GetWindowRect.Contains(pos))
 						return true;
 					break;
 				case GameScenes.TRACKSTATION:
-					if (SCANcontroller.controller.kscMapVisible && SCANcontroller.controller.kscMap != null && SCANcontroller.controller.kscMap.GetWindowRect.Contains(pos))
-						return true;
-					else if (SCANcontroller.controller.kscMap != null && SCANcontroller.controller.kscMap.spotMap != null && SCANcontroller.controller.kscMap.spotMap.Visible && SCANcontroller.controller.kscMap.spotMap.GetWindowRect.Contains(pos))
-						return true;
-					else if (SCANcontroller.controller.settingsWindow != null && SCANcontroller.controller.settingsWindow.Visible && SCANcontroller.controller.settingsWindow.GetWindowRect.Contains(pos))
-						return true;
-					else if (SCANcontroller.controller.resourceSettings != null && SCANcontroller.controller.resourceSettings.Visible && SCANcontroller.controller.resourceSettings.GetWindowRect.Contains(pos))
-						return true;
-					else if (SCANcontroller.controller.resourceOverlay != null && SCANcontroller.controller.resourceOverlay.Visible && SCANcontroller.controller.resourceOverlay.GetWindowRect.Contains(pos))
-						return true;
-					else if (SCANcontroller.controller.colorManager != null && SCANcontroller.controller.colorManager.Visible && SCANcontroller.controller.colorManager.GetWindowRect.Contains(pos))
+					if (SCANcontroller.controller.colorManager != null && SCANcontroller.controller.colorManager.Visible && SCANcontroller.controller.colorManager.GetWindowRect.Contains(pos))
 						return true;
 					break;
 			}

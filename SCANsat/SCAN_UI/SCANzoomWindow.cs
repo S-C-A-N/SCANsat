@@ -31,7 +31,7 @@ namespace SCANsat.SCAN_UI
 	class SCANzoomWindow : SCAN_MBW
 	{
 		protected SCANmap spotmap;
-		private SCANmap bigmap;
+		//private SCANmap bigmap;
 		protected CelestialBody b;
 		protected SCANdata data;
 		protected Vessel v;
@@ -109,8 +109,8 @@ namespace SCANsat.SCAN_UI
 			else if (HighLogic.LoadedSceneHasPlanetarium)
 			{
 				v = null;
-				b = SCANcontroller.controller.kscMap.Body;
-				data = SCANcontroller.controller.kscMap.Data;
+				//b = SCANcontroller.controller.kscMap.Body;
+				//data = SCANcontroller.controller.kscMap.Data;
 			}
 
 			if (spotmap == null)
@@ -119,9 +119,9 @@ namespace SCANsat.SCAN_UI
 				spotmap.setSize(320, 240);
 			}
 
-			showOrbit = SCANcontroller.controller.map_orbit;
-			showAnomaly = SCANcontroller.controller.map_markers;
-			resourceOverlay = SCANcontroller.controller.map_ResourceOverlay;
+			showOrbit = SCANcontroller.controller.zoomMapOrbit;
+			showAnomaly = SCANcontroller.controller.zoomMapAnomaly;
+			resourceOverlay = SCANcontroller.controller.zoomMapResourceOn;
 
 			if (SCANconfigLoader.GlobalResource)
 			{
@@ -131,9 +131,9 @@ namespace SCANsat.SCAN_UI
 			if (HighLogic.LoadedScene == GameScenes.SPACECENTER)
 				showWaypoints = false;
 			else
-				showWaypoints = SCANcontroller.controller.map_waypoints;
+				showWaypoints = SCANcontroller.controller.zoomMapWaypoint;
 
-			TooltipsEnabled = SCANcontroller.controller.toolTips;
+			TooltipsEnabled = SCAN_Settings_Config.Instance.WindowTooltips;
 
 			spotmap.setBody(b);
 		}
@@ -176,7 +176,7 @@ namespace SCANsat.SCAN_UI
 
 			if (sync)
 			{
-				setMapCenter(SCANUtil.fixLatShift(v.latitude), SCANUtil.fixLonShift(v.longitude), true, SCANBigMap.BigMap, false);
+				setMapCenter(SCANUtil.fixLatShift(v.latitude), SCANUtil.fixLonShift(v.longitude), true, null, false);
 			}
 			else
 			{
@@ -196,57 +196,38 @@ namespace SCANsat.SCAN_UI
 			}
 		}
 
-		public virtual void setMapCenter(double lat, double lon, bool hi, SCANmap big = null, bool mapBody = true, SCANhiDefCamera camera = null)
+		public virtual void setMapCenter(double lat, double lon, bool hi, SCANmap big = null, bool mapBody = true)
 		{
 			highDetail = hi;
 			Visible = true;
-			bigmap = big;
+			//bigmap = big;
 
 			SCANcontroller.controller.TargetSelecting = false;
 			SCANcontroller.controller.TargetSelectingActive = false;
 
-			if (bigmap.Projection == MapProjection.Polar)
+			if (SCANcontroller.controller.bigMapProjection == "Polar")
 				spotmap.setProjection(MapProjection.Polar);
 			else
 				spotmap.setProjection(MapProjection.Rectangular);
+						
+			SCANdata dat = SCANUtil.getData(v.mainBody);
 
-			if (mapBody)
-			{
-				if (bigmap.Body != b)
-				{
-					SCANdata dat = SCANUtil.getData(bigmap.Body);
-					if (dat == null)
-						dat = new SCANdata(bigmap.Body);
+			if (dat == null)
+				dat = new SCANdata(v.mainBody);
 
-					data = dat;
-					b = data.Body;
+			data = dat;
+			b = data.Body;
 
-					spotmap.setBody(b);
-				}
-			}
-			else
-			{
-				if (v.mainBody != b)
-				{
-					SCANdata dat = SCANUtil.getData(v.mainBody);
-					if (dat == null)
-						dat = new SCANdata(v.mainBody);
-
-					data = dat;
-					b = data.Body;
-
-					spotmap.setBody(b);
-				}
-			}
+			spotmap.setBody(b);
 
 			if (SCANconfigLoader.GlobalResource)
 			{
-				resource = bigmap.Resource;
+				resource = loadedResources.FirstOrDefault(r => r.Name == SCANcontroller.controller.bigMapResource);
 				spotmap.Resource = resource;
 				spotmap.Resource.CurrentBodyConfig(b.name);
 			}
-	
-			if (SCANcontroller.controller.needsNarrowBand && resourceOverlay)
+
+			if (SCAN_Settings_Config.Instance.RequireNarrowBand && resourceOverlay)
 				checkForScanners();
 
 			spotmap.MapScale = 10;
@@ -255,7 +236,19 @@ namespace SCANsat.SCAN_UI
 
 			calcTerrainLimits();
 
-			spotmap.resetMap(bigmap.MType, false, resourceOverlay, narrowBand);
+			mapType t;
+
+			try
+			{
+				t = (mapType)Enum.Parse(typeof(mapType), SCANcontroller.controller.bigMapType, true);
+			}
+			catch (Exception e)
+			{
+				SCANUtil.SCANlog("Error in parsing map type\n{0}", e);
+				t = mapType.Altimetry;
+			}
+
+			spotmap.resetMap(t, false, resourceOverlay, narrowBand);
 		}
 
 		protected virtual void resetMap(bool checkScanner = false, double lat = 0, double lon = 0, bool withCenter = false)
@@ -268,7 +261,7 @@ namespace SCANsat.SCAN_UI
 			SCANcontroller.controller.TargetSelecting = false;
 			SCANcontroller.controller.TargetSelectingActive = false;
 
-			if (checkScanner && SCANcontroller.controller.needsNarrowBand && resourceOverlay)
+			if (checkScanner && SCAN_Settings_Config.Instance.RequireNarrowBand && resourceOverlay)
 				checkForScanners();
 
 			calcTerrainLimits();
@@ -281,16 +274,16 @@ namespace SCANsat.SCAN_UI
 			SCANcontroller.controller.TargetSelecting = false;
 			SCANcontroller.controller.TargetSelectingActive = false;
 
-			if (bigmap.Projection == MapProjection.Polar)
+			if (SCANcontroller.controller.bigMapProjection == "Polar")             //bigmap.Projection == MapProjection.Polar)
 				spotmap.setProjection(MapProjection.Polar);
 			else
 				spotmap.setProjection(MapProjection.Rectangular);
 
-			if (bigmap.Body != b)
+			if (SCANcontroller.controller.bigMapBody != b.bodyName)          //bigmap.Body != b)
 			{
-				SCANdata dat = SCANUtil.getData(bigmap.Body);
+				SCANdata dat = SCANUtil.getData(SCANcontroller.controller.bigMapBody);
 				if (dat == null)
-					dat = new SCANdata(bigmap.Body);
+					dat = new SCANdata(FlightGlobals.Bodies.FirstOrDefault(a => a.bodyName == SCANcontroller.controller.bigMapBody));
 
 				data = dat;
 				b = data.Body;
@@ -300,19 +293,31 @@ namespace SCANsat.SCAN_UI
 
 			if (SCANconfigLoader.GlobalResource && resourceOverlay)
 			{
-				resource = bigmap.Resource;
+				resource = loadedResources.FirstOrDefault(r => r.Name == SCANcontroller.controller.bigMapResource);
 				spotmap.Resource = resource;
 				spotmap.Resource.CurrentBodyConfig(b.name);
 			}
 
 			spotmap.centerAround(spotmap.CenteredLong, spotmap.CenteredLat);
 
-			if (SCANcontroller.controller.needsNarrowBand && resourceOverlay)
+			if (SCAN_Settings_Config.Instance.RequireNarrowBand && resourceOverlay)
 				checkForScanners();
 
 			calcTerrainLimits();
 
-			spotmap.resetMap(bigmap.MType, false, resourceOverlay, narrowBand);
+			mapType t;
+
+			try
+			{
+				t = (mapType)Enum.Parse(typeof(mapType), SCANcontroller.controller.bigMapType, true);
+			}
+			catch (Exception e)
+			{
+				SCANUtil.SCANlog("Error in parsing map type\n{0}", e);
+				t = mapType.Altimetry;
+			}
+
+			spotmap.resetMap(t, false, resourceOverlay, narrowBand);
 		}
 
 		protected void calcTerrainLimits()
@@ -386,7 +391,7 @@ namespace SCANsat.SCAN_UI
 		{
 			if (Visible)
 			{
-				if (!SCANcontroller.controller.needsNarrowBand && SCANconfigLoader.GlobalResource)
+				if (!SCAN_Settings_Config.Instance.RequireNarrowBand && SCANconfigLoader.GlobalResource)
 					narrowBand = true;
 
 				if (HighLogic.LoadedSceneIsFlight && FlightGlobals.ready)
@@ -545,7 +550,7 @@ namespace SCANsat.SCAN_UI
 			}
 			r.x += 20;
 			r.y += 1;
-			if (GUI.Button(r, SCANcontroller.controller.closeBox, SCANskins.SCAN_closeButton))
+			if (GUI.Button(r, "X", SCANskins.SCAN_closeButton))
 			{
 				closeMap();
 			}
@@ -575,7 +580,7 @@ namespace SCANsat.SCAN_UI
 
 				r = new Rect(58, 20, 24, 24);
 
-				if (SCANcontroller.controller.mechJebTargetSelection)
+				if (SCAN_Settings_Config.Instance.MechJebTarget)
 				{
 					if (SCANcontroller.controller.MechJebLoaded && SCANcontroller.controller.LandingTargetBody == b)
 					{
@@ -670,7 +675,7 @@ namespace SCANsat.SCAN_UI
 			r.x += 12;
 			r.width = r.height = 20;
 
-			if (GUI.Button(r, textWithTT(SCANcontroller.controller.anomalyMarker, "Toggle Anomalies"), SCANskins.SCAN_buttonBorderless))
+			if (GUI.Button(r, textWithTT("?", "Toggle Anomalies"), SCANskins.SCAN_buttonBorderless))
 			{
 				showAnomaly = !showAnomaly;
 			}
@@ -762,7 +767,7 @@ namespace SCANsat.SCAN_UI
 						mjTarget.y = mlat;
 						SCANcontroller.controller.LandingTargetCoords = mjTarget;
 						Rect r = new Rect(mx + TextureRect.x - 11, my + TextureRect.y - 13, 24, 24);
-						SCANuiUtil.drawMapIcon(r, SCANcontroller.controller.mechJebTargetSelection ? SCANskins.SCAN_MechJebIcon : SCANskins.SCAN_TargetIcon, true, palette.yellow, true);
+						SCANuiUtil.drawMapIcon(r, SCAN_Settings_Config.Instance.MechJebTarget ? SCANskins.SCAN_MechJebIcon : SCANskins.SCAN_TargetIcon, true, palette.yellow, true);
 					}
 				}
 				else if (SCANcontroller.controller.TargetSelecting)
@@ -790,7 +795,7 @@ namespace SCANsat.SCAN_UI
 					//Generate waypoint for MechJeb target
 					if (SCANcontroller.controller.TargetSelecting && SCANcontroller.controller.TargetSelectingActive && Event.current.button == 0 && in_map)
 					{
-						string s = SCANcontroller.controller.mechJebTargetSelection ? "MechJeb Landing Target" : "Landing Target Site";
+						string s = SCAN_Settings_Config.Instance.MechJebTarget ? "MechJeb Landing Target" : "Landing Target Site";
 						SCANwaypoint w = new SCANwaypoint(mlat, mlon, s);
 						SCANcontroller.controller.LandingTarget = w;
 						data.addToWaypoints();
@@ -848,12 +853,12 @@ namespace SCANsat.SCAN_UI
 			//Draw the actual mouse over info label below the map
 			if (SCANcontroller.controller.TargetSelecting)
 			{
-				SCANuiUtil.readableLabel(SCANcontroller.controller.mechJebTargetSelection ? "MechJeb Landing Guidance Targeting..." : "Landing Site Targeting...", false);
+				SCANuiUtil.readableLabel(SCAN_Settings_Config.Instance.MechJebTarget ? "MechJeb Landing Guidance Targeting..." : "Landing Site Targeting...", false);
 				fillS(-10);
-				SCANuiUtil.mouseOverInfoSimple(mlon, mlat, spotmap, data, spotmap.Body, in_map, ref infoString, ref infoString2);
+				SCANuiUtil.mouseOverInfoSimple(mlon, mlat, spotmap, data, spotmap.Body, in_map, showWaypoints, ref infoString, ref infoString2);
 			}
 			else if (showInfo)
-				SCANuiUtil.mouseOverInfoSimple(mlon, mlat, spotmap, data, spotmap.Body, in_map, ref infoString, ref infoString2);
+				SCANuiUtil.mouseOverInfoSimple(mlon, mlat, spotmap, data, spotmap.Body, in_map, showWaypoints, ref infoString, ref infoString2);
 			else
 				fillS(10);
 		}
@@ -863,10 +868,10 @@ namespace SCANsat.SCAN_UI
 			//Draw the orbit overlays
 			if (showOrbit && v != null)
 			{
-				SCANuiUtil.drawOrbit(TextureRect, spotmap, v, spotmap.Body, true);
+				SCANuiUtil.drawOrbit(TextureRect, spotmap, v, spotmap.Body, SCANcontroller.controller.zoomMapColor, true);
 			}
 
-			SCANuiUtil.drawMapLabels(TextureRect, v, spotmap, data, spotmap.Body, showAnomaly, showWaypoints);
+			SCANuiUtil.drawMapLabels(TextureRect, v, spotmap, data, spotmap.Body, showAnomaly, showWaypoints, false, false, SCANcontroller.controller.zoomMapColor);
 		}
 
 		private void drawDropDown(int id)

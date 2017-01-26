@@ -70,12 +70,6 @@ namespace SCANsat.SCAN_Toolbar
 
 		private void toggleFlight()
 		{
-			//if (SCANcontroller.controller != null)
-			//{
-			//	SCANcontroller.controller.mainMap.Visible = !SCANcontroller.controller.mainMap.Visible;
-			//	SCANcontroller.controller.mainMapVisible = !SCANcontroller.controller.mainMapVisible;
-			//}
-
 			if (SCAN_UI_MainMap.Instance.IsVisible)
 				SCAN_UI_MainMap.Instance.Close();
 			else
@@ -84,11 +78,11 @@ namespace SCANsat.SCAN_Toolbar
 
 		private void toggleKSC()
 		{
-			if (SCANcontroller.controller != null)
-			{
-				SCANcontroller.controller.kscMap.Visible = !SCANcontroller.controller.kscMap.Visible;
-				SCANcontroller.controller.kscMapVisible = !SCANcontroller.controller.kscMapVisible;
-			}
+			//if (SCANcontroller.controller != null)
+			//{
+			//	SCANcontroller.controller.kscMap.Visible = !SCANcontroller.controller.kscMap.Visible;
+			//	SCANcontroller.controller.kscMapVisible = !SCANcontroller.controller.kscMapVisible;
+			//}
 		}
 	}
 }

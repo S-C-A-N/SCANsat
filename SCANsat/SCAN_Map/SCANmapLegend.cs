@@ -24,7 +24,7 @@ namespace SCANsat.SCAN_Map
 		private Texture2D legend;
 		private float legendMin, legendMax;
 		private Palette dataPalette;
-		private int legendScheme;
+		private bool legendScheme;
 
 		public Texture2D Legend
 		{
@@ -32,34 +32,34 @@ namespace SCANsat.SCAN_Map
 			set { legend = value; }
 		}
 
-		internal Texture2D getLegend(float min, float max, int scheme, SCANterrainConfig terrain)
+		internal Texture2D getLegend(float min, float max, bool color, SCANterrainConfig terrain)
 		{
-			if (legend != null && legendMin == min && legendMax == max && legendScheme == scheme && terrain.ColorPal.hash == dataPalette.hash)
+			if (legend != null && legendMin == min && legendMax == max && legendScheme == color && terrain.ColorPal.hash == dataPalette.hash)
 				return legend;
 			legend = new Texture2D(256, 1, TextureFormat.RGB24, false);
 			legendMin = min;
 			legendMax = max;
-			legendScheme = scheme;
+			legendScheme = color;
 			dataPalette = terrain.ColorPal;
 			Color[] pix = legend.GetPixels();
 			for (int x = 0; x < 256; ++x)
 			{
 				float val = (x * (max - min)) / 256f + min;
-				pix[x] = palette.heightToColor(val, scheme, terrain);
+				pix[x] = palette.heightToColor(val, color, terrain);
 			}
 			legend.SetPixels(pix);
 			legend.Apply();
 			return legend;
 		}
 
-		internal Texture2D getLegend(int scheme, SCANterrainConfig terrain)
+		internal Texture2D getLegend(SCANterrainConfig terrain)
 		{
 			Texture2D t = new Texture2D(256, 1, TextureFormat.RGB24, false);
 			Color[] pix = t.GetPixels();
 			for (int x = 0; x < 256; ++x)
 			{
 				float val = (x * (terrain.MaxTerrain - terrain.MinTerrain)) / 256f + terrain.MinTerrain;
-				pix[x] = palette.heightToColor(val, scheme, terrain);
+				pix[x] = palette.heightToColor(val, true, terrain);
 			}
 			t.SetPixels(pix);
 			t.Apply();

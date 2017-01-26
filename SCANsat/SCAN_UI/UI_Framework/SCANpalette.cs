@@ -128,21 +128,21 @@ namespace SCANsat.SCAN_UI.UI_Framework
 
 		public static Color32[] small_redline;
 
-		public static Color32 heightToColor(float val, int scheme, SCANterrainConfig terrain, float min = 0, float max = 0, float range = 0, bool useCustomRange = false)
+		public static Color32 heightToColor(float val, bool color, SCANterrainConfig terrain, float min = 0, float max = 0, float range = 0, bool useCustomRange = false)
 		{
 			Color32[] c = terrain.ColorPal.colors;
 			if (terrain.PalRev)
 				c = terrain.ColorPal.colorsReverse;
 			if (useCustomRange)
 			{
-				if (scheme == 0)
+				if (color)
 					return heightToColor(val, max, min, range, terrain.ClampTerrain, terrain.PalDis, c, true);
 				else
 					return heightToColor(val, max, min, range, terrain.PalDis);
 			}
 			else
 			{
-				if (scheme == 0)
+				if (color)
 					return heightToColor(val, terrain.MaxTerrain, terrain.MinTerrain, terrain.TerrainRange, terrain.ClampTerrain, terrain.PalDis, c);
 				else
 					return heightToColor(val, terrain.MaxTerrain, terrain.MinTerrain, terrain.TerrainRange, terrain.PalDis);
@@ -153,7 +153,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 		{
 			Color32 c = Black;
 			val -= min;
-			if (SCANcontroller.controller.trueGreyScale)
+			if (SCAN_Settings_Config.Instance.TrueGreyScale)
 			{
 				val = Mathf.Clamp(val, 0, range) / range;
 				c = lerp(Black, White, val);
@@ -280,10 +280,14 @@ namespace SCANsat.SCAN_UI.UI_Framework
 		public static string colored ( Color c , string text ) {
 			return string.Format("<color=\"{0}\">{1}</color>", colorHex(c), text);
 		}
+		public static string coloredNoQuote(Color c, string text)
+		{
+			return string.Format("<color={0}>{1}</color>", colorHex(c), text);
+		}
 
 		internal static Color c_good {
 			get {
-				if (SCANcontroller.controller.colours != 1) 	return cb_bluishGreen;
+				if (SCANcontroller.controller.mainMapColor) 	return cb_bluishGreen;
 				else 								return cb_skyBlue;
 			}
 		}
@@ -296,7 +300,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 		}
 		internal static Color c_ugly {
 			get {
-				if (SCANcontroller.controller.colours != 1)	return xkcd_LightRed;
+				if (SCANcontroller.controller.mainMapColor) return xkcd_LightRed;
 				else 								return cb_yellow;
 			}
 		}

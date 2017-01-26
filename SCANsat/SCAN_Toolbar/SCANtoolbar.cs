@@ -80,23 +80,30 @@ namespace SCANsat.SCAN_Toolbar
 					{
 						if (SCANcontroller.controller != null)
 						{
-							SCANcontroller.controller.BigMap.Visible = !SCANcontroller.controller.BigMap.Visible;
-							SCANcontroller.controller.bigMapVisibleOld = !SCANcontroller.controller.bigMapVisibleOld;
+							if (SCANcontroller.controller._bigMap.IsVisible)
+								SCANcontroller.controller._bigMap.Close();
+							else
+								SCANcontroller.controller._bigMap.Open();
 						}
 					};
 				SmallButton.OnClick += (e) =>
 					{
 						if (SCANcontroller.controller != null)
 						{
-							SCANcontroller.controller.mainMap.Visible = !SCANcontroller.controller.mainMap.Visible;
-							SCANcontroller.controller.mainMapVisibleOld = !SCANcontroller.controller.mainMapVisibleOld;
+							if (SCANcontroller.controller._mainMap.IsVisible)
+								SCANcontroller.controller._mainMap.Close();
+							else
+								SCANcontroller.controller._mainMap.Open();
 						}
 					};
 				OverlayButton.OnClick += (e) =>
 					{
 						if (SCANcontroller.controller != null)
 						{
-							SCANcontroller.controller.resourceOverlay.Visible = !SCANcontroller.controller.resourceOverlay.Visible;
+							if (SCANcontroller.controller._overlay.IsVisible)
+								SCANcontroller.controller._overlay.Close();
+							else
+								SCANcontroller.controller._overlay.Open();
 						}
 					};
 				ZoomButton.OnClick += (e) =>
@@ -124,8 +131,7 @@ namespace SCANsat.SCAN_Toolbar
 					{
 						if (SCANcontroller.controller != null)
 						{
-							SCANcontroller.controller.kscMap.Visible = !SCANcontroller.controller.kscMap.Visible;
-							SCANcontroller.controller.kscMapVisible = !SCANcontroller.controller.kscMapVisible;
+							
 						}
 					};
 			}
@@ -150,23 +156,28 @@ namespace SCANsat.SCAN_Toolbar
 			IButton bigMap = list.AddOption("Big Map");
 			IButton zoomMap = list.AddOption("Zoom Map");
 			IButton settings = list.AddOption("Settings");
-			IButton color = list.AddOption("Color Options");
 			IButton resource = list.AddOption("Planetary Overlay");
-			IButton resourceSettings = list.AddOption("Resource Settings");
 
 			smallMap.OnClick += (e2) =>
 				{
-					SCANcontroller.controller.mainMap.Visible = !SCANcontroller.controller.mainMap.Visible;
-					SCANcontroller.controller.mainMapVisibleOld = !SCANcontroller.controller.mainMapVisibleOld;
+					if (SCANcontroller.controller._mainMap.IsVisible)
+						SCANcontroller.controller._mainMap.Close();
+					else
+						SCANcontroller.controller._mainMap.Open();
 				};
 			instrument.OnClick += (e2) =>
 				{
-					SCANcontroller.controller.instrumentsWindow.Visible = !SCANcontroller.controller.instrumentsWindow.Visible;
+					if (SCANcontroller.controller._instruments.IsVisible)
+						SCANcontroller.controller._instruments.Close();
+					else
+						SCANcontroller.controller._instruments.Open();
 				};
 			bigMap.OnClick += (e2) =>
 				{
-					SCANcontroller.controller.BigMap.Visible = !SCANcontroller.controller.BigMap.Visible;
-					SCANcontroller.controller.bigMapVisibleOld = !SCANcontroller.controller.bigMapVisibleOld;
+					if (SCANcontroller.controller._bigMap.IsVisible)
+						SCANcontroller.controller._bigMap.Close();
+					else
+						SCANcontroller.controller._bigMap.Open();
 				};
 			zoomMap.OnClick += (e2) =>
 				{
@@ -176,19 +187,17 @@ namespace SCANsat.SCAN_Toolbar
 				};
 			settings.OnClick += (e2) =>
 				{
-					SCANcontroller.controller.settingsWindow.Visible = !SCANcontroller.controller.settingsWindow.Visible;
-				};
-			color.OnClick += (e2) =>
-				{
-					SCANcontroller.controller.colorManager.Visible = !SCANcontroller.controller.colorManager.Visible;
+					if (SCANcontroller.controller._settings.IsVisible)
+						SCANcontroller.controller._settings.Close();
+					else
+						SCANcontroller.controller._settings.Open();
 				};
 			resource.OnClick += (e2) =>
 				{
-					SCANcontroller.controller.resourceOverlay.Visible = !SCANcontroller.controller.resourceOverlay.Visible;
-				};
-			resourceSettings.OnClick += (e2) =>
-				{
-					SCANcontroller.controller.resourceSettings.Visible = !SCANcontroller.controller.resourceSettings.Visible;
+					if (SCANcontroller.controller._overlay.IsVisible)
+						SCANcontroller.controller._overlay.Close();
+					else
+						SCANcontroller.controller._overlay.Open();
 				};
 			list.OnAnyOptionClicked += () => destroyMenu(menu);
 			menu.Drawable = list;
