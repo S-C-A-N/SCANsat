@@ -171,7 +171,7 @@ namespace SCANsat.SCAN_Unity
 			else
 				uiElement.UpdateMultiColor(palette.c_good);
 
-			if (SCAN_Settings_Config.Instance.DisableStock || !SCAN_Settings_Config.Instance.InstantScan)
+			if (SCAN_Settings_Config.Instance.DisableStockResource || !SCAN_Settings_Config.Instance.InstantScan)
 			{
 				s = SCANcontroller.controller.getSensorStatus(v, SCANtype.FuzzyResources);
 				if (s == null)
@@ -272,8 +272,6 @@ namespace SCANsat.SCAN_Unity
 			{
 				SCANcontroller.controller.mainMapBiome = value;
 
-				SCANUtil.SCANlog("Toggle Biome Map: {0}", SCANcontroller.controller.mainMapBiome);
-
 				resetImages();
 			}
 		}
@@ -297,27 +295,48 @@ namespace SCANsat.SCAN_Unity
 
 		public Sprite VesselType(Guid id)
 		{
-			if (!SCANcontroller.controller.knownVessels.Contains(id))
-				return null;
+			SCANcontroller.SCANvessel v;
 
-			Vessel sv = SCANcontroller.controller.knownVessels[id].vessel;
+			if (!SCANcontroller.controller.knownVessels.TryGetValue(id, out v))
+				v = null;
 
-			return null;
+			Vessel sv;
+
+			if (v == null)
+			{
+				if (FlightGlobals.ActiveVessel.id == id)
+					sv = FlightGlobals.ActiveVessel;
+				else
+					return SCAN_UI_Loader.MysteryIcon;
+			}
+			else
+				sv = v.vessel;
+
+			return SCAN_UI_Loader.VesselIcon(sv.vesselType);
 		}
 
 		public Vector2 VesselPosition(Guid id)
 		{
-			if (!SCANcontroller.controller.knownVessels.Contains(id))
-				return new Vector2();
+			SCANcontroller.SCANvessel v;
 
-			Vessel sv = SCANcontroller.controller.knownVessels[id].vessel;
+			if (!SCANcontroller.controller.knownVessels.TryGetValue(id, out v))
+				v = null;
+
+			Vessel sv;
+
+			if (v == null)
+			{
+				if (FlightGlobals.ActiveVessel.id == id)
+					sv = FlightGlobals.ActiveVessel;
+				else
+					return new Vector2();
+			}
+			else
+				sv = v.vessel;
 
 			double lon = SCANUtil.fixLon(sv.longitude);
 			double lat = SCANUtil.fixLat(sv.latitude);
 			
-			lon = lon * ((360 * Scale * GameSettings.UI_SCALE) / 360f);
-			lat = (180 * Scale * GameSettings.UI_SCALE) - lat * ((180 * Scale * GameSettings.UI_SCALE) / 180f);
-
 			return new Vector2((float)lon, (float)lat);
 		}
 
@@ -329,14 +348,21 @@ namespace SCANsat.SCAN_Unity
 
 				vessels.Add(v.id, new MapLabelInfo()
 				{
-					label = "",
+					label = Minimized ? "" : "1",
+					name = v.vesselName,
 					image = VesselType(v.id),
-					pos = new Vector2()
+					pos = VesselPosition(v.id),
+					baseColor = Color ? palette.white : palette.cb_skyBlue,
+					flashColor = palette.cb_yellow,
+					flash = true,
+					width = 18
 				});
 
-				for (int i = SCANcontroller.controller.Known_Vessels.Count - 1; i >= 0; i--)
+				int count = 2;
+
+				for (int i = SCANcontroller.controller.knownVessels.Count - 1; i >= 0; i--)
 				{
-					SCANcontroller.SCANvessel sv = SCANcontroller.controller.Known_Vessels[0];
+					SCANcontroller.SCANvessel sv = SCANcontroller.controller.knownVessels.At(i);
 
 					if (sv.vessel == v)
 						continue;
@@ -346,10 +372,16 @@ namespace SCANsat.SCAN_Unity
 
 					vessels.Add(sv.vessel.id, new MapLabelInfo()
 					{
-						label = "",
+						label = Minimized ? "" : count.ToString(),
+						name = sv.vessel.vesselName,
 						image = VesselType(sv.vessel.id),
-						pos = new Vector2()
+						pos = VesselPosition(sv.vessel.id),
+						baseColor = Color ? palette.white : palette.cb_skyBlue,
+						flash = false,
+						width = 18
 					});
+
+					count++;
 				}
 
 				return vessels;
@@ -400,15 +432,52 @@ namespace SCANsat.SCAN_Unity
 				SCAN_UI_Settings.Instance.Open();
 		}
 
+		public void ChangeToVessel(Guid id)
+		{
+			if (v == null || v.id == id)
+				return;
+
+			SCANcontroller.SCANvessel sv;
+
+			if (!SCANcontroller.controller.knownVessels.TryGetValue(id, out sv))
+				sv = null;
+
+			if (sv == null)
+				return;
+
+			if (!HighLogic.CurrentGame.Parameters.Flight.CanSwitchVesselsFar)
+				return;
+
+			if (FlightGlobals.SetActiveVessel(sv.vessel))
+			{
+				if (MapView.MapIsEnabled)
+					MapView.ExitMapView();
+
+				FlightInputHandler.SetNeutralControls();
+			}
+		}
+
 		public string VesselInfo(Guid id)
 		{
-			if (!SCANcontroller.controller.knownVessels.Contains(id))
-				return "";
+			SCANcontroller.SCANvessel sv;
 
-			Vessel sv = SCANcontroller.controller.knownVessels[id].vessel;
+			if (!SCANcontroller.controller.knownVessels.TryGetValue(id, out sv))
+				sv = null;
 
-			float lon = (float)SCANUtil.fixLonShift(sv.longitude);
-			float lat = (float)SCANUtil.fixLatShift(sv.latitude);
+			Vessel ves;
+
+			if (sv == null)
+			{
+				if (FlightGlobals.ActiveVessel.id == id)
+					ves = FlightGlobals.ActiveVessel;
+				else
+					return "";
+			}
+			else
+				ves = sv.vessel;
+
+			float lon = (float)SCANUtil.fixLonShift(ves.longitude);
+			float lat = (float)SCANUtil.fixLatShift(ves.latitude);
 
 			string units = "";
 			if (SCANcontroller.controller.mainMapBiome)
@@ -422,19 +491,19 @@ namespace SCANsat.SCAN_Unity
 				{
 					if (SCANUtil.isCovered(lon, lat, data, SCANtype.AltimetryHiRes))
 					{
-						float alt = sv.heightFromTerrain;
+						float alt = ves.heightFromTerrain;
 
 						if (alt < 0)
-							alt = (float)sv.altitude;
+							alt = (float)ves.altitude;
 
 						units = string.Format("; {0}", SCANuiUtil.distanceString(alt, 100000, 100000000));
 					}
 					else
 					{
-						float alt = sv.heightFromTerrain;
+						float alt = ves.heightFromTerrain;
 
 						if (alt < 0)
-							alt = (float)sv.altitude;
+							alt = (float)ves.altitude;
 
 						alt = ((int)(alt / 500)) * 500;
 
@@ -466,8 +535,6 @@ namespace SCANsat.SCAN_Unity
 				return;
 			}
 
-			int scheme = SCANcontroller.controller.colours;
-
 			for (int ilon = 0; ilon < 360; ilon++)
 			{
 				if (!pqsController)
@@ -481,9 +548,9 @@ namespace SCANsat.SCAN_Unity
 				if (SCANUtil.isCovered(ilon, scanline, data, SCANtype.Altimetry))
 				{
 					if (SCANUtil.isCovered(ilon, scanline, data, SCANtype.AltimetryHiRes))
-						c = palette.heightToColor(val, scheme, data.TerrainConfig);
+						c = palette.heightToColor(val, Color, data.TerrainConfig);
 					else
-						c = palette.heightToColor(val, 1, data.TerrainConfig);
+						c = palette.heightToColor(val, false, data.TerrainConfig);
 				}
 				else
 				{
@@ -527,8 +594,6 @@ namespace SCANsat.SCAN_Unity
 
 			if (biomeBuilding)
 				buildBiomeCache();
-
-			int scheme = SCANcontroller.controller.colours;
 
 			for (int ilon = 0; ilon < 360; ilon++)
 			{
@@ -575,11 +640,11 @@ namespace SCANsat.SCAN_Unity
 				double index = SCANUtil.getBiomeIndexFraction(data.Body, i - 180, scanline - 90);
 				Color32 c = palette.Grey;
 
-				if (SCANcontroller.controller.biomeBorder && ((i > 0 && biomeIndex[i - 1] != index) || (scanline > 0 && biomeIndex[i] != index)))
+				if (SCAN_Settings_Config.Instance.BiomeBorder && ((i > 0 && biomeIndex[i - 1] != index) || (scanline > 0 && biomeIndex[i] != index)))
 				{
 					c = palette.White;
 				}
-				else if (SCANcontroller.controller.useStockBiomes)
+				else if (SCAN_Settings_Config.Instance.StockBiomes)
 				{
 					c = SCANUtil.getBiome(data.Body, i - 180, scanline - 90).mapColor;
 				}
@@ -621,6 +686,14 @@ namespace SCANsat.SCAN_Unity
 				biomeBuilding = true;
 				scanline = 0;
 			}
+		}
+
+		public void ResetPosition()
+		{
+			SCAN_Settings_Config.Instance.MainMapPosition = new Vector2(100, -200);
+
+			if (uiElement != null)
+				uiElement.SetPosition(SCAN_Settings_Config.Instance.MainMapPosition);
 		}
 	}
 }

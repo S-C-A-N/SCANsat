@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using SCANsat.Unity.Interfaces;
 using SCANsat.Unity.Unity;
@@ -14,6 +15,7 @@ namespace SCANsat.SCAN_Unity
 	{
 		private bool _isVisible;
 		private string _sensorCount = "";
+		private Vector2 _position;
 
 		private SCAN_Settings uiElement;
 
@@ -29,9 +31,24 @@ namespace SCANsat.SCAN_Unity
 			instance = this;
 		}
 
+		public int Page
+		{
+			get
+			{
+				if (uiElement != null)
+					return uiElement.Page;
+
+				return 0;
+			}
+		}
+
 		public void OnDestroy()
 		{
-
+			if (uiElement != null)
+			{
+				uiElement.gameObject.SetActive(false);
+				MonoBehaviour.Destroy(uiElement.gameObject);
+			}
 		}
 
 		public void Update()
@@ -45,7 +62,7 @@ namespace SCANsat.SCAN_Unity
 				, SCANcontroller.controller.ActualPasses);
 		}
 
-		public void Open(int page = 0)
+		public void Open(int page = 0, bool savePosition = false)
 		{
 			uiElement = GameObject.Instantiate(SCAN_UI_Loader.SettingsPrefab).GetComponent<SCAN_Settings>();
 
@@ -55,6 +72,11 @@ namespace SCANsat.SCAN_Unity
 			uiElement.transform.SetParent(UIMasterController.Instance.mainCanvas.transform, false);
 
 			uiElement.setSettings(this, page);
+
+			if (!savePosition)
+				_position = new Vector2();
+
+			uiElement.SetPosition(_position);
 
 			_isVisible = true;
 		}
@@ -218,6 +240,33 @@ namespace SCANsat.SCAN_Unity
 				SCAN_Settings_Config.Instance.StockUIStyle = value;
 
 				SCAN_UI_Loader.ResetUIStyle();
+
+				if (SCAN_UI_BigMap.Instance != null && SCAN_UI_BigMap.Instance.IsVisible)
+				{
+					SCAN_UI_BigMap.Instance.Close();
+					SCAN_UI_BigMap.Instance.Open();
+				}
+
+				if (SCAN_UI_MainMap.Instance != null && SCAN_UI_MainMap.Instance.IsVisible)
+				{ 
+					SCAN_UI_MainMap.Instance.Close();
+					SCAN_UI_MainMap.Instance.Open();
+				}
+
+				if (SCAN_UI_Instruments.Instance != null && SCAN_UI_Instruments.Instance.IsVisible)
+				{
+					SCAN_UI_Instruments.Instance.Close();
+					SCAN_UI_Instruments.Instance.Open();
+				}
+
+				if (SCAN_UI_Overlay.Instance != null && SCAN_UI_Overlay.Instance.IsVisible)
+				{
+					SCAN_UI_Overlay.Instance.Close();
+					SCAN_UI_Overlay.Instance.Open();
+				}
+
+				Close();
+				Open(0, true);
 			}
 		}
 
@@ -241,8 +290,8 @@ namespace SCANsat.SCAN_Unity
 
 		public bool DisableStock
 		{
-			get { return SCAN_Settings_Config.Instance.DisableStock; }
-			set { SCAN_Settings_Config.Instance.DisableStock = value; }
+			get { return SCAN_Settings_Config.Instance.DisableStockResource; }
+			set { SCAN_Settings_Config.Instance.DisableStockResource = value; }
 		}
 
 		public bool StockThreshold
@@ -265,17 +314,27 @@ namespace SCANsat.SCAN_Unity
 
 		public bool ShowSCANsatReset
 		{
-			get { return SCAN_Settings_Config.Instance.DisableStock || !SCAN_Settings_Config.Instance.InstantScan; }
+			get { return SCAN_Settings_Config.Instance.DisableStockResource || !SCAN_Settings_Config.Instance.InstantScan; }
 		}
 
 		public bool ShowStockReset
 		{
-			get { return SCAN_Settings_Config.Instance.DisableStock || !SCAN_Settings_Config.Instance.InstantScan; }
+			get { return SCAN_Settings_Config.Instance.DisableStockResource || !SCAN_Settings_Config.Instance.InstantScan; }
 		}
 
 		public bool ShowMapFill
 		{
 			get { return SCAN_Settings_Config.Instance.CheatMapFill; }
+		}
+		
+		public Vector2 Position
+		{
+			set { _position = value; }
+		}
+		
+		public IList<string> BackgroundBodies
+		{
+			get	{ return new List<string>(SCANcontroller.controller.GetAllData.Select(d => d.Body.bodyName)); }
 		}
 
 		public void ClampToScreen(RectTransform rect)
@@ -347,7 +406,7 @@ namespace SCANsat.SCAN_Unity
 
 		public void OpenColor()
 		{
-
+			SCANcontroller.controller.colorManager.Visible = !SCANcontroller.controller.colorManager.Visible;
 		}
 
 		public void ResetWindows()
@@ -358,15 +417,13 @@ namespace SCANsat.SCAN_Unity
 				SCANuiUtil.resetBigMapPos();
 				SCANuiUtil.resetInstUIPos();
 				SCANuiUtil.resetColorMapPos();
-				SCANuiUtil.resetResourceSettingPos();
 				SCANuiUtil.resetOverlayControllerPos();
 				SCANuiUtil.resetZoomMapPos();
 			}
 			else
 			{
-				SCANuiUtil.resetKSCMapPos();
+				SCANuiUtil.resetBigMapPos();
 				SCANuiUtil.resetColorMapPos();
-				SCANuiUtil.resetSettingsUIPos();
 				SCANuiUtil.resetZoomMapPos();
 				if (HighLogic.LoadedScene == GameScenes.TRACKSTATION)
 					SCANuiUtil.resetOverlayControllerPos();
@@ -381,14 +438,14 @@ namespace SCANsat.SCAN_Unity
 				data.Disabled = !data.Disabled;
 		}
 
-		public string BodyPercentage(string bodyName)
+		public double BodyPercentage(string bodyName)
 		{
 			SCANdata data = SCANUtil.getData(bodyName);
 
 			if (data == null)
-				return "";
+				return 0;
 
-			return string.Format("{0} ({1:N1}%)", data.Body.bodyName, SCANUtil.getCoveragePercentage(data, SCANtype.Nothing));
+			return SCANUtil.getCoveragePercentage(data, SCANtype.Nothing);
 		}
 
 		private CelestialBody getTargetBody()
@@ -405,6 +462,5 @@ namespace SCANsat.SCAN_Unity
 					return null;
 			}
 		}
-
 	}
 }

@@ -32,6 +32,8 @@ namespace SCANsat.SCAN_Unity
 		private StringBuilder infoString = new StringBuilder();
 		private string slopeString;
 
+		private Texture2D anomalyTex;
+
 		private SCAN_Instruments uiElement;
 		
 		private static SCAN_UI_Instruments instance;
@@ -110,12 +112,19 @@ namespace SCANsat.SCAN_Unity
 			biomeInfo();
 			resourceInfo();
 			anomalyInfo();
+			BTDTInfo();
 
-			uiElement.UpdateText(infoString.ToString());
+			uiElement.UpdateText(infoString.ToString());			
 		}
 
 		public void OnDestroy()
 		{
+			if (uiElement != null)
+			{
+				uiElement.gameObject.SetActive(false);
+				MonoBehaviour.Destroy(uiElement.gameObject);
+			}
+
 			GameEvents.onVesselSOIChanged.Remove(soiChange);
 			GameEvents.onVesselChange.Remove(vesselChange);
 			GameEvents.onVesselWasModified.Remove(vesselChange);
@@ -216,7 +225,7 @@ namespace SCANsat.SCAN_Unity
 
 		public void ClampToScreen(RectTransform rect)
 		{
-
+			UIMasterController.ClampToScreen(rect, Vector2.zero);
 		}
 
 		public void NextResource()
@@ -371,7 +380,7 @@ namespace SCANsat.SCAN_Unity
 			if (v.mainBody.pqsController == null)
 				return;
 
-			if (SCANcontroller.controller.needsNarrowBand)
+			if (SCAN_Settings_Config.Instance.RequireNarrowBand)
 			{
 				bool tooHigh = false;
 				bool scanner = false;
@@ -410,18 +419,18 @@ namespace SCANsat.SCAN_Unity
 				if (high || !onboard)
 				{
 					infoString.AppendLine();
-					infoString.AppendFormat("{0}: {1:P0}", r.Name, SCANUtil.ResourceOverlay(vlat, vlon, r.Name, v.mainBody, SCANcontroller.controller.resourceBiomeLock));
+					infoString.AppendFormat("{0}: {1:P0}", r.Name, SCANUtil.ResourceOverlay(vlat, vlon, r.Name, v.mainBody, SCAN_Settings_Config.Instance.BiomeLock));
 				}
 				else
 				{
 					infoString.AppendLine();
-					infoString.AppendFormat("{0}: {1:P2}", r.Name, SCANUtil.ResourceOverlay(vlat, vlon, r.Name, v.mainBody, SCANcontroller.controller.resourceBiomeLock));
+					infoString.AppendFormat("{0}: {1:P2}", r.Name, SCANUtil.ResourceOverlay(vlat, vlon, r.Name, v.mainBody, SCAN_Settings_Config.Instance.BiomeLock));
 				}
 			}
 			else if ((sensors & SCANtype.FuzzyResources) != SCANtype.Nothing)
 			{
 				infoString.AppendLine();
-				infoString.AppendFormat("{0}: {1:P0}", r.Name, SCANUtil.ResourceOverlay(vlat, vlon, r.Name, v.mainBody, SCANcontroller.controller.resourceBiomeLock));
+				infoString.AppendFormat("{0}: {1:P0}", r.Name, SCANUtil.ResourceOverlay(vlat, vlon, r.Name, v.mainBody, SCAN_Settings_Config.Instance.BiomeLock));
 			}
 			else if (ResourceButtons)
 			{
@@ -463,6 +472,41 @@ namespace SCANsat.SCAN_Unity
 			}
 			else
 				nearest = null;
+		}
+
+		private void BTDTInfo()
+		{
+			if (nearest == null || !nearest.Detail || nearest.Mod == null)
+			{
+				uiElement.SetDetailState(false);
+				return;
+			}
+
+			uiElement.SetDetailState(true);
+
+			if (false)
+			{
+				uiElement.UpdateAnomaly(anomalyTex);
+
+				int count = 1;
+				string aName = "";
+				double dist = (v.transform.position - new Vector3()).magnitude;
+
+				uiElement.UpdateAnomalyText(string.Format("Identified {0} structure{1}", count, count > 1 ? "s" : ""));
+				uiElement.UpdateAnomalyName(string.Format("{0}\n{1}", aName, distanceString(dist)));
+			}
+
+			//....
+
+			
+		}
+
+		private string distanceString(double dist)
+		{
+			if (dist < 5000)
+				return string.Format("{0:N1}m", dist);
+
+			return string.Format("{0:N3}km", dist / 1000);
 		}
 
 		private double waypointRange(SCANwaypoint p)
@@ -524,6 +568,14 @@ namespace SCANsat.SCAN_Unity
 
 				resourceScanners.Add(s);
 			}
+		}
+
+		public void ResetPosition()
+		{
+			SCAN_Settings_Config.Instance.InstrumentsPosition = new Vector2(100, -500);
+
+			if (uiElement != null)
+				uiElement.SetPosition(SCAN_Settings_Config.Instance.InstrumentsPosition);
 		}
 	}
 }

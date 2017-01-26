@@ -23,11 +23,36 @@ namespace SCANsat.SCAN_Unity
 
 		private static UISkinDef _unitySkinDef;
 
+		private static Sprite _podIcon;
+		private static Sprite _planeIcon;
+		private static Sprite _probeIcon;
+		private static Sprite _debrisIcon;
+		private static Sprite _baseIcon;
+		private static Sprite _stationIcon;
+		private static Sprite _landerIcon;
+		private static Sprite _roverIcon;
+		private static Sprite _relayIcon;
+		private static Sprite _asteroidIcon;
+		private static Sprite _evaIcon;
+		private static Sprite _planetIcon;
+		private static Sprite _mysteryIcon;
+		private static Sprite _flagIcon;
+		private static Sprite _apMarker;
+		private static Sprite _peMarker;
+		private static Sprite _maneuverMarker;
+		private static Sprite _encounterMarker;
+		private static Sprite _exitMarker;
+		private static Sprite _anomalyIcon;
+		private static Sprite _waypointIcon;
+
 		private static Sprite _clearSprite;
 		private static Sprite _toggleNormal;
 		private static Sprite _toggleHover;
 		private static Sprite _toggleActive;
 		private static Sprite _toggleOn;
+		private static Sprite _toggleOnHover;
+		private static Sprite _toggleOnActive;
+		private static Sprite _unityToggleOnHover;
 
 		private static GameObject[] loadedPrefabs;
 
@@ -65,6 +90,146 @@ namespace SCANsat.SCAN_Unity
 		public static UISkinDef UnitySkinDef
 		{
 			get { return _unitySkinDef; }
+		}
+
+		public static Sprite PodIcon
+		{
+			get { return _podIcon; }
+		}
+
+		public static Sprite PlaneIcon
+		{
+			get { return _planeIcon; }
+		}
+
+		public static Sprite ProbeIcon
+		{
+			get { return _probeIcon; }
+		}
+
+		public static Sprite DebrisIcon
+		{
+			get { return _debrisIcon; }
+		}
+
+		public static Sprite BaseIcon
+		{
+			get { return _baseIcon; }
+		}
+
+		public static Sprite StationIcon
+		{
+			get { return _stationIcon; }
+		}
+
+		public static Sprite LanderIcon
+		{
+			get { return _landerIcon; }
+		}
+
+		public static Sprite RoverIcon
+		{
+			get { return _roverIcon; }
+		}
+
+		public static Sprite RelayIcon
+		{
+			get { return _relayIcon; }
+		}
+
+		public static Sprite AsteroidIcon
+		{
+			get { return _asteroidIcon; }
+		}
+
+		public static Sprite EVAIcon
+		{
+			get { return _evaIcon; }
+		}
+
+		public static Sprite PlanetIcon
+		{
+			get { return _planetIcon; }
+		}
+
+		public static Sprite MysteryIcon
+		{
+			get { return _mysteryIcon; }
+		}
+
+		public static Sprite FlagIcon
+		{
+			get { return _flagIcon; }
+		}
+
+		public static Sprite APMarker
+		{
+			get { return _apMarker; }
+		}
+
+		public static Sprite PEMarker
+		{
+			get { return _peMarker; }
+		}
+
+		public static Sprite ManeuverMarker
+		{
+			get { return _maneuverMarker; }
+		}
+
+		public static Sprite EncounterMarker
+		{
+			get { return _encounterMarker; }
+		}
+
+		public static Sprite ExitMarker
+		{
+			get { return _exitMarker; }
+		}
+
+		public static Sprite AnomalyIcon
+		{
+			get { return _anomalyIcon; }
+		}
+
+		public static Sprite WaypointIcon
+		{
+			get { return _waypointIcon; }
+		}
+
+		public static Sprite VesselIcon(VesselType type)
+		{
+			switch(type)
+			{
+				case VesselType.Base:
+					return _baseIcon;
+				case VesselType.Debris:
+					return _debrisIcon;
+				case VesselType.EVA:
+					return _evaIcon;
+				case VesselType.Flag:
+					return _flagIcon;
+				case VesselType.Lander:
+					return _landerIcon;
+				case VesselType.Plane:
+					return _planeIcon;
+				case VesselType.Probe:
+					return _probeIcon;
+				case VesselType.Relay:
+					return _relayIcon;
+				case VesselType.Rover:
+					return _roverIcon;
+				case VesselType.Ship:
+					return _podIcon;
+				case VesselType.SpaceObject:
+					return _asteroidIcon;
+				case VesselType.Station:
+					return _stationIcon;
+				case VesselType.Unknown:
+					return _mysteryIcon;
+				default:
+					return _mysteryIcon;
+			}
 		}
 
 		public static void ResetUIStyle()
@@ -113,10 +278,12 @@ namespace SCANsat.SCAN_Unity
 				if (skin == null)
 					return;
 
-				_toggleNormal = Sprite.Create(skin.toggle.normal.background, new Rect(0, 0, skin.toggle.normal.background.width, skin.toggle.normal.background.height), new Vector2(0.5f, 0.5f));
-				_toggleHover = Sprite.Create(skin.toggle.hover.background, new Rect(0, 0, skin.toggle.hover.background.width, skin.toggle.hover.background.height), new Vector2(0.5f, 0.5f));
-				_toggleActive = Sprite.Create(skin.toggle.active.background, new Rect(0, 0, skin.toggle.active.background.width, skin.toggle.active.background.height), new Vector2(0.5f, 0.5f));
-				_toggleOn = Sprite.Create(skin.toggle.onNormal.background, new Rect(0, 0, skin.toggle.onNormal.background.width, skin.toggle.onNormal.background.height), new Vector2(0.5f, 0.5f));
+				_toggleNormal = Sprite.Create(skin.toggle.normal.background, new Rect(16, 16, skin.toggle.normal.background.width - 32, skin.toggle.normal.background.height - 32), new Vector2(0.5f, 0.5f));
+				_toggleHover = Sprite.Create(skin.toggle.hover.background, new Rect(16, 16, skin.toggle.hover.background.width - 32, skin.toggle.hover.background.height - 32), new Vector2(0.5f, 0.5f));
+				_toggleActive = Sprite.Create(skin.toggle.active.background, new Rect(16, 16, skin.toggle.active.background.width - 32, skin.toggle.active.background.height - 32), new Vector2(0.5f, 0.5f));
+				_toggleOn = Sprite.Create(skin.toggle.onNormal.background, new Rect(16, 16, skin.toggle.onNormal.background.width - 32, skin.toggle.onNormal.background.height - 32), new Vector2(0.5f, 0.5f));
+				_toggleOnHover = Sprite.Create(skin.toggle.onHover.background, new Rect(16, 16, skin.toggle.onHover.background.width - 32, skin.toggle.onHover.background.height - 32), new Vector2(0.5f, 0.5f));
+				_toggleOnActive = Sprite.Create(skin.toggle.onActive.background, new Rect(16, 16, skin.toggle.onActive.background.width - 32, skin.toggle.onActive.background.height - 32), new Vector2(0.5f, 0.5f));
 				
 				toggleLoaded = true;
 			}
@@ -174,14 +341,16 @@ namespace SCANsat.SCAN_Unity
 					_unitySkinDef.button.highlight.background = s;
 				else if (s.name == "button on")
 					_unitySkinDef.button.active.background = s;
-				else if (s.name == "toggle")
+				else if (s.name == "toggle_border")
 					_unitySkinDef.toggle.normal.background = s;
-				else if (s.name == "toggle hover")
+				else if (s.name == "SCAN_Toggle_Hover_Border")
 					_unitySkinDef.toggle.highlight.background = s;
-				else if (s.name == "toggle active")
+				else if (s.name == "toggle active_border")
 					_unitySkinDef.toggle.active.background = s;
-				else if (s.name == "SCAN_Toggle")
+				else if (s.name == "SCAN_Toggle_Border")
 					_unitySkinDef.toggle.disabled.background = s;
+				else if (s.name == "SCAN_Toggle_On_Hover_Border")
+					_unityToggleOnHover = s;
 				else if (s.name == "textfield")
 					_unitySkinDef.textField.normal.background = s;
 				else if (s.name == "textfield hover")
@@ -212,70 +381,50 @@ namespace SCANsat.SCAN_Unity
 					_unitySkinDef.verticalSliderThumb.highlight.background = s;
 				else if (s.name == "slider thumb active")
 					_unitySkinDef.verticalSliderThumb.active.background = s;
+
+				else if (s.name == "PodIcon")
+					_podIcon = s;
+				else if (s.name == "PlaneIcon")
+					_planeIcon = s;
+				else if (s.name == "ProbeIcon")
+					_probeIcon = s;
+				else if (s.name == "DebrisIcon")
+					_debrisIcon = s;
+				else if (s.name == "StationIcon")
+					_stationIcon = s;
+				else if (s.name == "LanderIcon")
+					_landerIcon = s;
+				else if (s.name == "RoverIcon")
+					_roverIcon = s;
+				else if (s.name == "RelayIcon")
+					_relayIcon = s;
+				else if (s.name == "AsteroidIcon")
+					_asteroidIcon = s;
+				else if (s.name == "EVAIcon")
+					_evaIcon = s;
+				else if (s.name == "BaseIcon")
+					_baseIcon = s;
+				else if (s.name == "PlanetIcon")
+					_planetIcon = s;
+				else if (s.name == "MysteryIcon")
+					_mysteryIcon = s;
+				else if (s.name == "FlagIcon")
+					_flagIcon = s;
+				else if (s.name == "APMarker")
+					_apMarker = s;
+				else if (s.name == "PEMarker")
+					_peMarker = s;
+				else if (s.name == "ManeuverMarker")
+					_maneuverMarker = s;
+				else if (s.name == "EncounterMarker")
+					_encounterMarker = s;
+				else if (s.name == "ExitMarker")
+					_exitMarker = s;
+				else if (s.name == "AnomalyIconOutline")
+					_anomalyIcon = s;
+				else if (s.name == "SCAN_WayPointIcon_Outline")
+					_waypointIcon = s;
 			}
-
-			//AssetBundle skin = AssetBundle.LoadFromFile(path + "/scan_ghost.ksp");
-
-			//if (skin == null)
-			//	return;
-
-			//SCAN_GhostSkin ghost = skin.LoadAsset<GameObject>("SCAN_Ghost_Skin").GetComponent<SCAN_GhostSkin>();
-
-			//if (ghost == null)
-			//	return;			
-
-			//_unitySkinDef.name = ghost.GhostSkin.SkinName;
-
-			//_unitySkinDef.window.name = ghost.GhostSkin.Window.Name;
-
-			//_unitySkinDef.window.normal.background = ghost.GhostSkin.Window.Normal.Background;
-
-			//_unitySkinDef.box.name = ghost.GhostSkin.Box.Name;
-			//_unitySkinDef.box.normal.background = ghost.GhostSkin.Box.Normal.Background;
-
-			//_unitySkinDef.button.name = ghost.GhostSkin.Button.Name;
-			//_unitySkinDef.button.normal.background = ghost.GhostSkin.Button.Normal.Background;
-			//_unitySkinDef.button.highlight.background = ghost.GhostSkin.Button.Highlight.Background;
-			//_unitySkinDef.button.active.background = ghost.GhostSkin.Button.Active.Background;
-
-			//_unitySkinDef.toggle.name = ghost.GhostSkin.Toggle.Name;
-			//_unitySkinDef.toggle.normal.background = ghost.GhostSkin.Toggle.Normal.Background;
-			//_unitySkinDef.toggle.highlight.background = ghost.GhostSkin.Toggle.Highlight.Background;
-			//_unitySkinDef.toggle.active.background = ghost.GhostSkin.Toggle.Active.Background;
-			//_unitySkinDef.toggle.disabled.background = ghost.GhostSkin.Toggle.CheckMark.Background;
-
-			//_unitySkinDef.textField.name = ghost.GhostSkin.TextField.Name;
-			//_unitySkinDef.textField.normal.background = ghost.GhostSkin.TextField.Normal.Background;
-			//_unitySkinDef.textField.highlight.background = ghost.GhostSkin.TextField.Highlight.Background;
-			//_unitySkinDef.textField.active.background = ghost.GhostSkin.TextField.Active.Background;
-
-			//_unitySkinDef.horizontalScrollbar.name = ghost.GhostSkin.HorizontalScrollbar.Name;
-			//_unitySkinDef.horizontalScrollbar.normal.background = ghost.GhostSkin.HorizontalScrollbar.Normal.Background;
-
-			//_unitySkinDef.horizontalScrollbarThumb.name = ghost.GhostSkin.HorizontalScrollbarThumb.Name;
-			//_unitySkinDef.horizontalScrollbarThumb.normal.background = ghost.GhostSkin.HorizontalScrollbarThumb.Normal.Background;
-
-			//_unitySkinDef.verticalScrollbar.name = ghost.GhostSkin.VerticalScrollbar.Name;
-			//_unitySkinDef.verticalScrollbar.normal.background = ghost.GhostSkin.VerticalScrollbar.Normal.Background;
-
-			//_unitySkinDef.verticalScrollbarThumb.name = ghost.GhostSkin.VerticalScrollbarThumb.Name;
-			//_unitySkinDef.verticalScrollbarThumb.normal.background = ghost.GhostSkin.VerticalScrollbarThumb.Normal.Background;
-
-			//_unitySkinDef.horizontalSlider.name = ghost.GhostSkin.HorizontalSlider.Name;
-			//_unitySkinDef.horizontalSlider.normal.background = ghost.GhostSkin.HorizontalSlider.Normal.Background;
-
-			//_unitySkinDef.horizontalSliderThumb.name = ghost.GhostSkin.HorizontalSliderThumb.Name;
-			//_unitySkinDef.horizontalSliderThumb.normal.background = ghost.GhostSkin.HorizontalSliderThumb.Normal.Background;
-			//_unitySkinDef.horizontalSliderThumb.highlight.background = ghost.GhostSkin.HorizontalSliderThumb.Highlight.Background;
-			//_unitySkinDef.horizontalSliderThumb.active.background = ghost.GhostSkin.HorizontalSliderThumb.Active.Background;
-
-			//_unitySkinDef.verticalSlider.name = ghost.GhostSkin.VerticalSlider.Name;
-			//_unitySkinDef.verticalSlider.normal.background = ghost.GhostSkin.VerticalSlider.Normal.Background;
-
-			//_unitySkinDef.verticalSliderThumb.name = ghost.GhostSkin.VerticalSliderThumb.Name;
-			//_unitySkinDef.verticalSliderThumb.normal.background = ghost.GhostSkin.VerticalSliderThumb.Normal.Background;
-			//_unitySkinDef.verticalSliderThumb.highlight.background = ghost.GhostSkin.VerticalSliderThumb.Highlight.Background;
-			//_unitySkinDef.verticalSliderThumb.active.background = ghost.GhostSkin.VerticalSliderThumb.Active.Background;
 
 			skinLoaded = true;
 		}
@@ -540,18 +689,21 @@ namespace SCANsat.SCAN_Unity
 					break;
 				case SCAN_Style.StyleTypes.Toggle:
 					if (stock)
-						style.setToggle(_toggleNormal, _toggleHover, _toggleActive, _toggleActive, _toggleOn);
+						style.setToggle(_toggleNormal, _toggleHover, _toggleActive, _toggleActive, _toggleOn, _toggleOnHover);
 					else
-						style.setToggle(skin.toggle.normal.background, skin.toggle.highlight.background, skin.toggle.active.background, skin.toggle.active.background, skin.toggle.disabled.background);
+						style.setToggle(skin.toggle.normal.background, skin.toggle.highlight.background, skin.toggle.active.background, skin.toggle.active.background, skin.toggle.disabled.background, _unityToggleOnHover);
 					break;
 				case SCAN_Style.StyleTypes.ToggleButton:
 					style.setToggleButton(skin.button.normal.background, skin.button.highlight.background, skin.button.active.background, skin.button.active.background);
 					break;
 				case SCAN_Style.StyleTypes.KSPToggle:
-					style.setToggle(_toggleNormal, _toggleHover, _toggleActive, _toggleActive, _toggleOn);
+					style.setToggle(_toggleNormal, _toggleHover, _toggleActive, _toggleActive, _toggleOn, _toggleOnHover);
 					break;
 				case SCAN_Style.StyleTypes.HorizontalSlider:
 					style.setSlider(skin.horizontalSlider.normal.background, skin.horizontalSliderThumb.normal.background, skin.horizontalSliderThumb.highlight.background, skin.horizontalSliderThumb.active.background, skin.horizontalSliderThumb.active.background);
+					break;
+				case SCAN_Style.StyleTypes.VerticalScrollbar:
+					style.setScrollbar(skin.verticalScrollbar.normal.background, skin.verticalScrollbarThumb.normal.background);
 					break;
 				default:
 					break;

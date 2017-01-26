@@ -66,6 +66,12 @@ namespace SCANsat.SCAN_Unity
 
 		public void OnDestroy()
 		{
+			if (uiElement != null)
+			{
+				uiElement.gameObject.SetActive(false);
+				MonoBehaviour.Destroy(uiElement.gameObject);
+			}
+
 			GameEvents.onGameSceneSwitchRequested.Remove(switchScene);
 		}
 
@@ -82,8 +88,6 @@ namespace SCANsat.SCAN_Unity
 
 		public void Update()
 		{
-
-
 			if ((MapView.MapIsEnabled && HighLogic.LoadedSceneIsFlight && FlightGlobals.ready) || HighLogic.LoadedScene == GameScenes.TRACKSTATION)
 			{
 				CelestialBody mapBody = SCANUtil.getTargetBody(MapView.MapCamera.target);
@@ -159,10 +163,11 @@ namespace SCANsat.SCAN_Unity
 			get { return _overlayOn; }
 			set
 			{
-				_overlayOn = value;
-
 				if (value)
-					refreshMap(SCANcontroller.controller.overlaySelection);
+				{
+					if (!_overlayOn)
+						refreshMap(SCANcontroller.controller.overlaySelection);
+				}
 				else
 					removeOverlay();
 			}
@@ -173,12 +178,17 @@ namespace SCANsat.SCAN_Unity
 			get { return SCANcontroller.controller.overlaySelection == 0; }
 			set
 			{
+				if (!value)
+				{
+					if (_overlayOn && SCANcontroller.controller.overlaySelection == 0)
+						removeOverlay();
+
+					return;
+				}
+
 				SCANcontroller.controller.overlaySelection = 0;
 
-				if (value)
-					refreshMap(0);
-				else
-					removeOverlay();
+				refreshMap(0);
 			}
 		}
 
@@ -187,13 +197,23 @@ namespace SCANsat.SCAN_Unity
 			get { return SCANcontroller.controller.overlaySelection == 1; }
 			set
 			{
+				if (!value)
+				{
+					if (_overlayOn && SCANcontroller.controller.overlaySelection == 1)
+						removeOverlay();
+
+					return;
+				}
+
 				SCANcontroller.controller.overlaySelection = 1;
 
-				if (value)
-					refreshMap(1);
-				else
-					removeOverlay();
+				refreshMap(1);
 			}
+		}
+
+		public bool DrawResource
+		{
+			get { return SCANcontroller.controller.overlaySelection == 2; }
 		}
 
 		public float Scale
@@ -217,8 +237,16 @@ namespace SCANsat.SCAN_Unity
 			UIMasterController.ClampToScreen(rect, Vector2.zero);
 		}
 
-		public void DrawResource(string resource, bool isOn)
+		public void SetResource(string resource, bool isOn)
 		{
+			if (!isOn)
+			{ 
+				if(_overlayOn && SCANcontroller.controller.overlaySelection == 2 && currentResource != null && currentResource.Name == resource)
+					removeOverlay();
+
+				return;
+			}
+
 			SCANcontroller.controller.overlaySelection = 2;
 
 			if (currentResource.Name != resource)
@@ -238,35 +266,32 @@ namespace SCANsat.SCAN_Unity
 			if (currentResource == null)
 				return;
 
-			if (isOn)
-				refreshMap(2);
-			else
-				removeOverlay();
+			SCANcontroller.controller.overlayResource = resource;
+
+			refreshMap(2);
 		}
 
 		public void Refresh()
 		{
 			_overlayOn = true;
 
-			refreshMap(SCANcontroller.controller.overlaySelection);
+			refreshMap(SCANcontroller.controller.overlaySelection, false);
 		}
 
 		public void OpenSettings()
 		{
 			if (SCAN_UI_Settings.Instance.IsVisible)
-				SCAN_UI_Settings.Instance.Close();
+			{
+				if (SCAN_UI_Settings.Instance.Page == 2)
+					SCAN_UI_Settings.Instance.Close();
+				else
+				{
+					SCAN_UI_Settings.Instance.Close();
+					SCAN_UI_Settings.Instance.Open(2, true);
+				}
+			}
 			else
 				SCAN_UI_Settings.Instance.Open(2);
-		}
-
-		private void removeOverlay()
-		{
-			OverlayGenerator.Instance.ClearDisplay();
-
-			if (mapOverlay != null)
-				MonoBehaviour.Destroy(mapOverlay);
-
-			mapOverlay = null;
 		}
 
 		private void setBody(CelestialBody B)
@@ -284,7 +309,20 @@ namespace SCANsat.SCAN_Unity
 			{
 				if (resources.Count > 0)
 				{
-					currentResource = resources[0];
+					for (int i = resources.Count - 1; i >= 0; i--)
+					{
+						SCANresourceGlobal r = resources[i];
+
+						if (r.Name != SCANcontroller.controller.overlayResource)
+							continue;
+
+						currentResource = r;
+						break;
+					}
+
+					if (currentResource == null)
+						currentResource = resources[0];
+
 					currentResource.CurrentBodyConfig(body.name);
 				}
 			}
@@ -306,6 +344,17 @@ namespace SCANsat.SCAN_Unity
 			degreeOffset = 5 / eqDistancePerDegree;
 		}
 
+		private void removeOverlay()
+		{
+			_overlayOn = false;
+
+			OverlayGenerator.Instance.ClearDisplay();
+
+			if (mapOverlay != null)
+				MonoBehaviour.Destroy(mapOverlay);
+
+			mapOverlay = null;
+		}
 
 		public void refreshMap(float t, int height, int interp, int biomeHeight)
 		{
@@ -313,17 +362,22 @@ namespace SCANsat.SCAN_Unity
 				refreshMap(SCANcontroller.controller.overlaySelection);
 		}
 
-		private void refreshMap(int i)
+		private void refreshMap(int i, bool remove = true)
 		{
+			if (remove)
+				removeOverlay();
+
 			if (mapGenerating)
 				return;
 			if (threadRunning)
 				return;
 
+			_overlayOn = true;
+
 			switch(i)
 			{
 				case 0:
-					body.SetResourceMap(SCANuiUtil.drawBiomeMap(ref mapOverlay, ref biomePixels, data, SCANcontroller.controller.overlayTransparency, SCANcontroller.controller.overlayBiomeHeight));
+					body.SetResourceMap(SCANuiUtil.drawBiomeMap(ref mapOverlay, ref biomePixels, data, SCAN_Settings_Config.Instance.CoverageTransparency, SCAN_Settings_Config.Instance.BiomeMapHeight));
 					break;
 				case 1:
 					SCANcontroller.controller.StartCoroutine(setTerrainMap());
@@ -342,13 +396,13 @@ namespace SCANsat.SCAN_Unity
 
 			mapGenerating = true;
 
-			SCANuiUtil.generateOverlayResourceValues(ref abundanceValues, SCANcontroller.controller.overlayMapHeight, data, currentResource, SCANcontroller.controller.overlayInterpolation);
+			SCANuiUtil.generateOverlayResourceValues(ref abundanceValues, SCAN_Settings_Config.Instance.ResourceMapHeight, data, currentResource, SCAN_Settings_Config.Instance.Interpolation);
 
 			SCANdata copy = new SCANdata(data);
 			SCANresourceGlobal resourceCopy = new SCANresourceGlobal(currentResource);
 			resourceCopy.CurrentBodyConfig(body.name);
 
-			Thread t = new Thread(() => resourceThreadRun(SCANcontroller.controller.overlayMapHeight, SCANcontroller.controller.overlayInterpolation, SCANcontroller.controller.overlayTransparency, new System.Random(ResourceScenario.Instance.gameSettings.Seed), copy, resourceCopy));
+			Thread t = new Thread(() => resourceThreadRun(SCAN_Settings_Config.Instance.ResourceMapHeight, SCAN_Settings_Config.Instance.Interpolation, SCAN_Settings_Config.Instance.CoverageTransparency, new System.Random(ResourceScenario.Instance.gameSettings.Seed), copy, resourceCopy));
 			threadRunning = true;
 			threadFinished = false;
 			t.Start();
@@ -377,8 +431,8 @@ namespace SCANsat.SCAN_Unity
 				yield break;
 			}
 
-			if (mapOverlay == null || mapOverlay.height != SCANcontroller.controller.overlayMapHeight)
-				mapOverlay = new Texture2D(SCANcontroller.controller.overlayMapHeight * 2, SCANcontroller.controller.overlayMapHeight, TextureFormat.ARGB32, true);
+			if (mapOverlay == null || mapOverlay.height != SCAN_Settings_Config.Instance.ResourceMapHeight)
+				mapOverlay = new Texture2D(SCAN_Settings_Config.Instance.ResourceMapHeight * 2, SCAN_Settings_Config.Instance.ResourceMapHeight, TextureFormat.ARGB32, true);
 
 			mapOverlay.SetPixels32(resourcePixels);
 			mapOverlay.Apply();
@@ -498,6 +552,14 @@ namespace SCANsat.SCAN_Unity
 			{
 				threadRunning = false;
 			}
+		}
+
+		public void ResetPosition()
+		{
+			SCAN_Settings_Config.Instance.OverlayPosition = new Vector2(600, -200);
+
+			if (uiElement != null)
+				uiElement.SetPosition(SCAN_Settings_Config.Instance.OverlayPosition);
 		}
 
 	}
