@@ -2,6 +2,7 @@
 using System.IO;
 using System.Reflection;
 using UnityEngine;
+using palette = SCANsat.SCAN_UI.UI_Framework.SCANpalette;
 
 namespace SCANsat
 {
@@ -16,6 +17,8 @@ namespace SCANsat
 		public bool ShowGroundTracks = true;
 		[Persistent]
 		public bool GroundTracksActiveOnly = true;
+		[Persistent]
+		public bool MechJebTarget = false;
 		[Persistent]
 		public bool OverlayTooltips = true;
 		[Persistent]
@@ -33,7 +36,7 @@ namespace SCANsat
 		[Persistent]
 		public bool RequireNarrowBand = true;
 		[Persistent]
-		public bool DisableStock = false;
+		public bool DisableStockResource = false;
 		[Persistent]
 		public bool InstantScan = true;
 		[Persistent]
@@ -43,15 +46,35 @@ namespace SCANsat
 		[Persistent]
 		public int Interpolation = 8;
 		[Persistent]
-		public int ResourceMapHeight = 512;
+		public int ResourceMapHeight = 256;
 		[Persistent]
 		public int BiomeMapHeight = 512;
 		[Persistent]
-		public float CoverageTransparency = 0.1f;
+		public float CoverageTransparency = 0.2f;
 		[Persistent]
 		public bool TrueGreyScale = false;
 		[Persistent]
 		public bool ExportCSV = false;
+		[Persistent]
+		public float BiomeTransparency = 0.4f;
+		[Persistent]
+		public bool BiomeBorder = true;
+		[Persistent]
+		public bool StockBiomes = false;
+		[Persistent]
+		public Color LowBiomeColor = palette.xkcd_CamoGreen;
+		[Persistent]
+		public Color HighBiomeColor = palette.xkcd_Marigold;
+		[Persistent]
+		public float SlopeCutoff = 1;
+		[Persistent]
+		public Color BottomLowSlopeColor = palette.xkcd_PukeGreen;
+		[Persistent]
+		public Color BottomHighSlopeColor = palette.xkcd_Lemon;
+		[Persistent]
+		public Color TopLowSlopeColor = palette.xkcd_Lemon;
+		[Persistent]
+		public Color TopHighSlopeColor = palette.xkcd_OrangeRed;
 		[Persistent]
 		public bool CheatMapFill = false;
 		[Persistent]
@@ -107,6 +130,11 @@ namespace SCANsat
 
 			if (Load())
 				SCANUtil.SCANlog("Settings file loaded");
+			else
+			{
+				if (Save())
+					SCANUtil.SCANlog("Settings file generated at:\n{0}", filePath);
+			}
 		}
 
 		public bool Load()
