@@ -10,9 +10,9 @@ namespace SCANsat.Unity.Unity
 	public class SCAN_SettingsData : SettingsPage
 	{
 		[SerializeField]
-		private Toggle m_GreyScaleToggle = null;
+		private SCAN_Toggle m_GreyScaleToggle = null;
 		[SerializeField]
-		private Toggle m_CSVExportToggle = null;
+		private SCAN_Toggle m_CSVExportToggle = null;
 		[SerializeField]
 		private TextHandler m_MapWidth = null;
 		[SerializeField]

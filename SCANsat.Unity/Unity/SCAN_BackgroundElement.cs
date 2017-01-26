@@ -11,7 +11,7 @@ namespace SCANsat.Unity.Unity
 		[SerializeField]
 		private TextHandler m_BodyText = null;
 		[SerializeField]
-		private Toggle m_BodyToggle = null;
+		private SCAN_Toggle m_BodyToggle = null;
 
 		private bool loaded;
 		private string bodyName;
@@ -22,29 +22,29 @@ namespace SCANsat.Unity.Unity
 			get { return bodyName; }
 		}
 
-		public void Setup(string name, bool active, ISCAN_Settings settings)
+		public void Setup(string body, bool active, ISCAN_Settings settings)
 		{
 			if (settings == null)
 				return;
 
-			bodyName = name;
+			bodyName = body;
 			settingsInterface = settings;
 
 			if (m_BodyToggle != null)
 				m_BodyToggle.isOn = active;
 
 			if (m_BodyText != null)
-				m_BodyText.OnTextUpdate.Invoke(string.Format("{0} (0%)", name));
+				m_BodyText.OnTextUpdate.Invoke(string.Format("{0} (0%)", body));
 
 			loaded = true;
 		}
 
-		public void UpdateText(string amount)
+		public void UpdateText(double amount)
 		{
 			if (m_BodyText == null)
 				return;
 
-			m_BodyText.OnTextUpdate.Invoke(string.Format("{0} ({1:P0})", name, amount));
+			m_BodyText.OnTextUpdate.Invoke(string.Format("{0} ({1:P0})", bodyName, amount));
 		}
 
 		public void ToggleBody(bool isOn)

@@ -7,7 +7,7 @@ using SCANsat.Unity.Interfaces;
 
 namespace SCANsat.Unity.Unity
 {
-	public class SCAN_Instruments : MonoBehaviour, IDragHandler, IBeginDragHandler, IEndDragHandler
+	public class SCAN_Instruments : MonoBehaviour, IDragHandler, IBeginDragHandler, IEndDragHandler, IPointerDownHandler
 	{
 		[SerializeField]
 		private TextHandler m_Version = null;
@@ -21,6 +21,8 @@ namespace SCANsat.Unity.Unity
 		private TextHandler m_AnomalyPrintText = null;
 		[SerializeField]
 		private TextHandler m_AnomalyNameText = null;
+		[SerializeField]
+		private GameObject m_AnomalyObject = null;
 
 		private ISCAN_Instruments insInterface;
 		private RectTransform rect;
@@ -69,6 +71,11 @@ namespace SCANsat.Unity.Unity
 				return;
 
 			rect.anchoredPosition = new Vector3(pos.x, pos.y, 0);
+		}
+
+		public void OnPointerDown(PointerEventData eventData)
+		{
+			transform.SetAsLastSibling();
 		}
 
 		public void OnBeginDrag(PointerEventData eventData)
@@ -155,6 +162,17 @@ namespace SCANsat.Unity.Unity
 				return;
 
 			insInterface.NextResource();
+		}
+
+		public void SetDetailState(bool isOn)
+		{
+			if (m_AnomalyObject == null)
+				return;
+
+			if (isOn && !m_AnomalyObject.activeSelf)
+				m_AnomalyObject.SetActive(true);
+			else if (!isOn && m_AnomalyObject.activeSelf)
+				m_AnomalyObject.SetActive(false);
 		}
 
 	}

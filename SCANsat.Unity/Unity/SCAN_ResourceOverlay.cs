@@ -9,12 +9,15 @@ namespace SCANsat.Unity.Unity
 	{
 		[SerializeField]
 		private TextHandler m_ResourceName = null;
-		[SerializeField]
-		private Toggle m_ResourceToggle = null;
 
 		private SCAN_Overlay parent;
 		private string resource;
-		private bool loaded;
+		private bool active;
+
+		public string Resource
+		{
+			get { return resource; }
+		}
 
 		public void SetResource(string name, SCAN_Overlay p, bool isOn)
 		{
@@ -24,20 +27,37 @@ namespace SCANsat.Unity.Unity
 			parent = p;
 			resource = name;
 
-			if (m_ResourceToggle != null)
-				m_ResourceToggle.isOn = isOn;
-
 			m_ResourceName.OnTextUpdate.Invoke(name);
 
-			loaded = true;
+			if (isOn && p.OverlayInterface.DrawResource)
+			{
+				m_ResourceName.OnColorUpdate.Invoke(p.ActiveColor);
+				m_ResourceName.SetNormalColor(p.ActiveColor);
+			}
 		}
 
-		public void ToggleResource(bool isOn)
+		public void DrawResource()
 		{
-			if (!loaded || parent == null)
+			if (parent == null)
 				return;
 
-			parent.SetResource(resource, isOn);
+			active = !active;
+
+			parent.SetResource(resource, active);
+
+			if (m_ResourceName != null)
+				m_ResourceName.SetNormalColor(parent.ActiveColor);
+		}
+
+		public void Inactivate()
+		{
+			active = false;
+
+			if (m_ResourceName != null)
+			{
+				m_ResourceName.OnColorUpdate.Invoke(parent.NormalColor);
+				m_ResourceName.SetNormalColor(parent.NormalColor);
+			}
 		}
 	}
 }

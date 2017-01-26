@@ -10,19 +10,17 @@ namespace SCANsat.Unity.Unity
 	public class SCAN_SettingsGeneral : SettingsPage
 	{
 		[SerializeField]
-		private Toggle m_GroundTrackToggle = null;
+		private SCAN_Toggle m_GroundTrackToggle = null;
 		[SerializeField]
-		private Toggle m_GroundTrackActiveToggle = null;
+		private SCAN_Toggle m_GroundTrackActiveToggle = null;
 		[SerializeField]
-		private Toggle m_OverlayTooltipToggle = null;
+		private SCAN_Toggle m_WindowTooltipToggle = null;
 		[SerializeField]
-		private Toggle m_WindowTooltipToggle = null;
+		private SCAN_Toggle m_StockToolbarToggle = null;
 		[SerializeField]
-		private Toggle m_StockToolbarToggle = null;
+		private SCAN_Toggle m_ToolbarMenuToggle = null;
 		[SerializeField]
-		private Toggle m_ToolbarMenuToggle = null;
-		[SerializeField]
-		private Toggle m_StockUIToggle = null;
+		private SCAN_Toggle m_StockUIToggle = null;
 		[SerializeField]
 		private TextHandler m_UIScale = null;
 		[SerializeField]
@@ -46,9 +44,6 @@ namespace SCANsat.Unity.Unity
 				m_GroundTrackActiveToggle.isOn = set.ActiveGround;
 				m_GroundTrackActiveToggle.gameObject.SetActive(set.GroundTracks);
 			}
-
-			if (m_OverlayTooltipToggle != null)
-				m_OverlayTooltipToggle.isOn = set.OverlayTooltips;
 
 			if (m_WindowTooltipToggle != null)
 				m_WindowTooltipToggle.isOn = set.WindowTooltips;
@@ -91,14 +86,6 @@ namespace SCANsat.Unity.Unity
 				return;
 
 			settings.ActiveGround = isOn;
-		}
-
-		public void OverlayTooltip(bool isOn)
-		{
-			if (!loaded || settings == null)
-				return;
-
-			settings.OverlayTooltips = isOn;
 		}
 
 		public void WindowTooltip(bool isOn)

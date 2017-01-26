@@ -20,6 +20,7 @@ namespace SCANsat.Unity.Unity
 			HorizontalSlider,
 			TextInput,
 			KSPToggle,
+			VerticalScrollbar,
 		}
 
 		[SerializeField]
@@ -63,7 +64,7 @@ namespace SCANsat.Unity.Unity
 			setSelectable(normal, highlight, active, inactive);
 		}
 
-		public void setToggle(Sprite normal, Sprite highlight, Sprite active, Sprite inactive, Sprite checkmark)
+		public void setToggle(Sprite normal, Sprite highlight, Sprite active, Sprite inactive, Sprite checkmark, Sprite checkmarkHover)
 		{
 			setSelectable(normal, highlight, active, inactive);
 
@@ -79,6 +80,11 @@ namespace SCANsat.Unity.Unity
 
 			toggleImage.sprite = checkmark;
 			toggleImage.type = Image.Type.Sliced;
+
+			SCAN_Toggle scan_toggle = GetComponent<SCAN_Toggle>();
+
+			if (scan_toggle != null)
+				scan_toggle.HoverCheckmark = checkmarkHover;
 		}
 
 		public void setToggleButton(Sprite normal, Sprite highlight, Sprite active, Sprite inactive)
@@ -118,6 +124,31 @@ namespace SCANsat.Unity.Unity
 
 			back.sprite = background;
 			back.type = Image.Type.Sliced;
+		}
+
+		public void setScrollbar(Sprite background, Sprite thumb)
+		{
+			Image back = GetComponent<Image>();
+
+			if (back == null)
+				return;
+
+			back.sprite = background;
+
+			Scrollbar scroll = GetComponent<Scrollbar>();
+
+			if (scroll == null)
+				return;
+
+			if (scroll.targetGraphic == null)
+				return;
+
+			Image scrollThumb = scroll.targetGraphic.GetComponent<Image>();
+
+			if (scrollThumb == null)
+				return;
+
+			scrollThumb.sprite = thumb;
 		}
 	}
 }

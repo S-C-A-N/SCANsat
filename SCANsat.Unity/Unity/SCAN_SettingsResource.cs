@@ -10,21 +10,23 @@ namespace SCANsat.Unity.Unity
 	public class SCAN_SettingsResource : SettingsPage
 	{
 		[SerializeField]
-		private Toggle m_BiomeLockToggle = null;
+		private SCAN_Toggle m_BiomeLockToggle = null;
 		[SerializeField]
-		private Toggle m_NarrowBandToggle = null;
+		private SCAN_Toggle m_NarrowBandToggle = null;
 		[SerializeField]
-		private Toggle m_InstantScanToggle = null;
+		private SCAN_Toggle m_InstantScanToggle = null;
 		[SerializeField]
-		private Toggle m_DisableStockToggle = null;
+		private SCAN_Toggle m_DisableStockToggle = null;
 		[SerializeField]
 		private GameObject m_StockThresholdObject = null;
 		[SerializeField]
-		private Toggle m_StockThresholdToggle = null;
+		private SCAN_Toggle m_StockThresholdToggle = null;
 		[SerializeField]
 		private TextHandler m_StockThresholdValue = null;
 		[SerializeField]
 		private InputField m_ThresholdInput = null;
+		[SerializeField]
+		private SCAN_Toggle m_OverlayTooltipToggle = null;
 		[SerializeField]
 		private TextHandler m_MapInterpolation = null;
 		[SerializeField]
@@ -78,6 +80,9 @@ namespace SCANsat.Unity.Unity
 				if (m_StockThresholdObject != null)
 					m_StockThresholdObject.gameObject.SetActive(false);
 			}
+
+			if (m_OverlayTooltipToggle != null)
+				m_OverlayTooltipToggle.isOn = set.OverlayTooltips;
 
 			if (m_MapInterpolation != null)
 				m_MapInterpolation.OnTextUpdate.Invoke(set.Interpolation.ToString());
@@ -150,11 +155,26 @@ namespace SCANsat.Unity.Unity
 
 			if (float.TryParse(m_ThresholdInput.text, out value))
 			{
+				value /= 100;
+
+				if (value < 0)
+					value = 0;
+				else if (value > 1)
+					value = 1;
+
 				settings.StockThresholdValue = value;
 
 				if (m_StockThresholdValue != null)
 					m_StockThresholdValue.OnTextUpdate.Invoke("Stock Scan Threshold: " + value.ToString("P0"));
 			}
+		}
+
+		public void OverlayTooltip(bool isOn)
+		{
+			if (!loaded || settings == null)
+				return;
+
+			settings.OverlayTooltips = isOn;
 		}
 
 		public void InterpolationDown()

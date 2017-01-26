@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace SCANsat.Unity.Interfaces
@@ -63,6 +64,10 @@ namespace SCANsat.Unity.Interfaces
 
 		bool ShowMapFill { get; }
 
+		Vector2 Position { set; }
+
+		IList<string> BackgroundBodies { get; }
+
 		void ClampToScreen(RectTransform rect);
 
 		void ResetCurrent();
@@ -85,6 +90,6 @@ namespace SCANsat.Unity.Interfaces
 
 		void ToggleBody(string name);
 
-		string BodyPercentage(string bodyName);
+		double BodyPercentage(string bodyName);
 	}
 }

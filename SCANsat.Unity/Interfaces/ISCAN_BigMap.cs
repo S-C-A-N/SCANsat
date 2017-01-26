@@ -8,8 +8,6 @@ namespace SCANsat.Unity.Interfaces
 	{
 		string Version { get; }
 
-		string Readout { get; }
-
 		string CurrentProjection { get; set; }
 
 		string CurrentMapType { get; set; }
@@ -42,11 +40,21 @@ namespace SCANsat.Unity.Interfaces
 
 		bool ShowWaypoint { get; }
 
+		bool ShowResource { get; }
+
+		int OrbitSteps { get; }
+
 		float Scale { get; }
+
+		Canvas MainCanvas { get; }
 
 		Vector2 Position { get; set; }
 
 		Vector2 Size { get; set; }
+
+		Vector2 MapScreenPosition { get; set; }
+
+		Texture2D LegendImage { get; }
 
 		IList<string> Projections { get; }
 
@@ -55,6 +63,18 @@ namespace SCANsat.Unity.Interfaces
 		IList<string> Resources { get; }
 
 		IList<string> CelestialBodies { get; }
+
+		IList<string> LegendLabels { get; }
+
+		Dictionary<Guid, MapLabelInfo> FlagInfoList { get; }
+
+		Dictionary<string, MapLabelInfo> AnomalyInfoList { get; }
+
+		Dictionary<int, MapLabelInfo> WaypointInfoList { get; }
+
+		KeyValuePair<Guid, MapLabelInfo> VesselInfo { get; }
+
+		string MapInfo(Vector2 rectPosition);
 
 		void RefreshMap();
 
@@ -73,5 +93,9 @@ namespace SCANsat.Unity.Interfaces
 		void Update();
 
 		void OnGUI();
+
+		SimpleLabelInfo OrbitInfo(int index);
+
+		Vector2 VesselPosition();
 	}
 }

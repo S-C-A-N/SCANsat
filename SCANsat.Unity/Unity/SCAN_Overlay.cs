@@ -7,28 +7,49 @@ using SCANsat.Unity.Interfaces;
 
 namespace SCANsat.Unity.Unity
 {
-	public class SCAN_Overlay : MonoBehaviour, IDragHandler, IBeginDragHandler, IEndDragHandler
+	public class SCAN_Overlay : MonoBehaviour, IDragHandler, IBeginDragHandler, IEndDragHandler, IPointerDownHandler
 	{
 		[SerializeField]
 		private TextHandler m_Version = null;
 		[SerializeField]
-		private Toggle m_BiomeToggle = null;
+		private TextHandler m_BiomeText = null;
 		[SerializeField]
-		private Toggle m_TerrainToggle = null;
+		private TextHandler m_TerrainText = null;
 		[SerializeField]
-		private Toggle m_OverlayToggle = null;
+		private SCAN_Toggle m_OverlayToggle = null;
 		[SerializeField]
-		private Toggle m_TooltipToggle = null;
+		private GameObject m_RefreshButton = null;
 		[SerializeField]
 		private GameObject m_ResourcePrefab = null;
 		[SerializeField]
 		private Transform m_ResourceTransform = null;
+		[SerializeField]
+		private Color m_ActiveColor = Color.white;
+		[SerializeField]
+		private Color m_NormalColor = Color.white;
 
 		private ISCAN_Overlay overInterface;
 		private bool loaded;
 		private RectTransform rect;
 		private Vector2 mouseStart;
 		private Vector3 windowStart;
+
+		private List<SCAN_ResourceOverlay> resources = new List<SCAN_ResourceOverlay>();
+		
+		public Color ActiveColor
+		{
+			get { return m_ActiveColor; }
+		}
+
+		public Color NormalColor
+		{
+			get { return m_NormalColor; }
+		}
+
+		public ISCAN_Overlay OverlayInterface
+		{
+			get { return overInterface; }
+		}
 
 		private void Awake()
 		{
@@ -53,12 +74,30 @@ namespace SCANsat.Unity.Unity
 			if (m_Version != null)
 				m_Version.OnTextUpdate.Invoke(over.Version);
 
-			if (m_BiomeToggle == null || m_TerrainToggle == null || m_OverlayToggle == null)
+			if (m_OverlayToggle == null)
 				return;
 
-			m_BiomeToggle.isOn = over.DrawBiome;
-			m_TerrainToggle.isOn = over.DrawTerrain;
 			m_OverlayToggle.isOn = over.DrawOverlay;
+
+			if (over.DrawBiome)
+			{
+				if (m_BiomeText != null)
+				{
+					m_BiomeText.OnColorUpdate.Invoke(m_ActiveColor);
+					m_BiomeText.SetNormalColor(m_ActiveColor);
+				}
+			}
+			else if (over.DrawTerrain)
+			{
+				if (m_TerrainText != null)
+				{
+					m_TerrainText.OnColorUpdate.Invoke(m_ActiveColor);
+					m_TerrainText.SetNormalColor(m_ActiveColor);
+				}
+			}
+
+			if (m_RefreshButton != null)
+				m_RefreshButton.SetActive(over.DrawOverlay);
 
 			CreateResources(over.Resources);
 
@@ -80,6 +119,11 @@ namespace SCANsat.Unity.Unity
 				return;
 
 			rect.anchoredPosition = new Vector3(pos.x, pos.y, 0);
+		}
+
+		public void OnPointerDown(PointerEventData eventData)
+		{
+			transform.SetAsLastSibling();
 		}
 
 		public void OnBeginDrag(PointerEventData eventData)
@@ -138,6 +182,8 @@ namespace SCANsat.Unity.Unity
 			res.transform.SetParent(m_ResourceTransform, false);
 
 			res.SetResource(resource, this, overInterface.CurrentResource == resource);
+
+			resources.Add(res);
 		}
 
 		public void Close()
@@ -153,31 +199,125 @@ namespace SCANsat.Unity.Unity
 			if (overInterface == null)
 				return;
 
-			overInterface.DrawResource(resource, isOn);
+			overInterface.SetResource(resource, isOn);
+
+			if (isOn)
+			{
+				if (m_RefreshButton != null)
+					m_RefreshButton.SetActive(true);
+
+				loaded = false;
+
+				if (m_OverlayToggle != null)
+					m_OverlayToggle.isOn = true;
+
+				loaded = true;
+			}
+			else
+			{
+				if (overInterface.DrawResource && overInterface.CurrentResource == resource)
+				{
+					if (m_RefreshButton != null)
+						m_RefreshButton.SetActive(false);
+
+					loaded = false;
+
+					if (m_OverlayToggle != null)
+						m_OverlayToggle.isOn = false;
+
+					loaded = true;
+				}
+			}
+
+			InactivateOthers();
 		}
 
-		public void ToggleBiome(bool isOn)
+		public void DrawBiome()
 		{
 			if (!loaded || overInterface == null)
 				return;
 
-			overInterface.DrawBiome = isOn;
+			overInterface.DrawBiome = overInterface.DrawBiome ? !overInterface.DrawOverlay : true;
+
+			if (m_BiomeText != null)
+				m_BiomeText.SetNormalColor(m_ActiveColor);
+
+			if (m_RefreshButton != null)
+				m_RefreshButton.SetActive(overInterface.DrawOverlay);
+
+			if (m_OverlayToggle != null)
+			{
+				loaded = false;
+				m_OverlayToggle.isOn = overInterface.DrawOverlay;
+				loaded = true;
+			}
+
+			InactivateOthers();
 		}
 
-		public void ToggleTerrain(bool isOn)
+		public void DrawTerrain()
 		{
 			if (!loaded || overInterface == null)
 				return;
 
-			overInterface.DrawTerrain = isOn;
+			overInterface.DrawTerrain = overInterface.DrawTerrain ? !overInterface.DrawOverlay : true;
+
+			if (m_TerrainText != null)
+				m_TerrainText.SetNormalColor(m_ActiveColor);
+
+			if (m_RefreshButton != null)
+				m_RefreshButton.SetActive(overInterface.DrawOverlay);
+			
+			if (m_OverlayToggle != null)
+			{
+				loaded = false;
+				m_OverlayToggle.isOn = overInterface.DrawOverlay;
+				loaded = true;
+			}
+						
+			InactivateOthers();
 		}
 
+		private void InactivateOthers()
+		{
+			if (overInterface == null)
+				return;
+
+			if (m_BiomeText != null && !overInterface.DrawBiome)
+			{
+				m_BiomeText.OnColorUpdate.Invoke(m_NormalColor);
+				m_BiomeText.SetNormalColor(m_NormalColor);
+			}
+
+			if (m_TerrainText != null && !overInterface.DrawTerrain)
+			{
+				m_TerrainText.OnColorUpdate.Invoke(m_NormalColor);
+				m_TerrainText.SetNormalColor(m_NormalColor);
+			}
+
+			for (int i = resources.Count - 1; i >= 0; i--)
+			{
+				SCAN_ResourceOverlay resource = resources[i];
+
+				if (resource == null)
+					continue;
+
+				if (!overInterface.DrawResource)
+					resource.Inactivate();
+				else if (resource.Resource != overInterface.CurrentResource)
+					resource.Inactivate();
+			}
+		}
+		
 		public void DrawOverlay(bool isOn)
 		{
 			if (!loaded || overInterface == null)
 				return;
 
 			overInterface.DrawOverlay = isOn;
+
+			if (m_RefreshButton != null)
+				m_RefreshButton.SetActive(isOn);
 		}
 
 		public void Refresh()

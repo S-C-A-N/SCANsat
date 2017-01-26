@@ -34,6 +34,8 @@ namespace SCANsat.Unity.Interfaces
 
 		void OpenOverlay();
 
+		void ChangeToVessel(Guid id);
+
 		string VesselInfo(Guid id);
 
 		Sprite VesselType(Guid id);

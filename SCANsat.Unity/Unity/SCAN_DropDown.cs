@@ -14,6 +14,10 @@ namespace SCANsat.Unity.Unity
 		private Transform m_ContentTransform = null;
 		[SerializeField]
 		private GameObject m_ContentPrefab = null;
+		[SerializeField]
+		private ScrollRect m_Scrollbar = null;
+		[SerializeField]
+		private LayoutElement m_Layout = null;
 
 		private string currentElement;
 		private OnSelectEvent _onSelectUpdate = new OnSelectEvent();
@@ -27,6 +31,18 @@ namespace SCANsat.Unity.Unity
 		{
 			if (elements == null)
 				return;
+
+			if (m_Layout != null)
+			{
+				float height = elements.Count * 25;
+
+				height += 5;
+
+				if (height > 155)
+					height = 155;
+
+				m_Layout.preferredHeight = height;
+			}
 
 			currentElement = current;
 
@@ -43,7 +59,7 @@ namespace SCANsat.Unity.Unity
 			if (m_ContentPrefab == null || m_ContentTransform == null)
 				return;
 
-			for (int i = elements.Count - 1; i >= 0; i--)
+			for (int i = 0; i < elements.Count; i++)
 			{
 				string element = elements[i];
 
@@ -58,7 +74,9 @@ namespace SCANsat.Unity.Unity
 			if (dropDown == null)
 				return;
 
-			dropDown.Setup(element, element == currentElement, this);
+			dropDown.transform.SetParent(m_ContentTransform, false);
+
+			dropDown.Setup(element, element == currentElement, this, m_Scrollbar);
 		}
 	}
 }

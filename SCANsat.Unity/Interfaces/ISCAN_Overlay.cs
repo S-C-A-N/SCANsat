@@ -20,6 +20,8 @@ namespace SCANsat.Unity.Interfaces
 
 		bool DrawTerrain { get; set; }
 
+		bool DrawResource { get; }
+
 		float Scale { get; }
 
 		IList<string> Resources { get; }
@@ -28,7 +30,7 @@ namespace SCANsat.Unity.Interfaces
 
 		void ClampToScreen(RectTransform rect);
 
-		void DrawResource(string resource, bool isOn);
+		void SetResource(string resource, bool isOn);
 
 		void Refresh();
 

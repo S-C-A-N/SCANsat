@@ -14,7 +14,7 @@ namespace SCANsat.Unity.Unity
 		[SerializeField]
 		private Transform m_BodyInfoTransform = null;
 		[SerializeField]
-		private Toggle m_ScanActiveToggle = null;
+		private SCAN_Toggle m_ScanActiveToggle = null;
 		[SerializeField]
 		private Slider m_TimeWarpResolution = null;
 		[SerializeField]
@@ -35,6 +35,9 @@ namespace SCANsat.Unity.Unity
 
 				background.UpdateText(settings.BodyPercentage(background.BodyName));
 			}
+
+			if (m_SensorInfo != null)
+				m_SensorInfo.OnTextUpdate.Invoke(settings.SensorCount);
 		}
 
 		public void setup(ISCAN_Settings set)
@@ -50,13 +53,25 @@ namespace SCANsat.Unity.Unity
 			if (m_TimeWarpResolution != null)
 				m_TimeWarpResolution.value = set.TimeWarp;
 
+			CreateBodySections(set.BackgroundBodies);
+
 			loaded = true;
 		}
 
-		private void CreateBodySections()
+		private void CreateBodySections(IList<string> bodies)
 		{
-			if (settings == null || m_BodyInfoPrefab == null || m_BodyInfoTransform == null)
+			if (bodies == null || settings == null || m_BodyInfoPrefab == null || m_BodyInfoTransform == null)
 				return;
+
+			for (int i = 0; i < bodies.Count; i++)
+			{
+				string s = bodies[i];
+
+				if (string.IsNullOrEmpty(s))
+					continue;
+
+				CreateBodySection(s);
+			}
 		}
 
 		private void CreateBodySection(string body)

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
@@ -7,7 +8,7 @@ using SCANsat.Unity.Interfaces;
 
 namespace SCANsat.Unity.Unity
 {
-	public class SCAN_BigMap : MonoBehaviour, IDragHandler, IBeginDragHandler, IEndDragHandler
+	public class SCAN_BigMap : MonoBehaviour, IDragHandler, IBeginDragHandler, IEndDragHandler, IPointerDownHandler
 	{
 		[SerializeField]
 		private TextHandler m_Version = null;
@@ -22,42 +23,65 @@ namespace SCANsat.Unity.Unity
 		[SerializeField]
 		private Transform m_CelestialBody = null;
 		[SerializeField]
+		private ToggleGroup m_DropDownToggles = null;
+		[SerializeField]
 		private GameObject m_DropDownPrefab = null;
 		[SerializeField]
 		private GameObject m_OrbitObject = null;
 		[SerializeField]
 		private GameObject m_WaypointObject = null;
 		[SerializeField]
-		private Toggle m_ColorToggle = null;
+		private SCAN_Toggle m_ColorToggle = null;
 		[SerializeField]
-		private Toggle m_GridToggle = null;
+		private SCAN_Toggle m_GridToggle = null;
 		[SerializeField]
-		private Toggle m_OrbitToggle = null;
+		private SCAN_Toggle m_OrbitToggle = null;
 		[SerializeField]
-		private Toggle m_WaypointToggle = null;
+		private SCAN_Toggle m_WaypointToggle = null;
 		[SerializeField]
-		private Toggle m_AnomalyToggle = null;
+		private SCAN_Toggle m_AnomalyToggle = null;
 		[SerializeField]
-		private Toggle m_FlagToggle = null;
+		private SCAN_Toggle m_FlagToggle = null;
 		[SerializeField]
-		private Toggle m_AsteroidToggle = null;
+		private SCAN_Toggle m_AsteroidToggle = null;
 		[SerializeField]
-		private Toggle m_LegendToggle = null;
+		private SCAN_Toggle m_LegendToggle = null;
 		[SerializeField]
-		private Toggle m_ResourcesToggle = null;
+		private SCAN_Toggle m_ResourcesToggle = null;
 		[SerializeField]
 		private TextHandler m_ReadoutText = null;
 		[SerializeField]
 		private RawImage m_MapImage = null;
 		[SerializeField]
 		private LayoutElement m_MapLayout = null;
+		[SerializeField]
+		private GameObject m_MapLabelPrefab = null;
+		[SerializeField]
+		private GameObject m_LegendObject = null;
+		[SerializeField]
+		private RawImage m_LegendImage = null;
+		[SerializeField]
+		private TextHandler m_LegendLabelOne = null;
+		[SerializeField]
+		private TextHandler m_LegendLabelTwo = null;
+		[SerializeField]
+		private TextHandler m_LegendLabelThree = null;
 
 		private ISCAN_BigMap bigInterface;
 		private bool loaded;
-		private bool resizing;
 		private RectTransform rect;
 		private Vector2 mouseStart;
 		private Vector3 windowStart;
+		private bool resizing;
+		private bool inMap;
+		private Vector2 rectPos = new Vector2();
+
+		private List<SCAN_SimpleLabel> orbitLabels = new List<SCAN_SimpleLabel>();
+		private List<SCAN_MapLabel> orbitIconLabels = new List<SCAN_MapLabel>();
+		private List<SCAN_MapLabel> anomalyLabels = new List<SCAN_MapLabel>();
+		private List<SCAN_MapLabel> waypointLabels = new List<SCAN_MapLabel>();
+		private List<SCAN_MapLabel> flagLabels = new List<SCAN_MapLabel>();
+		private SCAN_MapLabel vesselLabel;
 
 		private SCAN_DropDown dropDown;
 
@@ -72,14 +96,65 @@ namespace SCANsat.Unity.Unity
 				return;
 
 			bigInterface.Update();
+
+			if (vesselLabel != null)
+				vesselLabel.UpdatePosition(bigInterface.VesselPosition());
+
+			if (inMap && m_MapImage != null && m_ReadoutText != null)
+			{
+				RectTransformUtility.ScreenPointToLocalPointInRectangle(m_MapImage.rectTransform, Input.mousePosition, bigInterface.MainCanvas.worldCamera, out rectPos);
+
+				m_ReadoutText.OnTextUpdate.Invoke(bigInterface.MapInfo(rectPos));
+			}
+
+			if (bigInterface.OrbitToggle && bigInterface.ShowOrbit)
+			{
+				for (int i = orbitLabels.Count - 1; i >= 0; i--)
+				{
+					SCAN_SimpleLabel label = orbitLabels[i];
+
+					label.UpdateIcon(bigInterface.OrbitInfo(i));
+				}
+			}
 		}
 
 		private void OnGUI()
 		{
-			if (bigInterface == null || !bigInterface.IsVisible)
+			if (resizing)
 				return;
 
+			if (rect == null || bigInterface == null || !bigInterface.IsVisible || m_MapImage == null)
+				return;
+
+			bigInterface.MapScreenPosition = ScreenPosition(m_MapImage.rectTransform, bigInterface.MainCanvas);
+
 			bigInterface.OnGUI();
+		}
+
+		private Vector2 ScreenPosition(RectTransform r, Canvas canvas)
+		{
+			Vector3[] corners = new Vector3[4];
+			Vector2 pos = new Vector2();
+
+			r.GetWorldCorners(corners);
+
+			//print(string.Format("[SCAN_UI] Map Corners: 0: {0:N2} - 1: {1:N2} - 2: {2:N2} - 3: {3:N2}",
+				//corners[0], corners[1], corners[2], corners[3]));
+
+			if (canvas.renderMode == RenderMode.ScreenSpaceOverlay)
+			{
+				pos = RectTransformUtility.WorldToScreenPoint(null, corners[0]);
+			}
+			else
+			{
+				pos = RectTransformUtility.WorldToScreenPoint(canvas.worldCamera, corners[0]);
+			}
+
+			pos.y = Screen.height - pos.y - r.sizeDelta.y;
+
+			//print(string.Format("[SCAN_UI] Screen Position: {0:N2}", pos));
+
+			return pos;
 		}
 
 		public void setMap(ISCAN_BigMap map)
@@ -125,9 +200,22 @@ namespace SCANsat.Unity.Unity
 			if (!map.ShowWaypoint && m_WaypointObject != null)
 				m_WaypointObject.SetActive(false);
 
+			if (!map.ShowResource && m_Resources != null)
+				m_Resources.gameObject.SetActive(false);
+
+			if (m_LegendObject != null && !map.LegendToggle)
+				m_LegendObject.SetActive(false);
+
+			if (map.LegendToggle)
+				SetLegend(map.LegendImage, map.LegendLabels);
+
 			SetScale(map.Scale);
 
 			SetPosition(map.Position);
+
+			SetSize(map.Size);
+
+			SetIcons();
 
 			loaded = true;
 		}
@@ -143,6 +231,282 @@ namespace SCANsat.Unity.Unity
 				return;
 
 			rect.anchoredPosition = new Vector3(pos.x, pos.y, 0);
+		}
+
+		private void SetSize(Vector2 size)
+		{
+			if (m_MapLayout == null)
+				return;
+
+			if (size.x < m_MapLayout.minWidth)
+				size.x = m_MapLayout.minWidth;
+			else if (size.x > 8192)
+				size.x = 8192;
+
+			if (size.x % 2 != 0)
+				size.x += 1;
+
+			m_MapLayout.preferredWidth = size.x;
+			m_MapLayout.preferredHeight = m_MapLayout.preferredWidth / 2;
+		}
+
+		private void SetLegend(Texture2D tex, IList<string> labels)
+		{
+			if (m_LegendImage != null)
+				m_LegendImage.texture = tex;
+
+			if (labels == null || labels.Count != 3)
+				return;
+
+			if (m_LegendLabelOne != null)
+				m_LegendLabelOne.OnTextUpdate.Invoke(labels[0]);
+
+			if (m_LegendLabelTwo != null)
+				m_LegendLabelTwo.OnTextUpdate.Invoke(labels[1]);
+
+			if (m_LegendLabelThree != null)
+				m_LegendLabelThree.OnTextUpdate.Invoke(labels[2]);
+		}
+
+		private void SetFlagIcons(Dictionary<Guid, MapLabelInfo> flags)
+		{
+			if (flags == null)
+				return;
+
+			if (bigInterface == null || m_MapLabelPrefab == null || m_MapImage == null)
+				return;
+
+			for (int i = 0; i < flags.Count; i++)
+			{
+				Guid id = flags.ElementAt(i).Key;
+
+				MapLabelInfo info;
+
+				if (!flags.TryGetValue(id, out info))
+					continue;
+
+				createFlag(id, info);
+			}
+		}
+
+		private void createFlag(Guid id, MapLabelInfo info)
+		{
+			SCAN_MapLabel mapLabel = Instantiate(m_MapLabelPrefab).GetComponent<SCAN_MapLabel>();
+
+			if (mapLabel == null)
+				return;
+
+			mapLabel.transform.SetParent(m_MapImage.transform, false);
+
+			mapLabel.Setup(id, info);
+
+			flagLabels.Add(mapLabel);
+		}
+
+		private void SetAnomalyIcons(Dictionary<string, MapLabelInfo> anomalies)
+		{
+			if (anomalies == null)
+				return;
+
+			if (bigInterface == null || m_MapLabelPrefab == null || m_MapImage == null)
+				return;
+
+			for (int i = 0; i < anomalies.Count; i++)
+			{
+				string id = anomalies.ElementAt(i).Key;
+
+				MapLabelInfo info;
+
+				if (!anomalies.TryGetValue(id, out info))
+					continue;
+
+				createAnomaly(id, info);
+			}
+		}
+
+		private void createAnomaly(string id, MapLabelInfo info)
+		{
+			SCAN_MapLabel mapLabel = Instantiate(m_MapLabelPrefab).GetComponent<SCAN_MapLabel>();
+
+			if (mapLabel == null)
+				return;
+
+			mapLabel.transform.SetParent(m_MapImage.transform, false);
+
+			mapLabel.Setup(id, info);
+
+			anomalyLabels.Add(mapLabel);
+		}
+
+		private void SetWaypointIcons(Dictionary<int, MapLabelInfo> waypoints)
+		{
+			if (waypoints == null)
+				return;
+
+			if (bigInterface == null || m_MapLabelPrefab == null || m_MapImage == null)
+				return;
+
+			for (int i = 0; i < waypoints.Count; i++)
+			{
+				int id = waypoints.ElementAt(i).Key;
+
+				MapLabelInfo info;
+
+				if (!waypoints.TryGetValue(id, out info))
+					continue;
+
+				createWaypoint(id, info);
+			}
+		}
+
+		private void createWaypoint(int id, MapLabelInfo info)
+		{
+			SCAN_MapLabel mapLabel = Instantiate(m_MapLabelPrefab).GetComponent<SCAN_MapLabel>();
+
+			if (mapLabel == null)
+				return;
+
+			mapLabel.transform.SetParent(m_MapImage.transform, false);
+
+			mapLabel.Setup(id, info);
+
+			waypointLabels.Add(mapLabel);
+		}
+
+		private void SetVesselIcon(KeyValuePair<Guid, MapLabelInfo> vessel)
+		{
+			if (vessel.Value.label == "null")
+				return;
+
+			if (bigInterface == null || m_MapLabelPrefab == null || m_MapImage == null)
+				return;
+
+			SCAN_MapLabel mapLabel = Instantiate(m_MapLabelPrefab).GetComponent<SCAN_MapLabel>();
+
+			if (mapLabel == null)
+				return;
+
+			mapLabel.transform.SetParent(m_MapImage.transform, false);
+
+			mapLabel.Setup(vessel.Key, vessel.Value);
+
+			vesselLabel = mapLabel;
+		}
+
+		private void SetOrbitIcons(int count)
+		{
+			if (bigInterface == null || m_MapImage == null)
+				return;
+
+			for (int i = 0; i < count; i++)
+			{
+				SimpleLabelInfo info = bigInterface.OrbitInfo(i);
+
+				CreateOrbitIcon(info);
+			}
+		}
+
+		private void CreateOrbitIcon(SimpleLabelInfo info)
+		{
+			GameObject labelObj = new GameObject("SCAN_SimpleLabel");
+
+			SCAN_SimpleLabel label = labelObj.AddComponent<SCAN_SimpleLabel>();
+
+			if (label == null)
+				return;
+
+			label.transform.SetParent(m_MapImage.transform, false);
+
+			label.Setup(info);
+
+			orbitLabels.Add(label);
+		}
+
+		private void ClearIcons()
+		{
+			for (int i = waypointLabels.Count - 1; i >= 0; i--)
+			{
+				SCAN_MapLabel m = waypointLabels[i];
+
+				m.gameObject.SetActive(false);
+				Destroy(m.gameObject);
+			}
+
+			for (int i = anomalyLabels.Count - 1; i >= 0; i--)
+			{
+				SCAN_MapLabel m = anomalyLabels[i];
+
+				m.gameObject.SetActive(false);
+				Destroy(m.gameObject);
+			}
+
+			for (int i = flagLabels.Count - 1; i >= 0; i--)
+			{
+				SCAN_MapLabel m = flagLabels[i];
+
+				m.gameObject.SetActive(false);
+				Destroy(m.gameObject);
+			}
+
+			for (int i = orbitLabels.Count - 1; i >= 0; i--)
+			{
+				SCAN_SimpleLabel s = orbitLabels[i];
+
+				s.gameObject.SetActive(false);
+				Destroy(s.gameObject);
+			}
+
+			if (vesselLabel != null)
+			{
+				vesselLabel.gameObject.SetActive(false);
+				Destroy(vesselLabel.gameObject);
+			}
+
+			flagLabels.Clear();
+			anomalyLabels.Clear();
+			waypointLabels.Clear();
+			orbitLabels.Clear();
+			vesselLabel = null;
+		}
+
+		private void RefreshIcons()
+		{
+			ClearIcons();
+
+			SetIcons();
+		}
+
+		private void SetIcons()
+		{
+			if (bigInterface == null)
+				return;
+
+			if (bigInterface.FlagToggle)
+				SetFlagIcons(bigInterface.FlagInfoList);
+
+			if (bigInterface.AnomalyToggle)
+				SetAnomalyIcons(bigInterface.AnomalyInfoList);
+
+			if (bigInterface.WaypointToggle && bigInterface.ShowWaypoint)
+				SetWaypointIcons(bigInterface.WaypointInfoList);
+
+			if (bigInterface.OrbitToggle && bigInterface.ShowOrbit)
+				SetOrbitIcons(bigInterface.OrbitSteps);
+
+			SetVesselIcon(bigInterface.VesselInfo);
+		}
+
+		public void OnEnterMap(BaseEventData eventData)
+		{
+			inMap = true;
+		}
+
+		public void OnExitMap(BaseEventData eventData)
+		{
+			inMap = false;
+
+			if (m_ReadoutText != null)
+				m_ReadoutText.OnTextUpdate.Invoke("");
 		}
 
 		public void OnBeginDrag(PointerEventData eventData)
@@ -176,6 +540,8 @@ namespace SCANsat.Unity.Unity
 				return;
 
 			resizing = true;
+
+			ClearIcons();
 		}
 
 		public void OnResize(BaseEventData eventData)
@@ -186,12 +552,27 @@ namespace SCANsat.Unity.Unity
 			if (!(eventData is PointerEventData))
 				return;
 
+			//print(string.Format("[SCAN_UI] Resize - Width: {0:N2} - Delta: {1:N2} - Height: {2:N2}"
+			//	, m_MapLayout.preferredWidth
+			//	, ((PointerEventData)eventData).delta.x
+			//	, m_MapLayout.preferredHeight));
+
 			m_MapLayout.preferredWidth += ((PointerEventData)eventData).delta.x;
+
+			if (m_MapLayout.preferredWidth < m_MapLayout.minWidth)
+				m_MapLayout.preferredWidth = m_MapLayout.minWidth;
+			else if (m_MapLayout.preferredWidth > 8192)
+				m_MapLayout.preferredWidth = 8192;
 
 			if (m_MapLayout.preferredWidth % 2 != 0)
 				m_MapLayout.preferredWidth += 1;
 
 			m_MapLayout.preferredHeight = m_MapLayout.preferredWidth / 2;
+
+			//print(string.Format("[SCAN_UI] New size - Width: {0:N2} - Delta: {1:N2} - Height: {2:N2}"
+			//	, m_MapLayout.preferredWidth
+			//	, ((PointerEventData)eventData).delta.x
+			//	, m_MapLayout.preferredHeight));
 		}
 
 		public void OnEndResize(BaseEventData eventData)
@@ -202,6 +583,31 @@ namespace SCANsat.Unity.Unity
 				return;
 
 			bigInterface.Size = new Vector2(m_MapLayout.preferredWidth, m_MapLayout.preferredHeight);
+
+			SetIcons();
+		}
+
+		public void OnPointerDown(PointerEventData eventData)
+		{
+			transform.SetAsLastSibling();
+
+			if (dropDown == null)
+				return;
+
+			RectTransform r = dropDown.GetComponent<RectTransform>();
+
+			if (r == null)
+				return;
+
+			if (RectTransformUtility.RectangleContainsScreenPoint(r, eventData.position, eventData.pressEventCamera))
+				return;
+
+			dropDown.gameObject.SetActive(false);
+			DestroyImmediate(dropDown.gameObject);
+			dropDown = null;
+
+			if (m_DropDownToggles != null)
+				m_DropDownToggles.SetAllTogglesOff();
 		}
 
 		public void Close()
@@ -261,6 +667,15 @@ namespace SCANsat.Unity.Unity
 				return;
 
 			bigInterface.CurrentProjection = selection;
+
+			dropDown.gameObject.SetActive(false);
+			DestroyImmediate(dropDown.gameObject);
+			dropDown = null;
+
+			if (m_DropDownToggles != null)
+				m_DropDownToggles.SetAllTogglesOff();
+
+			RefreshIcons();
 		}
 
 		public void ToggleTypeSelection(bool isOn)
@@ -296,6 +711,15 @@ namespace SCANsat.Unity.Unity
 				return;
 
 			bigInterface.CurrentMapType = selection;
+
+			dropDown.gameObject.SetActive(false);
+			DestroyImmediate(dropDown.gameObject);
+			dropDown = null;
+
+			if (m_DropDownToggles != null)
+				m_DropDownToggles.SetAllTogglesOff();
+
+			RefreshIcons();
 		}
 
 		public void ToggleResourceSelection(bool isOn)
@@ -331,6 +755,15 @@ namespace SCANsat.Unity.Unity
 				return;
 
 			bigInterface.CurrentResource = selection;
+
+			dropDown.gameObject.SetActive(false);
+			DestroyImmediate(dropDown.gameObject);
+			dropDown = null;
+
+			if (m_DropDownToggles != null)
+				m_DropDownToggles.SetAllTogglesOff();
+
+			RefreshIcons();
 		}
 
 		public void ToggleCelestialBodySelection(bool isOn)
@@ -366,6 +799,18 @@ namespace SCANsat.Unity.Unity
 				return;
 
 			bigInterface.CurrentCelestialBody = selection;
+
+			if (bigInterface.LegendToggle)
+				SetLegend(bigInterface.LegendImage, bigInterface.LegendLabels);
+
+			dropDown.gameObject.SetActive(false);
+			DestroyImmediate(dropDown.gameObject);
+			dropDown = null;
+
+			if (m_DropDownToggles != null)
+				m_DropDownToggles.SetAllTogglesOff();
+
+			RefreshIcons();
 		}
 
 		public void RefreshMap()
@@ -374,6 +819,8 @@ namespace SCANsat.Unity.Unity
 				return;
 
 			bigInterface.RefreshMap();
+
+			RefreshIcons();
 		}
 
 		public void ToggleColor(bool isOn)
@@ -382,6 +829,11 @@ namespace SCANsat.Unity.Unity
 				return;
 
 			bigInterface.ColorToggle = isOn;
+
+			RefreshIcons();
+
+			if (bigInterface.LegendToggle)
+				SetLegend(bigInterface.LegendImage, bigInterface.LegendLabels);
 		}
 
 		public void ToggleGrid(bool isOn)
@@ -398,6 +850,8 @@ namespace SCANsat.Unity.Unity
 				return;
 
 			bigInterface.OrbitToggle = isOn;
+
+			RefreshIcons();
 		}
 
 		public void ToggleWaypoint(bool isOn)
@@ -406,6 +860,21 @@ namespace SCANsat.Unity.Unity
 				return;
 
 			bigInterface.WaypointToggle = isOn;
+
+			if (isOn && bigInterface.ShowWaypoint)
+				SetWaypointIcons(bigInterface.WaypointInfoList);
+			else
+			{
+				for (int i = waypointLabels.Count - 1; i >= 0; i--)
+				{
+					SCAN_MapLabel m = waypointLabels[i];
+
+					m.gameObject.SetActive(false);
+					Destroy(m.gameObject);
+				}
+
+				waypointLabels.Clear();
+			}
 		}
 
 		public void ToggleAnomaly(bool isOn)
@@ -414,6 +883,21 @@ namespace SCANsat.Unity.Unity
 				return;
 
 			bigInterface.AnomalyToggle = isOn;
+
+			if (isOn)
+				SetAnomalyIcons(bigInterface.AnomalyInfoList);
+			else
+			{
+				for (int i = anomalyLabels.Count - 1; i >= 0; i--)
+				{
+					SCAN_MapLabel m = anomalyLabels[i];
+
+					m.gameObject.SetActive(false);
+					Destroy(m.gameObject);
+				}
+
+				anomalyLabels.Clear();
+			}
 		}
 
 		public void ToggleFlag(bool isOn)
@@ -422,6 +906,21 @@ namespace SCANsat.Unity.Unity
 				return;
 
 			bigInterface.FlagToggle = isOn;
+
+			if (isOn)
+				SetFlagIcons(bigInterface.FlagInfoList);
+			else
+			{
+				for (int i = flagLabels.Count - 1; i >= 0; i--)
+				{
+					SCAN_MapLabel m = flagLabels[i];
+
+					m.gameObject.SetActive(false);
+					Destroy(m.gameObject);
+				}
+
+				flagLabels.Clear();
+			}
 		}
 
 		public void ToggleAsteroid(bool isOn)
@@ -438,6 +937,12 @@ namespace SCANsat.Unity.Unity
 				return;
 
 			bigInterface.LegendToggle = isOn;
+
+			if (m_LegendObject != null)
+				m_LegendObject.SetActive(isOn);
+
+			if (isOn)
+				SetLegend(bigInterface.LegendImage, bigInterface.LegendLabels);
 		}
 
 		public void ToggleResource(bool isOn)
@@ -446,6 +951,8 @@ namespace SCANsat.Unity.Unity
 				return;
 
 			bigInterface.ResourceToggle = isOn;
+
+			RefreshIcons();
 		}
 
 		public void OpenSmallMap()
@@ -485,7 +992,7 @@ namespace SCANsat.Unity.Unity
 			if (bigInterface == null)
 				return;
 
-			bigInterface.OpenSettings();
+			bigInterface.OpenOverlay();
 		}
 
 		public void ExportMap()

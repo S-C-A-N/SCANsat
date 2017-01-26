@@ -8,7 +8,7 @@ using SCANsat.Unity.Interfaces;
 
 namespace SCANsat.Unity.Unity
 {
-	public class SCAN_MainMap : MonoBehaviour, IDragHandler, IBeginDragHandler, IEndDragHandler
+	public class SCAN_MainMap : MonoBehaviour, IDragHandler, IBeginDragHandler, IEndDragHandler, IPointerDownHandler
 	{
 		[SerializeField]
 		private TextHandler m_Version = null;
@@ -166,22 +166,25 @@ namespace SCANsat.Unity.Unity
 			if (vessels == null)
 				return;
 
-			if (mapInterface == null || m_VesselPrefab == null || m_VesselTransform == null)
+			if (mapInterface == null || m_VesselPrefab == null || m_MapPrefab == null || m_VesselTransform == null || m_MainMap == null)
 				return;
 
 			for (int i = 0; i < vessels.Count; i++)
 			{
 				Guid id = vessels.ElementAt(i).Key;
 
-				MapLabelInfo label = vessels[id];
+				MapLabelInfo label;
 
-				CreateVessel(id, i + 1, label.label);
+				if (!vessels.TryGetValue(id, out label))
+					continue;
 
-				CreateMapLabel(id, i + 1, label);
+				CreateVessel(id, label);
+
+				CreateMapLabel(id, label);
 			}
 		}
 
-		private void CreateVessel(Guid id, int i, string vessel)
+		private void CreateVessel(Guid id, MapLabelInfo info)
 		{
 			SCAN_VesselInfo vInfo = Instantiate(m_VesselPrefab).GetComponent<SCAN_VesselInfo>();
 
@@ -190,12 +193,12 @@ namespace SCANsat.Unity.Unity
 
 			vInfo.transform.SetParent(m_VesselTransform, false);
 
-			vInfo.SetVessel(id, i, vessel, mapInterface);
+			vInfo.SetVessel(id, info, mapInterface);
 
 			vessels.Add(vInfo);
 		}
 
-		private void CreateMapLabel(Guid id, int i, MapLabelInfo info)
+		private void CreateMapLabel(Guid id, MapLabelInfo info)
 		{
 			SCAN_MapLabel mapLabel = Instantiate(m_MapPrefab).GetComponent<SCAN_MapLabel>();
 
@@ -204,11 +207,14 @@ namespace SCANsat.Unity.Unity
 
 			mapLabel.transform.SetParent(m_MainMap.transform, false);
 
-			info.label = string.Format("[{0}]", i);
-
-			mapLabel.Setup(id, info.label, info.image, info.pos);
+			mapLabel.Setup(id, info);
 
 			mapLabels.Add(mapLabel);
+		}
+
+		public void OnPointerDown(PointerEventData eventData)
+		{
+			transform.SetAsLastSibling();
 		}
 
 		public void OnBeginDrag(PointerEventData eventData)

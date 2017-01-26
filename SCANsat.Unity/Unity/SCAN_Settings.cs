@@ -7,7 +7,7 @@ using SCANsat.Unity.Interfaces;
 
 namespace SCANsat.Unity.Unity
 {
-	public class SCAN_Settings : MonoBehaviour, IDragHandler, IBeginDragHandler
+	public class SCAN_Settings : MonoBehaviour, IDragHandler, IBeginDragHandler, IEndDragHandler, IPointerDownHandler
 	{
 		[SerializeField]
 		private TextHandler m_Version = null;
@@ -34,8 +34,14 @@ namespace SCANsat.Unity.Unity
 		private RectTransform rect;
 		private Vector2 mouseStart;
 		private Vector3 windowStart;
+		private int _page;
 
 		private SettingsPage CurrentPage;
+
+		public int Page
+		{
+			get { return _page; }
+		}
 
 		private void Awake()
 		{
@@ -59,6 +65,8 @@ namespace SCANsat.Unity.Unity
 
 			if (m_Version != null)
 				m_Version.OnTextUpdate.Invoke(settings.Version);
+
+			_page = page;
 
 			switch (page)
 			{
@@ -92,6 +100,19 @@ namespace SCANsat.Unity.Unity
 			rect.localScale = Vector3.one * scale;
 		}
 
+		public void SetPosition(Vector2 pos)
+		{
+			if (rect == null)
+				return;
+
+			rect.anchoredPosition = new Vector3(pos.x, pos.y, 0);
+		}
+
+		public void OnPointerDown(PointerEventData eventData)
+		{
+			transform.SetAsLastSibling();
+		}
+
 		public void OnBeginDrag(PointerEventData eventData)
 		{
 			if (rect == null)
@@ -112,6 +133,14 @@ namespace SCANsat.Unity.Unity
 				return;
 
 			settingsInterface.ClampToScreen(rect);
+		}
+
+		public void OnEndDrag(PointerEventData eventData)
+		{
+			if (rect == null || settingsInterface == null)
+				return;
+
+			settingsInterface.Position = new Vector2(rect.anchoredPosition.x, rect.anchoredPosition.y);
 		}
 
 		public void Close()
@@ -138,6 +167,8 @@ namespace SCANsat.Unity.Unity
 			if (CurrentPage == null)
 				return;
 
+			_page = 0;
+
 			CurrentPage.transform.SetParent(m_ContentTransform, false);
 
 			((SCAN_SettingsGeneral)CurrentPage).setup(settingsInterface);
@@ -158,6 +189,8 @@ namespace SCANsat.Unity.Unity
 
 			if (CurrentPage == null)
 				return;
+
+			_page = 1;
 
 			CurrentPage.transform.SetParent(m_ContentTransform, false);
 
@@ -180,6 +213,8 @@ namespace SCANsat.Unity.Unity
 			if (CurrentPage == null)
 				return;
 
+			_page = 2;
+
 			CurrentPage.transform.SetParent(m_ContentTransform, false);
 
 			((SCAN_SettingsResource)CurrentPage).setup(settingsInterface);
@@ -200,6 +235,8 @@ namespace SCANsat.Unity.Unity
 
 			if (CurrentPage == null)
 				return;
+
+			_page = 3;
 
 			CurrentPage.transform.SetParent(m_ContentTransform, false);
 
