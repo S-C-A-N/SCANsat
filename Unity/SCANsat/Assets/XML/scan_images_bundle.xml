@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<KSPBundleDefinition xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" UrlName="scan_images" Name="scan_images" CreatedTime="-8587163082425471144">
+<KSPBundleDefinition xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" UrlName="scan_images" Name="scan_images" CreatedTime="-8587157172430384579">
   <Author />
   <Info />
   <Assets>
@@ -41,6 +41,7 @@
     <Asset Name="EncounterMarker" Path="Assets/Images/EncounterMarker.png" Type="Texture2D" Url="Images/EncounterMarker" AutoLoad="false" />
     <Asset Name="ExitMarker" Path="Assets/Images/ExitMarker.png" Type="Texture2D" Url="Images/ExitMarker" AutoLoad="false" />
     <Asset Name="FlagIcon" Path="Assets/Images/FlagIcon.png" Type="Texture2D" Url="Images/FlagIcon" AutoLoad="false" />
+    <Asset Name="KSP_Tooltip" Path="Assets/Images/KSP_Tooltip.png" Type="Texture2D" Url="Images/KSP_Tooltip" AutoLoad="false" />
     <Asset Name="LanderIcon" Path="Assets/Images/LanderIcon.png" Type="Texture2D" Url="Images/LanderIcon" AutoLoad="false" />
     <Asset Name="ManeuverMarker" Path="Assets/Images/ManeuverMarker.png" Type="Texture2D" Url="Images/ManeuverMarker" AutoLoad="false" />
     <Asset Name="MysteryIcon" Path="Assets/Images/MysteryIcon.png" Type="Texture2D" Url="Images/MysteryIcon" AutoLoad="false" />

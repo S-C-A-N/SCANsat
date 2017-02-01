@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<KSPBundleDefinition xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" UrlName="scansat_prefabs" Name="scansat_prefabs" CreatedTime="-8587162234914114400">
+<KSPBundleDefinition xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" UrlName="scansat_prefabs" Name="scansat_prefabs" CreatedTime="-8587156393067061029">
   <Author />
   <Info />
   <Assets>
@@ -18,6 +18,8 @@
     <Asset Name="SCAN_Overlay" Path="Assets/Prefabs/SCAN_Overlay.prefab" Type="GameObject" Url="Prefabs/SCAN_Overlay" AutoLoad="false" />
     <Asset Name="SCAN_Resources" Path="Assets/Prefabs/SCAN_Resources.prefab" Type="GameObject" Url="Prefabs/SCAN_Resources" AutoLoad="false" />
     <Asset Name="SCAN_Settings" Path="Assets/Prefabs/SCAN_Settings.prefab" Type="GameObject" Url="Prefabs/SCAN_Settings" AutoLoad="false" />
+    <Asset Name="SCAN_Toolbar" Path="Assets/Prefabs/SCAN_Toolbar.prefab" Type="GameObject" Url="Prefabs/SCAN_Toolbar" AutoLoad="false" />
+    <Asset Name="SCAN_Tooltip" Path="Assets/Prefabs/SCAN_Tooltip.prefab" Type="GameObject" Url="Prefabs/SCAN_Tooltip" AutoLoad="false" />
   </Assets>
   <Dependencies>
     <Dependency>scan_images</Dependency>
