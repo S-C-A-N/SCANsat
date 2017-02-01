@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using UnityEngine;
+using SCANsat.SCAN_Toolbar;
 using SCANsat.Unity.Interfaces;
 using SCANsat.Unity;
 using SCANsat.Unity.Unity;
@@ -34,8 +35,31 @@ namespace SCANsat.SCAN_Unity
 
 		private SCAN_BigMap uiElement;
 
-		private int steps = 80;
+		private const int orbitSteps = 80;
 		private List<SimpleLabelInfo> orbitLabels = new List<SimpleLabelInfo>();
+		private Dictionary<string, MapLabelInfo> orbitMapLabels = new Dictionary<string, MapLabelInfo>();
+		private const string Aplabel = "Ap";
+		private const string Pelabel = "Pe";
+		private const string Escapelabel = "Escape";
+		private const string Encounterlabel = "Encounter";
+		private const string Manlabel = "Man";
+		private const string ManAplabel = "ManAp";
+		private const string ManPelabel = "ManPe";
+		private const string ManEscapelabel = "ManEscape";
+		private const string ManEncounterlabel = "ManEncounter";
+		
+		private static Texture2D eqMap;
+		private static bool[] eq_an;
+		private static bool[] eq_dn;
+		private static Color32[] eq_pix;
+		private const int eq_height = 20;
+		private const int eq_count = 100;
+		private const int eq_update = 4;
+		private int eq_timer;
+		private Color32 c_dn = palette.CB_orange;
+		private Color32 c_an = palette.CB_skyBlue;
+		private Texture2D clearEQMap;
+		private bool clearMapSet;
 
 		private static SCAN_UI_BigMap instance;
 
@@ -52,13 +76,32 @@ namespace SCANsat.SCAN_Unity
 
 			GameEvents.onVesselChange.Add(vesselChange);
 			GameEvents.onVesselWasModified.Add(vesselChange);
+			GameEvents.onVesselSOIChanged.Add(soiChange);
 
 			initializeMap();
+
+			if (HighLogic.LoadedSceneIsFlight && SCANcontroller.controller.bigMapVisible)
+				Open();
 		}
 
 		private void vesselChange(Vessel V)
 		{
-			vessel = V;
+			vessel = FlightGlobals.ActiveVessel;
+
+			if (!_isVisible || uiElement == null)
+				return;
+
+			uiElement.RefreshIcons();
+		}
+
+		private void soiChange(GameEvents.HostedFromToAction<Vessel, CelestialBody> action)
+		{
+			if (!_isVisible || uiElement == null)
+				return;
+
+			uiElement.RefreshIcons();
+
+			updateMap = true;
 		}
 
 		private void initializeMap()
@@ -118,6 +161,7 @@ namespace SCANsat.SCAN_Unity
 
 				bigmap.Projection = p;
 				bigmap.MType = t;
+				bigmap.ResourceActive = SCANcontroller.controller.bigMapResourceOn;
 				bigmap.ColorMap = SCANcontroller.controller.bigMapColor;
 
 				if (SCAN_Settings_Config.Instance.BigMapWidth % 2 != 0)
@@ -125,6 +169,125 @@ namespace SCANsat.SCAN_Unity
 
 				bigmap.setWidth(SCAN_Settings_Config.Instance.BigMapWidth);
 			}
+
+			bigmap.setBody(body);
+
+			currentResource = AssignResource(SCANcontroller.controller.bigMapResource);
+
+			if (currentResource != null)
+				bigmap.Resource = currentResource;
+
+			if (eqMap == null)
+				RefreshEQMap();
+
+			AddOrbitMapLabels();
+
+			clearEQMap = new Texture2D(1, 1, TextureFormat.ARGB32, false);
+
+			clearEQMap.SetPixel(0, 0, palette.clear);
+			clearEQMap.Apply();
+		}
+
+		private void AddOrbitMapLabels()
+		{
+			orbitMapLabels.Add(Aplabel, new MapLabelInfo()
+			{
+				label = "",
+				image = SCAN_UI_Loader.APMarker,
+				pos = new Vector2(),
+				baseColor = palette.cb_skyBlue,
+				flash = false,
+				width = 28,
+				show = false
+			});
+
+			orbitMapLabels.Add(Pelabel, new MapLabelInfo()
+			{
+				label = "",
+				image = SCAN_UI_Loader.PEMarker,
+				pos = new Vector2(),
+				baseColor = palette.cb_skyBlue,
+				flash = false,
+				width = 28,
+				show = false
+			});
+
+			orbitMapLabels.Add(Escapelabel, new MapLabelInfo()
+			{
+				label = "",
+				image = SCAN_UI_Loader.ExitMarker,
+				pos = new Vector2(),
+				baseColor = palette.cb_skyBlue,
+				flash = false,
+				width = 26,
+				show = false
+			});
+
+			orbitMapLabels.Add(Encounterlabel, new MapLabelInfo()
+			{
+				label = "",
+				image = SCAN_UI_Loader.EncounterMarker,
+				pos = new Vector2(),
+				baseColor = palette.cb_skyBlue,
+				flash = false,
+				width = 26,
+				show = false
+			});
+
+			orbitMapLabels.Add(Manlabel, new MapLabelInfo()
+			{
+				label = "",
+				image = SCAN_UI_Loader.ManeuverMarker,
+				pos = new Vector2(),
+				baseColor = palette.cb_reddishPurple,
+				flash = false,
+				width = 24,
+				show = false
+			});
+
+			orbitMapLabels.Add(ManEscapelabel, new MapLabelInfo()
+			{
+				label = "",
+				image = SCAN_UI_Loader.ExitMarker,
+				pos = new Vector2(),
+				baseColor = palette.cb_reddishPurple,
+				flash = false,
+				width = 26,
+				show = false
+			});
+
+			orbitMapLabels.Add(ManEncounterlabel, new MapLabelInfo()
+			{
+				label = "",
+				image = SCAN_UI_Loader.EncounterMarker,
+				pos = new Vector2(),
+				baseColor = palette.cb_reddishPurple,
+				flash = false,
+				width = 26,
+				show = false
+			});
+
+			orbitMapLabels.Add(ManAplabel, new MapLabelInfo()
+			{
+				label = "",
+				image = SCAN_UI_Loader.APMarker,
+				pos = new Vector2(),
+				baseColor = palette.cb_reddishPurple,
+				flash = false,
+				width = 28,
+				show = false
+			});
+
+			orbitMapLabels.Add(ManPelabel, new MapLabelInfo()
+			{
+				label = "",
+				image = SCAN_UI_Loader.PEMarker,
+				pos = new Vector2(),
+				baseColor = palette.cb_reddishPurple,
+				flash = false,
+				width = 28,
+				show = false
+			});
 		}
 
 		public void OnDestroy()
@@ -144,6 +307,12 @@ namespace SCANsat.SCAN_Unity
 				uiElement.SetScale(scale);
 		}
 
+		public void ProcessTooltips()
+		{
+			if (uiElement != null)
+				uiElement.ProcessTooltips();
+		}
+
 		public void Update()
 		{
 			if (!_isVisible || data == null || bigmap == null)
@@ -155,42 +324,70 @@ namespace SCANsat.SCAN_Unity
 			if (!bigmap.isMapComplete())
 				bigmap.getPartialMap();
 
+			if (OrbitToggle && ShowOrbit)
+			{
+				if (vessel != null && vessel.mainBody == body && !vessel.LandedOrSplashed)
+				{
+					Orbit o = vessel.orbit;
+
+					UpdateOrbitIcons(o);
+
+					if (o.PeA < 0)
+					{
+						if (!clearMapSet)
+						{
+							clearMapSet = true;
+							uiElement.UpdateEQMapTexture(clearEQMap);
+						}
+					}
+					else if (clearMapSet)
+					{
+						clearMapSet = false;
+						if (bigmap.Projection != MapProjection.Polar)
+							uiElement.UpdateEQMapTexture(eqMap);
+					}
+
+					if (eq_timer >= eq_update)
+						UpdateEQMap(o);
+
+					eq_timer++;
+
+					if (eq_timer > eq_update)
+						eq_timer = 0;
+				}
+			}
+
 			if (updateMap)
 			{
 				updateMap = false;
 				uiElement.UpdateMapTexture(bigmap.Map);
-			}
 
-			if (OrbitToggle && ShowOrbit)
-			{
-				UpdateOrbitIcons();
+				if (OrbitToggle && ShowOrbit && bigmap.Projection != MapProjection.Polar && vessel.orbit.PeA > 0)
+					uiElement.UpdateEQMapTexture(eqMap);
+				else
+					uiElement.UpdateEQMapTexture(clearEQMap);
 			}
 		}
 
-		private void UpdateOrbitIcons()
+		private void UpdateOrbitIcons(Orbit o)
 		{
-			if (vessel == null || vessel.mainBody != body || vessel.LandedOrSplashed)
-				return;
-
-			Orbit o = vessel.orbit;
-
 			double startUT = Planetarium.GetUniversalTime();
 			double UT = startUT;
 			Color col;
 
-			for (int i = 0; i < orbitLabels.Count; i++)
+			for (int i = 0; i < orbitSteps * 2; i++)
 			{
 				SimpleLabelInfo info = orbitLabels[i];
 
 				if (info == null)
 					continue;
 
-				int k = i - steps;
+				int k = i - orbitSteps;
 
 				if (k < 0)
-					UT = startUT - (steps + k) * (o.period / steps);
+					UT = startUT - (orbitSteps + k) * (o.period / orbitSteps);
 				else
-					UT = startUT + k * o.period * (1f / steps);
+					UT = startUT + k * o.period * (1f / orbitSteps);
 
 				if (double.IsNaN(UT))
 				{
@@ -231,16 +428,16 @@ namespace SCANsat.SCAN_Unity
 					{
 						for (int j = k; j < 0; j++)
 						{
-							orbitLabels[j + steps].show = false;
+							orbitLabels[j + orbitSteps].show = false;
 						}
 
-						i = steps;
+						i = orbitSteps;
 						continue;
 					}
 
-					for (int j = k; j < steps; j++)
+					for (int j = k; j < orbitSteps; j++)
 					{
-						orbitLabels[j + steps].show = false;
+						orbitLabels[j + orbitSteps].show = false;
 					}
 
 					break;
@@ -278,6 +475,399 @@ namespace SCANsat.SCAN_Unity
 				info.color = col;
 				info.pos = new Vector2((float)lon, (float)lat);
 			}
+
+			MapLabelInfo Ap = orbitMapLabels[Aplabel];
+
+			Vector2 labelPos;
+
+			if (o.ApA > 0 && mapPosAtT(o, o.timeToAp, startUT, out labelPos))
+			{
+				Ap.show = true;
+				Ap.pos = labelPos;
+				Ap.label = o.ApA.ToString("N0");
+			}
+			else
+				Ap.show = false;
+
+			orbitMapLabels[Aplabel] = Ap;
+
+			MapLabelInfo Pe = orbitMapLabels[Pelabel];
+
+			if (o.PeA > 0 && mapPosAtT(o, o.timeToPe, startUT, out labelPos))
+			{
+				Pe.show = true;
+				Pe.pos = labelPos;
+				Pe.label = o.PeA.ToString("N0");
+			}
+			else
+				Pe.show = false;
+
+			orbitMapLabels[Pelabel] = Pe;
+
+			if (o.patchEndTransition == Orbit.PatchTransitionType.ESCAPE && mapPosAtT(o, o.EndUT, startUT, out labelPos))
+			{
+				MapLabelInfo Esc = orbitMapLabels[Escapelabel];
+
+				Esc.show = true;
+				Esc.pos = labelPos;
+
+				orbitMapLabels[Escapelabel] = Esc;
+			}
+			else if (o.patchEndTransition == Orbit.PatchTransitionType.ENCOUNTER && mapPosAtT(o, o.EndUT, startUT, out labelPos))
+			{
+				MapLabelInfo Enc = orbitMapLabels[Encounterlabel];
+
+				Enc.show = true;
+				Enc.pos = labelPos;
+
+				orbitMapLabels[Encounterlabel] = Enc;
+			}
+			else
+			{
+				MapLabelInfo Esc = orbitMapLabels[Escapelabel];
+				Esc.show = false;
+				orbitMapLabels[Escapelabel] = Esc;
+
+				MapLabelInfo Enc = orbitMapLabels[Encounterlabel];
+				Enc.show = false;
+				orbitMapLabels[Encounterlabel] = Enc;
+			}
+
+			if (vessel.patchedConicSolver != null)
+			{
+				if (vessel.patchedConicSolver.maneuverNodes.Count > 0)
+				{
+					ManeuverNode n = vessel.patchedConicSolver.maneuverNodes[0];
+
+					if (n.patch == o && n.nextPatch != null && n.nextPatch.activePatch && n.UT > startUT - o.period && mapPosAtT(o, n.UT - startUT, startUT, out labelPos))
+					{
+						MapLabelInfo Man = orbitMapLabels[Manlabel];
+
+						Man.show = true;
+						Man.pos = labelPos;
+
+						orbitMapLabels[Manlabel] = Man;
+
+						Orbit next = n.nextPatch;
+
+						for (int i = 0; i < orbitSteps; i++)
+						{
+							SimpleLabelInfo info = orbitLabels[orbitSteps * 2 + i];
+
+							double T = n.UT - startUT + i * next.period / orbitSteps;
+
+							if (T + startUT > next.EndUT)
+							{
+								for (int j = i; j < orbitSteps; j++)
+								{
+									orbitLabels[orbitSteps * 2 + j].show = false;
+								}
+
+								info.show = false;
+
+								break;
+							}
+
+							if (mapPosAtT(next, T, startUT, out labelPos))
+							{
+								info.color = palette.cb_reddishPurple;
+								info.show = true;
+								info.pos = labelPos;
+							}
+							else
+							{
+								info.show = false;
+								continue;
+							}
+						}
+
+						if (next.patchEndTransition == Orbit.PatchTransitionType.ESCAPE)
+						{
+							MapLabelInfo ManEsc = orbitMapLabels[ManEscapelabel];
+
+							ManEsc.show = true;
+							ManEsc.pos = labelPos;
+
+							orbitMapLabels[ManEscapelabel] = ManEsc;
+						}
+						else if (next.patchEndTransition == Orbit.PatchTransitionType.ENCOUNTER)
+						{
+							MapLabelInfo ManEnc = orbitMapLabels[ManEncounterlabel];
+
+							ManEnc.show = true;
+							ManEnc.pos = labelPos;
+
+							orbitMapLabels[ManEncounterlabel] = ManEnc;
+						}
+						else
+						{
+							MapLabelInfo ManEsc = orbitMapLabels[ManEscapelabel];
+							ManEsc.show = false;
+							orbitMapLabels[ManEscapelabel] = ManEsc;
+
+							MapLabelInfo ManEnc = orbitMapLabels[ManEncounterlabel];
+							ManEnc.show = false;
+							orbitMapLabels[ManEncounterlabel] = ManEnc;
+						}
+
+						MapLabelInfo ManAp = orbitMapLabels[ManAplabel];
+
+						if (next.timeToAp > 0 && n.UT + next.timeToAp < next.EndUT && mapPosAtT(next, n.UT - startUT + next.timeToAp, startUT, out labelPos))
+						{
+							ManAp.show = true;
+							ManAp.pos = labelPos;
+						}
+						else
+							ManAp.show = false;
+
+						orbitMapLabels[ManAplabel] = ManAp;
+
+						MapLabelInfo ManPe = orbitMapLabels[ManPelabel];
+
+						if (next.timeToPe > 0 && n.UT + next.timeToPe < next.EndUT && mapPosAtT(next, n.UT - startUT + next.timeToPe, startUT, out labelPos))
+						{
+							ManPe.show = true;
+							ManPe.pos = labelPos;
+						}
+						else
+							ManPe.show = false;
+
+						orbitMapLabels[ManPelabel] = ManPe;
+
+					}
+					else
+					{
+						MapLabelInfo Man = orbitMapLabels[Manlabel];
+						Man.show = false;
+						orbitMapLabels[Manlabel] = Man;
+
+						MapLabelInfo ManEsc = orbitMapLabels[ManEscapelabel];
+						ManEsc.show = false;
+						orbitMapLabels[ManEscapelabel] = ManEsc;
+
+						MapLabelInfo ManEnc = orbitMapLabels[ManEncounterlabel];
+						ManEnc.show = false;
+						orbitMapLabels[ManEncounterlabel] = ManEnc;
+
+						MapLabelInfo ManAp = orbitMapLabels[ManAplabel];
+						ManAp.show = false;
+						orbitMapLabels[ManAplabel] = ManAp;
+
+						MapLabelInfo ManPe = orbitMapLabels[ManPelabel];
+						ManPe.show = false;
+						orbitMapLabels[ManPelabel] = ManPe;
+
+						for (int i = 0; i < orbitSteps; i++)
+						{
+							SimpleLabelInfo info = orbitLabels[orbitSteps * 2 + i];
+							info.show = false;
+						}
+					}
+
+				}
+				else
+				{
+					MapLabelInfo Man = orbitMapLabels[Manlabel];
+					Man.show = false;
+					orbitMapLabels[Manlabel] = Man;
+
+					MapLabelInfo ManEsc = orbitMapLabels[ManEscapelabel];
+					ManEsc.show = false;
+					orbitMapLabels[ManEscapelabel] = ManEsc;
+
+					MapLabelInfo ManEnc = orbitMapLabels[ManEncounterlabel];
+					ManEnc.show = false;
+					orbitMapLabels[ManEncounterlabel] = ManEnc;
+
+					MapLabelInfo ManAp = orbitMapLabels[ManAplabel];
+					ManAp.show = false;
+					orbitMapLabels[ManAplabel] = ManAp;
+
+					MapLabelInfo ManPe = orbitMapLabels[ManPelabel];
+					ManPe.show = false;
+					orbitMapLabels[ManPelabel] = ManPe;
+
+					for (int i = 0; i < orbitSteps; i++)
+					{
+						SimpleLabelInfo info = orbitLabels[orbitSteps * 2 + i];
+						info.show = false;
+					}
+				}
+
+			}
+		}
+
+		private void UpdateEQMap(Orbit o)
+		{
+			if (o.PeA < 0)
+				return;
+
+			if (bigmap.Projection == MapProjection.Polar)
+				return;
+
+			for (int i = eq_an.Length - 1; i >= 0; i--)
+			{
+				eq_an[i] = false;
+				eq_dn[i] = false;
+			}
+
+			double startUT = Planetarium.GetUniversalTime();
+
+			double TAAN = 360f - o.argumentOfPeriapsis;	// true anomaly at ascending node
+			double TADN = (TAAN + 180) % 360;			// true anomaly at descending node
+			double MAAN = meanForTrue(TAAN, o.eccentricity);
+			double MADN = meanForTrue(TADN, o.eccentricity);
+			double tAN = (((MAAN - o.meanAnomaly * Mathf.Rad2Deg + 360) % 360) / 360f * o.period + startUT);
+			double tDN = (((MADN - o.meanAnomaly * Mathf.Rad2Deg + 360) % 360) / 360f * o.period + startUT);
+
+			for (int i = 0; i < 100; i++)
+			{
+				double UTAN = tAN + o.period * i;
+				double UTDN = tDN + o.period * i;
+
+				if (double.IsNaN(UTAN) || double.IsNaN(UTDN))
+					continue;
+
+				Vector3d pAN = o.getPositionAtUT(UTAN);
+				Vector3d pDN = o.getPositionAtUT(UTDN);
+
+				double rotAN = 0;
+				double rotDN = 0;
+
+				if (body.rotates)
+				{
+					rotAN = ((360 * ((UTAN - startUT) / body.rotationPeriod)) % 360);
+					rotDN = ((360 * ((UTDN - startUT) / body.rotationPeriod)) % 360);
+				}
+
+				double loAN = body.GetLongitude(pAN) - rotAN;
+				double loDN = body.GetLongitude(pDN) - rotDN;
+
+				int lonAN = (int)(((bigmap.projectLongitude(loAN, 0) + 180) % 360) * eq_an.Length / 360f);
+				int lonDN = (int)(((bigmap.projectLongitude(loDN, 0) + 180) % 360) * eq_dn.Length / 360f);
+
+				if (lonAN >= 0 && lonAN < eq_an.Length)
+					eq_an[lonAN] = true;
+				if (lonDN >= 0 && lonDN < eq_dn.Length)
+					eq_dn[lonDN] = true;
+			}
+
+			for (int y = 0; y < eq_height; y++)
+			{
+				bool down = y < eq_height / 2;
+				Color32 lc = palette.Clear;
+
+				for (int x = 0; x < eq_an.Length; x++)
+				{
+					bool cross;
+					Color32 c = palette.Clear;
+
+					if (down)
+						cross = eq_dn[x];
+					else
+						cross = eq_an[x];
+
+					if (cross)
+					{
+						if (y == 0 || y == eq_height - 1)
+							c = palette.Black;
+						else
+						{
+							if (lc.r == palette.Clear.r)
+								eq_pix[y * eq_an.Length + x - 1] = palette.Black;
+
+							c = down ? c_dn : c_an;
+						}
+					}
+					else
+					{
+						if (lc.r != palette.Clear.r && lc.r != palette.Black.r)
+							c = palette.Black;
+					}
+
+					eq_pix[y * eq_an.Length + x] = c;
+					lc = c;
+				}
+			}
+
+			eqMap.SetPixels32(eq_pix);
+			eqMap.Apply();
+		}
+
+		private double meanForTrue(double TA, double e)
+		{
+			TA = TA * Mathf.Deg2Rad;
+
+			double EA = Math.Acos((e + Math.Cos(TA)) / (1 + e * Math.Cos(TA)));
+
+			if (TA > Math.PI)
+				EA = 2 * Math.PI - EA;
+
+			double MA = EA - e * Math.Sin(EA);
+
+			// the mean anomaly isn't really an angle, but I'm a simple person
+			return MA * Mathf.Rad2Deg;
+		}
+
+		private bool mapPosAtT(Orbit o, double dT, double startUT, out Vector2 labelPos)
+		{
+			labelPos = new Vector2();
+
+			double UT = startUT + dT;
+
+			if (double.IsNaN(UT))
+				return false;
+
+			try
+			{
+				if (double.IsNaN(o.getObtAtUT(UT)))
+					return false;
+
+				Vector3d pos = o.getPositionAtUT(UT);
+				double rotation = 0;
+
+				if (body.rotates)
+					rotation = (360 * (dT / vessel.mainBody.rotationPeriod)) % 360;
+
+				double lo = (body.GetLongitude(pos) - rotation);
+				double la = (body.GetLatitude(pos));
+
+				double lon = (bigmap.projectLongitude(lo, la) + 180) % 360;
+				double lat = (bigmap.projectLatitude(lo, la) + 90) % 180;
+
+				lat = bigmap.scaleLatitude(lat);
+				lon = bigmap.scaleLongitude(lon);
+
+				if (lat < 0 || lon < 0 || lat > 180 || lon > 360)
+					return false;
+
+				lon = lon * bigmap.MapWidth / 360;
+				lat = lat * bigmap.MapHeight / 180;
+
+				labelPos = new Vector2((float)lon, (float)lat);
+
+				return true;
+			}
+			catch (Exception)
+			{
+				return false;
+			}
+		}
+
+		private void RefreshEQMap()
+		{
+			eqMap = new Texture2D(bigmap.MapWidth, eq_height, TextureFormat.ARGB32, false);
+			eq_an = new bool[bigmap.MapWidth];
+			eq_dn = new bool[bigmap.MapWidth];
+			eq_pix = new Color32[bigmap.MapWidth * eq_height];
+
+			for (int i = eq_pix.Length - 1; i >= 0; i--)
+			{
+				eq_pix[i] = palette.Clear;
+			}
+
+			eqMap.SetPixels32(eq_pix);
+			eqMap.Apply();
 		}
 
 		public void OnGUI()
@@ -327,34 +917,79 @@ namespace SCANsat.SCAN_Unity
 
 			if (OrbitToggle && ShowOrbit)
 			{
-				orbitLabels = new List<SimpleLabelInfo>();
+				Orbit o = vessel.orbit;
 
-				for (int i = 0; i < steps * 2; i++)
+				orbitLabels.Clear();
+
+				for (int i = 0; i < orbitSteps * 3; i++)
 				{
 					orbitLabels.Add(new SimpleLabelInfo(10, SCAN_UI_Loader.PlanetIcon));
 				}
 
-				UpdateOrbitIcons();
+				if (!vessel.LandedOrSplashed)
+					UpdateOrbitIcons(o);
 			}
 
 			uiElement.setMap(this);
 
 			SetGridLines();
 
+			uiElement.UpdateEQMapTexture(clearEQMap);
+			clearMapSet = true;
+
 			updateMap = true;
 
 			_isVisible = true;
+
+			if (HighLogic.LoadedSceneIsFlight)
+				SCANcontroller.controller.bigMapVisible = true;
+
+			if (SCAN_Settings_Config.Instance.StockToolbar)
+			{
+				if (HighLogic.LoadedSceneIsFlight)
+				{
+					if (SCAN_Settings_Config.Instance.ToolbarMenu)
+					{
+						if (SCANappLauncher.Instance != null && SCANappLauncher.Instance.UIElement != null)
+							SCANappLauncher.Instance.UIElement.SetBigMapToggle(false);
+					}
+				}
+				else
+				{
+					if (SCANappLauncher.Instance != null && SCANappLauncher.Instance.SCANAppButton != null)
+						SCANappLauncher.Instance.SCANAppButton.SetTrue(false);
+				}
+			}
 		}
 
 		public void Close()
 		{
 			_isVisible = false;
+			
+			if (HighLogic.LoadedSceneIsFlight)
+				SCANcontroller.controller.bigMapVisible = false;
 
 			if (uiElement == null)
 				return;
 
-			uiElement.gameObject.SetActive(false);
-			MonoBehaviour.Destroy(uiElement.gameObject);
+			uiElement.FadeOut();
+
+			if (SCAN_Settings_Config.Instance.StockToolbar)
+			{
+				if (HighLogic.LoadedSceneIsFlight)
+				{
+					if (SCAN_Settings_Config.Instance.ToolbarMenu)
+					{
+						if (SCANappLauncher.Instance != null && SCANappLauncher.Instance.UIElement != null)
+							SCANappLauncher.Instance.UIElement.SetBigMapToggle(false);
+					}
+				}
+				else
+				{
+					if (SCANappLauncher.Instance != null && SCANappLauncher.Instance.SCANAppButton != null)
+						SCANappLauncher.Instance.SCANAppButton.SetFalse(false);
+				}
+			}
 		}
 
 		public string Version
@@ -379,6 +1014,8 @@ namespace SCANsat.SCAN_Unity
 					SetGridLines();
 
 					bigmap.resetMap(SCANcontroller.controller.bigMapResourceOn);
+
+					updateMap = true;
 				}
 				catch (Exception e)
 				{
@@ -417,28 +1054,46 @@ namespace SCANsat.SCAN_Unity
 				SCANcontroller.controller.bigMapResource = value;
 				SCANcontroller.controller.bigMapResourceOn = true;
 
-				if (currentResource.Name != value)
-				{
-					for (int i = resources.Count - 1; i >= 0; i--)
-					{
-						SCANresourceGlobal r = resources[i];
-						
-						if (r.Name != value)
-							continue;
-
-						currentResource = r;
-						break;
-					}
-				}
+				currentResource = AssignResource(value);
 
 				if (currentResource == null)
-					currentResource = SCANcontroller.GetFirstResource;
-
-				currentResource.CurrentBodyConfig(body.name);
-
-				bigmap.Resource = currentResource;
-				bigmap.resetMap(SCANcontroller.controller.bigMapResourceOn);
+				{
+					SCANcontroller.controller.bigMapResourceOn = false;
+					return;
+				}
+				else
+				{
+					bigmap.Resource = currentResource;
+					bigmap.resetMap(SCANcontroller.controller.bigMapResourceOn);
+				}
 			}
+		}
+
+		private SCANresourceGlobal AssignResource(string resource)
+		{
+			SCANresourceGlobal r = currentResource;
+
+			if (r == null || r.Name != resource)
+			{
+				for (int i = resources.Count - 1; i >= 0; i--)
+				{
+					SCANresourceGlobal res = resources[i];
+
+					if (res.Name != resource)
+						continue;
+
+					r = res;
+					break;
+				}
+			}
+
+			if (r == null)
+				r = SCANcontroller.GetFirstResource;
+
+			if (r != null)
+				r.CurrentBodyConfig(body.name);
+
+			return r;
 		}
 
 		public string CurrentCelestialBody
@@ -453,7 +1108,24 @@ namespace SCANsat.SCAN_Unity
 					data = bodyData;
 					body = data.Body;
 					bigmap.setBody(body);
+
+					if (OrbitToggle && ShowOrbit)
+					{
+						Orbit o = vessel.orbit;
+
+						orbitLabels.Clear();
+
+						for (int i = 0; i < orbitSteps * 3; i++)
+						{
+							orbitLabels.Add(new SimpleLabelInfo(10, SCAN_UI_Loader.PlanetIcon));
+						}
+
+						if (!vessel.LandedOrSplashed)
+							UpdateOrbitIcons(o);
+					}
+
 					bigmap.resetMap(SCANcontroller.controller.bigMapResourceOn);
+
 					SCANcontroller.controller.bigMapBody = value;
 				}
 			}
@@ -504,15 +1176,20 @@ namespace SCANsat.SCAN_Unity
 
 				if (value && ShowOrbit)
 				{
-					orbitLabels = new List<SimpleLabelInfo>();
-					
-					for (int i = 0; i < steps * 2; i++)
+					Orbit o = vessel.orbit;
+
+					orbitLabels.Clear();
+
+					for (int i = 0; i < orbitSteps * 3; i++)
 					{
 						orbitLabels.Add(new SimpleLabelInfo(10, SCAN_UI_Loader.PlanetIcon));
 					}
 
-					UpdateOrbitIcons();
+					if (!vessel.LandedOrSplashed)
+						UpdateOrbitIcons(o);
 				}
+
+				updateMap = true;	
 			}
 		}
 
@@ -573,6 +1250,11 @@ namespace SCANsat.SCAN_Unity
 			}
 		}
 
+		public bool OrbitAvailable
+		{
+			get { return HighLogic.LoadedSceneIsFlight; }
+		}
+
 		public bool ShowOrbit
 		{
 			get
@@ -594,9 +1276,32 @@ namespace SCANsat.SCAN_Unity
 			get { return SCANcontroller.MasterResourceCount > 1; }
 		}
 
+		public bool TooltipsOn
+		{
+			get { return SCAN_Settings_Config.Instance.WindowTooltips; }
+		}
+
 		public int OrbitSteps
 		{
-			get { return steps * 2; }
+			get { return orbitSteps * 3; }
+		}
+
+		public int CurrentScene
+		{
+			get
+			{
+				switch (HighLogic.LoadedScene)
+				{
+					case GameScenes.FLIGHT:
+						return 0;
+					case GameScenes.TRACKSTATION:
+						return 1;
+					case GameScenes.SPACECENTER:
+						return 2;
+					default:
+						return -1;
+				}
+			}
 		}
 
 		public float Scale
@@ -607,6 +1312,11 @@ namespace SCANsat.SCAN_Unity
 		public Canvas MainCanvas
 		{
 			get { return UIMasterController.Instance.mainCanvas; }
+		}
+
+		public Canvas TooltipCanvas
+		{
+			get { return UIMasterController.Instance.tooltipCanvas; }
 		}
 
 		public Vector2 Position
@@ -631,6 +1341,8 @@ namespace SCANsat.SCAN_Unity
 				bigmap.setWidth(SCAN_Settings_Config.Instance.BigMapWidth);
 
 				SetGridLines();
+
+				RefreshEQMap();
 
 				updateMap = true;
 			}
@@ -701,6 +1413,16 @@ namespace SCANsat.SCAN_Unity
 			return orbitLabels[index];
 		}
 
+		public MapLabelInfo OrbitIconInfo(string id)
+		{
+			MapLabelInfo info;
+
+			if (OrbitLabelList.TryGetValue(id, out info))
+				return info;
+
+			return new MapLabelInfo();
+		}
+
 		public Vector2 VesselPosition()
 		{
 			if (vessel == null)
@@ -753,6 +1475,11 @@ namespace SCANsat.SCAN_Unity
 			return new Vector2((float)Lon, (float)Lat);
 		}
 
+		public Dictionary<string, MapLabelInfo> OrbitLabelList
+		{
+			get { return orbitMapLabels; }
+		}
+
 		public Dictionary<Guid, MapLabelInfo> FlagInfoList
 		{
 			get
@@ -779,7 +1506,8 @@ namespace SCANsat.SCAN_Unity
 						pos = VesselPosition(v.id),
 						baseColor = ColorToggle ? palette.cb_yellow : palette.cb_skyBlue,
 						flash = false,
-						width = 32
+						width = 32,
+						show = true
 					});
 				}
 
@@ -812,7 +1540,8 @@ namespace SCANsat.SCAN_Unity
 								pos = MapPosition(a.Latitude, a.Longitude),
 								baseColor = ColorToggle ? palette.cb_yellow : palette.cb_skyBlue,
 								flash = false,
-								width = 20
+								width = 20,
+								show = true
 							});
 					}
 				}
@@ -844,7 +1573,8 @@ namespace SCANsat.SCAN_Unity
 							baseColor = palette.white,
 							flash = false,
 							width = 20,
-							alignBottom = true
+							alignBottom = true,
+							show = true
 						});
 					}
 				}
@@ -868,7 +1598,8 @@ namespace SCANsat.SCAN_Unity
 					baseColor = ColorToggle ? palette.white : palette.cb_skyBlue,
 					flashColor = palette.cb_yellow,
 					flash = true,
-					width = 22
+					width = 28,
+					show = true
 				});
 			}
 		}
