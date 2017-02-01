@@ -61,7 +61,6 @@
     <Compile Include="SCAN_Map\SCANmapLegend.cs" />
     <Compile Include="SCAN_Map\SCANmapProjection.cs" />
     <Compile Include="SCAN_Map\SCANmapType.cs" />
-    <Compile Include="SCAN_PartModules\SCANhiDefCamera.cs" />
     <Compile Include="SCAN_PartModules\SCANresourceDisplay.cs" />
     <Compile Include="SCAN_PartModules\SCANresourceScanner.cs" />
     <Compile Include="SCAN_PartModules\SCANRPMStorage.cs" />
@@ -93,34 +92,34 @@
     <Compile Include="SCAN_Platform\SCAN_MBE.cs" />
     <Compile Include="SCAN_Platform\SCAN_MBW.cs" />
     <Compile Include="SCAN_Platform\SCAN_SkinsLibrary.cs" />
+    <Compile Include="SCAN_Settings_Config.cs" />
     <Compile Include="SCAN_Toolbar\SCANappLauncher.cs" />
     <Compile Include="SCAN_Toolbar\SCANtoolbar.cs" />
     <Compile Include="SCAN_Toolbar\SCANtoolbarwrapper.cs" />
     <Compile Include="SCAN_UI\SCANcolorSelection.cs" />
-    <Compile Include="SCAN_UI\SCANbigMap.cs" />
-    <Compile Include="SCAN_UI\SCANoverlayController.cs" />
-    <Compile Include="SCAN_UI\SCANresourceSettings.cs" />
-    <Compile Include="SCAN_UI\SCANzoomHiDef.cs" />
     <Compile Include="SCAN_UI\SCANzoomWindow.cs" />
     <Compile Include="SCAN_UI\UI_Framework\SCANlanguagePack.cs" />
     <Compile Include="SCAN_UI\UI_Framework\SCAN_Localization.cs" />
     <Compile Include="SCAN_UI\UI_Framework\SCANremoteView.cs" />
     <Compile Include="SCANcontroller.cs" />
     <Compile Include="SCAN_UI\UI_Framework\SCANicon.cs" />
-    <Compile Include="SCAN_UI\SCANinstrumentUI.cs" />
-    <Compile Include="SCAN_UI\SCANkscMap.cs" />
-    <Compile Include="SCAN_UI\SCANmainMap.cs" />
     <Compile Include="SCAN_UI\UI_Framework\SCANpalette.cs" />
     <Compile Include="SCANquickload.cs" />
     <Compile Include="SCANreflection.cs" />
     <Compile Include="SCAN_UI\SCANsatRPM.cs" />
-    <Compile Include="SCAN_UI\SCANsettingsUI.cs" />
     <Compile Include="SCANutil.cs" />
     <Compile Include="SCANmainMenuLoader.cs" />
     <Compile Include="SCAN_UI\UI_Framework\SCANskins.cs" />
     <Compile Include="SCAN_UI\UI_Framework\SCANuiColorPicker.cs" />
     <Compile Include="SCAN_UI\UI_Framework\SCANuiSlider.cs" />
     <Compile Include="SCAN_UI\UI_Framework\SCANuiUtil.cs" />
+    <Compile Include="SCAN_Unity\SCAN_TextMeshPro.cs" />
+    <Compile Include="SCAN_Unity\SCAN_UI_BigMap.cs" />
+    <Compile Include="SCAN_Unity\SCAN_UI_Instruments.cs" />
+    <Compile Include="SCAN_Unity\SCAN_UI_Loader.cs" />
+    <Compile Include="SCAN_Unity\SCAN_UI_MainMap.cs" />
+    <Compile Include="SCAN_Unity\SCAN_UI_Overlay.cs" />
+    <Compile Include="SCAN_Unity\SCAN_UI_Settings.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>
@@ -157,5 +156,10 @@
       <Private>False</Private>
     </Reference>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <ProjectReference Include="..\SCANsat.Unity\SCANsat.Unity.csproj">
+      <Project>{4ed5e40d-273a-4643-9009-04c1dd02f3e2}</Project>
+      <Name>SCANsat.Unity</Name>
+    </ProjectReference>
+  </ItemGroup>
 </Project>

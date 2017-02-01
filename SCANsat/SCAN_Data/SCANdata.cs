@@ -167,17 +167,27 @@ namespace SCANsat.SCAN_Data
 				if (anomalies == null)
 				{
 					PQSSurfaceObject[] sites = body.pqsSurfaceObjects;
-					//PQSCity[] sites = body.GetComponentsInChildren<PQSCity>(true);
 					anomalies = new SCANanomaly[sites.Length];
 					for (int i = 0; i < sites.Length; ++i)
 					{
-						anomalies[i] = new SCANanomaly(sites[i].SurfaceObjectName, body.GetLongitude(sites[i].transform.position), body.GetLatitude(sites[i].transform.position), sites[i]);
+						anomalies[i] = new SCANanomaly(sites[i].SurfaceObjectName
+							, body.GetLongitude(sites[i].transform.position)
+							, body.GetLatitude(sites[i].transform.position)
+							, sites[i]);
 					}
 				}
+
 				for (int i = 0; i < anomalies.Length; ++i)
 				{
-					anomalies[i].Known = SCANUtil.isCovered(anomalies[i].Longitude, anomalies[i].Latitude, this, SCANtype.Anomaly);
-					anomalies[i].Detail = SCANUtil.isCovered(anomalies[i].Longitude, anomalies[i].Latitude, this, SCANtype.AnomalyDetail);
+					anomalies[i].Known = SCANUtil.isCovered(anomalies[i].Longitude
+						, anomalies[i].Latitude
+						, this
+						, SCANtype.Anomaly);
+
+					anomalies[i].Detail = SCANUtil.isCovered(anomalies[i].Longitude
+						, anomalies[i].Latitude
+						, this
+						, SCANtype.AnomalyDetail);
 				}
 				return anomalies;
 			}
@@ -329,19 +339,30 @@ namespace SCANsat.SCAN_Data
 							{
 								if (p.celestialName == body.GetName())
 								{
-									if (p.contractReference != null)
+									bool add = true;
+
+									for (int j = waypoints.Count - 1; j >= 0; j--)
 									{
-										if (p.contractReference.ContractState == Contract.State.Active)
+										SCANwaypoint w = waypoints[j];
+
+										if (w.Seed != p.uniqueSeed)
+											continue;
+
+										add = false;
+										break;
+									}
+
+									if (add)
+									{
+										if (p.contractReference != null)
 										{
-											if (!waypoints.Any(a => a.Way == p))
+											if (p.contractReference.ContractState == Contract.State.Active)
 											{
 												waypoints.Add(new SCANwaypoint(p));
 											}
 										}
-									}
-									else if (!waypoints.Any(a => a.Way == p))
-									{
-										waypoints.Add(new SCANwaypoint(p));
+										else
+											waypoints.Add(new SCANwaypoint(p));
 									}
 								}
 							}
@@ -544,10 +565,10 @@ namespace SCANsat.SCAN_Data
 			if (SCANcontroller.controller == null)
 				return;
 
-			if (SCANcontroller.controller.mainMap == null)
+			if (SCANcontroller.controller._mainMap == null)
 				return;
 
-			SCANcontroller.controller.mainMap.resetImages();
+			SCANcontroller.controller._mainMap.resetImages();
 		}
 
 		internal void resetResources()
@@ -624,7 +645,7 @@ namespace SCANsat.SCAN_Data
 			return blob.Replace("/", "-").Replace("=", "_");
 		}
 
-		internal void integerDeserialize(string blob, bool b)
+		internal void integerDeserialize(string blob)
 		{
 			try
 			{
@@ -633,17 +654,8 @@ namespace SCANsat.SCAN_Data
 				bytes = SCAN_CLZF2.Decompress(bytes);
 				MemoryStream mem = new MemoryStream(bytes, false);
 				BinaryFormatter binf = new BinaryFormatter();
-				if (b)
-				{
-					byte[,] bRecover = new byte[360, 180];
-					bRecover = (byte[,])binf.Deserialize(mem);
-					Coverage = RecoverToInt(bRecover);
-				}
-				else
-				{
-					byte[] bArray = (byte[])binf.Deserialize(mem);
-					Coverage = ConvertToInt(bArray);
-				}
+				byte[] bArray = (byte[])binf.Deserialize(mem);
+				Coverage = ConvertToInt(bArray);
 			}
 			catch (Exception e)
 			{

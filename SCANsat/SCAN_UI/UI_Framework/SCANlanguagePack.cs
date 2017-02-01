@@ -28,15 +28,19 @@ namespace SCANsat.SCAN_UI.UI_Framework
 		[Persistent]
 		public string settingsHelpGroundTracksActive = "The ground track indicator can be limited to only be displayed for the active vessel.";
 		[Persistent]
+		public string settingsHelpStockUIStyle = "Switch between stock KSP-style UI elements and Unity-style elements."; 
+		[Persistent]
 		public string settingsHelpOverlayTooltips = "Displays tooltips for the current mouse position when a planetary overlay map is activated. These tooltips include The cursor coordinates, terrain height, slope, biome name, and resource abundance, depending on scanning coverage.";
 		[Persistent]
 		public string settingsHelpWindowTooltips = "Display tooltips on some map window buttons. These are primarily used to identify icon buttons.";
 		[Persistent]
 		public string settingsHelpStockToolbar = "Use the stock toolbar.\nOnly one stock button is available. Can be used concurrently with the Blizzy78 Toolbar.";
 		[Persistent]
+		public string settingsHelpToolbarMenu = "Use a pop-out menu for the stock toolbar to show all available windows.";
+		[Persistent]
 		public string settingsHelpMechJeb = "The SCANsat zoom map target selection mode can be used to select a MechJeb landing site.";
 		[Persistent]
-		public string settingsHelpResetWindows = "Reset all window positions and scale. Use this in case a window has been dragged completely off screen or if any windows are not visible.";
+		public string settingsHelpResetWindows = "Reset all window positions. Use this in case a window has been dragged completely off screen or if any windows are not visible.";
 		[Persistent]
 		public string settingsHelpResetPlanetData = "Resets all SCANsat data for the current celestial body.\nA confirmation window will open before activating.\nCannot be reversed.";
 		[Persistent]
@@ -50,7 +54,11 @@ namespace SCANsat.SCAN_UI.UI_Framework
 		[Persistent]
 		public string settingsHelpSetMapWidth = "Enter an exact value for the SCANsat big map texture width. Values are limited to 550 - 8192 pixels wide. Press the Set button to apply the value.";
 		[Persistent]
-		public string settingsHelpWindowScale = "Adjust all SCANsat window scales; buttons adjust scale in increments of 5%.";
+		public string settingsHelpWindowScale = "Adjust SCANsat window UI scale; scale is also affected by the stock master UI scale controls.";
+		[Persistent]
+		public string settingsHelpFillPlanet = "Fill in all SCANsat data for the current celestial body.";
+		[Persistent]
+		public string settingsHelpFillAll = "Fill in all SCANsat data for all celestial bodies.";
 
 		//Resource Settings Window Help Tooltips
 		[Persistent]
@@ -128,6 +136,66 @@ namespace SCANsat.SCAN_UI.UI_Framework
 		[Persistent]
 		public string colorSlopeHelpCutoff = "Adjust the cutoff level between the two selected slope color pairs.";
 
+		//Window toggle buttons
+		[Persistent]
+		public string mainMapToggle = "Main Map";
+		[Persistent]
+		public string bigMapToggle = "Big Map";
+		[Persistent]
+		public string zoomMapToggle = "Zoom Map";
+		[Persistent]
+		public string overlayToggle = "Planetary Overlay";
+		[Persistent]
+		public string instrumentsToggle = "Instruments Readout";
+		[Persistent]
+		public string settingsToggle = "Settings";
+
+		//Main Map tooltips
+		[Persistent]
+		public string mainMapColor = "Map Color";
+		[Persistent]
+		public string mainMapType = "Terrain/Biome Toggle";
+		[Persistent]
+		public string mainMapMinimize = "Show/Hide Vessel Info";
+		[Persistent]
+		public string mainMapStatus = "Scanner Status Indicators";
+		[Persistent]
+		public string mainMapPercentage = "Active Scanner Completion Percentage";
+
+		//Big Map tooltips
+		[Persistent]
+		public string bigMapRefresh = "Map Refresh";
+		[Persistent]
+		public string bigMapColor = "Map Color";
+		[Persistent]
+		public string bigMapGrid = "Grid Overlay";
+		[Persistent]
+		public string bigMapOrbit = "Orbit Overlay";
+		[Persistent]
+		public string bigMapWaypoints = "Waypoints";
+		[Persistent]
+		public string bigMapAnomaly = "Anomalies";
+		[Persistent]
+		public string bigMapFlags = "Flags";
+		[Persistent]
+		public string bigMapLegend = "Map Legend";
+		[Persistent]
+		public string bigMapResource = "Resource Overlay";
+		[Persistent]
+		public string bigMapExport = "Export Map To Disk";
+
+		//Overlay tooltips
+		[Persistent]
+		public string overlayRefresh = "Map Refresh";
+
+		//Instruments tooltips
+		[Persistent]
+		public string insNextResource = "Next Resource";
+		[Persistent]
+		public string insPreviousResource = "Previous Resource";
+
+
+
 		public override void OnDecodeFromConfigNode()
 		{
 			Regex openBracket = new Regex(@"\[(?=\d+:?\w?\d?\])");
@@ -170,6 +238,23 @@ namespace SCANsat.SCAN_UI.UI_Framework
 
 				f.SetValue(this, newLines.Replace((string)f.GetValue(this), @"\n"));
 			}
+		}
+
+		public string GetStringWithName(string title)
+		{
+			var stringFields = this.GetType().GetFields(BindingFlags.Instance | BindingFlags.Public).Where(a => a.FieldType == typeof(string)).ToList();
+
+			for (int i = stringFields.Count - 1; i >= 0; i--)
+			{
+				FieldInfo f = stringFields[i];
+
+				if (f.Name != title)
+					continue;
+
+				return (string)f.GetValue(this);
+			}
+
+			return "";
 		}
 
 	}

@@ -27,7 +27,7 @@ public class Debug_AutoLoadPersistentSaveOnStartup : MonoBehaviour {
 	public static int  vId = 0;
 
 	public void Start () {
-            
+		return;
 		if (first) {
 			first = false;
 			HighLogic.SaveFolder = "Testing_Off";

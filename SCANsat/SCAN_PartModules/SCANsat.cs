@@ -244,8 +244,9 @@ namespace SCANsat.SCAN_PartModules
 		{
 			if (!ToolbarManager.ToolbarAvailable && SCANcontroller.controller != null)
 			{
-				if (!SCANcontroller.controller.useStockAppLauncher)
-					SCANcontroller.controller.mainMap.Visible = true;
+				if (!SCAN_Settings_Config.Instance.StockToolbar && !SCANcontroller.controller._mainMap.IsVisible)
+					//SCANcontroller.controller.mainMap.Visible = true;
+					SCANcontroller.controller._mainMap.Open();
 			}
 			registerScanner();
 			animate(1, 0);
@@ -359,16 +360,16 @@ namespace SCANsat.SCAN_PartModules
 			if (SCANcontroller.controller == null)
 				return;
 
-			if (SCANcontroller.controller.mainMap == null)
-				return;
+			//if (SCANcontroller.controller.mainMap == null)
+			//	return;
 
-			if (SCANcontroller.controller.mainMap.Map == null)
-				return;
+			//if (SCANcontroller.controller.mainMap.Map == null)
+			//	return;
 
-			for (int i = 0; i < 1000; i++)
-			{
-				SCANcontroller.controller.mainMap.Map.SetPixel(UnityEngine.Random.Range(0, 360), UnityEngine.Random.Range(0, 180), palette.lerp(palette.black, palette.white, UnityEngine.Random.value));
-			}
+			//for (int i = 0; i < 1000; i++)
+			//{
+			//	SCANcontroller.controller.mainMap.Map.SetPixel(UnityEngine.Random.Range(0, 360), UnityEngine.Random.Range(0, 180), palette.lerp(palette.black, palette.white, UnityEngine.Random.value));
+			//}
 		}
 
 		/* SCAN: register scanners without going through animation */
@@ -390,7 +391,7 @@ namespace SCANsat.SCAN_PartModules
 		private string scanAlt(SCANdata d)
 		{
 			string altitude = "Unknown";
-			if (!SCANcontroller.controller.scan_background)
+			if (!SCAN_Settings_Config.Instance.BackgroundScanning)
 				altitude = "All Scanning Disabled";
 			else if (d.Disabled)
 				altitude = d.Body.name + " Scanning Disabled";

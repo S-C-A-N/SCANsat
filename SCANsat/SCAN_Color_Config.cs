@@ -35,30 +35,30 @@ namespace SCANsat
 		private float rangeBelowMinHeight = 10000;
 		[Persistent]
 		private string defaultPalette = "Default";
-		[Persistent]
-		private Color lowBiomeColor = palette.xkcd_CamoGreen;
-		[Persistent]
-		private Color highBiomeColor = palette.xkcd_Marigold;
-		[Persistent]
-		private float biomeTransparency = 40;
-		[Persistent]
-		private bool stockBiomeMap = false;
-		[Persistent]
-		private bool biomeBorder = true;
-		[Persistent]
-		private float slopeCutoff = 1f;
-		[Persistent]
-		private Color bottomLowSlopeColor = palette.xkcd_PukeGreen;
-		[Persistent]
-		private Color bottemHighSlopeColor = palette.xkcd_Lemon;
-		[Persistent]
-		private Color topLowSlopeColor = palette.xkcd_Lemon;
-		[Persistent]
-		private Color topHighSlopeColor = palette.xkcd_OrangeRed;
-		[Persistent]
-		private float windowScale = 1f;
-		[Persistent]
-		private bool cheatMapFill = false;
+		//[Persistent]
+		//private Color lowBiomeColor = palette.xkcd_CamoGreen;
+		//[Persistent]
+		//private Color highBiomeColor = palette.xkcd_Marigold;
+		//[Persistent]
+		//private float biomeTransparency = 40;
+		//[Persistent]
+		//private bool stockBiomeMap = false;
+		//[Persistent]
+		//private bool biomeBorder = true;
+		//[Persistent]
+		//private float slopeCutoff = 1f;
+		//[Persistent]
+		//private Color bottomLowSlopeColor = palette.xkcd_PukeGreen;
+		//[Persistent]
+		//private Color bottemHighSlopeColor = palette.xkcd_Lemon;
+		//[Persistent]
+		//private Color topLowSlopeColor = palette.xkcd_Lemon;
+		//[Persistent]
+		//private Color topHighSlopeColor = palette.xkcd_OrangeRed;
+		//[Persistent]
+		//private float windowScale = 1f;
+		//[Persistent]
+		//private bool cheatMapFill = false;
 		[Persistent]
 		private List<SCANterrainConfig> SCANsat_Altimetry = new List<SCANterrainConfig>();
 		[Persistent]
@@ -86,20 +86,20 @@ namespace SCANsat
 			SCANsat_Altimetry = SCANcontroller.EncodeTerrainConfigs;
 			SCANsat_Resources = SCANcontroller.EncodeResourceConfigs;
 
-			if (SCANcontroller.controller != null)
-			{
-				lowBiomeColor = SCANcontroller.controller.lowBiomeColor;
-				highBiomeColor = SCANcontroller.controller.highBiomeColor;
-				biomeTransparency = SCANcontroller.controller.biomeTransparency;
-				stockBiomeMap = SCANcontroller.controller.useStockBiomes;
-				biomeBorder = SCANcontroller.controller.biomeBorder;
-				slopeCutoff = SCANcontroller.controller.slopeCutoff;
-				bottomLowSlopeColor = SCANcontroller.controller.lowSlopeColorOne;
-				bottemHighSlopeColor = SCANcontroller.controller.highSlopeColorOne;
-				topLowSlopeColor = SCANcontroller.controller.lowSlopeColorTwo;
-				topHighSlopeColor = SCANcontroller.controller.highSlopeColorTwo;
-				windowScale = SCANcontroller.controller.windowScale;
-			}
+			//if (SCANcontroller.controller != null)
+			//{
+			//	lowBiomeColor = SCANcontroller.controller.lowBiomeColor;
+			//	highBiomeColor = SCANcontroller.controller.highBiomeColor;
+			//	biomeTransparency = SCANcontroller.controller.biomeTransparency;
+			//	stockBiomeMap = SCANcontroller.controller.useStockBiomes;
+			//	biomeBorder = SCANcontroller.controller.biomeBorder;
+			//	slopeCutoff = SCANcontroller.controller.slopeCutoff;
+			//	bottomLowSlopeColor = SCANcontroller.controller.lowSlopeColorOne;
+			//	bottemHighSlopeColor = SCANcontroller.controller.highSlopeColorOne;
+			//	topLowSlopeColor = SCANcontroller.controller.lowSlopeColorTwo;
+			//	topHighSlopeColor = SCANcontroller.controller.highSlopeColorTwo;
+			//	windowScale = SCANcontroller.controller.windowScale;
+			//}
 		}
 
 		public float DefaultMinHeightRange
@@ -127,64 +127,64 @@ namespace SCANsat
 			get { return defaultPalette; }
 		}
 
-		public Color LowBiomeColor
-		{
-			get { return lowBiomeColor; }
-		}
+		//public Color LowBiomeColor
+		//{
+		//	get { return lowBiomeColor; }
+		//}
 
-		public Color HighBiomeColor
-		{
-			get { return highBiomeColor; }
-		}
+		//public Color HighBiomeColor
+		//{
+		//	get { return highBiomeColor; }
+		//}
 
-		public float BiomeTransparency
-		{
-			get { return biomeTransparency; }
-		}
+		//public float BiomeTransparency
+		//{
+		//	get { return biomeTransparency; }
+		//}
 
-		public bool StockBiomeMap
-		{
-			get { return stockBiomeMap; }
-		}
+		//public bool StockBiomeMap
+		//{
+		//	get { return stockBiomeMap; }
+		//}
 
-		public bool BiomeBorder
-		{
-			get { return biomeBorder; }
-		}
+		//public bool BiomeBorder
+		//{
+		//	get { return biomeBorder; }
+		//}
 
-		public bool CheatMapFill
-		{
-			get { return cheatMapFill; }
-		}
+		//public bool CheatMapFill
+		//{
+		//	get { return cheatMapFill; }
+		//}
 
-		public float SlopeCutoff
-		{
-			get { return slopeCutoff; }
-		}
+		//public float SlopeCutoff
+		//{
+		//	get { return slopeCutoff; }
+		//}
 
-		public Color BottomLowSlopeColor
-		{
-			get { return bottomLowSlopeColor; }
-		}
+		//public Color BottomLowSlopeColor
+		//{
+		//	get { return bottomLowSlopeColor; }
+		//}
 
-		public Color BottomHighSlopeColor
-		{
-			get { return bottemHighSlopeColor; }
-		}
+		//public Color BottomHighSlopeColor
+		//{
+		//	get { return bottemHighSlopeColor; }
+		//}
 
-		public Color TopLowSlopeColor
-		{
-			get { return topLowSlopeColor; }
-		}
+		//public Color TopLowSlopeColor
+		//{
+		//	get { return topLowSlopeColor; }
+		//}
 
-		public Color TopHighSlopeColor
-		{
-			get { return topHighSlopeColor; }
-		}
+		//public Color TopHighSlopeColor
+		//{
+		//	get { return topHighSlopeColor; }
+		//}
 
-		public float WindowScale
-		{
-			get { return windowScale; }
-		}
+		//public float WindowScale
+		//{
+		//	get { return windowScale; }
+		//}
 	}
 }

@@ -22,6 +22,7 @@ using FinePrint.Contracts;
 using FinePrint.Utilities;
 using SCANsat.SCAN_UI;
 using SCANsat.SCAN_UI.UI_Framework;
+using SCANsat.SCAN_Unity;
 using SCANsat.SCAN_Data;
 using SCANsat.SCAN_Map;
 using SCANsat.SCAN_PartModules;
@@ -46,106 +47,156 @@ namespace SCANsat
 		private static int minScanAlt = 5000;
 		private static int maxScanAlt = 500000;
 		private static int bestScanAlt = 250000;
-		[KSPField(isPersistant = true)]
-		public int colours = 0;
-		[KSPField(isPersistant = true)]
-		public bool map_markers = true;
-		[KSPField(isPersistant = true)]
-		public bool map_flags = true;
-		[KSPField(isPersistant = true)]
-		public bool map_waypoints = true;
-		[KSPField(isPersistant = true)]
-		public bool map_orbit = true;
-		[KSPField(isPersistant = true)]
-		public bool map_asteroids = true;
-		[KSPField(isPersistant = true)]
-		public bool map_grid = true;
-		[KSPField(isPersistant = true)]
-		public bool map_ResourceOverlay = false; //Is the overlay activated for the selected resource
-		[KSPField(isPersistant = true)]
-		public int projection = 0;
-		[KSPField(isPersistant = true)]
-		public int map_width = 0;
-		[KSPField(isPersistant = true)]
-		public int map_x = 100;
-		[KSPField(isPersistant = true)]
-		public int map_y = 50;
-		[KSPField(isPersistant = true)]
-		public string anomalyMarker = "X";
-		public string closeBox = "X";
-		[KSPField(isPersistant = true)]
-		public bool legend = false;
-		[KSPField(isPersistant = true)]
-		public bool scan_background = true;
-		[KSPField(isPersistant = true)]
-		public int timeWarpResolution = 15;
-		[KSPField(isPersistant = true)]
-		public string resourceSelection;
-		[KSPField(isPersistant = true)]
-		public bool dataRebuild = true;
+		//[KSPField(isPersistant = true)]
+		//public int colours = 0;
+		//[KSPField(isPersistant = true)]
+		//public bool map_markers = true;
+		//[KSPField(isPersistant = true)]
+		//public bool map_flags = true;
+		//[KSPField(isPersistant = true)]
+		//public bool map_waypoints = true;
+		//[KSPField(isPersistant = true)]
+		//public bool map_orbit = true;
+		//[KSPField(isPersistant = true)]
+		//public bool map_asteroids = true;
+		//[KSPField(isPersistant = true)]
+		//public bool map_grid = true;
+		//[KSPField(isPersistant = true)]
+		//public bool map_ResourceOverlay = false; //Is the overlay activated for the selected resource
+		//[KSPField(isPersistant = true)]
+		//public int projection = 0;
+		//[KSPField(isPersistant = true)]
+		//public int map_width = 0;
+		//[KSPField(isPersistant = true)]
+		//public int map_x = 100;
+		//[KSPField(isPersistant = true)]
+		//public int map_y = 50;
+		//[KSPField(isPersistant = true)]
+		//public string anomalyMarker = "X";
+		//public string closeBox = "X";
+		//[KSPField(isPersistant = true)]
+		//public bool legend = false;
+		//[KSPField(isPersistant = true)]
+		//public bool scan_background = true;
+		//[KSPField(isPersistant = true)]
+		//public int timeWarpResolution = 15;
+		//[KSPField(isPersistant = true)]
+		//public string resourceSelection;
+		//[KSPField(isPersistant = true)]
+		//public bool dataRebuild = true;
+		//[KSPField(isPersistant = true)]
+		//public bool mainMapVisibleOld = false;
+		//[KSPField(isPersistant = true)]
+		//public bool bigMapVisibleOld = false;
+		//[KSPField(isPersistant = true)]
+		//public bool kscMapVisible = false;
+		//[KSPField(isPersistant = true)]
+		//public bool toolTips = true;
+		//[KSPField(isPersistant = true)]
+		//public bool useStockAppLauncher = true;
+		//[KSPField(isPersistant = true)]
+		//public bool resourceBiomeLock = true;
+		//[KSPField(isPersistant = true)]
+		//public bool useStockBiomes = false;
+		//[KSPField(isPersistant = true)]
+		//public float biomeTransparency = 40;
+		//[KSPField(isPersistant = true)]
+		//public bool mechJebTargetSelection = false;
+		//[KSPField(isPersistant = true)]
+		//public bool easyModeScanning = true;
+		//[KSPField(isPersistant = true)]
+		//public bool needsNarrowBand = true;
+		//[KSPField(isPersistant = true)]
+		//public bool biomeBorder = true;
+		//[KSPField(isPersistant = true)]
+		//public bool disableStockResource = false;
+		//[KSPField(isPersistant = true)]
+		//public bool hiDetailZoomMap = false;
+		//[KSPField(isPersistant = true)]
+		//public bool planetaryOverlayTooltips = true;
+		//[KSPField(isPersistant = true)]
+		//public int overlayInterpolation = 8;
+		//[KSPField(isPersistant = true)]
+		//public int overlayMapHeight = 256;
+		//[KSPField(isPersistant = true)]
+		//public int overlayBiomeHeight = 512;
+		//[KSPField(isPersistant = true)]
+		//public float overlayTransparency = 0;
+		//[KSPField(isPersistant = true)]
+		//public bool trueGreyScale = false;
+		//[KSPField(isPersistant = true)]
+		//public bool groundTracks = true;
+		//[KSPField(isPersistant = true)]
+		//public bool groundTrackActiveOnly = true;
+		//[KSPField(isPersistant = true)]
+		//public bool exportCSV = false;
+		//[KSPField(isPersistant = true)]
+		//public float scanThreshold = 0.90f;
+		//[KSPField(isPersistant = true)]
+		//public bool useScanThreshold = true;
+		//[KSPField(isPersistant = true)]
+		//public float slopeCutoff = 1f;
+		//[KSPField(isPersistant = true)]
+		//public float windowScale = 1f;
+
+
 		[KSPField(isPersistant = true)]
 		public bool mainMapVisible = false;
 		[KSPField(isPersistant = true)]
+		public bool mainMapColor = true;
+		[KSPField(isPersistant = true)]
+		public bool mainMapBiome = false;
+		[KSPField(isPersistant = true)]
+		public bool mainMapMinimized = false;
+		[KSPField(isPersistant = true)]
 		public bool bigMapVisible = false;
 		[KSPField(isPersistant = true)]
-		public bool kscMapVisible = false;
+		public bool bigMapColor = true;
 		[KSPField(isPersistant = true)]
-		public bool toolTips = true;
+		public bool bigMapGrid = true;
 		[KSPField(isPersistant = true)]
-		public bool useStockAppLauncher = true;
+		public bool bigMapOrbit = true;
 		[KSPField(isPersistant = true)]
-		public bool resourceBiomeLock = true;
+		public bool bigMapWaypoint = true;
 		[KSPField(isPersistant = true)]
-		public bool useStockBiomes = false;
+		public bool bigMapAnomaly = true;
 		[KSPField(isPersistant = true)]
-		public float biomeTransparency = 40;
+		public bool bigMapAsteroid = true;
 		[KSPField(isPersistant = true)]
-		public bool mechJebTargetSelection = false;
+		public bool bigMapFlag = true;
 		[KSPField(isPersistant = true)]
-		public bool easyModeScanning = true;
+		public bool bigMapLegend = true;
 		[KSPField(isPersistant = true)]
-		public bool needsNarrowBand = true;
+		public bool bigMapResourceOn = false;
 		[KSPField(isPersistant = true)]
-		public bool biomeBorder = true;
+		public string bigMapProjection = "Rectangular";
 		[KSPField(isPersistant = true)]
-		public bool disableStockResource = false;
+		public string bigMapType = "Altimetry";
 		[KSPField(isPersistant = true)]
-		public bool hiDetailZoomMap = false;
+		public string bigMapResource = "Ore";
 		[KSPField(isPersistant = true)]
-		public bool planetaryOverlayTooltips = true;
+		public string bigMapBody = "Kerbin";
 		[KSPField(isPersistant = true)]
-		public int overlayInterpolation = 8;
+		public bool zoomMapColor = true;
 		[KSPField(isPersistant = true)]
-		public int overlayMapHeight = 256;
+		public bool zoomMapOrbit = true;
 		[KSPField(isPersistant = true)]
-		public int overlayBiomeHeight = 512;
+		public bool zoomMapWaypoint = true;
 		[KSPField(isPersistant = true)]
-		public float overlayTransparency = 0;
+		public bool zoomMapAnomaly = true;
 		[KSPField(isPersistant = true)]
-		public bool trueGreyScale = false;
+		public bool zoomMapFlag = true;
 		[KSPField(isPersistant = true)]
-		public bool groundTracks = true;
+		public bool zoomMapResourceOn = false;
 		[KSPField(isPersistant = true)]
-		public bool groundTrackActiveOnly = true;
+		public string zoomMapType = "Altimetry";
 		[KSPField(isPersistant = true)]
-		public bool exportCSV = false;
+		public string zoomMapResource = "Ore";
 		[KSPField(isPersistant = true)]
-		public float scanThreshold = 0.90f;
+		public int overlaySelection = 0;
 		[KSPField(isPersistant = true)]
-		public bool useScanThreshold = true;
-		[KSPField(isPersistant = true)]
-		public float slopeCutoff = 1f;
-		[KSPField(isPersistant = true)]
-		public float windowScale = 1f;
-
-		/* Biome and slope colors can't be serialized properly as a KSP Field */
-		public Color lowBiomeColor = new Color(0, 0.46f, 0.02345098f, 1);
-		public Color highBiomeColor = new Color(0.7f, 0.2388235f, 0, 1);
-		public Color lowSlopeColorOne = new Color(0.004705883f, 0.6f, 0.3788235f, 1);
-		public Color highSlopeColorOne = new Color(0.9764706f, 1, 0.4627451f, 1);
-		public Color lowSlopeColorTwo = new Color(0.9764706f, 1, 0.4627451f, 1);
-		public Color highSlopeColorTwo = new Color(0.94f, 0.2727843f, 0.007372549f, 1);
-
+		public string overlayResource = "Ore";
+		
 		public Color32 lowBiomeColor32 = new Color(0, 0.46f, 0.02345098f, 1);
 		public Color32 highBiomeColor32 = new Color(0.7f, 0.2388235f, 0, 1);
 		public Color32 lowSlopeColorOne32 = new Color(0.004705883f, 0.6f, 0.3788235f, 1);
@@ -183,22 +234,20 @@ namespace SCANsat
 
 		/* Kopernicus On Demand Loading Data */
 		private List<CelestialBody> dataBodies = new List<CelestialBody>();
-		private CelestialBody bigMapBody;
+		private CelestialBody bigMapBodyPQS;
 		private CelestialBody zoomMapBody;
 		private PQSMod KopernicusOnDemand;
 
 		/* UI window objects */
-		internal SCANmainMap mainMap;
-		internal SCANsettingsUI settingsWindow;
-		internal SCANinstrumentUI instrumentsWindow;
-		internal SCANBigMap BigMap;
-		internal SCANkscMap kscMap;
 		internal SCANcolorSelection colorManager;
-		internal SCANoverlayController resourceOverlay;
-		internal SCANresourceSettings resourceSettings;
-		//internal SCANzoomHiDef hiDefMap;
 		internal SCANzoomWindow zoomMap;
 
+		internal SCAN_UI_MainMap _mainMap;
+		internal SCAN_UI_Instruments _instruments;
+		internal SCAN_UI_BigMap _bigMap;
+		internal SCAN_UI_Overlay _overlay;
+		internal SCAN_UI_Settings _settings;
+		
 		/* App launcher object */
 		internal SCANappLauncher appLauncher;
 
@@ -608,20 +657,6 @@ namespace SCANsat
 
 		public override void OnLoad(ConfigNode node)
 		{
-			lowBiomeColor = node.parse("lowBiomeColor", lowBiomeColor);
-			highBiomeColor = node.parse("highBiomeColor", highBiomeColor);
-			lowSlopeColorOne = node.parse("lowSlopeColorOne", lowSlopeColorOne);
-			highSlopeColorOne = node.parse("highSlopeColorOne", highSlopeColorOne);
-			lowSlopeColorTwo = node.parse("lowSlopeColorTwo", lowSlopeColorTwo);
-			highSlopeColorTwo = node.parse("highSlopeColorTwo", highSlopeColorTwo);
-			
-			lowBiomeColor32 = lowBiomeColor;
-			highBiomeColor32 = highBiomeColor;
-			lowSlopeColorOne32 = lowSlopeColorOne;
-			highSlopeColorOne32 = highSlopeColorOne;
-			lowSlopeColorTwo32 = lowSlopeColorTwo;
-			highSlopeColorTwo32 = highSlopeColorTwo;
-
 			ConfigNode node_vessels = node.GetNode("Scanners");
 			if (node_vessels != null)
 			{
@@ -697,14 +732,7 @@ namespace SCANsat
 								continue;
 							}
 							
-							if (dataRebuild)
-							{ //On the first load deserialize the "Map" value to both coverage arrays
-								data.integerDeserialize(mapdata, true);
-							}
-							else
-							{
-								data.integerDeserialize(mapdata, false);
-							}
+							data.integerDeserialize(mapdata);
 						}
 						catch (Exception e)
 						{
@@ -763,18 +791,17 @@ namespace SCANsat
 					}
 				}
 			}
-			dataRebuild = false; //Used for the one-time update to the new integer array
 
-			if (SCANconfigLoader.GlobalResource)
-			{
-				if (masterResourceNodes.Count > 0)
-				{
-					if (string.IsNullOrEmpty(resourceSelection))
-						resourceSelection = masterResourceNodes.Keys.First();
-					else if (!masterResourceNodes.Contains(resourceSelection))
-						resourceSelection = masterResourceNodes.Keys.First();
-				}
-			}
+			//if (SCANconfigLoader.GlobalResource)
+			//{
+			//	if (masterResourceNodes.Count > 0)
+			//	{
+			//		if (string.IsNullOrEmpty(resourceSelection))
+			//			resourceSelection = masterResourceNodes.Keys.First();
+			//		else if (!masterResourceNodes.Contains(resourceSelection))
+			//			resourceSelection = masterResourceNodes.Keys.First();
+			//	}
+			//}
 			ConfigNode node_resources = node.GetNode("SCANResources");
 			if (node_resources != null)
 			{
@@ -791,13 +818,6 @@ namespace SCANsat
 
 		public override void OnSave(ConfigNode node)
 		{
-			node.AddValue("lowBiomeColor", ConfigNode.WriteColor(lowBiomeColor));
-			node.AddValue("highBiomeColor", ConfigNode.WriteColor(highBiomeColor));
-			node.AddValue("lowSlopeColorOne", ConfigNode.WriteColor(lowSlopeColorOne));
-			node.AddValue("highSlopeColorOne", ConfigNode.WriteColor(highSlopeColorOne));
-			node.AddValue("lowSlopeColorTwo", ConfigNode.WriteColor(lowSlopeColorTwo));
-			node.AddValue("highSlopeColorTwo", ConfigNode.WriteColor(highSlopeColorTwo));
-
 			int l = knownVessels.Count;
 			ConfigNode node_vessels = new ConfigNode("Scanners");
 
@@ -874,30 +894,15 @@ namespace SCANsat
 		{
 			instance = this;
 
-			if (SCANconfigLoader.SCANNode == null)
+			if (SCAN_Settings_Config.Instance == null)
 				return;
 
-			biomeTransparency = SCANconfigLoader.SCANNode.BiomeTransparency;
-			biomeBorder = SCANconfigLoader.SCANNode.BiomeBorder;
-			useStockBiomes = SCANconfigLoader.SCANNode.StockBiomeMap;
-
-			slopeCutoff = SCANconfigLoader.SCANNode.SlopeCutoff;
-
-			windowScale = SCANconfigLoader.SCANNode.WindowScale;
-
-			lowBiomeColor = SCANconfigLoader.SCANNode.LowBiomeColor;
-			highBiomeColor = SCANconfigLoader.SCANNode.HighBiomeColor;
-			lowSlopeColorOne = SCANconfigLoader.SCANNode.BottomLowSlopeColor;
-			highSlopeColorOne = SCANconfigLoader.SCANNode.BottomHighSlopeColor;
-			lowSlopeColorTwo = SCANconfigLoader.SCANNode.TopLowSlopeColor;
-			highSlopeColorTwo = SCANconfigLoader.SCANNode.TopHighSlopeColor;
-
-			lowBiomeColor32 = lowBiomeColor;
-			highBiomeColor32 = highBiomeColor;
-			lowSlopeColorOne32 = lowSlopeColorOne;
-			highSlopeColorOne32 = highSlopeColorOne;
-			lowSlopeColorTwo32 = lowSlopeColorTwo;
-			highSlopeColorTwo32 = highSlopeColorTwo;
+			lowBiomeColor32 = SCAN_Settings_Config.Instance.LowBiomeColor;
+			highBiomeColor32 = SCAN_Settings_Config.Instance.HighBiomeColor;
+			lowSlopeColorOne32 = SCAN_Settings_Config.Instance.BottomLowSlopeColor;
+			highSlopeColorOne32 = SCAN_Settings_Config.Instance.BottomHighSlopeColor;
+			lowSlopeColorTwo32 = SCAN_Settings_Config.Instance.TopLowSlopeColor;
+			highSlopeColorTwo32 = SCAN_Settings_Config.Instance.TopHighSlopeColor;
 		}
 
 		private void Start()
@@ -932,18 +937,18 @@ namespace SCANsat
 					body_data.Add(FlightGlobals.currentMainBody.name, new SCANdata(FlightGlobals.currentMainBody));
 				try
 				{
-					mainMap = gameObject.AddComponent<SCANmainMap>();
-					settingsWindow = gameObject.AddComponent<SCANsettingsUI>();
-					instrumentsWindow = gameObject.AddComponent<SCANinstrumentUI>();
 					colorManager = gameObject.AddComponent<SCANcolorSelection>();
-					BigMap = gameObject.AddComponent<SCANBigMap>();
-					resourceOverlay = gameObject.AddComponent<SCANoverlayController>();
-					resourceSettings = gameObject.AddComponent<SCANresourceSettings>();
 					zoomMap = gameObject.AddComponent<SCANzoomWindow>();
+
+					_mainMap = new SCAN_UI_MainMap();
+					_bigMap = new SCAN_UI_BigMap();
+					_instruments = new SCAN_UI_Instruments();
+					_overlay = new SCAN_UI_Overlay();
+					_settings = new SCAN_UI_Settings();
 				}
 				catch (Exception e)
 				{
-					SCANUtil.SCANlog("Something Went Wrong Initializing UI Objects: {0}", e);
+					SCANUtil.SCANlog("Something Went Wrong Initializing UI Objects:\n{0}", e);
 				}
 			}
 			else if (HighLogic.LoadedSceneHasPlanetarium)
@@ -952,24 +957,25 @@ namespace SCANsat
 					body_data.Add(Planetarium.fetch.Home.name, new SCANdata(Planetarium.fetch.Home));
 				try
 				{
-					kscMap = gameObject.AddComponent<SCANkscMap>();
-					settingsWindow = gameObject.AddComponent<SCANsettingsUI>();
 					colorManager = gameObject.AddComponent<SCANcolorSelection>();
-					resourceSettings = gameObject.AddComponent<SCANresourceSettings>();
+
+					_bigMap = new SCAN_UI_BigMap();
+					_settings = new SCAN_UI_Settings();
+
 					if (HighLogic.LoadedScene == GameScenes.TRACKSTATION)
 					{
-						resourceOverlay = gameObject.AddComponent<SCANoverlayController>();
+						_overlay = new SCAN_UI_Overlay();
 					}
 				}
 				catch (Exception e)
 				{
-					SCANUtil.SCANlog("Something Went Wrong Initializing UI Objects: {0}", e);
+					SCANUtil.SCANlog("Something Went Wrong Initializing UI Objects:\n{0}", e);
 				}
 			}
-			if (useStockAppLauncher)
+			if (SCAN_Settings_Config.Instance.StockToolbar)
 				appLauncher = gameObject.AddComponent<SCANappLauncher>();
 
-			if (disableStockResource && useScanThreshold)
+			if (SCAN_Settings_Config.Instance.DisableStockResource && SCAN_Settings_Config.Instance.UseStockTreshold)
 			{
 				for (int i = FlightGlobals.Bodies.Count - 1; i >= 0; i--)
 				{					
@@ -978,7 +984,7 @@ namespace SCANsat
 					checkResourceScanStatus(b);
 				}
 			}
-			else if (!disableStockResource && easyModeScanning)
+			else if (!SCAN_Settings_Config.Instance.DisableStockResource && SCAN_Settings_Config.Instance.InstantScan)
 			{
 				for (int i = FlightGlobals.Bodies.Count - 1; i >= 0; i--)
 				{
@@ -991,7 +997,7 @@ namespace SCANsat
 
 		private void Update()
 		{
-			if (scan_background && loaded)
+			if (SCAN_Settings_Config.Instance.BackgroundScanning && loaded)
 				scanFromAllVessels();
 
 			if (!heightMapsBuilt)
@@ -1000,7 +1006,7 @@ namespace SCANsat
 
 		public void checkStockResourceScanStatus(CelestialBody body)
 		{
-			if (disableStockResource || !easyModeScanning)
+			if (SCAN_Settings_Config.Instance.DisableStockResource || !SCAN_Settings_Config.Instance.InstantScan)
 				return;
 
 			if (body == null)
@@ -1022,7 +1028,7 @@ namespace SCANsat
 
 		public void checkResourceScanStatus(CelestialBody body)
 		{
-			if (!useScanThreshold)
+			if (!SCAN_Settings_Config.Instance.UseStockTreshold)
 				return;
 
 			if (body == null)
@@ -1036,9 +1042,9 @@ namespace SCANsat
 			if (data == null)
 				return;
 
-			if (SCANUtil.getCoveragePercentage(data, SCANtype.FuzzyResources) > (scanThreshold * 100))
+			if (SCANUtil.getCoveragePercentage(data, SCANtype.FuzzyResources) > (SCAN_Settings_Config.Instance.StockTreshold * 100))
 			{
-				SCANUtil.SCANlog("SCANsat resource scanning for {0} meets threshold value [{1:P0}]\nConducting stock orbital resource scan...", body.theName, scanThreshold);
+				SCANUtil.SCANlog("SCANsat resource scanning for {0} meets threshold value [{1:P0}]\nConducting stock orbital resource scan...", body.theName, SCAN_Settings_Config.Instance.StockTreshold);
 				ResourceMap.Instance.UnlockPlanet(body.flightGlobalsIndex);
 			}
 		}
@@ -1117,24 +1123,22 @@ namespace SCANsat
 			GameEvents.onPartCouple.Remove(dockingEventCheck);
 			GameEvents.Contract.onContractsLoaded.Remove(contractsCheck);
 			GameEvents.Contract.onParameterChange.Remove(onParamChange);
-			if (mainMap != null)
-				Destroy(mainMap);
-			if (settingsWindow != null)
-				Destroy(settingsWindow);
-			if (instrumentsWindow != null)
-				Destroy(instrumentsWindow);
-			if (kscMap != null)
-				Destroy(kscMap);
-			if (BigMap != null)
-				Destroy(BigMap);
-			if (resourceOverlay != null)
-				Destroy(resourceOverlay);
-			if (resourceSettings != null)
-				Destroy(resourceSettings);
 			if (appLauncher != null)
 				Destroy(appLauncher);
-			//if (hiDefMap != null)
-			//	Destroy(hiDefMap);
+
+			if (_mainMap != null)
+				_mainMap.OnDestroy();
+			if (_bigMap != null)
+				_bigMap.OnDestroy();
+			if (_instruments != null)
+				_instruments.OnDestroy();
+			if (_overlay != null)
+				_overlay.OnDestroy();
+			if (_settings != null)
+				_settings.OnDestroy();
+
+			if (SCAN_Settings_Config.Instance != null)
+				SCAN_Settings_Config.Instance.Save();
 
 			if (!heightMapsBuilt)
 			{
@@ -1171,7 +1175,7 @@ namespace SCANsat
 
 		private void onSurvey(Vessel v, CelestialBody b)
 		{
-			if (!easyModeScanning || disableStockResource)
+			if (!SCAN_Settings_Config.Instance.InstantScan || SCAN_Settings_Config.Instance.DisableStockResource)
 				return;
 
 			if (b == null)
@@ -1207,17 +1211,17 @@ namespace SCANsat
 
 					dataBodies.Add(b);
 
-					if (bigMapBody != null && bigMapBody == b)
+					if (bigMapBodyPQS != null && bigMapBodyPQS == b)
 						return;
 
 					if (zoomMapBody != null && zoomMapBody == b)
 						return;
 					break;
 				case mapSource.BigMap:
-					if (bigMapBody != null && bigMapBody == b)
+					if (bigMapBodyPQS != null && bigMapBodyPQS == b)
 						return;
 
-					bigMapBody = b;
+					bigMapBodyPQS = b;
 
 					if (zoomMapBody != null && zoomMapBody == b)
 						return;
@@ -1232,7 +1236,7 @@ namespace SCANsat
 
 					zoomMapBody = b;
 
-					if (bigMapBody != null && bigMapBody == b)
+					if (bigMapBodyPQS != null && bigMapBodyPQS == b)
 						return;
 
 					if (dataBodies.Contains(b))
@@ -1268,14 +1272,14 @@ namespace SCANsat
 					if (dataBodies.Contains(b))
 						dataBodies.RemoveAll(a => a == b);
 
-					if (bigMapBody != null && bigMapBody == b)
+					if (bigMapBodyPQS != null && bigMapBodyPQS == b)
 						return;
 
 					if (zoomMapBody != null && zoomMapBody == b)
 						return;
 					break;
 				case mapSource.BigMap:
-					bigMapBody = null;
+					bigMapBodyPQS = null;
 
 					if (zoomMapBody != null && zoomMapBody == b)
 						return;
@@ -1287,7 +1291,7 @@ namespace SCANsat
 				case mapSource.ZoomMap:
 					zoomMapBody = null;
 
-					if (bigMapBody != null && bigMapBody == b)
+					if (bigMapBodyPQS != null && bigMapBodyPQS == b)
 						return;
 
 					if (dataBodies.Contains(b))
@@ -1334,7 +1338,7 @@ namespace SCANsat
 			if (showUI)
 			{
 				Matrix4x4 previousGuiMatrix = GUI.matrix;
-				GUI.matrix = Matrix4x4.TRS(Vector3.zero, Quaternion.identity, new Vector3(windowScale, windowScale, 1));
+				GUI.matrix = Matrix4x4.TRS(Vector3.zero, Quaternion.identity, new Vector3(SCAN_Settings_Config.Instance.UIScale, SCAN_Settings_Config.Instance.UIScale, 1));
 
 				for (int i = 0; i < drawQueue.Count; i++)
 				{
@@ -1363,10 +1367,10 @@ namespace SCANsat
 			if (d == null)
 				return;
 
-			if (groundTracks && HighLogic.LoadedSceneIsFlight && !d.Disabled && scan_background)
+			if (SCAN_Settings_Config.Instance.ShowGroundTracks && HighLogic.LoadedSceneIsFlight && !d.Disabled && SCAN_Settings_Config.Instance.BackgroundScanning)
 				drawGroundTracks(b);
 
-			if (!mechJebTargetSelection)
+			if (!SCAN_Settings_Config.Instance.MechJebTarget)
 			{
 				SCANwaypoint target = d.Waypoints.FirstOrDefault(a => a.LandingTarget);
 				if (target != null)
@@ -1378,7 +1382,7 @@ namespace SCANsat
 
 		private void drawGroundTracks(CelestialBody body)
 		{
-			if (groundTrackActiveOnly)
+			if (SCAN_Settings_Config.Instance.GroundTracksActiveOnly)
 			{
 				Vessel v = FlightGlobals.ActiveVessel;
 
@@ -1708,7 +1712,7 @@ namespace SCANsat
 			if (!double.TryParse(a[1], out lon))
 				return w;
 
-			string name = mechJebTargetSelection ? "MechJeb Landing Target" : "Landing Target Site";
+			string name = SCAN_Settings_Config.Instance.MechJebTarget ? "MechJeb Landing Target" : "Landing Target Site";
 
 			w = new SCANwaypoint(lat, lon, name);
 
@@ -2169,7 +2173,7 @@ namespace SCANsat
 				return;
 			if (v.LandedOrSplashed)
 				return;
-			if (res >= timeWarpResolution)
+			if (res >= SCAN_Settings_Config.Instance.TimeWarpResolution)
 				goto dequeue;
 
 			if (startUT > UT)

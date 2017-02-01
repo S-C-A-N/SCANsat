@@ -35,9 +35,9 @@ namespace SCANsat.SCAN_PartModules
 						continue;
 
 					int m = RPMNode.parse("Mode", (int)0);
-					int c = RPMNode.parse("Color", (int)0);
 					int z = RPMNode.parse("Zoom", (int)0);
 					int r = RPMNode.parse("Resource", (int)0);
+					bool c = RPMNode.parse("Color", true);
 					bool lines = RPMNode.parse("Lines", true);
 					bool anom = RPMNode.parse("Anomalies", true);
 					bool resource = RPMNode.parse("DrawResource", true);
@@ -58,9 +58,9 @@ namespace SCANsat.SCAN_PartModules
 					ConfigNode RPMProp = new ConfigNode("Prop");
 					RPMProp.AddValue("Prop ID", RPMMFD.RPMID);
 					RPMProp.AddValue("Mode", RPMMFD.RPMMode);
-					RPMProp.AddValue("Color", RPMMFD.RPMColor);
 					RPMProp.AddValue("Zoom", RPMMFD.RPMZoom);
 					RPMProp.AddValue("Resource", RPMMFD.RPMResource);
+					RPMProp.AddValue("Color", RPMMFD.RPMColor);
 					RPMProp.AddValue("Lines", RPMMFD.RPMLines);
 					RPMProp.AddValue("Anomalies", RPMMFD.RPMAnomaly);
 					RPMProp.AddValue("DrawResource", RPMMFD.RPMDrawResource);

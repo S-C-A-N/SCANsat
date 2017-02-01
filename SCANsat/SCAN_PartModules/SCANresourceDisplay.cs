@@ -109,17 +109,14 @@ namespace SCANsat.SCAN_PartModules
 			if (!HighLogic.LoadedSceneIsFlight || !FlightGlobals.ready)
 				return;
 
-			if (SCANcontroller.controller == null)
-				return;
-
 			if (refreshState)
 			{
-				if (SCANcontroller.controller.disableStockResource)
+				if (SCAN_Settings_Config.Instance.DisableStockResource)
 					disableConnectedScanners();
 				refreshState = false;
 			}
 
-			if (!SCANcontroller.controller.disableStockResource)
+			if (!SCAN_Settings_Config.Instance.DisableStockResource)
 			{
 				Fields["abundanceField"].guiActive = false;
 				return;
@@ -143,7 +140,7 @@ namespace SCANsat.SCAN_PartModules
 			if (body.BiomeMap != null)
 				biome = SCANUtil.getBiomeName(body, SCANUtil.fixLonShift(vessel.longitude), SCANUtil.fixLatShift(vessel.latitude));
 
-			if (checkBiome(biome) || !SCANcontroller.controller.resourceBiomeLock)
+			if (checkBiome(biome) || !SCAN_Settings_Config.Instance.BiomeLock)
 			{
 				if (fuzzy)
 					abundanceField = abundanceValue.ToString("P0");
@@ -185,12 +182,12 @@ namespace SCANsat.SCAN_PartModules
 			double lon = SCANUtil.fixLonShift(vessel.longitude);
 			if (SCANUtil.isCovered(lon, lat, vessel.mainBody, sensorType))
 			{
-				abundanceValue = SCANUtil.ResourceOverlay(lat, lon, ResourceName, vessel.mainBody, RequiresUnlock && SCANcontroller.controller.resourceBiomeLock);
+				abundanceValue = SCANUtil.ResourceOverlay(lat, lon, ResourceName, vessel.mainBody, RequiresUnlock && SCAN_Settings_Config.Instance.BiomeLock);
 				fuzzy = false;
 			}
 			else if (SCANUtil.isCovered(lon, lat, vessel.mainBody, 524288))
 			{
-				abundanceValue = SCANUtil.ResourceOverlay(lat, lon, ResourceName, vessel.mainBody, RequiresUnlock && SCANcontroller.controller.resourceBiomeLock);
+				abundanceValue = SCANUtil.ResourceOverlay(lat, lon, ResourceName, vessel.mainBody, RequiresUnlock && SCAN_Settings_Config.Instance.BiomeLock);
 				fuzzy = true;
 			}
 			else
@@ -240,14 +237,14 @@ namespace SCANsat.SCAN_PartModules
 		public void EnableModule()
 		{
 			activated = true;
-			if (SCANcontroller.controller != null && SCANcontroller.controller.disableStockResource)
+			if (SCAN_Settings_Config.Instance.DisableStockResource)
 				disableConnectedScanners();
 		}
 
 		public void DisableModule()
 		{
 			activated = false;
-			if (SCANcontroller.controller != null && SCANcontroller.controller.disableStockResource)
+			if (SCAN_Settings_Config.Instance.DisableStockResource)
 				disableConnectedScanners();
 		}
 

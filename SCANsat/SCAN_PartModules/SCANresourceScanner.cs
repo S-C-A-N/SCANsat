@@ -104,7 +104,7 @@ namespace SCANsat.SCAN_PartModules
 			{
 				refreshState = false;
 
-				if (SCANcontroller.controller.disableStockResource)
+				if (SCAN_Settings_Config.Instance.DisableStockResource)
 				{
 					if (mSurvey != null)
 					{
@@ -121,7 +121,7 @@ namespace SCANsat.SCAN_PartModules
 				loaded = true;
 			}
 
-			if (!SCANcontroller.controller.easyModeScanning || SCANcontroller.controller.disableStockResource)
+			if (!SCAN_Settings_Config.Instance.InstantScan || SCAN_Settings_Config.Instance.DisableStockResource)
 				updateEvents();
 			else
 			{
@@ -136,7 +136,7 @@ namespace SCANsat.SCAN_PartModules
 		[KSPAction("Start Resource Scan")]
 		public void startResourceScanAction(KSPActionParam param)
 		{
-			if (!SCANcontroller.controller.easyModeScanning || SCANcontroller.controller.disableStockResource)
+			if (!SCAN_Settings_Config.Instance.InstantScan || SCAN_Settings_Config.Instance.DisableStockResource)
 			{
 				if (animGroup != null && !scanning && !animGroup.isDeployed)
 					animGroup.DeployModule();
@@ -157,7 +157,7 @@ namespace SCANsat.SCAN_PartModules
 				stopScan();
 			else
 			{
-				if (!SCANcontroller.controller.easyModeScanning || SCANcontroller.controller.disableStockResource)
+				if (!SCAN_Settings_Config.Instance.InstantScan || SCAN_Settings_Config.Instance.DisableStockResource)
 				{
 					if (animGroup != null && !animGroup.isDeployed)
 						animGroup.DeployModule();
@@ -175,7 +175,7 @@ namespace SCANsat.SCAN_PartModules
 			if (scanning && loaded)
 				unregisterScanner();
 
-			if (SCANcontroller.controller != null && SCANcontroller.controller.disableStockResource)
+			if (SCAN_Settings_Config.Instance.DisableStockResource)
 			{
 				if (mSurvey != null)
 				{
@@ -194,7 +194,7 @@ namespace SCANsat.SCAN_PartModules
 		public void EnableModule()
 		{
 			activated = true;
-			if (SCANcontroller.controller != null && SCANcontroller.controller.disableStockResource)
+			if (SCAN_Settings_Config.Instance.DisableStockResource)
 			{
 				base.Events["analyze"].active = (sensorType & (int)SCANtype.FuzzyResources) != 0;
 
