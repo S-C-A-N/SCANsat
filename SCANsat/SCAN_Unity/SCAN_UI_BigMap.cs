@@ -1262,7 +1262,11 @@ namespace SCANsat.SCAN_Unity
 				return HighLogic.LoadedSceneIsFlight
 				&& vessel != null
 				&& body != null
-				&& vessel.mainBody == body;
+				&& vessel.mainBody == body
+				&& GameVariables.Instance.GetOrbitDisplayMode(
+					ScenarioUpgradeableFacilities.GetFacilityLevel(
+					SpaceCenterFacility.TrackingStation)
+					) == GameVariables.OrbitDisplayMode.PatchedConics;
 			}
 		}
 
