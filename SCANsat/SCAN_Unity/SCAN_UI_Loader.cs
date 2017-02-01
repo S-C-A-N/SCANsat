@@ -1,10 +1,13 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using SCANsat.Unity.UISkin;
 using SCANsat.Unity;
 using SCANsat.Unity.Unity;
+using KSP.UI;
+using KSP.UI.Screens;
 using TMPro;
 using palette = SCANsat.SCAN_UI.UI_Framework.SCANpalette;
 
@@ -17,9 +20,11 @@ namespace SCANsat.SCAN_Unity
 		private static bool skinLoaded;
 		private static bool spritesLoaded;
 		private static bool tmpProcessed;
+		private static bool tooltipsProcessed;
 		private static bool prefabsProcessed;
 		private static bool clearLoaded;
 		private static bool toggleLoaded;
+		private static bool appLoaded;
 
 		private static UISkinDef _unitySkinDef;
 
@@ -54,6 +59,15 @@ namespace SCANsat.SCAN_Unity
 		private static Sprite _toggleOnActive;
 		private static Sprite _unityToggleOnHover;
 
+		private static Sprite _appButtonNormal;
+		private static Sprite _appButtonHover;
+		private static Sprite _appButtonActive;
+		private static Sprite _appButtonDisabled;
+		private static Sprite _appBackground;
+
+		private static Sprite _kspTooltipBackground;
+		private static Sprite _unityTooltipBackground;
+
 		private static GameObject[] loadedPrefabs;
 
 		private static GameObject _mainMapPrefab;
@@ -61,6 +75,8 @@ namespace SCANsat.SCAN_Unity
 		private static GameObject _instrumentsPrefab;
 		private static GameObject _overlayPrefab;
 		private static GameObject _settingsPrefab;
+		private static GameObject _toolbarPrefab;
+		private static GameObject _tooltipPrefab;
 
 		public static GameObject MainMapPrefab
 		{
@@ -85,6 +101,11 @@ namespace SCANsat.SCAN_Unity
 		public static GameObject SettingsPrefab
 		{
 			get { return _settingsPrefab; }
+		}
+
+		public static GameObject ToolbarPrefab
+		{
+			get { return _toolbarPrefab; }
 		}
 
 		public static UISkinDef UnitySkinDef
@@ -245,7 +266,23 @@ namespace SCANsat.SCAN_Unity
 			if (loaded)
 				Destroy(gameObject);
 
+			DontDestroyOnLoad(gameObject);
+
 			path = KSPUtil.ApplicationRootPath + "GameData/SCANsat/Resources";
+
+			StartCoroutine(loadResources());
+		}
+
+		private IEnumerator loadResources()
+		{
+			while (ApplicationLauncher.Instance == null)
+				yield return null;
+
+			while (SCANconfigLoader.languagePack == null)
+				yield return null;
+
+			while (SCAN_Settings_Config.Instance == null)
+				yield return null;
 
 			if (!spritesLoaded)
 				loadTextures();
@@ -288,7 +325,28 @@ namespace SCANsat.SCAN_Unity
 				toggleLoaded = true;
 			}
 
-			spritesLoaded = true;
+			if (!appLoaded)
+			{
+				if (ApplicationLauncher.Instance != null)
+				{
+					UIRadioButton button = ApplicationLauncher.Instance.listItemPrefab.toggleButton;
+
+					_appButtonNormal = button.stateFalse.normal;
+					_appButtonHover = button.stateTrue.highlight;
+					_appButtonActive = button.stateTrue.pressed;
+					_appButtonDisabled = button.stateTrue.disabled;
+
+					Image background = ApplicationLauncher.Instance.listItemPrefab.GetComponent<Image>();
+
+					if (background != null)
+						_appBackground = background.sprite;
+
+					appLoaded = true;
+				}
+			}
+
+			if (clearLoaded && toggleLoaded && appLoaded)
+				spritesLoaded = true;
 		}
 
 		private static void loadPrefabBundle()
@@ -305,6 +363,9 @@ namespace SCANsat.SCAN_Unity
 			{
 				if (!tmpProcessed)
 					processTMPPrefabs();
+
+				if (!tooltipsProcessed && _tooltipPrefab != null)
+					processTooltips();
 
 				if (!prefabsProcessed)
 					processUIPrefabs();
@@ -424,6 +485,11 @@ namespace SCANsat.SCAN_Unity
 					_anomalyIcon = s;
 				else if (s.name == "SCAN_WayPointIcon_Outline")
 					_waypointIcon = s;
+
+				else if (s.name == "KSP_Tooltip")
+					_kspTooltipBackground = s;
+				else if (s.name == "DropDownTex")
+					_unityTooltipBackground = s;
 			}
 
 			skinLoaded = true;
@@ -487,6 +553,10 @@ namespace SCANsat.SCAN_Unity
 					_overlayPrefab = o;
 				else if (o.name == "SCAN_Settings")
 					_settingsPrefab = o;
+				else if (o.name == "SCAN_Toolbar")
+					_toolbarPrefab = o;
+				else if (o.name == "SCAN_Tooltip")
+					_tooltipPrefab = o;
 
 				if (o != null)
 					processTMP(o);
@@ -539,42 +609,11 @@ namespace SCANsat.SCAN_Unity
 
 			tmp.font = Resources.Load("Fonts/Calibri SDF", typeof(TMP_FontAsset)) as TMP_FontAsset;
 
-			//var mats = Resources.LoadAll<Material>("Fonts/Materials");
-
-			//for (int j = mats.Length - 1; j >= 0; j--)
-			//{
-			//	Material mat = mats[j];
-
-			//	SCANUtil.SCANlog("Material: {0}", mat.name);
-			//}
-
-			ScreenMessagesText smt = ScreenMessages.Instance.textPrefab;
-
-			//SCANUtil.SCANlog("Font: {0} - Material {1} - Outline: {2:N2} - Outline Color {3:N3}"
-				//, smt.text.font.name
-				//, smt.text.fontSharedMaterial.name
-				//, smt.text.outlineWidth
-				//, smt.text.outlineColor);
-
-			//tmp.fontSharedMaterial = smt.text.fontSharedMaterial;   //Resources.Load("Fonts/Materials/Calibri Dropshadow Outline", typeof(Material)) as Material;
-
-			
-
-			//tmp.font = Resources.Load("Fonts & Materials/IMPACT SDF", typeof(TMP_FontAsset)) as TMP_FontAsset;
-			//tmp.fontSharedMaterial = Resources.Load("Fonts & Materials/Impact SDF - Drop Shadow", typeof(Material)) as Material;
 			if (handler.Outline)
 			{
 				tmp.fontSharedMaterial = Resources.Load("Fonts/Materials/Calibri Dropshadow Outline", typeof(Material)) as Material;  //smt.text.fontSharedMaterial;
 
-				if (tmp.fontMaterial)
-				{
-
-				}
-
-				//SCANUtil.SCANlog("Material: {0} - FontMaterial is  - SharedMaterial is "
-				//	//, tmp.fontSharedMaterial.name
-				//, tmp.fontMaterial == null ? "Null" : "Loaded");
-				//, tmp.fontSharedMaterial == null ? "Null" : "Loaded");
+				if (tmp.fontMaterial) { }
 
 				tmp.outlineColor = palette.black;
 				tmp.outlineWidth = handler.OutlineWidth;
@@ -585,6 +624,59 @@ namespace SCANsat.SCAN_Unity
 			tmp.enableWordWrapping = true;
 			tmp.isOverlay = false;
 			tmp.richText = true;
+		}
+
+		private static void processTooltips()
+		{
+			for (int i = loadedPrefabs.Length - 1; i >= 0; i--)
+			{
+				GameObject o = loadedPrefabs[i];
+
+				TooltipHandler[] handlers = o.GetComponentsInChildren<TooltipHandler>(true);
+
+				if (handlers == null)
+					return;
+
+				for (int j = 0; j < handlers.Length; j++)
+					processTooltip(handlers[j]);
+			}
+
+			tooltipsProcessed = true;
+		}
+
+		private static void processTooltip(TooltipHandler handler)
+		{
+			if (handler == null)
+				return;
+
+			handler.Prefab = _tooltipPrefab;
+			handler.TooltipText = SCANconfigLoader.languagePack.GetStringWithName(handler.TooltipName);
+
+			toggleTooltip(handler, SCAN_Settings_Config.Instance.WindowTooltips);
+		}
+
+		public static void ToggleTooltips(bool isOn)
+		{
+			for (int i = loadedPrefabs.Length - 1; i >= 0; i--)
+			{
+				GameObject o = loadedPrefabs[i];
+
+				TooltipHandler[] handlers = o.GetComponentsInChildren<TooltipHandler>(true);
+
+				if (handlers == null)
+					return;
+
+				for (int j = 0; j < handlers.Length; j++)
+					toggleTooltip(handlers[j], isOn);
+			}
+		}
+
+		private static void toggleTooltip(TooltipHandler handler, bool isOn)
+		{
+			if (handler == null)
+				return;
+
+			handler.IsActive = isOn && !handler.HelpTip;
 		}
 
 		private static FontStyles getStyle(FontStyle style)
@@ -662,6 +754,8 @@ namespace SCANsat.SCAN_Unity
 
 			UISkinDef skin = UISkinManager.defaultSkin;
 
+			Sprite KSPWindow = skin.window.normal.background;
+
 			bool stock = SCAN_Settings_Config.Instance == null || SCAN_Settings_Config.Instance.StockUIStyle || _unitySkinDef == null;
 
 			if (!stock)
@@ -675,6 +769,9 @@ namespace SCANsat.SCAN_Unity
 				case SCAN_Style.StyleTypes.Window:
 					style.setImage(skin.window.normal.background);
 					break;
+				case SCAN_Style.StyleTypes.KSPWindow:
+					style.setImage(_appBackground);
+					break;
 				case SCAN_Style.StyleTypes.Box:
 					style.setImage(skin.box.normal.background);
 					break;
@@ -687,6 +784,9 @@ namespace SCANsat.SCAN_Unity
 				case SCAN_Style.StyleTypes.HiddenButton:
 					style.setButton(_clearSprite, skin.button.highlight.background, skin.button.active.background, skin.button.active.background);
 					break;
+				case SCAN_Style.StyleTypes.AppButton:
+					style.setToggleButton(_appButtonNormal, _appButtonHover, _appButtonActive, _appButtonDisabled, _appButtonHover);
+					break;
 				case SCAN_Style.StyleTypes.Toggle:
 					if (stock)
 						style.setToggle(_toggleNormal, _toggleHover, _toggleActive, _toggleActive, _toggleOn, _toggleOnHover);
@@ -694,7 +794,7 @@ namespace SCANsat.SCAN_Unity
 						style.setToggle(skin.toggle.normal.background, skin.toggle.highlight.background, skin.toggle.active.background, skin.toggle.active.background, skin.toggle.disabled.background, _unityToggleOnHover);
 					break;
 				case SCAN_Style.StyleTypes.ToggleButton:
-					style.setToggleButton(skin.button.normal.background, skin.button.highlight.background, skin.button.active.background, skin.button.active.background);
+					style.setToggleButton(skin.button.normal.background, skin.button.highlight.background, skin.button.active.background, skin.button.active.background, skin.button.active.background);
 					break;
 				case SCAN_Style.StyleTypes.KSPToggle:
 					style.setToggle(_toggleNormal, _toggleHover, _toggleActive, _toggleActive, _toggleOn, _toggleOnHover);
@@ -704,6 +804,12 @@ namespace SCANsat.SCAN_Unity
 					break;
 				case SCAN_Style.StyleTypes.VerticalScrollbar:
 					style.setScrollbar(skin.verticalScrollbar.normal.background, skin.verticalScrollbarThumb.normal.background);
+					break;
+				case SCAN_Style.StyleTypes.Tooltip:
+					if (stock)
+						style.setImage(_kspTooltipBackground);
+					else
+						style.setImage(_unityTooltipBackground);
 					break;
 				default:
 					break;
