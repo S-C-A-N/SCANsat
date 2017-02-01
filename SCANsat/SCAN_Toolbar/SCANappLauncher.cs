@@ -178,6 +178,9 @@ namespace SCANsat.SCAN_Toolbar
 		private void OnTrue()
 		{
 			_sticky = true;
+
+			if (uiElement == null)
+				OpenMenu();
 		}
 
 		private void OnFalse()
@@ -211,7 +214,7 @@ namespace SCANsat.SCAN_Toolbar
 		{
 			int timer = 0;
 
-			while (timer < 4)
+			while (timer < 2)
 			{
 				timer++;
 				yield return null;
@@ -253,6 +256,32 @@ namespace SCANsat.SCAN_Toolbar
 		{
 			if (uiElement != null)
 				uiElement.FadeOut();
+		}
+
+		private IEnumerator MenuHoverOutWait()
+		{
+			int timer = 0;
+
+			while (timer < 2)
+			{
+				timer++;
+				yield return null;
+			}
+
+			if (!_hovering && !_sticky)
+				CloseMenu();
+		}
+
+		public bool InMenu
+		{
+			get { return _inMenu; }
+			set
+			{
+				_inMenu = value;
+
+				if (!value)
+					StartCoroutine(MenuHoverOutWait());
+			}
 		}
 
 		public bool MainMap
@@ -321,18 +350,6 @@ namespace SCANsat.SCAN_Toolbar
 					SCAN_UI_Settings.Instance.Open();
 				else
 					SCAN_UI_Settings.Instance.Close();
-			}
-		}
-
-		public bool InMenu
-		{
-			get { return _inMenu; }
-			set
-			{
-				_inMenu = value;
-
-				if (!value && !_hovering && !_sticky && uiElement != null)
-					CloseMenu();
 			}
 		}
 	}
