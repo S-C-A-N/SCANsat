@@ -109,6 +109,8 @@ namespace SCANsat.Unity.Unity
 
 			UpdatePosition(info.pos);
 
+			UpdateActive(info.show);
+
 			UpdateSize(info.width);
 		}
 
@@ -133,11 +135,34 @@ namespace SCANsat.Unity.Unity
 			}
 		}
 
+		public void UpdateActive(bool show)
+		{
+			if (gameObject.activeSelf && !show)
+			{
+				gameObject.SetActive(false);
+				return;
+			}
+			else if (!gameObject.activeSelf && show)
+				gameObject.SetActive(true);
+		}
+
 		public void UpdatePosition(Vector2 p)
 		{
 			if (rect != null)
 				rect.anchoredPosition = new Vector2(p.x - (label.width / 2), label.alignBottom ? p.y + (label.width / 2) : p.y);
 		}
 
+		public void UpdatePositionActivation(MapLabelInfo info)
+		{
+			UpdateActive(info.show);
+
+			if (!info.show)
+				return;
+
+			UpdatePosition(info.pos);
+
+			if (label.label != info.label)
+				UpdateLabel(info.label);
+		}
 	}
 }

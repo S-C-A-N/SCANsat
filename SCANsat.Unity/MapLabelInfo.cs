@@ -14,5 +14,6 @@ namespace SCANsat.Unity
 		public bool flash;
 		public int width;
 		public bool alignBottom;
+		public bool show;
 	}
 }
