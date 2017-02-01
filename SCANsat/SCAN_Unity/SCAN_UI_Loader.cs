@@ -16,6 +16,9 @@ namespace SCANsat.SCAN_Unity
 	[KSPAddon(KSPAddon.Startup.MainMenu, true)]
 	public class SCAN_UI_Loader : MonoBehaviour
 	{
+		private const string prefabAssetName = "scansat_prefabs";
+		private const string imageAssetName = "scan_images";
+
 		private static bool loaded;
 		private static bool skinLoaded;
 		private static bool spritesLoaded;
@@ -268,7 +271,7 @@ namespace SCANsat.SCAN_Unity
 
 			DontDestroyOnLoad(gameObject);
 
-			path = KSPUtil.ApplicationRootPath + "GameData/SCANsat/Resources";
+			path = KSPUtil.ApplicationRootPath + "GameData/SCANsat/Resources/";
 
 			StartCoroutine(loadResources());
 		}
@@ -353,7 +356,7 @@ namespace SCANsat.SCAN_Unity
 		{
 			if (loadedPrefabs == null)
 			{
-				AssetBundle prefabs = AssetBundle.LoadFromFile(path + "/scansat_prefabs.ksp");
+				AssetBundle prefabs = AssetBundle.LoadFromFile(path + prefabAssetName);
 
 				if (prefabs != null)
 					loadedPrefabs = prefabs.LoadAllAssets<GameObject>();
@@ -378,7 +381,7 @@ namespace SCANsat.SCAN_Unity
 
 			SkinInit(_unitySkinDef);
 
-			AssetBundle images = AssetBundle.LoadFromFile(path + "/scan_images.ksp");
+			AssetBundle images = AssetBundle.LoadFromFile(path + imageAssetName);
 
 			if (images == null)
 				return;
