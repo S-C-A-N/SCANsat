@@ -21,6 +21,9 @@ namespace SCANsat.Unity.Unity
 			TextInput,
 			KSPToggle,
 			VerticalScrollbar,
+			KSPWindow,
+			AppButton,
+			Tooltip,
 		}
 
 		[SerializeField]
@@ -87,7 +90,7 @@ namespace SCANsat.Unity.Unity
 				scan_toggle.HoverCheckmark = checkmarkHover;
 		}
 
-		public void setToggleButton(Sprite normal, Sprite highlight, Sprite active, Sprite inactive)
+		public void setToggleButton(Sprite normal, Sprite highlight, Sprite active, Sprite inactive, Sprite checkmark)
 		{
 			setSelectable(normal, highlight, active, inactive);
 
@@ -101,7 +104,7 @@ namespace SCANsat.Unity.Unity
 			if (toggleImage == null)
 				return;
 
-			toggleImage.sprite = active;
+			toggleImage.sprite = checkmark;
 			toggleImage.type = Image.Type.Sliced;
 		}
 

@@ -21,7 +21,11 @@ namespace SCANsat.Unity.Interfaces
 
 		bool Anomaly { get; }
 
+		bool TooltipsOn { get; }
+
 		float Scale { get; }
+
+		Canvas TooltipCanvas { get; }
 
 		Texture AnomalyCamera { get; }
 

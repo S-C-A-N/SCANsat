@@ -7,7 +7,7 @@ using SCANsat.Unity.Interfaces;
 
 namespace SCANsat.Unity.Unity
 {
-	public class SCAN_Overlay : MonoBehaviour, IDragHandler, IBeginDragHandler, IEndDragHandler, IPointerDownHandler
+	public class SCAN_Overlay : CanvasFader, IDragHandler, IBeginDragHandler, IEndDragHandler, IPointerDownHandler
 	{
 		[SerializeField]
 		private TextHandler m_Version = null;
@@ -51,9 +51,13 @@ namespace SCANsat.Unity.Unity
 			get { return overInterface; }
 		}
 
-		private void Awake()
+		protected override void Awake()
 		{
+			base.Awake();
+
 			rect = GetComponent<RectTransform>();
+
+			Alpha(0);
 		}
 
 		private void Update()
@@ -105,7 +109,57 @@ namespace SCANsat.Unity.Unity
 
 			SetPosition(over.Position);
 
+			ProcessTooltips();
+
+			FadeIn();
+
 			loaded = true;
+		}
+
+		public void FadeIn()
+		{
+			Fade(1, true);
+		}
+
+		public void FadeOut()
+		{
+			Fade(0, false, Kill, false);
+		}
+
+		private void Kill()
+		{
+			gameObject.SetActive(false);
+			Destroy(gameObject);
+		}
+
+		public void Close()
+		{
+			if (overInterface != null)
+				overInterface.IsVisible = false;
+		}
+
+		public void ProcessTooltips()
+		{
+			if (overInterface == null)
+				return;
+
+			TooltipHandler[] handlers = gameObject.GetComponentsInChildren<TooltipHandler>(true);
+
+			if (handlers == null)
+				return;
+
+			for (int j = 0; j < handlers.Length; j++)
+				ProcessTooltip(handlers[j], overInterface.TooltipsOn, overInterface.TooltipCanvas, overInterface.Scale);
+		}
+
+		private void ProcessTooltip(TooltipHandler handler, bool isOn, Canvas c, float scale)
+		{
+			if (handler == null)
+				return;
+
+			handler.IsActive = isOn && !handler.HelpTip;
+			handler._Canvas = c;
+			handler.Scale = scale;
 		}
 
 		public void SetScale(float scale)
@@ -184,14 +238,6 @@ namespace SCANsat.Unity.Unity
 			res.SetResource(resource, this, overInterface.CurrentResource == resource);
 
 			resources.Add(res);
-		}
-
-		public void Close()
-		{
-			if (overInterface == null)
-				return;
-
-			overInterface.IsVisible = false;
 		}
 
 		public void SetResource(string resource, bool isOn)

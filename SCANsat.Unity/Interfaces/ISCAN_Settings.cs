@@ -64,6 +64,8 @@ namespace SCANsat.Unity.Interfaces
 
 		bool ShowMapFill { get; }
 
+		Canvas TooltipCanvas { get; }
+
 		Vector2 Position { set; }
 
 		IList<string> BackgroundBodies { get; }

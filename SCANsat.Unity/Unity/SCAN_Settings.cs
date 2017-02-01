@@ -7,7 +7,7 @@ using SCANsat.Unity.Interfaces;
 
 namespace SCANsat.Unity.Unity
 {
-	public class SCAN_Settings : MonoBehaviour, IDragHandler, IBeginDragHandler, IEndDragHandler, IPointerDownHandler
+	public class SCAN_Settings : CanvasFader, IDragHandler, IBeginDragHandler, IEndDragHandler, IPointerDownHandler
 	{
 		[SerializeField]
 		private TextHandler m_Version = null;
@@ -21,6 +21,8 @@ namespace SCANsat.Unity.Unity
 		private Toggle m_ResourceToggle = null;
 		[SerializeField]
 		private Toggle m_DataToggle = null;
+		[SerializeField]
+		private Toggle m_HelpTips = null;
 		[SerializeField]
 		private GameObject m_GeneralPrefab = null;
 		[SerializeField]
@@ -42,10 +44,14 @@ namespace SCANsat.Unity.Unity
 		{
 			get { return _page; }
 		}
-
-		private void Awake()
+		
+		protected override void Awake()
 		{
+			base.Awake();
+
 			rect = GetComponent<RectTransform>();
+
+			Alpha(0);
 		}
 
 		private void Update()
@@ -93,6 +99,57 @@ namespace SCANsat.Unity.Unity
 			}
 
 			SetScale(settings.UIScale);
+
+			FadeIn();
+		}
+
+		public void FadeIn()
+		{
+			Fade(1, true);
+		}
+
+		public void FadeOut()
+		{
+			Fade(0, false, Kill, false);
+		}
+
+		private void Kill()
+		{
+			gameObject.SetActive(false);
+			Destroy(gameObject);
+		}
+
+		public void Close()
+		{
+			if (settingsInterface != null)
+				settingsInterface.IsVisible = false;
+		}
+
+		public void ProcessTooltips()
+		{
+			if (settingsInterface == null)
+				return;
+
+			TooltipHandler[] handlers = gameObject.GetComponentsInChildren<TooltipHandler>(true);
+
+			if (handlers == null)
+				return;
+
+			for (int j = 0; j < handlers.Length; j++)
+				ProcessTooltip(handlers[j], settingsInterface.WindowTooltips, settingsInterface.TooltipCanvas, settingsInterface.UIScale);
+
+			if (m_HelpTips != null)
+				ProcessHelpTooltips(m_HelpTips.isOn);
+		}
+
+		private void ProcessTooltip(TooltipHandler handler, bool isOn, Canvas c, float scale)
+		{
+			if (handler == null)
+				return;
+
+			handler.IsActive = isOn && !handler.HelpTip;
+			handler._Canvas = c;
+			handler.Scale = scale;
 		}
 
 		public void SetScale(float scale)
@@ -143,12 +200,32 @@ namespace SCANsat.Unity.Unity
 			settingsInterface.Position = new Vector2(rect.anchoredPosition.x, rect.anchoredPosition.y);
 		}
 
-		public void Close()
+		public void HelpTips(bool isOn)
+		{
+			ProcessHelpTooltips(isOn);
+		}
+
+		public void ProcessHelpTooltips(bool isOn)
 		{
 			if (settingsInterface == null)
 				return;
 
-			settingsInterface.IsVisible = false;
+			TooltipHandler[] handlers = gameObject.GetComponentsInChildren<TooltipHandler>(true);
+
+			if (handlers == null)
+				return;
+
+			for (int j = 0; j < handlers.Length; j++)
+				ProcessHelpTooltip(handlers[j], isOn, settingsInterface.TooltipCanvas);
+		}
+
+		private void ProcessHelpTooltip(TooltipHandler handler, bool isOn, Canvas c)
+		{
+			if (handler == null)
+				return;
+
+			handler.IsActive = isOn && handler.HelpTip;
+			handler._Canvas = c;
 		}
 
 		public void GeneralSettings(bool isOn)
@@ -172,6 +249,8 @@ namespace SCANsat.Unity.Unity
 			CurrentPage.transform.SetParent(m_ContentTransform, false);
 
 			((SCAN_SettingsGeneral)CurrentPage).setup(settingsInterface);
+
+			ProcessTooltips();
 		}
 
 		public void BackgroundSettings(bool isOn)
@@ -195,6 +274,8 @@ namespace SCANsat.Unity.Unity
 			CurrentPage.transform.SetParent(m_ContentTransform, false);
 
 			((SCAN_SettingsBackground)CurrentPage).setup(settingsInterface);
+
+			ProcessTooltips();
 		}
 
 		public void ResourceSettings(bool isOn)
@@ -218,6 +299,8 @@ namespace SCANsat.Unity.Unity
 			CurrentPage.transform.SetParent(m_ContentTransform, false);
 
 			((SCAN_SettingsResource)CurrentPage).setup(settingsInterface);
+
+			ProcessTooltips();
 		}
 
 		public void DataSettings(bool isOn)
@@ -241,6 +324,8 @@ namespace SCANsat.Unity.Unity
 			CurrentPage.transform.SetParent(m_ContentTransform, false);
 
 			((SCAN_SettingsData)CurrentPage).setup(settingsInterface);
+
+			ProcessTooltips();
 		}
 
 		public void ColorSettings(bool isOn)

@@ -8,7 +8,7 @@ using SCANsat.Unity.Interfaces;
 
 namespace SCANsat.Unity.Unity
 {
-	public class SCAN_MainMap : MonoBehaviour, IDragHandler, IBeginDragHandler, IEndDragHandler, IPointerDownHandler
+	public class SCAN_MainMap : CanvasFader, IDragHandler, IBeginDragHandler, IEndDragHandler, IPointerDownHandler
 	{
 		[SerializeField]
 		private TextHandler m_Version = null;
@@ -51,9 +51,13 @@ namespace SCANsat.Unity.Unity
 		private List<SCAN_VesselInfo> vessels = new List<SCAN_VesselInfo>();
 		private List<SCAN_MapLabel> mapLabels = new List<SCAN_MapLabel>();
 
-		private void Awake()
+		protected override void Awake()
 		{
+			base.Awake();
+
 			rect = GetComponent<RectTransform>();
+
+			Alpha(0);
 		}
 
 		private void Update()
@@ -104,10 +108,60 @@ namespace SCANsat.Unity.Unity
 
 			SetPosition(map.Position);
 
+			ProcessTooltips();
+
 			if (m_VesselTransform != null)
 				m_VesselTransform.gameObject.SetActive(!map.Minimized);
 
+			FadeIn();
+
 			loaded = true;
+		}
+
+		public void FadeIn()
+		{
+			Fade(1, true);
+		}
+
+		public void FadeOut()
+		{
+			Fade(0, false, Kill, false);
+		}
+
+		private void Kill()
+		{
+			gameObject.SetActive(false);
+			Destroy(gameObject);
+		}
+
+		public void Close()
+		{
+			if (mapInterface != null)
+				mapInterface.IsVisible = false;
+		}
+
+		public void ProcessTooltips()
+		{
+			if (mapInterface == null)
+				return;
+
+			TooltipHandler[] handlers = gameObject.GetComponentsInChildren<TooltipHandler>(true);
+
+			if (handlers == null)
+				return;
+
+			for (int j = 0; j < handlers.Length; j++)
+				ProcessTooltip(handlers[j], mapInterface.TooltipsOn, mapInterface.TooltipCanvas, mapInterface.Scale);
+		}
+
+		private void ProcessTooltip(TooltipHandler handler, bool isOn, Canvas c, float scale)
+		{
+			if (handler == null)
+				return;
+
+			handler.IsActive = isOn && !handler.HelpTip;
+			handler._Canvas = c;
+			handler.Scale = scale;
 		}
 
 		public void SetScale(float scale)
@@ -334,14 +388,6 @@ namespace SCANsat.Unity.Unity
 
 			if (m_VesselTransform != null)
 				m_VesselTransform.gameObject.SetActive(!isOn);
-		}
-
-		public void Close()
-		{
-			if (mapInterface == null)
-				return;
-
-			mapInterface.IsVisible = false;
 		}
 
 		public void OpenBigMap()

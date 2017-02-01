@@ -22,7 +22,11 @@ namespace SCANsat.Unity.Interfaces
 
 		bool DrawResource { get; }
 
+		bool TooltipsOn { get; }
+
 		float Scale { get; }
+
+		Canvas TooltipCanvas { get; }
 
 		IList<string> Resources { get; }
 

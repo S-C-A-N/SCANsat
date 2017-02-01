@@ -6,7 +6,7 @@ using UnityEngine.Events;
 
 namespace SCANsat.Unity.Unity
 {
-	public class SCAN_DropDown : MonoBehaviour
+	public class SCAN_DropDown : CanvasFader
 	{
 		public class OnSelectEvent : UnityEvent<string> { }
 
@@ -21,6 +21,13 @@ namespace SCANsat.Unity.Unity
 
 		private string currentElement;
 		private OnSelectEvent _onSelectUpdate = new OnSelectEvent();
+
+		protected override void Awake()
+		{
+			base.Awake();
+
+			Alpha(0);
+		}
 
 		public OnSelectEvent OnSelectUpdate
 		{
@@ -47,6 +54,24 @@ namespace SCANsat.Unity.Unity
 			currentElement = current;
 
 			AddElements(elements);
+
+			FadeIn();
+		}
+
+		public void FadeIn()
+		{
+			Fade(1, true);
+		}
+
+		public void FadeOut(bool fast = false)
+		{
+			Fade(0, fast, Close, false);
+		}
+
+		private void Close()
+		{
+			gameObject.SetActive(false);
+			DestroyImmediate(gameObject);
 		}
 
 		public void SetElement(string element)

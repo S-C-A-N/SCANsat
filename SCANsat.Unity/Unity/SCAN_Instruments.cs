@@ -7,7 +7,7 @@ using SCANsat.Unity.Interfaces;
 
 namespace SCANsat.Unity.Unity
 {
-	public class SCAN_Instruments : MonoBehaviour, IDragHandler, IBeginDragHandler, IEndDragHandler, IPointerDownHandler
+	public class SCAN_Instruments : CanvasFader, IDragHandler, IBeginDragHandler, IEndDragHandler, IPointerDownHandler
 	{
 		[SerializeField]
 		private TextHandler m_Version = null;
@@ -29,9 +29,13 @@ namespace SCANsat.Unity.Unity
 		private Vector2 mouseStart;
 		private Vector3 windowStart;
 
-		private void Awake()
+		protected override void Awake()
 		{
+			base.Awake();
+
 			rect = GetComponent<RectTransform>();
+
+			Alpha(0);
 		}
 
 		private void Update()
@@ -58,6 +62,56 @@ namespace SCANsat.Unity.Unity
 			SetScale(ins.Scale);
 
 			SetPosition(ins.Position);
+
+			ProcessTooltips();
+
+			FadeIn();
+		}
+
+		public void FadeIn()
+		{
+			Fade(1, true);
+		}
+
+		public void FadeOut()
+		{
+			Fade(0, false, Kill, false);
+		}
+
+		private void Kill()
+		{
+			gameObject.SetActive(false);
+			Destroy(gameObject);
+		}
+
+		public void Close()
+		{
+			if (insInterface != null)
+				insInterface.IsVisible = false;
+		}
+
+		public void ProcessTooltips()
+		{
+			if (insInterface == null)
+				return;
+
+			TooltipHandler[] handlers = gameObject.GetComponentsInChildren<TooltipHandler>(true);
+
+			if (handlers == null)
+				return;
+
+			for (int j = 0; j < handlers.Length; j++)
+				ProcessTooltip(handlers[j], insInterface.TooltipsOn, insInterface.TooltipCanvas, insInterface.Scale);
+		}
+
+		private void ProcessTooltip(TooltipHandler handler, bool isOn, Canvas c, float scale)
+		{
+			if (handler == null)
+				return;
+
+			handler.IsActive = isOn && !handler.HelpTip;
+			handler._Canvas = c;
+			handler.Scale = scale;
 		}
 
 		public void SetScale(float scale)
@@ -138,14 +192,6 @@ namespace SCANsat.Unity.Unity
 				return;
 
 			m_AnomalyNameText.OnTextUpdate.Invoke(s);
-		}
-
-		public void Close()
-		{
-			if (insInterface == null)
-				return;
-
-			insInterface.IsVisible = false;
 		}
 
 		public void PreviousResource()

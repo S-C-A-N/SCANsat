@@ -16,7 +16,11 @@ namespace SCANsat.Unity.Interfaces
 
 		bool Minimized { get; set; }
 
+		bool TooltipsOn { get; }
+
 		float Scale { get; }
+
+		Canvas TooltipCanvas { get; }
 
 		Vector2 Position { get; set; }
 
