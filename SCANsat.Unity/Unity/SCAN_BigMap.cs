@@ -8,7 +8,7 @@ using SCANsat.Unity.Interfaces;
 
 namespace SCANsat.Unity.Unity
 {
-	public class SCAN_BigMap : MonoBehaviour, IDragHandler, IBeginDragHandler, IEndDragHandler, IPointerDownHandler
+	public class SCAN_BigMap : CanvasFader, IDragHandler, IBeginDragHandler, IEndDragHandler, IPointerDownHandler
 	{
 		[SerializeField]
 		private TextHandler m_Version = null;
@@ -53,6 +53,8 @@ namespace SCANsat.Unity.Unity
 		[SerializeField]
 		private RawImage m_MapImage = null;
 		[SerializeField]
+		private RawImage m_EQMap = null;
+		[SerializeField]
 		private LayoutElement m_MapLayout = null;
 		[SerializeField]
 		private GameObject m_MapLabelPrefab = null;
@@ -66,6 +68,17 @@ namespace SCANsat.Unity.Unity
 		private TextHandler m_LegendLabelTwo = null;
 		[SerializeField]
 		private TextHandler m_LegendLabelThree = null;
+		[SerializeField]
+		private GameObject m_SmallMapButton = null;
+		[SerializeField]
+		private GameObject m_ZoomMapButton = null;
+		[SerializeField]
+		private GameObject m_OverlayButton = null;
+		[SerializeField]
+		private GameObject m_InstrumentsButton = null;
+		[SerializeField]
+		private GameObject m_SettingsButton = null;
+
 
 		private ISCAN_BigMap bigInterface;
 		private bool loaded;
@@ -85,9 +98,13 @@ namespace SCANsat.Unity.Unity
 
 		private SCAN_DropDown dropDown;
 
-		private void Awake()
+		protected override void Awake()
 		{
+			base.Awake();
+
 			rect = GetComponent<RectTransform>();
+
+			Alpha(0);
 		}
 
 		private void Update()
@@ -115,6 +132,13 @@ namespace SCANsat.Unity.Unity
 
 					label.UpdateIcon(bigInterface.OrbitInfo(i));
 				}
+
+				for (int i = orbitIconLabels.Count - 1; i >= 0; i--)
+				{
+					SCAN_MapLabel label = orbitIconLabels[i];
+
+					label.UpdatePositionActivation(bigInterface.OrbitIconInfo(label.StringID));
+				}
 			}
 		}
 
@@ -138,9 +162,6 @@ namespace SCANsat.Unity.Unity
 
 			r.GetWorldCorners(corners);
 
-			//print(string.Format("[SCAN_UI] Map Corners: 0: {0:N2} - 1: {1:N2} - 2: {2:N2} - 3: {3:N2}",
-				//corners[0], corners[1], corners[2], corners[3]));
-
 			if (canvas.renderMode == RenderMode.ScreenSpaceOverlay)
 			{
 				pos = RectTransformUtility.WorldToScreenPoint(null, corners[0]);
@@ -151,8 +172,6 @@ namespace SCANsat.Unity.Unity
 			}
 
 			pos.y = Screen.height - pos.y - r.sizeDelta.y;
-
-			//print(string.Format("[SCAN_UI] Screen Position: {0:N2}", pos));
 
 			return pos;
 		}
@@ -194,7 +213,7 @@ namespace SCANsat.Unity.Unity
 			if (m_ResourcesToggle != null)
 				m_ResourcesToggle.isOn = map.ResourceToggle;
 
-			if (!map.ShowOrbit && m_OrbitObject != null)
+			if (!map.OrbitAvailable && m_OrbitObject != null)
 				m_OrbitObject.SetActive(false);
 
 			if (!map.ShowWaypoint && m_WaypointObject != null)
@@ -202,12 +221,10 @@ namespace SCANsat.Unity.Unity
 
 			if (!map.ShowResource && m_Resources != null)
 				m_Resources.gameObject.SetActive(false);
+			
+			SetLegend(map.LegendToggle, map.LegendImage, map.LegendLabels);
 
-			if (m_LegendObject != null && !map.LegendToggle)
-				m_LegendObject.SetActive(false);
-
-			if (map.LegendToggle)
-				SetLegend(map.LegendImage, map.LegendLabels);
+			SetButtons(map.CurrentScene);
 
 			SetScale(map.Scale);
 
@@ -217,7 +234,90 @@ namespace SCANsat.Unity.Unity
 
 			SetIcons();
 
+			ProcessTooltips();
+
+			FadeIn();
+
 			loaded = true;
+		}
+
+		public void FadeIn()
+		{
+			Fade(1, true);
+		}
+
+		public void FadeOut()
+		{
+			Fade(0, false, Kill, false);
+		}
+
+		private void Kill()
+		{
+			gameObject.SetActive(false);
+			Destroy(gameObject);
+		}
+
+		public void Close()
+		{
+			if (bigInterface != null)
+				bigInterface.IsVisible = false;
+		}
+
+		public void ProcessTooltips()
+		{
+			if (bigInterface == null)
+				return;
+
+			TooltipHandler[] handlers = gameObject.GetComponentsInChildren<TooltipHandler>(true);
+
+			if (handlers == null)
+				return;
+
+			for (int j = 0; j < handlers.Length; j++)
+				ProcessTooltip(handlers[j], bigInterface.TooltipsOn, bigInterface.TooltipCanvas, bigInterface.Scale);
+		}
+
+		private void ProcessTooltip(TooltipHandler handler, bool isOn, Canvas c, float scale)
+		{
+			if (handler == null)
+				return;
+
+			handler.IsActive = isOn && !handler.HelpTip;
+			handler._Canvas = c;
+			handler.Scale = scale;
+		}
+
+		private void SetButtons(int i)
+		{
+			switch(i)
+			{
+				case -1:
+					if (m_SmallMapButton != null)
+						m_SmallMapButton.SetActive(false);
+					if (m_ZoomMapButton != null)
+						m_ZoomMapButton.SetActive(false);
+					if (m_OverlayButton != null)
+						m_OverlayButton.SetActive(false);
+					if (m_InstrumentsButton != null)
+						m_InstrumentsButton.SetActive(false);
+					if (m_SettingsButton != null)
+						m_SettingsButton.SetActive(false);
+					break;
+				case 1:
+					if (m_SmallMapButton != null)
+						m_SmallMapButton.SetActive(false);
+					if (m_InstrumentsButton != null)
+						m_InstrumentsButton.SetActive(false);
+					break;
+				case 2:
+					if (m_SmallMapButton != null)
+						m_SmallMapButton.SetActive(false);
+					if (m_OverlayButton != null)
+						m_OverlayButton.SetActive(false);
+					if (m_InstrumentsButton != null)
+						m_InstrumentsButton.SetActive(false);
+					break;
+			}
 		}
 
 		public void SetScale(float scale)
@@ -250,8 +350,22 @@ namespace SCANsat.Unity.Unity
 			m_MapLayout.preferredHeight = m_MapLayout.preferredWidth / 2;
 		}
 
-		private void SetLegend(Texture2D tex, IList<string> labels)
+		private void SetLegend(bool isOn, Texture2D tex, IList<string> labels)
 		{
+			if (m_LegendObject == null)
+				return;
+
+			if (bigInterface.CurrentMapType == "Altimetry")
+				m_LegendObject.SetActive(isOn);
+			else
+			{
+				m_LegendObject.SetActive(false);
+				return;
+			}
+
+			if (!isOn)
+				return;
+
 			if (m_LegendImage != null)
 				m_LegendImage.texture = tex;
 
@@ -422,6 +536,41 @@ namespace SCANsat.Unity.Unity
 			orbitLabels.Add(label);
 		}
 
+		private void SetOrbitMapIcons(Dictionary<string, MapLabelInfo> orbitLabels)
+		{
+			if (orbitLabels == null)
+				return;
+
+			if (bigInterface == null || m_MapLabelPrefab == null || m_MapImage == null)
+				return;
+
+			for (int i = 0; i < orbitLabels.Count; i++)
+			{
+				string id = orbitLabels.ElementAt(i).Key;
+
+				MapLabelInfo info;
+
+				if (!orbitLabels.TryGetValue(id, out info))
+					continue;
+
+				CreateOrbitMapIcon(id, info);
+			}
+		}
+
+		private void CreateOrbitMapIcon(string id, MapLabelInfo info)
+		{
+			SCAN_MapLabel mapLabel = Instantiate(m_MapLabelPrefab).GetComponent<SCAN_MapLabel>();
+
+			if (mapLabel == null)
+				return;
+
+			mapLabel.transform.SetParent(m_MapImage.transform, false);
+
+			mapLabel.Setup(id, info);
+
+			orbitIconLabels.Add(mapLabel);
+		}
+
 		private void ClearIcons()
 		{
 			for (int i = waypointLabels.Count - 1; i >= 0; i--)
@@ -456,6 +605,14 @@ namespace SCANsat.Unity.Unity
 				Destroy(s.gameObject);
 			}
 
+			for (int i = orbitIconLabels.Count - 1; i >= 0; i--)
+			{
+				SCAN_MapLabel m = orbitIconLabels[i];
+
+				m.gameObject.SetActive(false);
+				Destroy(m.gameObject);
+			}
+
 			if (vesselLabel != null)
 			{
 				vesselLabel.gameObject.SetActive(false);
@@ -466,10 +623,11 @@ namespace SCANsat.Unity.Unity
 			anomalyLabels.Clear();
 			waypointLabels.Clear();
 			orbitLabels.Clear();
+			orbitIconLabels.Clear();
 			vesselLabel = null;
 		}
 
-		private void RefreshIcons()
+		public void RefreshIcons()
 		{
 			ClearIcons();
 
@@ -491,7 +649,10 @@ namespace SCANsat.Unity.Unity
 				SetWaypointIcons(bigInterface.WaypointInfoList);
 
 			if (bigInterface.OrbitToggle && bigInterface.ShowOrbit)
+			{
 				SetOrbitIcons(bigInterface.OrbitSteps);
+				SetOrbitMapIcons(bigInterface.OrbitLabelList);
+			}
 
 			SetVesselIcon(bigInterface.VesselInfo);
 		}
@@ -552,11 +713,6 @@ namespace SCANsat.Unity.Unity
 			if (!(eventData is PointerEventData))
 				return;
 
-			//print(string.Format("[SCAN_UI] Resize - Width: {0:N2} - Delta: {1:N2} - Height: {2:N2}"
-			//	, m_MapLayout.preferredWidth
-			//	, ((PointerEventData)eventData).delta.x
-			//	, m_MapLayout.preferredHeight));
-
 			m_MapLayout.preferredWidth += ((PointerEventData)eventData).delta.x;
 
 			if (m_MapLayout.preferredWidth < m_MapLayout.minWidth)
@@ -568,11 +724,6 @@ namespace SCANsat.Unity.Unity
 				m_MapLayout.preferredWidth += 1;
 
 			m_MapLayout.preferredHeight = m_MapLayout.preferredWidth / 2;
-
-			//print(string.Format("[SCAN_UI] New size - Width: {0:N2} - Delta: {1:N2} - Height: {2:N2}"
-			//	, m_MapLayout.preferredWidth
-			//	, ((PointerEventData)eventData).delta.x
-			//	, m_MapLayout.preferredHeight));
 		}
 
 		public void OnEndResize(BaseEventData eventData)
@@ -602,20 +753,11 @@ namespace SCANsat.Unity.Unity
 			if (RectTransformUtility.RectangleContainsScreenPoint(r, eventData.position, eventData.pressEventCamera))
 				return;
 
-			dropDown.gameObject.SetActive(false);
-			DestroyImmediate(dropDown.gameObject);
+			dropDown.FadeOut();
 			dropDown = null;
 
 			if (m_DropDownToggles != null)
 				m_DropDownToggles.SetAllTogglesOff();
-		}
-
-		public void Close()
-		{
-			if (bigInterface == null)
-				return;
-
-			bigInterface.IsVisible = false;
 		}
 
 		public void UpdateTitle(string text)
@@ -634,12 +776,17 @@ namespace SCANsat.Unity.Unity
 			m_MapImage.texture = map;
 		}
 
+		public void UpdateEQMapTexture(Texture2D eq)
+		{
+			if (m_EQMap != null)
+				m_EQMap.texture = eq;
+		}
+
 		public void ToggleProjectionSelection(bool isOn)
 		{
 			if (dropDown != null)
 			{
-				dropDown.gameObject.SetActive(false);
-				DestroyImmediate(dropDown.gameObject);
+				dropDown.FadeOut(true);
 				dropDown = null;
 			}
 
@@ -668,8 +815,7 @@ namespace SCANsat.Unity.Unity
 
 			bigInterface.CurrentProjection = selection;
 
-			dropDown.gameObject.SetActive(false);
-			DestroyImmediate(dropDown.gameObject);
+			dropDown.FadeOut();
 			dropDown = null;
 
 			if (m_DropDownToggles != null)
@@ -682,8 +828,7 @@ namespace SCANsat.Unity.Unity
 		{
 			if (dropDown != null)
 			{
-				dropDown.gameObject.SetActive(false);
-				DestroyImmediate(dropDown.gameObject);
+				dropDown.FadeOut(true);
 				dropDown = null;
 			}
 
@@ -712,22 +857,22 @@ namespace SCANsat.Unity.Unity
 
 			bigInterface.CurrentMapType = selection;
 
-			dropDown.gameObject.SetActive(false);
-			DestroyImmediate(dropDown.gameObject);
+			dropDown.FadeOut();
 			dropDown = null;
 
 			if (m_DropDownToggles != null)
 				m_DropDownToggles.SetAllTogglesOff();
 
 			RefreshIcons();
+
+			SetLegend(bigInterface.LegendToggle, bigInterface.LegendImage, bigInterface.LegendLabels);
 		}
 
 		public void ToggleResourceSelection(bool isOn)
 		{
 			if (dropDown != null)
 			{
-				dropDown.gameObject.SetActive(false);
-				DestroyImmediate(dropDown.gameObject);
+				dropDown.FadeOut(true);
 				dropDown = null;
 			}
 
@@ -756,8 +901,7 @@ namespace SCANsat.Unity.Unity
 
 			bigInterface.CurrentResource = selection;
 
-			dropDown.gameObject.SetActive(false);
-			DestroyImmediate(dropDown.gameObject);
+			dropDown.FadeOut();
 			dropDown = null;
 
 			if (m_DropDownToggles != null)
@@ -770,8 +914,7 @@ namespace SCANsat.Unity.Unity
 		{
 			if (dropDown != null)
 			{
-				dropDown.gameObject.SetActive(false);
-				DestroyImmediate(dropDown.gameObject);
+				dropDown.FadeOut(true);
 				dropDown = null;
 			}
 
@@ -800,11 +943,9 @@ namespace SCANsat.Unity.Unity
 
 			bigInterface.CurrentCelestialBody = selection;
 
-			if (bigInterface.LegendToggle)
-				SetLegend(bigInterface.LegendImage, bigInterface.LegendLabels);
+			SetLegend(bigInterface.LegendToggle, bigInterface.LegendImage, bigInterface.LegendLabels);
 
-			dropDown.gameObject.SetActive(false);
-			DestroyImmediate(dropDown.gameObject);
+			dropDown.FadeOut();
 			dropDown = null;
 
 			if (m_DropDownToggles != null)
@@ -832,8 +973,7 @@ namespace SCANsat.Unity.Unity
 
 			RefreshIcons();
 
-			if (bigInterface.LegendToggle)
-				SetLegend(bigInterface.LegendImage, bigInterface.LegendLabels);
+			SetLegend(bigInterface.LegendToggle, bigInterface.LegendImage, bigInterface.LegendLabels);
 		}
 
 		public void ToggleGrid(bool isOn)
@@ -938,11 +1078,7 @@ namespace SCANsat.Unity.Unity
 
 			bigInterface.LegendToggle = isOn;
 
-			if (m_LegendObject != null)
-				m_LegendObject.SetActive(isOn);
-
-			if (isOn)
-				SetLegend(bigInterface.LegendImage, bigInterface.LegendLabels);
+			SetLegend(isOn, bigInterface.LegendImage, bigInterface.LegendLabels);
 		}
 
 		public void ToggleResource(bool isOn)

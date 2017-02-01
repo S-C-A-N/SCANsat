@@ -36,17 +36,25 @@ namespace SCANsat.Unity.Interfaces
 
 		bool ResourceToggle { get; set; }
 
+		bool OrbitAvailable { get; }
+
 		bool ShowOrbit { get; }
 
 		bool ShowWaypoint { get; }
 
 		bool ShowResource { get; }
 
+		bool TooltipsOn { get; }
+
 		int OrbitSteps { get; }
+
+		int CurrentScene { get; }
 
 		float Scale { get; }
 
 		Canvas MainCanvas { get; }
+
+		Canvas TooltipCanvas { get; }
 
 		Vector2 Position { get; set; }
 
@@ -65,6 +73,8 @@ namespace SCANsat.Unity.Interfaces
 		IList<string> CelestialBodies { get; }
 
 		IList<string> LegendLabels { get; }
+
+		Dictionary<string, MapLabelInfo> OrbitLabelList { get; }
 
 		Dictionary<Guid, MapLabelInfo> FlagInfoList { get; }
 
@@ -95,6 +105,8 @@ namespace SCANsat.Unity.Interfaces
 		void OnGUI();
 
 		SimpleLabelInfo OrbitInfo(int index);
+
+		MapLabelInfo OrbitIconInfo(string id);
 
 		Vector2 VesselPosition();
 	}
