@@ -135,6 +135,14 @@ namespace SCANsat
 				if (Save())
 					SCANUtil.SCANlog("Settings file generated at:\n{0}", filePath);
 			}
+
+			GameEvents.onGameStateSaved.Add(GameSaved);
+		}
+
+		private void GameSaved(Game g)
+		{
+			if (HighLogic.CurrentGame == g)
+				Save();
 		}
 
 		public bool Load()

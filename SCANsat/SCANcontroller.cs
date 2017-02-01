@@ -948,7 +948,7 @@ namespace SCANsat
 				}
 				catch (Exception e)
 				{
-					SCANUtil.SCANlog("Something Went Wrong Initializing UI Objects: {0}", e);
+					SCANUtil.SCANlog("Something Went Wrong Initializing UI Objects:\n{0}", e);
 				}
 			}
 			else if (HighLogic.LoadedSceneHasPlanetarium)
@@ -969,7 +969,7 @@ namespace SCANsat
 				}
 				catch (Exception e)
 				{
-					SCANUtil.SCANlog("Something Went Wrong Initializing UI Objects: {0}", e);
+					SCANUtil.SCANlog("Something Went Wrong Initializing UI Objects:\n{0}", e);
 				}
 			}
 			if (SCAN_Settings_Config.Instance.StockToolbar)

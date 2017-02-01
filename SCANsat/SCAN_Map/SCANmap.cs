@@ -123,6 +123,7 @@ namespace SCANsat.SCAN_Map
 		public bool ResourceActive
 		{
 			get { return resourceActive; }
+			set { resourceActive = value; }
 		}
 
 		public SCANmapLegend MapLegend

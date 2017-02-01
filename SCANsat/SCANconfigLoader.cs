@@ -44,7 +44,7 @@ namespace SCANsat
 
 		public static SCANlanguagePack languagePack
 		{
-			get { return localNode.ActivePack; }
+			get { return localNode == null ? null : localNode.ActivePack; }
 		}
 
 		public static bool GlobalResource
