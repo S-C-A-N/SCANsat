@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using UnityEngine;
+using SCANsat.SCAN_Toolbar;
 using SCANsat.Unity.Interfaces;
 using SCANsat.Unity.Unity;
 using SCANsat.SCAN_Data;
@@ -69,6 +70,12 @@ namespace SCANsat.SCAN_Unity
 		{
 			if (uiElement != null)
 				uiElement.SetScale(scale);
+		}
+
+		public void ProcessTooltips()
+		{
+			if (uiElement != null)
+				uiElement.ProcessTooltips();
 		}
 
 		public void Update()
@@ -144,6 +151,12 @@ namespace SCANsat.SCAN_Unity
 			uiElement.SetInstruments(this);
 
 			_isVisible = true;
+
+			if (HighLogic.LoadedSceneIsFlight && SCAN_Settings_Config.Instance.StockToolbar && SCAN_Settings_Config.Instance.ToolbarMenu)
+			{
+				if (SCANappLauncher.Instance != null && SCANappLauncher.Instance.UIElement != null)
+					SCANappLauncher.Instance.UIElement.SetInstrumentToggle(true);
+			}
 		}
 
 		public void Close()
@@ -153,8 +166,13 @@ namespace SCANsat.SCAN_Unity
 			if (uiElement == null)
 				return;
 
-			uiElement.gameObject.SetActive(false);
-			MonoBehaviour.Destroy(uiElement.gameObject);
+			uiElement.FadeOut();
+
+			if (HighLogic.LoadedSceneIsFlight && SCAN_Settings_Config.Instance.StockToolbar && SCAN_Settings_Config.Instance.ToolbarMenu)
+			{
+				if (SCANappLauncher.Instance != null && SCANappLauncher.Instance.UIElement != null)
+					SCANappLauncher.Instance.UIElement.SetInstrumentToggle(false);
+			}
 		}
 
 		public string Version
@@ -207,6 +225,11 @@ namespace SCANsat.SCAN_Unity
 			get { return false; }
 		}
 
+		public bool TooltipsOn
+		{
+			get { return SCAN_Settings_Config.Instance.WindowTooltips; }
+		}
+
 		public float Scale
 		{
 			get { return SCAN_Settings_Config.Instance.UIScale; }
@@ -215,6 +238,11 @@ namespace SCANsat.SCAN_Unity
 		public Texture AnomalyCamera
 		{
 			get { return null; }
+		}
+
+		public Canvas TooltipCanvas
+		{
+			get { return UIMasterController.Instance.tooltipCanvas; }
 		}
 
 		public Vector2 Position

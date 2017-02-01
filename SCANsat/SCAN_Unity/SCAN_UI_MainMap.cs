@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using UnityEngine;
+using SCANsat.SCAN_Toolbar;
 using SCANsat.Unity.Interfaces;
 using SCANsat.Unity;
 using SCANsat.Unity.Unity;
@@ -57,6 +58,9 @@ namespace SCANsat.SCAN_Unity
 			GameEvents.onVesselSOIChanged.Add(soiChange);
 			GameEvents.onVesselChange.Add(vesselChange);
 			GameEvents.onVesselWasModified.Add(vesselChange);
+
+			if (SCANcontroller.controller.mainMapVisible)
+				Open();
 		}
 
 		public void OnDestroy()
@@ -112,6 +116,12 @@ namespace SCANsat.SCAN_Unity
 		{
 			if (uiElement != null)
 				uiElement.SetScale(scale);
+		}
+
+		public void ProcessTooltips()
+		{
+			if (uiElement != null)
+				uiElement.ProcessTooltips();
 		}
 
 		public void Update()
@@ -215,7 +225,7 @@ namespace SCANsat.SCAN_Unity
 			{
 				data = new SCANdata(v.mainBody);
 				SCANcontroller.controller.addToBodyData(v.mainBody, data);
-			}			
+			}
 
 			uiElement = GameObject.Instantiate(SCAN_UI_Loader.MainMapPrefab).GetComponent<SCAN_MainMap>();
 
@@ -229,17 +239,46 @@ namespace SCANsat.SCAN_Unity
 			uiElement.UpdateMapTexture(map_small);
 
 			_isVisible = true;
+			SCANcontroller.controller.mainMapVisible = true;
+
+			if (HighLogic.LoadedSceneIsFlight && SCAN_Settings_Config.Instance.StockToolbar)
+			{
+				if (SCAN_Settings_Config.Instance.ToolbarMenu)
+				{
+					if (SCANappLauncher.Instance != null && SCANappLauncher.Instance.UIElement != null)
+						SCANappLauncher.Instance.UIElement.SetMainMapToggle(true);
+				}
+				else
+				{
+					if (SCANappLauncher.Instance != null && SCANappLauncher.Instance.SCANAppButton != null)
+						SCANappLauncher.Instance.SCANAppButton.SetTrue(false);
+				}
+			}
 		}
 
 		public void Close()
 		{
 			_isVisible = false;
+			SCANcontroller.controller.mainMapVisible = false;
 
 			if (uiElement == null)
 				return;
 
-			uiElement.gameObject.SetActive(false);
-			MonoBehaviour.Destroy(uiElement.gameObject);
+			uiElement.FadeOut();
+
+			if (HighLogic.LoadedSceneIsFlight && SCAN_Settings_Config.Instance.StockToolbar)
+			{
+				if (SCAN_Settings_Config.Instance.ToolbarMenu)
+				{
+					if (SCANappLauncher.Instance != null && SCANappLauncher.Instance.UIElement != null)
+						SCANappLauncher.Instance.UIElement.SetMainMapToggle(false);
+				}
+				else
+				{
+					if (SCANappLauncher.Instance != null && SCANappLauncher.Instance.SCANAppButton != null)
+						SCANappLauncher.Instance.SCANAppButton.SetFalse(false);
+				}
+			}
 		}
 
 		public bool IsVisible
@@ -282,9 +321,19 @@ namespace SCANsat.SCAN_Unity
 			set { SCANcontroller.controller.mainMapMinimized = value; }
 		}
 
+		public bool TooltipsOn
+		{
+			get { return SCAN_Settings_Config.Instance.WindowTooltips; }
+		}
+
 		public float Scale
 		{
 			get { return SCAN_Settings_Config.Instance.UIScale; }
+		}
+
+		public Canvas TooltipCanvas
+		{
+			get { return UIMasterController.Instance.tooltipCanvas; }
 		}
 
 		public Vector2 Position
@@ -355,7 +404,8 @@ namespace SCANsat.SCAN_Unity
 					baseColor = Color ? palette.white : palette.cb_skyBlue,
 					flashColor = palette.cb_yellow,
 					flash = true,
-					width = 18
+					width = 18,
+					show = true
 				});
 
 				int count = 2;
@@ -378,7 +428,8 @@ namespace SCANsat.SCAN_Unity
 						pos = VesselPosition(sv.vessel.id),
 						baseColor = Color ? palette.white : palette.cb_skyBlue,
 						flash = false,
-						width = 18
+						width = 18,
+						show = true
 					});
 
 					count++;

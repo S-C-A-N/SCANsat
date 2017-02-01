@@ -74,11 +74,17 @@ namespace SCANsat.SCAN_Unity
 			uiElement.setSettings(this, page);
 
 			if (!savePosition)
-				_position = new Vector2();
+				_position = new Vector2(0, 100);
 
 			uiElement.SetPosition(_position);
 
 			_isVisible = true;
+
+			if (HighLogic.LoadedSceneIsFlight && SCAN_Settings_Config.Instance.StockToolbar && SCAN_Settings_Config.Instance.ToolbarMenu)
+			{
+				if (SCANappLauncher.Instance != null && SCANappLauncher.Instance.UIElement != null)
+					SCANappLauncher.Instance.UIElement.SetSettingsToggle(true);
+			}
 		}
 
 		public void Close()
@@ -88,8 +94,15 @@ namespace SCANsat.SCAN_Unity
 			if (uiElement == null)
 				return;
 
-			uiElement.gameObject.SetActive(false);
-			MonoBehaviour.Destroy(uiElement.gameObject);
+			uiElement.FadeOut();
+
+			uiElement.FadeOut();
+
+			if (HighLogic.LoadedSceneIsFlight && SCAN_Settings_Config.Instance.StockToolbar && SCAN_Settings_Config.Instance.ToolbarMenu)
+			{
+				if (SCANappLauncher.Instance != null && SCANappLauncher.Instance.UIElement != null)
+					SCANappLauncher.Instance.UIElement.SetSettingsToggle(false);
+			}
 		}
 
 		public string Version
@@ -206,7 +219,28 @@ namespace SCANsat.SCAN_Unity
 		public bool WindowTooltips
 		{
 			get { return SCAN_Settings_Config.Instance.WindowTooltips; }
-			set { SCAN_Settings_Config.Instance.WindowTooltips = value; }			
+			set
+			{
+				SCAN_Settings_Config.Instance.WindowTooltips = value;
+
+				SCAN_UI_Loader.ToggleTooltips(value);
+
+				if (SCAN_UI_BigMap.Instance != null && SCAN_UI_BigMap.Instance.IsVisible)
+					SCAN_UI_BigMap.Instance.ProcessTooltips();
+
+				if (SCAN_UI_MainMap.Instance != null && SCAN_UI_MainMap.Instance.IsVisible)
+					SCAN_UI_MainMap.Instance.ProcessTooltips();
+
+				if (SCAN_UI_Instruments.Instance != null && SCAN_UI_Instruments.Instance.IsVisible)
+					SCAN_UI_Instruments.Instance.ProcessTooltips();
+
+				if (SCAN_UI_Overlay.Instance != null && SCAN_UI_Overlay.Instance.IsVisible)
+					SCAN_UI_Overlay.Instance.ProcessTooltips();
+
+				if (SCAN_Settings_Config.Instance.StockToolbar && SCAN_Settings_Config.Instance.ToolbarMenu
+					&& SCANappLauncher.Instance != null && SCANappLauncher.Instance.IsVisible)
+					SCANappLauncher.Instance.ProcessTooltips();
+			}			
 		}
 
 		public bool StockToolbar
@@ -229,7 +263,13 @@ namespace SCANsat.SCAN_Unity
 		public bool ToolbarMenu
 		{
 			get { return SCAN_Settings_Config.Instance.ToolbarMenu; }
-			set { SCAN_Settings_Config.Instance.ToolbarMenu = value; }
+			set
+			{
+				SCAN_Settings_Config.Instance.ToolbarMenu = value;
+
+				if (SCANappLauncher.Instance != null)
+					SCANappLauncher.Instance.ToggleToolbarType();
+			}
 		}
 
 		public bool StockUIStyle
@@ -326,7 +366,12 @@ namespace SCANsat.SCAN_Unity
 		{
 			get { return SCAN_Settings_Config.Instance.CheatMapFill; }
 		}
-		
+
+		public Canvas TooltipCanvas
+		{
+			get { return UIMasterController.Instance.tooltipCanvas; }
+		}
+
 		public Vector2 Position
 		{
 			set { _position = value; }
@@ -445,7 +490,7 @@ namespace SCANsat.SCAN_Unity
 			if (data == null)
 				return 0;
 
-			return SCANUtil.getCoveragePercentage(data, SCANtype.Nothing);
+			return SCANUtil.getCoveragePercentage(data, SCANtype.Nothing) / 100;
 		}
 
 		private CelestialBody getTargetBody()

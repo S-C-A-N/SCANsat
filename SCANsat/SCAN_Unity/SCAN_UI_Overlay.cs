@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading;
 using System.Text;
 using UnityEngine;
+using SCANsat.SCAN_Toolbar;
 using SCANsat.Unity.Interfaces;
 using SCANsat.Unity.Unity;
 using SCANsat.SCAN_Data;
@@ -86,6 +87,12 @@ namespace SCANsat.SCAN_Unity
 				uiElement.SetScale(scale);
 		}
 
+		public void ProcessTooltips()
+		{
+			if (uiElement != null)
+				uiElement.ProcessTooltips();
+		}
+
 		public void Update()
 		{
 			if ((MapView.MapIsEnabled && HighLogic.LoadedSceneIsFlight && FlightGlobals.ready) || HighLogic.LoadedScene == GameScenes.TRACKSTATION)
@@ -117,6 +124,12 @@ namespace SCANsat.SCAN_Unity
 			uiElement.SetOverlay(this);
 
 			_isVisible = true;
+
+			if (HighLogic.LoadedSceneIsFlight && SCAN_Settings_Config.Instance.StockToolbar && SCAN_Settings_Config.Instance.ToolbarMenu)
+			{
+				if (SCANappLauncher.Instance != null && SCANappLauncher.Instance.UIElement != null)
+					SCANappLauncher.Instance.UIElement.SetOverlayToggle(true);
+			}
 		}
 
 		public void Close()
@@ -126,8 +139,13 @@ namespace SCANsat.SCAN_Unity
 			if (uiElement == null)
 				return;
 
-			uiElement.gameObject.SetActive(false);
-			MonoBehaviour.Destroy(uiElement.gameObject);
+			uiElement.FadeOut();
+
+			if (HighLogic.LoadedSceneIsFlight && SCAN_Settings_Config.Instance.StockToolbar && SCAN_Settings_Config.Instance.ToolbarMenu)
+			{
+				if (SCANappLauncher.Instance != null && SCANappLauncher.Instance.UIElement != null)
+					SCANappLauncher.Instance.UIElement.SetOverlayToggle(false);
+			}
 		}
 
 		public string Version
@@ -216,9 +234,19 @@ namespace SCANsat.SCAN_Unity
 			get { return SCANcontroller.controller.overlaySelection == 2; }
 		}
 
+		public bool TooltipsOn
+		{
+			get { return SCAN_Settings_Config.Instance.WindowTooltips; }
+		}
+
 		public float Scale
 		{
 			get { return SCAN_Settings_Config.Instance.UIScale; }
+		}
+
+		public Canvas TooltipCanvas
+		{
+			get { return UIMasterController.Instance.tooltipCanvas; }
 		}
 
 		public IList<string> Resources
