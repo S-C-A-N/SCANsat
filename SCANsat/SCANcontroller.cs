@@ -47,98 +47,6 @@ namespace SCANsat
 		private static int minScanAlt = 5000;
 		private static int maxScanAlt = 500000;
 		private static int bestScanAlt = 250000;
-		//[KSPField(isPersistant = true)]
-		//public int colours = 0;
-		//[KSPField(isPersistant = true)]
-		//public bool map_markers = true;
-		//[KSPField(isPersistant = true)]
-		//public bool map_flags = true;
-		//[KSPField(isPersistant = true)]
-		//public bool map_waypoints = true;
-		//[KSPField(isPersistant = true)]
-		//public bool map_orbit = true;
-		//[KSPField(isPersistant = true)]
-		//public bool map_asteroids = true;
-		//[KSPField(isPersistant = true)]
-		//public bool map_grid = true;
-		//[KSPField(isPersistant = true)]
-		//public bool map_ResourceOverlay = false; //Is the overlay activated for the selected resource
-		//[KSPField(isPersistant = true)]
-		//public int projection = 0;
-		//[KSPField(isPersistant = true)]
-		//public int map_width = 0;
-		//[KSPField(isPersistant = true)]
-		//public int map_x = 100;
-		//[KSPField(isPersistant = true)]
-		//public int map_y = 50;
-		//[KSPField(isPersistant = true)]
-		//public string anomalyMarker = "X";
-		//public string closeBox = "X";
-		//[KSPField(isPersistant = true)]
-		//public bool legend = false;
-		//[KSPField(isPersistant = true)]
-		//public bool scan_background = true;
-		//[KSPField(isPersistant = true)]
-		//public int timeWarpResolution = 15;
-		//[KSPField(isPersistant = true)]
-		//public string resourceSelection;
-		//[KSPField(isPersistant = true)]
-		//public bool dataRebuild = true;
-		//[KSPField(isPersistant = true)]
-		//public bool mainMapVisibleOld = false;
-		//[KSPField(isPersistant = true)]
-		//public bool bigMapVisibleOld = false;
-		//[KSPField(isPersistant = true)]
-		//public bool kscMapVisible = false;
-		//[KSPField(isPersistant = true)]
-		//public bool toolTips = true;
-		//[KSPField(isPersistant = true)]
-		//public bool useStockAppLauncher = true;
-		//[KSPField(isPersistant = true)]
-		//public bool resourceBiomeLock = true;
-		//[KSPField(isPersistant = true)]
-		//public bool useStockBiomes = false;
-		//[KSPField(isPersistant = true)]
-		//public float biomeTransparency = 40;
-		//[KSPField(isPersistant = true)]
-		//public bool mechJebTargetSelection = false;
-		//[KSPField(isPersistant = true)]
-		//public bool easyModeScanning = true;
-		//[KSPField(isPersistant = true)]
-		//public bool needsNarrowBand = true;
-		//[KSPField(isPersistant = true)]
-		//public bool biomeBorder = true;
-		//[KSPField(isPersistant = true)]
-		//public bool disableStockResource = false;
-		//[KSPField(isPersistant = true)]
-		//public bool hiDetailZoomMap = false;
-		//[KSPField(isPersistant = true)]
-		//public bool planetaryOverlayTooltips = true;
-		//[KSPField(isPersistant = true)]
-		//public int overlayInterpolation = 8;
-		//[KSPField(isPersistant = true)]
-		//public int overlayMapHeight = 256;
-		//[KSPField(isPersistant = true)]
-		//public int overlayBiomeHeight = 512;
-		//[KSPField(isPersistant = true)]
-		//public float overlayTransparency = 0;
-		//[KSPField(isPersistant = true)]
-		//public bool trueGreyScale = false;
-		//[KSPField(isPersistant = true)]
-		//public bool groundTracks = true;
-		//[KSPField(isPersistant = true)]
-		//public bool groundTrackActiveOnly = true;
-		//[KSPField(isPersistant = true)]
-		//public bool exportCSV = false;
-		//[KSPField(isPersistant = true)]
-		//public float scanThreshold = 0.90f;
-		//[KSPField(isPersistant = true)]
-		//public bool useScanThreshold = true;
-		//[KSPField(isPersistant = true)]
-		//public float slopeCutoff = 1f;
-		//[KSPField(isPersistant = true)]
-		//public float windowScale = 1f;
-
 
 		[KSPField(isPersistant = true)]
 		public bool mainMapVisible = false;
@@ -177,21 +85,23 @@ namespace SCANsat
 		[KSPField(isPersistant = true)]
 		public string bigMapBody = "Kerbin";
 		[KSPField(isPersistant = true)]
+		public bool zoomMapVesselLock = false;
+		[KSPField(isPersistant = true)]
 		public bool zoomMapColor = true;
 		[KSPField(isPersistant = true)]
 		public bool zoomMapOrbit = true;
 		[KSPField(isPersistant = true)]
-		public bool zoomMapWaypoint = true;
+		public bool zoomMapIcons = true;
 		[KSPField(isPersistant = true)]
-		public bool zoomMapAnomaly = true;
-		[KSPField(isPersistant = true)]
-		public bool zoomMapFlag = true;
+		public bool zoomMapLegend = true;
 		[KSPField(isPersistant = true)]
 		public bool zoomMapResourceOn = false;
 		[KSPField(isPersistant = true)]
 		public string zoomMapType = "Altimetry";
 		[KSPField(isPersistant = true)]
 		public string zoomMapResource = "Ore";
+		[KSPField(isPersistant = true)]
+		public int zoomMapState = 0;
 		[KSPField(isPersistant = true)]
 		public int overlaySelection = 0;
 		[KSPField(isPersistant = true)]
@@ -240,13 +150,13 @@ namespace SCANsat
 
 		/* UI window objects */
 		internal SCANcolorSelection colorManager;
-		internal SCANzoomWindow zoomMap;
 
-		internal SCAN_UI_MainMap _mainMap;
-		internal SCAN_UI_Instruments _instruments;
-		internal SCAN_UI_BigMap _bigMap;
-		internal SCAN_UI_Overlay _overlay;
-		internal SCAN_UI_Settings _settings;
+		private SCAN_UI_MainMap _mainMap;
+		private SCAN_UI_Instruments _instruments;
+		private SCAN_UI_BigMap _bigMap;
+		private SCAN_UI_ZoomMap _zoomMap;
+		private SCAN_UI_Overlay _overlay;
+		private SCAN_UI_Settings _settings;
 		
 		/* App launcher object */
 		internal SCANappLauncher appLauncher;
@@ -931,6 +841,7 @@ namespace SCANsat
 			GameEvents.onPartCouple.Add(dockingEventCheck);
 			GameEvents.Contract.onContractsLoaded.Add(contractsCheck);
 			GameEvents.Contract.onParameterChange.Add(onParamChange);
+
 			if (HighLogic.LoadedSceneIsFlight)
 			{
 				if (!body_data.Contains(FlightGlobals.currentMainBody.name))
@@ -938,10 +849,10 @@ namespace SCANsat
 				try
 				{
 					colorManager = gameObject.AddComponent<SCANcolorSelection>();
-					zoomMap = gameObject.AddComponent<SCANzoomWindow>();
 
 					_mainMap = new SCAN_UI_MainMap();
 					_bigMap = new SCAN_UI_BigMap();
+					_zoomMap = new SCAN_UI_ZoomMap();
 					_instruments = new SCAN_UI_Instruments();
 					_overlay = new SCAN_UI_Overlay();
 					_settings = new SCAN_UI_Settings();
@@ -961,6 +872,7 @@ namespace SCANsat
 
 					_bigMap = new SCAN_UI_BigMap();
 					_settings = new SCAN_UI_Settings();
+					_zoomMap = new SCAN_UI_ZoomMap();
 
 					if (HighLogic.LoadedScene == GameScenes.TRACKSTATION)
 					{
@@ -1123,6 +1035,7 @@ namespace SCANsat
 			GameEvents.onPartCouple.Remove(dockingEventCheck);
 			GameEvents.Contract.onContractsLoaded.Remove(contractsCheck);
 			GameEvents.Contract.onParameterChange.Remove(onParamChange);
+
 			if (appLauncher != null)
 				Destroy(appLauncher);
 
@@ -1136,6 +1049,8 @@ namespace SCANsat
 				_overlay.OnDestroy();
 			if (_settings != null)
 				_settings.OnDestroy();
+			if (_zoomMap != null)
+				_zoomMap.OnDestroy();
 
 			if (SCAN_Settings_Config.Instance != null)
 				SCAN_Settings_Config.Instance.Save();
@@ -1590,6 +1505,9 @@ namespace SCANsat
 				return;
 
 			data.addSurveyWaypoints(b, s);
+
+			if (_bigMap.IsVisible && _bigMap.WaypointToggle)
+				_bigMap.RefreshIcons();
 		}
 
 		private void SOIChange(GameEvents.HostedFromToAction<Vessel, CelestialBody> VC)
