@@ -215,6 +215,18 @@ namespace SCANsat.SCAN_Map
 						lon = 1.3 * Math.Cos(lat) * Math.Sin(lon) + Math.PI / 2;
 					}
 					return Mathf.Rad2Deg * lon;
+				case MapProjection.Orthographic:
+					lon = Mathf.Deg2Rad * lon;
+					lat = Mathf.Deg2Rad * lat;
+					double centerLon = Mathf.Deg2Rad * centeredLong;
+					double centerLat = Mathf.Deg2Rad * centeredLat;
+
+					if (Math.Sin(centerLat) * Math.Sin(lat) + Math.Cos(centerLat) * Math.Cos(lat) * Math.Cos(lon - centerLon) < 0)
+						return -200;
+
+					lon = 1.5 * Math.Cos(lat) * Math.Sin(lon - centerLon);
+					
+					return Mathf.Rad2Deg * lon;
 				default:
 					return lon;
 			}
@@ -237,6 +249,18 @@ namespace SCANsat.SCAN_Map
 					{
 						lat = -1.3 * Math.Cos(lat) * Math.Cos(lon);
 					}
+					return Mathf.Rad2Deg * lat;
+				case MapProjection.Orthographic:
+					lon = Mathf.Deg2Rad * lon;
+					lat = Mathf.Deg2Rad * lat;
+					double centerLon = Mathf.Deg2Rad * centeredLong;
+					double centerLat = Mathf.Deg2Rad * centeredLat;
+
+					if (Math.Sin(centerLat) * Math.Sin(lat) + Math.Cos(centerLat) * Math.Cos(lat) * Math.Cos(lon - centerLon) < 0)
+						return -200;
+
+					lat = 1.5 * (Math.Cos(centerLat) * Math.Sin(lat) - Math.Sin(centerLat) * Math.Cos(lat) * Math.Cos(lon - centerLon));
+
 					return Mathf.Rad2Deg * lat;
 				default:
 					return lat;
@@ -286,6 +310,26 @@ namespace SCANsat.SCAN_Map
 					if (lon <= -180)
 						lon = -180;
 					return lon;
+				case MapProjection.Orthographic:
+					lon = Mathf.Deg2Rad * lon;
+					lat = Mathf.Deg2Rad * lat;
+					double centerLon = Mathf.Deg2Rad * centeredLong;
+					double centerLat = Mathf.Deg2Rad * centeredLat;
+
+					double p2 = Math.Sqrt(lon * lon + lat * lat);
+					double c2 = Math.Asin(p2/1.5);
+
+					if (Math.Cos(c2) < 0)
+						return 300;
+
+					lon = centerLon + Math.Atan2(lon * Math.Sin(c2), p2 * Math.Cos(c2) * Math.Cos(centerLat) - lat * Math.Sin(c2) * Math.Sin(centerLat));
+					
+					lon = (Mathf.Rad2Deg * lon + 180) % 360 - 180;
+
+					if (lon <= -180)
+						lon += 360;
+
+					return lon;
 				default:
 					return lon;
 			}
@@ -326,6 +370,20 @@ namespace SCANsat.SCAN_Map
 					double c = Math.Asin(p);
 					lat = Math.Asin(Math.Cos(c) * Math.Sin(lat0) + (lat * Math.Sin(c) * Math.Cos(lat0)) / (p));
 					return Mathf.Rad2Deg * lat;
+				case MapProjection.Orthographic:
+					lon = Mathf.Deg2Rad * lon;
+					lat = Mathf.Deg2Rad * lat;
+					double centerLat = Mathf.Deg2Rad * centeredLat;
+
+					double p2 = Math.Sqrt(lon * lon + lat * lat);
+					double c2 = Math.Asin(p2/1.5);
+
+					if (Math.Cos(c2) < 0)
+						return 300;
+
+					lat = Math.Asin(Math.Cos(c2) * Math.Sin(centerLat) + (lat * Math.Sin(c2) * Math.Cos(centerLat)) / p2);
+
+					return Mathf.Rad2Deg * lat;
 				default:
 					return lat;
 			}
@@ -346,6 +404,11 @@ namespace SCANsat.SCAN_Map
 		private Color32[] stockBiomeColor;
 		private int startLine;
 		private int stopLine;
+
+		internal void setSize(Vector2 size)
+		{
+			setSize((int)size.x, (int)size.y);
+		}
 
 		internal void setSize(int w, int h, int interpolation = 2, int start = 0, int stop = 0)
 		{
@@ -410,7 +473,10 @@ namespace SCANsat.SCAN_Map
 
 		internal void centerAround(double lon, double lat)
 		{
-			if (projection == MapProjection.Polar)
+			centeredLong = lon;
+			centeredLat = lat;
+
+			if (projection == MapProjection.Orthographic)
 			{
 				double lo = projectLongitude(lon, lat);
 				double la = projectLatitude(lon, lat);
@@ -422,8 +488,6 @@ namespace SCANsat.SCAN_Map
 				lon_offset = 180 + lon - (mapwidth / mapscale) / 2;
 				lat_offset = 90 + lat - (mapheight / mapscale) / 2;
 			}
-			centeredLong = lon;
-			centeredLat = lat;
 		}
 
 		internal double scaleLatitude(double lat)
@@ -622,7 +686,7 @@ namespace SCANsat.SCAN_Map
 		#region Big Map Texture Generator
 
 		/* MAP: build: map to Texture2D */
-		internal Texture2D getPartialMap()
+		internal Texture2D getPartialMap(bool apply = true)
 		{
 			if (data == null)
 				return new Texture2D(1, 1);
@@ -870,25 +934,15 @@ namespace SCANsat.SCAN_Map
 					switch (projection)
 					{
 						case MapProjection.Rectangular:
-							{
-								abundance = getResoureCache(lo, la);
-								break;
-							}
 						case MapProjection.KavrayskiyVII:
-							{
+						case MapProjection.Polar:
 								abundance = getResoureCache(lon, lat);
 								break;
-							}
-						case MapProjection.Polar:
-							{
-								if (mSource == mapSource.ZoomMap)
-									abundance = resourceCache[Mathf.RoundToInt(i * (resourceMapWidth / mapwidth)), Mathf.RoundToInt(mapstep * (resourceMapWidth / mapwidth))];
-								else
-									abundance = getResoureCache(lon, lat);
+						case MapProjection.Orthographic:
+								abundance = resourceCache[Mathf.RoundToInt(i * (resourceMapWidth / mapwidth)), Mathf.RoundToInt(mapstep * (resourceMapWidth / mapwidth))];
 								break;
-							}
 					}
-					pix[i] = SCANuiUtil.resourceToColor(baseColor, resource, abundance, data, lon, lat);
+					pix[i] = SCANuiUtil.resourceToColor32(baseColor, resource, abundance, data, lon, lat);
 				}
 				else
 					pix[i] = baseColor;
@@ -898,13 +952,14 @@ namespace SCANsat.SCAN_Map
 				map.SetPixels32(0, mapstep, map.width, 1, pix);
 
 			mapstep++;
-
+			
 			if (mapstep % 10 == 0 || mapstep >= map.height)
 			{
 				if (mapstep < map.height - 1)
 					map.SetPixels32(0, mapstep, map.width, 1, palette.redline);
 
-				map.Apply();
+				if (apply || mapstep >= map.height)
+					map.Apply();
 			}
 
 			return map;
@@ -921,7 +976,17 @@ namespace SCANsat.SCAN_Map
 				{
 					double lon = fixUnscale(unScaleLongitude(Lon), w);
 					double lat = fixUnscale(unScaleLatitude(Lat), h);
-					elevation = heightMap[Mathf.RoundToInt((float)lon), Mathf.RoundToInt((float)lat)];
+
+					int ilon = Mathf.RoundToInt((float)lon);
+					int ilat = Mathf.RoundToInt((float)lat);
+
+					if (ilon >= w)
+						ilon = w - 1;
+
+					if (ilat >= h)
+						ilat = h - 1;
+
+					elevation = heightMap[ilon, ilat];
 					if (elevation == 0f && !exporting)
 						elevation = (float)SCANUtil.getElevation(body, Lon, Lat);
 				}
@@ -934,7 +999,17 @@ namespace SCANsat.SCAN_Map
 				{
 					double lon = fixUnscale(unScaleLongitude(Lon), w);
 					double lat = fixUnscale(unScaleLatitude(Lat), h);
-					elevation = heightMap[((int)(lon * 5)) / 5, ((int)(lat * 5)) / 5];
+
+					int ilon = ((int)(lon * 5)) / 5;
+					int ilat = ((int)(lat * 5)) / 5;
+
+					if (ilon >= w)
+						ilon = w - 1;
+
+					if (ilat >= h)
+						ilat = h - 1;
+
+					elevation = heightMap[ilon, ilat];
 					if (elevation == 0f && !exporting)
 						elevation = (float)SCANUtil.getElevation(body, ((int)(Lon * 5)) / 5, ((int)(Lat * 5)) / 5);
 				}
