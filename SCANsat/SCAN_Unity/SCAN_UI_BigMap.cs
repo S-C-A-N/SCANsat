@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -10,8 +11,10 @@ using SCANsat.Unity.Unity;
 using SCANsat.SCAN_Data;
 using SCANsat.SCAN_Map;
 using SCANsat.SCAN_UI.UI_Framework;
+using Contracts;
 using KSP.UI;
 using FinePrint;
+using FinePrint.Utilities;
 using palette = SCANsat.SCAN_UI.UI_Framework.SCANpalette;
 
 namespace SCANsat.SCAN_Unity
@@ -26,9 +29,9 @@ namespace SCANsat.SCAN_Unity
 		private Vessel vessel;
 		private bool updateMap;
 		private StringBuilder infoString;
-
-		private Dictionary<int, List<List<Vector2d>>> gridLines = new Dictionary<int, List<List<Vector2d>>>();
-		private Vector2 _mapScreenPosition;
+		private System.Random gen;
+		private bool _inputLock;
+		private const string controlLock = "SCANsatBig";
 
 		private SCANresourceGlobal currentResource;
 		private List<SCANresourceGlobal> resources;
@@ -58,8 +61,10 @@ namespace SCANsat.SCAN_Unity
 		private int eq_timer;
 		private Color32 c_dn = palette.CB_orange;
 		private Color32 c_an = palette.CB_skyBlue;
-		private Texture2D clearEQMap;
+		private Texture2D clearMap;
 		private bool clearMapSet;
+
+		private Texture2D gridMap;
 
 		private static SCAN_UI_BigMap instance;
 
@@ -78,30 +83,53 @@ namespace SCANsat.SCAN_Unity
 			GameEvents.onVesselWasModified.Add(vesselChange);
 			GameEvents.onVesselSOIChanged.Add(soiChange);
 
+			gen = new System.Random(Environment.TickCount.GetHashCode());
+
 			initializeMap();
 
 			if (HighLogic.LoadedSceneIsFlight && SCANcontroller.controller.bigMapVisible)
-				Open();
+			{
+				if (WaypointToggle)
+					SCANcontroller.controller.StartCoroutine(WaitForWaypoints());
+				else
+					Open();
+			}
+		}
+
+		private IEnumerator WaitForWaypoints()
+		{
+			while (!ContractSystem.loaded)
+				yield return null;
+
+			Open();
 		}
 
 		private void vesselChange(Vessel V)
 		{
 			vessel = FlightGlobals.ActiveVessel;
 
-			if (!_isVisible || uiElement == null)
+			if (!_isVisible)
 				return;
 
-			uiElement.RefreshIcons();
+			RefreshIcons();
 		}
 
 		private void soiChange(GameEvents.HostedFromToAction<Vessel, CelestialBody> action)
+		{
+			if (!_isVisible)
+				return;
+
+			RefreshIcons();
+
+			updateMap = true;
+		}
+
+		public void RefreshIcons()
 		{
 			if (!_isVisible || uiElement == null)
 				return;
 
 			uiElement.RefreshIcons();
-
-			updateMap = true;
 		}
 
 		private void initializeMap()
@@ -182,10 +210,10 @@ namespace SCANsat.SCAN_Unity
 
 			AddOrbitMapLabels();
 
-			clearEQMap = new Texture2D(1, 1, TextureFormat.ARGB32, false);
+			clearMap = new Texture2D(1, 1, TextureFormat.ARGB32, false);
 
-			clearEQMap.SetPixel(0, 0, palette.clear);
-			clearEQMap.Apply();
+			clearMap.SetPixel(0, 0, palette.clear);
+			clearMap.Apply();
 		}
 
 		private void AddOrbitMapLabels()
@@ -294,6 +322,10 @@ namespace SCANsat.SCAN_Unity
 		{
 			SCANcontroller.controller.unloadPQS(bigmap.Body, mapSource.BigMap);
 
+			GameEvents.onVesselChange.Remove(vesselChange);
+			GameEvents.onVesselWasModified.Remove(vesselChange);
+			GameEvents.onVesselSOIChanged.Remove(soiChange);
+
 			if (uiElement != null)
 			{
 				uiElement.gameObject.SetActive(false);
@@ -322,7 +354,12 @@ namespace SCANsat.SCAN_Unity
 				return;
 
 			if (!bigmap.isMapComplete())
-				bigmap.getPartialMap();
+			{
+				if (!SCAN_Settings_Config.Instance.SlowMapGeneration)
+					bigmap.getPartialMap(false);
+
+				bigmap.getPartialMap(true);
+			}
 
 			if (OrbitToggle && ShowOrbit)
 			{
@@ -337,7 +374,7 @@ namespace SCANsat.SCAN_Unity
 						if (!clearMapSet)
 						{
 							clearMapSet = true;
-							uiElement.UpdateEQMapTexture(clearEQMap);
+							uiElement.UpdateEQMapTexture(clearMap);
 						}
 					}
 					else if (clearMapSet)
@@ -365,7 +402,7 @@ namespace SCANsat.SCAN_Unity
 				if (OrbitToggle && ShowOrbit && bigmap.Projection != MapProjection.Polar && vessel.orbit.PeA > 0)
 					uiElement.UpdateEQMapTexture(eqMap);
 				else
-					uiElement.UpdateEQMapTexture(clearEQMap);
+					uiElement.UpdateEQMapTexture(clearMap);
 			}
 		}
 
@@ -870,40 +907,60 @@ namespace SCANsat.SCAN_Unity
 			eqMap.Apply();
 		}
 
-		public void OnGUI()
+		private void SetGridLines()
 		{
-			if (GridToggle && Event.current.type == EventType.Repaint)
+			if (uiElement == null)
+				return;
+
+			if (!GridToggle)
+				uiElement.UpdateGridTexture(clearMap);
+			else
 			{
-				if (gridLines.Count > 0)
-				{
-					Matrix4x4 previousGuiMatrix = GUI.matrix;
-					GUI.matrix = Matrix4x4.TRS(Vector3.zero, Quaternion.identity, new Vector3(Scale * GameSettings.UI_SCALE, Scale * GameSettings.UI_SCALE, 1));
+				GenerateGridMap();
 
-					GL.PushMatrix();
-					for (int i = gridLines[0].Count - 1; i >= 0; i--)
-					{
-						List<Vector2d> points = gridLines[0][i];
-						SCANuiUtil.drawGridLines(points, bigmap.MapWidth, _mapScreenPosition.x, _mapScreenPosition.y, SCANuiUtil.blackLineColor);
-					}
-					for (int i = gridLines[1].Count - 1; i >= 0; i--)
-					{
-						List<Vector2d> points = gridLines[1][i];
-						SCANuiUtil.drawGridLines(points, bigmap.MapWidth, _mapScreenPosition.x, _mapScreenPosition.y, SCANuiUtil.lineColor);
-					}
-					GL.PopMatrix();
-
-					GUI.matrix = previousGuiMatrix;
-				}
+				uiElement.UpdateGridTexture(gridMap);
 			}
 		}
 
-		private void SetGridLines()
+		private void GenerateGridMap()
 		{
-			if (!GridToggle)
-				return;
+			gridMap = new Texture2D(bigmap.MapWidth, bigmap.MapHeight, TextureFormat.ARGB32, false);
 
-			gridLines = new Dictionary<int, List<List<Vector2d>>>();
-			gridLines = SCANuiUtil.drawGridLine(bigmap);
+			Color32[] pix = gridMap.GetPixels32();
+
+			for (int i = pix.Length - 1; i >= 0; i--)
+				pix[i] = palette.Clear;
+
+			int x, y;
+			for (double lat = -90; lat < 90; lat+=2)
+			{
+				for (double lon = -180; lon < 180; lon +=2)
+				{
+					if (lat % 30 == 0 || lon % 30 == 0)
+					{
+						x = (int)(bigmap.MapScale * ((bigmap.projectLongitude(lon, lat) + 180) % 360));
+						y = (int)(bigmap.MapScale * ((bigmap.projectLatitude(lon, lat) + 90) % 180));
+
+						pix[y * bigmap.MapWidth + x] = palette.White;
+
+						if (x < bigmap.MapWidth - 1)
+							pix[(y * bigmap.MapWidth) + (x + 1)] = palette.Black;
+
+						if (x > 0)
+							pix[(y * bigmap.MapWidth) + (x - 1)] = palette.Black;
+
+						if (y < bigmap.MapHeight - 1)
+							pix[((y + 1) * bigmap.MapWidth) + x] = palette.Black;
+
+						if (y > 0)
+							pix[((y - 1) * bigmap.MapWidth) + x] = palette.Black;
+					}
+				}
+			}
+
+			gridMap.SetPixels32(pix);
+
+			gridMap.Apply();
 		}
 
 		public void Open()
@@ -934,7 +991,9 @@ namespace SCANsat.SCAN_Unity
 
 			SetGridLines();
 
-			uiElement.UpdateEQMapTexture(clearEQMap);
+			SetTitle();
+
+			uiElement.UpdateEQMapTexture(clearMap);
 			clearMapSet = true;
 
 			updateMap = true;
@@ -992,6 +1051,22 @@ namespace SCANsat.SCAN_Unity
 			}
 		}
 
+		public void SetMapSize()
+		{
+			if (!_isVisible || uiElement == null)
+				return;
+
+			uiElement.SetSize(Size);
+		}
+
+		private void SetTitle()
+		{
+			if (uiElement == null || bigmap == null)
+				return;
+
+			uiElement.UpdateTitle(string.Format("S.C.A.N. {0} Map of {1}", bigmap.MType, body.theName));
+		}
+
 		public string Version
 		{
 			get { return SCANmainMenuLoader.SCANsatVersion; }
@@ -1043,6 +1118,8 @@ namespace SCANsat.SCAN_Unity
 				{
 					SCANUtil.SCANlog("Error in parsing map type\n{0}", e);
 				}
+
+				SetTitle();
 			}
 		}
 
@@ -1128,7 +1205,14 @@ namespace SCANsat.SCAN_Unity
 
 					SCANcontroller.controller.bigMapBody = value;
 				}
+
+				SetTitle();
 			}
+		}
+
+		public string RandomWaypoint
+		{
+			get { return StringUtilities.GenerateSiteName(gen.Next(), body, false, true); }
 		}
 
 		public bool IsVisible
@@ -1162,8 +1246,7 @@ namespace SCANsat.SCAN_Unity
 			{
 				SCANcontroller.controller.bigMapGrid = value;
 
-				if (value)
-					SetGridLines();
+				SetGridLines();
 			}
 		}
 
@@ -1280,6 +1363,20 @@ namespace SCANsat.SCAN_Unity
 			get { return SCANcontroller.MasterResourceCount > 1; }
 		}
 
+		public bool LockInput
+		{
+			get { return _inputLock; }
+			set
+			{
+				_inputLock = value;
+
+				if (_inputLock)
+					InputLockManager.SetControlLock(controlLock);
+				else
+					InputLockManager.RemoveControlLock(controlLock);
+			}
+		}
+
 		public bool TooltipsOn
 		{
 			get { return SCAN_Settings_Config.Instance.WindowTooltips; }
@@ -1311,6 +1408,11 @@ namespace SCANsat.SCAN_Unity
 		public float Scale
 		{
 			get { return SCAN_Settings_Config.Instance.UIScale; }
+		}
+
+		public Sprite WaypointSprite
+		{
+			get { return SCAN_UI_Loader.WaypointIcon; }
 		}
 
 		public Canvas MainCanvas
@@ -1364,12 +1466,6 @@ namespace SCANsat.SCAN_Unity
 
 				return bigmap.MapLegend.getLegend(data.TerrainConfig.MinTerrain, data.TerrainConfig.MaxTerrain, SCANcontroller.controller.bigMapColor, data.TerrainConfig);
 			}
-		}
-
-		public Vector2 MapScreenPosition
-		{
-			get { return _mapScreenPosition; }
-			set { _mapScreenPosition = value; }
 		}
 
 		public IList<string> Projections
@@ -1608,16 +1704,26 @@ namespace SCANsat.SCAN_Unity
 			}
 		}
 
-		public string MapInfo(Vector2 mapPos)
+		private Vector2d MousePosition(Vector2 pos)
 		{
-			float mx = mapPos.x;
-			float my = mapPos.y * -1f;
+			float mx = pos.x;
+			float my = pos.y * -1f;
 
 			double mlo = (mx * 360 / bigmap.MapWidth) - 180;
 			double mla = 90 - (my * 180 / bigmap.MapHeight);
 
 			double mlon = bigmap.unprojectLongitude(mlo, mla);
 			double mlat = bigmap.unprojectLatitude(mlo, mla);
+
+			return new Vector2d(mlon, mlat);
+		}
+
+		public string MapInfo(Vector2 mapPos)
+		{
+			Vector2d pos = MousePosition(mapPos);
+
+			double mlon = pos.x;
+			double mlat = pos.y;
 
 			if (mlon >= -180 && mlon <= 180 && mlat >= -90 && mlat <= 90)
 				return mouseOverInfo(mlon, mlat);
@@ -1701,7 +1807,7 @@ namespace SCANsat.SCAN_Unity
 
 				if (resources)
 				{
-					infoString.Append(string.Format(" {0}: ", bigmap.Resource.Name));
+					infoString.Append(" ");
 					infoString.Append(palette.coloredNoQuote(bigmap.Resource.MaxColor, SCANuiUtil.getResourceAbundance(bigmap.Body, lat, lon, fuzzy, bigmap.Resource)));
 				}
 			}
@@ -1740,13 +1846,48 @@ namespace SCANsat.SCAN_Unity
 			return infoString.ToStringAndRelease();
 		}
 
+		public void SetWaypoint(string id, Vector2 pos)
+		{
+			if (string.IsNullOrEmpty(id))
+				id = RandomWaypoint;
+
+			pos.y -= bigmap.MapHeight;
+
+			Vector2d mapPos = MousePosition(pos);
+
+			double mlon = pos.x;
+			double mlat = pos.y;
+
+			if (mlon >= -180 && mlon <= 180 && mlat >= -90 && mlat <= 90)
+				return;
+
+			Waypoint w = new Waypoint();
+
+			w.name = id;
+			w.isExplored = true;
+			w.isNavigatable = true;
+			w.isOnSurface = true;
+			w.celestialName = body.GetName();
+			w.latitude = mapPos.y;
+			w.longitude = mapPos.x;
+			w.seed = gen.Next(0, int.MaxValue);
+			w.navigationId = new Guid();
+
+			ScenarioCustomWaypoints.AddWaypoint(w);
+		}
+
+		public void ClickMap(Vector2 pos)
+		{
+			Vector2d mapPos = MousePosition(pos);
+
+			
+		}
+
 		public void RefreshMap()
 		{
 			SCANcontroller.controller.TargetSelecting = false;
 			SCANcontroller.controller.TargetSelectingActive = false;
 			bigmap.resetMap(SCANcontroller.controller.bigMapResourceOn);
-
-			SetGridLines();
 		}
 
 		public void OpenMainMap()
@@ -1759,9 +1900,10 @@ namespace SCANsat.SCAN_Unity
 
 		public void OpenZoomMap()
 		{
-			SCANcontroller.controller.zoomMap.Visible = !SCANcontroller.controller.zoomMap.Visible;
-			if (SCANcontroller.controller.zoomMap.Visible && !SCANcontroller.controller.zoomMap.Initialized)
-				SCANcontroller.controller.zoomMap.initializeMap();
+			if (SCAN_UI_ZoomMap.Instance.IsVisible)
+				SCAN_UI_ZoomMap.Instance.Close();
+			else
+				SCAN_UI_ZoomMap.Instance.Open(true);
 		}
 
 		public void OpenOverlay()

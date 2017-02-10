@@ -25,6 +25,7 @@ using System.Runtime.Serialization.Formatters.Binary;
 using SCANsat.SCAN_Platform;
 using SCANsat.SCAN_Platform.Palettes;
 using SCANsat.SCAN_Platform.Palettes.ColorBrewer;
+using SCANsat.SCAN_Unity;
 using palette = SCANsat.SCAN_UI.UI_Framework.SCANpalette;
 
 namespace SCANsat.SCAN_Data
@@ -275,11 +276,14 @@ namespace SCANsat.SCAN_Data
 
 				if (HighLogic.CurrentGame.Mode == Game.Modes.CAREER && !SCANcontroller.controller.ContractsLoaded)
 					return new List<SCANwaypoint>();
-				else if (!waypointsLoaded)
+				else// if (!waypointsLoaded)
 				{
-					waypointsLoaded = true;
+					//waypointsLoaded = true;
 					if (waypoints == null)
 						waypoints = new List<SCANwaypoint>();
+					else
+						waypoints.Clear();
+
 					if (ContractSystem.Instance != null)
 					{
 						var surveys = ContractSystem.Instance.GetCurrentActiveContracts<SurveyContract>();
@@ -565,10 +569,10 @@ namespace SCANsat.SCAN_Data
 			if (SCANcontroller.controller == null)
 				return;
 
-			if (SCANcontroller.controller._mainMap == null)
+			if (SCAN_UI_MainMap.Instance == null)
 				return;
 
-			SCANcontroller.controller._mainMap.resetImages();
+			SCAN_UI_MainMap.Instance.resetImages();
 		}
 
 		internal void resetResources()

@@ -16,6 +16,7 @@ using System.Linq;
 using SCANsat.SCAN_Data;
 using SCANsat.SCAN_Toolbar;
 using SCANsat.SCAN_UI;
+using SCANsat.SCAN_Unity;
 using KSP.UI.Screens.Flight.Dialogs;
 
 using UnityEngine;
@@ -244,9 +245,8 @@ namespace SCANsat.SCAN_PartModules
 		{
 			if (!ToolbarManager.ToolbarAvailable && SCANcontroller.controller != null)
 			{
-				if (!SCAN_Settings_Config.Instance.StockToolbar && !SCANcontroller.controller._mainMap.IsVisible)
-					//SCANcontroller.controller.mainMap.Visible = true;
-					SCANcontroller.controller._mainMap.Open();
+				if (!SCAN_Settings_Config.Instance.StockToolbar && SCAN_UI_MainMap.Instance != null && !SCAN_UI_MainMap.Instance.IsVisible)
+					SCAN_UI_MainMap.Instance.Open();
 			}
 			registerScanner();
 			animate(1, 0);

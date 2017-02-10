@@ -14,8 +14,10 @@ namespace SCANsat.SCAN_Unity
 	public class SCAN_UI_Settings : ISCAN_Settings
 	{
 		private bool _isVisible;
+		private bool _inputLock;
 		private string _sensorCount = "";
 		private Vector2 _position;
+		private const string controlLock = "SCANsatSettings";
 
 		private SCAN_Settings uiElement;
 
@@ -29,6 +31,9 @@ namespace SCANsat.SCAN_Unity
 		public SCAN_UI_Settings()
 		{
 			instance = this;
+
+			GameEvents.onShowUI.Add(showUI);
+			GameEvents.onHideUI.Add(hideUI);
 		}
 
 		public int Page
@@ -44,11 +49,24 @@ namespace SCANsat.SCAN_Unity
 
 		public void OnDestroy()
 		{
+			GameEvents.onShowUI.Remove(showUI);
+			GameEvents.onHideUI.Remove(hideUI);
+
 			if (uiElement != null)
 			{
 				uiElement.gameObject.SetActive(false);
 				MonoBehaviour.Destroy(uiElement.gameObject);
 			}
+		}
+
+		private void showUI()
+		{
+
+		}
+
+		private void hideUI()
+		{
+
 		}
 
 		public void Update()
@@ -103,6 +121,9 @@ namespace SCANsat.SCAN_Unity
 				if (SCANappLauncher.Instance != null && SCANappLauncher.Instance.UIElement != null)
 					SCANappLauncher.Instance.UIElement.SetSettingsToggle(false);
 			}
+
+			if (_inputLock)
+				InputLockManager.RemoveControlLock(controlLock);
 		}
 
 		public string Version
@@ -124,7 +145,17 @@ namespace SCANsat.SCAN_Unity
 		public int MapWidth
 		{
 			get { return SCAN_Settings_Config.Instance.BigMapWidth; }
-			set { SCAN_Settings_Config.Instance.BigMapWidth = value; }
+			set
+			{
+				SCAN_Settings_Config.Instance.BigMapWidth = value;
+
+				if (SCAN_UI_BigMap.Instance != null && SCAN_UI_BigMap.Instance.IsVisible)
+				{
+					SCAN_UI_BigMap.Instance.Size = new Vector2(value, value / 2);
+
+					SCAN_UI_BigMap.Instance.SetMapSize();
+				}
+			}
 		}
 
 		public int Interpolation
@@ -243,6 +274,12 @@ namespace SCANsat.SCAN_Unity
 			}			
 		}
 
+		public bool MapGenSpeed
+		{
+			get { return SCAN_Settings_Config.Instance.SlowMapGeneration; }
+			set { SCAN_Settings_Config.Instance.SlowMapGeneration = value; }
+		}
+
 		public bool StockToolbar
 		{
 			get { return SCAN_Settings_Config.Instance.StockToolbar; }
@@ -291,6 +328,12 @@ namespace SCANsat.SCAN_Unity
 				{ 
 					SCAN_UI_MainMap.Instance.Close();
 					SCAN_UI_MainMap.Instance.Open();
+				}
+
+				if (SCAN_UI_ZoomMap.Instance != null && SCAN_UI_ZoomMap.Instance.IsVisible)
+				{
+					SCAN_UI_ZoomMap.Instance.Close();
+					SCAN_UI_ZoomMap.Instance.Open(true);
 				}
 
 				if (SCAN_UI_Instruments.Instance != null && SCAN_UI_Instruments.Instance.IsVisible)
@@ -365,6 +408,20 @@ namespace SCANsat.SCAN_Unity
 		public bool ShowMapFill
 		{
 			get { return SCAN_Settings_Config.Instance.CheatMapFill; }
+		}
+
+		public bool LockInput
+		{
+			get { return _inputLock; }
+			set
+			{
+				_inputLock = value;
+
+				if (_inputLock)
+					InputLockManager.SetControlLock(controlLock);
+				else
+					InputLockManager.RemoveControlLock(controlLock);
+			}
 		}
 
 		public Canvas TooltipCanvas

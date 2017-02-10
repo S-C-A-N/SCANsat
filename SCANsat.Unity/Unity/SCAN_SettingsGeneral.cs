@@ -22,6 +22,8 @@ namespace SCANsat.Unity.Unity
 		[SerializeField]
 		private SCAN_Toggle m_StockUIToggle = null;
 		[SerializeField]
+		private SCAN_Toggle m_MapSpeedToggle = null;
+		[SerializeField]
 		private TextHandler m_UIScale = null;
 		[SerializeField]
 		private Slider m_UIScaleSlider = null;
@@ -47,6 +49,9 @@ namespace SCANsat.Unity.Unity
 
 			if (m_WindowTooltipToggle != null)
 				m_WindowTooltipToggle.isOn = set.WindowTooltips;
+
+			if (m_MapSpeedToggle != null)
+				m_MapSpeedToggle.isOn = set.MapGenSpeed;
 
 			if (m_StockToolbarToggle != null)
 				m_StockToolbarToggle.isOn = set.StockToolbar;
@@ -94,6 +99,14 @@ namespace SCANsat.Unity.Unity
 				return;
 
 			settings.WindowTooltips = isOn;
+		}
+
+		public void SlowMapSpeed(bool isOn)
+		{
+			if (!loaded || settings == null)
+				return;
+
+			settings.MapGenSpeed = isOn;
 		}
 
 		public void StockToolbar(bool isOn)

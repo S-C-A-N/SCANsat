@@ -64,6 +64,37 @@ namespace SCANsat.SCAN_Unity
 			GameEvents.onVesselSOIChanged.Add(soiChange);
 			GameEvents.onVesselChange.Add(vesselChange);
 			GameEvents.onVesselWasModified.Add(vesselChange);
+			GameEvents.onShowUI.Add(showUI);
+			GameEvents.onHideUI.Add(hideUI);
+		}
+
+		private void soiChange(GameEvents.HostedFromToAction<Vessel, CelestialBody> VC)
+		{
+			data = SCANUtil.getData(VC.to);
+			if (data == null)
+			{
+				data = new SCANdata(VC.to);
+				SCANcontroller.controller.addToBodyData(VC.to, data);
+			}
+			planetConstants(VC.to);
+		}
+
+		private void vesselChange(Vessel V)
+		{
+			v = FlightGlobals.ActiveVessel;
+			resetResourceList();
+		}
+
+		private void showUI()
+		{
+			if (IsVisible && uiElement != null)
+				uiElement.gameObject.SetActive(true);
+		}
+
+		private void hideUI()
+		{
+			if (IsVisible && uiElement != null)
+				uiElement.gameObject.SetActive(false);
 		}
 
 		public void SetScale(float scale)
@@ -135,6 +166,8 @@ namespace SCANsat.SCAN_Unity
 			GameEvents.onVesselSOIChanged.Remove(soiChange);
 			GameEvents.onVesselChange.Remove(vesselChange);
 			GameEvents.onVesselWasModified.Remove(vesselChange);
+			GameEvents.onShowUI.Remove(showUI);
+			GameEvents.onHideUI.Remove(hideUI);
 		}
 
 		public void Open()
@@ -560,23 +593,6 @@ namespace SCANsat.SCAN_Unity
 			double circum = b.Radius * 2 * Math.PI;
 			double eqDistancePerDegree = circum / 360;
 			degreeOffset = 5 / eqDistancePerDegree;
-		}
-
-		private void soiChange(GameEvents.HostedFromToAction<Vessel, CelestialBody> VC)
-		{
-			data = SCANUtil.getData(VC.to);
-			if (data == null)
-			{
-				data = new SCANdata(VC.to);
-				SCANcontroller.controller.addToBodyData(VC.to, data);
-			}
-			planetConstants(VC.to);
-		}
-
-		private void vesselChange(Vessel V)
-		{
-			v = FlightGlobals.ActiveVessel;
-			resetResourceList();
 		}
 
 		public void resetResourceList()

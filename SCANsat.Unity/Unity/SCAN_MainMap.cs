@@ -42,9 +42,12 @@ namespace SCANsat.Unity.Unity
 		private Transform m_VesselTransform = null;
 		[SerializeField]
 		private GameObject m_MapPrefab = null;
+		[SerializeField]
+		private GameObject m_GeneratingText = null;
 
 		private ISCAN_MainMap mapInterface;
 		private bool loaded;
+		private bool generating;
 		private RectTransform rect;
 		private Vector2 mouseStart;
 		private Vector3 windowStart;
@@ -66,6 +69,9 @@ namespace SCANsat.Unity.Unity
 				return;
 
 			mapInterface.Update();
+
+			if (generating)
+				SetGeneratingText(mapInterface.MapGenerating);
 
 			if (!mapInterface.Minimized)
 			{
@@ -95,10 +101,10 @@ namespace SCANsat.Unity.Unity
 			if (m_Version != null)
 				m_Version.OnTextUpdate.Invoke(map.Version);
 
-			if (/*m_ColorToggle == null || */m_MinimizeToggle == null || m_TypeToggle == null)
+			if (m_ColorToggle == null || m_MinimizeToggle == null || m_TypeToggle == null)
 				return;
 
-			//m_ColorToggle.isOn = map.Color;
+			m_ColorToggle.isOn = map.Color;
 			m_TypeToggle.isOn = map.MapType;
 			m_MinimizeToggle.isOn = map.Minimized;
 
@@ -107,6 +113,8 @@ namespace SCANsat.Unity.Unity
 			SetScale(map.Scale);
 
 			SetPosition(map.Position);
+
+			SetGeneratingText(map.MapGenerating);
 
 			ProcessTooltips();
 
@@ -138,6 +146,19 @@ namespace SCANsat.Unity.Unity
 		{
 			if (mapInterface != null)
 				mapInterface.IsVisible = false;
+		}
+
+		private void SetGeneratingText(bool isOn)
+		{
+			if (m_GeneratingText == null)
+				return;
+
+			generating = isOn;
+
+			if (isOn && !m_GeneratingText.activeSelf)
+				m_GeneratingText.SetActive(true);
+			else if (!isOn && m_GeneratingText.activeSelf)
+				m_GeneratingText.SetActive(false);
 		}
 
 		public void ProcessTooltips()

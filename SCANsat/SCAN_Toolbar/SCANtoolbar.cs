@@ -16,6 +16,7 @@
 using System.IO;
 using UnityEngine;
 using SCANsat.SCAN_Platform;
+using SCANsat.SCAN_Unity;
 
 namespace SCANsat.SCAN_Toolbar
 {
@@ -78,41 +79,42 @@ namespace SCANsat.SCAN_Toolbar
 					};
 				MapButton.OnClick += (e) =>
 					{
-						if (SCANcontroller.controller != null)
+						if (SCAN_UI_BigMap.Instance != null)
 						{
-							if (SCANcontroller.controller._bigMap.IsVisible)
-								SCANcontroller.controller._bigMap.Close();
+							if (SCAN_UI_BigMap.Instance.IsVisible)
+								SCAN_UI_BigMap.Instance.Close();
 							else
-								SCANcontroller.controller._bigMap.Open();
+								SCAN_UI_BigMap.Instance.Open();
 						}
 					};
 				SmallButton.OnClick += (e) =>
 					{
-						if (SCANcontroller.controller != null)
+						if (SCAN_UI_MainMap.Instance != null)
 						{
-							if (SCANcontroller.controller._mainMap.IsVisible)
-								SCANcontroller.controller._mainMap.Close();
+							if (SCAN_UI_MainMap.Instance.IsVisible)
+								SCAN_UI_MainMap.Instance.Close();
 							else
-								SCANcontroller.controller._mainMap.Open();
+								SCAN_UI_MainMap.Instance.Open();
 						}
 					};
 				OverlayButton.OnClick += (e) =>
 					{
-						if (SCANcontroller.controller != null)
+						if (SCAN_UI_Overlay.Instance != null)
 						{
-							if (SCANcontroller.controller._overlay.IsVisible)
-								SCANcontroller.controller._overlay.Close();
+							if (SCAN_UI_Overlay.Instance.IsVisible)
+								SCAN_UI_Overlay.Instance.Close();
 							else
-								SCANcontroller.controller._overlay.Open();
+								SCAN_UI_Overlay.Instance.Open();
 						}
 					};
 				ZoomButton.OnClick += (e) =>
 					{
-						if (SCANcontroller.controller != null)
+						if (SCAN_UI_ZoomMap.Instance != null)
 						{
-							SCANcontroller.controller.zoomMap.Visible = !SCANcontroller.controller.zoomMap.Visible;
-							if (SCANcontroller.controller.zoomMap.Visible && !SCANcontroller.controller.zoomMap.Initialized)
-								SCANcontroller.controller.zoomMap.initializeMap();
+							if (SCAN_UI_ZoomMap.Instance.IsVisible)
+								SCAN_UI_ZoomMap.Instance.Close();
+							else
+								SCAN_UI_ZoomMap.Instance.Open(true);
 						}
 					};
 			}
@@ -129,9 +131,12 @@ namespace SCANsat.SCAN_Toolbar
 
 				KSCButton.OnClick += (e) =>
 					{
-						if (SCANcontroller.controller != null)
+						if (SCAN_UI_BigMap.Instance != null)
 						{
-							
+							if (SCAN_UI_BigMap.Instance.IsVisible)
+								SCAN_UI_BigMap.Instance.Close();
+							else
+								SCAN_UI_BigMap.Instance.Open();
 						}
 					};
 			}
@@ -160,44 +165,63 @@ namespace SCANsat.SCAN_Toolbar
 
 			smallMap.OnClick += (e2) =>
 				{
-					if (SCANcontroller.controller._mainMap.IsVisible)
-						SCANcontroller.controller._mainMap.Close();
-					else
-						SCANcontroller.controller._mainMap.Open();
+					if (SCAN_UI_MainMap.Instance != null)
+					{
+						if (SCAN_UI_MainMap.Instance.IsVisible)
+							SCAN_UI_MainMap.Instance.Close();
+						else
+							SCAN_UI_MainMap.Instance.Open();
+					}
 				};
 			instrument.OnClick += (e2) =>
 				{
-					if (SCANcontroller.controller._instruments.IsVisible)
-						SCANcontroller.controller._instruments.Close();
-					else
-						SCANcontroller.controller._instruments.Open();
+					if (SCAN_UI_Instruments.Instance != null)
+					{
+						if (SCAN_UI_Instruments.Instance.IsVisible)
+							SCAN_UI_Instruments.Instance.Close();
+						else
+							SCAN_UI_Instruments.Instance.Open();
+					}
 				};
 			bigMap.OnClick += (e2) =>
 				{
-					if (SCANcontroller.controller._bigMap.IsVisible)
-						SCANcontroller.controller._bigMap.Close();
-					else
-						SCANcontroller.controller._bigMap.Open();
+					if (SCAN_UI_BigMap.Instance != null)
+					{
+						if (SCAN_UI_BigMap.Instance.IsVisible)
+							SCAN_UI_BigMap.Instance.Close();
+						else
+							SCAN_UI_BigMap.Instance.Open();
+					}
 				};
 			zoomMap.OnClick += (e2) =>
 				{
-					SCANcontroller.controller.zoomMap.Visible = !SCANcontroller.controller.zoomMap.Visible;
-					if (SCANcontroller.controller.zoomMap.Visible && !SCANcontroller.controller.zoomMap.Initialized)
-						SCANcontroller.controller.zoomMap.initializeMap();
+					if (SCAN_UI_ZoomMap.Instance != null)
+					{
+						if (SCAN_UI_ZoomMap.Instance.IsVisible)
+							SCAN_UI_ZoomMap.Instance.Close();
+						else
+							SCAN_UI_ZoomMap.Instance.Open(true);
+					}
 				};
 			settings.OnClick += (e2) =>
 				{
-					if (SCANcontroller.controller._settings.IsVisible)
-						SCANcontroller.controller._settings.Close();
-					else
-						SCANcontroller.controller._settings.Open();
+					if (SCAN_UI_Settings.Instance != null)
+					{
+						if (SCAN_UI_Settings.Instance.IsVisible)
+							SCAN_UI_Settings.Instance.Close();
+						else
+							SCAN_UI_Settings.Instance.Open();
+					}
 				};
 			resource.OnClick += (e2) =>
 				{
-					if (SCANcontroller.controller._overlay.IsVisible)
-						SCANcontroller.controller._overlay.Close();
-					else
-						SCANcontroller.controller._overlay.Open();
+					if (SCAN_UI_Overlay.Instance != null)
+					{
+						if (SCAN_UI_Overlay.Instance.IsVisible)
+							SCAN_UI_Overlay.Instance.Close();
+						else
+							SCAN_UI_Overlay.Instance.Open();
+					}
 				};
 			list.OnAnyOptionClicked += () => destroyMenu(menu);
 			menu.Drawable = list;

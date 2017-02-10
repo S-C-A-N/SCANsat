@@ -310,10 +310,13 @@ namespace SCANsat.SCAN_Toolbar
 
 		public bool ZoomMap
 		{
-			get { return SCANcontroller.controller.zoomMap.Visible; }
+			get { return SCAN_UI_ZoomMap.Instance.IsVisible; }
 			set
 			{
-				SCANcontroller.controller.zoomMap.Visible = !SCANcontroller.controller.zoomMap.Visible;
+				if (value)
+					SCAN_UI_ZoomMap.Instance.Open(true);
+				else
+					SCAN_UI_ZoomMap.Instance.Close();
 			}
 		}
 

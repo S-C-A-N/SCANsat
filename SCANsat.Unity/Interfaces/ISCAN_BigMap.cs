@@ -16,6 +16,8 @@ namespace SCANsat.Unity.Interfaces
 
 		string CurrentCelestialBody { get; set; }
 
+		string RandomWaypoint { get; }
+
 		bool IsVisible { get; set; }
 
 		bool ColorToggle { get; set; }
@@ -46,11 +48,15 @@ namespace SCANsat.Unity.Interfaces
 
 		bool TooltipsOn { get; }
 
+		bool LockInput { get; set; }
+
 		int OrbitSteps { get; }
 
 		int CurrentScene { get; }
 
 		float Scale { get; }
+
+		Sprite WaypointSprite { get; }
 
 		Canvas MainCanvas { get; }
 
@@ -59,8 +65,6 @@ namespace SCANsat.Unity.Interfaces
 		Vector2 Position { get; set; }
 
 		Vector2 Size { get; set; }
-
-		Vector2 MapScreenPosition { get; set; }
 
 		Texture2D LegendImage { get; }
 
@@ -102,7 +106,9 @@ namespace SCANsat.Unity.Interfaces
 
 		void Update();
 
-		void OnGUI();
+		void SetWaypoint(string id, Vector2 pos);
+
+		void ClickMap(Vector2 pos);
 
 		SimpleLabelInfo OrbitInfo(int index);
 

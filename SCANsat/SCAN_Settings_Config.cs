@@ -30,6 +30,8 @@ namespace SCANsat
 		[Persistent]
 		public bool StockUIStyle = false;
 		[Persistent]
+		public bool SlowMapGeneration = false;
+		[Persistent]
 		public float UIScale = 1;
 		[Persistent]
 		public bool BiomeLock = true;
@@ -92,7 +94,7 @@ namespace SCANsat
 		[Persistent]
 		public int BigMapWidth = 720;
 		[Persistent]
-		public int ZoomMapWidth = 240;
+		public Vector2 ZoomMapSize = new Vector2(360, 240);
 		[Persistent]
 		public Vector2 BigMapPosition = new Vector2(400, -400);
 		[Persistent]
