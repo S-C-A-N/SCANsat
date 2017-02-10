@@ -194,7 +194,39 @@ namespace SCANsat.SCAN_UI.UI_Framework
 		[Persistent]
 		public string insPreviousResource = "Previous Resource";
 
+		//Zoom Map tooltips
+		[Persistent]
+		public string zoomVesselSync = "Sync Current Vessel";
+		[Persistent]
+		public string zoomVesselLock = "Lock Position To Vessel";
+		[Persistent]
+		public string zoomMapRefresh = "Map Refresh";
+		[Persistent]
+		public string zoomMapWindowState = "Toggle Window Size";
+		[Persistent]
+		public string zoomMapIn = "Zoom In";
+		[Persistent]
+		public string zoomMapOut = "Zoom Out";
+		[Persistent]
+		public string zoomMapLeft = "Shift Left";
+		[Persistent]
+		public string zoomMapRight = "Shift Right";
+		[Persistent]
+		public string zoomMapUp = "Shift Up";
+		[Persistent]
+		public string zoomMapDown = "Shift Down";
+		[Persistent]
+		public string zoomMapIcons = "Map Icons";
 
+		//Waypoint tooltips
+		[Persistent]
+		public string waypointToggle = "Waypoint Selector";
+		[Persistent]
+		public string waypointSet = "Create Waypoint";
+		[Persistent]
+		public string waypointCancel = "Cancel Waypoint";
+		[Persistent]
+		public string waypointMechJeb = "Set MechJeb Landing Target";
 
 		public override void OnDecodeFromConfigNode()
 		{
