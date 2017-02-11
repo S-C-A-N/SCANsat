@@ -64,8 +64,6 @@ namespace SCANsat.SCAN_Unity
 			GameEvents.onVesselSOIChanged.Add(soiChange);
 			GameEvents.onVesselChange.Add(vesselChange);
 			GameEvents.onVesselWasModified.Add(vesselChange);
-			GameEvents.onShowUI.Add(showUI);
-			GameEvents.onHideUI.Add(hideUI);
 		}
 
 		private void soiChange(GameEvents.HostedFromToAction<Vessel, CelestialBody> VC)
@@ -83,18 +81,6 @@ namespace SCANsat.SCAN_Unity
 		{
 			v = FlightGlobals.ActiveVessel;
 			resetResourceList();
-		}
-
-		private void showUI()
-		{
-			if (IsVisible && uiElement != null)
-				uiElement.gameObject.SetActive(true);
-		}
-
-		private void hideUI()
-		{
-			if (IsVisible && uiElement != null)
-				uiElement.gameObject.SetActive(false);
 		}
 
 		public void SetScale(float scale)
@@ -166,8 +152,6 @@ namespace SCANsat.SCAN_Unity
 			GameEvents.onVesselSOIChanged.Remove(soiChange);
 			GameEvents.onVesselChange.Remove(vesselChange);
 			GameEvents.onVesselWasModified.Remove(vesselChange);
-			GameEvents.onShowUI.Remove(showUI);
-			GameEvents.onHideUI.Remove(hideUI);
 		}
 
 		public void Open()

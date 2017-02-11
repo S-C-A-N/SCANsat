@@ -31,9 +31,6 @@ namespace SCANsat.SCAN_Unity
 		public SCAN_UI_Settings()
 		{
 			instance = this;
-
-			GameEvents.onShowUI.Add(showUI);
-			GameEvents.onHideUI.Add(hideUI);
 		}
 
 		public int Page
@@ -49,24 +46,11 @@ namespace SCANsat.SCAN_Unity
 
 		public void OnDestroy()
 		{
-			GameEvents.onShowUI.Remove(showUI);
-			GameEvents.onHideUI.Remove(hideUI);
-
 			if (uiElement != null)
 			{
 				uiElement.gameObject.SetActive(false);
 				MonoBehaviour.Destroy(uiElement.gameObject);
 			}
-		}
-
-		private void showUI()
-		{
-
-		}
-
-		private void hideUI()
-		{
-
 		}
 
 		public void Update()
