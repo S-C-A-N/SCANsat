@@ -38,6 +38,8 @@ namespace SCANsat.Unity.Interfaces
 
 		bool WindowTooltips { get; set; }
 
+		bool MapGenSpeed { get; set; }
+
 		bool StockToolbar { get; set; }
 
 		bool ToolbarMenu { get; set; }
@@ -63,6 +65,8 @@ namespace SCANsat.Unity.Interfaces
 		bool ShowStockReset { get; }
 
 		bool ShowMapFill { get; }
+
+		bool LockInput { get; set; }
 
 		Canvas TooltipCanvas { get; }
 

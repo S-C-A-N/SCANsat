@@ -1,38 +1,33 @@
 ﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace SCANsat.Unity.Interfaces
 {
-	public interface ISCAN_BigMap
+	public interface ISCAN_ZoomMap
 	{
 		string Version { get; }
-
-		string CurrentProjection { get; set; }
 
 		string CurrentMapType { get; set; }
 
 		string CurrentResource { get; set; }
 
-		string CurrentCelestialBody { get; set; }
+		string ZoomLevelText { get; }
+
+		string MapCenterText { get; }
 
 		string RandomWaypoint { get; }
 
 		bool IsVisible { get; set; }
 
-		bool ColorToggle { get; set; }
+		bool VesselLock { get; set; }
 
-		bool GridToggle { get; set; }
+		bool ColorToggle { get; set; }
 
 		bool OrbitToggle { get; set; }
 
-		bool WaypointToggle { get; set; }
-
-		bool AnomalyToggle { get; set; }
-
-		bool FlagToggle { get; set; }
-
-		bool AsteroidToggle { get; set; }
+		bool IconsToggle { get; set; }
 
 		bool LegendToggle { get; set; }
 
@@ -54,6 +49,8 @@ namespace SCANsat.Unity.Interfaces
 
 		int CurrentScene { get; }
 
+		int WindowState { get; set; }
+
 		float Scale { get; }
 
 		Sprite WaypointSprite { get; }
@@ -68,13 +65,9 @@ namespace SCANsat.Unity.Interfaces
 
 		Texture2D LegendImage { get; }
 
-		IList<string> Projections { get; }
-
 		IList<string> MapTypes { get; }
 
 		IList<string> Resources { get; }
-
-		IList<string> CelestialBodies { get; }
 
 		IList<string> LegendLabels { get; }
 
@@ -92,23 +85,17 @@ namespace SCANsat.Unity.Interfaces
 
 		void RefreshMap();
 
-		void OpenMainMap();
-
-		void OpenInstruments();
-
-		void OpenZoomMap();
-
-		void OpenSettings();
-
-		void OpenOverlay();
-
-		void ExportMap();
-
 		void Update();
+
+		void VesselSync();
+
+		void MoveMap(int i);
+
+		void ZoomMap(bool zoom);
 
 		void SetWaypoint(string id, Vector2 pos);
 
-		void ClickMap(Vector2 pos);
+		void ClickMap(int button, Vector2 pos);
 
 		SimpleLabelInfo OrbitInfo(int index);
 

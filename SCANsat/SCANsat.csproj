@@ -97,7 +97,6 @@
     <Compile Include="SCAN_Toolbar\SCANtoolbar.cs" />
     <Compile Include="SCAN_Toolbar\SCANtoolbarwrapper.cs" />
     <Compile Include="SCAN_UI\SCANcolorSelection.cs" />
-    <Compile Include="SCAN_UI\SCANzoomWindow.cs" />
     <Compile Include="SCAN_UI\UI_Framework\SCANlanguagePack.cs" />
     <Compile Include="SCAN_UI\UI_Framework\SCAN_Localization.cs" />
     <Compile Include="SCAN_UI\UI_Framework\SCANremoteView.cs" />
@@ -120,6 +119,7 @@
     <Compile Include="SCAN_Unity\SCAN_UI_MainMap.cs" />
     <Compile Include="SCAN_Unity\SCAN_UI_Overlay.cs" />
     <Compile Include="SCAN_Unity\SCAN_UI_Settings.cs" />
+    <Compile Include="SCAN_Unity\SCAN_UI_ZoomMap.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>

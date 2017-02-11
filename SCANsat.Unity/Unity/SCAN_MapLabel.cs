@@ -39,6 +39,11 @@ namespace SCANsat.Unity.Unity
 			get { return _stringID; }
 		}
 
+		public MapLabelInfo Info
+		{
+			get { return label; }
+		}
+
 		private void Awake()
 		{
 			rect = GetComponent<RectTransform>();

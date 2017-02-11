@@ -75,6 +75,7 @@ namespace SCANsat.SCAN_Unity
 
 		private static GameObject _mainMapPrefab;
 		private static GameObject _bigMapPrefab;
+		private static GameObject _zoomMapPrefab;
 		private static GameObject _instrumentsPrefab;
 		private static GameObject _overlayPrefab;
 		private static GameObject _settingsPrefab;
@@ -89,6 +90,11 @@ namespace SCANsat.SCAN_Unity
 		public static GameObject BigMapPrefab
 		{
 			get { return _bigMapPrefab; }
+		}
+
+		public static GameObject ZoomMapPrefab
+		{
+			get { return _zoomMapPrefab; }
 		}
 
 		public static GameObject InstrumentsPrefab
@@ -550,6 +556,8 @@ namespace SCANsat.SCAN_Unity
 					_mainMapPrefab = o;
 				else if (o.name == "SCAN_BigMap")
 					_bigMapPrefab = o;
+				else if (o.name == "SCAN_ZoomMap")
+					_zoomMapPrefab = o;
 				else if (o.name == "SCAN_Instruments")
 					_instrumentsPrefab = o;
 				else if (o.name == "SCAN_Overlay")

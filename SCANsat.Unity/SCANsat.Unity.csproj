@@ -48,6 +48,7 @@
     <Compile Include="Interfaces\ISCAN_Overlay.cs" />
     <Compile Include="Interfaces\ISCAN_Settings.cs" />
     <Compile Include="Interfaces\ISCAN_Toolbar.cs" />
+    <Compile Include="Interfaces\ISCAN_ZoomMap.cs" />
     <Compile Include="MapLabelInfo.cs" />
     <Compile Include="SCAN_DoubleButton.cs" />
     <Compile Include="SCAN_Toggle.cs" />
@@ -79,6 +80,7 @@
     <Compile Include="Unity\SCAN_Toolbar.cs" />
     <Compile Include="Unity\SCAN_Tooltip.cs" />
     <Compile Include="Unity\SCAN_VesselInfo.cs" />
+    <Compile Include="Unity\SCAN_ZoomMap.cs" />
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

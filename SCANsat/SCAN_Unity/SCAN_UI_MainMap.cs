@@ -132,16 +132,24 @@ namespace SCANsat.SCAN_Unity
 			sensors = SCANcontroller.controller.activeSensorsOnVessel(v.id);
 
 			if (!SCANcontroller.controller.mainMapBiome)
-				drawPartialMap(sensors);
+			{
+				if (!SCAN_Settings_Config.Instance.SlowMapGeneration)
+					drawPartialMap(sensors, false);
+
+				drawPartialMap(sensors, true);
+			}
 			else
-				drawBiomeMap(sensors);
+			{
+				if (!SCAN_Settings_Config.Instance.SlowMapGeneration)
+					drawBiomeMap(sensors, false);
+					
+				drawBiomeMap(sensors, true);
+			}
 
 			lastUpdate++;
 
 			if (uiElement == null)
 				return;
-
-			//uiElement.UpdateMapTexture(map_small);
 
 			if (lastUpdate < updateInterval)
 				return;
@@ -236,6 +244,8 @@ namespace SCANsat.SCAN_Unity
 
 			uiElement.setMap(this);
 
+			resetImages();
+
 			uiElement.UpdateMapTexture(map_small);
 
 			_isVisible = true;
@@ -324,6 +334,11 @@ namespace SCANsat.SCAN_Unity
 		public bool TooltipsOn
 		{
 			get { return SCAN_Settings_Config.Instance.WindowTooltips; }
+		}
+
+		public bool MapGenerating
+		{
+			get { return data == null ? false : !data.Built || data.MapBuilding || data.OverlayBuilding || data.ControllerBuilding; }
 		}
 
 		public float Scale
@@ -454,9 +469,10 @@ namespace SCANsat.SCAN_Unity
 
 		public void OpenZoomMap()
 		{
-			SCANcontroller.controller.zoomMap.Visible = !SCANcontroller.controller.zoomMap.Visible;
-			if (SCANcontroller.controller.zoomMap.Visible && !SCANcontroller.controller.zoomMap.Initialized)
-				SCANcontroller.controller.zoomMap.initializeMap();
+			if (SCAN_UI_ZoomMap.Instance.IsVisible)
+				SCAN_UI_ZoomMap.Instance.Close();
+			else
+				SCAN_UI_ZoomMap.Instance.Open(true);
 		}
 
 		public void OpenOverlay()
@@ -566,7 +582,7 @@ namespace SCANsat.SCAN_Unity
 			return string.Format("({0:F1}°,{1:F1}°{2})", lat, lon, units);
 		}
 		
-		private void drawPartialMap(SCANtype type)
+		private void drawPartialMap(SCANtype type, bool apply)
 		{
 			bool pqsController = data.Body.pqsController != null;
 
@@ -628,18 +644,22 @@ namespace SCANsat.SCAN_Unity
 
 			map_small.SetPixels32(0, scanline, 360, 1, cols_height_map_small);
 
-			if (scanline < 179)
-				map_small.SetPixels32(0, scanline + 1, 360, 1, palette.small_redline);
+			if (apply)
+			{
+				if (scanline < 179)
+					map_small.SetPixels32(0, scanline + 1, 360, 1, palette.small_redline);
+			}
 
 			scanline++;
 
+			if (apply || scanline >= 180)
+				map_small.Apply();
+
 			if (scanline >= 180)
 				scanline = 0;
-
-			map_small.Apply();
 		}
 
-		private void drawBiomeMap(SCANtype type)
+		private void drawBiomeMap(SCANtype type, bool apply)
 		{
 			bool biomeMap = data.Body.BiomeMap != null;
 
@@ -673,15 +693,19 @@ namespace SCANsat.SCAN_Unity
 
 			map_small.SetPixels32(0, scanline, 360, 1, cols_height_map_small);
 
-			if (scanline < 179)
-				map_small.SetPixels32(0, scanline + 1, 360, 1, palette.small_redline);
+			if (apply)
+			{
+				if (scanline < 179)
+					map_small.SetPixels32(0, scanline + 1, 360, 1, palette.small_redline);
+			}
 
 			scanline++;
 
+			if (apply || scanline >= 180)
+				map_small.Apply();
+
 			if (scanline >= 180)
 				scanline = 0;
-
-			map_small.Apply();
 		}
 
 		private void buildBiomeCache()

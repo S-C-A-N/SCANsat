@@ -18,6 +18,8 @@ namespace SCANsat.Unity.Interfaces
 
 		bool TooltipsOn { get; }
 
+		bool MapGenerating { get; }
+
 		float Scale { get; }
 
 		Canvas TooltipCanvas { get; }

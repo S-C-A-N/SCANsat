@@ -27,6 +27,18 @@ namespace SCANsat.Unity.Unity
 		private bool loaded;
 		private ISCAN_Settings settings;
 
+		private void Update()
+		{
+			if (settings == null)
+				return;
+
+			if (settings.LockInput)
+			{
+				if (m_MapWidthInput != null && !m_MapWidthInput.isFocused)
+					settings.LockInput = false;
+			}
+		}
+
 		public void setup(ISCAN_Settings set)
 		{
 			if (set == null)
@@ -82,6 +94,8 @@ namespace SCANsat.Unity.Unity
 			if (settings == null || m_MapWidthInput == null)
 				return;
 
+			settings.LockInput = false;
+
 			int width = settings.MapWidth;
 
 			if (int.TryParse(m_MapWidthInput.text, out width))
@@ -89,11 +103,29 @@ namespace SCANsat.Unity.Unity
 				if (width % 2 != 0)
 					width += 1;
 
+				if (width > 8192)
+					width = 8192;
+				else if (width < 560)
+					width = 560;
+
+				m_MapWidthInput.text = width.ToString();
+
 				settings.MapWidth = width;
 
 				if (m_MapWidth != null)
 					m_MapWidth.OnTextUpdate.Invoke("Map Width: " + width.ToString());
 			}
+		}
+
+		public void OnInputClick(BaseEventData eventData)
+		{
+			if (!(eventData is PointerEventData) || settings == null)
+				return;
+
+			if (((PointerEventData)eventData).button != PointerEventData.InputButton.Left)
+				return;
+
+			settings.LockInput = true;
 		}
 
 		public void ResetCurrentMap()

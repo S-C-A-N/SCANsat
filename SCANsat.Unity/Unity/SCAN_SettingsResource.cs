@@ -39,6 +39,18 @@ namespace SCANsat.Unity.Unity
 		private bool loaded;
 		private ISCAN_Settings settings;
 
+		private void Update()
+		{
+			if (settings == null)
+				return;
+
+			if (settings.LockInput)
+			{
+				if (m_ThresholdInput != null && !m_ThresholdInput.isFocused)
+					settings.LockInput = false;
+			}
+		}
+
 		public void setup(ISCAN_Settings set)
 		{
 			if (set == null)
@@ -143,6 +155,8 @@ namespace SCANsat.Unity.Unity
 			if (!loaded || settings == null)
 				return;
 
+			settings.LockInput = false;
+
 			settings.StockThreshold = isOn;
 		}
 
@@ -150,6 +164,8 @@ namespace SCANsat.Unity.Unity
 		{
 			if (m_ThresholdInput == null || settings == null)
 				return;
+
+			settings.LockInput = false;
 
 			float value = settings.StockThresholdValue;
 
@@ -162,11 +178,24 @@ namespace SCANsat.Unity.Unity
 				else if (value > 1)
 					value = 1;
 
+				m_ThresholdInput.text = (value * 100).ToString("N0");
+
 				settings.StockThresholdValue = value;
 
 				if (m_StockThresholdValue != null)
 					m_StockThresholdValue.OnTextUpdate.Invoke("Stock Scan Threshold: " + value.ToString("P0"));
 			}
+		}
+
+		public void OnInputClick(BaseEventData eventData)
+		{
+			if (!(eventData is PointerEventData) || settings == null)
+				return;
+
+			if (((PointerEventData)eventData).button != PointerEventData.InputButton.Left)
+				return;
+
+			settings.LockInput = true;
 		}
 
 		public void OverlayTooltip(bool isOn)

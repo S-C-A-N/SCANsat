@@ -239,6 +239,9 @@ namespace SCANsat.Unity.Unity
 			if (m_GeneralPrefab == null || m_ContentTransform == null || settingsInterface == null)
 				return;
 
+			if (settingsInterface.LockInput)
+				settingsInterface.LockInput = false;
+
 			CurrentPage = Instantiate(m_GeneralPrefab).GetComponent<SettingsPage>();
 
 			if (CurrentPage == null)
@@ -263,6 +266,9 @@ namespace SCANsat.Unity.Unity
 
 			if (m_BackgroundPrefab == null || m_ContentTransform == null || settingsInterface == null)
 				return;
+
+			if (settingsInterface.LockInput)
+				settingsInterface.LockInput = false;
 
 			CurrentPage = Instantiate(m_BackgroundPrefab).GetComponent<SettingsPage>();
 
@@ -289,6 +295,9 @@ namespace SCANsat.Unity.Unity
 			if (m_ResourcePrefab == null || m_ContentTransform == null || settingsInterface == null)
 				return;
 
+			if (settingsInterface.LockInput)
+				settingsInterface.LockInput = false;
+
 			CurrentPage = Instantiate(m_ResourcePrefab).GetComponent<SettingsPage>();
 
 			if (CurrentPage == null)
@@ -311,6 +320,9 @@ namespace SCANsat.Unity.Unity
 				DestroyImmediate(CurrentPage.gameObject);
 			}
 
+			if (settingsInterface.LockInput)
+				settingsInterface.LockInput = false;
+
 			if (m_DataPrefab == null || m_ContentTransform == null || settingsInterface == null)
 				return;
 
@@ -332,6 +344,9 @@ namespace SCANsat.Unity.Unity
 		{
 			if (settingsInterface == null)
 				return;
+
+			if (settingsInterface.LockInput)
+				settingsInterface.LockInput = false;
 
 			settingsInterface.OpenColor();
 		}
