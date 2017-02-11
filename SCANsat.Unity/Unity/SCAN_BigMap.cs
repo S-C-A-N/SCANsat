@@ -325,6 +325,8 @@ namespace SCANsat.Unity.Unity
 						m_SmallMapButton.SetActive(false);
 					if (m_InstrumentsButton != null)
 						m_InstrumentsButton.SetActive(false);
+					if (m_ZoomMapButton != null)
+						m_ZoomMapButton.SetActive(false);
 					break;
 				case 2:
 					if (m_SmallMapButton != null)
@@ -333,6 +335,8 @@ namespace SCANsat.Unity.Unity
 						m_OverlayButton.SetActive(false);
 					if (m_InstrumentsButton != null)
 						m_InstrumentsButton.SetActive(false);
+					if (m_ZoomMapButton != null)
+						m_ZoomMapButton.SetActive(false);
 					break;
 			}
 		}
@@ -805,7 +809,7 @@ namespace SCANsat.Unity.Unity
 
 				SetWaypoint(pos);
 			}
-			else
+			else if (((PointerEventData)eventData).button == PointerEventData.InputButton.Right)
 				bigInterface.ClickMap(pos);
 		}
 
