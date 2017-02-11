@@ -595,14 +595,6 @@ namespace SCANsat.SCAN_Map
 			}
 		}
 
-		public void setMapType(mapType m)
-		{
-			if (mType == m)
-				return;
-
-			mType = m;
-		}
-
 		public void setCustomRange(float min, float max)
 		{
 			useCustomRange = true;
