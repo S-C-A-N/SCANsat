@@ -74,8 +74,6 @@ namespace SCANsat.SCAN_Unity
 			GameEvents.onVesselChange.Add(vesselChange);
 			GameEvents.onVesselWasModified.Add(vesselChange);
 			GameEvents.onVesselSOIChanged.Add(soiChange);
-			GameEvents.onShowUI.Add(showUI);
-			GameEvents.onHideUI.Add(hideUI);
 
 			gen = new System.Random(Environment.TickCount.GetHashCode());
 
@@ -100,18 +98,6 @@ namespace SCANsat.SCAN_Unity
 			uiElement.RefreshIcons();
 
 			updateMap = true;
-		}
-
-		private void showUI()
-		{
-			if (IsVisible && uiElement != null)
-				uiElement.gameObject.SetActive(true);
-		}
-
-		private void hideUI()
-		{
-			if (IsVisible && uiElement != null)
-				uiElement.gameObject.SetActive(false);
 		}
 
 		private void initializeMap()
@@ -224,6 +210,9 @@ namespace SCANsat.SCAN_Unity
 
 				t = mapType.Altimetry;
 			}
+
+			spotmap.ResourceActive = SCANcontroller.controller.zoomMapResourceOn;
+			spotmap.ColorMap = SCANcontroller.controller.zoomMapColor;
 
 			spotmap.resetMap(t, false, ResourceToggle, narrowBand);
 		}
@@ -436,8 +425,6 @@ namespace SCANsat.SCAN_Unity
 			GameEvents.onVesselChange.Remove(vesselChange);
 			GameEvents.onVesselWasModified.Remove(vesselChange);
 			GameEvents.onVesselSOIChanged.Remove(soiChange);
-			GameEvents.onShowUI.Remove(showUI);
-			GameEvents.onHideUI.Remove(hideUI);
 
 			if (uiElement != null)
 			{
@@ -879,7 +866,7 @@ namespace SCANsat.SCAN_Unity
 			}
 		}
 
-		public void Open(bool v, double lat = 0, double lon = 0, CelestialBody b = null)
+		public void Open(bool v, double lat = 0, double lon = 0, SCANmap m = null)
 		{
 			uiElement = GameObject.Instantiate(SCAN_UI_Loader.ZoomMapPrefab).GetComponent<SCAN_ZoomMap>();
 
@@ -908,7 +895,7 @@ namespace SCANsat.SCAN_Unity
 			if (v || VesselLock)
 				setToVessel();
 			else
-				setToPosition(lat, lon, b);
+				setToPosition(lat, lon, m);
 
 			uiElement.setMap(this);
 
@@ -939,9 +926,14 @@ namespace SCANsat.SCAN_Unity
 			}
 		}
 
-		private void setToPosition(double lat, double lon, CelestialBody b)
+		public void setToPosition(double lat, double lon, SCANmap map)
 		{
-			initializeMapCenter(SCANUtil.fixLatShift(lat), SCANUtil.fixLonShift(lon), b);
+			SCANcontroller.controller.zoomMapType = map.MType.ToString();
+			SCANcontroller.controller.zoomMapColor = map.ColorMap;
+			SCANcontroller.controller.zoomMapResource = map.Resource.Name;
+			SCANcontroller.controller.zoomMapResourceOn = map.ResourceActive;
+
+			initializeMapCenter(SCANUtil.fixLatShift(lat), SCANUtil.fixLonShift(lon), map.Body);
 
 			initialized = true;
 		}
@@ -949,8 +941,10 @@ namespace SCANsat.SCAN_Unity
 		public void setToVessel()
 		{
 			if (vessel == null)
+			{
+				initializeMapCenter(0, 0, FlightGlobals.GetHomeBody());
 				return;
-			
+			}
 			if(initialized && !VesselLock)
 				return;
 

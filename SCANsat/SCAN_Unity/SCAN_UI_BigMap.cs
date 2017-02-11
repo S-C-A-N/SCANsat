@@ -1880,7 +1880,16 @@ namespace SCANsat.SCAN_Unity
 		{
 			Vector2d mapPos = MousePosition(pos);
 
-			
+			if (SCANcontroller.controller.zoomMapVesselLock)
+				return;
+
+			if (SCAN_UI_ZoomMap.Instance == null)
+				return;
+
+			if (SCAN_UI_ZoomMap.Instance.IsVisible)
+				SCAN_UI_ZoomMap.Instance.Close();
+
+			SCAN_UI_ZoomMap.Instance.Open(false, mapPos.y, mapPos.x, bigmap);
 		}
 
 		public void RefreshMap()
