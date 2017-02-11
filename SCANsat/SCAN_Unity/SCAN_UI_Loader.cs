@@ -16,8 +16,8 @@ namespace SCANsat.SCAN_Unity
 	[KSPAddon(KSPAddon.Startup.MainMenu, true)]
 	public class SCAN_UI_Loader : MonoBehaviour
 	{
-		private const string prefabAssetName = "scansat_prefabs.ksp";
-		private const string imageAssetName = "scan_images.ksp";
+		private const string prefabAssetName = "scansat_prefabs";
+		private const string imageAssetName = "scan_images";
 
 		private static bool loaded;
 		private static bool skinLoaded;
