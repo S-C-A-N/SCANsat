@@ -144,8 +144,8 @@ namespace SCANsat.SCAN_UI
 
 			currentTerrain = new SCANterrainConfig(bodyTerrain);
 
-			stockBiomes = SCAN_Settings_Config.Instance.StockBiomes;
-			biomeBorders = SCAN_Settings_Config.Instance.BiomeBorder;
+			stockBiomes = SCAN_Settings_Config.Instance.BigMapStockBiomes;
+			biomeBorders = SCAN_Settings_Config.Instance.BigMapBiomeBorder;
 
 			minTerrainSlider = new SCANuiSlider(currentTerrain.DefaultMinHeight - SCANconfigLoader.SCANNode.RangeBelowMinHeight, currentTerrain.MaxTerrain - 100, currentTerrain.MinTerrain, "Min: ", "m", colorTerrainHelpMin, -2);
 			maxTerrainSlider = new SCANuiSlider(currentTerrain.MinTerrain + 100, currentTerrain.DefaultMaxHeight + SCANconfigLoader.SCANNode.RangeAboveMaxHeight, currentTerrain.MaxTerrain, "Max: ", "m", colorTerrainHelpMax, -2);
@@ -206,8 +206,8 @@ namespace SCANsat.SCAN_UI
 			colorBiomeHelpTransparency = SCANconfigLoader.languagePack.colorBiomeHelpTransparency;
 			colorPickerHelpLow = SCANconfigLoader.languagePack.colorPickerHelpLow;
 			colorPickerHelpHigh = SCANconfigLoader.languagePack.colorPickerHelpHigh;
-			colorPickerHelpValue = SCANconfigLoader.languagePack.colorPickerHelpValue;
-			colorResourceHelpFineControl = SCANconfigLoader.languagePack.colorResourceHelpFineControl;
+			//colorPickerHelpValue = SCANconfigLoader.languagePack.colorPickerHelpValue;
+			//colorResourceHelpFineControl = SCANconfigLoader.languagePack.colorResourceHelpFineControl;
 			colorResourceHelpMin = SCANconfigLoader.languagePack.colorResourceHelpMin;
 			colorResourceHelpMax = SCANconfigLoader.languagePack.colorResourceHelpMax;
 			colorResourceHelpTransparency = SCANconfigLoader.languagePack.colorResourceHelpTransparency;
@@ -876,8 +876,8 @@ namespace SCANsat.SCAN_UI
 						SCANcontroller.controller.lowBiomeColor32 = biomeColorPicker.ColorLow;
 						SCAN_Settings_Config.Instance.HighBiomeColor = biomeColorPicker.ColorHigh;
 						SCANcontroller.controller.highBiomeColor32 = biomeColorPicker.ColorHigh;
-						SCAN_Settings_Config.Instance.StockBiomes = stockBiomes;
-						SCAN_Settings_Config.Instance.BiomeBorder = biomeBorders;
+						SCAN_Settings_Config.Instance.BigMapStockBiomes = stockBiomes;
+						SCAN_Settings_Config.Instance.BigMapBiomeBorder = biomeBorders;
 						SCAN_Settings_Config.Instance.BiomeTransparency = bTrans / 100;
 
 						biomeColorPicker.updateOldSwatches();
@@ -897,8 +897,8 @@ namespace SCANsat.SCAN_UI
 						SCANcontroller.controller.lowBiomeColor32 = palette.xkcd_CamoGreen;
 						SCAN_Settings_Config.Instance.HighBiomeColor = palette.xkcd_Marigold;
 						SCANcontroller.controller.highBiomeColor32 = palette.xkcd_Marigold;
-						SCAN_Settings_Config.Instance.StockBiomes = false;
-						SCAN_Settings_Config.Instance.BiomeBorder = true;
+						SCAN_Settings_Config.Instance.BigMapStockBiomes = false;
+						SCAN_Settings_Config.Instance.BigMapBiomeBorder = true;
 						SCAN_Settings_Config.Instance.BiomeTransparency = 0.4f;
 
 						stockBiomes = false;
