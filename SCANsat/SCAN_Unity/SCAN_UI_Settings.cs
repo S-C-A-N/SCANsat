@@ -21,6 +21,8 @@ namespace SCANsat.SCAN_Unity
 
 		private SCAN_Settings uiElement;
 
+		private SCAN_UI_Color colorInterface;
+
 		private static SCAN_UI_Settings instance;
 
 		public static SCAN_UI_Settings Instance
@@ -31,6 +33,8 @@ namespace SCANsat.SCAN_Unity
 		public SCAN_UI_Settings()
 		{
 			instance = this;
+
+			colorInterface = new SCAN_UI_Color();
 		}
 
 		public int Page
@@ -118,6 +122,46 @@ namespace SCANsat.SCAN_Unity
 		public string SensorCount
 		{
 			get { return _sensorCount; }
+		}
+
+		public string DataResetCurrent
+		{
+			get { return string.Format(SCANconfigLoader.languagePack.warningDataResetCurrent, getTargetBody().theName); }
+		}
+
+		public string DataResetAll
+		{
+			get { return SCANconfigLoader.languagePack.warningDataResetAll; }
+		}
+
+		public string SCANResourceResetCurrent
+		{
+			get { return string.Format(SCANconfigLoader.languagePack.warningSCANResourceResetCurrent, getTargetBody().theName); }
+		}
+
+		public string SCANResourceResetAll
+		{
+			get { return SCANconfigLoader.languagePack.warningSCANResourceResetAll; }
+		}
+
+		public string StockResourceResetCurrent
+		{
+			get { return string.Format(SCANconfigLoader.languagePack.warningStockResourceResetCurrent, getTargetBody().theName); }
+		}
+
+		public string StockResourceResetAll
+		{
+			get { return SCANconfigLoader.languagePack.warningStockResourceResetAll; }
+		}
+
+		public string ModuleManagerWarning
+		{
+			get { return SCANconfigLoader.languagePack.warningModuleManagerResource; }
+		}
+
+		public string SaveToConfig
+		{
+			get { return SCANconfigLoader.languagePack.warningSaveToConfig; }
 		}
 
 		public int TimeWarp
@@ -408,6 +452,11 @@ namespace SCANsat.SCAN_Unity
 			}
 		}
 
+		public bool ModuleManager
+		{
+			get { return SCANmainMenuLoader.MMLoaded; }
+		}
+
 		public Canvas TooltipCanvas
 		{
 			get { return UIMasterController.Instance.tooltipCanvas; }
@@ -421,6 +470,11 @@ namespace SCANsat.SCAN_Unity
 		public IList<string> BackgroundBodies
 		{
 			get	{ return new List<string>(SCANcontroller.controller.GetAllData.Select(d => d.Body.bodyName)); }
+		}
+
+		public ISCAN_Color ColorInterface
+		{
+			get { return colorInterface; }
 		}
 
 		public void ClampToScreen(RectTransform rect)
@@ -444,7 +498,7 @@ namespace SCANsat.SCAN_Unity
 				data.reset();
 		}
 
-		public void ResetSCANResource()
+		public void ResetSCANResourceCurrent()
 		{
 			CelestialBody thisBody = getTargetBody();
 
@@ -454,13 +508,24 @@ namespace SCANsat.SCAN_Unity
 				data.resetResources();
 		}
 
-		public void ResetStockResource()
+		public void ResetSCANResourceAll()
+		{
+			foreach (SCANdata data in SCANcontroller.controller.GetAllData)
+				data.resetResources();
+		}
+
+		public void ResetStockResourceCurrent()
 		{
 			CelestialBody thisBody = getTargetBody();
 
 			var resources = ResourceScenario.Instance.gameSettings.GetPlanetScanInfo();
 
 			resources.RemoveAll(a => a.PlanetId == thisBody.flightGlobalsIndex);
+		}
+
+		public void ResetStockResourceAll()
+		{
+			ResourceScenario.Instance.gameSettings.GetPlanetScanInfo().Clear();
 		}
 
 		public void FillCurrent()
@@ -488,11 +553,6 @@ namespace SCANsat.SCAN_Unity
 				}
 				data.fillMap();
 			}
-		}
-
-		public void OpenColor()
-		{
-			SCANcontroller.controller.colorManager.Visible = !SCANcontroller.controller.colorManager.Visible;
 		}
 
 		public void ResetWindows()
