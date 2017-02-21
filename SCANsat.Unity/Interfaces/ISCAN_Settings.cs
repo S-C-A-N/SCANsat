@@ -10,6 +10,22 @@ namespace SCANsat.Unity.Interfaces
 
 		string SensorCount { get; }
 
+		string DataResetCurrent { get; }
+
+		string DataResetAll { get; }
+
+		string SCANResourceResetCurrent { get; }
+
+		string SCANResourceResetAll { get; }
+
+		string StockResourceResetCurrent { get; }
+
+		string StockResourceResetAll { get; }
+
+		string ModuleManagerWarning { get; }
+
+		string SaveToConfig { get; }
+
 		int TimeWarp { get; set; }
 
 		int MapWidth { get; set; }
@@ -68,11 +84,15 @@ namespace SCANsat.Unity.Interfaces
 
 		bool LockInput { get; set; }
 
+		bool ModuleManager { get; }
+
 		Canvas TooltipCanvas { get; }
 
 		Vector2 Position { set; }
 
 		IList<string> BackgroundBodies { get; }
+
+		ISCAN_Color ColorInterface { get; }
 
 		void ClampToScreen(RectTransform rect);
 
@@ -80,15 +100,17 @@ namespace SCANsat.Unity.Interfaces
 
 		void ResetAll();
 
-		void ResetSCANResource();
+		void ResetSCANResourceCurrent();
 
-		void ResetStockResource();
+		void ResetSCANResourceAll();
+
+		void ResetStockResourceCurrent();
+
+		void ResetStockResourceAll();
 
 		void FillCurrent();
 
 		void FillAll();
-
-		void OpenColor();
 
 		void ResetWindows();
 

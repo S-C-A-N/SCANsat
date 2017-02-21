@@ -41,6 +41,8 @@ namespace SCANsat.Unity.Interfaces
 
 		bool ShowResource { get; }
 
+		bool ShowVessel { get; }
+
 		bool TooltipsOn { get; }
 
 		bool LockInput { get; set; }
