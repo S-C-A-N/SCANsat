@@ -774,10 +774,10 @@ namespace SCANsat.SCAN_Map
 					continue;
 				}
 
-				if (SCAN_Settings_Config.Instance.StockBiomes && colorMap)
+				if (SCAN_Settings_Config.Instance.BigMapStockBiomes && colorMap)
 				{
 					stockBiomeColor[i] = SCANUtil.getBiome(body, lon, lat).mapColor;
-					if (SCAN_Settings_Config.Instance.BiomeBorder)
+					if (SCAN_Settings_Config.Instance.BigMapBiomeBorder)
 						biomeIndex[i] = SCANUtil.getBiomeIndexFraction(body, lon, lat);
 				}
 				else
@@ -899,11 +899,11 @@ namespace SCANsat.SCAN_Map
 										}
 									}
 
-									if (SCAN_Settings_Config.Instance.BiomeBorder && ((i > 0 && mapline[i - 1] != biomeIndex[i]) || (mapstep > 0 && mapline[i] != biomeIndex[i])))
+									if (SCAN_Settings_Config.Instance.BigMapBiomeBorder && ((i > 0 && mapline[i - 1] != biomeIndex[i]) || (mapstep > 0 && mapline[i] != biomeIndex[i])))
 									{
 										biome = palette.White;
 									}
-									else if (SCAN_Settings_Config.Instance.StockBiomes)
+									else if (SCAN_Settings_Config.Instance.BigMapStockBiomes)
 									{
 										biome = palette.lerp(stockBiomeColor[i], elevation, SCAN_Settings_Config.Instance.BiomeTransparency);
 									}
