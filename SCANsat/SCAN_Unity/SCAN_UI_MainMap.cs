@@ -715,18 +715,12 @@ namespace SCANsat.SCAN_Unity
 				double index = SCANUtil.getBiomeIndexFraction(data.Body, i - 180, scanline - 90);
 				Color32 c = palette.Grey;
 
-				if (SCAN_Settings_Config.Instance.BiomeBorder && ((i > 0 && biomeIndex[i - 1] != index) || (scanline > 0 && biomeIndex[i] != index)))
-				{
+				if (SCAN_Settings_Config.Instance.SmallMapBiomeBorder && ((i > 0 && biomeIndex[i - 1] != index) || (scanline > 0 && biomeIndex[i] != index)))
 					c = palette.White;
-				}
-				else if (SCAN_Settings_Config.Instance.StockBiomes)
-				{
+				else if (SCAN_Settings_Config.Instance.SmallMapStockBiomes)
 					c = SCANUtil.getBiome(data.Body, i - 180, scanline - 90).mapColor;
-				}
 				else
-				{
 					c = palette.lerp(SCANcontroller.controller.lowBiomeColor32, SCANcontroller.controller.highBiomeColor32, (float)index);
-				}
 
 				biomeCache[scanline * 360 + i] = c;
 
