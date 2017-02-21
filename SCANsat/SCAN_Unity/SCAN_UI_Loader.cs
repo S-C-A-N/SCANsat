@@ -16,8 +16,8 @@ namespace SCANsat.SCAN_Unity
 	[KSPAddon(KSPAddon.Startup.MainMenu, true)]
 	public class SCAN_UI_Loader : MonoBehaviour
 	{
-		private const string prefabAssetName = "scansat_prefabs";
-		private const string imageAssetName = "scan_images";
+		private const string prefabAssetName = "scansat_prefabs.ksp";
+		private const string imageAssetName = "scan_images.ksp";
 
 		private static bool loaded;
 		private static bool skinLoaded;
@@ -817,10 +817,13 @@ namespace SCANsat.SCAN_Unity
 					style.setScrollbar(skin.verticalScrollbar.normal.background, skin.verticalScrollbarThumb.normal.background);
 					break;
 				case SCAN_Style.StyleTypes.Tooltip:
-					if (stock)
-						style.setImage(_kspTooltipBackground);
-					else
-						style.setImage(_unityTooltipBackground);
+					style.setImage(stock ? _kspTooltipBackground : _unityTooltipBackground);
+					break;
+				case SCAN_Style.StyleTypes.VerticalSlider:
+					style.setButton(skin.horizontalSliderThumb.normal.background, skin.horizontalSliderThumb.highlight.background, skin.horizontalSliderThumb.active.background, skin.horizontalSliderThumb.active.background);
+					break;
+				case SCAN_Style.StyleTypes.Popup:
+					style.setImage(stock ? _kspTooltipBackground : _unityTooltipBackground);
 					break;
 				default:
 					break;
