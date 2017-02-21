@@ -114,7 +114,8 @@ namespace SCANsat.Unity.Unity
 
 			SetPosition(map.Position);
 
-			SetGeneratingText(map.MapGenerating);
+			if (!map.MapType)
+				SetGeneratingText(map.MapGenerating);
 
 			ProcessTooltips();
 

@@ -218,7 +218,7 @@ namespace SCANsat.Unity.Unity
 			if (m_ResourcePrefab == null || m_ResourceTransform == null)
 				return;
 
-			for (int i = resources.Count - 1; i >= 0; i--)
+			for (int i = 0; i < resources.Count; i++)
 			{
 				string s = resources[i];
 
