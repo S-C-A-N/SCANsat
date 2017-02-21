@@ -1,0 +1,116 @@
+﻿using System;
+using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.UI;
+
+namespace SCANsat.Unity.Interfaces
+{
+	public interface ISCAN_Color
+	{
+		string ResourcePlanet { get; set; }
+
+		string ResourceCurrent { get; set; }
+
+		string TerrainPlanet { get; set; }
+
+		string TerrainPalette { get; set; }
+
+		string TerrainPaletteStyle { get; set; }
+
+		bool BiomeBigMapStockColor { get; set; }
+
+		bool BiomeBigMapWhiteBoder { get; set; }
+
+		bool BiomeSmallMapStockColor { get; set; }
+
+		bool BiomeSmallMapWhiteBorder { get; set; }
+
+		bool TerrainClampOn { get; set; }
+
+		bool TerrainReverse { get; set; }
+
+		bool TerrainDiscrete { get; set; }
+
+		bool TerrainHasSize { get; }
+
+		float BiomeTransparency { get; set; }
+
+		float SlopeCutoff { get; set; }
+
+		float ResourceMin { get; set; }
+
+		float ResourceMax { get; set; }
+
+		float ResourceTransparency { get; set; }
+
+		float TerrainCurrentMin { get; set; }
+
+		float TerrainGlobalMin { get; }
+
+		float TerrainCurrentMax { get; set; }
+
+		float TerrainGlobalMax { get; }
+
+		float TerrainClamp { get; set; }
+
+		int TerrainSize { get; set; }
+
+		int TerrainSizeMin { get; }
+
+		int TerrainSizeMax { get; }
+
+		Color BiomeColorOne { get; }
+
+		Color BiomeColorTwo { get; }
+
+		Color SlopeColorOneLo { get; }
+
+		Color SlopeColorOneHi { get; }
+
+		Color SlopeColorTwoLo { get; }
+
+		Color SlopeColorTwoHi { get; }
+
+		Color ResourceColorOne { get; }
+
+		Color ResourceColorTwo { get; }
+
+		Texture2D TerrainPaletteOld { get; }
+
+		Texture2D TerrainPaletteNew { get; }
+
+		IList<KeyValuePair<string, Texture2D>> TerrainPalettes { get; }
+
+		IList<string> Resources { get; }
+
+		IList<string> CelestialBodies { get; }
+
+		IList<string> PaletteStyleNames { get; }
+
+		void BiomeApply(Color one, Color two);
+
+		void BiomeDefault();
+
+		void SlopeApply(Color oneLow, Color oneHigh, Color twoLow, Color twoHigh);
+
+		void SlopeDefault();
+
+		void ResourceApply(Color one, Color two);
+
+		void ResourceApplyToAll(Color one, Color two);
+
+		void ResourceDefault();
+
+		void ResourceDefaultToAll();
+
+		void ResourceSaveToConfig(Color one, Color two);
+
+		void TerrainApply();
+
+		void TerrainDefault();
+
+		void TerrainSaveToConfig();
+
+		void Refresh();
+	}
+}
