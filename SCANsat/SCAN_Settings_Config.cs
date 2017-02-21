@@ -60,9 +60,13 @@ namespace SCANsat
 		[Persistent]
 		public float BiomeTransparency = 0.4f;
 		[Persistent]
-		public bool BiomeBorder = true;
+		public bool BigMapBiomeBorder = true;
 		[Persistent]
-		public bool StockBiomes = false;
+		public bool BigMapStockBiomes = true;
+		[Persistent]
+		public bool SmallMapBiomeBorder = false;
+		[Persistent]
+		public bool SmallMapStockBiomes = true;
 		[Persistent]
 		public Color LowBiomeColor = palette.xkcd_CamoGreen;
 		[Persistent]
