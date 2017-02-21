@@ -22,39 +22,39 @@ namespace SCANsat.SCAN_UI.UI_Framework
 		[Persistent]
 		public string settingsHelpBackground = "Toggle background scanning on\nselected celestial bodies.";
 		[Persistent]
-		public string settingsHelpTimeWarp = "Adjust the scanning frequency during TimeWarp.\nHigher settings result in fewer gaps in the maps but may have a performance impact at high TimeWarp.";
+		public string settingsHelpTimeWarp = "Adjust the scanning frequency during TimeWarp.\nHigher settings result in fewer gaps in the maps\nbut may have a performance impact at high TimeWarp.";
 		[Persistent]
 		public string settingsHelpGroundTracks = "Display a visible indicator of\nscanning activity in map mode.";
 		[Persistent]
-		public string settingsHelpGroundTracksActive = "The ground track indicator can be limited to only be displayed for the active vessel.";
+		public string settingsHelpGroundTracksActive = "The ground track indicator can be limited\nto only be displayed for the active vessel.";
 		[Persistent]
 		public string settingsHelpStockUIStyle = "Switch between stock KSP-style UI elements and Unity-style elements."; 
 		[Persistent]
-		public string settingsHelpOverlayTooltips = "Displays tooltips for the current mouse position when a planetary overlay map is activated. These tooltips include The cursor coordinates, terrain height, slope, biome name, and resource abundance, depending on scanning coverage.";
+		public string settingsHelpOverlayTooltips = "Displays tooltips for the current mouse position when a planetary overlay map is activated.\nThese tooltips include The cursor coordinates, terrain height, slope, biome name,\nand resource abundance, depending on scanning coverage.";
 		[Persistent]
-		public string settingsHelpWindowTooltips = "Display tooltips on some map window buttons. These are primarily used to identify icon buttons.";
+		public string settingsHelpWindowTooltips = "Display tooltips on some map window buttons.\nThese are primarily used to identify icon buttons.";
 		[Persistent]
-		public string settingsHelpStockToolbar = "Use the stock toolbar.\nOnly one stock button is available. Can be used concurrently with the Blizzy78 Toolbar.";
+		public string settingsHelpStockToolbar = "Use the stock toolbar.\nCan be used concurrently with the Blizzy78 Toolbar.";
 		[Persistent]
 		public string settingsHelpToolbarMenu = "Use a pop-out menu for the stock toolbar to show all available windows.";
 		[Persistent]
 		public string settingsHelpMechJeb = "The SCANsat zoom map target selection mode can be used to select a MechJeb landing site.";
 		[Persistent]
-		public string settingsHelpResetWindows = "Reset all window positions. Use this in case a window has been dragged completely off screen or if any windows are not visible.";
+		public string settingsHelpResetWindows = "Reset all window positions and scale.\nUse this in case a window has been dragged completely\noff screen or if any windows are not visible.";
 		[Persistent]
 		public string settingsHelpResetPlanetData = "Resets all SCANsat data for the current celestial body.\nA confirmation window will open before activating.\nCannot be reversed.";
 		[Persistent]
-		public string settingsHelpResetAllData = "Resets all SCANsat data for all celestial bodies.       \nA confirmation window will open before activating.\nCannot be reversed.";
+		public string settingsHelpResetAllData = "Resets all SCANsat data for all celestial bodies.\nA confirmation window will open before activating.\nCannot be reversed.";
 		[Persistent]
-		public string settingsHelpVesselsSensorsPasses = "Information about the currently active SCANsat sensors. Vessels indicates the number of vessels with active sensors. Sensors indicates the total number of sensors; instruments with multiple sensor types count each individual sensor. Passes indicates the number of sensor updates performed per second.\nThis value is affected by the\nTimeWarp Resolution setting.";
+		public string settingsHelpVesselsSensorsPasses = "Information about the currently active SCANsat sensors.\nVessels indicates the number of vessels with active sensors.\nSensors indicates the total number of sensors;\ninstruments with multiple sensor types count each individual sensor.\nPasses indicates the number of sensor updates performed per second.\nThis value is affected by the TimeWarp Resolution setting.";
 		[Persistent]
-		public string settingsHelpGreyScale = "Use a true grey-scale color spectrum for black-and-white SCANsat maps. Pixels on the altitude map will interpolate between black and white; the min and max terrain heights for each celestial body\ndefine the limits.";
+		public string settingsHelpGreyScale = "Use a true grey-scale color spectrum for black-and-white SCANsat maps.\nPixels on the altitude map will interpolate between black and white;\nthe min and max terrain heights for each celestial body define the limits.";
 		[Persistent]
-		public string settingsHelpExportCSV = "Export a .csv file along with map texture when using the Export button on the big map. The file contains coordinates and the terrain height for each pixel. Pixels are labeled from left to right\nand from top to bottom.";
+		public string settingsHelpExportCSV = "Export a .csv file along with map texture when using the Export button on the big map.\nThe file contains coordinates and the terrain height for each pixel.\nPixels are labeled from left to right and from top to bottom.";
 		[Persistent]
-		public string settingsHelpSetMapWidth = "Enter an exact value for the SCANsat big map texture width. Values are limited to 550 - 8192 pixels wide. Press the Set button to apply the value.";
+		public string settingsHelpSetMapWidth = "Enter an exact value for the SCANsat big map texture width.\nValues are limited to 550 - 8192 pixels wide.\nPress the Set button to apply the value.";
 		[Persistent]
-		public string settingsHelpWindowScale = "Adjust SCANsat window UI scale; scale is also affected by the stock master UI scale controls.";
+		public string settingsHelpWindowScale = "Adjust all SCANsat window scales.";
 		[Persistent]
 		public string settingsHelpFillPlanet = "Fill in all SCANsat data for the current celestial body.";
 		[Persistent]
@@ -62,79 +62,71 @@ namespace SCANsat.SCAN_UI.UI_Framework
 
 		//Resource Settings Window Help Tooltips
 		[Persistent]
-		public string resourceSettingsHelpOverlayWindow = "Open the planetary overlay map control window.";
+		public string resourceSettingsHelpBiomeLock = "Circumvents the requirement for stock surface biome scans.\nSCANsat displays will show the full accuracy for resource\nabundance with or without any surface biome scans.";
 		[Persistent]
-		public string resourceSettingsHelpBiomeLock = "Circumvents the requirement for stock surface biome scans. SCANsat displays will show the full accuracy for resource abundance with or without any surface biome scans.";
+		public string resourceSettingsHelpInstant = "By default, the stock M700 resource scanner's orbital survey will fill in all SCANsat resource maps.\nThis can be disabled, requiring standard SCANsat methods for all resource scanning.\nDisabled automatically when stock resource scanning is disabled.";
 		[Persistent]
-		public string resourceSettingsHelpInstant = "By default, the stock M700 resource scanner's orbital survey will fill in all SCANsat resource maps. This can be disabled, requiring standard SCANsat methods for all resource scanning. Disabled automatically when stock resource scanning is disabled.";
+		public string resourceSettingsHelpNarrowBand = "Numerous SCANsat functions require a Narrow-Band resource scanner on-board\nthe current vessel or in orbit of a celestial body for fully accurate resource abundance data.\nDisable this to circumvent these restrictions.";
 		[Persistent]
-		public string resourceSettingsHelpNarrowBand = "Numerous SCANsat functions require a Narrow-Band resource scanner on-board the current vessel or in orbit of a celestial body for fully accurate resource abundance data.\nDisable this to circumvent these restrictions.";
+		public string resourceSettingsHelpDisableStock = "Disables all stock resource scanning functions.\nSCANsat scanning methods will be required for all resource data.\nReplaces several stock resource functions with SCANsat tools.\nThese include The right-click readouts, and the planetary overlay maps.";
 		[Persistent]
-		public string resourceSettingsHelpDisableStock = "Disables all stock resource scanning functions. SCANsat scanning methods will be required for all resource data. Replaces several stock resource functions with SCANsat tools. These include The right-click readouts, the high resolution narrow-band scanner map, and the planetary overlay maps.";
+		public string resourceSettingsHelpResetSCANsatResource = "Resets all SCANsat resource data for the current celestial body.\nOther SCANsat data is not affected.\nA confirmation window will open before activating.\nCannot be reversed.";
 		[Persistent]
-		public string resourceSettingsHelpResetSCANsatResource = "Resets all SCANsat resource data for the current celestial body. Other SCANsat data is not affected.\nA confirmation window will open before activating.\nCannot be reversed.";
+		public string resourceSettingsHelpResetStockResource = "Resets the stock resource scanning coverage for the current celestial body.\nA reload or scene change may be required for all changes to take effect.\nA confirmation window will open before activating.\nCannot be reversed.";
 		[Persistent]
-		public string resourceSettingsHelpResetStockResource = "Resets the stock resource scanning coverage for the current celestial body. A reload or scene change may be required for all changes to take effect.\nA confirmation window will open before activating.\nCannot be reversed.";
+		public string resourceSettingsHelpOverlayInterpolation = "Change the number of resource abundance measurements used in constructing\nthe planetary overlay and big map resource overlay.\nDecrease the value to increase the accuracy of the map.\nLower values will result in slower map generation.";
 		[Persistent]
-		public string resourceSettingsHelpOverlayInterpolation = "Change the number of resource abundance measurements used in constructing the planetary overlay and big map resource overlay. Decrease the value to increase the accuracy of the map. Lower values will result in slower map generation.";
+		public string resourceSettingsHelpOverlayHeight = "Change the texture size (map width is 2XHeight) used in constructing\nthe planetary overlay and big map resource overlay.\nIncrease the value to increase the quality and accuracy of the map.\nHigher values will result in slower map generation.";
 		[Persistent]
-		public string resourceSettingsHelpOverlayHeight = "Change the texture size (map width is 2XHeight) used in constructing the planetary overlay and big map resource overlay. Increase the value to increase the quality and accuracy of the map. Higher values will result in slower map generation.";
+		public string resourceSettingsHelpOverlayBiomeHeight = "Change the texture size (map width is 2XHeight) used in constructing\nthe planetary overlay biome map. Increase the value to increase\nthe quality and accuracy of the map.\nHigher values will result in slower map generation.";
 		[Persistent]
-		public string resourceSettingsHelpOverlayBiomeHeight = "Change the texture size (map width is 2XHeight) used in constructing the planetary overlay biome map. Increase the value to increase the quality and accuracy of the map. Higher values will result in slower map generation.";
+		public string resourceSettingsHelpOverlayTransparency = "Create a grey background for planetary overlay resource maps.\nUsed to make clear which sections of the celestial body\nhave been scanned but contain no resources.";
 		[Persistent]
-		public string resourceSettingsHelpOverlayTransparency = "Create a grey background for planetary overlay resource maps. Used to make clear which sections of the celestial body have been\nscanned but contain no resources.";
-		[Persistent]
-		public string resourceSettingsHelpScanThreshold = "A threshold level used to apply the stock resource scan to a celestial body after scanning with SCANsat sensors. This is useful when contracts or other addons require that a stock resource scan be performed. Set a value from 0-100 in the text box and click on the Set button. All celestial bodies will be checked immediately; celestial bodies will also be checked upon loading or a scene change. A reload may be required for the changes to take effect.";
-		[Persistent]
-		public string resourceSettingsModuleManagerWarning = "Warning:\nModule Manager is required for all SCANsat resource scanning";
+		public string resourceSettingsHelpScanThreshold = "A threshold level used to apply the stock resource scan to a celestial body after scanning with SCANsat sensors.\nThis is useful when contracts or other addons require that a stock resource scan be performed.\nSet a value from 0-100 in the text box and click on the Set button.\nAll celestial bodies will be checked immediately;\ncelestial bodies will also be checked upon loading or a scene change.\nA reload may be required for the changes to take effect.";
 
 		//Color Config Window Help Tooltips
 		[Persistent]
-		public string colorTerrainHelpMin = "Defines the low altitude cutoff for the terrain color palette. Anything below this altitude will be shown with the lowest color.";
+		public string colorTerrainHelpMin = "Defines the low altitude cutoff for the terrain color palette.\nAnything below this altitude will be shown with the lowest color.";
 		[Persistent]
-		public string colorTerrainHelpMax = "Defines the high altitude cutoff for the terrain color palette. Anything above this altitude will be shown with the highest color.";
+		public string colorTerrainHelpMax = "Defines the high altitude cutoff for the terrain color palette.\nAnything above this altitude will be shown with the highest color.";
 		[Persistent]
-		public string colorTerrainHelpClampToggle = "Used to define a cutoff between the low and high altitude values. This is particularly useful for ocean planets where it helps to define a sharp distinction between land and ocean.";
+		public string colorTerrainHelpClampToggle = "Used to define a cutoff between the low and high altitude values.\nThis is particularly useful for ocean planets where it helps to\ndefine a sharp distinction between land and ocean.";
 		[Persistent]
-		public string colorTerrainHelpClamp = "Defines the clamp altitude cutoff. Anything below the cutoff will be represented by the first two colors in the selected color palette. Anything above the cutoff will be represented with the remaining colors.";
+		public string colorTerrainHelpClamp = "Defines the clamp altitude cutoff.\nAnything below the cutoff will be represented by the first two colors in the selected color palette.\nAnything above the cutoff will be represented with the remaining colors.";
 		[Persistent]
 		public string colorTerrainHelpReverse = "Reverses the order of the currently\nselected color palette.";
 		[Persistent]
-		public string colorTerrainHelpDiscrete = "Draws the map using only the specific colors defined by each palette, instead of smoothly interpolating between them.";
+		public string colorTerrainHelpDiscrete = "Draws the map using only the specific colors defined by each palette,\ninstead of smoothly interpolating between them.";
 		[Persistent]
-		public string colorTerrainHelpPaletteSize = "Adjust the number of colors available in the currently selected color palette.";
+		public string colorTerrainHelpPaletteSize = "Adjust the number of colors available\nin the currently selected color palette.";
 		[Persistent]
 		public string colorBiomeHelpStock = "Use the stock biome color scheme for\nSCANsat biome maps.";
 		[Persistent]
-		public string colorBiomeHelpWhiteBorder = "Draw a white border between biomes. Does not apply to the planetary overlay biome maps.";
+		public string colorBiomeHelpWhiteBorder = "Draw a white border between biomes.\nDoes not apply to the planetary overlay biome maps.";
 		[Persistent]
-		public string colorBiomeHelpTransparency = "Adjust the transparency of biome maps. Terrain elevation is shown behind the biome maps. Set to 0% to disable terrain drawing.";
+		public string colorBiomeHelpTransparency = "Adjust the transparency of biome maps.\nTerrain elevation is shown behind the biome maps.\nSet to 0% to disable terrain drawing.";
 		[Persistent]
-		public string colorPickerHelpLow = "The top color swatch shows the updated color selection for the low end of this color spectrum. The bottom color swatch shows the currently active color.";
+		public string colorPickerHelpLow = "The top color swatch shows the updated\ncolor selection for the low end of this color spectrum.\nThe bottom color swatch shows the currently active color.";
 		[Persistent]
-		public string colorPickerHelpHigh = "The top color swatch shows the updated color selection for the high end of this color spectrum. The bottom color swatch shows the currently active color.";
+		public string colorPickerHelpHigh = "The top color swatch shows the updated\ncolor selection for the high end of this color spectrum.\nThe bottom color swatch shows the currently active color.";
 		[Persistent]
-		public string colorPickerHelpValue = "This slider adjusts the Value (in HSV color terms) or Brightness for the currently selected color.";
+		public string colorResourceHelpMin = "The low cutoff for resource concentration on the selected celestial body.\nResource deposits at this level will be displayed\nusing the low end of the current resource overlay color spectrum.\nResource deposits below this value will not be shown.";
 		[Persistent]
-		public string colorResourceHelpFineControl = "Activates Fine Control Mode where the sliders will only show values within 5% of the current selection.";
+		public string colorResourceHelpMax = "The high cutoff for resource concentration on the selected celestial body.\nResource deposits above this value will be displayed\nusing the high end of the current resource overlay color spectrum.";
 		[Persistent]
-		public string colorResourceHelpMin = "The low cutoff for resource concentration on the selected celestial body. Resource deposits at this level will be displayed using the low end of the current resource overlay color spectrum. Resource deposits below this value will not be shown.";
+		public string colorResourceHelpTransparency = "Defines the level of transparency for resource overlays.\nIncrease to allow more of the underlying terrain, slope, or biome map to be visible.\nThis also affect the transparency of resource deposits on the planetary overlay resource map.";
 		[Persistent]
-		public string colorResourceHelpMax = "The high cutoff for resource concentration on the selected celestial body. Resource deposits above this value will be shown using the high end of the current resource overlay color spectrum.";
+		public string colorResourceHelpApply = "Applies the current values for the\nselected resource and celestial body only.";
 		[Persistent]
-		public string colorResourceHelpTransparency = "Defines the level of transparency for resource overlays. Increase to allow more of the underlying terrain, slope, or biome map to be visible. This also affect the transparency of resource deposits on the planetary overlay resource map.";
+		public string colorResourceHelpApplyAll = "Applies the current values for the\nselected resource for all celestial bodies.";
 		[Persistent]
-		public string colorResourceHelpApply = "Applies the current values for the selected resource and celestial body only.";
+		public string colorResourceHelpDefault = "Reverts to the default values for the\nselected resource and celestial body only.";
 		[Persistent]
-		public string colorResourceHelpApplyAll = "Applies the current values for the selected resource for all celestial bodies.";
+		public string colorResourceHelpDefaultAll = "Reverts to the default values for the\nselected resource for all celestial bodies.";
 		[Persistent]
-		public string colorResourceHelpDefault = "Reverts to the default values for the selected resource and celestial body only.";
+		public string colorHelpSaveToConfig = "Save all color configuration values to\nthe config file found in your SCANsat/Resources folder.\nThese values serve as the defaults for new saves\nand for all Revert To Default buttons.\nValues do not need to be saved to the config file to be applied for this save file.";
 		[Persistent]
-		public string colorResourceHelpDefaultAll = "Reverts to the default values for the selected resource for all celestial bodies.";
-		[Persistent]
-		public string colorHelpSaveToConfig = "Save all color configuration values to the config file found in your SCANsat/Resources folder. These values serve as the defaults for new saves and for all Revert To Default buttons. Values do not need to be saved to the config file to be applied for this save file.";
-		[Persistent]
-		public string colorSlopeHelpCutoff = "Adjust the cutoff level between the two selected slope color pairs.";
+		public string colorSlopeHelpCutoff = "Adjust the cutoff level between\nthe two selected slope color pairs.";
 
 		//Window toggle buttons
 		[Persistent]
@@ -227,7 +219,27 @@ namespace SCANsat.SCAN_UI.UI_Framework
 		public string waypointCancel = "Cancel Waypoint";
 		[Persistent]
 		public string waypointMechJeb = "Set MechJeb Landing Target";
+		[Persistent]
+		public string waypointNameRefresh = "Reset Waypoint";
 
+		//Warning labels
+		[Persistent]
+		public string warningDataResetCurrent = "Erase all map data for {0}?";
+		[Persistent]
+		public string warningDataResetAll = "Erase map data for all celestial bodies?";
+		[Persistent]
+		public string warningSCANResourceResetCurrent = "Erase SCANsat resource data for {0}?";
+		[Persistent]
+		public string warningSCANResourceResetAll = "Erase SCANsat resource data for all celestial bodies?";
+		[Persistent]
+		public string warningStockResourceResetCurrent = "Erase stock resource data for {0}?";
+		[Persistent]
+		public string warningStockResourceResetAll = "Erase stock resource data for all celestial bodies?";
+		[Persistent]
+		public string warningModuleManagerResource = "Warning\nModule Manager is required for all SCANsat resource scanning functions.";
+		[Persistent]
+		public string warningSaveToConfig = "Overwrite existing config file on disk?";
+		
 		public override void OnDecodeFromConfigNode()
 		{
 			Regex openBracket = new Regex(@"\[(?=\d+:?\w?\d?\])");
@@ -238,8 +250,8 @@ namespace SCANsat.SCAN_UI.UI_Framework
 
 			var stringFields = this.GetType().GetFields(BindingFlags.Instance | BindingFlags.Public).Where(a => a.FieldType == typeof(string)).ToList();
 
-			for (int i = 0; i < stringFields.Count(); i++)
-			{
+			for (int i = stringFields.Count - 1; i >= 0; i--)
+			{				
 				FieldInfo f = stringFields[i];
 
 				f.SetValue(this, openBracket.Replace((string)f.GetValue(this), "{"));
@@ -260,7 +272,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 
 			var stringFields = this.GetType().GetFields(BindingFlags.Instance | BindingFlags.Public).Where(a => a.FieldType == typeof(string)).ToList();
 
-			for (int i = 0; i < stringFields.Count(); i++)
+			for (int i = stringFields.Count - 1; i >= 0; i--)
 			{
 				FieldInfo f = stringFields[i];
 
