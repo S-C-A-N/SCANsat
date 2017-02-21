@@ -114,6 +114,7 @@
     <Compile Include="SCAN_UI\UI_Framework\SCANuiUtil.cs" />
     <Compile Include="SCAN_Unity\SCAN_TextMeshPro.cs" />
     <Compile Include="SCAN_Unity\SCAN_UI_BigMap.cs" />
+    <Compile Include="SCAN_Unity\SCAN_UI_Color.cs" />
     <Compile Include="SCAN_Unity\SCAN_UI_Instruments.cs" />
     <Compile Include="SCAN_Unity\SCAN_UI_Loader.cs" />
     <Compile Include="SCAN_Unity\SCAN_UI_MainMap.cs" />

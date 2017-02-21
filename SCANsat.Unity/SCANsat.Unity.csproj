@@ -42,7 +42,23 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CanvasFader.cs" />
+    <Compile Include="HSVPicker\Enums\ColorValues.cs" />
+    <Compile Include="HSVPicker\Events\ColorChangedEvent.cs" />
+    <Compile Include="HSVPicker\Events\HSVChangedEvent.cs" />
+    <Compile Include="HSVPicker\UI\ColorImage.cs" />
+    <Compile Include="HSVPicker\UI\ColorLabel.cs" />
+    <Compile Include="HSVPicker\UI\ColorPicker.cs" />
+    <Compile Include="HSVPicker\UI\ColorSlider.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="HSVPicker\UI\ColorSliderImage.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="HSVPicker\UI\SVBoxSlider.cs" />
+    <Compile Include="HSVPicker\UtilityScripts\BoxSlider.cs" />
+    <Compile Include="HSVPicker\UtilityScripts\HSVUtil.cs" />
     <Compile Include="Interfaces\ISCAN_BigMap.cs" />
+    <Compile Include="Interfaces\ISCAN_Color.cs" />
     <Compile Include="Interfaces\ISCAN_Instruments.cs" />
     <Compile Include="Interfaces\ISCAN_MainMap.cs" />
     <Compile Include="Interfaces\ISCAN_Overlay.cs" />
@@ -50,6 +66,7 @@
     <Compile Include="Interfaces\ISCAN_Toolbar.cs" />
     <Compile Include="Interfaces\ISCAN_ZoomMap.cs" />
     <Compile Include="MapLabelInfo.cs" />
+    <Compile Include="SCAN_ColorPicker.cs" />
     <Compile Include="SCAN_DoubleButton.cs" />
     <Compile Include="SCAN_Toggle.cs" />
     <Compile Include="SettingsPage.cs" />
@@ -61,14 +78,21 @@
     <Compile Include="UISkin\SCAN_UISkinDef.cs" />
     <Compile Include="UISkin\SCAN_UIStyle.cs" />
     <Compile Include="UISkin\SCAN_UIStyleState.cs" />
+    <Compile Include="Unity\SCAN_ColorAltimetry.cs" />
     <Compile Include="Unity\SCAN_BackgroundElement.cs" />
     <Compile Include="Unity\SCAN_BigMap.cs" />
+    <Compile Include="Unity\SCAN_ColorBiome.cs" />
+    <Compile Include="Unity\SCAN_ColorControl.cs" />
+    <Compile Include="Unity\SCAN_ColorResource.cs" />
+    <Compile Include="Unity\SCAN_ColorSlope.cs" />
     <Compile Include="Unity\SCAN_DropDown.cs" />
     <Compile Include="Unity\SCAN_DropDownElement.cs" />
     <Compile Include="Unity\SCAN_Instruments.cs" />
     <Compile Include="Unity\SCAN_MainMap.cs" />
     <Compile Include="Unity\SCAN_MapLabel.cs" />
     <Compile Include="Unity\SCAN_Overlay.cs" />
+    <Compile Include="Unity\SCAN_PaletteButton.cs" />
+    <Compile Include="Unity\SCAN_Popup.cs" />
     <Compile Include="Unity\SCAN_ResourceOverlay.cs" />
     <Compile Include="Unity\SCAN_Settings.cs" />
     <Compile Include="Unity\SCAN_SettingsBackground.cs" />
