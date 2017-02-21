@@ -22,6 +22,8 @@ namespace SCANsat.Unity.Unity
 		[SerializeField]
 		private Toggle m_DataToggle = null;
 		[SerializeField]
+		private Toggle m_ColorToggle = null;
+		[SerializeField]
 		private Toggle m_HelpTips = null;
 		[SerializeField]
 		private GameObject m_GeneralPrefab = null;
@@ -31,6 +33,12 @@ namespace SCANsat.Unity.Unity
 		private GameObject m_ResourcePrefab = null;
 		[SerializeField]
 		private GameObject m_DataPrefab = null;
+		[SerializeField]
+		private GameObject m_ColorPrefab = null;
+		[SerializeField]
+		private GameObject m_PopupPrefab = null;
+		[SerializeField]
+		private GameObject m_DropDownPrefab = null;
 
 		private ISCAN_Settings settingsInterface;
 		private RectTransform rect;
@@ -39,15 +47,65 @@ namespace SCANsat.Unity.Unity
 		private int _page;
 
 		private SettingsPage CurrentPage;
+		private SCAN_Popup warningPopup;
+		private SCAN_DropDown dropDown;
+
+		private static SCAN_Settings instance;
+
+		public static SCAN_Settings Instance
+		{
+			get { return instance; }
+		}
 
 		public int Page
 		{
 			get { return _page; }
 		}
+
+		public GameObject PopupPrefab
+		{
+			get { return m_PopupPrefab; }
+		}
+
+		public GameObject DropDownPrefab
+		{
+			get { return m_DropDownPrefab; }
+		}
+
+		public SCAN_Popup WarningPopup
+		{
+			get { return warningPopup; }
+			set { warningPopup = value; }
+		}
+
+		public SCAN_DropDown DropDown
+		{
+			get { return dropDown; }
+			set { dropDown = value; }
+		}
 		
+		public void ClearWarningsAndDropDown()
+		{
+			if (dropDown != null)
+			{
+				dropDown.gameObject.SetActive(false);
+				DestroyImmediate(dropDown.gameObject);
+				dropDown = null;
+			}
+
+			if (warningPopup != null)
+			{
+				warningPopup.gameObject.SetActive(false);
+				DestroyImmediate(warningPopup.gameObject);
+				warningPopup = null;
+			}
+		}
+
 		protected override void Awake()
 		{
 			base.Awake();
+
+			instance = this;
 
 			rect = GetComponent<RectTransform>();
 
@@ -91,6 +149,10 @@ namespace SCANsat.Unity.Unity
 				case 3:
 					if (m_DataToggle != null)
 						m_DataToggle.isOn = true;
+					break;
+				case 4:
+					if (m_ColorToggle != null)
+						m_ColorToggle.isOn = true;
 					break;
 				default:
 					if (m_GeneralToggle != null)
@@ -168,6 +230,25 @@ namespace SCANsat.Unity.Unity
 		public void OnPointerDown(PointerEventData eventData)
 		{
 			transform.SetAsLastSibling();
+
+			if (warningPopup != null)
+			{
+				RectTransform r = warningPopup.GetComponent<RectTransform>();
+
+				if (r != null && !RectTransformUtility.RectangleContainsScreenPoint(r, eventData.position, eventData.pressEventCamera))
+				{
+					warningPopup.FadeOut();
+					warningPopup = null;
+				}
+			}
+
+			if (_page != 4)
+				return;
+
+			if (!(CurrentPage is SCAN_ColorControl))
+				return;
+
+			((SCAN_ColorControl)CurrentPage).OnPointerDown(eventData);
 		}
 
 		public void OnBeginDrag(PointerEventData eventData)
@@ -230,6 +311,9 @@ namespace SCANsat.Unity.Unity
 
 		public void GeneralSettings(bool isOn)
 		{
+			if (!isOn)
+				return;
+
 			if (CurrentPage != null)
 			{
 				CurrentPage.gameObject.SetActive(false);
@@ -254,10 +338,15 @@ namespace SCANsat.Unity.Unity
 			((SCAN_SettingsGeneral)CurrentPage).setup(settingsInterface);
 
 			ProcessTooltips();
+
+			ClearWarningsAndDropDown();
 		}
 
 		public void BackgroundSettings(bool isOn)
 		{
+			if (!isOn)
+				return;
+
 			if (CurrentPage != null)
 			{
 				CurrentPage.gameObject.SetActive(false);
@@ -282,10 +371,15 @@ namespace SCANsat.Unity.Unity
 			((SCAN_SettingsBackground)CurrentPage).setup(settingsInterface);
 
 			ProcessTooltips();
+
+			ClearWarningsAndDropDown();
 		}
 
 		public void ResourceSettings(bool isOn)
 		{
+			if (!isOn)
+				return;
+
 			if (CurrentPage != null)
 			{
 				CurrentPage.gameObject.SetActive(false);
@@ -310,21 +404,26 @@ namespace SCANsat.Unity.Unity
 			((SCAN_SettingsResource)CurrentPage).setup(settingsInterface);
 
 			ProcessTooltips();
+
+			ClearWarningsAndDropDown();
 		}
 
 		public void DataSettings(bool isOn)
 		{
+			if (!isOn)
+				return;
+
 			if (CurrentPage != null)
 			{
 				CurrentPage.gameObject.SetActive(false);
 				DestroyImmediate(CurrentPage.gameObject);
 			}
 
-			if (settingsInterface.LockInput)
-				settingsInterface.LockInput = false;
-
 			if (m_DataPrefab == null || m_ContentTransform == null || settingsInterface == null)
 				return;
+
+			if (settingsInterface.LockInput)
+				settingsInterface.LockInput = false;
 
 			CurrentPage = Instantiate(m_DataPrefab).GetComponent<SettingsPage>();
 
@@ -338,17 +437,41 @@ namespace SCANsat.Unity.Unity
 			((SCAN_SettingsData)CurrentPage).setup(settingsInterface);
 
 			ProcessTooltips();
+
+			ClearWarningsAndDropDown();
 		}
 
 		public void ColorSettings(bool isOn)
 		{
-			if (settingsInterface == null)
+			if (!isOn)
+				return;
+
+			if (CurrentPage != null)
+			{
+				CurrentPage.gameObject.SetActive(false);
+				DestroyImmediate(CurrentPage.gameObject);
+			}
+
+			if (m_ColorPrefab == null || m_ContentTransform == null || settingsInterface == null)
 				return;
 
 			if (settingsInterface.LockInput)
 				settingsInterface.LockInput = false;
 
-			settingsInterface.OpenColor();
+			CurrentPage = Instantiate(m_ColorPrefab).GetComponent<SettingsPage>();
+
+			if (CurrentPage == null)
+				return;
+
+			_page = 4;
+
+			CurrentPage.transform.SetParent(m_ContentTransform, false);
+
+			((SCAN_ColorControl)CurrentPage).setup(settingsInterface, settingsInterface.ColorInterface);
+
+			ProcessTooltips();
+
+			ClearWarningsAndDropDown();
 		}
 
 	}
