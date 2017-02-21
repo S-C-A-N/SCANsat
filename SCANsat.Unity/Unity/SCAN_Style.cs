@@ -24,6 +24,8 @@ namespace SCANsat.Unity.Unity
 			KSPWindow,
 			AppButton,
 			Tooltip,
+			VerticalSlider,
+			Popup,
 		}
 
 		[SerializeField]
