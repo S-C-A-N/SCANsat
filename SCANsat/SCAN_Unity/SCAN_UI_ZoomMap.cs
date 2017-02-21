@@ -43,6 +43,8 @@ namespace SCANsat.SCAN_Unity
 		private SCANresourceGlobal currentResource;
 		private List<SCANresourceGlobal> resources;
 
+		private List<Vessel> mapFlags = new List<Vessel>();
+
 		private SCAN_ZoomMap uiElement;
 
 		private const int orbitSteps = 80;
@@ -1160,6 +1162,11 @@ namespace SCANsat.SCAN_Unity
 			get { return SCANcontroller.MasterResourceCount > 1; }
 		}
 
+		public bool ShowVessel
+		{
+			get { return HighLogic.LoadedSceneIsFlight; }
+		}
+
 		public bool TooltipsOn
 		{
 			get { return SCAN_Settings_Config.Instance.WindowTooltips; }
@@ -1381,6 +1388,7 @@ namespace SCANsat.SCAN_Unity
 			get
 			{
 				Dictionary<Guid, MapLabelInfo> vessels = new Dictionary<Guid, MapLabelInfo>();
+				mapFlags.Clear();
 
 				for (int i = FlightGlobals.Vessels.Count - 1; i >= 0; i--)
 				{
@@ -1394,6 +1402,8 @@ namespace SCANsat.SCAN_Unity
 
 					if (v.mainBody != body)
 						continue;
+
+					mapFlags.Add(v);
 
 					Vector2 flagPos = VesselPosition(v.id);
 
@@ -1588,9 +1598,16 @@ namespace SCANsat.SCAN_Unity
 
 			if (SCANcontroller.controller.zoomMapIcons)
 			{
+				bool space = false;
+
+				infoString.AppendLine();
+
 				double range = ContractDefs.Survey.MaximumTriggerRange;
-				foreach (SCANwaypoint p in data.Waypoints)
+
+				for (int i = data.Waypoints.Count - 1; i >= 0; i--)
 				{
+					SCANwaypoint p = data.Waypoints[i];
+
 					if (!p.LandingTarget)
 					{
 						if (p.Root != null)
@@ -1606,9 +1623,53 @@ namespace SCANsat.SCAN_Unity
 
 						if (SCANUtil.waypointDistance(lat, lon, 1000, p.Latitude, p.Longitude, 1000, body) <= range)
 						{
+							infoString.Append("Way: ");
 							infoString.Append(p.Name);
+							space = true;
 							break;
 						}
+					}
+				}
+
+				for (int i = data.Anomalies.Length - 1; i >= 0; i--)
+				{
+					SCANanomaly a = data.Anomalies[i];
+
+					if (a.Known)
+					{
+						if (SCANUtil.mapLabelDistance(lat, lon, a.Latitude, a.Longitude, body) <= range)
+						{
+							if (space)
+								infoString.Append(" ");
+
+							if (a.Detail)
+							{
+								infoString.Append("?: ");
+								infoString.Append(a.Name);
+							}
+							else
+							{
+								infoString.Append("?: Unknown");
+							}
+
+							space = true;
+							break;
+						}
+					}
+				}
+
+				for (int i = mapFlags.Count - 1; i >= 0; i--)
+				{
+					Vessel flag = mapFlags[i];
+
+					if (SCANUtil.mapLabelDistance(lat, lon, flag.latitude, flag.longitude, body) <= range)
+					{
+						if (space)
+							infoString.Append(" ");
+
+						infoString.Append("Flag: ");
+						infoString.Append(flag.vesselName);
+						break;
 					}
 				}
 			}
