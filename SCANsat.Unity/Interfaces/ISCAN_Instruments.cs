@@ -1,4 +1,17 @@
-﻿using System;
+﻿#region license
+/*  [Scientific Committee on Advanced Navigation]
+ * 			S.C.A.N. Satellite
+ *
+ * ISCAN_Instruments - Interface for transfer of instruments window information
+ * 
+ * Copyright (c)2013 damny;
+ * Copyright (c)2014 technogeeky <technogeeky@gmail.com>;
+ * Copyright (c)2014 DMagic
+ * Copyright (c)2014 (Your Name Here) <your email here>; see LICENSE.txt for licensing details.
+ */
+#endregion
+
+using System;
 using UnityEngine;
 
 namespace SCANsat.Unity.Interfaces

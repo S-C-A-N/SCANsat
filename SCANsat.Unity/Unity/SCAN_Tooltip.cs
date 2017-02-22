@@ -7,6 +7,8 @@
 //Copyright (c) 2015 Emiliano Pastorelli, H&R - Hammer&Ravens, Tallinn, Estonia.
 //All rights reserved.
 
+//Modified by DMagic - 2017
+
 //Redistribution and use in source and binary forms are permitted
 //provided that the above copyright notice and this paragraph are
 //duplicated in all such forms and that any documentation,

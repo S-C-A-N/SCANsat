@@ -1,4 +1,17 @@
-﻿using System;
+﻿#region license
+/* 
+ * [Scientific Committee on Advanced Navigation]
+ * 			S.C.A.N. Satellite
+ *
+ * SCAN_ColorResource - Script for controlling the resource color management UI
+ * 
+ * Copyright (c)2014 David Grandy <david.grandy@gmail.com>;
+ * Copyright (c)2014 technogeeky <technogeeky@gmail.com>;
+ * Copyright (c)2014 (Your Name Here) <your email here>; see LICENSE.txt for licensing details.
+ */
+#endregion
+
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -45,6 +58,12 @@ namespace SCANsat.Unity.Unity
 		private InputField m_MaxInputField = null;
 		[SerializeField]
 		private InputField m_TransInputField = null;
+		[SerializeField]
+		private InputField m_RInputField = null;
+		[SerializeField]
+		private InputField m_GInputField = null;
+		[SerializeField]
+		private InputField m_BInputField = null;
 
 		private ISCAN_Color colorInterface;
 		private ISCAN_Settings settingsInterface;
@@ -70,7 +89,10 @@ namespace SCANsat.Unity.Unity
 			{
 				if (m_MinInputField != null && !m_MinInputField.isFocused
 					&& m_MaxInputField != null && !m_MaxInputField.isFocused
-					&& m_TransInputField != null && !m_TransInputField.isFocused)
+					&& m_TransInputField != null && !m_TransInputField.isFocused
+					&& m_RInputField != null && !m_RInputField.isFocused
+					&& m_GInputField != null && !m_GInputField.isFocused
+					&& m_BInputField != null && !m_BInputField.isFocused)
 					settingsInterface.LockInput = false;
 			}
 		}
