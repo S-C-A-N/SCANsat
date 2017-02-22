@@ -1,4 +1,17 @@
-﻿using System;
+﻿#region license
+/*  [Scientific Committee on Advanced Navigation]
+ * 			S.C.A.N. Satellite
+ *
+ * CanvasFader - Monobehaviour for making smooth fade in and fade out for UI windows
+ * 
+ * Copyright (c)2013 damny;
+ * Copyright (c)2014 technogeeky <technogeeky@gmail.com>;
+ * Copyright (c)2014 DMagic
+ * Copyright (c)2014 (Your Name Here) <your email here>; see LICENSE.txt for licensing details.
+ */
+#endregion
+
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -16,6 +29,12 @@ namespace SCANsat.Unity
 		private Image m_OldColorOne = null;
 		[SerializeField]
 		private Image m_OldColorTwo = null;
+		[SerializeField]
+		private InputField m_RInputField = null;
+		[SerializeField]
+		private InputField m_GInputField = null;
+		[SerializeField]
+		private InputField m_BInputField = null;
 
 		private ColorPicker picker;
 
@@ -55,6 +74,15 @@ namespace SCANsat.Unity
 
 			if (m_OldColorTwo != null)
 				m_OldColorTwo.color = two;
+
+			if (m_RInputField != null)
+				m_RInputField.text = "";
+
+			if (m_GInputField != null)
+				m_GInputField.text = "";
+
+			if (m_BInputField != null)
+				m_BInputField.text = "";
 		}
 
 		public void ColorOne(bool isOn)
@@ -65,7 +93,18 @@ namespace SCANsat.Unity
 			m_ColorOne.IsActive = isOn;
 
 			if (isOn)
+			{
 				picker.CurrentColor = m_ColorOne.CurrentColor;
+
+				if (m_RInputField != null)
+					m_RInputField.text = "";
+
+				if (m_GInputField != null)
+					m_GInputField.text = "";
+
+				if (m_BInputField != null)
+					m_BInputField.text = "";
+			}
 		}
 
 		public void ColorTwo(bool isOn)
@@ -76,16 +115,19 @@ namespace SCANsat.Unity
 			m_ColorTwo.IsActive = isOn;
 
 			if (isOn)
+			{
 				picker.CurrentColor = m_ColorTwo.CurrentColor;
+
+				if (m_RInputField != null)
+					m_RInputField.text = "";
+
+				if (m_GInputField != null)
+					m_GInputField.text = "";
+
+				if (m_BInputField != null)
+					m_BInputField.text = "";
+			}
 		}
 
-		public void Apply()
-		{
-			if (m_OldColorOne != null && m_ColorOne != null)
-				m_OldColorOne.color = m_ColorOne.CurrentColor;
-
-			if (m_OldColorTwo != null && m_ColorTwo != null)
-				m_OldColorTwo.color = m_ColorTwo.CurrentColor;
-		}
 	}
 }
