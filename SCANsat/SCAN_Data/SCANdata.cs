@@ -624,20 +624,6 @@ namespace SCANsat.SCAN_Data
 			return iArray;
 		}
 
-		//One time conversion of single byte[,] to Int32 to recover old scanning data
-		private Int32[,] RecoverToInt(byte[,] bArray)
-		{
-			Int32[,] iArray = new Int32[360, 180];
-			for (int i = 0; i < 360; i++)
-			{
-				for (int j = 0; j < 180; j++)
-				{
-					iArray[i, j] = (Int32)bArray[i, j];
-				}
-			}
-			return iArray;
-		}
-
 		/* DATA: serialization and compression */
 		internal string integerSerialize()
 		{

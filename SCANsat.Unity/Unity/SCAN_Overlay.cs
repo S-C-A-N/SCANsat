@@ -1,4 +1,17 @@
-﻿using System;
+﻿#region license
+/* 
+ * [Scientific Committee on Advanced Navigation]
+ * 			S.C.A.N. Satellite
+ *
+ * SCAN_Overlay - Script for controlling the planetary overlay UI
+ * 
+ * Copyright (c)2014 David Grandy <david.grandy@gmail.com>;
+ * Copyright (c)2014 technogeeky <technogeeky@gmail.com>;
+ * Copyright (c)2014 (Your Name Here) <your email here>; see LICENSE.txt for licensing details.
+ */
+#endregion
+
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -218,7 +231,7 @@ namespace SCANsat.Unity.Unity
 			if (m_ResourcePrefab == null || m_ResourceTransform == null)
 				return;
 
-			for (int i = resources.Count - 1; i >= 0; i--)
+			for (int i = 0; i < resources.Count; i++)
 			{
 				string s = resources[i];
 

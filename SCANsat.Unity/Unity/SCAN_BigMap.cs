@@ -1,4 +1,17 @@
-﻿using System;
+﻿#region license
+/* 
+ * [Scientific Committee on Advanced Navigation]
+ * 			S.C.A.N. Satellite
+ *
+ * SCAN_BigMap - Script for controlling the big map UI
+ * 
+ * Copyright (c)2014 David Grandy <david.grandy@gmail.com>;
+ * Copyright (c)2014 technogeeky <technogeeky@gmail.com>;
+ * Copyright (c)2014 (Your Name Here) <your email here>; see LICENSE.txt for licensing details.
+ */
+#endregion
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -1260,6 +1273,23 @@ namespace SCANsat.Unity.Unity
 			bigInterface.LockInput = true;
 		}
 
+		public void RefreshWaypoint()
+		{
+			if (tempWaypointLabel != null)
+			{
+				tempWaypointLabel.gameObject.SetActive(false);
+				Destroy(tempWaypointLabel.gameObject);
+				tempWaypointLabel = null;
+			}
+
+			if (bigInterface == null || m_WaypointInput == null)
+				return;
+
+			m_WaypointInput.text = bigInterface.RandomWaypoint;
+
+			waypoint = "";
+		}
+
 		public void SetWaypoint()
 		{
 			if (bigInterface == null || m_WaypointInput == null)
@@ -1267,14 +1297,14 @@ namespace SCANsat.Unity.Unity
 
 			bigInterface.LockInput = false;
 
-			if (tempWaypointLabel != null)
-				bigInterface.SetWaypoint(m_WaypointInput.text, tempWaypointLabel.Info.pos);
+			GenerateWaypoint();
 
 			waypoint = "";
 
-			GenerateWaypoint();
-
 			RefreshIcons();
+
+			if (tempWaypointLabel != null)
+				bigInterface.SetWaypoint(m_WaypointInput.text, tempWaypointLabel.Info.pos);
 
 			waypointSelecting = false;
 		}

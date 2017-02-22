@@ -1,4 +1,17 @@
-﻿using System;
+﻿#region license
+/* 
+ * [Scientific Committee on Advanced Navigation]
+ * 			S.C.A.N. Satellite
+ *
+ * SCAN_SettingsResource - Script for controlling the resource settings page
+ * 
+ * Copyright (c)2014 David Grandy <david.grandy@gmail.com>;
+ * Copyright (c)2014 technogeeky <technogeeky@gmail.com>;
+ * Copyright (c)2014 (Your Name Here) <your email here>; see LICENSE.txt for licensing details.
+ */
+#endregion
+
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -133,6 +146,34 @@ namespace SCANsat.Unity.Unity
 			if (!loaded || settings == null)
 				return;
 
+			if (isOn && !settings.ModuleManager)
+			{
+				if (SCAN_Settings.Instance == null)
+					return;
+
+				if (SCAN_Settings.Instance.WarningPopup != null)
+				{
+					SCAN_Settings.Instance.WarningPopup.FadeOut(true);
+					SCAN_Settings.Instance.WarningPopup = null;
+				}
+
+				if (SCAN_Settings.Instance.PopupPrefab == null)
+					return;
+
+				SCAN_Settings.Instance.WarningPopup = Instantiate(SCAN_Settings.Instance.PopupPrefab).GetComponent<SCAN_Popup>();
+
+				if (SCAN_Settings.Instance.WarningPopup == null)
+					return;
+
+				SCAN_Settings.Instance.WarningPopup.transform.SetParent(transform, false);
+
+				SCAN_Settings.Instance.WarningPopup.Setup(settings.ModuleManagerWarning);
+
+				SCAN_Settings.Instance.WarningPopup.OnSelectUpdate.AddListener(ConfirmStockDisable);
+
+				return;
+			}
+
 			settings.DisableStock = isOn;
 
 			if (m_InstantScanToggle != null)
@@ -140,6 +181,20 @@ namespace SCANsat.Unity.Unity
 
 			if (m_StockThresholdObject != null)
 				m_StockThresholdObject.gameObject.SetActive(isOn);
+		}
+
+		private void ConfirmStockDisable()
+		{
+			if (settings == null)
+				return;
+
+			settings.DisableStock = true;
+
+			if (m_InstantScanToggle != null)
+				m_InstantScanToggle.gameObject.SetActive(false);
+
+			if (m_StockThresholdObject != null)
+				m_StockThresholdObject.gameObject.SetActive(true);
 		}
 
 		public void InstantScan(bool isOn)

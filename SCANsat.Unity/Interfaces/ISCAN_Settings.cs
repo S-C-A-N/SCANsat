@@ -1,4 +1,17 @@
-﻿using System;
+﻿#region license
+/*  [Scientific Committee on Advanced Navigation]
+ * 			S.C.A.N. Satellite
+ *
+ * ISCAN_Settings - Interface for transfer of settings information
+ * 
+ * Copyright (c)2013 damny;
+ * Copyright (c)2014 technogeeky <technogeeky@gmail.com>;
+ * Copyright (c)2014 DMagic
+ * Copyright (c)2014 (Your Name Here) <your email here>; see LICENSE.txt for licensing details.
+ */
+#endregion
+
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -9,6 +22,22 @@ namespace SCANsat.Unity.Interfaces
 		string Version { get; }
 
 		string SensorCount { get; }
+
+		string DataResetCurrent { get; }
+
+		string DataResetAll { get; }
+
+		string SCANResourceResetCurrent { get; }
+
+		string SCANResourceResetAll { get; }
+
+		string StockResourceResetCurrent { get; }
+
+		string StockResourceResetAll { get; }
+
+		string ModuleManagerWarning { get; }
+
+		string SaveToConfig { get; }
 
 		int TimeWarp { get; set; }
 
@@ -68,11 +97,15 @@ namespace SCANsat.Unity.Interfaces
 
 		bool LockInput { get; set; }
 
+		bool ModuleManager { get; }
+
 		Canvas TooltipCanvas { get; }
 
 		Vector2 Position { set; }
 
 		IList<string> BackgroundBodies { get; }
+
+		ISCAN_Color ColorInterface { get; }
 
 		void ClampToScreen(RectTransform rect);
 
@@ -80,15 +113,17 @@ namespace SCANsat.Unity.Interfaces
 
 		void ResetAll();
 
-		void ResetSCANResource();
+		void ResetSCANResourceCurrent();
 
-		void ResetStockResource();
+		void ResetSCANResourceAll();
+
+		void ResetStockResourceCurrent();
+
+		void ResetStockResourceAll();
 
 		void FillCurrent();
 
 		void FillAll();
-
-		void OpenColor();
 
 		void ResetWindows();
 

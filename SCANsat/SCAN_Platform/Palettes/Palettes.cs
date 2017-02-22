@@ -22,6 +22,11 @@ namespace SCANsat.SCAN_Platform.Palettes
 		internal Texture2D[] paletteSwatch;
 		internal int size;
 
+		internal int Length
+		{
+			get { return availablePalettes.Length; }
+		}
+
 		internal _Palettes (Palette[] p, Palette.Kind pK, int i)
 		{
 			availablePalettes = p;

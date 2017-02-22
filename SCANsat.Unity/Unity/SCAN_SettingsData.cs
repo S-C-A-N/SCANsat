@@ -1,7 +1,21 @@
-﻿using System;
+﻿#region license
+/* 
+ * [Scientific Committee on Advanced Navigation]
+ * 			S.C.A.N. Satellite
+ *
+ * SCAN_SettingsData - Script for controlling the data management settings page
+ * 
+ * Copyright (c)2014 David Grandy <david.grandy@gmail.com>;
+ * Copyright (c)2014 technogeeky <technogeeky@gmail.com>;
+ * Copyright (c)2014 (Your Name Here) <your email here>; see LICENSE.txt for licensing details.
+ */
+#endregion
+
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.Events;
 using UnityEngine.EventSystems;
 using SCANsat.Unity.Interfaces;
 
@@ -128,8 +142,43 @@ namespace SCANsat.Unity.Unity
 			settings.LockInput = true;
 		}
 
+		private void PopupPopup(string message, UnityAction callback)
+		{
+			if (SCAN_Settings.Instance == null)
+				return;
+
+			if (SCAN_Settings.Instance.WarningPopup != null)
+			{
+				SCAN_Settings.Instance.WarningPopup.FadeOut(true);
+				SCAN_Settings.Instance.WarningPopup = null;
+			}
+
+			if (SCAN_Settings.Instance.PopupPrefab == null)
+				return;
+
+			SCAN_Settings.Instance.WarningPopup = Instantiate(SCAN_Settings.Instance.PopupPrefab).GetComponent<SCAN_Popup>();
+
+			if (SCAN_Settings.Instance.WarningPopup == null)
+				return;
+
+			SCAN_Settings.Instance.WarningPopup.transform.SetParent(transform, false);
+
+			SCAN_Settings.Instance.WarningPopup.Setup(message);
+
+			SCAN_Settings.Instance.WarningPopup.OnSelectUpdate.AddListener(callback);
+		}
+
 		public void ResetCurrentMap()
 		{
+			if (settings != null)
+				PopupPopup(settings.DataResetCurrent, ConfirmResetCurrentMap);
+		}
+
+		private void ConfirmResetCurrentMap()
+		{
+			SCAN_Settings.Instance.WarningPopup.FadeOut(true);
+			SCAN_Settings.Instance.WarningPopup = null;
+
 			if (settings == null)
 				return;
 
@@ -138,26 +187,87 @@ namespace SCANsat.Unity.Unity
 
 		public void ResetAllMaps()
 		{
+			if (settings != null)
+				PopupPopup(settings.DataResetAll, ConfirmResetAllMaps);
+		}
+
+		private void ConfirmResetAllMaps()
+		{
+			SCAN_Settings.Instance.WarningPopup.FadeOut(true);
+			SCAN_Settings.Instance.WarningPopup = null;
+
 			if (settings == null)
 				return;
 
 			settings.ResetAll();
 		}
 
-		public void ResetSCANResource()
+		public void ResetSCANResourceCurrent()
 		{
-			if (settings == null)
-				return;
-
-			settings.ResetSCANResource();
+			if (settings != null)
+				PopupPopup(settings.SCANResourceResetCurrent, ConfirmResetSCANResourceCurrent);
 		}
 
-		public void ResetStockResource()
+		private void ConfirmResetSCANResourceCurrent()
 		{
+			SCAN_Settings.Instance.WarningPopup.FadeOut(true);
+			SCAN_Settings.Instance.WarningPopup = null;
+
 			if (settings == null)
 				return;
 
-			settings.ResetStockResource();
+			settings.ResetSCANResourceCurrent();
+		}
+
+		public void ResetSCANResourceAll()
+		{
+			if (settings != null)
+				PopupPopup(settings.SCANResourceResetAll, ConfirmResetSCANResourceAll);
+		}
+
+		private void ConfirmResetSCANResourceAll()
+		{
+			SCAN_Settings.Instance.WarningPopup.FadeOut(true);
+			SCAN_Settings.Instance.WarningPopup = null;
+
+			if (settings == null)
+				return;
+
+			settings.ResetSCANResourceCurrent();
+		}
+
+		public void ResetStockResourceCurrent()
+		{
+			if (settings != null)
+				PopupPopup(settings.StockResourceResetCurrent, ConfirmResetStockResourceCurrent);
+		}
+
+		private void ConfirmResetStockResourceCurrent()
+		{
+			SCAN_Settings.Instance.WarningPopup.FadeOut(true);
+			SCAN_Settings.Instance.WarningPopup = null;
+
+			if (settings == null)
+				return;
+
+			settings.ResetStockResourceCurrent();
+		}
+
+		public void ResetStockResourceAll()
+		{
+			if (settings != null)
+				PopupPopup(settings.StockResourceResetAll, ConfirmResetStockResourceAll);
+		}
+
+		private void ConfirmResetStockResourceAll()
+		{
+			SCAN_Settings.Instance.WarningPopup.FadeOut(true);
+			SCAN_Settings.Instance.WarningPopup = null;
+
+			if (settings == null)
+				return;
+
+			settings.ResetStockResourceAll();
 		}
 
 		public void FillCurrentMap()

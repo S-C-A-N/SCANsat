@@ -21,7 +21,7 @@ using UnityEngine.EventSystems;
 namespace SCANsat.Unity
 {
 
-	public class TooltipHandler : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
+	public class TooltipHandler : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IPointerClickHandler
 	{
 		[SerializeField, TextArea(2, 10)]
 		private string m_TooltipName = "";
@@ -82,6 +82,14 @@ namespace SCANsat.Unity
 		}
 
 		public void OnPointerExit(PointerEventData eventData)
+		{
+			if (!m_IsActive)
+				return;
+
+			CloseTooltip();
+		}
+
+		public void OnPointerClick(PointerEventData eventData)
 		{
 			if (!m_IsActive)
 				return;

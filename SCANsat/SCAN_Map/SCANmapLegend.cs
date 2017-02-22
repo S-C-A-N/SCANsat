@@ -79,5 +79,33 @@ namespace SCANsat.SCAN_Map
 			t.Apply();
 			return t;
 		}
+
+		internal static Texture2D getStaticLegend(SCANterrainConfig terrain)
+		{
+			Texture2D t = new Texture2D(256, 1, TextureFormat.RGB24, false);
+			Color[] pix = t.GetPixels();
+			for (int x = 0; x < 256; ++x)
+			{
+				float val = (x * (terrain.MaxTerrain - terrain.MinTerrain)) / 256f + terrain.MinTerrain;
+				pix[x] = palette.heightToColor(val, true, terrain);
+			}
+			t.SetPixels(pix);
+			t.Apply();
+			return t;
+		}
+
+		internal static Texture2D getStaticLegend(float max, float min, float range, float? clamp, bool discrete, Color32[] c)
+		{
+			Texture2D t = new Texture2D(128, 1, TextureFormat.RGB24, false);
+			Color[] pix = t.GetPixels();
+			for (int x = 0; x < 128; x++)
+			{
+				float val = (x * (max - min)) / 128f + min;
+				pix[x] = palette.heightToColor(val, max, min, range, clamp, discrete, c);
+			}
+			t.SetPixels(pix);
+			t.Apply();
+			return t;
+		}
 	}
 }

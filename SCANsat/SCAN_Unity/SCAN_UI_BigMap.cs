@@ -1,4 +1,17 @@
-﻿using System;
+﻿#region license
+/* 
+ * [Scientific Committee on Advanced Navigation]
+ * 			S.C.A.N. Satellite
+ *
+ * SCAN_UI_BigMap - UI control object for SCANsat big map
+ * 
+ * Copyright (c)2014 David Grandy <david.grandy@gmail.com>;
+ * Copyright (c)2014 technogeeky <technogeeky@gmail.com>;
+ * Copyright (c)2014 (Your Name Here) <your email here>; see LICENSE.txt for licensing details.
+ */
+#endregion
+
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -35,6 +48,8 @@ namespace SCANsat.SCAN_Unity
 
 		private SCANresourceGlobal currentResource;
 		private List<SCANresourceGlobal> resources;
+
+		private List<Vessel> mapFlags = new List<Vessel>();
 
 		private SCAN_BigMap uiElement;
 
@@ -1204,6 +1219,9 @@ namespace SCANsat.SCAN_Unity
 					bigmap.resetMap(SCANcontroller.controller.bigMapResourceOn);
 
 					SCANcontroller.controller.bigMapBody = value;
+
+					if (currentResource != null)
+						currentResource.CurrentBodyConfig(body.name);
 				}
 
 				SetTitle();
@@ -1585,6 +1603,7 @@ namespace SCANsat.SCAN_Unity
 			get
 			{
 				Dictionary<Guid, MapLabelInfo> vessels = new Dictionary<Guid, MapLabelInfo>();
+				mapFlags.Clear();
 
 				for (int i = FlightGlobals.Vessels.Count - 1; i >= 0; i--)
 				{
@@ -1598,6 +1617,8 @@ namespace SCANsat.SCAN_Unity
 
 					if (v.mainBody != body)
 						continue;
+
+					mapFlags.Add(v);
 
 					vessels.Add(v.id, new MapLabelInfo()
 					{
@@ -1808,18 +1829,21 @@ namespace SCANsat.SCAN_Unity
 				if (resources)
 				{
 					infoString.Append(" ");
-					infoString.Append(palette.coloredNoQuote(bigmap.Resource.MaxColor, SCANuiUtil.getResourceAbundance(bigmap.Body, lat, lon, fuzzy, bigmap.Resource)));
+					infoString.Append(SCANuiUtil.getResourceAbundance(bigmap.Body, lat, lon, fuzzy, bigmap.Resource));
 				}
 			}
 			
 			infoString.AppendLine();
 			infoString.AppendFormat("{0} (lat: {1:F2}° lon: {2:F2}°)", SCANuiUtil.toDMS(lat, lon), lat, lon);
 
+			double range = ContractDefs.Survey.MaximumTriggerRange;
+
 			if (SCANcontroller.controller.bigMapWaypoint)
 			{
-				double range = ContractDefs.Survey.MaximumTriggerRange;
-				foreach (SCANwaypoint p in data.Waypoints)
+				for (int i = data.Waypoints.Count - 1; i >= 0; i--)
 				{
+					SCANwaypoint p = data.Waypoints[i];
+
 					if (!p.LandingTarget)
 					{
 						if (p.Root != null)
@@ -1839,6 +1863,46 @@ namespace SCANsat.SCAN_Unity
 							infoString.Append(p.Name);
 							break;
 						}
+					}
+				}
+			}
+
+			if (SCANcontroller.controller.bigMapAnomaly)
+			{
+				for (int i = data.Anomalies.Length - 1; i >= 0; i--)
+				{
+					SCANanomaly a = data.Anomalies[i];
+
+					if (a.Known)
+					{
+						if (SCANUtil.mapLabelDistance(lat, lon, a.Latitude, a.Longitude, body) <= range)
+						{
+							if (a.Detail)
+							{
+								infoString.Append(" Anomaly: ");
+								infoString.Append(a.Name);
+							}
+							else
+							{
+								infoString.Append(" Anomaly: Unknown");
+							}
+							break;
+						}
+					}
+				}
+			}
+
+			if (SCANcontroller.controller.bigMapFlag)
+			{
+				for (int i = mapFlags.Count - 1; i >= 0; i--)
+				{
+					Vessel flag = mapFlags[i];
+
+					if (SCANUtil.mapLabelDistance(lat, lon, flag.latitude, flag.longitude, body) <= range)
+					{
+						infoString.Append(" Flag: ");
+						infoString.Append(flag.vesselName);
+						break;
 					}
 				}
 			}

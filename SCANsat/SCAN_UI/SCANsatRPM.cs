@@ -186,7 +186,13 @@ namespace SCANsat.SCAN_UI
 						int? loadedResource = persist.RPMResource;
 						currentResource = loadedResource ?? 0;
 
-						loadedResources[currentResource].CurrentBodyConfig(vessel.mainBody.name);
+						if (currentResource >= loadedResources.Count - 1)
+							currentResource = 0;
+						else if (currentResource < 0)
+							currentResource = 0;
+
+						if (loadedResources.Count > 0)
+							loadedResources[currentResource].CurrentBodyConfig(vessel.mainBody.name);
 					}
 
 				}
@@ -699,8 +705,13 @@ namespace SCANsat.SCAN_UI
 			if (zoomLevel == 0)
 				mapCenterLat = 0;
 			map.centerAround(mapCenterLong, mapCenterLat);
-			if (SCANconfigLoader.GlobalResource)
+			if (SCANconfigLoader.GlobalResource && loadedResources.Count > 0)
 			{
+				if (currentResource >= loadedResources.Count - 1)
+					currentResource = 0;
+				else if (currentResource < 0)
+					currentResource = 0;
+
 				map.Resource = loadedResources[currentResource];
 				map.Resource.CurrentBodyConfig(orbitingBody.name);
 			}

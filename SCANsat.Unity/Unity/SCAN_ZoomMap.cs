@@ -1,4 +1,17 @@
-﻿using System;
+﻿#region license
+/* 
+ * [Scientific Committee on Advanced Navigation]
+ * 			S.C.A.N. Satellite
+ *
+ * SCAN_ZoomMap - Script for controlling the zoom map UI
+ * 
+ * Copyright (c)2014 David Grandy <david.grandy@gmail.com>;
+ * Copyright (c)2014 technogeeky <technogeeky@gmail.com>;
+ * Copyright (c)2014 (Your Name Here) <your email here>; see LICENSE.txt for licensing details.
+ */
+#endregion
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using SCANsat.Unity.Interfaces;
@@ -72,6 +85,10 @@ namespace SCANsat.Unity.Unity
 		private GameObject m_MapLabelPrefab = null;
 		[SerializeField]
 		private InputField m_WaypointInput = null;
+		[SerializeField]
+		private GameObject m_VesselSyncButton = null;
+		[SerializeField]
+		private GameObject m_VesselLockButton = null;
 		[SerializeField]
 		private Image m_VesselLockImage = null;
 		[SerializeField]
@@ -207,6 +224,15 @@ namespace SCANsat.Unity.Unity
 
 			if (m_VesselLockImage != null && m_VesselLock != null && m_VesselUnlock != null)
 				m_VesselLockImage.sprite = map.VesselLock ? m_VesselLock : m_VesselUnlock;
+
+			if (!map.ShowVessel)
+			{
+				if (m_VesselLockButton != null)
+					m_VesselLockButton.SetActive(false);
+
+				if (m_VesselSyncButton != null)
+					m_VesselSyncButton.SetActive(false);
+			}
 
 			SetLegend(map.LegendToggle, map.LegendImage, map.LegendLabels);
 
@@ -1229,6 +1255,23 @@ namespace SCANsat.Unity.Unity
 			zoomInterface.LockInput = true;
 		}
 
+		public void RefreshWaypoint()
+		{
+			if (tempWaypointLabel != null)
+			{
+				tempWaypointLabel.gameObject.SetActive(false);
+				Destroy(tempWaypointLabel.gameObject);
+				tempWaypointLabel = null;
+			}
+
+			if (zoomInterface == null || m_WaypointInput == null)
+				return;
+
+			m_WaypointInput.text = zoomInterface.RandomWaypoint;
+
+			waypoint = "";
+		}
+
 		public void SetWaypoint()
 		{
 			if (zoomInterface == null || m_WaypointInput == null)
@@ -1236,24 +1279,16 @@ namespace SCANsat.Unity.Unity
 
 			zoomInterface.LockInput = false;
 
-			if (tempWaypointLabel != null)
-				zoomInterface.SetWaypoint(m_WaypointInput.text, tempWaypointLabel.Info.pos);
+			GenerateWaypoint();
 
 			waypoint = "";
 
-			waypointSelecting = false;
+			RefreshIcons();
 
 			if (tempWaypointLabel != null)
-			{
-				tempWaypointLabel.gameObject.SetActive(false);
-				DestroyImmediate(tempWaypointLabel.gameObject);
-				tempWaypointLabel = null;
-			}
+				zoomInterface.SetWaypoint(m_WaypointInput.text, tempWaypointLabel.Info.pos);
 
-			if (m_WaypointBar != null)
-				m_WaypointBar.SetActive(false);
-
-			RefreshIcons();
+			waypointSelecting = false;
 		}
 
 		public void CancelWaypoint()
@@ -1261,19 +1296,11 @@ namespace SCANsat.Unity.Unity
 			if (zoomInterface != null)
 				zoomInterface.LockInput = false;
 
-			waypointSelecting = false;
-
-			if (tempWaypointLabel != null)
-			{
-				tempWaypointLabel.gameObject.SetActive(false);
-				DestroyImmediate(tempWaypointLabel.gameObject);
-				tempWaypointLabel = null;
-			}
-
-			if (m_WaypointBar != null)
-				m_WaypointBar.SetActive(false);
+			GenerateWaypoint();
 
 			RefreshIcons();
+
+			waypointSelecting = false;
 		}
 
 		public void MechJebLanding()
@@ -1283,19 +1310,11 @@ namespace SCANsat.Unity.Unity
 
 			waypoint = "";
 
-			waypointSelecting = false;
-
-			if (tempWaypointLabel != null)
-			{
-				tempWaypointLabel.gameObject.SetActive(false);
-				DestroyImmediate(tempWaypointLabel.gameObject);
-				tempWaypointLabel = null;
-			}
-
-			if (m_WaypointBar != null)
-				m_WaypointBar.SetActive(false);
+			GenerateWaypoint();
 
 			RefreshIcons();
+
+			waypointSelecting = false;
 		}
 
 	}

@@ -65,18 +65,11 @@
     <Compile Include="SCAN_PartModules\SCANresourceScanner.cs" />
     <Compile Include="SCAN_PartModules\SCANRPMStorage.cs" />
     <Compile Include="SCAN_PartModules\SCANsat.cs" />
-    <Compile Include="SCAN_Platform\Attributes\Bounds.cs" />
     <Compile Include="SCAN_Platform\Extensions\Colors\UnityEngine.Color_.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="SCAN_Platform\Extensions\ConfigNodes\ConfigExtensions.cs" />
-    <Compile Include="SCAN_Platform\Extensions\GUI\UnityEngine.GUILayout_.cs" />
-    <Compile Include="SCAN_Platform\Extensions\GUI\UnityEngine.GUISkin_.cs" />
-    <Compile Include="SCAN_Platform\Extensions\GUI\UnityEngine.GUIStyleState_.cs" />
-    <Compile Include="SCAN_Platform\Extensions\GUI\UnityEngine.GUIStyle_.cs" />
-    <Compile Include="SCAN_Platform\Extensions\GUI\UnityEngine.GUI_.cs" />
     <Compile Include="SCAN_Platform\Extensions\Math\UnityEngine.Mathf_.cs" />
-    <Compile Include="SCAN_Platform\Extensions\Math\UnityEngine.Rect_.cs" />
     <Compile Include="SCAN_Platform\Extensions\MJExtensions.cs" />
     <Compile Include="SCAN_Platform\Logging.cs" />
     <Compile Include="SCAN_Platform\Palettes\ColorBrewer\ColorBrewer.cs" />
@@ -85,18 +78,14 @@
     <Compile Include="SCAN_Platform\Palettes\Palette.cs" />
     <Compile Include="SCAN_Platform\Palettes\PaletteLoader.cs" />
     <Compile Include="SCAN_Platform\Palettes\Palettes.cs" />
-    <Compile Include="SCAN_Platform\Palettes\Swatches.cs" />
     <Compile Include="SCAN_Platform\SCAN_CLZF2.cs" />
     <Compile Include="SCAN_Platform\SCAN_ConfigNodeStorage.cs" />
     <Compile Include="SCAN_Platform\SCAN_KSPAddonImproved.cs" />
     <Compile Include="SCAN_Platform\SCAN_MBE.cs" />
-    <Compile Include="SCAN_Platform\SCAN_MBW.cs" />
-    <Compile Include="SCAN_Platform\SCAN_SkinsLibrary.cs" />
     <Compile Include="SCAN_Settings_Config.cs" />
     <Compile Include="SCAN_Toolbar\SCANappLauncher.cs" />
     <Compile Include="SCAN_Toolbar\SCANtoolbar.cs" />
     <Compile Include="SCAN_Toolbar\SCANtoolbarwrapper.cs" />
-    <Compile Include="SCAN_UI\SCANcolorSelection.cs" />
     <Compile Include="SCAN_UI\UI_Framework\SCANlanguagePack.cs" />
     <Compile Include="SCAN_UI\UI_Framework\SCAN_Localization.cs" />
     <Compile Include="SCAN_UI\UI_Framework\SCANremoteView.cs" />
@@ -109,11 +98,10 @@
     <Compile Include="SCANutil.cs" />
     <Compile Include="SCANmainMenuLoader.cs" />
     <Compile Include="SCAN_UI\UI_Framework\SCANskins.cs" />
-    <Compile Include="SCAN_UI\UI_Framework\SCANuiColorPicker.cs" />
-    <Compile Include="SCAN_UI\UI_Framework\SCANuiSlider.cs" />
     <Compile Include="SCAN_UI\UI_Framework\SCANuiUtil.cs" />
     <Compile Include="SCAN_Unity\SCAN_TextMeshPro.cs" />
     <Compile Include="SCAN_Unity\SCAN_UI_BigMap.cs" />
+    <Compile Include="SCAN_Unity\SCAN_UI_Color.cs" />
     <Compile Include="SCAN_Unity\SCAN_UI_Instruments.cs" />
     <Compile Include="SCAN_Unity\SCAN_UI_Loader.cs" />
     <Compile Include="SCAN_Unity\SCAN_UI_MainMap.cs" />
@@ -162,4 +150,5 @@
       <Name>SCANsat.Unity</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup />
 </Project>

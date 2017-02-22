@@ -48,8 +48,6 @@ namespace SCANsat.SCAN_Platform.Palettes
 
 		public static string[] kindNames = getKindNames();
 
-
-
 		public enum Is : ushort { Unsafe = 0, Safe = 1, Unsure = 2, Unknown = 3 }
 
 		public Is blind;

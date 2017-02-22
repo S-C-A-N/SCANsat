@@ -147,10 +147,7 @@ namespace SCANsat
 		private CelestialBody bigMapBodyPQS;
 		private CelestialBody zoomMapBody;
 		private PQSMod KopernicusOnDemand;
-
-		/* UI window objects */
-		internal SCANcolorSelection colorManager;
-
+		
 		private SCAN_UI_MainMap _mainMap;
 		private SCAN_UI_Instruments _instruments;
 		private SCAN_UI_BigMap _bigMap;
@@ -848,8 +845,6 @@ namespace SCANsat
 					body_data.Add(FlightGlobals.currentMainBody.name, new SCANdata(FlightGlobals.currentMainBody));
 				try
 				{
-					colorManager = gameObject.AddComponent<SCANcolorSelection>();
-
 					_mainMap = new SCAN_UI_MainMap();
 					_bigMap = new SCAN_UI_BigMap();
 					_zoomMap = new SCAN_UI_ZoomMap();
@@ -868,8 +863,6 @@ namespace SCANsat
 					body_data.Add(Planetarium.fetch.Home.name, new SCANdata(Planetarium.fetch.Home));
 				try
 				{
-					colorManager = gameObject.AddComponent<SCANcolorSelection>();
-
 					_bigMap = new SCAN_UI_BigMap();
 					_settings = new SCAN_UI_Settings();
 					_zoomMap = new SCAN_UI_ZoomMap();

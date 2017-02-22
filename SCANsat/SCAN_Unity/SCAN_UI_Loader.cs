@@ -1,9 +1,21 @@
-﻿using System;
+﻿#region license
+/* 
+ * [Scientific Committee on Advanced Navigation]
+ * 			S.C.A.N. Satellite
+ *
+ * SCAN_UI_Loader - Script for loading in all UI objects
+ * 
+ * Copyright (c)2014 David Grandy <david.grandy@gmail.com>;
+ * Copyright (c)2014 technogeeky <technogeeky@gmail.com>;
+ * Copyright (c)2014 (Your Name Here) <your email here>; see LICENSE.txt for licensing details.
+ */
+#endregion
+
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
-using SCANsat.Unity.UISkin;
 using SCANsat.Unity;
 using SCANsat.Unity.Unity;
 using KSP.UI;
@@ -817,10 +829,13 @@ namespace SCANsat.SCAN_Unity
 					style.setScrollbar(skin.verticalScrollbar.normal.background, skin.verticalScrollbarThumb.normal.background);
 					break;
 				case SCAN_Style.StyleTypes.Tooltip:
-					if (stock)
-						style.setImage(_kspTooltipBackground);
-					else
-						style.setImage(_unityTooltipBackground);
+					style.setImage(stock ? _kspTooltipBackground : _unityTooltipBackground);
+					break;
+				case SCAN_Style.StyleTypes.VerticalSlider:
+					style.setButton(skin.horizontalSliderThumb.normal.background, skin.horizontalSliderThumb.highlight.background, skin.horizontalSliderThumb.active.background, skin.horizontalSliderThumb.active.background);
+					break;
+				case SCAN_Style.StyleTypes.Popup:
+					style.setImage(stock ? _kspTooltipBackground : _unityTooltipBackground);
 					break;
 				default:
 					break;

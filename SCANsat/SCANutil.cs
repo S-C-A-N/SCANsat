@@ -558,6 +558,13 @@ namespace SCANsat
 			return (float)Vector3d.Distance(pos1, pos2);
 		}
 
+		internal static double mapLabelDistance(double lat1, double lon1, double lat2, double lon2, CelestialBody body)
+		{
+			Vector3d pos1 = body.GetWorldSurfacePosition(lat1, lon1, 1000);
+			Vector3d pos2 = body.GetWorldSurfacePosition(lat2, lon2, 1000);
+			return (float)Vector3d.Distance(pos1, pos2);
+		}
+
 		internal static double slope(double centerElevation, CelestialBody body, double lon, double lat, double offset)
 		{
 			/* Slope is calculated using a nine point grid centered 5m around the vessel location
@@ -635,14 +642,6 @@ namespace SCANsat
 
 			switch (HighLogic.LoadedScene)
 			{
-				case GameScenes.FLIGHT:
-					if (SCANcontroller.controller.colorManager != null && SCANcontroller.controller.colorManager.Visible && SCANcontroller.controller.colorManager.GetWindowRect.Contains(pos))
-						return true;
-					break;
-				case GameScenes.TRACKSTATION:
-					if (SCANcontroller.controller.colorManager != null && SCANcontroller.controller.colorManager.Visible && SCANcontroller.controller.colorManager.GetWindowRect.Contains(pos))
-						return true;
-					break;
 			}
 
 			return false;
