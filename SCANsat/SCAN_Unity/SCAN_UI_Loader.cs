@@ -1,9 +1,21 @@
-﻿using System;
+﻿#region license
+/* 
+ * [Scientific Committee on Advanced Navigation]
+ * 			S.C.A.N. Satellite
+ *
+ * SCAN_UI_Loader - Script for loading in all UI objects
+ * 
+ * Copyright (c)2014 David Grandy <david.grandy@gmail.com>;
+ * Copyright (c)2014 technogeeky <technogeeky@gmail.com>;
+ * Copyright (c)2014 (Your Name Here) <your email here>; see LICENSE.txt for licensing details.
+ */
+#endregion
+
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
-using SCANsat.Unity.UISkin;
 using SCANsat.Unity;
 using SCANsat.Unity.Unity;
 using KSP.UI;
@@ -16,8 +28,8 @@ namespace SCANsat.SCAN_Unity
 	[KSPAddon(KSPAddon.Startup.MainMenu, true)]
 	public class SCAN_UI_Loader : MonoBehaviour
 	{
-		private const string prefabAssetName = "scansat_prefabs.ksp";
-		private const string imageAssetName = "scan_images.ksp";
+		private const string prefabAssetName = "scansat_prefabs";
+		private const string imageAssetName = "scan_images";
 
 		private static bool loaded;
 		private static bool skinLoaded;
