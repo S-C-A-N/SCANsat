@@ -5,6 +5,7 @@ using SCANsat.Unity.HSVPicker.Enum;
 
 namespace SCANsat.Unity.HSVPicker.UI
 {
+	[RequireComponent(typeof(TextHandler))]
 	public class ColorLabel : MonoBehaviour
 	{
 		public ColorPicker picker;
