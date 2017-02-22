@@ -1,4 +1,17 @@
-﻿using System;
+﻿#region license
+/* 
+ * [Scientific Committee on Advanced Navigation]
+ * 			S.C.A.N. Satellite
+ *
+ * SCAN_UI_ZoomMap - UI control object for SCANsat zoom map
+ * 
+ * Copyright (c)2014 David Grandy <david.grandy@gmail.com>;
+ * Copyright (c)2014 technogeeky <technogeeky@gmail.com>;
+ * Copyright (c)2014 (Your Name Here) <your email here>; see LICENSE.txt for licensing details.
+ */
+#endregion
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -1589,7 +1602,7 @@ namespace SCANsat.SCAN_Unity
 				if (resources)
 				{
 					infoString.Append(" ");
-					infoString.Append(palette.coloredNoQuote(spotmap.Resource.MaxColor, SCANuiUtil.getResourceAbundance(spotmap.Body, lat, lon, fuzzy, spotmap.Resource)));
+					infoString.Append(SCANuiUtil.getResourceAbundance(spotmap.Body, lat, lon, fuzzy, spotmap.Resource));
 				}
 			}
 

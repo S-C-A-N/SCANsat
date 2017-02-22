@@ -1,4 +1,17 @@
-﻿using System;
+﻿#region license
+/* 
+ * [Scientific Committee on Advanced Navigation]
+ * 			S.C.A.N. Satellite
+ *
+ * SCAN_UI_BigMap - UI control object for SCANsat big map
+ * 
+ * Copyright (c)2014 David Grandy <david.grandy@gmail.com>;
+ * Copyright (c)2014 technogeeky <technogeeky@gmail.com>;
+ * Copyright (c)2014 (Your Name Here) <your email here>; see LICENSE.txt for licensing details.
+ */
+#endregion
+
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -1816,7 +1829,7 @@ namespace SCANsat.SCAN_Unity
 				if (resources)
 				{
 					infoString.Append(" ");
-					infoString.Append(palette.coloredNoQuote(bigmap.Resource.MaxColor, SCANuiUtil.getResourceAbundance(bigmap.Body, lat, lon, fuzzy, bigmap.Resource)));
+					infoString.Append(SCANuiUtil.getResourceAbundance(bigmap.Body, lat, lon, fuzzy, bigmap.Resource));
 				}
 			}
 			
