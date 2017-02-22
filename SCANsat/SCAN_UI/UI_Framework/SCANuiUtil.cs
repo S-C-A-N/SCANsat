@@ -30,28 +30,6 @@ namespace SCANsat.SCAN_UI.UI_Framework
 {
 	static class SCANuiUtil
 	{
-
-		#region Text labels
-
-		//A smaller font-size, simpler label method
-		internal static void drawLabel(Rect r, string txt, bool aligned, bool left)
-		{
-			if (txt.Length < 1)
-				return;
-			if (aligned)
-			{
-				Vector2 sz = SCANskins.SCAN_labelSmallLeft.CalcSize(new GUIContent(txt.Substring(0, 1)));
-				r.x -= sz.x / 2;
-				r.y -= sz.y / 2;
-			}
-			if (left)
-				GUI.Label(r, txt, SCANskins.SCAN_labelSmallLeft);
-			else
-				GUI.Label(r, txt, SCANskins.SCAN_labelSmallRight);
-		}
-
-		#endregion
-
 		#region UI Utilities
 
 		internal static string getResourceAbundance(CelestialBody Body, double lat, double lon, bool fuzzy, SCANresourceGlobal resource)
@@ -313,14 +291,6 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			SCAN_UI_BigMap.Instance.ResetPosition();
 		}
 
-		internal static void resetColorMapPos()
-		{
-			if (SCANcontroller.controller.colorManager == null)
-				return;
-
-			SCANcontroller.controller.colorManager.resetWindowPos(SCANcolorSelection.defaultRect);
-		}
-
 		internal static void resetOverlayControllerPos()
 		{
 			if (SCAN_UI_Overlay.Instance == null)
@@ -384,34 +354,6 @@ namespace SCANsat.SCAN_UI.UI_Framework
 				Graphics.DrawTexture(pos, tex);
 			}
 
-		}
-
-		internal static void drawSliderLabel(Rect r, string min, string max)
-		{
-			Rect sr = new Rect(r.x, r.y + 7, 10, 20);
-			drawLabel(sr, "|", true, true);
-			sr.x += (r.width - 8);
-			drawLabel(sr, "|", true, false);
-			sr.width = 80;
-			sr.x -= (r.width + 60);
-			sr.y += 12;
-			drawLabel(sr, min, true, false);
-			sr.x += (r.width + 62);
-			drawLabel(sr, max, true, true);
-		}
-
-		internal static void drawVerticalSliderLabel(Rect r, string min, string max)
-		{
-			Rect sr = new Rect(r.x - 15, r.y - 4, 20, 20);
-			drawLabel(sr, "_", true, false);
-			sr.y += (r.height - 8);
-			drawLabel(sr, "_", true, false);
-			sr.width = 50;
-			sr.x -= 40;
-			sr.y = r.y + 2;
-			drawLabel(sr, max, true, false);
-			sr.y += (r.height - 8);
-			drawLabel(sr, min, true, false);
 		}
 
 		#endregion
@@ -1233,6 +1175,5 @@ namespace SCANsat.SCAN_UI.UI_Framework
 		}
 
 		#endregion
-
 	}
 }

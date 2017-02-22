@@ -642,14 +642,6 @@ namespace SCANsat
 
 			switch (HighLogic.LoadedScene)
 			{
-				case GameScenes.FLIGHT:
-					if (SCANcontroller.controller.colorManager != null && SCANcontroller.controller.colorManager.Visible && SCANcontroller.controller.colorManager.GetWindowRect.Contains(pos))
-						return true;
-					break;
-				case GameScenes.TRACKSTATION:
-					if (SCANcontroller.controller.colorManager != null && SCANcontroller.controller.colorManager.Visible && SCANcontroller.controller.colorManager.GetWindowRect.Contains(pos))
-						return true;
-					break;
 			}
 
 			return false;
