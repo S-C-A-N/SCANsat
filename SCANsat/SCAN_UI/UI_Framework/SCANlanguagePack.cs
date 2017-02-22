@@ -28,7 +28,9 @@ namespace SCANsat.SCAN_UI.UI_Framework
 		[Persistent]
 		public string settingsHelpGroundTracksActive = "The ground track indicator can be limited\nto only be displayed for the active vessel.";
 		[Persistent]
-		public string settingsHelpStockUIStyle = "Switch between stock KSP-style UI elements and Unity-style elements."; 
+		public string settingsHelpStockUIStyle = "Switch between stock KSP-style UI elements and Unity-style elements.";
+		[Persistent]
+		public string settingsHelpSlowMap = "Enable this to reduce map generation speed.\nThis will save CPU resources and may reduce the performance impact\nof generating the small and/or big map.";
 		[Persistent]
 		public string settingsHelpOverlayTooltips = "Displays tooltips for the current mouse position when a planetary overlay map is activated.\nThese tooltips include The cursor coordinates, terrain height, slope, biome name,\nand resource abundance, depending on scanning coverage.";
 		[Persistent]
