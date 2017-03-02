@@ -31,6 +31,8 @@ namespace SCANsat.Unity.Unity
 		[SerializeField]
 		private Toggle m_BigMapBorder = null;
 		[SerializeField]
+		private Toggle m_ZoomMapBorder = null;
+		[SerializeField]
 		private Toggle m_SmallMapColor = null;
 		[SerializeField]
 		private Toggle m_SmallMapBorder = null;
@@ -66,7 +68,10 @@ namespace SCANsat.Unity.Unity
 				m_BigMapColor.isOn = color.BiomeBigMapStockColor;
 
 			if (m_BigMapBorder != null)
-				m_BigMapBorder.isOn = color.BiomeBigMapWhiteBoder;
+				m_BigMapBorder.isOn = color.BiomeBigMapWhiteBorder;
+
+			if (m_ZoomMapBorder != null)
+				m_ZoomMapBorder.isOn = color.BiomeZoomMapWhiteBorder;
 
 			if (m_SmallMapColor != null)
 				m_SmallMapColor.isOn = color.BiomeSmallMapStockColor;
@@ -107,7 +112,15 @@ namespace SCANsat.Unity.Unity
 			if (!loaded || colorInterface == null)
 				return;
 
-			colorInterface.BiomeBigMapWhiteBoder = isOn;
+			colorInterface.BiomeBigMapWhiteBorder = isOn;
+		}
+
+		public void ZoomMapBorder(bool isOn)
+		{
+			if (!loaded || colorInterface == null)
+				return;
+
+			colorInterface.BiomeZoomMapWhiteBorder = isOn;
 		}
 
 		public void SmallMapColor(bool isOn)
@@ -175,7 +188,7 @@ namespace SCANsat.Unity.Unity
 				m_BigMapColor.isOn = colorInterface.BiomeBigMapStockColor;
 
 			if (m_BigMapBorder != null)
-				m_BigMapBorder.isOn = colorInterface.BiomeBigMapWhiteBoder;
+				m_BigMapBorder.isOn = colorInterface.BiomeBigMapWhiteBorder;
 
 			if (m_SmallMapColor != null)
 				m_SmallMapColor.isOn = colorInterface.BiomeSmallMapStockColor;

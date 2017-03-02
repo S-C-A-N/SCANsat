@@ -34,6 +34,7 @@ namespace SCANsat.SCAN_Unity
 
 		private bool _biomeBigMapStockColor;
 		private bool _biomeBigMapWhiteBorder;
+		private bool _biomeZoomMapWhiteBorder;
 		private bool _biomeSmallMapStockColor;
 		private bool _biomeSmallMapWhiteBorder;
 		private bool _terrainClampOn;
@@ -71,6 +72,7 @@ namespace SCANsat.SCAN_Unity
 		{
 			_biomeBigMapStockColor = SCAN_Settings_Config.Instance.BigMapStockBiomes;
 			_biomeBigMapWhiteBorder = SCAN_Settings_Config.Instance.BigMapBiomeBorder;
+			_biomeZoomMapWhiteBorder = SCAN_Settings_Config.Instance.ZoomMapBiomeBorder;
 			_biomeSmallMapStockColor = SCAN_Settings_Config.Instance.SmallMapStockBiomes;
 			_biomeSmallMapWhiteBorder = SCAN_Settings_Config.Instance.SmallMapBiomeBorder;
 			_biomeTransparency = SCAN_Settings_Config.Instance.BiomeTransparency * 100;
@@ -244,10 +246,16 @@ namespace SCANsat.SCAN_Unity
 			set { _biomeBigMapStockColor = value; }
 		}
 
-		public bool BiomeBigMapWhiteBoder
+		public bool BiomeBigMapWhiteBorder
 		{
 			get { return _biomeBigMapWhiteBorder; }
 			set { _biomeBigMapWhiteBorder = value; }
+		}
+
+		public bool BiomeZoomMapWhiteBorder
+		{
+			get { return _biomeZoomMapWhiteBorder; }
+			set { _biomeZoomMapWhiteBorder = value; }
 		}
 
 		public bool BiomeSmallMapStockColor
@@ -476,6 +484,7 @@ namespace SCANsat.SCAN_Unity
 
 			SCAN_Settings_Config.Instance.BigMapStockBiomes = _biomeBigMapStockColor;
 			SCAN_Settings_Config.Instance.BigMapBiomeBorder = _biomeBigMapWhiteBorder;
+			SCAN_Settings_Config.Instance.ZoomMapBiomeBorder = _biomeZoomMapWhiteBorder;
 			SCAN_Settings_Config.Instance.SmallMapStockBiomes = _biomeSmallMapStockColor;
 			SCAN_Settings_Config.Instance.SmallMapBiomeBorder = _biomeSmallMapWhiteBorder;
 			SCAN_Settings_Config.Instance.BiomeTransparency = _biomeTransparency / 100;
@@ -496,12 +505,14 @@ namespace SCANsat.SCAN_Unity
 
 			SCAN_Settings_Config.Instance.BigMapStockBiomes = true;
 			SCAN_Settings_Config.Instance.BigMapBiomeBorder = true;
+			SCAN_Settings_Config.Instance.ZoomMapBiomeBorder = true;
 			SCAN_Settings_Config.Instance.SmallMapStockBiomes = true;
 			SCAN_Settings_Config.Instance.SmallMapBiomeBorder = false;
 			SCAN_Settings_Config.Instance.BiomeTransparency = 0.4f;
 
 			_biomeBigMapStockColor = true;
 			_biomeBigMapWhiteBorder = true;
+			_biomeZoomMapWhiteBorder = true;
 			_biomeSmallMapStockColor = true;
 			_biomeSmallMapWhiteBorder = false;
 			_biomeTransparency = 40;

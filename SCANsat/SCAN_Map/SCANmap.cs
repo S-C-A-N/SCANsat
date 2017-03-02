@@ -777,8 +777,19 @@ namespace SCANsat.SCAN_Map
 				if (SCAN_Settings_Config.Instance.BigMapStockBiomes && colorMap)
 				{
 					stockBiomeColor[i] = SCANUtil.getBiome(body, lon, lat).mapColor;
-					if (SCAN_Settings_Config.Instance.BigMapBiomeBorder)
-						biomeIndex[i] = SCANUtil.getBiomeIndexFraction(body, lon, lat);
+
+					switch (mSource)
+					{
+						case mapSource.BigMap:
+							if (SCAN_Settings_Config.Instance.BigMapBiomeBorder)
+								biomeIndex[i] = SCANUtil.getBiomeIndexFraction(body, lon, lat);
+							break;
+						case mapSource.ZoomMap:
+						case mapSource.RPM:
+							if (SCAN_Settings_Config.Instance.ZoomMapBiomeBorder)
+								biomeIndex[i] = SCANUtil.getBiomeIndexFraction(body, lon, lat);
+							break;
+					}					
 				}
 				else
 					biomeIndex[i] = SCANUtil.getBiomeIndexFraction(body, lon, lat);
@@ -899,18 +910,27 @@ namespace SCANsat.SCAN_Map
 										}
 									}
 
-									if (SCAN_Settings_Config.Instance.BigMapBiomeBorder && ((i > 0 && mapline[i - 1] != biomeIndex[i]) || (mapstep > 0 && mapline[i] != biomeIndex[i])))
+									bool border = false;
+
+									switch(mSource)
 									{
+										case mapSource.BigMap:
+											if (SCAN_Settings_Config.Instance.BigMapBiomeBorder)
+												border = true;
+											break;
+										case mapSource.ZoomMap:
+										case mapSource.RPM:
+											if (SCAN_Settings_Config.Instance.ZoomMapBiomeBorder)
+												border = true;
+											break;
+									}
+
+									if (border && ((i > 0 && mapline[i - 1] != biomeIndex[i]) || (mapstep > 0 && mapline[i] != biomeIndex[i])))
 										biome = palette.White;
-									}
 									else if (SCAN_Settings_Config.Instance.BigMapStockBiomes)
-									{
 										biome = palette.lerp(stockBiomeColor[i], elevation, SCAN_Settings_Config.Instance.BiomeTransparency);
-									}
 									else
-									{
 										biome = palette.lerp(palette.lerp(SCANcontroller.controller.lowBiomeColor32, SCANcontroller.controller.highBiomeColor32, (float)biomeIndex[i]), elevation, SCAN_Settings_Config.Instance.BiomeTransparency);
-									}
 								}
 
 								baseColor = biome;
