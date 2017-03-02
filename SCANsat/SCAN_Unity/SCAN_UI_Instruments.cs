@@ -30,6 +30,7 @@ namespace SCANsat.SCAN_Unity
 	public class SCAN_UI_Instruments : ISCAN_Instruments
 	{
 		private bool _isVisible;
+		private bool _mouseInAnomaly;
 		private SCANremoteView _anomalyView;
 		private SCANtype sensors;
 		private SCANdata data;
@@ -42,11 +43,15 @@ namespace SCANsat.SCAN_Unity
 		private double vlat, vlon;
 		private float lastUpdate = 0f;
 		private float updateInterval = 0.2f;
+		private double maxAnomalyDistance = 20000;
 		private double slopeAVG;
 		private StringBuilder infoString = new StringBuilder();
 		private string slopeString;
 
-		private Texture2D anomalyTex;
+		private int oldLines;
+		private int lines;
+
+		private Texture anomalyTex;
 
 		private SCAN_Instruments uiElement;
 		
@@ -76,7 +81,7 @@ namespace SCANsat.SCAN_Unity
 
 			GameEvents.onVesselSOIChanged.Add(soiChange);
 			GameEvents.onVesselChange.Add(vesselChange);
-			GameEvents.onVesselWasModified.Add(vesselChange);
+			GameEvents.onVesselWasModified.Add(vesselChange);			
 		}
 
 		private void soiChange(GameEvents.HostedFromToAction<Vessel, CelestialBody> VC)
@@ -133,6 +138,11 @@ namespace SCANsat.SCAN_Unity
 				sensors |= SCANtype.Biome;
 			}
 
+			if (SCANUtil.isCovered(vlon, vlat, data, SCANtype.Anomaly))
+			{
+				sensors |= SCANtype.Anomaly;
+			}
+
 			foreach (SCANresourceGlobal s in resources)
 			{
 				if (SCANUtil.isCovered(vlon, vlat, data, s.SType))
@@ -150,6 +160,12 @@ namespace SCANsat.SCAN_Unity
 			resourceInfo();
 			anomalyInfo();
 			BTDTInfo();
+
+			if (oldLines != lines && ResourceButtons)
+			{
+				oldLines = lines;
+				uiElement.SetResourceButtons(lines);
+			}
 
 			uiElement.UpdateText(infoString.ToString());			
 		}
@@ -192,6 +208,8 @@ namespace SCANsat.SCAN_Unity
 		public void Close()
 		{
 			_isVisible = false;
+
+			oldLines = 0;
 
 			if (uiElement == null)
 				return;
@@ -250,9 +268,10 @@ namespace SCANsat.SCAN_Unity
 			get { return SCANcontroller.MasterResourceCount > 1; }
 		}
 
-		public bool Anomaly
+		public bool MouseAnomaly
 		{
-			get { return false; }
+			get { return _mouseInAnomaly; }
+			set { _mouseInAnomaly = value; }
 		}
 
 		public bool TooltipsOn
@@ -306,6 +325,8 @@ namespace SCANsat.SCAN_Unity
 		{
 			infoString.AppendFormat("Lat: {0:F2}°, Lon: {1:F2}°", vlat, vlon);
 
+			lines = 1;
+
 			foreach (SCANwaypoint p in data.Waypoints)
 			{
 				if (p.LandingTarget)
@@ -315,6 +336,7 @@ namespace SCANsat.SCAN_Unity
 					{
 						infoString.AppendLine();
 						infoString.AppendFormat("Target Dist: {0:N1}m", distance);
+						lines++;
 					}
 					continue;
 				}
@@ -340,17 +362,9 @@ namespace SCANsat.SCAN_Unity
 				{
 					infoString.AppendLine();
 					infoString.AppendFormat("Waypoint: {0}", p.Name);
+					lines++;
 					break;
 				}
-			}
-		}
-
-		private void biomeInfo()
-		{
-			if ((sensors & SCANtype.Biome) != SCANtype.Nothing && v.mainBody.BiomeMap != null)
-			{
-				infoString.AppendLine();
-				infoString.AppendFormat("Biome: {0}", SCANUtil.getBiomeName(v.mainBody, vlon, vlat));
 			}
 		}
 
@@ -375,6 +389,7 @@ namespace SCANsat.SCAN_Unity
 				case Vessel.Situations.PRELAUNCH:
 					infoString.AppendLine();
 					infoString.AppendFormat("Terrain: {0:N1}m", pqs);
+					lines++;
 					drawSlope = true;
 					break;
 				case Vessel.Situations.SPLASHED:
@@ -383,12 +398,14 @@ namespace SCANsat.SCAN_Unity
 					{
 						infoString.AppendLine();
 						infoString.AppendFormat("Depth: {0}", SCANuiUtil.distanceString(Math.Abs(d), 10000));
+						lines++;
 					}
 					else
 					{
 						d = ((int)(d / 100)) * 100;
 						infoString.AppendLine();
 						infoString.AppendFormat("Depth: {0}", SCANuiUtil.distanceString(Math.Abs(d), 10000));
+						lines++;
 					}
 					drawSlope = false;
 					break;
@@ -397,6 +414,7 @@ namespace SCANsat.SCAN_Unity
 					{
 						infoString.AppendLine();
 						infoString.AppendFormat("Altitude: {0}", SCANuiUtil.distanceString(h, 100000));
+						lines++;
 						drawSlope = true;
 					}
 					else if ((sensors & SCANtype.AltimetryLoRes) != SCANtype.Nothing)
@@ -404,6 +422,7 @@ namespace SCANsat.SCAN_Unity
 						h = ((int)(h / 500)) * 500;
 						infoString.AppendLine();
 						infoString.AppendFormat("Altitude: {0}", SCANuiUtil.distanceString(h, 100000));
+						lines++;
 						drawSlope = false;
 					}
 					break;
@@ -429,7 +448,18 @@ namespace SCANsat.SCAN_Unity
 
 					infoString.AppendLine();
 					infoString.Append(slopeString);
+					lines++;
 				}
+			}
+		}
+
+		private void biomeInfo()
+		{
+			if ((sensors & SCANtype.Biome) != SCANtype.Nothing && v.mainBody.BiomeMap != null)
+			{
+				infoString.AppendLine();
+				infoString.AppendFormat("Biome: {0}", SCANUtil.getBiomeName(v.mainBody, vlon, vlat));
+				lines++;
 			}
 		}
 
@@ -499,18 +529,21 @@ namespace SCANsat.SCAN_Unity
 
 		private void anomalyInfo()
 		{
-			if ((sensors & SCANtype.AnomalyDetail) != SCANtype.Nothing)
-			{
+			//if ((sensors & SCANtype.Anomaly) != SCANtype.Nothing)
+			//{
 				nearest = null;
 				double nearest_dist = -1;
+
 				foreach (SCANanomaly a in data.Anomalies)
 				{
-					if (!a.Known)
-						continue;
+					//if (!a.Known)
+						//continue;
+
 					double d = (a.Mod.transform.position - v.transform.position).magnitude;
+
 					if (d < nearest_dist || nearest_dist < 0)
 					{
-						if (d < 50000)
+						if (d < maxAnomalyDistance)
 						{
 							nearest = a;
 							nearest_dist = d;
@@ -523,40 +556,51 @@ namespace SCANsat.SCAN_Unity
 					infoString.AppendLine();
 
 					if (nearest.Detail)
-						infoString.Append(nearest.Name);
+						infoString.Append(string.Format("{0}: {1}", nearest.Name, SCANuiUtil.distanceString(nearest_dist, 2000)));
 					else
-						infoString.Append("Anomaly");
+						infoString.Append(string.Format("Unknown Anomaly: {0}", SCANuiUtil.distanceString(nearest_dist, 2000)));
 				}
-			}
-			else
-				nearest = null;
+			//}
+			//else
+				//nearest = null;
 		}
 
 		private void BTDTInfo()
 		{
-			if (nearest == null || !nearest.Detail || nearest.Mod == null)
+			if ((sensors & SCANtype.AnomalyDetail) == SCANtype.Nothing || nearest == null || !nearest.Detail || nearest.Mod == null)
 			{
 				uiElement.SetDetailState(false);
+				if (_anomalyView != null)
+					_anomalyView.free();
+				_anomalyView = null;
 				return;
 			}
 
 			uiElement.SetDetailState(true);
 
-			if (false)
+			if (_anomalyView == null)
 			{
-				uiElement.UpdateAnomaly(anomalyTex);
-
-				int count = 1;
-				string aName = "";
-				double dist = (v.transform.position - new Vector3()).magnitude;
-
-				uiElement.UpdateAnomalyText(string.Format("Identified {0} structure{1}", count, count > 1 ? "s" : ""));
-				uiElement.UpdateAnomalyName(string.Format("{0}\n{1}", aName, distanceString(dist)));
+				_anomalyView = new SCANremoteView();
+				_anomalyView.setup(320, 240, nearest.Mod.gameObject);//, uiElement.EdgeDetectShader, uiElement.GrayScaleShader);
 			}
 
-			//....
+			if (!_anomalyView.valid(nearest.Mod.gameObject))
+			{
+				if (_anomalyView != null)
+					_anomalyView.free();
+				_anomalyView = null;
+				return;
+			}
 
-			
+			anomalyTex = _anomalyView.getTexture();
+
+			uiElement.UpdateAnomaly(anomalyTex);
+
+			string info = _anomalyView.getInfoString();
+			string aData = _anomalyView.getAnomalyDataString(_mouseInAnomaly);
+
+			uiElement.UpdateAnomalyText(info);
+			uiElement.UpdateAnomalyName(aData);
 		}
 
 		private string distanceString(double dist)
