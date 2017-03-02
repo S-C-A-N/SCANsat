@@ -123,8 +123,6 @@ namespace SCANsat.SCAN_UI.UI_Framework
 		};
 
 		public static Color32[] redline;
-        	public static Color gridFull; // resource colors
-        	public static Color gridEmpty; //empty resource color
 
 		public static Color32[] small_redline;
 
@@ -277,18 +275,19 @@ namespace SCANsat.SCAN_UI.UI_Framework
 		public static string colorHex ( Color32 c ) {
 			return string.Format("#{0:X2}{1:X2}{2:X2}", c.r, c.g, c.b);
 		}
-		public static string colored ( Color c , string text ) {
-			return string.Format("<color=\"{0}\">{1}</color>", colorHex(c), text);
-		}
 		public static string coloredNoQuote(Color c, string text)
 		{
 			return string.Format("<color={0}>{1}</color>", colorHex(c), text);
 		}
 
-		internal static Color c_good {
-			get {
-				if (SCANcontroller.controller.mainMapColor) 	return cb_bluishGreen;
-				else 								return cb_skyBlue;
+		internal static Color c_good
+		{
+			get
+			{
+				if (SCANcontroller.controller.mainMapColor)
+					return cb_bluishGreen;
+				else
+					return cb_skyBlue;
 			}
 		}
 		internal static Color c_bad
@@ -299,37 +298,13 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			}
 		}
 		internal static Color c_ugly {
-			get {
-				if (SCANcontroller.controller.mainMapColor) return xkcd_LightRed;
-				else 								return cb_yellow;
+			get
+			{
+				if (SCANcontroller.controller.mainMapColor)
+					return xkcd_LightRed;
+				else
+					return cb_yellow;
 			}
-		}
-
-		public static Color picker(Rect r, Color c) {
-			GUILayout.BeginArea (r,"","Box");
-			GUILayout.BeginHorizontal ();
-			// R
-			GUILayout.EndHorizontal();
-
-			GUILayout.BeginHorizontal ();
-			// G
-			GUILayout.EndHorizontal();
-
-			GUILayout.BeginHorizontal ();
-			// B
-			GUILayout.EndHorizontal();
-
-			GUILayout.EndArea ();
-			return c;
-		}
-
-		public static void swatch(Color c) {
-			Texture2D tex = new Texture2D (20,20);
-			GUILayout.BeginVertical ("Box",new GUILayoutOption[]{GUILayout.Width (22),GUILayout.Height (22)});
-			GUI.color = c;
-			GUILayout.Label (tex);
-			GUI.color = Color.white;
-			GUILayout.EndVertical ();
 		}
 
 		private static _Palettes currentPaletteSet;

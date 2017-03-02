@@ -199,7 +199,6 @@ namespace SCANsat.SCAN_Data
 		#region Waypoints
 
 		private List<SCANwaypoint> waypoints;
-		private bool waypointsLoaded;
 
 		public void addToWaypoints()
 		{
@@ -236,9 +235,6 @@ namespace SCANsat.SCAN_Data
 
 		public void addSurveyWaypoints(CelestialBody b, SurveyContract c)
 		{
-			if (!waypointsLoaded)
-				return;
-
 			if (b != body)
 				return;
 
