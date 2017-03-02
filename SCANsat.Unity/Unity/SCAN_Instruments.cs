@@ -27,7 +27,7 @@ namespace SCANsat.Unity.Unity
 		[SerializeField]
 		private TextHandler m_ReadoutText = null;
 		[SerializeField]
-		private Transform m_ResourceButtons = null;
+		private RectTransform m_ResourceButtons = null;
 		[SerializeField]
 		private RawImage m_AnomalyImage = null;
 		[SerializeField]
@@ -36,17 +36,39 @@ namespace SCANsat.Unity.Unity
 		private TextHandler m_AnomalyNameText = null;
 		[SerializeField]
 		private GameObject m_AnomalyObject = null;
+		[SerializeField]
+		private Shader m_EdgeDetectShader = null;
+		[SerializeField]
+		private Shader m_GrayScaleShader = null;
 
 		private ISCAN_Instruments insInterface;
 		private RectTransform rect;
 		private Vector2 mouseStart;
 		private Vector3 windowStart;
 
+		public Shader EdgeDetectShader
+		{
+			get { return m_EdgeDetectShader; }
+		}
+
+		public Shader GrayScaleShader
+		{
+			get { return m_GrayScaleShader; }
+		}
+
 		protected override void Awake()
 		{
 			base.Awake();
 
 			rect = GetComponent<RectTransform>();
+
+			string s;
+
+			if (m_EdgeDetectShader != null)
+				s = m_EdgeDetectShader.name;
+
+			if (m_GrayScaleShader != null)
+				s = m_GrayScaleShader.name;
 
 			Alpha(0);
 		}
@@ -127,6 +149,17 @@ namespace SCANsat.Unity.Unity
 			handler.Scale = scale;
 		}
 
+		public void SetResourceButtons(int lines)
+		{
+			if (insInterface == null || m_ResourceButtons == null)
+				return;
+
+			float y = -1 * lines * 21;
+
+			if (insInterface.ResourceButtons && m_ResourceButtons != null)
+				m_ResourceButtons.anchoredPosition3D = new Vector3(m_ResourceButtons.anchoredPosition.x, y, 0);
+		}
+
 		public void SetScale(float scale)
 		{
 			rect.localScale = Vector3.one * scale;
@@ -183,7 +216,7 @@ namespace SCANsat.Unity.Unity
 			m_ReadoutText.OnTextUpdate.Invoke(s);
 		}
 
-		public void UpdateAnomaly(Texture2D tex)
+		public void UpdateAnomaly(Texture tex)
 		{
 			if (m_AnomalyImage == null)
 				return;
@@ -234,5 +267,20 @@ namespace SCANsat.Unity.Unity
 				m_AnomalyObject.SetActive(false);
 		}
 
+		public void OnMouseEnterAnomaly(BaseEventData eventData)
+		{
+			if (!(eventData is PointerEventData) || insInterface == null)
+				return;
+
+			insInterface.MouseAnomaly = true;
+		}
+
+		public void OnMouseExitAnomaly(BaseEventData eventData)
+		{
+			if (!(eventData is PointerEventData) || insInterface == null)
+				return;
+
+			insInterface.MouseAnomaly = false;
+		}
 	}
 }
