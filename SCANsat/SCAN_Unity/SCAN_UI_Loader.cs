@@ -30,10 +30,16 @@ namespace SCANsat.SCAN_Unity
 	{
 		private const string prefabAssetName = "scansat_prefabs";
 		private const string imageAssetName = "scan_images";
+		private const string shadersAssetName = "scan_shaders";
+		private const string winShaderName = "-windows";
+		private const string linuxShaderName = "-linux";
+		private const string macShaderName = "-macosx";
 
 		private static bool loaded;
 		private static bool skinLoaded;
+		private static bool prefabsLoaded;
 		private static bool spritesLoaded;
+		private static bool shadersLoaded;
 		private static bool tmpProcessed;
 		private static bool tooltipsProcessed;
 		private static bool prefabsProcessed;
@@ -82,6 +88,9 @@ namespace SCANsat.SCAN_Unity
 
 		private static Sprite _kspTooltipBackground;
 		private static Sprite _unityTooltipBackground;
+
+		private static Shader _edgeDetectShader;
+		private static Shader _greyScaleShader;
 
 		private static GameObject[] loadedPrefabs;
 
@@ -274,6 +283,16 @@ namespace SCANsat.SCAN_Unity
 			}
 		}
 
+		public static Shader EdgeDetectShader
+		{
+			get {return _edgeDetectShader;}
+		}
+
+		public static Shader GreyScaleShader
+		{
+			get { return _greyScaleShader; }
+		}
+
 		public static void ResetUIStyle()
 		{
 			if (loadedPrefabs != null)
@@ -305,15 +324,57 @@ namespace SCANsat.SCAN_Unity
 			while (SCAN_Settings_Config.Instance == null)
 				yield return null;
 
+			if (!shadersLoaded)
+				loadShaders();
+
 			if (!spritesLoaded)
 				loadTextures();
 
 			if (!skinLoaded)
 				loadUnitySkin();
 
-			loadPrefabBundle();
+			if (!prefabsLoaded)
+				loadPrefabBundle();
 
 			loaded = true;
+		}
+
+		private static void loadShaders()
+		{
+			string shaderPath;
+
+			if (Application.platform == RuntimePlatform.WindowsPlayer && SystemInfo.graphicsDeviceVersion.StartsWith("OpenGL"))
+				shaderPath = shadersAssetName + linuxShaderName;
+			else if (Application.platform == RuntimePlatform.WindowsPlayer)
+				shaderPath = shadersAssetName + winShaderName;
+			else if (Application.platform == RuntimePlatform.LinuxPlayer)
+				shaderPath = shadersAssetName + linuxShaderName;
+			else
+				shaderPath = shadersAssetName + macShaderName;
+
+			AssetBundle shaders = AssetBundle.LoadFromFile(path + shaderPath);
+
+			if (shaders == null)
+				return;
+
+			Shader[] loadedShaders = shaders.LoadAllAssets<Shader>();
+
+			if (loadedShaders == null)
+				return;
+
+			for (int i = loadedShaders.Length - 1; i >= 0; i--)
+			{
+				Shader s = loadedShaders[i];
+
+				if (s.name == "Hidden/Edge Detect X")
+					_edgeDetectShader = s;
+				else if (s.name == "Hidden/Grayscale Effect")
+					_greyScaleShader = s;
+			}
+
+			//shaders.Unload(false);
+
+			shadersLoaded = true;
 		}
 
 		private static void loadTextures()
@@ -368,29 +429,6 @@ namespace SCANsat.SCAN_Unity
 
 			if (clearLoaded && toggleLoaded && appLoaded)
 				spritesLoaded = true;
-		}
-
-		private static void loadPrefabBundle()
-		{
-			if (loadedPrefabs == null)
-			{
-				AssetBundle prefabs = AssetBundle.LoadFromFile(path + prefabAssetName);
-
-				if (prefabs != null)
-					loadedPrefabs = prefabs.LoadAllAssets<GameObject>();
-			}
-
-			if (loadedPrefabs != null)
-			{
-				if (!tmpProcessed)
-					processTMPPrefabs();
-
-				if (!tooltipsProcessed && _tooltipPrefab != null)
-					processTooltips();
-
-				if (!prefabsProcessed)
-					processUIPrefabs();
-			}
 		}
 
 		private static void loadUnitySkin()
@@ -509,9 +547,11 @@ namespace SCANsat.SCAN_Unity
 
 				else if (s.name == "KSP_Tooltip")
 					_kspTooltipBackground = s;
-				else if (s.name == "DropDownTex")
+				else if (s.name == "tooltip")
 					_unityTooltipBackground = s;
 			}
+
+			//images.Unload(false);
 
 			skinLoaded = true;
 		}
@@ -556,6 +596,32 @@ namespace SCANsat.SCAN_Unity
 			skin.verticalSliderThumb.normal = new UIStyleState();
 			skin.verticalSliderThumb.highlight = new UIStyleState();
 			skin.verticalSliderThumb.active = new UIStyleState();
+		}
+
+		private static void loadPrefabBundle()
+		{
+			AssetBundle prefabs = AssetBundle.LoadFromFile(path + prefabAssetName);
+
+			if (prefabs == null)
+				return;
+
+			loadedPrefabs = prefabs.LoadAllAssets<GameObject>();
+
+			if (loadedPrefabs == null)
+				return;
+
+			if (!tmpProcessed)
+				processTMPPrefabs();
+
+			if (!tooltipsProcessed && _tooltipPrefab != null)
+				processTooltips();
+
+			if (!prefabsProcessed)
+				processUIPrefabs();
+
+			//prefabs.Unload(false);
+
+			prefabsLoaded = true;
 		}
 
 		private static void processTMPPrefabs()
@@ -649,6 +715,50 @@ namespace SCANsat.SCAN_Unity
 			tmp.richText = true;
 		}
 
+		private static FontStyles getStyle(FontStyle style)
+		{
+			switch (style)
+			{
+				case FontStyle.Normal:
+					return FontStyles.Normal;
+				case FontStyle.Bold:
+					return FontStyles.Bold;
+				case FontStyle.Italic:
+					return FontStyles.Italic;
+				case FontStyle.BoldAndItalic:
+					return FontStyles.Bold;
+				default:
+					return FontStyles.Normal;
+			}
+		}
+
+		private static TextAlignmentOptions getAnchor(TextAnchor anchor)
+		{
+			switch (anchor)
+			{
+				case TextAnchor.UpperLeft:
+					return TextAlignmentOptions.TopLeft;
+				case TextAnchor.UpperCenter:
+					return TextAlignmentOptions.Top;
+				case TextAnchor.UpperRight:
+					return TextAlignmentOptions.TopRight;
+				case TextAnchor.MiddleLeft:
+					return TextAlignmentOptions.MidlineLeft;
+				case TextAnchor.MiddleCenter:
+					return TextAlignmentOptions.Midline;
+				case TextAnchor.MiddleRight:
+					return TextAlignmentOptions.MidlineRight;
+				case TextAnchor.LowerLeft:
+					return TextAlignmentOptions.BottomLeft;
+				case TextAnchor.LowerCenter:
+					return TextAlignmentOptions.Bottom;
+				case TextAnchor.LowerRight:
+					return TextAlignmentOptions.BottomRight;
+				default:
+					return TextAlignmentOptions.Center;
+			}
+		}
+
 		private static void processTooltips()
 		{
 			for (int i = loadedPrefabs.Length - 1; i >= 0; i--)
@@ -700,50 +810,6 @@ namespace SCANsat.SCAN_Unity
 				return;
 
 			handler.IsActive = isOn && !handler.HelpTip;
-		}
-
-		private static FontStyles getStyle(FontStyle style)
-		{
-			switch (style)
-			{
-				case FontStyle.Normal:
-					return FontStyles.Normal;
-				case FontStyle.Bold:
-					return FontStyles.Bold;
-				case FontStyle.Italic:
-					return FontStyles.Italic;
-				case FontStyle.BoldAndItalic:
-					return FontStyles.Bold;
-				default:
-					return FontStyles.Normal;
-			}
-		}
-
-		private static TextAlignmentOptions getAnchor(TextAnchor anchor)
-		{
-			switch (anchor)
-			{
-				case TextAnchor.UpperLeft:
-					return TextAlignmentOptions.TopLeft;
-				case TextAnchor.UpperCenter:
-					return TextAlignmentOptions.Top;
-				case TextAnchor.UpperRight:
-					return TextAlignmentOptions.TopRight;
-				case TextAnchor.MiddleLeft:
-					return TextAlignmentOptions.MidlineLeft;
-				case TextAnchor.MiddleCenter:
-					return TextAlignmentOptions.Midline;
-				case TextAnchor.MiddleRight:
-					return TextAlignmentOptions.MidlineRight;
-				case TextAnchor.LowerLeft:
-					return TextAlignmentOptions.BottomLeft;
-				case TextAnchor.LowerCenter:
-					return TextAlignmentOptions.Bottom;
-				case TextAnchor.LowerRight:
-					return TextAlignmentOptions.BottomRight;
-				default:
-					return TextAlignmentOptions.Center;
-			}
 		}
 
 		private static void processUIPrefabs()
