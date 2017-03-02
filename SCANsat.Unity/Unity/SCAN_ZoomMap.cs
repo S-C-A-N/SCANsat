@@ -124,6 +124,7 @@ namespace SCANsat.Unity.Unity
 		private List<SCAN_MapLabel> flagLabels = new List<SCAN_MapLabel>();
 		private SCAN_MapLabel vesselLabel;
 		private SCAN_MapLabel tempWaypointLabel;
+		private SCAN_MapLabel hoverWaypointLabel;
 
 		private ISCAN_ZoomMap zoomInterface;
 
@@ -168,6 +169,23 @@ namespace SCANsat.Unity.Unity
 				RectTransformUtility.ScreenPointToLocalPointInRectangle(m_ZoomImage.rectTransform, Input.mousePosition, zoomInterface.MainCanvas.worldCamera, out rectPos);
 
 				m_ReadoutText.OnTextUpdate.Invoke(zoomInterface.MapInfo(rectPos));
+
+				if (waypointSelecting)
+				{
+					if (hoverWaypointLabel != null)
+					{
+						Vector2 mapPos = new Vector2(rectPos.x, rectPos.y + zoomInterface.Size.y);
+
+						hoverWaypointLabel.UpdateActive(true);
+
+						hoverWaypointLabel.UpdatePosition(mapPos);
+					}
+				}
+			}
+			else if (waypointSelecting)
+			{
+				if (hoverWaypointLabel != null)
+					hoverWaypointLabel.UpdateActive(false);
 			}
 
 			if (zoomInterface.OrbitToggle && zoomInterface.ShowOrbit)
@@ -319,15 +337,15 @@ namespace SCANsat.Unity.Unity
 			if (m_MapLayout == null)
 				return;
 
-			if (size.x < m_MapLayout.minWidth)
-				size.x = m_MapLayout.minWidth;
-			else if (size.x > m_MaxWidth)
-				size.x = m_MaxWidth;
+			if (size.x + 8 < m_MapLayout.minWidth)
+				size.x = m_MapLayout.minWidth - 8;
+			else if (size.x + 8 > m_MaxWidth)
+				size.x = m_MaxWidth - 8;
 
-			if (size.y < m_MapLayout.minHeight)
-				size.y = m_MapLayout.minHeight;
-			else if (size.y > m_MaxHeight)
-				size.y = m_MaxHeight;
+			if (size.y + 8 < m_MapLayout.minHeight)
+				size.y = m_MapLayout.minHeight - 8;
+			else if (size.y + 8 > m_MaxHeight)
+				size.y = m_MaxHeight - 8;
 
 			if (size.x % 2 != 0)
 				size.x += 1;
@@ -339,8 +357,8 @@ namespace SCANsat.Unity.Unity
 			if (size.y % 4 != 0)
 				size.y += 2;
 
-			m_MapLayout.preferredWidth = size.x;
-			m_MapLayout.preferredHeight = size.y;
+			m_MapLayout.preferredWidth = size.x + 8;
+			m_MapLayout.preferredHeight = size.y + 8;
 		}
 
 		private void SetWindowState(int i)
@@ -692,20 +710,15 @@ namespace SCANsat.Unity.Unity
 				vesselLabel.gameObject.SetActive(false);
 				Destroy(vesselLabel.gameObject);
 			}
+
+			DestroyWaypoint(tempWaypointLabel);
 	
-			if (tempWaypointLabel != null)
-			{
-				tempWaypointLabel.gameObject.SetActive(false);
-				Destroy(tempWaypointLabel.gameObject);
-			}
-		
 			flagLabels.Clear();
 			anomalyLabels.Clear();
 			waypointLabels.Clear();
 			orbitLabels.Clear();
 			orbitIconLabels.Clear();
 			vesselLabel = null;
-			tempWaypointLabel = null;
 		}
 
 		public void RefreshIcons()
@@ -783,12 +796,7 @@ namespace SCANsat.Unity.Unity
 
 			if (waypointSelecting)
 			{
-				if (tempWaypointLabel != null)
-				{
-					tempWaypointLabel.gameObject.SetActive(false);
-					DestroyImmediate(tempWaypointLabel.gameObject);
-					tempWaypointLabel = null;
-				}
+				DestroyWaypoint(tempWaypointLabel);
 
 				SetWaypoint(pos);
 			}
@@ -902,7 +910,7 @@ namespace SCANsat.Unity.Unity
 			if (m_MapLayout == null || zoomInterface == null)
 				return;
 
-			zoomInterface.Size = new Vector2(m_MapLayout.preferredWidth, m_MapLayout.preferredHeight);
+			zoomInterface.Size = new Vector2(m_MapLayout.preferredWidth - 8, m_MapLayout.preferredHeight - 8);
 
 			SetIcons();
 
@@ -1220,12 +1228,8 @@ namespace SCANsat.Unity.Unity
 		{
 			waypointSelecting = !waypointSelecting;
 
-			if (tempWaypointLabel != null)
-			{
-				tempWaypointLabel.gameObject.SetActive(false);
-				DestroyImmediate(tempWaypointLabel.gameObject);
-				tempWaypointLabel = null;
-			}
+			DestroyWaypoint(tempWaypointLabel);
+			DestroyWaypoint(hoverWaypointLabel);
 
 			if (zoomInterface == null)
 				return;
@@ -1235,13 +1239,36 @@ namespace SCANsat.Unity.Unity
 			if (m_WaypointBar != null)
 				m_WaypointBar.SetActive(waypointSelecting);
 
-			if (waypointSelecting && m_WaypointInput != null)
+			if (waypointSelecting)
 			{
-				if (string.IsNullOrEmpty(waypoint))
-					m_WaypointInput.text = zoomInterface.RandomWaypoint;
-				else
-					m_WaypointInput.text = waypoint;
+				HoverWaypoint();
+
+				if (m_WaypointInput != null)
+				{
+					if (string.IsNullOrEmpty(waypoint))
+						m_WaypointInput.text = zoomInterface.RandomWaypoint;
+					else
+						m_WaypointInput.text = waypoint;
+				}
 			}
+		}
+
+		private void HoverWaypoint()
+		{
+			MapLabelInfo info = new MapLabelInfo()
+			{
+				label = "",
+				image = zoomInterface.WaypointSprite,
+				pos = new Vector2(),
+				baseColor = Color.white,
+				flashColor = Color.red,
+				flash = true,
+				width = 20,
+				alignBottom = true,
+				show = false
+			};
+
+			hoverWaypointLabel = createWaypoint(0, info, true);
 		}
 
 		public void OnInputClick(BaseEventData eventData)
@@ -1257,12 +1284,7 @@ namespace SCANsat.Unity.Unity
 
 		public void RefreshWaypoint()
 		{
-			if (tempWaypointLabel != null)
-			{
-				tempWaypointLabel.gameObject.SetActive(false);
-				Destroy(tempWaypointLabel.gameObject);
-				tempWaypointLabel = null;
-			}
+			DestroyWaypoint(tempWaypointLabel);
 
 			if (zoomInterface == null || m_WaypointInput == null)
 				return;
@@ -1283,10 +1305,10 @@ namespace SCANsat.Unity.Unity
 
 			waypoint = "";
 
-			RefreshIcons();
-
 			if (tempWaypointLabel != null)
 				zoomInterface.SetWaypoint(m_WaypointInput.text, tempWaypointLabel.Info.pos);
+
+			RefreshIcons();
 
 			waypointSelecting = false;
 		}
@@ -1317,5 +1339,14 @@ namespace SCANsat.Unity.Unity
 			waypointSelecting = false;
 		}
 
+		private void DestroyWaypoint(SCAN_MapLabel waypoint)
+		{
+			if (waypoint != null)
+			{
+				waypoint.gameObject.SetActive(false);
+				Destroy(waypoint.gameObject);
+				waypoint = null;
+			}
+		}
 	}
 }

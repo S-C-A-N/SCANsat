@@ -119,6 +119,7 @@ namespace SCANsat.Unity.Unity
 		private List<SCAN_MapLabel> flagLabels = new List<SCAN_MapLabel>();
 		private SCAN_MapLabel vesselLabel;
 		private SCAN_MapLabel tempWaypointLabel;
+		private SCAN_MapLabel hoverWaypointLabel;
 
 		private SCAN_DropDown dropDown;
 
@@ -152,6 +153,23 @@ namespace SCANsat.Unity.Unity
 				RectTransformUtility.ScreenPointToLocalPointInRectangle(m_MapImage.rectTransform, Input.mousePosition, bigInterface.MainCanvas.worldCamera, out rectPos);
 
 				m_ReadoutText.OnTextUpdate.Invoke(bigInterface.MapInfo(rectPos));
+
+				if (waypointSelecting)
+				{
+					if (hoverWaypointLabel != null)
+					{
+						Vector2 mapPos = new Vector2(rectPos.x, rectPos.y + bigInterface.Size.y);
+
+						hoverWaypointLabel.UpdateActive(true);
+
+						hoverWaypointLabel.UpdatePosition(mapPos);
+					}
+				}
+			}
+			else if (waypointSelecting)
+			{
+				if (hoverWaypointLabel != null)
+					hoverWaypointLabel.UpdateActive(false);
 			}
 
 			if (bigInterface.OrbitToggle && bigInterface.ShowOrbit)
@@ -372,16 +390,16 @@ namespace SCANsat.Unity.Unity
 			if (m_MapLayout == null)
 				return;
 
-			if (size.x < m_MapLayout.minWidth)
-				size.x = m_MapLayout.minWidth;
+			if (size.x + 8 < m_MapLayout.minWidth)
+				size.x = m_MapLayout.minWidth - 8;
 			else if (size.x > 8192)
 				size.x = 8192;
 
 			if (size.x % 2 != 0)
 				size.x += 1;
 
-			m_MapLayout.preferredWidth = size.x;
-			m_MapLayout.preferredHeight = m_MapLayout.preferredWidth / 2;
+			m_MapLayout.preferredWidth = size.x + 8;
+			m_MapLayout.preferredHeight = m_MapLayout.preferredWidth / 2 + 8;
 		}
 
 		private void SetLegend(bool isOn, Texture2D tex, IList<string> labels)
@@ -656,11 +674,7 @@ namespace SCANsat.Unity.Unity
 				Destroy(vesselLabel.gameObject);
 			}
 
-			if (tempWaypointLabel != null)
-			{
-				tempWaypointLabel.gameObject.SetActive(false);
-				Destroy(tempWaypointLabel.gameObject);
-			}
+			DestroyWaypoint(tempWaypointLabel);
 
 			flagLabels.Clear();
 			anomalyLabels.Clear();
@@ -668,7 +682,6 @@ namespace SCANsat.Unity.Unity
 			orbitLabels.Clear();
 			orbitIconLabels.Clear();
 			vesselLabel = null;
-			tempWaypointLabel = null;
 		}
 
 		public void RefreshIcons()
@@ -759,8 +772,8 @@ namespace SCANsat.Unity.Unity
 
 			if (m_MapLayout.preferredWidth < m_MapLayout.minWidth)
 				m_MapLayout.preferredWidth = m_MapLayout.minWidth;
-			else if (m_MapLayout.preferredWidth > 8192)
-				m_MapLayout.preferredWidth = 8192;
+			else if (m_MapLayout.preferredWidth > 8200)
+				m_MapLayout.preferredWidth = 8200;
 
 			if (m_MapLayout.preferredWidth % 2 != 0)
 				m_MapLayout.preferredWidth += 1;
@@ -773,7 +786,7 @@ namespace SCANsat.Unity.Unity
 			if (m_MapLayout == null || bigInterface == null)
 				return;
 
-			bigInterface.Size = new Vector2(m_MapLayout.preferredWidth, m_MapLayout.preferredHeight);
+			bigInterface.Size = new Vector2(m_MapLayout.preferredWidth - 8, m_MapLayout.preferredHeight - 8);
 
 			SetIcons();
 		}
@@ -813,12 +826,7 @@ namespace SCANsat.Unity.Unity
 
 			if (waypointSelecting)
 			{
-				if (tempWaypointLabel != null)
-				{
-					tempWaypointLabel.gameObject.SetActive(false);
-					Destroy(tempWaypointLabel.gameObject);
-					tempWaypointLabel = null;
-				}
+				DestroyWaypoint(tempWaypointLabel);
 
 				SetWaypoint(pos);
 			}
@@ -1238,12 +1246,7 @@ namespace SCANsat.Unity.Unity
 		{
 			waypointSelecting = !waypointSelecting;
 
-			if (tempWaypointLabel != null)
-			{
-				tempWaypointLabel.gameObject.SetActive(false);
-				Destroy(tempWaypointLabel.gameObject);
-				tempWaypointLabel = null;
-			}
+			DestroyWaypoint(tempWaypointLabel);
 
 			if (bigInterface == null)
 				return;
@@ -1253,13 +1256,36 @@ namespace SCANsat.Unity.Unity
 			if (m_WaypointBar != null)
 				m_WaypointBar.SetActive(waypointSelecting);
 
-			if (waypointSelecting && m_WaypointInput != null)
+			if (waypointSelecting)
 			{
-				if (string.IsNullOrEmpty(waypoint))
-					m_WaypointInput.text = bigInterface.RandomWaypoint;
-				else
-					m_WaypointInput.text = waypoint;
+				HoverWaypoint();
+
+				if (m_WaypointInput != null)
+				{
+					if (string.IsNullOrEmpty(waypoint))
+						m_WaypointInput.text = bigInterface.RandomWaypoint;
+					else
+						m_WaypointInput.text = waypoint;
+				}
 			}
+		}
+
+		private void HoverWaypoint()
+		{
+			MapLabelInfo info = new MapLabelInfo()
+			{
+				label = "",
+				image = bigInterface.WaypointSprite,
+				pos = new Vector2(),
+				baseColor = Color.white,
+				flashColor = Color.red,
+				flash = true,
+				width = 20,
+				alignBottom = true,
+				show = false
+			};
+
+			hoverWaypointLabel = createWaypoint(0, info, true);
 		}
 
 		public void OnInputClick(BaseEventData eventData)
@@ -1275,12 +1301,7 @@ namespace SCANsat.Unity.Unity
 
 		public void RefreshWaypoint()
 		{
-			if (tempWaypointLabel != null)
-			{
-				tempWaypointLabel.gameObject.SetActive(false);
-				Destroy(tempWaypointLabel.gameObject);
-				tempWaypointLabel = null;
-			}
+			DestroyWaypoint(tempWaypointLabel);
 
 			if (bigInterface == null || m_WaypointInput == null)
 				return;
@@ -1301,10 +1322,10 @@ namespace SCANsat.Unity.Unity
 
 			waypoint = "";
 
-			RefreshIcons();
-
 			if (tempWaypointLabel != null)
 				bigInterface.SetWaypoint(m_WaypointInput.text, tempWaypointLabel.Info.pos);
+
+			RefreshIcons();
 
 			waypointSelecting = false;
 		}
@@ -1335,5 +1356,14 @@ namespace SCANsat.Unity.Unity
 			waypointSelecting = false;
 		}
 
+		private void DestroyWaypoint(SCAN_MapLabel waypoint)
+		{
+			if (waypoint != null)
+			{
+				waypoint.gameObject.SetActive(false);
+				Destroy(waypoint.gameObject);
+				waypoint = null;
+			}
+		}
 	}
 }
