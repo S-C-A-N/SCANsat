@@ -640,10 +640,6 @@ namespace SCANsat
 
 			Vector2 pos = new Vector2(Input.mousePosition.x, Screen.height - Input.mousePosition.y);
 
-			switch (HighLogic.LoadedScene)
-			{
-			}
-
 			return false;
 		}
 

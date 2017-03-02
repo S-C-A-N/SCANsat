@@ -1222,6 +1222,8 @@ namespace SCANsat.SCAN_Unity
 
 					if (currentResource != null)
 						currentResource.CurrentBodyConfig(body.name);
+
+					updateMap = true;
 				}
 
 				SetTitle();
@@ -1656,7 +1658,7 @@ namespace SCANsat.SCAN_Unity
 
 						anomalies.Add(a.Name, new MapLabelInfo()
 							{
-								label = a.Detail ? a.Name : "",
+								label = "",
 								image = SCAN_UI_Loader.AnomalyIcon,
 								pos = MapPosition(a.Latitude, a.Longitude),
 								baseColor = ColorToggle ? palette.cb_yellow : palette.cb_skyBlue,

@@ -181,15 +181,15 @@ namespace SCANsat.SCAN_Unity
 			AddOrbitMapLabels();
 		}
 
-		private void initializeMapCenter(double lat, double lon, CelestialBody body)
+		private void initializeMapCenter(double lat, double lon, CelestialBody b)
 		{
 			SCANcontroller.controller.TargetSelecting = false;
 			SCANcontroller.controller.TargetSelectingActive = false;
 
-			SCANdata dat = SCANUtil.getData(body);
+			SCANdata dat = SCANUtil.getData(b);
 
 			if (dat == null)
-				dat = new SCANdata(body);
+				dat = new SCANdata(b);
 
 			data = dat;
 			body = data.Body;
@@ -501,6 +501,9 @@ namespace SCANsat.SCAN_Unity
 
 			for (int i = 0; i < orbitSteps * 2; i++)
 			{
+				if (i > orbitLabels.Count - 1)
+					break;
+
 				SimpleLabelInfo info = orbitLabels[i];
 
 				if (info == null)
@@ -892,6 +895,11 @@ namespace SCANsat.SCAN_Unity
 
 			vessel = FlightGlobals.ActiveVessel;
 
+			if (v || VesselLock)
+				setToVessel();
+			else
+				setToPosition(lat, lon, m);
+
 			if (OrbitToggle && ShowOrbit)
 			{
 				Orbit o = vessel.orbit;
@@ -906,11 +914,6 @@ namespace SCANsat.SCAN_Unity
 				if (!vessel.LandedOrSplashed)
 					UpdateOrbitIcons(o);
 			}
-
-			if (v || VesselLock)
-				setToVessel();
-			else
-				setToPosition(lat, lon, m);
 
 			uiElement.setMap(this);
 
@@ -1458,7 +1461,7 @@ namespace SCANsat.SCAN_Unity
 
 						anomalies.Add(a.Name, new MapLabelInfo()
 						{
-							label = a.Detail ? a.Name : "",
+							label = "",
 							image = SCAN_UI_Loader.AnomalyIcon,
 							pos = mapPos,
 							baseColor = ColorToggle ? palette.cb_yellow : palette.cb_skyBlue,

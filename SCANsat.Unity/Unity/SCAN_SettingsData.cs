@@ -30,6 +30,14 @@ namespace SCANsat.Unity.Unity
 		[SerializeField]
 		private TextHandler m_MapWidth = null;
 		[SerializeField]
+		private TextHandler m_ResetCurrentText = null;
+		[SerializeField]
+		private TextHandler m_ResetCurrentSCANText = null;
+		[SerializeField]
+		private TextHandler m_ResetCurrentStockText = null;
+		[SerializeField]
+		private TextHandler m_FillCurrentText = null;
+		[SerializeField]
 		private InputField m_MapWidthInput = null;
 		[SerializeField]
 		private GameObject m_ResetSCANResource = null;
@@ -84,7 +92,27 @@ namespace SCANsat.Unity.Unity
 			if (!set.ShowMapFill && m_MapFill != null)
 				m_MapFill.SetActive(false);
 
+			SetButtonText();
+
 			loaded = true;
+		}
+
+		public void SetButtonText()
+		{
+			if (settings == null)
+				return;
+
+			if (m_ResetCurrentText != null)
+				m_ResetCurrentText.OnTextUpdate.Invoke("Reset Map of " + settings.CurrentBody);
+
+			if (m_ResetCurrentSCANText != null)
+				m_ResetCurrentSCANText.OnTextUpdate.Invoke("Reset SCANsat resource data of " + settings.CurrentBody);
+
+			if (m_ResetCurrentStockText != null)
+				m_ResetCurrentStockText.OnTextUpdate.Invoke("Reset stock resource data for " + settings.CurrentBody);
+
+			if (m_FillCurrentText != null)
+				m_FillCurrentText.OnTextUpdate.Invoke("Fill map of " + settings.CurrentBody);
 		}
 
 		public void GreyScale(bool isOn)

@@ -39,6 +39,8 @@ namespace SCANsat.Unity.Interfaces
 
 		string SaveToConfig { get; }
 
+		string CurrentBody { get; }
+
 		int TimeWarp { get; set; }
 
 		int MapWidth { get; set; }

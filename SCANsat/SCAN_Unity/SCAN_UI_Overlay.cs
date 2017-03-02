@@ -18,6 +18,7 @@ using System.Linq;
 using System.Threading;
 using System.Text;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using SCANsat.SCAN_Toolbar;
 using SCANsat.Unity.Interfaces;
 using SCANsat.Unity.Unity;
@@ -40,7 +41,6 @@ namespace SCANsat.SCAN_Unity
 
 		private bool mapGenerating;
 		private double degreeOffset;
-		private bool enableUI = true;
 		private int mapStep, mapStart;
 		private bool bodyBiome, bodyPQS;
 
@@ -49,7 +49,8 @@ namespace SCANsat.SCAN_Unity
 		private volatile bool threadRunning, threadFinished;
 		private volatile bool terrainGenerated;
 
-		private string tooltipText = "";
+		private StringBuilder tooltipText = new StringBuilder();
+		private bool tooltipActive;
 
 		private Texture2D mapOverlay;
 		private Color32[] resourcePixels;
@@ -108,6 +109,8 @@ namespace SCANsat.SCAN_Unity
 
 		public void Update()
 		{
+			tooltipActive = false;
+
 			if ((MapView.MapIsEnabled && HighLogic.LoadedSceneIsFlight && FlightGlobals.ready) || HighLogic.LoadedScene == GameScenes.TRACKSTATION)
 			{
 				CelestialBody mapBody = SCANUtil.getTargetBody(MapView.MapCamera.target);
@@ -117,11 +120,104 @@ namespace SCANsat.SCAN_Unity
 
 				if (mapBody != body)
 					setBody(mapBody);
+
+				if (SCAN_Settings_Config.Instance.OverlayTooltips && _overlayOn)
+				{
+					SCANUtil.SCANCoordinates coords = SCANUtil.GetMouseCoordinates(body);
+
+					if (coords != null)
+					{
+						tooltipActive = true;
+
+						PointerEventData pe = new PointerEventData(EventSystem.current);
+						pe.position = Input.mousePosition;
+						List<RaycastResult> hits = new List<RaycastResult>();
+
+						EventSystem.current.RaycastAll(pe, hits);
+
+						for (int i = hits.Count - 1; i >= 0; i--)
+						{
+							RaycastResult r = hits[i];
+
+							GameObject go = r.gameObject;
+
+							if (go.layer == 5)
+							{
+								tooltipActive = false;
+								break;
+							}
+						}
+
+						if (tooltipActive)
+							MouseOverTooltip(coords);
+					}
+				}
+
 			}
 			else if (HighLogic.LoadedSceneIsFlight && FlightGlobals.ready)
 			{
 				if (body != FlightGlobals.currentMainBody)
 					setBody(FlightGlobals.currentMainBody);
+			}
+		}
+
+		private void MouseOverTooltip(SCANUtil.SCANCoordinates coords)
+		{
+			if (timer < 5)
+			{
+				timer++;
+				return;
+			}
+
+			timer = 0;
+
+			tooltipText.Length = 0;
+
+			tooltipText.Append(coords.ToDMS());
+
+			if (body.pqsController != null)
+			{
+				if (SCANUtil.isCovered(coords.longitude, coords.latitude, data, SCANtype.Altimetry))
+				{
+					bool hires = SCANUtil.isCovered(coords.longitude, coords.latitude, data, SCANtype.AltimetryHiRes);
+
+					tooltipText.AppendLine();
+					tooltipText.AppendFormat(string.Format("Terrain: {0}", SCANuiUtil.getMouseOverElevation(coords.longitude, coords.latitude, data, 0, hires)));
+
+					if (hires)
+					{
+						tooltipText.AppendLine();
+						tooltipText.AppendFormat(string.Format("Slope: {0:F1}°", SCANUtil.slope(SCANUtil.getElevation(body, coords.longitude, coords.latitude), body, coords.longitude, coords.latitude, degreeOffset)));
+					}
+				}
+			}
+
+			if (body.BiomeMap != null)
+			{
+				if (SCANUtil.isCovered(coords.longitude, coords.latitude, data, SCANtype.Biome))
+				{
+					tooltipText.AppendLine();
+					tooltipText.AppendFormat(string.Format("Biome: {0}", SCANUtil.getBiomeName(body, coords.longitude, coords.latitude)));
+				}
+			}
+
+			bool resources = false;
+			bool fuzzy = false;
+
+			if (SCANUtil.isCovered(coords.longitude, coords.latitude, data, currentResource.SType))
+			{
+				resources = true;
+			}
+			else if (SCANUtil.isCovered(coords.longitude, coords.latitude, data, SCANtype.FuzzyResources))
+			{
+				resources = true;
+				fuzzy = true;
+			}
+
+			if (resources)
+			{
+				tooltipText.AppendLine();
+				tooltipText.Append(SCANuiUtil.getResourceAbundance(body, coords.latitude, coords.longitude, fuzzy, currentResource));
 			}
 		}
 
@@ -135,6 +231,8 @@ namespace SCANsat.SCAN_Unity
 			uiElement.transform.SetParent(UIMasterController.Instance.mainCanvas.transform, false);
 
 			uiElement.SetOverlay(this);
+
+			tooltipText = StringBuilderCache.Acquire();
 
 			_isVisible = true;
 
@@ -171,6 +269,11 @@ namespace SCANsat.SCAN_Unity
 			get { return currentResource == null ? "" : currentResource.Name; }
 		}
 
+		public string TooltipText
+		{
+			get { return tooltipText.ToString(); }
+		}
+
 		public bool IsVisible
 		{
 			get { return _isVisible; }
@@ -183,10 +286,9 @@ namespace SCANsat.SCAN_Unity
 			}
 		}
 
-		public bool Tooltips
+		public bool OverlayTooltip
 		{
-			get;
-			set;
+			get { return tooltipActive; }
 		}
 
 		public bool DrawOverlay
@@ -247,7 +349,7 @@ namespace SCANsat.SCAN_Unity
 			get { return SCANcontroller.controller.overlaySelection == 2; }
 		}
 
-		public bool TooltipsOn
+		public bool WindowTooltips
 		{
 			get { return SCAN_Settings_Config.Instance.WindowTooltips; }
 		}

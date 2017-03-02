@@ -172,6 +172,11 @@ namespace SCANsat.SCAN_Unity
 			get { return SCANconfigLoader.languagePack.warningModuleManagerResource; }
 		}
 
+		public string CurrentBody
+		{
+			get { return getTargetBody().theName; }
+		}
+
 		public string SaveToConfig
 		{
 			get { return SCANconfigLoader.languagePack.warningSaveToConfig; }

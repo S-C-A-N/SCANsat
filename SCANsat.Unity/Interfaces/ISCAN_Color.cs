@@ -31,11 +31,13 @@ namespace SCANsat.Unity.Interfaces
 
 		bool BiomeBigMapStockColor { get; set; }
 
-		bool BiomeBigMapWhiteBoder { get; set; }
+		bool BiomeBigMapWhiteBorder { get; set; }
 
 		bool BiomeSmallMapStockColor { get; set; }
 
 		bool BiomeSmallMapWhiteBorder { get; set; }
+
+		bool BiomeZoomMapWhiteBorder { get; set; }
 
 		bool TerrainClampOn { get; set; }
 

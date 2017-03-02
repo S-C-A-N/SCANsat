@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<KSPBundleDefinition xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" UrlName="scan_shaders" Name="scan_shaders" CreatedTime="-8587133776754384417">
+  <Author />
+  <Info />
+  <Assets>
+    <Asset Name="Hidden/EdgeDetect" Path="Assets/Standard Assets/Effects/ImageEffects/Shaders/EdgeDetectNormals.shader" Type="Shader" Url="Standard Assets/Effects/ImageEffects/Shaders/EdgeDetectNormals" AutoLoad="false" />
+    <Asset Name="Hidden/Grayscale Effect" Path="Assets/Standard Assets/Effects/ImageEffects/Shaders/GrayscaleEffect.shader" Type="Shader" Url="Standard Assets/Effects/ImageEffects/Shaders/GrayscaleEffect" AutoLoad="false" />
+  </Assets>
+  <Dependencies />
+</KSPBundleDefinition>
