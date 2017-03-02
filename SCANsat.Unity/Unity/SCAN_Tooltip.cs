@@ -76,6 +76,12 @@ namespace SCANsat.Unity.Unity
 			_inside = true;
 		}
 
+		public void UpdateText(string text)
+		{
+			if (_handler != null)
+				_handler.OnTextUpdate.Invoke(text);
+		}
+
 		// Update is called once per frame
 		void FixedUpdate()
 		{
@@ -136,7 +142,6 @@ namespace SCANsat.Unity.Unity
 			}
 			newPosWVP = _guiCamera.ViewportToWorldPoint(newPos);
 			this.transform.position = new Vector3(newPosWVP.x, newPosWVP.y, 1f);
-			//this.gameObject.SetActive(true);
 			_inside = true;
 		}
 	}
