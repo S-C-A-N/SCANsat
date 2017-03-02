@@ -132,10 +132,6 @@ namespace SCANsat
 		/* Primary SCANdata dictionary; loaded every time*/
 		private DictionaryValueList<string, SCANdata> body_data = new DictionaryValueList<string, SCANdata>();
 
-		/* GUI draw function callbacks */
-		private DictionaryValueList<int, Callback> drawQueue = new DictionaryValueList<int, Callback>();
-		private bool showUI = true;
-
 		/* MechJeb Landing Target Integration */
 		private bool mechjebLoaded, targetSelecting, targetSelectingActive;
 		private Vector2d landingTargetCoords;
@@ -172,18 +168,6 @@ namespace SCANsat
 		private static SCANcontroller instance;
 
 		#region Public Accessors
-
-		public void addToDrawQueue(int id, Callback c)
-		{
-			if (!drawQueue.Contains(id))
-				drawQueue.Add(id, c);
-		}
-
-		public void removeFromDrawQueue(int id)
-		{
-			if (drawQueue.Contains(id))
-				drawQueue.Remove(id);
-		}
 
 		public SCANdata getData(string bodyName)
 		{
@@ -821,17 +805,6 @@ namespace SCANsat
 				finishRegistration(id);
 			}
 
-			GameEvents.onShowUI.Add(UIShow);
-			GameEvents.onHideUI.Add(UIHide);
-			GameEvents.onGUIMissionControlSpawn.Add(UIOff);
-			GameEvents.onGUIMissionControlDespawn.Add(UIOn);
-			GameEvents.onGUIRnDComplexSpawn.Add(UIOff);
-			GameEvents.onGUIRnDComplexDespawn.Add(UIOn);
-			GameEvents.onGUIAdministrationFacilitySpawn.Add(UIOff);
-			GameEvents.onGUIAdministrationFacilityDespawn.Add(UIOn);
-			GameEvents.onGUIAstronautComplexSpawn.Add(UIOff);
-			GameEvents.onGUIAstronautComplexDespawn.Add(UIOn);
-
 			GameEvents.OnOrbitalSurveyCompleted.Add(onSurvey);
 			GameEvents.onVesselSOIChanged.Add(SOIChange);
 			GameEvents.onVesselCreate.Add(newVesselCheck);
@@ -1011,17 +984,6 @@ namespace SCANsat
 
 		private void OnDestroy()
 		{
-			GameEvents.onShowUI.Remove(UIShow);
-			GameEvents.onHideUI.Remove(UIHide);
-			GameEvents.onGUIMissionControlSpawn.Remove(UIOff);
-			GameEvents.onGUIMissionControlDespawn.Remove(UIOn);
-			GameEvents.onGUIRnDComplexSpawn.Remove(UIOff);
-			GameEvents.onGUIRnDComplexDespawn.Remove(UIOn);
-			GameEvents.onGUIAdministrationFacilitySpawn.Remove(UIOff);
-			GameEvents.onGUIAdministrationFacilityDespawn.Remove(UIOn);
-			GameEvents.onGUIAstronautComplexSpawn.Remove(UIOff);
-			GameEvents.onGUIAstronautComplexDespawn.Remove(UIOn);
-
 			GameEvents.OnOrbitalSurveyCompleted.Remove(onSurvey);
 			GameEvents.onVesselSOIChanged.Remove(SOIChange);
 			GameEvents.onVesselCreate.Remove(newVesselCheck);
@@ -1057,28 +1019,6 @@ namespace SCANsat
 					unloadPQS(b);
 				}
 			}
-		}
-
-		private void UIOn()
-		{
-			showUI = true;
-		}
-
-		private void UIOff()
-		{
-			showUI = false;
-		}
-
-		private void UIShow()
-		{
-			if (HighLogic.LoadedSceneIsFlight)
-				showUI = true;
-		}
-
-		private void UIHide()
-		{
-			if (HighLogic.LoadedSceneIsFlight)
-				showUI = false;
 		}
 
 		private void onSurvey(Vessel v, CelestialBody b)
@@ -1243,19 +1183,6 @@ namespace SCANsat
 
 		private void OnGUI()
 		{
-			if (showUI)
-			{
-				Matrix4x4 previousGuiMatrix = GUI.matrix;
-				GUI.matrix = Matrix4x4.TRS(Vector3.zero, Quaternion.identity, new Vector3(SCAN_Settings_Config.Instance.UIScale, SCAN_Settings_Config.Instance.UIScale, 1));
-
-				for (int i = 0; i < drawQueue.Count; i++)
-				{
-					drawQueue.At(i)();
-				}
-
-				GUI.matrix = previousGuiMatrix;
-			}
-
 			if (HighLogic.LoadedSceneIsFlight || HighLogic.LoadedScene == GameScenes.TRACKSTATION)
 				drawTarget();
 		}
@@ -2048,7 +1975,22 @@ namespace SCANsat
 				int f = (int)Math.Truncate(fov);
 				int f1 = f + (int)Math.Round(fov - f);
 
-				for (int x = -f; x <= f1; ++x)
+				int w = f;
+				double fovW = fov;
+
+				if (Math.Abs(lat) < 90)
+				{
+					fovW = fov * (1 / Math.Cos(Mathf.Deg2Rad * lat));
+
+					if (fovW > 120)
+						fovW = 120;
+
+					w = (int)Math.Truncate(fovW);
+				}
+
+				int w1 = w + (int)Math.Round(fovW - w);
+
+				for (int x = -w; x <= w1; ++x)
 				{
 					for (int y = -f; y <= f1; ++y)
 					{
