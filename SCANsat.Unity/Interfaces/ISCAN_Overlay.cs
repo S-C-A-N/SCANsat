@@ -23,9 +23,11 @@ namespace SCANsat.Unity.Interfaces
 
 		string CurrentResource { get; }
 
+		string TooltipText { get; }
+
 		bool IsVisible { get; set; }
 
-		bool Tooltips { get; set; }
+		bool OverlayTooltip { get; }
 
 		bool DrawOverlay { get; set; }
 
@@ -35,7 +37,7 @@ namespace SCANsat.Unity.Interfaces
 
 		bool DrawResource { get; }
 
-		bool TooltipsOn { get; }
+		bool WindowTooltips { get; }
 
 		float Scale { get; }
 

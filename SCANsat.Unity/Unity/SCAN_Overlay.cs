@@ -40,12 +40,17 @@ namespace SCANsat.Unity.Unity
 		private Color m_ActiveColor = Color.white;
 		[SerializeField]
 		private Color m_NormalColor = Color.white;
+		[SerializeField]
+		private GameObject m_TooltipPrefab = null;
 
 		private ISCAN_Overlay overInterface;
 		private bool loaded;
 		private RectTransform rect;
 		private Vector2 mouseStart;
 		private Vector3 windowStart;
+
+		private bool tooltipOn;
+		private SCAN_Tooltip _tooltip;
 
 		private List<SCAN_ResourceOverlay> resources = new List<SCAN_ResourceOverlay>();
 		
@@ -79,6 +84,52 @@ namespace SCANsat.Unity.Unity
 				return;
 
 			overInterface.Update();
+
+			if (overInterface.OverlayTooltip)
+			{
+				if (!tooltipOn)
+				{
+					if (_tooltip != null)
+						CloseTooltip();
+
+					tooltipOn = true;
+					OpenTooltip();
+				}
+				else if (_tooltip != null)
+					_tooltip.UpdateText(overInterface.TooltipText);
+					
+			}
+			else if (tooltipOn)
+			{
+				tooltipOn = false;
+				CloseTooltip();
+			}
+		}
+
+		private void OpenTooltip()
+		{
+			if (m_TooltipPrefab == null || overInterface.TooltipCanvas == null)
+				return;
+
+			_tooltip = Instantiate(m_TooltipPrefab).GetComponent<SCAN_Tooltip>();
+
+			if (_tooltip == null)
+				return;
+
+			_tooltip.transform.SetParent(overInterface.TooltipCanvas.transform, false);
+			_tooltip.transform.SetAsLastSibling();
+
+			_tooltip.Setup(overInterface.TooltipCanvas, "0°0'0\"N 0°0'0\"W", overInterface.Scale);
+		}
+
+		private void CloseTooltip()
+		{
+			if (_tooltip == null)
+				return;
+
+			_tooltip.gameObject.SetActive(false);
+			Destroy(_tooltip.gameObject);
+			_tooltip = null;
 		}
 
 		public void SetOverlay(ISCAN_Overlay over)
@@ -162,7 +213,7 @@ namespace SCANsat.Unity.Unity
 				return;
 
 			for (int j = 0; j < handlers.Length; j++)
-				ProcessTooltip(handlers[j], overInterface.TooltipsOn, overInterface.TooltipCanvas, overInterface.Scale);
+				ProcessTooltip(handlers[j], overInterface.WindowTooltips, overInterface.TooltipCanvas, overInterface.Scale);
 		}
 
 		private void ProcessTooltip(TooltipHandler handler, bool isOn, Canvas c, float scale)
