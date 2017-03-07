@@ -88,6 +88,11 @@ namespace SCANsat.SCAN_Unity
 			get { return instance; }
 		}
 
+		public static CelestialBody Body
+		{
+			get { return body; }
+		}
+
 		public SCAN_UI_BigMap()
 		{
 			instance = this;
@@ -370,7 +375,10 @@ namespace SCANsat.SCAN_Unity
 
 			if (!bigmap.isMapComplete())
 			{
-				if (!SCAN_Settings_Config.Instance.SlowMapGeneration)
+				if (SCAN_Settings_Config.Instance.MapGenerationSpeed > 2)
+					bigmap.getPartialMap(false);
+
+				if (SCAN_Settings_Config.Instance.MapGenerationSpeed > 1)
 					bigmap.getPartialMap(false);
 
 				bigmap.getPartialMap(true);
@@ -1326,20 +1334,26 @@ namespace SCANsat.SCAN_Unity
 			}
 		}
 
-		public bool AsteroidToggle
-		{
-			get { return SCANcontroller.controller.bigMapAsteroid; }
-			set
-			{
-				SCANcontroller.controller.bigMapAsteroid = value;
-
-			}
-		}
-
 		public bool LegendToggle
 		{
 			get { return SCANcontroller.controller.bigMapLegend; }
 			set { SCANcontroller.controller.bigMapLegend = value;}
+		}
+
+		public bool LegendAvailable
+		{
+			get
+			{
+				switch (bigmap.MType)
+				{
+					case mapType.Altimetry:
+						return body.pqsController != null;
+					case mapType.Biome:
+						return body.BiomeMap != null && SCAN_Settings_Config.Instance.LegendTooltips;
+				}
+
+				return false;
+			}
 		}
 
 		public bool ResourceToggle
@@ -1383,6 +1397,11 @@ namespace SCANsat.SCAN_Unity
 			get { return SCANcontroller.MasterResourceCount > 1; }
 		}
 
+		public bool MechJebAvailable
+		{
+			get { return SCANmainMenuLoader.MechJebLoaded && SCAN_Settings_Config.Instance.MechJebTarget && SCANcontroller.controller.MechJebLoaded; }
+		}
+
 		public bool LockInput
 		{
 			get { return _inputLock; }
@@ -1400,6 +1419,11 @@ namespace SCANsat.SCAN_Unity
 		public bool TooltipsOn
 		{
 			get { return SCAN_Settings_Config.Instance.WindowTooltips; }
+		}
+
+		public bool LegendTooltips
+		{
+			get { return SCAN_Settings_Config.Instance.LegendTooltips; }
 		}
 
 		public int OrbitSteps
@@ -1484,7 +1508,18 @@ namespace SCANsat.SCAN_Unity
 				if (data == null)
 					return null;
 
-				return bigmap.MapLegend.getLegend(data.TerrainConfig.MinTerrain, data.TerrainConfig.MaxTerrain, SCANcontroller.controller.bigMapColor, data.TerrainConfig);
+				switch (bigmap.MType)
+				{
+					case mapType.Altimetry:
+						return bigmap.MapLegend.getLegend(SCANcontroller.controller.zoomMapColor, data.TerrainConfig);
+					case mapType.Biome:
+						if (body != null && body.BiomeMap != null && body.BiomeMap.Attributes != null)
+							return bigmap.MapLegend.getLegend(data, SCANcontroller.controller.zoomMapColor, SCAN_Settings_Config.Instance.BigMapStockBiomes, body.BiomeMap.Attributes);
+						else
+							return null;
+				}
+
+				return null;
 			}
 		}
 
@@ -1688,17 +1723,36 @@ namespace SCANsat.SCAN_Unity
 						if (w == null)
 							continue;
 
-						waypoints.Add(w.Seed, new MapLabelInfo()
+						Vector2 wayPos = MapPosition(w.Latitude, w.Longitude);
+
+						if (w.LandingTarget)
 						{
-							label = "",
-							image = SCAN_UI_Loader.WaypointIcon,
-							pos = MapPosition(w.Latitude, w.Longitude),
-							baseColor = palette.white,
-							flash = false,
-							width = 20,
-							alignBottom = true,
-							show = true
-						});
+							waypoints.Add(w.Seed, new MapLabelInfo()
+							{
+								label = "",
+								image = SCAN_UI_Loader.MechJebIcon,
+								pos = wayPos,
+								baseColor = palette.red,
+								flash = false,
+								width = 20,
+								alignBottom = false,
+								show = true
+							});
+						}
+						else
+						{
+							waypoints.Add(w.Seed, new MapLabelInfo()
+							{
+								label = "",
+								image = SCAN_UI_Loader.WaypointIcon,
+								pos = wayPos,
+								baseColor = palette.white,
+								flash = false,
+								width = 20,
+								alignBottom = true,
+								show = true
+							});
+						}
 					}
 				}
 
@@ -1784,17 +1838,16 @@ namespace SCANsat.SCAN_Unity
 			if (SCANUtil.isCovered(lon, lat, data, SCANtype.Biome))
 			{
 				if (body.BiomeMap == null)
-					infoString.Append(palette.coloredNoQuote(palette.c_bad, "MULTI "));
+					infoString.Append(palette.coloredNoQuote(palette.c_bad, "MULTI"));
 				else
-					infoString.Append(palette.coloredNoQuote(palette.c_good, "MULTI "));
+					infoString.Append(palette.coloredNoQuote(palette.c_good, "MULTI"));
 			}
 			else
-				infoString.Append(palette.coloredNoQuote(palette.grey, "MULTI "));
+				infoString.Append(palette.coloredNoQuote(palette.grey, "MULTI"));
 
 			if (altimetry)
 			{
-				infoString.Append("Terrain Height: ");
-				infoString.Append(SCANuiUtil.getMouseOverElevation(lon, lat, data, 2, hires));
+				infoString.AppendFormat(" Terrain Height: {0}", SCANuiUtil.getMouseOverElevation(lon, lat, data, 2, hires));
 
 				if (hires)
 				{
@@ -1802,16 +1855,12 @@ namespace SCANsat.SCAN_Unity
 					double eqDistancePerDegree = circum / 360;
 					double degreeOffset = 5 / eqDistancePerDegree;
 
-					infoString.Append(" Slope: ");
-					infoString.AppendFormat("{0:F1}°", SCANUtil.slope(SCANUtil.getElevation(body, lon, lat), body, lon, lat, degreeOffset));
+					infoString.AppendFormat(" Slope: {0:F1}°", SCANUtil.slope(SCANUtil.getElevation(body, lon, lat), body, lon, lat, degreeOffset));
 				}
 			}
 
 			if (SCANUtil.isCovered(lon, lat, data, SCANtype.Biome))
-			{
-				infoString.Append(" Biome: ");
-				infoString.Append(SCANUtil.getBiomeName(body, lon, lat));
-			}
+				infoString.AppendFormat(" Biome: {0}", SCANUtil.getBiomeName(body, lon, lat));
 
 			if (bigmap.ResourceActive && SCANconfigLoader.GlobalResource && bigmap.Resource != null)
 			{
@@ -1829,10 +1878,7 @@ namespace SCANsat.SCAN_Unity
 				}
 
 				if (resources)
-				{
-					infoString.Append(" ");
-					infoString.Append(SCANuiUtil.getResourceAbundance(bigmap.Body, lat, lon, fuzzy, bigmap.Resource));
-				}
+					infoString.AppendFormat(" {0}", SCANuiUtil.getResourceAbundance(bigmap.Body, lat, lon, fuzzy, bigmap.Resource));
 			}
 			
 			infoString.AppendLine();
@@ -1861,10 +1907,14 @@ namespace SCANsat.SCAN_Unity
 
 						if (SCANUtil.waypointDistance(lat, lon, 1000, p.Latitude, p.Longitude, 1000, body) <= range)
 						{
-							infoString.Append(" Waypoint: ");
-							infoString.Append(p.Name);
+							infoString.AppendFormat(" Waypoint: {0}", p.Name);
 							break;
 						}
+					}
+					else if (SCANUtil.waypointDistance(lat, lon, 1000, p.Latitude, p.Longitude, 1000, body) <= range)
+					{
+						infoString.AppendFormat(" MechJeb Target: {0}", SCANuiUtil.toDMS(p.Latitude, p.Longitude, 0));
+						break;
 					}
 				}
 			}
@@ -1912,6 +1962,35 @@ namespace SCANsat.SCAN_Unity
 			return infoString.ToStringAndRelease();
 		}
 
+		public string TooltipText(float xPos)
+		{
+			switch (bigmap.MType)
+			{
+				case mapType.Biome:
+					if (body.BiomeMap == null || body.BiomeMap.Attributes == null)
+						return "";
+
+					int count = body.BiomeMap.Attributes.Length;
+
+					int blockSize = (int)Math.Truncate(256 / (count * 1d));
+
+					int current = (int)Math.Truncate((xPos * 256) / (blockSize * 1d));
+
+					if (current >= count)
+						current = count - 1;
+					else if (current < 0)
+						current = 0;
+
+					return body.BiomeMap.Attributes[current].name;
+				case mapType.Altimetry:
+					float terrain = xPos * data.TerrainConfig.TerrainRange + data.TerrainConfig.MinTerrain;
+
+					return string.Format("{0:N0}m", terrain);
+			}
+
+			return "";
+		}
+
 		public void SetWaypoint(string id, Vector2 pos)
 		{
 			if (string.IsNullOrEmpty(id))
@@ -1921,10 +2000,7 @@ namespace SCANsat.SCAN_Unity
 
 			Vector2d mapPos = MousePosition(pos);
 
-			double mlon = pos.x;
-			double mlat = pos.y;
-
-			if (mlon >= -180 && mlon <= 180 && mlat >= -90 && mlat <= 90)
+			if (mapPos.x < -180 || mapPos.x > 180 || mapPos.y < -90 || mapPos.y > 90)
 				return;
 
 			Waypoint w = new Waypoint();
@@ -1940,6 +2016,21 @@ namespace SCANsat.SCAN_Unity
 			w.navigationId = new Guid();
 
 			ScenarioCustomWaypoints.AddWaypoint(w);
+		}
+
+		public void SetMJWaypoint(Vector2 pos)
+		{
+			pos.y -= bigmap.MapHeight;
+
+			Vector2d mapPos = MousePosition(pos);
+
+			if (mapPos.x < -180 || mapPos.x > 180 || mapPos.y < -90 || mapPos.y > 90)
+				return;
+
+			SCANcontroller.controller.MJTargetSet.Invoke(mapPos, body);
+
+			SCANwaypoint w = new SCANwaypoint(mapPos.y, mapPos.x, "MechJeb Landing Target");
+			data.addToWaypoints(w);
 		}
 
 		public void ClickMap(Vector2 pos)
@@ -1960,9 +2051,9 @@ namespace SCANsat.SCAN_Unity
 
 		public void RefreshMap()
 		{
-			SCANcontroller.controller.TargetSelecting = false;
-			SCANcontroller.controller.TargetSelectingActive = false;
 			bigmap.resetMap(SCANcontroller.controller.bigMapResourceOn);
+
+			uiElement.SetLegend(LegendToggle);
 		}
 
 		public void OpenMainMap()
