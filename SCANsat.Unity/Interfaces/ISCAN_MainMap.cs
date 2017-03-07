@@ -33,6 +33,8 @@ namespace SCANsat.Unity.Interfaces
 
 		bool MapGenerating { get; }
 
+		bool ResourcesOn { get; }
+
 		float Scale { get; }
 
 		Canvas TooltipCanvas { get; }

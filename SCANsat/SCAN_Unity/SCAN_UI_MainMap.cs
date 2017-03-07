@@ -146,14 +146,14 @@ namespace SCANsat.SCAN_Unity
 
 			if (!SCANcontroller.controller.mainMapBiome)
 			{
-				if (!SCAN_Settings_Config.Instance.SlowMapGeneration)
+				if (SCAN_Settings_Config.Instance.MapGenerationSpeed > 1)
 					drawPartialMap(sensors, false);
 
 				drawPartialMap(sensors, true);
 			}
 			else
 			{
-				if (!SCAN_Settings_Config.Instance.SlowMapGeneration)
+				if (SCAN_Settings_Config.Instance.MapGenerationSpeed > 1)
 					drawBiomeMap(sensors, false);
 					
 				drawBiomeMap(sensors, true);
@@ -202,7 +202,7 @@ namespace SCANsat.SCAN_Unity
 			else
 				uiElement.UpdateMultiColor(palette.c_good);
 
-			if (SCAN_Settings_Config.Instance.DisableStockResource || !SCAN_Settings_Config.Instance.InstantScan)
+			if (ResourcesOn)
 			{
 				s = SCANcontroller.controller.getSensorStatus(v, SCANtype.FuzzyResources);
 				if (s == null)
@@ -354,6 +354,11 @@ namespace SCANsat.SCAN_Unity
 			get { return data == null ? false : !data.Built || data.MapBuilding || data.OverlayBuilding || data.ControllerBuilding; }
 		}
 
+		public bool ResourcesOn
+		{
+			get { return SCAN_Settings_Config.Instance.DisableStockResource || !SCAN_Settings_Config.Instance.InstantScan; }
+		}
+
 		public float Scale
 		{
 			get { return SCAN_Settings_Config.Instance.UIScale; }
@@ -438,7 +443,7 @@ namespace SCANsat.SCAN_Unity
 
 				int count = 2;
 
-				for (int i = SCANcontroller.controller.knownVessels.Count - 1; i >= 0; i--)
+				for (int i = 0; i < SCANcontroller.controller.knownVessels.Count; i++)
 				{
 					SCANcontroller.SCANvessel sv = SCANcontroller.controller.knownVessels.At(i);
 

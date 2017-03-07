@@ -114,12 +114,20 @@ namespace SCANsat.Unity.Unity
 			if (m_Version != null)
 				m_Version.OnTextUpdate.Invoke(map.Version);
 
-			if (m_ColorToggle == null || m_MinimizeToggle == null || m_TypeToggle == null)
-				return;
+			if (m_ColorToggle != null)
+				m_ColorToggle.isOn = map.Color;
 
-			m_ColorToggle.isOn = map.Color;
-			m_TypeToggle.isOn = map.MapType;
-			m_MinimizeToggle.isOn = map.Minimized;
+			if (m_TypeToggle != null)
+				m_TypeToggle.isOn = map.MapType;
+
+			if (m_MinimizeToggle != null)
+				m_MinimizeToggle.isOn = map.Minimized;
+
+			if (m_M700Text != null && !map.ResourcesOn)
+				m_M700Text.gameObject.SetActive(false);
+
+			if (m_OreText != null && !map.ResourcesOn)
+				m_OreText.gameObject.SetActive(false);
 
 			CreateVessels(map.VesselInfoList);
 
