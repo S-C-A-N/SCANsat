@@ -182,6 +182,12 @@ namespace SCANsat.SCAN_Unity
 			get { return SCANconfigLoader.languagePack.warningSaveToConfig; }
 		}
 
+		public int MapGenSpeed
+		{
+			get { return SCAN_Settings_Config.Instance.MapGenerationSpeed; }
+			set { SCAN_Settings_Config.Instance.MapGenerationSpeed = value; }
+		}
+
 		public int TimeWarp
 		{
 			get { return SCAN_Settings_Config.Instance.TimeWarpResolution; }
@@ -320,10 +326,10 @@ namespace SCANsat.SCAN_Unity
 			}			
 		}
 
-		public bool MapGenSpeed
+		public bool LegendTooltips
 		{
-			get { return SCAN_Settings_Config.Instance.SlowMapGeneration; }
-			set { SCAN_Settings_Config.Instance.SlowMapGeneration = value; }
+			get { return SCAN_Settings_Config.Instance.LegendTooltips; }
+			set { SCAN_Settings_Config.Instance.LegendTooltips = value; }
 		}
 
 		public bool StockToolbar
@@ -399,6 +405,23 @@ namespace SCANsat.SCAN_Unity
 			}
 		}
 
+		public bool MechJebTarget
+		{
+			get { return SCAN_Settings_Config.Instance.MechJebTarget; }
+			set { SCAN_Settings_Config.Instance.MechJebTarget = value; }
+		}
+
+		public bool MechJebLoad
+		{
+			get { return SCAN_Settings_Config.Instance.MechJebTargetLoad; }
+			set { SCAN_Settings_Config.Instance.MechJebTargetLoad = value; }
+		}
+
+		public bool MechJebAvailable
+		{
+			get { return SCANmainMenuLoader.MechJebLoaded; }
+		}
+
 		public bool BiomeLock
 		{
 			get { return SCAN_Settings_Config.Instance.BiomeLock; }
@@ -414,13 +437,34 @@ namespace SCANsat.SCAN_Unity
 		public bool InstantScan
 		{
 			get { return SCAN_Settings_Config.Instance.InstantScan; }
-			set { SCAN_Settings_Config.Instance.InstantScan = value; }
+			set
+			{
+				SCAN_Settings_Config.Instance.InstantScan = value;
+
+				if (SCAN_UI_MainMap.Instance != null && SCAN_UI_MainMap.Instance.IsVisible)
+				{
+					SCAN_UI_MainMap.Instance.Close();
+					SCAN_UI_MainMap.Instance.Open();
+				}
+
+			}
 		}
 
 		public bool DisableStock
 		{
 			get { return SCAN_Settings_Config.Instance.DisableStockResource; }
-			set { SCAN_Settings_Config.Instance.DisableStockResource = value; }
+			set
+			{
+				SCAN_Settings_Config.Instance.DisableStockResource = value;
+
+
+				if (SCAN_UI_MainMap.Instance != null && SCAN_UI_MainMap.Instance.IsVisible)
+				{
+					SCAN_UI_MainMap.Instance.Close();
+					SCAN_UI_MainMap.Instance.Open();
+				}
+
+			}
 		}
 
 		public bool StockThreshold
