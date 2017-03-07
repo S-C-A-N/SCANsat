@@ -125,12 +125,12 @@ namespace SCANsat.SCAN_Toolbar
 			{
 				if (SCAN_Settings_Config.Instance.ToolbarMenu)
 				{
-					SCANappLauncherButton = ApplicationLauncher.Instance.AddModApplication(OnTrue, OnFalse, HoverMenuIn, HoverMenuOut, null, null, ApplicationLauncher.AppScenes.FLIGHT | ApplicationLauncher.AppScenes.MAPVIEW, SCANskins.SCAN_SmallMapAppIcon);
+					SCANappLauncherButton = ApplicationLauncher.Instance.AddModApplication(OnTrue, OnFalse, HoverMenuIn, HoverMenuOut, null, null, ApplicationLauncher.AppScenes.FLIGHT | ApplicationLauncher.AppScenes.MAPVIEW, SCAN_UI_Loader.SmallMapAppIcon.texture);
 					ApplicationLauncher.Instance.EnableMutuallyExclusive(SCANappLauncherButton);
 				}
 				else
 				{
-					SCANappLauncherButton = ApplicationLauncher.Instance.AddModApplication(toggleFlight, toggleFlight, null, null, null, null, ApplicationLauncher.AppScenes.FLIGHT | ApplicationLauncher.AppScenes.MAPVIEW, SCANskins.SCAN_SmallMapAppIcon);
+					SCANappLauncherButton = ApplicationLauncher.Instance.AddModApplication(toggleFlight, toggleFlight, null, null, null, null, ApplicationLauncher.AppScenes.FLIGHT | ApplicationLauncher.AppScenes.MAPVIEW, SCAN_UI_Loader.SmallMapAppIcon.texture);
 
 					if (SCAN_UI_MainMap.Instance.IsVisible)
 						SCANappLauncherButton.SetTrue(false);
@@ -138,7 +138,7 @@ namespace SCANsat.SCAN_Toolbar
 			}
 			else if (HighLogic.LoadedScene == GameScenes.SPACECENTER || HighLogic.LoadedScene == GameScenes.TRACKSTATION)
 			{
-				SCANappLauncherButton = ApplicationLauncher.Instance.AddModApplication(toggleKSC, toggleKSC, null, null, null, null, ApplicationLauncher.AppScenes.SPACECENTER | ApplicationLauncher.AppScenes.TRACKSTATION, SCANskins.SCAN_BigMapAppIcon);
+				SCANappLauncherButton = ApplicationLauncher.Instance.AddModApplication(toggleKSC, toggleKSC, null, null, null, null, ApplicationLauncher.AppScenes.SPACECENTER | ApplicationLauncher.AppScenes.TRACKSTATION, SCAN_UI_Loader.BigMapAppIcon.texture);
 			}
 
 			GameEvents.onGUIApplicationLauncherUnreadifying.Add(removeButton);
