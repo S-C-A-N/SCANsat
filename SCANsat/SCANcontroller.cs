@@ -17,6 +17,7 @@ using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Events;
 using Contracts;
 using FinePrint.Contracts;
 using FinePrint.Utilities;
@@ -68,8 +69,6 @@ namespace SCANsat
 		public bool bigMapWaypoint = true;
 		[KSPField(isPersistant = true)]
 		public bool bigMapAnomaly = true;
-		[KSPField(isPersistant = true)]
-		public bool bigMapAsteroid = true;
 		[KSPField(isPersistant = true)]
 		public bool bigMapFlag = true;
 		[KSPField(isPersistant = true)]
@@ -133,9 +132,7 @@ namespace SCANsat
 		private DictionaryValueList<string, SCANdata> body_data = new DictionaryValueList<string, SCANdata>();
 
 		/* MechJeb Landing Target Integration */
-		private bool mechjebLoaded, targetSelecting, targetSelectingActive;
-		private Vector2d landingTargetCoords;
-		private CelestialBody landingTargetBody;
+		private bool mechjebLoaded;
 		private SCANwaypoint landingTarget;
 
 		/* Kopernicus On Demand Loading Data */
@@ -507,41 +504,16 @@ namespace SCANsat
 			set { mechjebLoaded = value; }
 		}
 
-		public bool TargetSelecting
-		{
-			get { return targetSelecting; }
-			internal set { targetSelecting = value; }
-		}
-
-		public bool TargetSelectingActive
-		{
-			get { return targetSelectingActive; }
-			internal set
-			{
-				if (targetSelecting)
-					targetSelectingActive = value;
-				else
-					targetSelectingActive = false;
-			}
-		}
-
-		public Vector2d LandingTargetCoords
-		{
-			get { return landingTargetCoords; }
-			internal set { landingTargetCoords = value; }
-		}
-
-		public CelestialBody LandingTargetBody
-		{
-			get { return landingTargetBody; }
-			set { landingTargetBody = value; }
-		}
-
 		public SCANwaypoint LandingTarget
 		{
 			get { return landingTarget; }
 			set { landingTarget = value; }
 		}
+
+		public class OnMJTargetSet : UnityEvent<Vector2d, CelestialBody> { }
+
+		public OnMJTargetSet MJTargetSet = new OnMJTargetSet();
+
 		#endregion
 
 		#region save/load
@@ -634,11 +606,13 @@ namespace SCANsat
 
 						try
 						{
-							SCANwaypoint target = null;
-							string targetName = node_body.parse("LandingTarget", "");
+							if (SCANmainMenuLoader.MechJebLoaded && SCAN_Settings_Config.Instance.MechJebTarget && SCAN_Settings_Config.Instance.MechJebTargetLoad)
+							{
+								string targetName = node_body.parse("LandingTarget", "");
 
-							if (!string.IsNullOrEmpty(targetName))
-								target = loadWaypoint(targetName);
+								if (!string.IsNullOrEmpty(targetName))
+									loadWaypoint(targetName, body);
+							}
 
 							data.Disabled = node_body.parse("Disabled", false);
 
@@ -671,9 +645,6 @@ namespace SCANsat
 								setNewTerrainConfigValues(dataTerrainConfig, min, max, clampState, dataPalette, pSize, pRev, pDis);
 
 							data.TerrainConfig = dataTerrainConfig;
-
-							if (target != null)
-								data.addToWaypoints(target);
 						}
 						catch (Exception e)
 						{
@@ -683,16 +654,6 @@ namespace SCANsat
 				}
 			}
 
-			//if (SCANconfigLoader.GlobalResource)
-			//{
-			//	if (masterResourceNodes.Count > 0)
-			//	{
-			//		if (string.IsNullOrEmpty(resourceSelection))
-			//			resourceSelection = masterResourceNodes.Keys.First();
-			//		else if (!masterResourceNodes.Contains(resourceSelection))
-			//			resourceSelection = masterResourceNodes.Keys.First();
-			//	}
-			//}
 			ConfigNode node_resources = node.GetNode("SCANResources");
 			if (node_resources != null)
 			{
@@ -741,9 +702,12 @@ namespace SCANsat
 					SCANdata body_scan = body_data[body_name];
 					node_body.AddValue("Name", body_name);
 					node_body.AddValue("Disabled", body_scan.Disabled);
-					SCANwaypoint w = body_scan.Waypoints.FirstOrDefault(a => a.LandingTarget);
-					if (w != null)
-						node_body.AddValue("LandingTarget", string.Format("{0:N4},{1:N4}", w.Latitude, w.Longitude));
+					if (SCANmainMenuLoader.MechJebLoaded && SCAN_Settings_Config.Instance.MechJebTarget && SCAN_Settings_Config.Instance.MechJebTargetLoad)
+					{
+						SCANwaypoint w = body_scan.Waypoints.FirstOrDefault(a => a.LandingTarget);
+						if (w != null)
+							node_body.AddValue("LandingTarget", string.Format("{0:N4},{1:N4}", w.Latitude, w.Longitude));
+					}
 					node_body.AddValue("MinHeightRange", body_scan.TerrainConfig.MinTerrain / body_scan.TerrainConfig.MinHeightMultiplier);
 					node_body.AddValue("MaxHeightRange", body_scan.TerrainConfig.MaxTerrain / body_scan.TerrainConfig.MaxHeightMultiplier);
 					if (body_scan.TerrainConfig.ClampTerrain != null)
@@ -1205,14 +1169,7 @@ namespace SCANsat
 			if (SCAN_Settings_Config.Instance.ShowGroundTracks && HighLogic.LoadedSceneIsFlight && !d.Disabled && SCAN_Settings_Config.Instance.BackgroundScanning)
 				drawGroundTracks(b);
 
-			if (!SCAN_Settings_Config.Instance.MechJebTarget)
-			{
-				SCANwaypoint target = d.Waypoints.FirstOrDefault(a => a.LandingTarget);
-				if (target != null)
-				{
-					SCANuiUtil.drawTargetOverlay(b, target.Latitude, target.Longitude, XKCDColors.DarkGreen);
-				}
-			}
+			return;
 		}
 
 		private void drawGroundTracks(CelestialBody body)
@@ -1539,22 +1496,48 @@ namespace SCANsat
 			}
 		}
 
-		private SCANwaypoint loadWaypoint(string s)
+		private void loadWaypoint(string s, CelestialBody b)
 		{
+			if (!HighLogic.LoadedSceneIsFlight)
+				return;
+
+			StartCoroutine(WaitForWaypoint(s, b));
+		}
+
+		private IEnumerator WaitForWaypoint(string s, CelestialBody b)
+		{
+			while (!FlightGlobals.ready || FlightGlobals.ActiveVessel == null)
+				yield return null;
+
+			int timer = 0;
+
+			while (timer < 5)
+			{
+				timer++;
+				yield return null;
+			}
+
+			if (!mechjebLoaded || b != FlightGlobals.currentMainBody)
+				yield break;
+
 			SCANwaypoint w = null;
 			string[] a = s.Split(',');
 			double lat = 0;
 			double lon = 0;
+
 			if (!double.TryParse(a[0], out lat))
-				return w;
+				yield break;
 			if (!double.TryParse(a[1], out lon))
-				return w;
+				yield break;
 
-			string name = SCAN_Settings_Config.Instance.MechJebTarget ? "MechJeb Landing Target" : "Landing Target Site";
+			w = new SCANwaypoint(lat, lon, "MechJeb Landing Target");
 
-			w = new SCANwaypoint(lat, lon, name);
+			MJTargetSet.Invoke(new Vector2d(lon, lat), b);
 
-			return w;
+			SCANdata d = getData(b.bodyName);
+
+			if (d != null)
+				d.addToWaypoints(w);
 		}
 
 		public class SCANsensor
