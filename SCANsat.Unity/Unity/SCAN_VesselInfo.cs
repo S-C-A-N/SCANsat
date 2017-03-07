@@ -35,13 +35,16 @@ namespace SCANsat.Unity.Unity
 
 		public void SetVessel(Guid id, MapLabelInfo info, ISCAN_MainMap map)
 		{
-			if (m_VesselText == null || map == null)
+			if (map == null)
 				return;
 
 			_id = id;
 			label = info;
 			label.name = !string.IsNullOrEmpty(label.name) && label.name.Length > 26 ? label.name.Substring(0, 26) : label.name;
 			mapInterface = map;
+
+			if (m_VesselText == null)
+				return;
 
 			if (info.label != "1")
 			{
