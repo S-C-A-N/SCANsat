@@ -142,10 +142,8 @@ namespace SCANsat.Unity.Unity
 			if (m_Version != null)
 				m_Version.OnTextUpdate.Invoke(over.Version);
 
-			if (m_OverlayToggle == null)
-				return;
-
-			m_OverlayToggle.isOn = over.DrawOverlay;
+			if (m_OverlayToggle != null)
+				m_OverlayToggle.isOn = over.DrawOverlay;
 
 			if (over.DrawBiome)
 			{

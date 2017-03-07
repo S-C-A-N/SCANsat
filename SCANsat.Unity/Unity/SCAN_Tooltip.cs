@@ -46,6 +46,8 @@ namespace SCANsat.Unity.Unity
 
 		private Camera _guiCamera;
 
+		private static SCAN_Tooltip instance;
+
 		private void Awake()
 		{
 			_rectTransform = GetComponent<RectTransform>();
@@ -55,6 +57,13 @@ namespace SCANsat.Unity.Unity
 		// Use this for initialization
 		public void Setup(Canvas c, string t, float f)
 		{
+			if (instance != null)
+			{
+				instance.gameObject.SetActive(false);
+				DestroyImmediate(instance.gameObject);
+				instance = null;
+			}
+
 			if (c == null || string.IsNullOrEmpty(t) || _rectTransform == null || _handler == null)
 				return;
 
@@ -74,6 +83,8 @@ namespace SCANsat.Unity.Unity
 			OnScreenSpaceCamera();
 
 			_inside = true;
+
+			instance = this;
 		}
 
 		public void UpdateText(string text)

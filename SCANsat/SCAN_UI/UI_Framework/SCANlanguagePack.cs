@@ -30,17 +30,21 @@ namespace SCANsat.SCAN_UI.UI_Framework
 		[Persistent]
 		public string settingsHelpStockUIStyle = "Switch between stock KSP-style UI elements and Unity-style elements.";
 		[Persistent]
-		public string settingsHelpSlowMap = "Enable this to reduce map generation speed.\nThis will save CPU resources and may reduce the performance impact\nof generating the small and/or big map.";
+		public string settingsHelpMapGenSpeed = "Adjust all SCANsat map generation speeds.\nLower values will save CPU resources and may reduce the\nperformance impact of generating maps.";
 		[Persistent]
 		public string settingsHelpOverlayTooltips = "Displays tooltips for the current mouse position when a planetary overlay map is activated.\nThese tooltips include The cursor coordinates, terrain height, slope, biome name,\nand resource abundance, depending on scanning coverage.";
 		[Persistent]
 		public string settingsHelpWindowTooltips = "Display tooltips on some map window buttons.\nThese are primarily used to identify icon buttons.";
 		[Persistent]
+		public string settingsHelpLegendTooltips = "Display tooltips on the map legend.\nDisabling will also disable biome map legends.";
+		[Persistent]
 		public string settingsHelpStockToolbar = "Use the stock toolbar.\nCan be used concurrently with the Blizzy78 Toolbar.";
 		[Persistent]
 		public string settingsHelpToolbarMenu = "Use a pop-out menu for the stock toolbar to show all available windows.";
 		[Persistent]
-		public string settingsHelpMechJeb = "The SCANsat zoom map target selection mode can be used to select a MechJeb landing site.";
+		public string settingsHelpMechJeb = "The SCANsat zoom map and big map waypoint selection modes\ncan be used to select a MechJeb landing site.";
+		[Persistent]
+		public string settingsHelpMechJebLoad = "Load a saved MechJeb landing target.\nThis only works while in the flight scene with a valid MechJeb vessel.";
 		[Persistent]
 		public string settingsHelpResetWindows = "Reset all window positions and scale.\nUse this in case a window has been dragged completely\noff screen or if any windows are not visible.";
 		[Persistent]

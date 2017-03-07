@@ -29,15 +29,23 @@ namespace SCANsat.Unity.Unity
 		[SerializeField]
 		private SCAN_Toggle m_WindowTooltipToggle = null;
 		[SerializeField]
+		private SCAN_Toggle m_LegendTooltipToggle = null;
+		[SerializeField]
 		private SCAN_Toggle m_StockToolbarToggle = null;
 		[SerializeField]
 		private SCAN_Toggle m_ToolbarMenuToggle = null;
 		[SerializeField]
 		private SCAN_Toggle m_StockUIToggle = null;
 		[SerializeField]
-		private SCAN_Toggle m_MapSpeedToggle = null;
+		private SCAN_Toggle m_MechJebToggle = null;
+		[SerializeField]
+		private SCAN_Toggle m_MechJebLoadToggle = null;
+		[SerializeField]
+		private GameObject m_MechJebBar = null;
 		[SerializeField]
 		private TextHandler m_UIScale = null;
+		[SerializeField]
+		private Slider m_MapSpeedSlider = null;
 		[SerializeField]
 		private Slider m_UIScaleSlider = null;
 
@@ -63,11 +71,25 @@ namespace SCANsat.Unity.Unity
 			if (m_WindowTooltipToggle != null)
 				m_WindowTooltipToggle.isOn = set.WindowTooltips;
 
-			if (m_MapSpeedToggle != null)
-				m_MapSpeedToggle.isOn = set.MapGenSpeed;
+			if (m_LegendTooltipToggle != null)
+				m_LegendTooltipToggle.isOn = set.LegendTooltips;
 
 			if (m_StockToolbarToggle != null)
 				m_StockToolbarToggle.isOn = set.StockToolbar;
+
+			if (m_MechJebBar != null)
+			{
+				m_MechJebBar.SetActive(set.MechJebAvailable);
+
+				if (m_MechJebToggle != null)
+					m_MechJebToggle.isOn = set.MechJebTarget;
+
+				if (m_MechJebLoadToggle != null)
+				{
+					m_MechJebLoadToggle.isOn = set.MechJebLoad;
+					m_MechJebLoadToggle.gameObject.SetActive(set.MechJebTarget);
+				}
+			}				
 
 			if (m_ToolbarMenuToggle != null)
 			{
@@ -77,6 +99,9 @@ namespace SCANsat.Unity.Unity
 
 			if (m_StockUIToggle != null)
 				m_StockUIToggle.isOn = set.StockUIStyle;
+
+			if (m_MapSpeedSlider != null)
+				m_MapSpeedSlider.value = set.MapGenSpeed;
 
 			if (m_UIScale != null)
 				m_UIScale.OnTextUpdate.Invoke("UI Scale: " + set.UIScale.ToString("P0"));
@@ -114,12 +139,12 @@ namespace SCANsat.Unity.Unity
 			settings.WindowTooltips = isOn;
 		}
 
-		public void SlowMapSpeed(bool isOn)
+		public void LegendTooltip(bool isOn)
 		{
 			if (!loaded || settings == null)
 				return;
 
-			settings.MapGenSpeed = isOn;
+			settings.LegendTooltips = isOn;
 		}
 
 		public void StockToolbar(bool isOn)
@@ -147,6 +172,33 @@ namespace SCANsat.Unity.Unity
 				return;
 
 			settings.StockUIStyle = isOn;
+		}
+
+		public void MechJebTargetSelection(bool isOn)
+		{
+			if (!loaded || settings == null)
+				return;
+
+			settings.MechJebTarget = isOn;
+
+			if (m_MechJebLoadToggle != null)
+				m_MechJebLoadToggle.gameObject.SetActive(isOn);
+		}
+
+		public void MechJebLoadTarget(bool isOn)
+		{
+			if (!loaded || settings == null)
+				return;
+
+			settings.MechJebLoad = isOn;
+		}
+
+		public void MapGenSlider(float speed)
+		{
+			if (!loaded || settings == null)
+				return;
+
+			settings.MapGenSpeed = Mathf.RoundToInt(speed);
 		}
 
 		public void UISlider(float scale)

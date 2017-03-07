@@ -34,13 +34,14 @@ namespace SCANsat.Unity.Unity
 
 		public void SetResource(string name, SCAN_Overlay p, bool isOn)
 		{
-			if (m_ResourceName == null || p == null)
+			if (p == null)
 				return;
 
 			parent = p;
 			resource = name;
 
-			m_ResourceName.OnTextUpdate.Invoke(name);
+			if (m_ResourceName != null)
+				m_ResourceName.OnTextUpdate.Invoke(name);
 
 			if (isOn && p.OverlayInterface.DrawResource)
 			{

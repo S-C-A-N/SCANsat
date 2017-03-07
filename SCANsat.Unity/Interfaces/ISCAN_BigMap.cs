@@ -45,9 +45,9 @@ namespace SCANsat.Unity.Interfaces
 
 		bool FlagToggle { get; set; }
 
-		bool AsteroidToggle { get; set; }
-
 		bool LegendToggle { get; set; }
+
+		bool LegendAvailable { get; }
 
 		bool ResourceToggle { get; set; }
 
@@ -59,7 +59,11 @@ namespace SCANsat.Unity.Interfaces
 
 		bool ShowResource { get; }
 
+		bool MechJebAvailable { get; }
+
 		bool TooltipsOn { get; }
+
+		bool LegendTooltips { get; }
 
 		bool LockInput { get; set; }
 
@@ -103,6 +107,8 @@ namespace SCANsat.Unity.Interfaces
 
 		string MapInfo(Vector2 rectPosition);
 
+		string TooltipText(float xPos);
+
 		void RefreshMap();
 
 		void OpenMainMap();
@@ -120,6 +126,8 @@ namespace SCANsat.Unity.Interfaces
 		void Update();
 
 		void SetWaypoint(string id, Vector2 pos);
+
+		void SetMJWaypoint(Vector2 pos);
 
 		void ClickMap(Vector2 pos);
 

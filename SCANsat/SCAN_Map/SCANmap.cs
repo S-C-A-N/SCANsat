@@ -559,6 +559,7 @@ namespace SCANsat.SCAN_Map
 		private SCANdata data;
 		private SCANmapLegend mapLegend;
 		private int mapstep; // all refs are below
+		private int mapRedStep;
 		private double[] mapline; // all refs are below
 		private bool pqs;
 		private bool biomeMap;
@@ -567,6 +568,7 @@ namespace SCANsat.SCAN_Map
 		private float customRange;
 		private bool useCustomRange;
 		private bool colorMap;
+		private float mapRedlineDraw = 10;
 
 		/* MAP: nearly trivial functions */
 		public void setBody(CelestialBody b)
@@ -620,6 +622,41 @@ namespace SCANsat.SCAN_Map
 					resource.CurrentBodyConfig(body.name);
 
 				resetResourceMap();
+			}
+
+			switch(mSource)
+			{
+				case mapSource.BigMap:
+					switch (SCAN_Settings_Config.Instance.MapGenerationSpeed)
+					{
+						case 1:
+							mapRedlineDraw = 6;
+							break;
+						case 2:
+							mapRedlineDraw = 3;
+							break;
+						case 3:
+							mapRedlineDraw = 2;
+							break;
+					}
+					break;
+				case mapSource.ZoomMap:
+					switch (SCAN_Settings_Config.Instance.MapGenerationSpeed)
+					{
+						case 1:
+							mapRedlineDraw = 6;
+							break;
+						case 2:
+							mapRedlineDraw = 3;
+							break;
+						case 3:
+							mapRedlineDraw = 2;
+							break;
+					}
+					break;
+				case mapSource.RPM:
+					mapRedlineDraw = 10;
+					break;
 			}
 		}
 
@@ -837,7 +874,7 @@ namespace SCANsat.SCAN_Map
 							{
 								projVal = terrainElevation(lon, lat, mapwidth, mapheight, big_heightmap, cache, data, out nowColor);
 								if (useCustomRange)
-									baseColor = palette.heightToColor(projVal, nowColor, data.TerrainConfig, customMin, customMax, customRange, useCustomRange);
+									baseColor = palette.heightToColor(projVal, nowColor, data.TerrainConfig, customMin, customMax, customRange, true);
 								else
 									baseColor = palette.heightToColor(projVal, nowColor, data.TerrainConfig);
 							}
@@ -964,9 +1001,14 @@ namespace SCANsat.SCAN_Map
 				map.SetPixels32(0, mapstep, map.width, 1, pix);
 
 			mapstep++;
-			
-			if (mapstep % 10 == 0 || mapstep >= map.height)
+
+			if (apply)
+				mapRedStep++;
+
+			if (mapRedStep % mapRedlineDraw == 0 || mapstep >= map.height)
 			{
+				mapRedStep = 0;
+
 				if (mapstep < map.height - 1)
 					map.SetPixels32(0, mapstep, map.width, 1, palette.redline);
 
@@ -1044,7 +1086,17 @@ namespace SCANsat.SCAN_Map
 		{
 			double resourceLat = fixUnscale(unScaleLatitude(Lat, resourceMapScale), resourceMapHeight);
 			double resourceLon = fixUnscale(unScaleLongitude(Lon, resourceMapScale), resourceMapWidth);
-			return resourceCache[Mathf.RoundToInt((float)resourceLon), Mathf.RoundToInt((float)resourceLat)];
+
+			int ilon = Mathf.RoundToInt((float)resourceLon);
+			int ilat = Mathf.RoundToInt((float)resourceLat);
+
+			if (ilon >= resourceMapWidth)
+				ilon = resourceMapWidth - 1;
+
+			if (ilat >= resourceMapHeight)
+				ilat = resourceMapHeight - 1;
+
+			return resourceCache[ilon, ilat];
 		}
 
 		#endregion

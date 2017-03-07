@@ -224,11 +224,11 @@ namespace SCANsat.SCAN_UI.UI_Framework
 
 			if (high)
 			{
-				s = SCANUtil.getElevation(d.Body, Lon, Lat).ToString("N" + precision) + "m ";
+				s = SCANUtil.getElevation(d.Body, Lon, Lat).ToString("N" + precision) + "m";
 			}
 			else
 			{
-				s = (((int)SCANUtil.getElevation(d.Body, Lon, Lat) / 500) * 500).ToString() + "m ";
+				s = (((int)SCANUtil.getElevation(d.Body, Lon, Lat) / 500) * 500).ToString() + "m";
 			}
 
 			return s;

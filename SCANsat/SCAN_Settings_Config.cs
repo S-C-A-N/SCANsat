@@ -33,9 +33,13 @@ namespace SCANsat
 		[Persistent]
 		public bool MechJebTarget = false;
 		[Persistent]
+		public bool MechJebTargetLoad = false;
+		[Persistent]
 		public bool OverlayTooltips = true;
 		[Persistent]
 		public bool WindowTooltips = true;
+		[Persistent]
+		public bool LegendTooltips = true;
 		[Persistent]
 		public bool StockToolbar = true;
 		[Persistent]
@@ -43,7 +47,7 @@ namespace SCANsat
 		[Persistent]
 		public bool StockUIStyle = false;
 		[Persistent]
-		public bool SlowMapGeneration = false;
+		public int MapGenerationSpeed = 1;
 		[Persistent]
 		public float UIScale = 1;
 		[Persistent]
@@ -76,6 +80,8 @@ namespace SCANsat
 		public bool BigMapBiomeBorder = true;
 		[Persistent]
 		public bool BigMapStockBiomes = true;
+		[Persistent]
+		public bool ZoomMapBiomeBorder = true;
 		[Persistent]
 		public bool SmallMapBiomeBorder = false;
 		[Persistent]

@@ -18,6 +18,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using SCANsat.Unity;
 using SCANsat.Unity.Unity;
+using SCANsat.SCAN_Platform.Palettes;
 using KSP.UI;
 using KSP.UI.Screens;
 using TMPro;
@@ -28,17 +29,19 @@ namespace SCANsat.SCAN_Unity
 	[KSPAddon(KSPAddon.Startup.MainMenu, true)]
 	public class SCAN_UI_Loader : MonoBehaviour
 	{
-		private const string prefabAssetName = "scansat_prefabs";
-		private const string imageAssetName = "scan_images";
+		private const string prefabAssetName = "scan_prefabs.scan";
+		private const string unitySkinAssetName = "scan_unity_skin.scan";
+		private const string iconAssetName = "scan_icons.scan";
 		private const string shadersAssetName = "scan_shaders";
-		private const string winShaderName = "-windows";
-		private const string linuxShaderName = "-linux";
-		private const string macShaderName = "-macosx";
+		private const string winShaderName = "-windows.scan";
+		private const string linuxShaderName = "-linux.scan";
+		private const string macShaderName = "-macosx.scan";
 
 		private static bool loaded;
 		private static bool skinLoaded;
 		private static bool prefabsLoaded;
 		private static bool spritesLoaded;
+		private static bool iconsLoaded;
 		private static bool shadersLoaded;
 		private static bool tmpProcessed;
 		private static bool tooltipsProcessed;
@@ -88,6 +91,11 @@ namespace SCANsat.SCAN_Unity
 
 		private static Sprite _kspTooltipBackground;
 		private static Sprite _unityTooltipBackground;
+
+		private static Sprite _smallMapAppIcon;
+		private static Sprite _bigMapAppIcon;
+
+		private static Sprite _mechJebIcon;
 
 		private static Shader _edgeDetectShader;
 		private static Shader _greyScaleShader;
@@ -283,6 +291,21 @@ namespace SCANsat.SCAN_Unity
 			}
 		}
 
+		public static Sprite SmallMapAppIcon
+		{
+			get { return _smallMapAppIcon; }
+		}
+
+		public static Sprite BigMapAppIcon
+		{
+			get { return _bigMapAppIcon; }
+		}
+
+		public static Sprite MechJebIcon
+		{
+			get { return _mechJebIcon; }
+		}
+
 		public static Shader EdgeDetectShader
 		{
 			get {return _edgeDetectShader;}
@@ -333,8 +356,13 @@ namespace SCANsat.SCAN_Unity
 			if (!skinLoaded)
 				loadUnitySkin();
 
+			if (!iconsLoaded)
+				loadIcons();
+
 			if (!prefabsLoaded)
 				loadPrefabBundle();
+
+			palette.CurrentPalettes = palette.setCurrentPalettesType(Palette.Kind.Diverging, 7);
 
 			loaded = true;
 		}
@@ -437,19 +465,19 @@ namespace SCANsat.SCAN_Unity
 
 			SkinInit(_unitySkinDef);
 
-			AssetBundle images = AssetBundle.LoadFromFile(path + imageAssetName);
+			AssetBundle skin = AssetBundle.LoadFromFile(path + unitySkinAssetName);
 
-			if (images == null)
+			if (skin == null)
 				return;
 
-			Sprite[] loadedImages = images.LoadAllAssets<Sprite>();
+			Sprite[] skinSprites = skin.LoadAllAssets<Sprite>();
 
-			if (loadedImages == null)
+			if (skinSprites == null)
 				return;
 
-			for (int i = loadedImages.Length - 1; i >= 0; i--)
+			for (int i = skinSprites.Length - 1; i >= 0; i--)
 			{
-				Sprite s = loadedImages[i];
+				Sprite s = skinSprites[i];
 
 				if (s.name == "window")
 					_unitySkinDef.window.normal.background = s;
@@ -501,52 +529,6 @@ namespace SCANsat.SCAN_Unity
 					_unitySkinDef.verticalSliderThumb.highlight.background = s;
 				else if (s.name == "slider thumb active")
 					_unitySkinDef.verticalSliderThumb.active.background = s;
-
-				else if (s.name == "PodIcon")
-					_podIcon = s;
-				else if (s.name == "PlaneIcon")
-					_planeIcon = s;
-				else if (s.name == "ProbeIcon")
-					_probeIcon = s;
-				else if (s.name == "DebrisIcon")
-					_debrisIcon = s;
-				else if (s.name == "StationIcon")
-					_stationIcon = s;
-				else if (s.name == "LanderIcon")
-					_landerIcon = s;
-				else if (s.name == "RoverIcon")
-					_roverIcon = s;
-				else if (s.name == "RelayIcon")
-					_relayIcon = s;
-				else if (s.name == "AsteroidIcon")
-					_asteroidIcon = s;
-				else if (s.name == "EVAIcon")
-					_evaIcon = s;
-				else if (s.name == "BaseIcon")
-					_baseIcon = s;
-				else if (s.name == "PlanetIcon")
-					_planetIcon = s;
-				else if (s.name == "MysteryIcon")
-					_mysteryIcon = s;
-				else if (s.name == "FlagIcon")
-					_flagIcon = s;
-				else if (s.name == "APMarker")
-					_apMarker = s;
-				else if (s.name == "PEMarker")
-					_peMarker = s;
-				else if (s.name == "ManeuverMarker")
-					_maneuverMarker = s;
-				else if (s.name == "EncounterMarker")
-					_encounterMarker = s;
-				else if (s.name == "ExitMarker")
-					_exitMarker = s;
-				else if (s.name == "AnomalyIconOutline")
-					_anomalyIcon = s;
-				else if (s.name == "SCAN_WayPointIcon_Outline")
-					_waypointIcon = s;
-
-				else if (s.name == "KSP_Tooltip")
-					_kspTooltipBackground = s;
 				else if (s.name == "tooltip")
 					_unityTooltipBackground = s;
 			}
@@ -596,6 +578,77 @@ namespace SCANsat.SCAN_Unity
 			skin.verticalSliderThumb.normal = new UIStyleState();
 			skin.verticalSliderThumb.highlight = new UIStyleState();
 			skin.verticalSliderThumb.active = new UIStyleState();
+		}
+
+		private static void loadIcons()
+		{
+			AssetBundle icons = AssetBundle.LoadFromFile(path + iconAssetName);
+
+			if (icons == null)
+				return;
+
+			Sprite[] iconSprites = icons.LoadAllAssets<Sprite>();
+
+			if (iconSprites == null)
+				return;
+
+			for (int i = iconSprites.Length - 1; i >= 0; i--)
+			{
+				Sprite s = iconSprites[i];
+
+				if (s.name == "PodIcon")
+					_podIcon = s;
+				else if (s.name == "PlaneIcon")
+					_planeIcon = s;
+				else if (s.name == "ProbeIcon")
+					_probeIcon = s;
+				else if (s.name == "DebrisIcon")
+					_debrisIcon = s;
+				else if (s.name == "StationIcon")
+					_stationIcon = s;
+				else if (s.name == "LanderIcon")
+					_landerIcon = s;
+				else if (s.name == "RoverIcon")
+					_roverIcon = s;
+				else if (s.name == "RelayIcon")
+					_relayIcon = s;
+				else if (s.name == "AsteroidIcon")
+					_asteroidIcon = s;
+				else if (s.name == "EVAIcon")
+					_evaIcon = s;
+				else if (s.name == "BaseIcon")
+					_baseIcon = s;
+				else if (s.name == "PlanetIcon")
+					_planetIcon = s;
+				else if (s.name == "MysteryIcon")
+					_mysteryIcon = s;
+				else if (s.name == "FlagIcon")
+					_flagIcon = s;
+				else if (s.name == "APMarker")
+					_apMarker = s;
+				else if (s.name == "PEMarker")
+					_peMarker = s;
+				else if (s.name == "ManeuverMarker")
+					_maneuverMarker = s;
+				else if (s.name == "EncounterMarker")
+					_encounterMarker = s;
+				else if (s.name == "ExitMarker")
+					_exitMarker = s;
+				else if (s.name == "AnomalyIconOutline")
+					_anomalyIcon = s;
+				else if (s.name == "SCAN_WayPointIcon_Outline")
+					_waypointIcon = s;
+				else if (s.name == "SCANsat_AppLauncherSmall_Icon")
+					_smallMapAppIcon = s;
+				else if (s.name == "SCANsat_AppLauncherLarge_Icon")
+					_bigMapAppIcon = s;
+				else if (s.name == "SCAN_MechJebIcon")
+					_mechJebIcon = s;
+				else if (s.name == "KSP_Tooltip")
+					_kspTooltipBackground = s;
+			}
+
+			iconsLoaded = true;
 		}
 
 		private static void loadPrefabBundle()

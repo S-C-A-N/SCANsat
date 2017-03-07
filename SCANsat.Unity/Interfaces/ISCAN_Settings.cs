@@ -41,6 +41,8 @@ namespace SCANsat.Unity.Interfaces
 
 		string CurrentBody { get; }
 
+		int MapGenSpeed { get; set; }
+
 		int TimeWarp { get; set; }
 
 		int MapWidth { get; set; }
@@ -69,13 +71,19 @@ namespace SCANsat.Unity.Interfaces
 
 		bool WindowTooltips { get; set; }
 
-		bool MapGenSpeed { get; set; }
+		bool LegendTooltips { get; set; }
 
 		bool StockToolbar { get; set; }
 
 		bool ToolbarMenu { get; set; }
 
 		bool StockUIStyle { get; set; }
+
+		bool MechJebTarget { get; set; }
+
+		bool MechJebLoad { get; set; }
+
+		bool MechJebAvailable { get; }
 
 		bool BiomeLock { get; set; }
 

@@ -24,6 +24,7 @@ using SCANsat.SCAN_Map;
 using SCANsat.SCAN_Data;
 using SCANsat.SCAN_PartModules;
 using SCANsat.SCAN_UI.UI_Framework;
+using SCANsat.SCAN_Unity;
 
 namespace SCANsat.SCAN_UI
 {
@@ -501,13 +502,13 @@ namespace SCANsat.SCAN_UI
 			{
 				pos.x -= 8;
 				pos.y -= 16;
-				SCANuiUtil.drawMapIconGL(pos, SCANskins.SCAN_WaypointIcon, iconColor, iconMaterial, iconColorShadowValue, true);
+				SCANuiUtil.drawMapIconGL(pos, SCAN_UI_Loader.WaypointIcon.texture, iconColor, iconMaterial, iconColorShadowValue, true);
 			}
 			else
 			{
 				pos.x -= 8;
 				pos.y -= 8;
-				SCANuiUtil.drawMapIconGL(pos, SCAN_Settings_Config.Instance.MechJebTarget ? SCANskins.SCAN_MechJebIcon : SCANskins.SCAN_TargetIcon, iconColor, iconMaterial, iconColorShadowValue, true);
+				SCANuiUtil.drawMapIconGL(pos, SCAN_UI_Loader.MechJebIcon.texture, iconColor, iconMaterial, iconColorShadowValue, true);
 			}
 		}
 

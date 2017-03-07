@@ -494,6 +494,9 @@ namespace SCANsat.SCAN_Unity
 
 			if (SCAN_UI_MainMap.Instance != null && SCAN_UI_MainMap.Instance.IsVisible && SCAN_UI_MainMap.Instance.MapType)
 				SCAN_UI_MainMap.Instance.resetImages();
+
+			if (SCAN_UI_ZoomMap.Instance != null && SCAN_UI_ZoomMap.Instance.IsVisible && SCAN_UI_ZoomMap.Instance.CurrentMapType == "Biome")
+				SCAN_UI_ZoomMap.Instance.RefreshMap();
 		}
 
 		public void BiomeDefault()
@@ -522,6 +525,9 @@ namespace SCANsat.SCAN_Unity
 
 			if (SCAN_UI_MainMap.Instance != null && SCAN_UI_MainMap.Instance.IsVisible && SCAN_UI_MainMap.Instance.MapType)
 				SCAN_UI_MainMap.Instance.resetImages();
+
+			if (SCAN_UI_ZoomMap.Instance != null && SCAN_UI_ZoomMap.Instance.IsVisible && SCAN_UI_ZoomMap.Instance.CurrentMapType == "Biome")
+				SCAN_UI_ZoomMap.Instance.RefreshMap();
 		}
 
 		public void SlopeApply(Color oneLow, Color oneHigh, Color twoLow, Color twoHigh)
@@ -539,6 +545,9 @@ namespace SCANsat.SCAN_Unity
 
 			if (SCAN_UI_BigMap.Instance != null && SCAN_UI_BigMap.Instance.IsVisible && SCAN_UI_BigMap.Instance.CurrentMapType == "Slope")
 				SCAN_UI_BigMap.Instance.RefreshMap();
+
+			if (SCAN_UI_ZoomMap.Instance != null && SCAN_UI_ZoomMap.Instance.IsVisible && SCAN_UI_ZoomMap.Instance.CurrentMapType == "Slope")
+				SCAN_UI_ZoomMap.Instance.RefreshMap();
 		}
 
 		public void SlopeDefault()
@@ -556,6 +565,9 @@ namespace SCANsat.SCAN_Unity
 			
 			if (SCAN_UI_BigMap.Instance != null && SCAN_UI_BigMap.Instance.IsVisible && SCAN_UI_BigMap.Instance.CurrentMapType == "Slope")
 				SCAN_UI_BigMap.Instance.RefreshMap();
+
+			if (SCAN_UI_ZoomMap.Instance != null && SCAN_UI_ZoomMap.Instance.IsVisible && SCAN_UI_ZoomMap.Instance.CurrentMapType == "Slope")
+				SCAN_UI_ZoomMap.Instance.RefreshMap();
 		}
 
 		public void ResourceApply(Color one, Color two)
@@ -570,6 +582,9 @@ namespace SCANsat.SCAN_Unity
 
 			if (SCAN_UI_BigMap.Instance != null && SCAN_UI_BigMap.Instance.IsVisible && SCAN_UI_BigMap.Instance.ResourceToggle)
 				SCAN_UI_BigMap.Instance.RefreshMap();
+
+			if (SCAN_UI_ZoomMap.Instance != null && SCAN_UI_ZoomMap.Instance.IsVisible && SCAN_UI_ZoomMap.Instance.ResourceToggle)
+				SCAN_UI_ZoomMap.Instance.RefreshMap();
 		}
 
 		public void ResourceApplyToAll(Color one, Color two)
@@ -584,6 +599,9 @@ namespace SCANsat.SCAN_Unity
 
 			if (SCAN_UI_BigMap.Instance != null && SCAN_UI_BigMap.Instance.IsVisible && SCAN_UI_BigMap.Instance.ResourceToggle)
 				SCAN_UI_BigMap.Instance.RefreshMap();
+
+			if (SCAN_UI_ZoomMap.Instance != null && SCAN_UI_ZoomMap.Instance.IsVisible && SCAN_UI_ZoomMap.Instance.ResourceToggle)
+				SCAN_UI_ZoomMap.Instance.RefreshMap();
 		}
 
 		public void ResourceDefault()
@@ -612,6 +630,9 @@ namespace SCANsat.SCAN_Unity
 
 			if (SCAN_UI_BigMap.Instance != null && SCAN_UI_BigMap.Instance.IsVisible && SCAN_UI_BigMap.Instance.ResourceToggle)
 				SCAN_UI_BigMap.Instance.RefreshMap();
+
+			if (SCAN_UI_ZoomMap.Instance != null && SCAN_UI_ZoomMap.Instance.IsVisible && SCAN_UI_ZoomMap.Instance.ResourceToggle)
+				SCAN_UI_ZoomMap.Instance.RefreshMap();
 		}
 
 		public void ResourceSaveToConfig(Color one, Color two)
@@ -626,6 +647,9 @@ namespace SCANsat.SCAN_Unity
 
 			if (SCAN_UI_BigMap.Instance != null && SCAN_UI_BigMap.Instance.IsVisible && SCAN_UI_BigMap.Instance.ResourceToggle)
 				SCAN_UI_BigMap.Instance.RefreshMap();
+
+			if (SCAN_UI_ZoomMap.Instance != null && SCAN_UI_ZoomMap.Instance.IsVisible && SCAN_UI_ZoomMap.Instance.ResourceToggle)
+				SCAN_UI_ZoomMap.Instance.RefreshMap();
 
 			SCANconfigLoader.SCANNode.Save();
 		}
@@ -648,6 +672,9 @@ namespace SCANsat.SCAN_Unity
 
 			if (SCAN_UI_MainMap.Instance != null && SCAN_UI_MainMap.Instance.IsVisible && !SCAN_UI_MainMap.Instance.MapType)
 				SCAN_UI_MainMap.Instance.resetImages();
+
+			if (SCAN_UI_ZoomMap.Instance != null && SCAN_UI_ZoomMap.Instance.IsVisible && SCAN_UI_ZoomMap.Instance.CurrentMapType == "Altimetry")
+				SCAN_UI_ZoomMap.Instance.RefreshMap();
 		}
 
 		public void TerrainDefault()
@@ -669,6 +696,9 @@ namespace SCANsat.SCAN_Unity
 
 			if (SCAN_UI_MainMap.Instance != null && SCAN_UI_MainMap.Instance.IsVisible && !SCAN_UI_MainMap.Instance.MapType)
 				SCAN_UI_MainMap.Instance.resetImages();
+
+			if (SCAN_UI_ZoomMap.Instance != null && SCAN_UI_ZoomMap.Instance.IsVisible && SCAN_UI_ZoomMap.Instance.CurrentMapType == "Altimetry")
+				SCAN_UI_ZoomMap.Instance.RefreshMap();
 		}
 
 		public void TerrainSaveToConfig()
@@ -689,6 +719,9 @@ namespace SCANsat.SCAN_Unity
 
 			if (SCAN_UI_MainMap.Instance != null && SCAN_UI_MainMap.Instance.IsVisible && !SCAN_UI_MainMap.Instance.MapType)
 				SCAN_UI_MainMap.Instance.resetImages();
+
+			if (SCAN_UI_ZoomMap.Instance != null && SCAN_UI_ZoomMap.Instance.IsVisible && SCAN_UI_ZoomMap.Instance.CurrentMapType == "Altimetry")
+				SCAN_UI_ZoomMap.Instance.RefreshMap();
 		}
 	}
 }

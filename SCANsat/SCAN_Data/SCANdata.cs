@@ -206,6 +206,12 @@ namespace SCANsat.SCAN_Data
 				return;
 
 			addToWaypoints(SCANcontroller.controller.LandingTarget);
+
+			if (SCAN_UI_ZoomMap.Instance != null && SCAN_UI_ZoomMap.Instance.IsVisible && SCAN_UI_ZoomMap.Body == body)
+				SCAN_UI_ZoomMap.Instance.RefreshIcons();
+
+			if (SCAN_UI_BigMap.Instance != null && SCAN_UI_BigMap.Instance.IsVisible && SCAN_UI_BigMap.Body == body)
+				SCAN_UI_BigMap.Instance.RefreshIcons();
 		}
 
 		public void addToWaypoints(SCANwaypoint w)
@@ -274,11 +280,20 @@ namespace SCANsat.SCAN_Data
 					return new List<SCANwaypoint>();
 				else// if (!waypointsLoaded)
 				{
+					SCANwaypoint landingTarget = null;
+
 					//waypointsLoaded = true;
 					if (waypoints == null)
 						waypoints = new List<SCANwaypoint>();
 					else
+					{
+						landingTarget = waypoints.FirstOrDefault(w => w.LandingTarget);
+						
 						waypoints.Clear();
+					}
+
+					if (landingTarget != null)
+						waypoints.Add(landingTarget);
 
 					if (ContractSystem.Instance != null)
 					{

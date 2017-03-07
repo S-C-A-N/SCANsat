@@ -56,6 +56,8 @@ namespace SCANsat.SCAN_Unity
 		private SCANresourceGlobal currentResource;
 		private List<SCANresourceGlobal> resources;
 
+		private List<CBAttributeMapSO.MapAttribute> biomes = new List<CBAttributeMapSO.MapAttribute>();
+
 		private List<Vessel> mapFlags = new List<Vessel>();
 
 		private SCAN_ZoomMap uiElement;
@@ -80,6 +82,11 @@ namespace SCANsat.SCAN_Unity
 			get { return instance; }
 		}
 		
+		public static CelestialBody Body
+		{
+			get { return body; }
+		}
+
 		public SCAN_UI_ZoomMap()
 		{
 			instance = this;
@@ -183,9 +190,6 @@ namespace SCANsat.SCAN_Unity
 
 		private void initializeMapCenter(double lat, double lon, CelestialBody b)
 		{
-			SCANcontroller.controller.TargetSelecting = false;
-			SCANcontroller.controller.TargetSelectingActive = false;
-
 			SCANdata dat = SCANUtil.getData(b);
 
 			if (dat == null)
@@ -239,9 +243,6 @@ namespace SCANsat.SCAN_Unity
 			else
 				spotmap.centerAround(spotmap.CenteredLong, spotmap.CenteredLat);
 
-			SCANcontroller.controller.TargetSelecting = false;
-			SCANcontroller.controller.TargetSelectingActive = false;
-
 			if (ResourceToggle)
 				checkForScanners();
 
@@ -252,9 +253,6 @@ namespace SCANsat.SCAN_Unity
 
 		public void resetMapToVessel()
 		{
-			SCANcontroller.controller.TargetSelecting = false;
-			SCANcontroller.controller.TargetSelectingActive = false;
-
 			vessel = FlightGlobals.ActiveVessel;
 
 			body = vessel.mainBody;
@@ -299,6 +297,9 @@ namespace SCANsat.SCAN_Unity
 					double la = lat, lo = lon;
 					lat = spotmap.unprojectLatitude(lo, la);
 					lon = spotmap.unprojectLongitude(lo, la);
+
+					if (lon < -180 || lon >= 180 || lat < -90 && lat >= 90 || double.IsNaN(lon) || double.IsNaN(lat))
+						continue;
 
 					terrain = (float)SCANUtil.getElevation(body, lon, lat);
 
@@ -470,7 +471,13 @@ namespace SCANsat.SCAN_Unity
 
 			if (!spotmap.isMapComplete())
 			{
-				if (!SCAN_Settings_Config.Instance.SlowMapGeneration)
+				if (SCAN_Settings_Config.Instance.MapGenerationSpeed > 2)
+				{
+					spotmap.getPartialMap(false);
+					spotmap.getPartialMap(false);
+				}
+
+				if (SCAN_Settings_Config.Instance.MapGenerationSpeed > 1)
 					spotmap.getPartialMap(false);
 
 				spotmap.getPartialMap(true);
@@ -944,6 +951,12 @@ namespace SCANsat.SCAN_Unity
 			}
 		}
 
+		public void RefreshIcons()
+		{
+			if (uiElement != null)
+				uiElement.RefreshIcons();
+		}
+
 		public void setToPosition(double lat, double lon, SCANmap map)
 		{
 			SCANcontroller.controller.zoomMapType = map.MType.ToString();
@@ -1023,7 +1036,12 @@ namespace SCANsat.SCAN_Unity
 
 		public string ZoomLevelText
 		{
-			get { return spotmap.MapScale.ToString("N2") + "X"; }
+			get
+			{
+				double zoom = spotmap.MapScale;
+
+				return (zoom > 999 ? zoom.ToString("N0") : zoom.ToString("N2")) + "X";
+			}
 		}
 
 		public string MapCenterText
@@ -1137,6 +1155,25 @@ namespace SCANsat.SCAN_Unity
 			set { SCANcontroller.controller.zoomMapLegend = value; }
 		}
 
+		public bool LegendAvailable
+		{
+			get
+			{
+				if (WindowState != 0)
+					return false;
+
+				switch(spotmap.MType)
+				{
+					case mapType.Altimetry:
+						return body.pqsController != null;
+					case mapType.Biome:
+						return body.BiomeMap != null && SCAN_Settings_Config.Instance.LegendTooltips;
+				}
+
+				return false;
+			}
+		}
+
 		public bool ResourceToggle
 		{
 			get { return SCANcontroller.controller.zoomMapResourceOn; }
@@ -1183,9 +1220,19 @@ namespace SCANsat.SCAN_Unity
 			get { return HighLogic.LoadedSceneIsFlight; }
 		}
 
+		public bool MechJebAvailable
+		{
+			get { return SCANmainMenuLoader.MechJebLoaded && SCAN_Settings_Config.Instance.MechJebTarget && SCANcontroller.controller.MechJebLoaded; }
+		}
+
 		public bool TooltipsOn
 		{
 			get { return SCAN_Settings_Config.Instance.WindowTooltips; }
+		}
+
+		public bool LegendTooltips
+		{
+			get { return SCAN_Settings_Config.Instance.LegendTooltips; }
 		}
 
 		public bool LockInput
@@ -1287,8 +1334,60 @@ namespace SCANsat.SCAN_Unity
 				if (data == null)
 					return null;
 
-				return spotmap.MapLegend.getLegend(data.TerrainConfig.MinTerrain, data.TerrainConfig.MaxTerrain, SCANcontroller.controller.zoomMapColor, data.TerrainConfig);
-			}
+				SCANUtil.SCANlog("Get legend label...");
+
+				switch (spotmap.MType)
+				{
+					case mapType.Altimetry:
+						return spotmap.MapLegend.getLegend(SCANcontroller.controller.zoomMapColor, data.TerrainConfig);
+					case mapType.Biome:
+						if (body != null && body.BiomeMap != null && body.BiomeMap.Attributes != null)
+						{
+							biomes = new List<CBAttributeMapSO.MapAttribute>();
+
+							int w = spotmap.MapWidth / 4;
+							int h = spotmap.MapHeight / 4;
+
+							for (int i = 0; i < spotmap.MapHeight; i += 4)
+							{
+								for (int j = 0; j < spotmap.MapWidth; j += 4)
+								{
+									double lon = spotmap.Lon_Offset + (j * 1.0f / spotmap.MapScale) - 180;
+									double lat = spotmap.Lat_Offset + (i * 1.0f / spotmap.MapScale) - 90;
+									double la = lat, lo = lon;
+									lat = spotmap.unprojectLatitude(lo, la);
+									lon = spotmap.unprojectLongitude(lo, la);
+
+									if (lon < -180 || lon >= 180 || lat < -90 && lat >= 90 || double.IsNaN(lon) || double.IsNaN(lat))
+										continue;
+
+									CBAttributeMapSO.MapAttribute biome = SCANUtil.getBiome(body, lon, lat);
+
+									bool add = true;
+
+									for (int b = biomes.Count - 1; b >= 0; b--)
+									{
+										if (biome != biomes[b])
+											continue;
+
+										add = false;
+										break;
+									}
+
+									if (add)
+										biomes.Add(biome);
+								}
+							}
+
+
+							return spotmap.MapLegend.getLegend(data, SCANcontroller.controller.zoomMapColor, SCAN_Settings_Config.Instance.BigMapStockBiomes, biomes.ToArray(), true);
+						}
+						else
+							return null;
+				}
+
+				return null;
+			}			
 		}
 
 		public IList<string> MapTypes
@@ -1493,17 +1592,34 @@ namespace SCANsat.SCAN_Unity
 
 						Vector2 wayPos = MapPosition(w.Latitude, w.Longitude);
 
-						waypoints.Add(w.Seed, new MapLabelInfo()
+						if (w.LandingTarget)
 						{
-							label = "",
-							image = SCAN_UI_Loader.WaypointIcon,
-							pos = wayPos,
-							baseColor = palette.white,
-							flash = false,
-							width = 20,
-							alignBottom = true,
-							show = wayPos.x >= 0 && wayPos.y >= 0
-						});
+							waypoints.Add(w.Seed, new MapLabelInfo()
+							{
+								label = "",
+								image = SCAN_UI_Loader.MechJebIcon,
+								pos = wayPos,
+								baseColor = palette.red,
+								flash = false,
+								width = 20,
+								alignBottom = false,
+								show = wayPos.x >= 0 && wayPos.y >= 0
+							});
+						}
+						else
+						{
+							waypoints.Add(w.Seed, new MapLabelInfo()
+							{
+								label = "",
+								image = SCAN_UI_Loader.WaypointIcon,
+								pos = wayPos,
+								baseColor = palette.white,
+								flash = false,
+								width = 20,
+								alignBottom = true,
+								show = wayPos.x >= 0 && wayPos.y >= 0
+							});
+						}
 					}
 				}
 
@@ -1548,6 +1664,11 @@ namespace SCANsat.SCAN_Unity
 			return new Vector2d(mlon, mlat);
 		}
 
+		public void ClampToScreen(RectTransform rect)
+		{
+			UIMasterController.ClampToScreen(rect, Vector2.zero);
+		}
+
 		public string MapInfo(Vector2 mapPos)
 		{
 			Vector2d pos = MousePosition(mapPos);
@@ -1570,7 +1691,7 @@ namespace SCANsat.SCAN_Unity
 
 			if (altimetry)
 			{
-				infoString.Append(SCANuiUtil.getMouseOverElevation(lon, lat, data, 2, hires));
+				infoString.AppendFormat("{0} ", SCANuiUtil.getMouseOverElevation(lon, lat, data, 2, hires));
 
 				if (hires)
 				{
@@ -1583,9 +1704,7 @@ namespace SCANsat.SCAN_Unity
 			}
 
 			if (SCANUtil.isCovered(lon, lat, data, SCANtype.Biome))
-			{
-				infoString.Append(SCANUtil.getBiomeName(body, lon, lat));
-			}
+				infoString.AppendFormat("{0} ", SCANUtil.getBiomeName(body, lon, lat));
 
 			if (spotmap.ResourceActive && SCANconfigLoader.GlobalResource && spotmap.Resource != null)
 			{
@@ -1603,19 +1722,14 @@ namespace SCANsat.SCAN_Unity
 				}
 
 				if (resources)
-				{
-					infoString.Append(" ");
 					infoString.Append(SCANuiUtil.getResourceAbundance(spotmap.Body, lat, lon, fuzzy, spotmap.Resource));
-				}
 			}
 
 			infoString.AppendLine();
-			infoString.AppendFormat("{0} (lat: {1:F2}° lon: {2:F2}°) ", SCANuiUtil.toDMS(lat, lon), lat, lon);
+			infoString.AppendFormat("{0} (lat: {1:F2}° lon: {2:F2}°)", SCANuiUtil.toDMS(lat, lon), lat, lon);
 
 			if (SCANcontroller.controller.zoomMapIcons)
 			{
-				bool space = false;
-
 				infoString.AppendLine();
 
 				double range = ContractDefs.Survey.MaximumTriggerRange;
@@ -1639,11 +1753,14 @@ namespace SCANsat.SCAN_Unity
 
 						if (SCANUtil.waypointDistance(lat, lon, 1000, p.Latitude, p.Longitude, 1000, body) <= range)
 						{
-							infoString.Append("Way: ");
-							infoString.Append(p.Name);
-							space = true;
+							infoString.AppendFormat("Way: {0} ", p.Name);
 							break;
 						}
+					}
+					else if (SCANUtil.waypointDistance(lat, lon, 1000, p.Latitude, p.Longitude, 1000, body) <= range)
+					{
+						infoString.AppendFormat("MJ: {0} ", SCANuiUtil.toDMS(p.Latitude, p.Longitude, 0));
+						break;
 					}
 				}
 
@@ -1655,20 +1772,10 @@ namespace SCANsat.SCAN_Unity
 					{
 						if (SCANUtil.mapLabelDistance(lat, lon, a.Latitude, a.Longitude, body) <= range)
 						{
-							if (space)
-								infoString.Append(" ");
-
 							if (a.Detail)
-							{
-								infoString.Append("?: ");
-								infoString.Append(a.Name);
-							}
+								infoString.AppendFormat("?: {0} ", a.Name);
 							else
-							{
-								infoString.Append("?: Unknown");
-							}
-
-							space = true;
+								infoString.Append("?: Unknown ");
 							break;
 						}
 					}
@@ -1680,11 +1787,7 @@ namespace SCANsat.SCAN_Unity
 
 					if (SCANUtil.mapLabelDistance(lat, lon, flag.latitude, flag.longitude, body) <= range)
 					{
-						if (space)
-							infoString.Append(" ");
-
-						infoString.Append("Flag: ");
-						infoString.Append(flag.vesselName);
+						infoString.AppendFormat("Flag: {0}", flag.vesselName);
 						break;
 					}
 				}
@@ -1693,12 +1796,43 @@ namespace SCANsat.SCAN_Unity
 			return infoString.ToStringAndRelease();
 		}
 
+		public string TooltipText(float xPos)
+		{
+			switch (spotmap.MType)
+			{
+				case mapType.Biome:
+					if (biomes.Count <= 0)
+						return "";
+
+					int count = biomes.Count;
+
+					int blockSize = (int)Math.Truncate(256 / (count * 1d));
+
+					int current = (int)Math.Truncate((xPos * 256) / (blockSize * 1d));
+
+					if (current >= count)
+						current = count - 1;
+					else if (current < 0)
+						current = 0;
+
+					return biomes[current].name;
+				case mapType.Altimetry:
+					float terrain = xPos * (terrainMax - terrainMin) + terrainMin;
+					
+					return string.Format("{0:N0}m", terrain);
+			}
+
+			return "";
+		}
+
 		public void RefreshMap()
 		{
-			SCANcontroller.controller.TargetSelecting = false;
-			SCANcontroller.controller.TargetSelectingActive = false;
+			if (VesselLock)
+				resetMapToVessel();
+			else
+				resetMap();
 
-			resetMap();
+			uiElement.SetLegend(LegendToggle);
 		}
 
 		public void VesselSync()
@@ -1818,7 +1952,7 @@ namespace SCANsat.SCAN_Unity
 		}
 
 		public void SetWaypoint(string id, Vector2 pos)
-		{
+		{	
 			if (string.IsNullOrEmpty(id))
 				id = RandomWaypoint;
 
@@ -1826,10 +1960,7 @@ namespace SCANsat.SCAN_Unity
 
 			Vector2d mapPos = MousePosition(pos);
 
-			double mlon = pos.x;
-			double mlat = pos.y;
-
-			if (mlon >= -180 && mlon <= 180 && mlat >= -90 && mlat <= 90)
+			if (mapPos.x < -180 || mapPos.x > 180 || mapPos.y < -90 || mapPos.y > 90)
 				return;
 
 			Waypoint w = new Waypoint();
@@ -1845,6 +1976,21 @@ namespace SCANsat.SCAN_Unity
 			w.navigationId = new Guid();
 
 			ScenarioCustomWaypoints.AddWaypoint(w);
+		}
+
+		public void SetMJWaypoint(Vector2 pos)
+		{
+			pos.y -= spotmap.MapHeight;
+
+			Vector2d mapPos = MousePosition(pos);
+
+			if (mapPos.x < -180 || mapPos.x > 180 || mapPos.y < -90 || mapPos.y > 90)
+				return;
+
+			SCANcontroller.controller.MJTargetSet.Invoke(mapPos, body);
+
+			SCANwaypoint w = new SCANwaypoint(mapPos.y, mapPos.x, "MechJeb Landing Target");
+			data.addToWaypoints(w);
 		}
 
 		public void ClickMap(int button, Vector2 pos)
