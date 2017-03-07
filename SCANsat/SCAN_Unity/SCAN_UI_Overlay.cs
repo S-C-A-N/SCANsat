@@ -75,8 +75,6 @@ namespace SCANsat.SCAN_Unity
 			resources = SCANcontroller.setLoadedResourceList();
 
 			setBody(HighLogic.LoadedSceneIsFlight ? FlightGlobals.currentMainBody : Planetarium.fetch.Home);
-
-			GameEvents.onGameSceneSwitchRequested.Add(switchScene);
 		}
 
 		public void OnDestroy()
@@ -87,12 +85,7 @@ namespace SCANsat.SCAN_Unity
 				MonoBehaviour.Destroy(uiElement.gameObject);
 			}
 
-			GameEvents.onGameSceneSwitchRequested.Remove(switchScene);
-		}
-
-		private void switchScene(GameEvents.FromToAction<GameScenes, GameScenes> FT)
-		{
-			removeOverlay();
+			removeOverlay(true);
 		}
 
 		public void SetScale(float scale)
@@ -487,16 +480,28 @@ namespace SCANsat.SCAN_Unity
 			degreeOffset = 5 / eqDistancePerDegree;
 		}
 
-		private void removeOverlay()
+		private void removeOverlay(bool immediate = false)
 		{
 			_overlayOn = false;
 
 			OverlayGenerator.Instance.ClearDisplay();
 
 			if (mapOverlay != null)
-				MonoBehaviour.Destroy(mapOverlay);
+				MonoBehaviour.DestroyImmediate(mapOverlay);
 
 			mapOverlay = null;
+
+			if (immediate)
+			{
+				try
+				{
+					body.scaledBody.GetComponentInChildren<ScaledSpaceFader>().r.material.SetTexture(Shader.PropertyToID("_ResourceMap"), null);
+				}
+				catch (Exception e)
+				{
+					SCANUtil.SCANlog("Error in destroying planetary map overlay:\n{0}", e);
+				}
+			}
 		}
 
 		public void refreshMap(float t, int height, int interp, int biomeHeight)
