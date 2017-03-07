@@ -81,7 +81,7 @@ namespace SCANsat.SCAN_Unity
 
 			GameEvents.onVesselSOIChanged.Add(soiChange);
 			GameEvents.onVesselChange.Add(vesselChange);
-			GameEvents.onVesselWasModified.Add(vesselChange);			
+			GameEvents.onVesselWasModified.Add(vesselChange);
 		}
 
 		private void soiChange(GameEvents.HostedFromToAction<Vessel, CelestialBody> VC)
@@ -529,15 +529,15 @@ namespace SCANsat.SCAN_Unity
 
 		private void anomalyInfo()
 		{
-			//if ((sensors & SCANtype.Anomaly) != SCANtype.Nothing)
-			//{
+			if ((sensors & SCANtype.Anomaly) != SCANtype.Nothing)
+			{
 				nearest = null;
 				double nearest_dist = -1;
 
 				foreach (SCANanomaly a in data.Anomalies)
 				{
-					//if (!a.Known)
-						//continue;
+					if (!a.Known)
+						continue;
 
 					double d = (a.Mod.transform.position - v.transform.position).magnitude;
 
@@ -560,9 +560,9 @@ namespace SCANsat.SCAN_Unity
 					else
 						infoString.Append(string.Format("Unknown Anomaly: {0}", SCANuiUtil.distanceString(nearest_dist, 2000)));
 				}
-			//}
-			//else
-				//nearest = null;
+			}
+			else
+				nearest = null;
 		}
 
 		private void BTDTInfo()
