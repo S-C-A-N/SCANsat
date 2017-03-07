@@ -27,8 +27,6 @@ namespace SCANsat.SCAN_UI.UI_Framework
 		private static Rect pos_icon = new Rect(0, 0, 0, 0);
 		private static Rect grid_pos;
 
-		private static string WhereIsKSPPP_DLL() { return Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location); }
-
 		internal static void drawOrbitIconGL(int x, int y, OrbitIcon icon, Color c, Color shadow, Material iconMat, int size = 32 /*px*/, bool outline = false)
 		{
 			// PX [0..n]
