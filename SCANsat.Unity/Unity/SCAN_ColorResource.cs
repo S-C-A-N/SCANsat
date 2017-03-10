@@ -143,22 +143,36 @@ namespace SCANsat.Unity.Unity
 			if (SCAN_Settings.Instance == null)
 				return;
 
-			if (SCAN_Settings.Instance.DropDown == null)
-				return;
+			if (SCAN_Settings.Instance.DropDown != null)
+			{
+				RectTransform r = SCAN_Settings.Instance.DropDown.GetComponent<RectTransform>();
 
-			RectTransform r = SCAN_Settings.Instance.DropDown.GetComponent<RectTransform>();
+				if (r != null)
+				{
+					if (!RectTransformUtility.RectangleContainsScreenPoint(r, eventData.position, eventData.pressEventCamera))
+					{
+						SCAN_Settings.Instance.DropDown.FadeOut();
+						SCAN_Settings.Instance.DropDown = null;
 
-			if (r == null)
-				return;
+						if (m_DropDownToggles != null)
+							m_DropDownToggles.SetAllTogglesOff();
+					}
+				}
+			}
 
-			if (RectTransformUtility.RectangleContainsScreenPoint(r, eventData.position, eventData.pressEventCamera))
-				return;
+			if (SCAN_Settings.Instance.WarningPopup != null)
+			{
+				RectTransform r = SCAN_Settings.Instance.WarningPopup.GetComponent<RectTransform>();
 
-			SCAN_Settings.Instance.DropDown.FadeOut();
-			SCAN_Settings.Instance.DropDown = null;
-
-			if (m_DropDownToggles != null)
-				m_DropDownToggles.SetAllTogglesOff();
+				if (r != null)
+				{
+					if (!RectTransformUtility.RectangleContainsScreenPoint(r, eventData.position, eventData.pressEventCamera))
+					{
+						SCAN_Settings.Instance.WarningPopup.FadeOut();
+						SCAN_Settings.Instance.WarningPopup = null;
+					}
+				}
+			}
 		}
 
 		public void PlanetDropDown(bool isOn)

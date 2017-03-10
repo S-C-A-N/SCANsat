@@ -125,6 +125,26 @@ namespace SCANsat.Unity.Unity
 			loaded = true;
 		}
 
+		public override void OnPointerDown(PointerEventData eventData)
+		{
+			if (SCAN_Settings.Instance == null)
+				return;
+
+			if (SCAN_Settings.Instance.WarningPopup != null)
+			{
+				RectTransform r = SCAN_Settings.Instance.WarningPopup.GetComponent<RectTransform>();
+
+				if (r != null)
+				{
+					if (!RectTransformUtility.RectangleContainsScreenPoint(r, eventData.position, eventData.pressEventCamera))
+					{
+						SCAN_Settings.Instance.WarningPopup.FadeOut();
+						SCAN_Settings.Instance.WarningPopup = null;
+					}
+				}
+			}
+		}
+
 		public void BimomeLock(bool isOn)
 		{
 			if (!loaded || settings == null)
