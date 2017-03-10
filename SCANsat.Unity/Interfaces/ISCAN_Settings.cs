@@ -27,19 +27,21 @@ namespace SCANsat.Unity.Interfaces
 
 		string DataResetAll { get; }
 
-		string SCANResourceResetCurrent { get; }
-
-		string SCANResourceResetAll { get; }
-
 		string StockResourceResetCurrent { get; }
 
 		string StockResourceResetAll { get; }
+
+		string WarningMapFillCurrent { get; }
+
+		string WarningMapFillAll { get; }
 
 		string ModuleManagerWarning { get; }
 
 		string SaveToConfig { get; }
 
 		string CurrentBody { get; }
+
+		string CurrentMapData { get; set; }
 
 		int MapGenSpeed { get; set; }
 
@@ -99,8 +101,6 @@ namespace SCANsat.Unity.Interfaces
 
 		bool ExportCSV { get; set; }
 
-		bool ShowSCANsatReset { get; }
-
 		bool ShowStockReset { get; }
 
 		bool ShowMapFill { get; }
@@ -115,6 +115,8 @@ namespace SCANsat.Unity.Interfaces
 
 		IList<string> BackgroundBodies { get; }
 
+		IList<string> MapDataTypes { get; }
+
 		ISCAN_Color ColorInterface { get; }
 
 		void ClampToScreen(RectTransform rect);
@@ -122,10 +124,6 @@ namespace SCANsat.Unity.Interfaces
 		void ResetCurrent();
 
 		void ResetAll();
-
-		void ResetSCANResourceCurrent();
-
-		void ResetSCANResourceAll();
 
 		void ResetStockResourceCurrent();
 

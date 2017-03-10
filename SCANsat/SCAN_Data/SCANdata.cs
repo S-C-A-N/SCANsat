@@ -551,13 +551,13 @@ namespace SCANsat.SCAN_Data
 
 		#region Map Utilities
 		/* DATA: debug option to fill in the map */
-		internal void fillMap()
+		internal void fillMap(SCANtype type)
 		{
 			for (int i = 0; i < 360; i++)
 			{
 				for (int j = 0; j < 180; j++)
 				{
-					coverage[i, j] |= (Int32)SCANtype.Everything;
+					coverage[i, j] |= (int)type;
 				}
 			}
 		}
@@ -577,25 +577,29 @@ namespace SCANsat.SCAN_Data
 		internal void reset()
 		{
 			coverage = new Int32[360, 180];
-			if (SCANcontroller.controller == null)
-				return;
 
-			if (SCAN_UI_MainMap.Instance == null)
-				return;
-
-			SCAN_UI_MainMap.Instance.resetImages();
+			if (SCAN_UI_MainMap.Instance != null && SCAN_UI_MainMap.Instance.IsVisible)
+				SCAN_UI_MainMap.Instance.resetImages();
 		}
 
-		internal void resetResources()
+		internal void reset(SCANtype type)
 		{
+			SCANtype mask = type;
+
+			mask ^= SCANtype.Everything;
+
 			for (int x = 0; x < 360; x++)
 			{
 				for (int y = 0; y < 180; y++)
 				{
-					coverage[x, y] &= (int)SCANtype.Everything_SCAN;
+					coverage[x, y] &= (int)mask;
 				}
 			}
+
+			if (SCAN_UI_MainMap.Instance != null && SCAN_UI_MainMap.Instance.IsVisible)
+				SCAN_UI_MainMap.Instance.resetImages();
 		}
+
 		#endregion
 
 		#region Data Serialize/Deserialize
