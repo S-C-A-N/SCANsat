@@ -46,6 +46,8 @@ namespace SCANsat.Unity.Unity
 		[SerializeField]
 		private SCAN_Toggle m_ColorToggle = null;
 		[SerializeField]
+		private SCAN_Toggle m_TerminatorToggle = null;
+		[SerializeField]
 		private SCAN_Toggle m_GridToggle = null;
 		[SerializeField]
 		private SCAN_Toggle m_OrbitToggle = null;
@@ -240,6 +242,9 @@ namespace SCANsat.Unity.Unity
 
 			if (m_ColorToggle != null)
 				m_ColorToggle.isOn = map.ColorToggle;
+
+			if (m_TerminatorToggle != null)
+				m_TerminatorToggle.isOn = map.TerminatorToggle;
 
 			if (m_GridToggle != null)
 				m_GridToggle.isOn = map.GridToggle;
@@ -1090,13 +1095,18 @@ namespace SCANsat.Unity.Unity
 
 			bigInterface.CurrentResource = selection;
 
+			loaded = false;
+			if (m_ResourcesToggle != null)
+				m_ResourcesToggle.isOn = true;
+			loaded = true;
+
+			bigInterface.ResourceToggle = true;
+
 			dropDown.FadeOut();
 			dropDown = null;
 
 			if (m_DropDownToggles != null)
 				m_DropDownToggles.SetAllTogglesOff();
-
-			RefreshIcons();
 		}
 
 		public void ToggleCelestialBodySelection(bool isOn)
@@ -1163,6 +1173,16 @@ namespace SCANsat.Unity.Unity
 			RefreshIcons();
 
 			SetLegend(bigInterface.LegendToggle);
+		}
+
+		public void ToggleTerminator(bool isOn)
+		{
+			if (!loaded || bigInterface == null)
+				return;
+
+			bigInterface.TerminatorToggle = isOn;
+
+			RefreshIcons();
 		}
 
 		public void ToggleGrid(bool isOn)
