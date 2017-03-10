@@ -152,6 +152,8 @@ namespace SCANsat.SCAN_UI.UI_Framework
 		[Persistent]
 		public string mainMapColor = "Map Color";
 		[Persistent]
+		public string mainMapTerminator = "Map Day/Night Terminator";
+		[Persistent]
 		public string mainMapType = "Terrain/Biome Toggle";
 		[Persistent]
 		public string mainMapMinimize = "Show/Hide Vessel Info";
@@ -165,6 +167,8 @@ namespace SCANsat.SCAN_UI.UI_Framework
 		public string bigMapRefresh = "Map Refresh";
 		[Persistent]
 		public string bigMapColor = "Map Color";
+		[Persistent]
+		public string bigMapTerminator = "Map Day/Night Terminator";
 		[Persistent]
 		public string bigMapGrid = "Grid Overlay";
 		[Persistent]
@@ -230,17 +234,17 @@ namespace SCANsat.SCAN_UI.UI_Framework
 
 		//Warning labels
 		[Persistent]
-		public string warningDataResetCurrent = "Erase all map data for {0}?";
+		public string warningDataResetCurrent = "Erase {0} map for {1}?";
 		[Persistent]
-		public string warningDataResetAll = "Erase map data for all celestial bodies?";
-		[Persistent]
-		public string warningSCANResourceResetCurrent = "Erase SCANsat resource data for {0}?";
-		[Persistent]
-		public string warningSCANResourceResetAll = "Erase SCANsat resource data for all celestial bodies?";
+		public string warningDataResetAll = "Erase {0} for all celestial bodies?";
 		[Persistent]
 		public string warningStockResourceResetCurrent = "Erase stock resource data for {0}?";
 		[Persistent]
 		public string warningStockResourceResetAll = "Erase stock resource data for all celestial bodies?";
+		[Persistent]
+		public string warningMapFillCurrent = "Fill in {0} map for {1}?";
+		[Persistent]
+		public string warningMapFillAll = "Fill in {0} for all celestial bodies?";
 		[Persistent]
 		public string warningModuleManagerResource = "Warning\nModule Manager is required for all SCANsat resource scanning functions.";
 		[Persistent]
@@ -292,17 +296,13 @@ namespace SCANsat.SCAN_UI.UI_Framework
 
 		public string GetStringWithName(string title)
 		{
-			var stringFields = this.GetType().GetFields(BindingFlags.Instance | BindingFlags.Public).Where(a => a.FieldType == typeof(string)).ToList();
+			var stringField = this.GetType()
+				.GetFields(BindingFlags.Instance | BindingFlags.Public)
+				.Where(a => a.FieldType == typeof(string))
+				.FirstOrDefault(f => f.Name == title);
 
-			for (int i = stringFields.Count - 1; i >= 0; i--)
-			{
-				FieldInfo f = stringFields[i];
-
-				if (f.Name != title)
-					continue;
-
-				return (string)f.GetValue(this);
-			}
+			if (stringField != null)
+				return (string)stringField.GetValue(this);
 
 			return "";
 		}
