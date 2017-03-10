@@ -73,6 +73,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 		public static Color xkcd_Yellow		= XKCDColors.Yellow;
 		public static Color xkcd_Red			= XKCDColors.Red;
 		public static Color xkcd_White		= XKCDColors.White;
+		public static Color xkcd_DarkGreenAlpha = XKCDColors.DarkGreen * new Vector4(1, 1, 1, 0.4f);
 
 
 		// colourblind barrier-free colours, according to Masataka Okabe and Kei Ito
