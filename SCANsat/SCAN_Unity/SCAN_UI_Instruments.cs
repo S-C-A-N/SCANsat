@@ -190,7 +190,7 @@ namespace SCANsat.SCAN_Unity
 			if (uiElement == null)
 				return;
 
-			uiElement.transform.SetParent(UIMasterController.Instance.mainCanvas.transform, false);
+			uiElement.transform.SetParent(UIMasterController.Instance.dialogCanvas.transform, false);
 
 			infoString = StringBuilderCache.Acquire();
 
