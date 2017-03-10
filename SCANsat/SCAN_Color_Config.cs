@@ -45,7 +45,12 @@ namespace SCANsat
 			FilePath = filepath;
 			TopNodeName = filepath + "/" + node;
 
-			if (Load())
+			if (!Load())
+			{
+				Save();
+				LoadSavedCopy();
+			}
+			else
 				SCANUtil.SCANlog("Color File Loaded...");
 		}
 

@@ -25,6 +25,8 @@ namespace SCANsat.Unity.Interfaces
 
 		bool Color { get; set; }
 
+		bool TerminatorToggle { get; set; }
+
 		bool MapType { get; set; }
 
 		bool Minimized { get; set; }

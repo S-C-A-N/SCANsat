@@ -32,6 +32,9 @@ namespace SCANsat.SCAN_Unity
 		private Vector2 _position;
 		private const string controlLock = "SCANsatSettings";
 
+		private string _currentData = "All Data";
+		private SCANtype _currentDataType = SCANtype.Everything;
+
 		private SCAN_Settings uiElement;
 
 		private SCAN_UI_Color colorInterface;
@@ -88,7 +91,7 @@ namespace SCANsat.SCAN_Unity
 			if (uiElement == null)
 				return;
 
-			uiElement.transform.SetParent(UIMasterController.Instance.mainCanvas.transform, false);
+			uiElement.transform.SetParent(UIMasterController.Instance.dialogCanvas.transform, false);
 
 			uiElement.setSettings(this, page);
 
@@ -139,22 +142,12 @@ namespace SCANsat.SCAN_Unity
 
 		public string DataResetCurrent
 		{
-			get { return string.Format(SCANconfigLoader.languagePack.warningDataResetCurrent, getTargetBody().theName); }
+			get { return string.Format(SCANconfigLoader.languagePack.warningDataResetCurrent, _currentDataType, getTargetBody().theName); }
 		}
 
 		public string DataResetAll
 		{
-			get { return SCANconfigLoader.languagePack.warningDataResetAll; }
-		}
-
-		public string SCANResourceResetCurrent
-		{
-			get { return string.Format(SCANconfigLoader.languagePack.warningSCANResourceResetCurrent, getTargetBody().theName); }
-		}
-
-		public string SCANResourceResetAll
-		{
-			get { return SCANconfigLoader.languagePack.warningSCANResourceResetAll; }
+			get { return string.Format(SCANconfigLoader.languagePack.warningDataResetAll, _currentDataType); }
 		}
 
 		public string StockResourceResetCurrent
@@ -165,6 +158,16 @@ namespace SCANsat.SCAN_Unity
 		public string StockResourceResetAll
 		{
 			get { return SCANconfigLoader.languagePack.warningStockResourceResetAll; }
+		}
+
+		public string WarningMapFillCurrent
+		{
+			get { return string.Format(SCANconfigLoader.languagePack.warningMapFillCurrent, _currentData, getTargetBody().theName); }
+		}
+
+		public string WarningMapFillAll
+		{
+			get { return string.Format(SCANconfigLoader.languagePack.warningMapFillAll, _currentData); }
 		}
 
 		public string ModuleManagerWarning
@@ -180,6 +183,43 @@ namespace SCANsat.SCAN_Unity
 		public string SaveToConfig
 		{
 			get { return SCANconfigLoader.languagePack.warningSaveToConfig; }
+		}
+
+		public string CurrentMapData
+		{
+			get { return _currentData; }
+			set
+			{
+				_currentData = value;
+
+				if (value == "All Data")
+					_currentDataType = SCANtype.Everything;
+				else if (value == "SCAN Data Types")
+					_currentDataType = SCANtype.Everything_SCAN;
+				else if (value == "All Resource Types")
+				{
+					_currentDataType = 0;
+
+					List<SCANresourceGlobal> resources = SCANcontroller.setLoadedResourceList();
+
+					for (int i = 0; i < resources.Count; i++)
+						_currentDataType |= resources[i].SType;
+				}
+				else
+				{
+					try
+					{
+						_currentDataType = (SCANtype)Enum.Parse(typeof(SCANtype), value);
+					}
+					catch (Exception e)
+					{
+						SCANUtil.SCANlog("Error in parsing map fill type value: {0} - Setting fill type to Everything:\n{1}", value, e);
+						_currentData = "All Data";
+						_currentDataType = SCANtype.Everything;
+					}
+				}
+
+			}
 		}
 
 		public int MapGenSpeed
@@ -206,6 +246,8 @@ namespace SCANsat.SCAN_Unity
 					SCAN_UI_BigMap.Instance.Size = new Vector2(value, value / 2);
 
 					SCAN_UI_BigMap.Instance.SetMapSize();
+
+					SCAN_UI_BigMap.Instance.RefreshIcons();
 				}
 			}
 		}
@@ -456,8 +498,7 @@ namespace SCANsat.SCAN_Unity
 			set
 			{
 				SCAN_Settings_Config.Instance.DisableStockResource = value;
-
-
+				
 				if (SCAN_UI_MainMap.Instance != null && SCAN_UI_MainMap.Instance.IsVisible)
 				{
 					SCAN_UI_MainMap.Instance.Close();
@@ -483,11 +524,6 @@ namespace SCANsat.SCAN_Unity
 		{
 			get { return SCAN_Settings_Config.Instance.ExportCSV; }
 			set { SCAN_Settings_Config.Instance.ExportCSV = value; }
-		}
-
-		public bool ShowSCANsatReset
-		{
-			get { return SCAN_Settings_Config.Instance.DisableStockResource || !SCAN_Settings_Config.Instance.InstantScan; }
 		}
 
 		public bool ShowStockReset
@@ -534,6 +570,35 @@ namespace SCANsat.SCAN_Unity
 			get	{ return new List<string>(SCANcontroller.controller.GetAllData.Select(d => d.Body.bodyName)); }
 		}
 
+		public IList<string> MapDataTypes
+		{
+			get
+			{
+				List<int> availableTypes = new List<int>() { 0, 1, 3, 4, 5 };
+
+				if (SCAN_Settings_Config.Instance.DisableStockResource || !SCAN_Settings_Config.Instance.InstantScan)
+					availableTypes.Add(19);
+
+				List<string> types = new List<string>() { "All Data", "SCAN Data Types" };
+
+				for (int i = 0; i < availableTypes.Count; i++)
+					types.Add(((SCANtype)(1 << availableTypes[i])).ToString());
+
+				if (SCAN_Settings_Config.Instance.DisableStockResource || !SCAN_Settings_Config.Instance.InstantScan)
+				{
+					List<SCANresourceGlobal> resources = SCANcontroller.setLoadedResourceList();
+
+					if (resources.Count > 1)
+						types.Add("All Resource Types");
+
+					for (int i = 0; i < resources.Count; i++)
+						types.Add(resources[i].SType.ToString());
+				}
+
+				return types;
+			}
+		}
+
 		public ISCAN_Color ColorInterface
 		{
 			get { return colorInterface; }
@@ -551,29 +616,13 @@ namespace SCANsat.SCAN_Unity
 			SCANdata data = SCANUtil.getData(thisBody);
 
 			if (data != null)
-				data.reset();
+				data.reset(_currentDataType);
 		}
 
 		public void ResetAll()
 		{
 			foreach (SCANdata data in SCANcontroller.controller.GetAllData)
-				data.reset();
-		}
-
-		public void ResetSCANResourceCurrent()
-		{
-			CelestialBody thisBody = getTargetBody();
-
-			SCANdata data = SCANUtil.getData(thisBody);
-
-			if (data != null)
-				data.resetResources();
-		}
-
-		public void ResetSCANResourceAll()
-		{
-			foreach (SCANdata data in SCANcontroller.controller.GetAllData)
-				data.resetResources();
+				data.reset(_currentDataType);
 		}
 
 		public void ResetStockResourceCurrent()
@@ -595,12 +644,14 @@ namespace SCANsat.SCAN_Unity
 			CelestialBody thisBody = getTargetBody();
 
 			SCANdata data = SCANUtil.getData(thisBody);
+
 			if (data == null)
 			{
 				data = new SCANdata(thisBody);
 				SCANcontroller.controller.addToBodyData(thisBody, data);
 			}
-			data.fillMap();
+
+			data.fillMap(_currentDataType);
 		}
 
 		public void FillAll()
@@ -608,12 +659,14 @@ namespace SCANsat.SCAN_Unity
 			foreach (CelestialBody b in FlightGlobals.Bodies)
 			{
 				SCANdata data = SCANUtil.getData(b);
+
 				if (data == null)
 				{
 					data = new SCANdata(b);
 					SCANcontroller.controller.addToBodyData(b, data);
 				}
-				data.fillMap();
+
+				data.fillMap(_currentDataType);
 			}
 		}
 

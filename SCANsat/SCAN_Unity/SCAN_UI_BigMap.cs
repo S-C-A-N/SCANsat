@@ -211,6 +211,7 @@ namespace SCANsat.SCAN_Unity
 				bigmap.MType = t;
 				bigmap.ResourceActive = SCANcontroller.controller.bigMapResourceOn;
 				bigmap.ColorMap = SCANcontroller.controller.bigMapColor;
+				bigmap.Terminator = SCANcontroller.controller.bigMapTerminator;
 
 				if (SCAN_Settings_Config.Instance.BigMapWidth % 2 != 0)
 					SCAN_Settings_Config.Instance.BigMapWidth += 1;
@@ -340,8 +341,6 @@ namespace SCANsat.SCAN_Unity
 
 		public void OnDestroy()
 		{
-			SCANcontroller.controller.unloadPQS(bigmap.Body, mapSource.BigMap);
-
 			GameEvents.onVesselChange.Remove(vesselChange);
 			GameEvents.onVesselWasModified.Remove(vesselChange);
 			GameEvents.onVesselSOIChanged.Remove(soiChange);
@@ -351,6 +350,8 @@ namespace SCANsat.SCAN_Unity
 				uiElement.gameObject.SetActive(false);
 				MonoBehaviour.Destroy(uiElement.gameObject);
 			}
+
+			SCANcontroller.controller.unloadPQS(bigmap.Body, mapSource.BigMap);
 		}
 
 		public void SetScale(float scale)
@@ -993,7 +994,7 @@ namespace SCANsat.SCAN_Unity
 			if (uiElement == null)
 				return;
 
-			uiElement.transform.SetParent(UIMasterController.Instance.mainCanvas.transform, false);
+			uiElement.transform.SetParent(UIMasterController.Instance.dialogCanvas.transform, false);
 
 			if (OrbitToggle && ShowOrbit)
 			{
@@ -1048,9 +1049,6 @@ namespace SCANsat.SCAN_Unity
 		{
 			_isVisible = false;
 			
-			if (HighLogic.LoadedSceneIsFlight)
-				SCANcontroller.controller.bigMapVisible = false;
-
 			if (uiElement == null)
 				return;
 
@@ -1072,6 +1070,9 @@ namespace SCANsat.SCAN_Unity
 						SCANappLauncher.Instance.SCANAppButton.SetFalse(false);
 				}
 			}
+
+			if (HighLogic.LoadedSceneIsFlight)
+				SCANcontroller.controller.bigMapVisible = false;
 		}
 
 		public void SetMapSize()
@@ -1152,20 +1153,13 @@ namespace SCANsat.SCAN_Unity
 			set
 			{
 				SCANcontroller.controller.bigMapResource = value;
-				SCANcontroller.controller.bigMapResourceOn = true;
 
 				currentResource = AssignResource(value);
 
 				if (currentResource == null)
-				{
-					SCANcontroller.controller.bigMapResourceOn = false;
-					return;
-				}
+					bigmap.Resource = null;
 				else
-				{
 					bigmap.Resource = currentResource;
-					bigmap.resetMap(SCANcontroller.controller.bigMapResourceOn);
-				}
 			}
 		}
 
@@ -1263,6 +1257,18 @@ namespace SCANsat.SCAN_Unity
 				SCANcontroller.controller.bigMapColor = value;
 
 				bigmap.ColorMap = value;
+				bigmap.resetMap(SCANcontroller.controller.bigMapResourceOn);
+			}
+		}
+
+		public bool TerminatorToggle
+		{
+			get { return SCANcontroller.controller.bigMapTerminator; }
+			set
+			{
+				SCANcontroller.controller.bigMapTerminator = value;
+
+				bigmap.Terminator = value;
 				bigmap.resetMap(SCANcontroller.controller.bigMapResourceOn);
 			}
 		}
@@ -1461,7 +1467,7 @@ namespace SCANsat.SCAN_Unity
 
 		public Canvas MainCanvas
 		{
-			get { return UIMasterController.Instance.mainCanvas; }
+			get { return UIMasterController.Instance.dialogCanvas; }
 		}
 
 		public Canvas TooltipCanvas

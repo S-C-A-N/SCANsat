@@ -103,7 +103,7 @@ namespace SCANsat
 				if (currentGlobal == null)
 				{
 					SCANcontroller.addToResourceData(rs.ResourceName, new SCANresourceGlobal(rs.ResourceName, 20, rs.Distribution.MinAbundance, rs.Distribution.MaxAbundance, palette.magenta, palette.cb_orange, t));
-					currentGlobal = SCANcontroller.getResourceNode(rs.ResourceName);
+					currentGlobal = SCANcontroller.getResourceNode(rs.ResourceName, true);
 				}
 
 				if (rs.Distribution.MinAbundance > currentGlobal.DefaultMinValue)
@@ -138,7 +138,7 @@ namespace SCANsat
 						continue;
 
 					SCANcontroller.addToResourceData(rsBody.ResourceName, new SCANresourceGlobal(rsBody.ResourceName, 20, 0, 0.001f, palette.magenta, palette.cb_orange, t));
-					currentGlobal = SCANcontroller.getResourceNode(rsBody.ResourceName);
+					currentGlobal = SCANcontroller.getResourceNode(rsBody.ResourceName, true);
 
 					foreach (CelestialBody body in FlightGlobals.Bodies)
 					{

@@ -103,18 +103,6 @@ namespace SCANsat
 		[Persistent]
 		public bool CheatMapFill = false;
 		[Persistent]
-		public bool CheatStartLoTerrain = false;
-		[Persistent]
-		public bool CheatStartHiTerrain = false;
-		[Persistent]
-		public bool CheatStartBiome = false;
-		[Persistent]
-		public bool CheatStartFuzzyResources = false;
-		[Persistent]
-		public bool CheatStartOre = false;
-		[Persistent]
-		public bool CheatStartAllResources = false;
-		[Persistent]
 		public int BigMapWidth = 720;
 		[Persistent]
 		public Vector2 ZoomMapSize = new Vector2(360, 240);
@@ -143,7 +131,10 @@ namespace SCANsat
 		private void Awake()
 		{
 			if (loaded)
+			{
 				Destroy(gameObject);
+				return;
+			}
 
 			DontDestroyOnLoad(gameObject);
 

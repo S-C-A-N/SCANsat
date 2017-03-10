@@ -20,8 +20,8 @@ using SCANsat.SCAN_Unity;
 
 namespace SCANsat.SCAN_Toolbar
 {
-	[SCAN_KSPAddonImproved(SCAN_KSPAddonImproved.Startup.TimeElapses, false)]
-	class SCANtoolbar : MonoBehaviour
+	[KSPAddon(KSPAddon.Startup.AllGameScenes, false)]
+	public class SCANtoolbar : MonoBehaviour
 	{
 		private IButton SCANButton;
 		private IButton MapButton;
@@ -30,9 +30,13 @@ namespace SCANsat.SCAN_Toolbar
 		private IButton KSCButton;
 		private IButton ZoomButton;
 
-		internal SCANtoolbar()
+		public SCANtoolbar()
 		{
-			if (!ToolbarManager.ToolbarAvailable) return; // bail if we don't have a toolbar
+			if (!ToolbarManager.ToolbarAvailable)
+			{
+				Destroy(gameObject); // bail if we don't have a toolbar
+				return;
+			}
 
 			if (HighLogic.LoadedSceneIsFlight)
 			{
@@ -140,6 +144,8 @@ namespace SCANsat.SCAN_Toolbar
 						}
 					};
 			}
+			else
+				Destroy(gameObject);
 		}
 
 		private void toggleMenu(IButton menu)

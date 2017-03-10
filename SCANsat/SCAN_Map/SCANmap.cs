@@ -98,6 +98,12 @@ namespace SCANsat.SCAN_Map
 			set { colorMap = value; }
 		}
 
+		public bool Terminator
+		{
+			get { return terminator; }
+			set { terminator = value; }
+		}
+
 		public mapSource MSource
 		{
 			get { return mSource; }
@@ -404,6 +410,9 @@ namespace SCANsat.SCAN_Map
 		private Color32[] stockBiomeColor;
 		private int startLine;
 		private int stopLine;
+		double sunLonCenter;
+		double sunLatCenter;
+		double gamma;
 
 		internal void setSize(Vector2 size)
 		{
@@ -568,6 +577,7 @@ namespace SCANsat.SCAN_Map
 		private float customRange;
 		private bool useCustomRange;
 		private bool colorMap;
+		private bool terminator;
 		private float mapRedlineDraw = 10;
 
 		/* MAP: nearly trivial functions */
@@ -657,6 +667,21 @@ namespace SCANsat.SCAN_Map
 				case mapSource.RPM:
 					mapRedlineDraw = 10;
 					break;
+			}
+
+			if (terminator)
+			{
+				double sunLon = body.GetLongitude(Planetarium.fetch.Sun.position, false);
+				double sunLat = body.GetLatitude(Planetarium.fetch.Sun.position, false);
+
+				sunLatCenter = SCANUtil.fixLatShift(sunLat);
+
+				if (sunLatCenter >= 0)
+					sunLonCenter = SCANUtil.fixLonShift(sunLon + 90);
+				else
+					sunLonCenter = SCANUtil.fixLonShift(sunLon - 90);
+
+				gamma = Math.Abs(sunLatCenter) < 1 ? 50 : Math.Tan(Mathf.Deg2Rad * (90 - Math.Abs(sunLatCenter)));
 			}
 		}
 
@@ -991,7 +1016,27 @@ namespace SCANsat.SCAN_Map
 								abundance = resourceCache[Mathf.RoundToInt(i * (resourceMapWidth / mapwidth)), Mathf.RoundToInt(mapstep * (resourceMapWidth / mapwidth))];
 								break;
 					}
-					pix[i] = SCANuiUtil.resourceToColor32(baseColor, resource, abundance, data, lon, lat);
+					baseColor = SCANuiUtil.resourceToColor32(baseColor, resource, abundance, data, lon, lat);
+				}
+
+				if (terminator)
+				{
+					double crossingLat = Math.Atan(gamma * Math.Sin(Mathf.Deg2Rad * lon - Mathf.Deg2Rad * sunLonCenter));
+
+					if (sunLatCenter >= 0)
+					{
+						if (lat < crossingLat * Mathf.Rad2Deg)
+							pix[i] = palette.lerp(baseColor, palette.Black, 0.5f);
+						else
+							pix[i] = baseColor;
+					}
+					else
+					{
+						if (lat > crossingLat * Mathf.Rad2Deg)
+							pix[i] = palette.lerp(baseColor, palette.Black, 0.5f);
+						else
+							pix[i] = baseColor;
+					}
 				}
 				else
 					pix[i] = baseColor;

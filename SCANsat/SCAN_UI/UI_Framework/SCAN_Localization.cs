@@ -25,9 +25,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 				LoadSavedCopy();
 			}
 			else
-			{
 				SCANUtil.SCANlog("Language File Loaded...");
-			}
 		}
 
 		public override void OnDecodeFromConfigNode()

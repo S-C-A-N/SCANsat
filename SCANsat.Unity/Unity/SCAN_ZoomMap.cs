@@ -60,15 +60,17 @@ namespace SCANsat.Unity.Unity
 		[SerializeField]
 		private GameObject m_OrbitObject = null;
 		[SerializeField]
-		private Toggle m_OrbitToggle = null;
+		private SCAN_Toggle m_OrbitToggle = null;
 		[SerializeField]
-		private Toggle m_ColorToggle = null;
+		private SCAN_Toggle m_ColorToggle = null;
 		[SerializeField]
-		private Toggle m_LegendToggle = null;
+		private SCAN_Toggle m_TerminatorToggle = null;
 		[SerializeField]
-		private Toggle m_ResourceToggle = null;
+		private SCAN_Toggle m_LegendToggle = null;
 		[SerializeField]
-		private Toggle m_IconsToggle = null;
+		private SCAN_Toggle m_ResourceToggle = null;
+		[SerializeField]
+		private SCAN_Toggle m_IconsToggle = null;
 		[SerializeField]
 		private TextHandler m_ReadoutText = null;
 		[SerializeField]
@@ -237,6 +239,9 @@ namespace SCANsat.Unity.Unity
 
 			if (m_ColorToggle != null)
 				m_ColorToggle.isOn = map.ColorToggle;
+
+			if (m_TerminatorToggle != null)
+				m_TerminatorToggle.isOn = map.TerminatorToggle;
 
 			if (m_OrbitToggle != null)
 				m_OrbitToggle.isOn = map.OrbitToggle;
@@ -1143,13 +1148,18 @@ namespace SCANsat.Unity.Unity
 
 			zoomInterface.CurrentResource = selection;
 
+			loaded = false;
+			if (m_ResourceToggle != null)
+				m_ResourceToggle.isOn = true;
+			loaded = true;
+
+			zoomInterface.ResourceToggle = true;
+
 			dropDown.FadeOut();
 			dropDown = null;
 
 			if (m_DropDownToggles != null)
 				m_DropDownToggles.SetAllTogglesOff();
-
-			RefreshIcons();
 		}
 
 		public void RefreshMap()
@@ -1172,6 +1182,16 @@ namespace SCANsat.Unity.Unity
 			RefreshIcons();
 
 			SetLegend(zoomInterface.LegendToggle);
+		}
+
+		public void ToggleTerminator(bool isOn)
+		{
+			if (!loaded || zoomInterface == null)
+				return;
+
+			zoomInterface.TerminatorToggle = isOn;
+
+			RefreshIcons();
 		}
 
 		public void ToggleOrbit(bool isOn)

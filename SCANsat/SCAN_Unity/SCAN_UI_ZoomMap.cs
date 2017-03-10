@@ -232,11 +232,20 @@ namespace SCANsat.SCAN_Unity
 
 			spotmap.ResourceActive = SCANcontroller.controller.zoomMapResourceOn;
 			spotmap.ColorMap = SCANcontroller.controller.zoomMapColor;
+			spotmap.Terminator = SCANcontroller.controller.zoomMapTerminator;
 
 			spotmap.resetMap(t, false, ResourceToggle, narrowBand);
 		}
+
+		private void resetMap(double lat = 0, double lon = 0, bool withCenter = false)
+		{
+			if (VesselLock)
+				resetMapToVessel();
+			else
+				resetMap(withCenter, lat, lon);
+		}
 		
-		public void resetMap(double lat = 0, double lon = 0, bool withCenter = false)
+		public void resetMap(bool withCenter, double lat, double lon)
 		{
 			if (withCenter)
 				spotmap.centerAround(lon, lat);
@@ -273,7 +282,7 @@ namespace SCANsat.SCAN_Unity
 					currentResource.CurrentBodyConfig(body.name);
 			}
 
-			resetMap(SCANUtil.fixLatShift(vessel.latitude), SCANUtil.fixLonShift(vessel.longitude), true);
+			resetMap(true, SCANUtil.fixLatShift(vessel.latitude), SCANUtil.fixLonShift(vessel.longitude));
 		}
 
 		protected void calcTerrainLimits()
@@ -898,7 +907,7 @@ namespace SCANsat.SCAN_Unity
 			if (uiElement == null)
 				return;
 
-			uiElement.transform.SetParent(UIMasterController.Instance.mainCanvas.transform, false);
+			uiElement.transform.SetParent(UIMasterController.Instance.dialogCanvas.transform, false);
 
 			vessel = FlightGlobals.ActiveVessel;
 
@@ -1017,20 +1026,13 @@ namespace SCANsat.SCAN_Unity
 			set
 			{
 				SCANcontroller.controller.zoomMapResource = value;
-				SCANcontroller.controller.zoomMapResourceOn = true;
 
 				currentResource = AssignResource(value);
 
 				if (currentResource == null)
-				{
-					SCANcontroller.controller.zoomMapResourceOn = false;
-					return;
-				}
+					spotmap.Resource = null;
 				else
-				{
 					spotmap.Resource = currentResource;
-					resetMap();
-				}
 			}
 		}
 
@@ -1113,6 +1115,18 @@ namespace SCANsat.SCAN_Unity
 				SCANcontroller.controller.zoomMapColor = value;
 
 				spotmap.ColorMap = value;
+				resetMap();
+			}
+		}
+
+		public bool TerminatorToggle
+		{
+			get { return SCANcontroller.controller.zoomMapTerminator; }
+			set
+			{
+				SCANcontroller.controller.zoomMapTerminator = value;
+
+				spotmap.Terminator = value;
 				resetMap();
 			}
 		}
@@ -1290,7 +1304,7 @@ namespace SCANsat.SCAN_Unity
 
 		public Canvas MainCanvas
 		{
-			get { return UIMasterController.Instance.mainCanvas; }
+			get { return UIMasterController.Instance.dialogCanvas; }
 		}
 
 		public Canvas TooltipCanvas
@@ -1315,10 +1329,7 @@ namespace SCANsat.SCAN_Unity
 				spotmap.setSize(value);
 				spotmap.MapScale = scale;
 
-				if (VesselLock)
-					resetMapToVessel();
-				else
-					resetMap();
+				resetMap();
 
 				updateMap = true;
 			}
@@ -1827,10 +1838,7 @@ namespace SCANsat.SCAN_Unity
 
 		public void RefreshMap()
 		{
-			if (VesselLock)
-				resetMapToVessel();
-			else
-				resetMap();
+			resetMap();
 
 			uiElement.SetLegend(LegendToggle);
 		}
@@ -1933,10 +1941,7 @@ namespace SCANsat.SCAN_Unity
 				if (spotmap.MapScale > maxZoom)
 					spotmap.MapScale = maxZoom;
 
-				if (VesselLock)
-					resetMapToVessel();
-				else
-					resetMap();
+				resetMap();
 			}
 			else
 			{
@@ -1944,10 +1949,7 @@ namespace SCANsat.SCAN_Unity
 				if (spotmap.MapScale < minZoom)
 					spotmap.MapScale = minZoom;
 
-				if (VesselLock)
-					resetMapToVessel();
-				else
-					resetMap();
+				resetMap();
 			}
 		}
 
@@ -2005,19 +2007,11 @@ namespace SCANsat.SCAN_Unity
 					if (spotmap.MapScale < minZoom)
 						spotmap.MapScale = minZoom;
 
-					if (VesselLock)
-						resetMapToVessel();
-					else
-						resetMap(mapPos.y, mapPos.x, true);
+					resetMap(mapPos.y, mapPos.x, true);
 					break;
 				case 1:
 					if (GameSettings.MODIFIER_KEY.GetKey())
-					{
-						if (VesselLock)
-						resetMapToVessel();
-					else
 						resetMap(mapPos.y, mapPos.x, true);
-					}
 					else
 					{
 						spotmap.MapScale = spotmap.MapScale * 1.25f;
@@ -2025,17 +2019,11 @@ namespace SCANsat.SCAN_Unity
 						if (spotmap.MapScale > maxZoom)
 							spotmap.MapScale = maxZoom;
 
-						if (VesselLock)
-							resetMapToVessel();
-						else
-							resetMap(mapPos.y, mapPos.x, true);
+						resetMap(mapPos.y, mapPos.x, true);
 					}
 					break;
 				case 2:
-					if (VesselLock)
-						resetMapToVessel();
-					else
-						resetMap(mapPos.y, mapPos.x, true);
+					resetMap(mapPos.y, mapPos.x, true);
 					break;
 			}
 		}

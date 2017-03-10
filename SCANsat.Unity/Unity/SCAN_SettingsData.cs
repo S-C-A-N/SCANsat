@@ -32,19 +32,19 @@ namespace SCANsat.Unity.Unity
 		[SerializeField]
 		private TextHandler m_ResetCurrentText = null;
 		[SerializeField]
-		private TextHandler m_ResetCurrentSCANText = null;
-		[SerializeField]
 		private TextHandler m_ResetCurrentStockText = null;
 		[SerializeField]
 		private TextHandler m_FillCurrentText = null;
 		[SerializeField]
-		private InputField m_MapWidthInput = null;
+		private TextHandler m_TypeText = null;
 		[SerializeField]
-		private GameObject m_ResetSCANResource = null;
+		private InputField m_MapWidthInput = null;
 		[SerializeField]
 		private GameObject m_ResetStockResource = null;
 		[SerializeField]
 		private GameObject m_MapFill = null;
+		[SerializeField]
+		private Transform m_MapTypeOption = null;
 
 		private bool loaded;
 		private ISCAN_Settings settings;
@@ -77,16 +77,10 @@ namespace SCANsat.Unity.Unity
 			if (m_MapWidth != null)
 				m_MapWidth.OnTextUpdate.Invoke("Map Width: " + set.MapWidth.ToString());
 
-			if (!set.DisableStock)
+			if (!set.ShowStockReset)
 			{
-				if (set.InstantScan)
-				{
-					if (m_ResetSCANResource != null)
-						m_ResetSCANResource.SetActive(false);
-
-					if (m_ResetStockResource != null)
-						m_ResetStockResource.SetActive(false);
-				}
+				if (m_ResetStockResource != null)
+					m_ResetStockResource.SetActive(false);
 			}
 
 			if (!set.ShowMapFill && m_MapFill != null)
@@ -105,14 +99,14 @@ namespace SCANsat.Unity.Unity
 			if (m_ResetCurrentText != null)
 				m_ResetCurrentText.OnTextUpdate.Invoke("Reset Map of " + settings.CurrentBody);
 
-			if (m_ResetCurrentSCANText != null)
-				m_ResetCurrentSCANText.OnTextUpdate.Invoke("Reset SCANsat resource data of " + settings.CurrentBody);
-
 			if (m_ResetCurrentStockText != null)
 				m_ResetCurrentStockText.OnTextUpdate.Invoke("Reset stock resource data for " + settings.CurrentBody);
 
 			if (m_FillCurrentText != null)
 				m_FillCurrentText.OnTextUpdate.Invoke("Fill map of " + settings.CurrentBody);
+
+			if (m_TypeText != null)
+				m_TypeText.OnTextUpdate.Invoke(settings.CurrentMapData);
 		}
 
 		public void GreyScale(bool isOn)
@@ -168,6 +162,40 @@ namespace SCANsat.Unity.Unity
 				return;
 
 			settings.LockInput = true;
+		}
+
+		public override void OnPointerDown(PointerEventData eventData)
+		{
+			if (SCAN_Settings.Instance == null)
+				return;
+
+			if (SCAN_Settings.Instance.DropDown != null)
+			{
+				RectTransform r = SCAN_Settings.Instance.DropDown.GetComponent<RectTransform>();
+
+				if (r != null)
+				{
+					if (!RectTransformUtility.RectangleContainsScreenPoint(r, eventData.position, eventData.pressEventCamera))
+					{
+						SCAN_Settings.Instance.DropDown.FadeOut();
+						SCAN_Settings.Instance.DropDown = null;
+					}
+				}
+			}
+
+			if (SCAN_Settings.Instance.WarningPopup != null)
+			{
+				RectTransform r = SCAN_Settings.Instance.WarningPopup.GetComponent<RectTransform>();
+
+				if (r != null)
+				{
+					if (!RectTransformUtility.RectangleContainsScreenPoint(r, eventData.position, eventData.pressEventCamera))
+					{
+						SCAN_Settings.Instance.WarningPopup.FadeOut();
+						SCAN_Settings.Instance.WarningPopup = null;
+					}
+				}
+			}
 		}
 
 		private void PopupPopup(string message, UnityAction callback)
@@ -230,40 +258,6 @@ namespace SCANsat.Unity.Unity
 			settings.ResetAll();
 		}
 
-		public void ResetSCANResourceCurrent()
-		{
-			if (settings != null)
-				PopupPopup(settings.SCANResourceResetCurrent, ConfirmResetSCANResourceCurrent);
-		}
-
-		private void ConfirmResetSCANResourceCurrent()
-		{
-			SCAN_Settings.Instance.WarningPopup.FadeOut(true);
-			SCAN_Settings.Instance.WarningPopup = null;
-
-			if (settings == null)
-				return;
-
-			settings.ResetSCANResourceCurrent();
-		}
-
-		public void ResetSCANResourceAll()
-		{
-			if (settings != null)
-				PopupPopup(settings.SCANResourceResetAll, ConfirmResetSCANResourceAll);
-		}
-
-		private void ConfirmResetSCANResourceAll()
-		{
-			SCAN_Settings.Instance.WarningPopup.FadeOut(true);
-			SCAN_Settings.Instance.WarningPopup = null;
-
-			if (settings == null)
-				return;
-
-			settings.ResetSCANResourceCurrent();
-		}
-
 		public void ResetStockResourceCurrent()
 		{
 			if (settings != null)
@@ -298,8 +292,57 @@ namespace SCANsat.Unity.Unity
 			settings.ResetStockResourceAll();
 		}
 
+		public void MapTypeDropDown(bool isOn)
+		{
+			if (SCAN_Settings.Instance.DropDown != null)
+			{
+				SCAN_Settings.Instance.DropDown.FadeOut(true);
+				SCAN_Settings.Instance.DropDown = null;
+			}
+
+			if (!isOn)
+				return;
+
+			if (m_MapTypeOption == null || SCAN_Settings.Instance.DropDownPrefab == null || settings == null)
+				return;
+
+			SCAN_Settings.Instance.DropDown = Instantiate(SCAN_Settings.Instance.DropDownPrefab).GetComponent<SCAN_DropDown>();
+
+			if (SCAN_Settings.Instance.DropDown == null)
+				return;
+
+			SCAN_Settings.Instance.DropDown.transform.SetParent(m_MapTypeOption, false);
+
+			SCAN_Settings.Instance.DropDown.Setup(settings.MapDataTypes, settings.CurrentMapData, 12);
+
+			SCAN_Settings.Instance.DropDown.OnSelectUpdate.AddListener(new UnityEngine.Events.UnityAction<string>(MapTypeOption));
+		}
+
+		public void MapTypeOption(string scanType)
+		{
+			if (m_TypeText != null)
+				m_TypeText.OnTextUpdate.Invoke(scanType);
+
+			SCAN_Settings.Instance.DropDown.FadeOut(true);
+			SCAN_Settings.Instance.DropDown = null;
+
+			if (settings == null)
+				return;
+
+			settings.CurrentMapData = scanType;
+		}
+
 		public void FillCurrentMap()
 		{
+			if (settings != null)
+				PopupPopup(settings.WarningMapFillCurrent, ConfirmFillCurrentMap);
+		}
+
+		public void ConfirmFillCurrentMap()
+		{
+			SCAN_Settings.Instance.WarningPopup.FadeOut(true);
+			SCAN_Settings.Instance.WarningPopup = null;
+
 			if (settings == null)
 				return;
 
@@ -308,6 +351,15 @@ namespace SCANsat.Unity.Unity
 
 		public void FillAllMaps()
 		{
+			if (settings != null)
+				PopupPopup(settings.WarningMapFillAll, ConfirmFillAllMaps);
+		}
+
+		public void ConfirmFillAllMaps()
+		{
+			SCAN_Settings.Instance.WarningPopup.FadeOut(true);
+			SCAN_Settings.Instance.WarningPopup = null;
+
 			if (settings == null)
 				return;
 

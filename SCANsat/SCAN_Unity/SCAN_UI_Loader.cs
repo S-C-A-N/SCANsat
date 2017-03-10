@@ -333,6 +333,8 @@ namespace SCANsat.SCAN_Unity
 
 			path = KSPUtil.ApplicationRootPath + "GameData/SCANsat/Resources/";
 
+			SCANUtil.SCANlog("Processing SCANsat asset bundles...");
+
 			StartCoroutine(loadResources());
 		}
 
@@ -363,6 +365,11 @@ namespace SCANsat.SCAN_Unity
 				loadPrefabBundle();
 
 			palette.CurrentPalettes = palette.setCurrentPalettesType(Palette.Kind.Diverging, 7);
+
+			if (shadersLoaded && spritesLoaded && skinLoaded && iconsLoaded && prefabsLoaded)
+				SCANUtil.SCANlog("All SCANsat asset bundles loaded");
+			else
+				SCANUtil.SCANlog("Error in loading SCANsat asset bundles\nSome UI elements may be non-functional");
 
 			loaded = true;
 		}
@@ -399,6 +406,8 @@ namespace SCANsat.SCAN_Unity
 				else if (s.name == "Hidden/Grayscale Effect")
 					_greyScaleShader = s;
 			}
+
+			SCANUtil.SCANlog("Shader asset bundle loaded; using platform bundle: {0}", shaderPath);
 
 			//shaders.Unload(false);
 
@@ -533,6 +542,8 @@ namespace SCANsat.SCAN_Unity
 					_unityTooltipBackground = s;
 			}
 
+			SCANUtil.SCANlog("Unity skin asset bundle loaded");
+
 			//images.Unload(false);
 
 			skinLoaded = true;
@@ -648,6 +659,8 @@ namespace SCANsat.SCAN_Unity
 					_kspTooltipBackground = s;
 			}
 
+			SCANUtil.SCANlog("Icon asset bundle loaded");
+
 			iconsLoaded = true;
 		}
 
@@ -671,6 +684,11 @@ namespace SCANsat.SCAN_Unity
 
 			if (!prefabsProcessed)
 				processUIPrefabs();
+
+			if (tmpProcessed && tooltipsProcessed && prefabsProcessed)
+				SCANUtil.SCANlog("UI prefab bundle loaded and processed");
+			else
+				SCANUtil.SCANlog("Error in processing UI prefab bundle\nSome UI elements may be affected or non-functional");
 
 			//prefabs.Unload(false);
 
@@ -753,8 +771,10 @@ namespace SCANsat.SCAN_Unity
 
 			if (handler.Outline)
 			{
-				tmp.fontSharedMaterial = Resources.Load("Fonts/Materials/Calibri Dropshadow Outline", typeof(Material)) as Material;  //smt.text.fontSharedMaterial;
+				tmp.fontSharedMaterial = Resources.Load("Fonts/Materials/Calibri Dropshadow Outline", typeof(Material)) as Material;
 
+				//TMP throws an error if we try to set the outline variables before accessing the font material
+				//Anything that calls the font property's Get method seems to be sufficient
 				if (tmp.fontMaterial) { }
 
 				tmp.outlineColor = palette.black;
