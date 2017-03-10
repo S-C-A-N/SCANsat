@@ -24,7 +24,7 @@ using UnityEngine;
 
 namespace SCANsat.SCAN_Toolbar
 {
-	class SCANappLauncher : MonoBehaviour, ISCAN_Toolbar
+	public class SCANappLauncher : MonoBehaviour, ISCAN_Toolbar
 	{
 		private ApplicationLauncherButton SCANappLauncherButton = null;
 		private bool _inMenu;
