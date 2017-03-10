@@ -54,6 +54,8 @@ namespace SCANsat
 		[KSPField(isPersistant = true)]
 		public bool mainMapColor = true;
 		[KSPField(isPersistant = true)]
+		public bool mainMapTerminator = false;
+		[KSPField(isPersistant = true)]
 		public bool mainMapBiome = false;
 		[KSPField(isPersistant = true)]
 		public bool mainMapMinimized = false;
@@ -61,6 +63,8 @@ namespace SCANsat
 		public bool bigMapVisible = false;
 		[KSPField(isPersistant = true)]
 		public bool bigMapColor = true;
+		[KSPField(isPersistant = true)]
+		public bool bigMapTerminator = false;
 		[KSPField(isPersistant = true)]
 		public bool bigMapGrid = true;
 		[KSPField(isPersistant = true)]
@@ -87,6 +91,8 @@ namespace SCANsat
 		public bool zoomMapVesselLock = false;
 		[KSPField(isPersistant = true)]
 		public bool zoomMapColor = true;
+		[KSPField(isPersistant = true)]
+		public bool zoomMapTerminator = false;
 		[KSPField(isPersistant = true)]
 		public bool zoomMapOrbit = true;
 		[KSPField(isPersistant = true)]
@@ -347,11 +353,11 @@ namespace SCANsat
 			}
 		}
 
-		public static SCANresourceGlobal getResourceNode (string resourceName)
+		public static SCANresourceGlobal getResourceNode (string resourceName, bool warn = false)
 		{
 			if (masterResourceNodes.Contains(resourceName))
 				return masterResourceNodes[resourceName];
-			else
+			else if (warn)
 				SCANUtil.SCANlog("SCANsat resource [{0}] cannot be found in master resource storage list", resourceName);
 
 			return null;
@@ -372,7 +378,7 @@ namespace SCANsat
 
 		public static void updateSCANresource (SCANresourceGlobal r, bool all)
 		{
-			SCANresourceGlobal update = getResourceNode(r.Name);
+			SCANresourceGlobal update = getResourceNode(r.Name, true);
 			if (update != null)
 			{
 				update.MinColor = r.MinColor;
@@ -959,17 +965,35 @@ namespace SCANsat
 				Destroy(appLauncher);
 
 			if (_mainMap != null)
+			{
 				_mainMap.OnDestroy();
+				_mainMap = null;
+			}
 			if (_bigMap != null)
+			{
 				_bigMap.OnDestroy();
+				_bigMap = null;
+			}
 			if (_instruments != null)
+			{
 				_instruments.OnDestroy();
+				_instruments = null;
+			}
 			if (_overlay != null)
+			{
 				_overlay.OnDestroy();
+				_overlay = null;
+			}
 			if (_settings != null)
+			{
 				_settings.OnDestroy();
+				_settings = null;
+			}
 			if (_zoomMap != null)
+			{
 				_zoomMap.OnDestroy();
+				_settings = null;
+			}
 
 			if (SCAN_Settings_Config.Instance != null)
 				SCAN_Settings_Config.Instance.Save();
@@ -1240,7 +1264,7 @@ namespace SCANsat
 
 		private double getFOV(SCANvessel v, CelestialBody b, out Color c)
 		{
-			c = XKCDColors.DarkGreen;
+			c = palette.xkcd_DarkGreenAlpha;
 			double maxFOV = 0;
 			double alt = v.vessel.altitude;
 			double soi_radius = b.sphereOfInfluence - b.Radius;
