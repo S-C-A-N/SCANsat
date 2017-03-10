@@ -80,7 +80,6 @@
     <Compile Include="SCAN_Platform\Palettes\Palettes.cs" />
     <Compile Include="SCAN_Platform\SCAN_CLZF2.cs" />
     <Compile Include="SCAN_Platform\SCAN_ConfigNodeStorage.cs" />
-    <Compile Include="SCAN_Platform\SCAN_KSPAddonImproved.cs" />
     <Compile Include="SCAN_Platform\SCAN_MBE.cs" />
     <Compile Include="SCAN_Settings_Config.cs" />
     <Compile Include="SCAN_Toolbar\SCANappLauncher.cs" />
@@ -143,8 +142,5 @@
       <Project>{4ed5e40d-273a-4643-9009-04c1dd02f3e2}</Project>
       <Name>SCANsat.Unity</Name>
     </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <WCFMetadata Include="Service References\" />
   </ItemGroup>
 </Project>
