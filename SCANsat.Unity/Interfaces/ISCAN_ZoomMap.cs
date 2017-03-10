@@ -37,6 +37,8 @@ namespace SCANsat.Unity.Interfaces
 
 		bool ColorToggle { get; set; }
 
+		bool TerminatorToggle { get; set; }
+
 		bool OrbitToggle { get; set; }
 
 		bool IconsToggle { get; set; }

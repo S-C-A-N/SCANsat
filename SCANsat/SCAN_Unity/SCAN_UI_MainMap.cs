@@ -44,6 +44,10 @@ namespace SCANsat.SCAN_Unity
 		private int lastUpdate;
 		private bool flip;
 
+		double sunLonCenter;
+		double sunLatCenter;
+		double gamma;
+
 		private SCAN_MainMap uiElement;
 		
 		private static SCAN_UI_MainMap instance;
@@ -253,7 +257,7 @@ namespace SCANsat.SCAN_Unity
 			if (uiElement == null)
 				return;
 
-			uiElement.transform.SetParent(UIMasterController.Instance.mainCanvas.transform, false);
+			uiElement.transform.SetParent(UIMasterController.Instance.dialogCanvas.transform, false);
 
 			uiElement.setMap(this);
 
@@ -322,6 +326,17 @@ namespace SCANsat.SCAN_Unity
 			set
 			{
 				SCANcontroller.controller.mainMapColor = value;
+
+				resetImages();
+			}
+		}
+
+		public bool TerminatorToggle
+		{
+			get { return SCANcontroller.controller.mainMapTerminator; }
+			set
+			{
+				SCANcontroller.controller.mainMapTerminator = value;
 
 				resetImages();
 			}
@@ -599,7 +614,7 @@ namespace SCANsat.SCAN_Unity
 
 			return string.Format("({0:F1}°,{1:F1}°{2})", lat, lon, units);
 		}
-		
+
 		private void drawPartialMap(SCANtype type, bool apply)
 		{
 			bool pqsController = data.Body.pqsController != null;
@@ -618,6 +633,21 @@ namespace SCANsat.SCAN_Unity
 				data.MapBuilding = true;
 				data.generateHeightMap(ref scanline, ref scanstep, 360);
 				return;
+			}
+
+			if (scanline == 0 && TerminatorToggle)
+			{
+				double sunLon = data.Body.GetLongitude(Planetarium.fetch.Sun.position, false);
+				double sunLat = data.Body.GetLatitude(Planetarium.fetch.Sun.position, false);
+
+				sunLatCenter = SCANUtil.fixLatShift(sunLat);
+
+				if (sunLatCenter >= 0)
+					sunLonCenter = SCANUtil.fixLonShift(sunLon + 90);
+				else
+					sunLonCenter = SCANUtil.fixLonShift(sunLon - 90);
+
+				gamma = Math.Abs(sunLatCenter) < 1 ? 50 : Math.Tan(Mathf.Deg2Rad * (90 - Math.Abs(sunLatCenter)));
 			}
 
 			for (int ilon = 0; ilon < 360; ilon++)
@@ -649,11 +679,27 @@ namespace SCANsat.SCAN_Unity
 					}
 				}
 
-				if (type != SCANtype.Nothing)
+				if (TerminatorToggle)
 				{
-					if (!SCANUtil.isCoveredByAll(ilon, scanline, data, type))
+					double crossingLat = Math.Atan(gamma * Math.Sin(Mathf.Deg2Rad * (ilon - 180) - Mathf.Deg2Rad * sunLonCenter));
+
+					if (sunLatCenter >= 0)
 					{
-						c = palette.lerp(c, palette.Black, 0.5f);
+						if (scanline - 90 < crossingLat * Mathf.Rad2Deg)
+							c = palette.lerp(c, palette.Black, 0.5f);
+					}
+					else
+					{
+						if (scanline - 90 > crossingLat * Mathf.Rad2Deg)
+							c = palette.lerp(c, palette.Black, 0.5f);
+					}
+				}
+				else
+				{
+					if (type != SCANtype.Nothing)
+					{
+						if (!SCANUtil.isCoveredByAll(ilon, scanline, data, type))
+							c = palette.lerp(c, palette.Black, 0.5f);
 					}
 				}
 
@@ -684,6 +730,21 @@ namespace SCANsat.SCAN_Unity
 			if (biomeBuilding)
 				buildBiomeCache();
 
+			if (scanline == 0 && TerminatorToggle)
+			{
+				double sunLon = data.Body.GetLongitude(Planetarium.fetch.Sun.position, false);
+				double sunLat = data.Body.GetLatitude(Planetarium.fetch.Sun.position, false);
+
+				sunLatCenter = SCANUtil.fixLatShift(sunLat);
+
+				if (sunLatCenter >= 0)
+					sunLonCenter = SCANUtil.fixLonShift(sunLon + 90);
+				else
+					sunLonCenter = SCANUtil.fixLonShift(sunLon - 90);
+
+				gamma = Math.Abs(sunLatCenter) < 1 ? 50 : Math.Tan(Mathf.Deg2Rad * (90 - Math.Abs(sunLatCenter)));
+			}
+
 			for (int ilon = 0; ilon < 360; ilon++)
 			{
 				if (!biomeMap)
@@ -698,11 +759,27 @@ namespace SCANsat.SCAN_Unity
 					c = palette.Grey;
 				}
 
-				if (type != SCANtype.Nothing)
+				if (TerminatorToggle)
 				{
-					if (!SCANUtil.isCoveredByAll(ilon, scanline, data, type))
+					double crossingLat = Math.Atan(gamma * Math.Sin(Mathf.Deg2Rad * (ilon - 180) - Mathf.Deg2Rad * sunLonCenter));
+
+					if (sunLatCenter >= 0)
 					{
-						c = palette.lerp(c, palette.Black, 0.5f);
+						if (scanline - 90 < crossingLat * Mathf.Rad2Deg)
+							c = palette.lerp(c, palette.Black, 0.5f);
+					}
+					else
+					{
+						if (scanline - 90 > crossingLat * Mathf.Rad2Deg)
+							c = palette.lerp(c, palette.Black, 0.5f);
+					}
+				}
+				else
+				{
+					if (type != SCANtype.Nothing)
+					{
+						if (!SCANUtil.isCoveredByAll(ilon, scanline, data, type))
+							c = palette.lerp(c, palette.Black, 0.5f);
 					}
 				}
 

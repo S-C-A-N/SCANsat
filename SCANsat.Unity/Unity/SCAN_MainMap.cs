@@ -28,6 +28,8 @@ namespace SCANsat.Unity.Unity
 		[SerializeField]
 		private Toggle m_ColorToggle = null;
 		[SerializeField]
+		private Toggle m_TerminatorToggle = null;
+		[SerializeField]
 		private Toggle m_TypeToggle = null;
 		[SerializeField]
 		private Toggle m_MinimizeToggle = null;
@@ -116,6 +118,9 @@ namespace SCANsat.Unity.Unity
 
 			if (m_ColorToggle != null)
 				m_ColorToggle.isOn = map.Color;
+
+			if (m_TerminatorToggle != null)
+				m_TerminatorToggle.isOn = map.TerminatorToggle;
 
 			if (m_TypeToggle != null)
 				m_TypeToggle.isOn = map.MapType;
@@ -406,6 +411,14 @@ namespace SCANsat.Unity.Unity
 				return;
 
 			mapInterface.Color = isOn;
+		}
+
+		public void ToggleTerminator(bool isOn)
+		{
+			if (!loaded || mapInterface == null)
+				return;
+
+			mapInterface.TerminatorToggle = isOn;
 		}
 
 		public void ToggleType(bool isOn)
