@@ -50,6 +50,7 @@ namespace SCANsat
 				Destroy(gameObject);
 				return;
 			}
+
 			loaded = true;
 
 			if (orbitIconsMap == null)
@@ -99,7 +100,7 @@ namespace SCANsat
 		{
 			foreach (AssemblyLog log in assemblyList)
 			{
-				print(string.Format("[SCANlogger] Assembly: {0} found; Version: {1}; File Version: {2}; Info Version: {3}; Location: {4}", log.name, log.version, log.fileVersion, log.infoVersion, log.location));
+				print(string.Format("[SCANsat] Assembly: {0} found; Version: {1}; File Version: {2}; Info Version: {3}; Location: {4}", log.name, log.version, log.fileVersion, log.infoVersion, log.location));
 			}
 		}
 
