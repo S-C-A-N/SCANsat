@@ -23,6 +23,7 @@ namespace SCANsat.Unity
 	{
 		private Sprite normalImage;
 		public Sprite HoverCheckmark;
+		private bool inToggle;
 
 		protected override void Awake()
 		{
@@ -38,12 +39,15 @@ namespace SCANsat.Unity
 			if (!isOn)
 				return;
 
-			((Image)graphic).sprite = HoverCheckmark;
+			if (inToggle)
+				((Image)graphic).sprite = HoverCheckmark;
 		}
 
 		new public void OnPointerEnter(PointerEventData eventData)
 		{
 			base.OnPointerEnter(eventData);
+
+			inToggle = true;
 
 			if (!isOn)
 				return;
@@ -54,6 +58,8 @@ namespace SCANsat.Unity
 		new public void OnPointerExit(PointerEventData eventData)
 		{
 			base.OnPointerExit(eventData);
+
+			inToggle = false;
 
 			if (!isOn)
 				return;
