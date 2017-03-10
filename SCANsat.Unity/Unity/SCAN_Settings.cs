@@ -244,24 +244,7 @@ namespace SCANsat.Unity.Unity
 		{
 			transform.SetAsLastSibling();
 
-			if (warningPopup != null)
-			{
-				RectTransform r = warningPopup.GetComponent<RectTransform>();
-
-				if (r != null && !RectTransformUtility.RectangleContainsScreenPoint(r, eventData.position, eventData.pressEventCamera))
-				{
-					warningPopup.FadeOut();
-					warningPopup = null;
-				}
-			}
-
-			if (_page != 4)
-				return;
-
-			if (!(CurrentPage is SCAN_ColorControl))
-				return;
-
-			((SCAN_ColorControl)CurrentPage).OnPointerDown(eventData);
+			((SettingsPage)CurrentPage).OnPointerDown(eventData);
 		}
 
 		public void OnBeginDrag(PointerEventData eventData)
