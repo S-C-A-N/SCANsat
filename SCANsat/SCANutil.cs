@@ -124,7 +124,7 @@ namespace SCANsat
 		/// <summary>
 		/// For a given Celestial Body name this returns the SCANdata instance if it exists in the SCANcontroller master dictionary; return is null if the SCANdata does not exist for that body (ie it has never been visited while SCANsat has been active), or if the SCANcontroller Scenario Module has not been loaded.
 		/// </summary>
-		/// <param name="BodyName">Name of celestial body (do not use TheName string)</param>
+		/// <param name="BodyName">Name of celestial body (do not use displayName string)</param>
 		/// <returns>SCANdata instance for the given Celestial Body; null if none exists</returns>
 		public static SCANdata getData(string BodyName)
 		{
@@ -496,11 +496,75 @@ namespace SCANsat
 			return a.name;
 		}
 
+		internal static string getBiomeDisplayName(CelestialBody body, double lon , double lat)
+		{
+			CBAttributeMapSO.MapAttribute a = getBiome(body, lon, lat);
+			if (a == null)
+				return "unknown";
+			return a.displayname;
+		}
+
 		internal static int countBits(int i)
 		{
 			int count;
 			for(count=0; i!=0; ++count) i &= (i - 1);
 			return count;
+		}
+
+		internal static string bodyFromDisplayName(string display)
+		{
+			for (int i = FlightGlobals.Bodies.Count - 1; i >= 0; i--)
+			{
+				CelestialBody b = FlightGlobals.Bodies[i];
+
+				if (b.displayName == display)
+					return b.bodyName;
+			}
+
+			return display;
+		}
+
+		internal static string displayNameFromBodyName(string body)
+		{
+			for (int i = FlightGlobals.Bodies.Count - 1; i >= 0; i--)
+			{
+				CelestialBody b = FlightGlobals.Bodies[i];
+
+				if (b.bodyName == body)
+					return b.displayName;
+			}
+
+			return body;
+		}
+
+		internal static string resourceFromDisplayName(string display)
+		{
+			List<SCANresourceGlobal> resources = SCANcontroller.resources();
+
+			for (int i = resources.Count - 1; i >= 0; i--)
+			{
+				SCANresourceGlobal r = resources[i];
+
+				if (r.DisplayName == display)
+					return r.Name;
+			}
+
+			return display;
+		}
+
+		internal static string displayNameFromResource(string resource)
+		{
+			List<SCANresourceGlobal> resources = SCANcontroller.resources();
+
+			for (int i = resources.Count - 1; i >= 0; i--)
+			{
+				SCANresourceGlobal r = resources[i];
+
+				if (r.Name == resource)
+					return r.DisplayName;
+			}
+
+			return resource;
 		}
 
 		internal static Palette paletteLoader(string name, int size)
@@ -548,6 +612,87 @@ namespace SCANsat
 					return target.vessel.mainBody;
 				default:
 					return null;
+			}
+		}
+
+		internal static void UpdateAllVesselData(Vessel v)
+		{
+			List<ScienceData> data = new List<ScienceData>();
+
+			var science = v.FindPartModulesImplementing<IScienceDataContainer>();
+
+			for (int i = science.Count - 1; i >= 0; i--)
+			{
+				IScienceDataContainer container = science[i];
+
+				data.AddRange(container.GetData());
+			}
+
+			if (data.Count <= 0)
+				return;
+
+			List<ScienceSubject> subjects = ResearchAndDevelopment.GetSubjects();
+
+			List<ScienceSubject> SCANsubjects = new List<ScienceSubject>();
+
+			for (int i = subjects.Count - 1; i >= 0; i--)
+			{
+				ScienceSubject sub = subjects[i];
+
+				if (sub.id.StartsWith("SCAN"))
+					SCANsubjects.Add(sub);
+			}
+
+			for (int i = SCANsubjects.Count - 1; i >= 0; i--)
+			{
+				ScienceSubject sub = SCANsubjects[i];
+
+				float submittedData = (sub.science / sub.subjectValue) * sub.dataScale;
+
+				for (int j = data.Count - 1; j >= 0; j--)
+				{
+					ScienceData d = data[j];
+
+					if (d.subjectID != sub.id)
+						continue;
+
+					SCANlog("Original Data: [{0}] - Amount: {1:N2} : New Subject: {2} - Adjusted Amount: {3:N0}"
+						, d.title, d.dataAmount, sub.title, Math.Max(0.0000001f, d.dataAmount - submittedData));
+
+					d.dataAmount = Math.Max(0.0000001f, d.dataAmount - submittedData);
+				}
+			}
+		}
+
+		internal static void UpdateVesselData(Vessel v, ScienceSubject sub)
+		{
+			List<ScienceData> data = new List<ScienceData>();
+
+			var science = v.FindPartModulesImplementing<IScienceDataContainer>();
+
+			for (int i = science.Count - 1; i >= 0; i--)
+			{
+				IScienceDataContainer container = science[i];
+
+				data.AddRange(container.GetData());
+			}
+
+			if (data.Count <= 0)
+				return;
+
+			float submittedData = (sub.science / sub.subjectValue) * sub.dataScale;
+
+			for (int i = data.Count - 1; i >= 0; i--)
+			{
+				ScienceData d = data[i];
+
+				if (d.subjectID != sub.id)
+					continue;
+
+				SCANlog("Original Data: [{0}] - Amount: {1:N2} : New Subject: {2} - Adjusted Amount: {3:N0}"
+					, d.title, d.dataAmount, sub.title, Math.Max(0.0000001f, d.dataAmount - submittedData));
+
+				d.dataAmount = Math.Max(0.0000001f, d.dataAmount - submittedData);
 			}
 		}
 
