@@ -119,7 +119,7 @@ namespace SCANsat.Unity.Unity
 				m_Label.OnColorUpdate.Invoke(info.baseColor);
 
 			if (rect != null)
-				rect.anchoredPosition = new Vector2(rect.anchoredPosition.x - (info.width / 2), info.alignBottom ? rect.anchoredPosition.y + (info.width / 2) : rect.anchoredPosition.y);
+				rect.anchoredPosition = new Vector2(rect.anchoredPosition.x - (info.width / 2), rect.anchoredPosition.y + info.alignBottom);
 
 			UpdateLabel(info.label);
 
@@ -167,7 +167,7 @@ namespace SCANsat.Unity.Unity
 		public void UpdatePosition(Vector2 p)
 		{
 			if (rect != null)
-				rect.anchoredPosition = new Vector2(p.x - (label.width / 2), label.alignBottom ? p.y + (label.width / 2) : p.y);
+				rect.anchoredPosition = new Vector2(p.x - (label.width / 2), p.y + label.alignBottom);
 		}
 
 		public void UpdatePositionActivation(MapLabelInfo info)
