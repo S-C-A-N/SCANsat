@@ -21,6 +21,7 @@ using SCANsat.Unity.Unity;
 using SCANsat.SCAN_Platform.Palettes;
 using KSP.UI;
 using KSP.UI.Screens;
+using KSP.Localization;
 using TMPro;
 using palette = SCANsat.SCAN_UI.UI_Framework.SCANpalette;
 
@@ -44,6 +45,7 @@ namespace SCANsat.SCAN_Unity
 		private static bool iconsLoaded;
 		private static bool shadersLoaded;
 		private static bool tmpProcessed;
+		private static bool tmpInputProcessed;
 		private static bool tooltipsProcessed;
 		private static bool prefabsProcessed;
 		private static bool clearLoaded;
@@ -327,9 +329,10 @@ namespace SCANsat.SCAN_Unity
 		private void Awake()
 		{
 			if (loaded)
+			{
 				Destroy(gameObject);
-
-			DontDestroyOnLoad(gameObject);
+				return;
+			}
 
 			path = KSPUtil.ApplicationRootPath + "GameData/SCANsat/Resources/";
 
@@ -341,9 +344,6 @@ namespace SCANsat.SCAN_Unity
 		private IEnumerator loadResources()
 		{
 			while (ApplicationLauncher.Instance == null)
-				yield return null;
-
-			while (SCANconfigLoader.languagePack == null)
 				yield return null;
 
 			while (SCAN_Settings_Config.Instance == null)
@@ -697,6 +697,21 @@ namespace SCANsat.SCAN_Unity
 
 		private static void processTMPPrefabs()
 		{
+			//foreach (var r in Resources.FindObjectsOfTypeAll<Material>())
+			//{
+			//	SCANUtil.SCANlog("Material: {0}", r.name);
+			//}
+
+			//foreach (var f in Resources.FindObjectsOfTypeAll<TMP_FontAsset>())
+			//{
+			//	SCANUtil.SCANlog("TMP Font: {0}", f.name);
+			//}
+
+			//foreach (var f in Resources.FindObjectsOfTypeAll<Font>())
+			//{
+			//	SCANUtil.SCANlog("Font: {0}", f.name);
+			//}
+
 			for (int i = loadedPrefabs.Length - 1; i >= 0; i--)
 			{
 				GameObject o = loadedPrefabs[i];
@@ -719,10 +734,16 @@ namespace SCANsat.SCAN_Unity
 					_tooltipPrefab = o;
 
 				if (o != null)
+				{
 					processTMP(o);
+
+					if (!tmpInputProcessed)
+						processInputFields(o);
+				}
 			}
 
 			tmpProcessed = true;
+			tmpInputProcessed = true;
 		}
 
 		private static void processTMP(GameObject obj)
@@ -750,8 +771,8 @@ namespace SCANsat.SCAN_Unity
 			Color c = text.color;
 			int i = text.fontSize;
 			bool r = text.raycastTarget;
-			FontStyles sty = getStyle(text.fontStyle);
-			TextAlignmentOptions align = getAnchor(text.alignment);
+			FontStyles sty = TMPProUtil.FontStyle(text.fontStyle);
+			TextAlignmentOptions align = TMPProUtil.TextAlignment(text.alignment);
 			float spacing = text.lineSpacing;
 			GameObject obj = text.gameObject;
 
@@ -767,8 +788,7 @@ namespace SCANsat.SCAN_Unity
 			tmp.fontStyle = sty;
 			tmp.lineSpacing = spacing;
 
-			tmp.font = Resources.Load("Fonts/Calibri SDF", typeof(TMP_FontAsset)) as TMP_FontAsset;
-
+			tmp.font = UISkinManager.TMPFont; //Resources.Load("Fonts/Calibri SDF", typeof(TMP_FontAsset)) as TMP_FontAsset;
 			if (handler.Outline)
 			{
 				tmp.fontSharedMaterial = Resources.Load("Fonts/Materials/Calibri Dropshadow Outline", typeof(Material)) as Material;
@@ -782,56 +802,97 @@ namespace SCANsat.SCAN_Unity
 			}
 			else
 				tmp.fontSharedMaterial = Resources.Load("Fonts/Materials/Calibri Dropshadow", typeof(Material)) as Material;
-
+			
 			tmp.enableWordWrapping = true;
+			
 			tmp.isOverlay = false;
 			tmp.richText = true;
 		}
 
-		private static FontStyles getStyle(FontStyle style)
+		private static void processInputFields(GameObject obj)
 		{
-			switch (style)
-			{
-				case FontStyle.Normal:
-					return FontStyles.Normal;
-				case FontStyle.Bold:
-					return FontStyles.Bold;
-				case FontStyle.Italic:
-					return FontStyles.Italic;
-				case FontStyle.BoldAndItalic:
-					return FontStyles.Bold;
-				default:
-					return FontStyles.Normal;
-			}
+			InputHandler[] handlers = obj.GetComponentsInChildren<InputHandler>(true);
+
+			if (handlers == null)
+				return;
+
+			for (int i = 0; i < handlers.Length; i++)
+				TMPInputFromInput(handlers[i]);
 		}
 
-		private static TextAlignmentOptions getAnchor(TextAnchor anchor)
+		private static void TMPInputFromInput(InputHandler handler)
 		{
-			switch (anchor)
-			{
-				case TextAnchor.UpperLeft:
-					return TextAlignmentOptions.TopLeft;
-				case TextAnchor.UpperCenter:
-					return TextAlignmentOptions.Top;
-				case TextAnchor.UpperRight:
-					return TextAlignmentOptions.TopRight;
-				case TextAnchor.MiddleLeft:
-					return TextAlignmentOptions.MidlineLeft;
-				case TextAnchor.MiddleCenter:
-					return TextAlignmentOptions.Midline;
-				case TextAnchor.MiddleRight:
-					return TextAlignmentOptions.MidlineRight;
-				case TextAnchor.LowerLeft:
-					return TextAlignmentOptions.BottomLeft;
-				case TextAnchor.LowerCenter:
-					return TextAlignmentOptions.Bottom;
-				case TextAnchor.LowerRight:
-					return TextAlignmentOptions.BottomRight;
-				default:
-					return TextAlignmentOptions.Center;
-			}
+			if (handler == null)
+				return;
+
+			InputField input = handler.GetComponent<InputField>();
+
+			if (input == null)
+				return;
+
+			int limit = input.characterLimit;
+			TMP_InputField.ContentType content = GetTMPContentType(input.contentType);
+			float caretBlinkRate = input.caretBlinkRate;
+			int caretWidth = input.caretWidth;
+			Color selectionColor = input.selectionColor;
+			GameObject obj = input.gameObject;
+
+			RectTransform viewport = handler.GetComponentInChildren<RectMask2D>().rectTransform;
+			SCAN_TextMeshPro placholder = handler.GetComponentsInChildren<SCAN_TextMeshPro>()[0];
+			SCAN_TextMeshPro textComponent = handler.GetComponentsInChildren<SCAN_TextMeshPro>()[1];
+
+			if (viewport == null || placholder == null || textComponent == null)
+				return;
+
+			MonoBehaviour.DestroyImmediate(input);
+
+			SCAN_TMP_InputField tmp = obj.AddComponent<SCAN_TMP_InputField>();
+
+			tmp.textViewport = viewport;
+			tmp.placeholder = placholder;
+			tmp.textComponent = textComponent;
+
+			tmp.characterLimit = limit;
+			tmp.contentType = content;
+			tmp.caretBlinkRate = caretBlinkRate;
+			tmp.caretWidth = caretWidth;
+			tmp.selectionColor = selectionColor;
+
+			tmp.readOnly = false;
+			tmp.shouldHideMobileInput = false;
+
+			tmp.fontAsset = UISkinManager.TMPFont;
 		}
 
+		private static TMP_InputField.ContentType GetTMPContentType(InputField.ContentType type)
+		{
+			switch(type)
+			{
+				case InputField.ContentType.Alphanumeric:
+					return TMP_InputField.ContentType.Alphanumeric;
+				case InputField.ContentType.Autocorrected:
+					return TMP_InputField.ContentType.Autocorrected;
+				case InputField.ContentType.Custom:
+					return TMP_InputField.ContentType.Custom;
+				case InputField.ContentType.DecimalNumber:
+					return TMP_InputField.ContentType.DecimalNumber;
+				case InputField.ContentType.EmailAddress:
+					return TMP_InputField.ContentType.EmailAddress;
+				case InputField.ContentType.IntegerNumber:
+					return TMP_InputField.ContentType.IntegerNumber;
+				case InputField.ContentType.Name:
+					return TMP_InputField.ContentType.Name;
+				case InputField.ContentType.Password:
+					return TMP_InputField.ContentType.Password;
+				case InputField.ContentType.Pin:
+					return TMP_InputField.ContentType.Pin;
+				case InputField.ContentType.Standard:
+					return TMP_InputField.ContentType.Standard;
+				default:
+					return TMP_InputField.ContentType.Standard;
+			}
+		}
+		
 		private static void processTooltips()
 		{
 			for (int i = loadedPrefabs.Length - 1; i >= 0; i--)
@@ -856,9 +917,14 @@ namespace SCANsat.SCAN_Unity
 				return;
 
 			handler.Prefab = _tooltipPrefab;
-			handler.TooltipText = SCANconfigLoader.languagePack.GetStringWithName(handler.TooltipName);
+			handler.TooltipText = GetStringWithName(handler.TooltipName);
 
 			toggleTooltip(handler, SCAN_Settings_Config.Instance.WindowTooltips);
+		}
+
+		private static string GetStringWithName(string tag)
+		{
+			return Localization.Format("#autoLOC_SCANsat_" + tag);
 		}
 
 		public static void ToggleTooltips(bool isOn)
