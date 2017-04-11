@@ -88,7 +88,7 @@ namespace SCANsat.Unity.Unity
 		[SerializeField]
 		private GameObject m_MapLabelPrefab = null;
 		[SerializeField]
-		private InputField m_WaypointInput = null;
+		private InputHandler m_WaypointInput = null;
 		[SerializeField]
 		private GameObject m_VesselSyncButton = null;
 		[SerializeField]
@@ -154,7 +154,7 @@ namespace SCANsat.Unity.Unity
 
 			if (zoomInterface.LockInput)
 			{
-				if (m_WaypointInput != null && !m_WaypointInput.isFocused)
+				if (m_WaypointInput != null && !m_WaypointInput.IsFocused)
 					zoomInterface.LockInput = false;
 			}
 
@@ -920,7 +920,7 @@ namespace SCANsat.Unity.Unity
 				baseColor = Color.white,
 				flash = false,
 				width = 20,
-				alignBottom = true,
+				alignBottom = 10,
 				show = true
 			};
 
@@ -1369,9 +1369,9 @@ namespace SCANsat.Unity.Unity
 				if (m_WaypointInput != null)
 				{
 					if (string.IsNullOrEmpty(waypoint))
-						m_WaypointInput.text = zoomInterface.RandomWaypoint;
+						m_WaypointInput.OnTextUpdate.Invoke(zoomInterface.RandomWaypoint);
 					else
-						m_WaypointInput.text = waypoint;
+						m_WaypointInput.OnTextUpdate.Invoke(waypoint);
 				}
 			}
 		}
@@ -1387,7 +1387,7 @@ namespace SCANsat.Unity.Unity
 				flashColor = Color.red,
 				flash = true,
 				width = 20,
-				alignBottom = true,
+				alignBottom = 10,
 				show = false
 			};
 
@@ -1412,7 +1412,7 @@ namespace SCANsat.Unity.Unity
 			if (zoomInterface == null || m_WaypointInput == null)
 				return;
 
-			m_WaypointInput.text = zoomInterface.RandomWaypoint;
+			m_WaypointInput.OnTextUpdate.Invoke(zoomInterface.RandomWaypoint);
 
 			waypoint = "";
 		}
@@ -1425,7 +1425,7 @@ namespace SCANsat.Unity.Unity
 			waypoint = "";
 
 			if (tempWaypointLabel != null)
-				zoomInterface.SetWaypoint(m_WaypointInput.text, tempWaypointLabel.Info.pos);
+				zoomInterface.SetWaypoint(m_WaypointInput.Text, tempWaypointLabel.Info.pos);
 
 			GenerateWaypoint();
 

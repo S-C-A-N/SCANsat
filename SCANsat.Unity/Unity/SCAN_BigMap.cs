@@ -88,7 +88,7 @@ namespace SCANsat.Unity.Unity
 		[SerializeField]
 		private GameObject m_MechJebButton = null;
 		[SerializeField]
-		private InputField m_WaypointInput = null;
+		private InputHandler m_WaypointInput = null;
 		[SerializeField]
 		private GameObject m_SmallMapButton = null;
 		[SerializeField]
@@ -146,7 +146,7 @@ namespace SCANsat.Unity.Unity
 
 			if (bigInterface.LockInput)
 			{
-				if (m_WaypointInput != null && !m_WaypointInput.isFocused)
+				if (m_WaypointInput != null && !m_WaypointInput.IsFocused)
 					bigInterface.LockInput = false;
 			}
 
@@ -937,7 +937,7 @@ namespace SCANsat.Unity.Unity
 				baseColor = Color.white,
 				flash = false,
 				width = 20,
-				alignBottom = true,
+				alignBottom = 10,
 				show = true
 			};
 
@@ -1365,9 +1365,9 @@ namespace SCANsat.Unity.Unity
 				if (m_WaypointInput != null)
 				{
 					if (string.IsNullOrEmpty(waypoint))
-						m_WaypointInput.text = bigInterface.RandomWaypoint;
+						m_WaypointInput.OnTextUpdate.Invoke(bigInterface.RandomWaypoint);
 					else
-						m_WaypointInput.text = waypoint;
+						m_WaypointInput.OnTextUpdate.Invoke(waypoint);
 				}
 			}
 		}
@@ -1383,7 +1383,7 @@ namespace SCANsat.Unity.Unity
 				flashColor = Color.red,
 				flash = true,
 				width = 20,
-				alignBottom = true,
+				alignBottom = 10,
 				show = false
 			};
 
@@ -1408,7 +1408,7 @@ namespace SCANsat.Unity.Unity
 			if (bigInterface == null || m_WaypointInput == null)
 				return;
 
-			m_WaypointInput.text = bigInterface.RandomWaypoint;
+			m_WaypointInput.OnTextUpdate.Invoke(bigInterface.RandomWaypoint);
 
 			waypoint = "";
 		}
@@ -1423,7 +1423,7 @@ namespace SCANsat.Unity.Unity
 			waypoint = "";
 
 			if (tempWaypointLabel != null)
-				bigInterface.SetWaypoint(m_WaypointInput.text, tempWaypointLabel.Info.pos);
+				bigInterface.SetWaypoint(m_WaypointInput.Text, tempWaypointLabel.Info.pos);
 
 			GenerateWaypoint();
 
