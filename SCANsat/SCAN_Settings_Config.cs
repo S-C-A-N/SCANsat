@@ -25,7 +25,7 @@ namespace SCANsat
 		[Persistent]
 		public bool BackgroundScanning = true;
 		[Persistent]
-		public int TimeWarpResolution = 15;
+		public int TimeWarpResolution = 12;
 		[Persistent]
 		public bool ShowGroundTracks = true;
 		[Persistent]
@@ -47,7 +47,7 @@ namespace SCANsat
 		[Persistent]
 		public bool StockUIStyle = false;
 		[Persistent]
-		public int MapGenerationSpeed = 1;
+		public int MapGenerationSpeed = 2;
 		[Persistent]
 		public float UIScale = 1;
 		[Persistent]
