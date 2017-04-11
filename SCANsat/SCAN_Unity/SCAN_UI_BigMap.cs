@@ -144,6 +144,94 @@ namespace SCANsat.SCAN_Unity
 			updateMap = true;
 		}
 
+		public void Open()
+		{
+			uiElement = GameObject.Instantiate(SCAN_UI_Loader.BigMapPrefab).GetComponent<SCAN_BigMap>();
+
+			if (uiElement == null)
+				return;
+
+			uiElement.transform.SetParent(UIMasterController.Instance.dialogCanvas.transform, false);
+
+			if (OrbitToggle && ShowOrbit)
+			{
+				Orbit o = vessel.orbit;
+
+				orbitLabels.Clear();
+
+				for (int i = 0; i < orbitSteps * 3; i++)
+				{
+					orbitLabels.Add(new SimpleLabelInfo(10, SCAN_UI_Loader.PlanetIcon));
+				}
+
+				if (!vessel.LandedOrSplashed)
+					UpdateOrbitIcons(o);
+			}
+
+			uiElement.setMap(this);
+
+			SetGridLines();
+
+			SetTitle();
+
+			uiElement.UpdateEQMapTexture(clearMap);
+			clearMapSet = true;
+
+			updateMap = true;
+
+			_isVisible = true;
+
+			if (HighLogic.LoadedSceneIsFlight)
+				SCANcontroller.controller.bigMapVisible = true;
+
+			if (SCAN_Settings_Config.Instance.StockToolbar)
+			{
+				if (HighLogic.LoadedSceneIsFlight)
+				{
+					if (SCAN_Settings_Config.Instance.ToolbarMenu)
+					{
+						if (SCANappLauncher.Instance != null && SCANappLauncher.Instance.UIElement != null)
+							SCANappLauncher.Instance.UIElement.SetBigMapToggle(false);
+					}
+				}
+				else
+				{
+					if (SCANappLauncher.Instance != null && SCANappLauncher.Instance.SCANAppButton != null)
+						SCANappLauncher.Instance.SCANAppButton.SetTrue(false);
+				}
+			}
+		}
+
+		public void Close()
+		{
+			_isVisible = false;
+
+			if (uiElement == null)
+				return;
+
+			uiElement.FadeOut();
+
+			if (SCAN_Settings_Config.Instance.StockToolbar)
+			{
+				if (HighLogic.LoadedSceneIsFlight)
+				{
+					if (SCAN_Settings_Config.Instance.ToolbarMenu)
+					{
+						if (SCANappLauncher.Instance != null && SCANappLauncher.Instance.UIElement != null)
+							SCANappLauncher.Instance.UIElement.SetBigMapToggle(false);
+					}
+				}
+				else
+				{
+					if (SCANappLauncher.Instance != null && SCANappLauncher.Instance.SCANAppButton != null)
+						SCANappLauncher.Instance.SCANAppButton.SetFalse(false);
+				}
+			}
+
+			if (HighLogic.LoadedSceneIsFlight)
+				SCANcontroller.controller.bigMapVisible = false;
+		}
+
 		public void RefreshIcons()
 		{
 			if (!_isVisible || uiElement == null)
@@ -987,94 +1075,6 @@ namespace SCANsat.SCAN_Unity
 			gridMap.Apply();
 		}
 
-		public void Open()
-		{
-			uiElement = GameObject.Instantiate(SCAN_UI_Loader.BigMapPrefab).GetComponent<SCAN_BigMap>();
-
-			if (uiElement == null)
-				return;
-
-			uiElement.transform.SetParent(UIMasterController.Instance.dialogCanvas.transform, false);
-
-			if (OrbitToggle && ShowOrbit)
-			{
-				Orbit o = vessel.orbit;
-
-				orbitLabels.Clear();
-
-				for (int i = 0; i < orbitSteps * 3; i++)
-				{
-					orbitLabels.Add(new SimpleLabelInfo(10, SCAN_UI_Loader.PlanetIcon));
-				}
-
-				if (!vessel.LandedOrSplashed)
-					UpdateOrbitIcons(o);
-			}
-
-			uiElement.setMap(this);
-
-			SetGridLines();
-
-			SetTitle();
-
-			uiElement.UpdateEQMapTexture(clearMap);
-			clearMapSet = true;
-
-			updateMap = true;
-
-			_isVisible = true;
-
-			if (HighLogic.LoadedSceneIsFlight)
-				SCANcontroller.controller.bigMapVisible = true;
-
-			if (SCAN_Settings_Config.Instance.StockToolbar)
-			{
-				if (HighLogic.LoadedSceneIsFlight)
-				{
-					if (SCAN_Settings_Config.Instance.ToolbarMenu)
-					{
-						if (SCANappLauncher.Instance != null && SCANappLauncher.Instance.UIElement != null)
-							SCANappLauncher.Instance.UIElement.SetBigMapToggle(false);
-					}
-				}
-				else
-				{
-					if (SCANappLauncher.Instance != null && SCANappLauncher.Instance.SCANAppButton != null)
-						SCANappLauncher.Instance.SCANAppButton.SetTrue(false);
-				}
-			}
-		}
-
-		public void Close()
-		{
-			_isVisible = false;
-			
-			if (uiElement == null)
-				return;
-
-			uiElement.FadeOut();
-
-			if (SCAN_Settings_Config.Instance.StockToolbar)
-			{
-				if (HighLogic.LoadedSceneIsFlight)
-				{
-					if (SCAN_Settings_Config.Instance.ToolbarMenu)
-					{
-						if (SCANappLauncher.Instance != null && SCANappLauncher.Instance.UIElement != null)
-							SCANappLauncher.Instance.UIElement.SetBigMapToggle(false);
-					}
-				}
-				else
-				{
-					if (SCANappLauncher.Instance != null && SCANappLauncher.Instance.SCANAppButton != null)
-						SCANappLauncher.Instance.SCANAppButton.SetFalse(false);
-				}
-			}
-
-			if (HighLogic.LoadedSceneIsFlight)
-				SCANcontroller.controller.bigMapVisible = false;
-		}
-
 		public void SetMapSize()
 		{
 			if (!_isVisible || uiElement == null)
@@ -1088,7 +1088,7 @@ namespace SCANsat.SCAN_Unity
 			if (uiElement == null || bigmap == null)
 				return;
 
-			uiElement.UpdateTitle(string.Format("S.C.A.N. {0} Map of {1}", bigmap.MType, body.theName));
+			uiElement.UpdateTitle(string.Format("S.C.A.N. {0} Map of {1}", bigmap.MType, body.displayName));
 		}
 
 		public string Version
@@ -1149,12 +1149,12 @@ namespace SCANsat.SCAN_Unity
 
 		public string CurrentResource
 		{
-			get { return SCANcontroller.controller.bigMapResource; }
+			get { return SCANUtil.displayNameFromResource(SCANcontroller.controller.bigMapResource); }
 			set
 			{
-				SCANcontroller.controller.bigMapResource = value;
+				SCANcontroller.controller.bigMapResource = SCANUtil.resourceFromDisplayName(value);
 
-				currentResource = AssignResource(value);
+				currentResource = AssignResource(SCANcontroller.controller.bigMapResource);
 
 				if (currentResource == null)
 					bigmap.Resource = null;
@@ -1167,13 +1167,13 @@ namespace SCANsat.SCAN_Unity
 		{
 			SCANresourceGlobal r = currentResource;
 
-			if (r == null || r.Name != resource)
+			if (r == null || r.DisplayName != resource)
 			{
 				for (int i = resources.Count - 1; i >= 0; i--)
 				{
 					SCANresourceGlobal res = resources[i];
 
-					if (res.Name != resource)
+					if (res.DisplayName != resource)
 						continue;
 
 					r = res;
@@ -1192,10 +1192,12 @@ namespace SCANsat.SCAN_Unity
 
 		public string CurrentCelestialBody
 		{
-			get { return SCANcontroller.controller.bigMapBody; }
+			get { return SCANUtil.displayNameFromBodyName(SCANcontroller.controller.bigMapBody); }
 			set
 			{
-				SCANdata bodyData = SCANUtil.getData(value);
+				string b = SCANUtil.bodyFromDisplayName(value);
+
+				SCANdata bodyData = SCANUtil.getData(b);
 
 				if (bodyData != null)
 				{
@@ -1220,10 +1222,10 @@ namespace SCANsat.SCAN_Unity
 
 					bigmap.resetMap(SCANcontroller.controller.bigMapResourceOn);
 
-					SCANcontroller.controller.bigMapBody = value;
+					SCANcontroller.controller.bigMapBody = b;
 
 					if (currentResource != null)
-						currentResource.CurrentBodyConfig(body.name);
+						currentResource.CurrentBodyConfig(body.bodyName);
 
 					updateMap = true;
 				}
@@ -1541,12 +1543,12 @@ namespace SCANsat.SCAN_Unity
 
 		public IList<string> Resources
 		{
-			get { return new List<string>(resources.Select(r => r.Name)); }
+			get { return new List<string>(resources.Select(r => r.DisplayName)); }
 		}
 
 		public IList<string> CelestialBodies
 		{
-			get { return new List<string>(SCANcontroller.controller.GetAllData.Select(d => d.Body.bodyName)); }
+			get { return new List<string>(SCANcontroller.controller.GetAllData.Select(d => d.Body.displayName)); }
 		}
 
 		public IList<string> LegendLabels
@@ -1705,6 +1707,7 @@ namespace SCANsat.SCAN_Unity
 								baseColor = ColorToggle ? palette.cb_yellow : palette.cb_skyBlue,
 								flash = false,
 								width = 20,
+								alignBottom = 8,
 								show = true
 							});
 					}
@@ -1741,7 +1744,7 @@ namespace SCANsat.SCAN_Unity
 								baseColor = palette.red,
 								flash = false,
 								width = 20,
-								alignBottom = false,
+								alignBottom = 0,
 								show = true
 							});
 						}
@@ -1755,7 +1758,7 @@ namespace SCANsat.SCAN_Unity
 								baseColor = palette.white,
 								flash = false,
 								width = 20,
-								alignBottom = true,
+								alignBottom = 10,
 								show = true
 							});
 						}
@@ -1866,7 +1869,7 @@ namespace SCANsat.SCAN_Unity
 			}
 
 			if (SCANUtil.isCovered(lon, lat, data, SCANtype.Biome))
-				infoString.AppendFormat(" Biome: {0}", SCANUtil.getBiomeName(body, lon, lat));
+				infoString.AppendFormat(" Biome: {0}", SCANUtil.getBiomeDisplayName(body, lon, lat));
 
 			if (bigmap.ResourceActive && SCANconfigLoader.GlobalResource && bigmap.Resource != null)
 			{
@@ -1987,7 +1990,7 @@ namespace SCANsat.SCAN_Unity
 					else if (current < 0)
 						current = 0;
 
-					return body.BiomeMap.Attributes[current].name;
+					return body.BiomeMap.Attributes[current].displayname;
 				case mapType.Altimetry:
 					float terrain = xPos * data.TerrainConfig.TerrainRange + data.TerrainConfig.MinTerrain;
 
