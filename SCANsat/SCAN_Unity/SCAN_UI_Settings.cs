@@ -21,6 +21,7 @@ using SCANsat.SCAN_Data;
 using SCANsat.SCAN_Toolbar;
 using SCANsat.SCAN_UI.UI_Framework;
 using KSP.UI;
+using KSP.Localization;
 
 namespace SCANsat.SCAN_Unity
 {
@@ -142,47 +143,47 @@ namespace SCANsat.SCAN_Unity
 
 		public string DataResetCurrent
 		{
-			get { return string.Format(SCANconfigLoader.languagePack.warningDataResetCurrent, _currentDataType, getTargetBody().theName); }
+			get { return Localization.Format("#autoLOC_SCANsat_Warning_DataResetCurrent", _currentDataType, getTargetBody().displayName); }
 		}
 
 		public string DataResetAll
 		{
-			get { return string.Format(SCANconfigLoader.languagePack.warningDataResetAll, _currentDataType); }
+			get { return Localization.Format("#autoLOC_SCANsat_Warning_DataResetAll", _currentDataType); }
 		}
 
 		public string StockResourceResetCurrent
 		{
-			get { return string.Format(SCANconfigLoader.languagePack.warningStockResourceResetCurrent, getTargetBody().theName); }
+			get { return Localization.Format("#autoLOC_SCANsat_Warning_StockResourceResetCurrent", getTargetBody().displayName); }
 		}
 
 		public string StockResourceResetAll
 		{
-			get { return SCANconfigLoader.languagePack.warningStockResourceResetAll; }
+			get { return Localization.Format("#autoLOC_SCANsat_Warning_StockResourceResetAll"); }
 		}
 
 		public string WarningMapFillCurrent
 		{
-			get { return string.Format(SCANconfigLoader.languagePack.warningMapFillCurrent, _currentData, getTargetBody().theName); }
+			get { return Localization.Format("#autoLOC_SCANsat_Warning_MapFillCurrent", _currentData, getTargetBody().displayName); }
 		}
 
 		public string WarningMapFillAll
 		{
-			get { return string.Format(SCANconfigLoader.languagePack.warningMapFillAll, _currentData); }
+			get { return Localization.Format("#autoLOC_SCANsat_Warning_MapFillAll", _currentData); }
 		}
 
 		public string ModuleManagerWarning
 		{
-			get { return SCANconfigLoader.languagePack.warningModuleManagerResource; }
+			get { return Localization.Format("#autoLOC_SCANsat_Warning_ModuleManagerResource"); }
 		}
 
 		public string CurrentBody
 		{
-			get { return getTargetBody().theName; }
+			get { return getTargetBody().displayName; }
 		}
 
 		public string SaveToConfig
 		{
-			get { return SCANconfigLoader.languagePack.warningSaveToConfig; }
+			get { return Localization.Format("#autoLOC_SCANsat_Warning_SaveToConfig"); }
 		}
 
 		public string CurrentMapData
@@ -567,7 +568,7 @@ namespace SCANsat.SCAN_Unity
 		
 		public IList<string> BackgroundBodies
 		{
-			get	{ return new List<string>(SCANcontroller.controller.GetAllData.Select(d => d.Body.bodyName)); }
+			get	{ return new List<string>(SCANcontroller.controller.GetAllData.Select(d => d.Body.displayName)); }
 		}
 
 		public IList<string> MapDataTypes
@@ -689,12 +690,23 @@ namespace SCANsat.SCAN_Unity
 			}
 		}
 
-		public void ToggleBody(string name)
+		public void ToggleBody(string bodyName)
 		{
-			SCANdata data = SCANUtil.getData(name);
+			string body = SCANUtil.bodyFromDisplayName(bodyName);
+
+			SCANdata data = SCANUtil.getData(body);
 
 			if (data != null)
 				data.Disabled = !data.Disabled;
+		}
+
+		public bool ToggleBodyActive(string bodyName)
+		{
+			string body = SCANUtil.bodyFromDisplayName(bodyName);
+
+			SCANdata data = SCANUtil.getData(body);
+
+			return data == null ? false : !data.Disabled;
 		}
 
 		public double BodyPercentage(string bodyName)

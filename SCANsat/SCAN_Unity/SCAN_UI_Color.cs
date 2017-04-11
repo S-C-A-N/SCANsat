@@ -85,7 +85,7 @@ namespace SCANsat.SCAN_Unity
 			if (currentResource != null)
 			{
 				currentResource.CurrentBodyConfig(_resourcePlanet);
-				_resourceCurrent = currentResource.Name;
+				_resourceCurrent = currentResource.DisplayName;
 				_resourceMin = currentResource.CurrentBody.MinValue;
 				_resourceMax = currentResource.CurrentBody.MaxValue;
 				_resourceTransparency = currentResource.Transparency;
@@ -117,11 +117,13 @@ namespace SCANsat.SCAN_Unity
 			get { return _resourcePlanet; }
 			set
 			{
-				_resourcePlanet = value;
+				string body = SCANUtil.bodyFromDisplayName(value);
+
+				_resourcePlanet = body;
 
 				if (currentResource != null)
 				{
-					currentResource.CurrentBodyConfig(value);
+					currentResource.CurrentBodyConfig(body);
 
 					_resourceMin = currentResource.CurrentBody.MinValue;
 					_resourceMax = currentResource.CurrentBody.MaxValue;
@@ -136,13 +138,13 @@ namespace SCANsat.SCAN_Unity
 			{
 				_resourceCurrent = value;
 
-				if (currentResource.Name != value)
+				if (currentResource.DisplayName != value)
 				{
 					for (int i = loadedResources.Count - 1; i >= 0; i--)
 					{
 						SCANresourceGlobal res = loadedResources[i];
 
-						if (res.Name != value)
+						if (res.DisplayName != value)
 							continue;
 
 						currentResource = res;
@@ -156,7 +158,7 @@ namespace SCANsat.SCAN_Unity
 					{
 						currentResource.CurrentBodyConfig(_resourcePlanet);
 
-						_resourceCurrent = currentResource.Name;
+						_resourceCurrent = currentResource.DisplayName;
 						_resourceMin = currentResource.CurrentBody.MinValue;
 						_resourceMax = currentResource.CurrentBody.MaxValue;
 						_resourceTransparency = currentResource.Transparency;
@@ -170,9 +172,11 @@ namespace SCANsat.SCAN_Unity
 			get { return _terrainPlanet; }
 			set
 			{
-				_terrainPlanet = value;
+				string body = SCANUtil.bodyFromDisplayName(value);
 
-				currentTerrain = SCANcontroller.getTerrainNode(value);
+				_terrainPlanet = body;
+
+				currentTerrain = SCANcontroller.getTerrainNode(body);
 
 				if (currentTerrain != null)
 				{
@@ -358,7 +362,18 @@ namespace SCANsat.SCAN_Unity
 			{
 				_terrainSize = value;
 
+				palette.CurrentPalettes = palette.setCurrentPalettesType(currentPalette.kind, _terrainSize);
 
+				for (int i = palette.CurrentPalettes.Length - 1; i >= 0; i--)
+				{
+					Palette p = palette.CurrentPalettes.availablePalettes[i];
+
+					if (p.name != currentPalette.name)
+						continue;
+
+					currentPalette = p;
+					break;
+				}
 			}
 		}
 
@@ -462,12 +477,12 @@ namespace SCANsat.SCAN_Unity
 
 		public IList<string> Resources
 		{
-			get { return new List<string>(loadedResources.Select(r => r.Name)); }
+			get { return new List<string>(loadedResources.Select(r => r.DisplayName)); }
 		}
 
 		public IList<string> CelestialBodies
 		{
-			get { return new List<string>(FlightGlobals.Bodies.Select(d => d.bodyName)); }
+			get { return new List<string>(FlightGlobals.Bodies.Select(d => d.displayName)); }
 		}
 
 		public IList<string> PaletteStyleNames

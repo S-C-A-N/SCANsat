@@ -203,9 +203,9 @@ namespace SCANsat.SCAN_UI.UI_Framework
 		internal static string resourceLabel(bool fuzz, double lat, double lon, SCANresourceGlobal resource, CelestialBody b)
 		{
 			if (fuzz)
-				return string.Format("{0}: {1:P0}", resource.Name, SCANUtil.ResourceOverlay(lat, lon, resource.Name, b, SCAN_Settings_Config.Instance.BiomeLock));
+				return string.Format("{0}: {1:P0}", resource.DisplayName, SCANUtil.ResourceOverlay(lat, lon, resource.Name, b, SCAN_Settings_Config.Instance.BiomeLock));
 			else
-				return string.Format("{0}: {1:P2}", resource.Name, SCANUtil.ResourceOverlay(lat, lon, resource.Name, b, SCAN_Settings_Config.Instance.BiomeLock));
+				return string.Format("{0}: {1:P2}", resource.DisplayName, SCANUtil.ResourceOverlay(lat, lon, resource.Name, b, SCAN_Settings_Config.Instance.BiomeLock));
 		}
 
 		private static double inc(double d)

@@ -15,6 +15,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using SCANsat.SCAN_Data;
+using KSP.Localization;
 
 namespace SCANsat.SCAN_PartModules
 {
@@ -22,7 +23,7 @@ namespace SCANsat.SCAN_PartModules
 	{
 		[KSPField]
 		public int sensorType;
-		[KSPField(guiActive = true, guiName = "Abundance")]
+		[KSPField(guiActive = true)]
 		public string abundanceField;
 		[KSPField]
 		public string ResourceName;
@@ -41,11 +42,14 @@ namespace SCANsat.SCAN_PartModules
 		private bool fuzzy;
 		private bool refreshState;
 		private bool activated;
+		private string resourceDisplayName;
 
 		public override void OnStart(PartModule.StartState state)
 		{
 			if (state == StartState.Editor)
 				return;
+
+			Fields["abundanceField"].guiName = Localization.Format("#autoLOC_SCANsat_Abundance");
 
 			GameEvents.onVesselSOIChanged.Add(onSOIChange);
 
@@ -53,6 +57,7 @@ namespace SCANsat.SCAN_PartModules
 			this.isEnabled = true;
 			activated = true;
 			refreshState = true;
+			resourceDisplayName = SCANUtil.displayNameFromResource(ResourceName);
 
 			stockScanners = findScanners();
 			animGroup = findAnimator();
@@ -90,7 +95,7 @@ namespace SCANsat.SCAN_PartModules
 				RequiresUnlock = true;
 			}
 
-			Fields["abundanceField"].guiName = string.Format("{0}[Surf]", ResourceName);
+			Fields["abundanceField"].guiName = string.Format("{0}[{1}]", resourceDisplayName, Localization.Format("#autoLOC_SCANsat_Surface"));
 		}
 
 		private void OnDestroy()
@@ -126,12 +131,12 @@ namespace SCANsat.SCAN_PartModules
 
 			if (tooHigh)
 			{
-				abundanceField = "Too High";
+				abundanceField = Localization.Format("#autoLOC_SCANsat_TooHigh");
 				return;
 			}
 			else if (abundanceValue < 0)
 			{
-				abundanceField = "No Data";
+				abundanceField = Localization.Format("#autoLOC_SCANsat_NoData");
 				return;
 			}
 

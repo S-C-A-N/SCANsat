@@ -71,7 +71,7 @@ namespace SCANsat.SCAN_Data
 				}
 				catch (Exception e)
 				{
-					SCANUtil.SCANlog("Error in calculating Max Height for {0}; using default value\n{1}", b.theName, e);
+					SCANUtil.SCANlog("Error in calculating Max Height for {0}; using default value\n{1}", b.displayName, e);
 					newMax = SCANconfigLoader.SCANNode.DefaultMaxHeightRange;
 				}
 
@@ -529,7 +529,7 @@ namespace SCANsat.SCAN_Data
 				if (!heightMaps.ContainsKey(body.flightGlobalsIndex))
 					heightMaps.Add(body.flightGlobalsIndex, tempHeightMap);
 				tempHeightMap = null;
-				SCANUtil.SCANlog("Height Map Of [{0}] Completed...", body.theName);
+				SCANUtil.SCANlog("Height Map Of [{0}] Completed...", body.displayName);
 				return;
 			}
 

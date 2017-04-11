@@ -190,7 +190,7 @@ namespace SCANsat.SCAN_Unity
 				if (SCANUtil.isCovered(coords.longitude, coords.latitude, data, SCANtype.Biome))
 				{
 					tooltipText.AppendLine();
-					tooltipText.AppendFormat(string.Format("Biome: {0}", SCANUtil.getBiomeName(body, coords.longitude, coords.latitude)));
+					tooltipText.AppendFormat(string.Format("Biome: {0}", SCANUtil.getBiomeDisplayName(body, coords.longitude, coords.latitude)));
 				}
 			}
 
@@ -259,7 +259,7 @@ namespace SCANsat.SCAN_Unity
 
 		public string CurrentResource
 		{
-			get { return currentResource == null ? "" : currentResource.Name; }
+			get { return currentResource == null ? "" : currentResource.DisplayName; }
 		}
 
 		public string TooltipText
@@ -359,7 +359,7 @@ namespace SCANsat.SCAN_Unity
 
 		public IList<string> Resources
 		{
-			get { return new List<string>(resources.Select(r => r.Name)); }
+			get { return new List<string>(resources.Select(r => r.DisplayName)); }
 		}
 
 		public Vector2 Position
@@ -377,7 +377,7 @@ namespace SCANsat.SCAN_Unity
 		{
 			if (!isOn)
 			{ 
-				if(_overlayOn && SCANcontroller.controller.overlaySelection == 2 && currentResource != null && currentResource.Name == resource)
+				if(_overlayOn && SCANcontroller.controller.overlaySelection == 2 && currentResource != null && currentResource.DisplayName == resource)
 					removeOverlay();
 
 				return;
@@ -385,13 +385,13 @@ namespace SCANsat.SCAN_Unity
 
 			SCANcontroller.controller.overlaySelection = 2;
 
-			if (currentResource.Name != resource)
+			if (currentResource.DisplayName != resource)
 			{
 				for (int i = resources.Count - 1; i >= 0; i--)
 				{
 					SCANresourceGlobal r = resources[i];
 
-					if (r.Name != resource)
+					if (r.DisplayName != resource)
 						continue;
 
 					currentResource = r;
@@ -402,7 +402,7 @@ namespace SCANsat.SCAN_Unity
 			if (currentResource == null)
 				return;
 
-			SCANcontroller.controller.overlayResource = resource;
+			SCANcontroller.controller.overlayResource = SCANUtil.resourceFromDisplayName(resource);
 
 			refreshMap(2);
 		}

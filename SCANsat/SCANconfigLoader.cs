@@ -31,20 +31,11 @@ namespace SCANsat
 		private const string configFile = "SCANsat/Resources/SCANcolors";
 		private const string configNodeName = "SCAN_Color_Config";
 
-		private const string localizationFile = "SCANsat/Resources/SCANlocalization";
-		private const string localizationNode = "SCAN_Localization";
-
 		private static SCAN_Color_Config SCANnode;
-		private static SCAN_Localization localNode;
 
 		public static SCAN_Color_Config SCANNode
 		{
 			get { return SCANnode; }
-		}
-
-		public static SCANlanguagePack languagePack
-		{
-			get { return localNode == null ? null : localNode.ActivePack; }
 		}
 
 		public static bool GlobalResource
@@ -60,8 +51,6 @@ namespace SCANsat
 		internal static void configLoader()
 		{
 			loadSCANtypes();
-
-			localNode = new SCAN_Localization(localizationFile, localizationNode);
 
 			SCANnode = new SCAN_Color_Config(configFile, configNodeName);
 
@@ -100,11 +89,15 @@ namespace SCANsat
 
 				SCANresourceGlobal currentGlobal = SCANcontroller.getResourceNode(rs.ResourceName);
 
+				PartResourceDefinition pr = PartResourceLibrary.Instance.GetDefinition(rs.ResourceName);
+
 				if (currentGlobal == null)
 				{
-					SCANcontroller.addToResourceData(rs.ResourceName, new SCANresourceGlobal(rs.ResourceName, 20, rs.Distribution.MinAbundance, rs.Distribution.MaxAbundance, palette.magenta, palette.cb_orange, t));
+					SCANcontroller.addToResourceData(rs.ResourceName, new SCANresourceGlobal(rs.ResourceName, pr == null ? rs.ResourceName : pr.displayName, 20, rs.Distribution.MinAbundance, rs.Distribution.MaxAbundance, palette.magenta, palette.cb_orange, t));
 					currentGlobal = SCANcontroller.getResourceNode(rs.ResourceName, true);
 				}
+
+				currentGlobal.DisplayName = pr == null ? rs.ResourceName : pr.displayName;
 
 				if (rs.Distribution.MinAbundance > currentGlobal.DefaultMinValue)
 					currentGlobal.DefaultMinValue = rs.Distribution.MinAbundance;
@@ -137,7 +130,8 @@ namespace SCANsat
 					if (t == null)
 						continue;
 
-					SCANcontroller.addToResourceData(rsBody.ResourceName, new SCANresourceGlobal(rsBody.ResourceName, 20, 0, 0.001f, palette.magenta, palette.cb_orange, t));
+					PartResourceDefinition pr = PartResourceLibrary.Instance.GetDefinition(rsBody.ResourceName);
+					SCANcontroller.addToResourceData(rsBody.ResourceName, new SCANresourceGlobal(rsBody.ResourceName, pr == null ? rsBody.ResourceName : pr.displayName, 20, 0, 0.001f, palette.magenta, palette.cb_orange, t));
 					currentGlobal = SCANcontroller.getResourceNode(rsBody.ResourceName, true);
 
 					foreach (CelestialBody body in FlightGlobals.Bodies)
