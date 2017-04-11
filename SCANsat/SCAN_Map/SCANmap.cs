@@ -681,7 +681,7 @@ namespace SCANsat.SCAN_Map
 				else
 					sunLonCenter = SCANUtil.fixLonShift(sunLon - 90);
 
-				gamma = Math.Abs(sunLatCenter) < 1 ? 50 : Math.Tan(Mathf.Deg2Rad * (90 - Math.Abs(sunLatCenter)));
+				gamma = Math.Abs(sunLatCenter) < 0.55 ? 100 : Math.Tan(Mathf.Deg2Rad * (90 - Math.Abs(sunLatCenter)));
 			}
 		}
 
