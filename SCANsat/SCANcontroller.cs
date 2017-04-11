@@ -262,11 +262,11 @@ namespace SCANsat
 					}
 					catch (Exception e)
 					{
-						SCANUtil.SCANlog("Error in calculating Max Height for {0}; using default value/n{1}", b.theName, e);
+						SCANUtil.SCANlog("Error in calculating Max Height for {0}; using default value/n{1}", b.displayName, e);
 						newMax = SCANconfigLoader.SCANNode.DefaultMaxHeightRange;
 					}
 
-					SCANUtil.SCANlog("Generating new SCANsat Terrain Config for [{0}] - Max Height: [{1:F0}m]", b.bodyName, newMax);
+					SCANUtil.SCANlog("Generating new SCANsat Terrain Config for [{0}] - Max Height: [{1:F0}m]", b.displayName, newMax);
 
 					addToTerrainConfigData(b.name, new SCANterrainConfig(SCANconfigLoader.SCANNode.DefaultMinHeightRange, newMax, clamp, SCANUtil.paletteLoader(SCANconfigLoader.SCANNode.DefaultPalette, 7), 7, false, false, b));
 				}
@@ -477,6 +477,11 @@ namespace SCANsat
 				rList.Insert(0, ore);
 
 			return rList;
+		}
+
+		public static List<SCANresourceGlobal> resources()
+		{
+			return masterResourceNodes.Values.ToList();
 		}
 
 		public List<SCANvessel> Known_Vessels
@@ -775,6 +780,7 @@ namespace SCANsat
 				finishRegistration(id);
 			}
 
+			GameEvents.OnScienceRecieved.Add(watcher);
 			GameEvents.OnOrbitalSurveyCompleted.Add(onSurvey);
 			GameEvents.onVesselSOIChanged.Add(SOIChange);
 			GameEvents.onVesselCreate.Add(newVesselCheck);
@@ -799,6 +805,8 @@ namespace SCANsat
 				{
 					SCANUtil.SCANlog("Something Went Wrong Initializing UI Objects:\n{0}", e);
 				}
+
+				StartCoroutine(WaitForScienceUpdate());
 			}
 			else if (HighLogic.LoadedSceneHasPlanetarium)
 			{
@@ -852,6 +860,14 @@ namespace SCANsat
 				checkHeightMapStatus();
 		}
 
+		private IEnumerator WaitForScienceUpdate()
+		{
+			while (!FlightGlobals.ready || FlightGlobals.ActiveVessel == null)
+				yield return null;
+
+			SCANUtil.UpdateAllVesselData(FlightGlobals.ActiveVessel);
+		}
+
 		public void checkStockResourceScanStatus(CelestialBody body)
 		{
 			if (SCAN_Settings_Config.Instance.DisableStockResource || !SCAN_Settings_Config.Instance.InstantScan)
@@ -892,7 +908,7 @@ namespace SCANsat
 
 			if (SCANUtil.getCoveragePercentage(data, SCANtype.FuzzyResources) > (SCAN_Settings_Config.Instance.StockTreshold * 100))
 			{
-				SCANUtil.SCANlog("SCANsat resource scanning for {0} meets threshold value [{1:P0}]\nConducting stock orbital resource scan...", body.theName, SCAN_Settings_Config.Instance.StockTreshold);
+				SCANUtil.SCANlog("SCANsat resource scanning for {0} meets threshold value [{1:P0}]\nConducting stock orbital resource scan...", body.displayName, SCAN_Settings_Config.Instance.StockTreshold);
 				ResourceMap.Instance.UnlockPlanet(body.flightGlobalsIndex);
 			}
 		}
@@ -954,6 +970,7 @@ namespace SCANsat
 
 		private void OnDestroy()
 		{
+			GameEvents.OnScienceRecieved.Remove(watcher);
 			GameEvents.OnOrbitalSurveyCompleted.Remove(onSurvey);
 			GameEvents.onVesselSOIChanged.Remove(SOIChange);
 			GameEvents.onVesselCreate.Remove(newVesselCheck);
@@ -1007,6 +1024,23 @@ namespace SCANsat
 					unloadPQS(b);
 				}
 			}
+		}
+
+		private void watcher(float sci, ScienceSubject sub, ProtoVessel v, bool b)
+		{
+			if (!HighLogic.LoadedSceneIsFlight)
+				return;
+
+			if (FlightGlobals.ActiveVessel == null)
+				return;
+
+			if (sub == null)
+				return;
+
+			if (!sub.id.StartsWith("SCAN"))
+				return;
+
+			SCANUtil.UpdateVesselData(FlightGlobals.ActiveVessel, sub);
 		}
 
 		private void onSurvey(Vessel v, CelestialBody b)
@@ -1091,7 +1125,7 @@ namespace SCANsat
 
 			KopernicusOnDemand = null;
 
-			SCANUtil.SCANlog("Loading Kopernicus On Demand PQSMod For {0}", b.theName);
+			SCANUtil.SCANlog("Loading Kopernicus On Demand PQSMod For {0}", b.displayName);
 		}
 
 		internal void unloadPQS(CelestialBody b, mapSource s = mapSource.Data)
@@ -1166,7 +1200,7 @@ namespace SCANsat
 
 			KopernicusOnDemand = null;
 
-			SCANUtil.SCANlog("Unloading Kopernicus On Demand PQSMod For {0}", b.theName);
+			SCANUtil.SCANlog("Unloading Kopernicus On Demand PQSMod For {0}", b.displayName);
 		}
 
 		private void OnGUI()
@@ -1313,7 +1347,7 @@ namespace SCANsat
 		{
 			foreach (SCANsat.SCAN_PartModules.SCANsat s in v.FindPartModulesImplementing<SCANsat.SCAN_PartModules.SCANsat>())
 			{
-				if (s.scanningNow())
+				if (s.scanningNow)
 					registerSensor(v.id, (SCANtype)s.sensorType, s.fov, s.min_alt, s.max_alt, s.best_alt);
 			}
 		}
