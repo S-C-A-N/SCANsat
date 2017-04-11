@@ -53,17 +53,11 @@ namespace SCANsat.Unity.Unity
 		[SerializeField]
 		private TextHandler m_TransText = null;
 		[SerializeField]
-		private InputField m_MinInputField = null;
+		private InputHandler m_MinInputField = null;
 		[SerializeField]
-		private InputField m_MaxInputField = null;
+		private InputHandler m_MaxInputField = null;
 		[SerializeField]
-		private InputField m_TransInputField = null;
-		[SerializeField]
-		private InputField m_RInputField = null;
-		[SerializeField]
-		private InputField m_GInputField = null;
-		[SerializeField]
-		private InputField m_BInputField = null;
+		private InputHandler m_TransInputField = null;
 
 		private ISCAN_Color colorInterface;
 		private ISCAN_Settings settingsInterface;
@@ -71,13 +65,13 @@ namespace SCANsat.Unity.Unity
 		private void Awake()
 		{
 			if (m_MinInputField != null)
-				m_MinInputField.onValueChanged.AddListener(new UnityAction<string>(OnMinInputChange));
+				m_MinInputField.OnValueChange.AddListener(new UnityAction<string>(OnMinInputChange));
 
 			if (m_MaxInputField != null)
-				m_MaxInputField.onValueChanged.AddListener(new UnityAction<string>(OnMaxInputChange));
+				m_MaxInputField.OnValueChange.AddListener(new UnityAction<string>(OnMaxInputChange));
 
 			if (m_TransInputField != null)
-				m_TransInputField.onValueChanged.AddListener(new UnityAction<string>(OnTransparencyInputChange));
+				m_TransInputField.OnValueChange.AddListener(new UnityAction<string>(OnTransparencyInputChange));
 		}
 
 		private void Update()
@@ -87,12 +81,10 @@ namespace SCANsat.Unity.Unity
 
 			if (settingsInterface.LockInput)
 			{
-				if (m_MinInputField != null && !m_MinInputField.isFocused
-					&& m_MaxInputField != null && !m_MaxInputField.isFocused
-					&& m_TransInputField != null && !m_TransInputField.isFocused
-					&& m_RInputField != null && !m_RInputField.isFocused
-					&& m_GInputField != null && !m_GInputField.isFocused
-					&& m_BInputField != null && !m_BInputField.isFocused)
+				if (m_MinInputField != null && !m_MinInputField.IsFocused
+					&& m_MaxInputField != null && !m_MaxInputField.IsFocused
+					&& m_TransInputField != null && !m_TransInputField.IsFocused
+					&& m_ColorPicker != null && !m_ColorPicker.AnyInputActive)
 					settingsInterface.LockInput = false;
 			}
 		}

@@ -79,11 +79,11 @@ namespace SCANsat.Unity.Unity
 		[SerializeField]
 		private TextHandler m_SizeText = null;
 		[SerializeField]
-		private InputField m_MinInputField = null;
+		private InputHandler m_MinInputField = null;
 		[SerializeField]
-		private InputField m_MaxInputField = null;
+		private InputHandler m_MaxInputField = null;
 		[SerializeField]
-		private InputField m_ClampInputField = null;
+		private InputHandler m_ClampInputField = null;
 		[SerializeField]
 		private Toggle m_ClampToggle = null;
 		[SerializeField]
@@ -101,13 +101,13 @@ namespace SCANsat.Unity.Unity
 		private void Awake()
 		{
 			if (m_MinInputField != null)
-				m_MinInputField.onValueChanged.AddListener(new UnityAction<string>(OnMinInputChange));
+				m_MinInputField.OnValueChange.AddListener(new UnityAction<string>(OnMinInputChange));
 
 			if (m_MaxInputField != null)
-				m_MaxInputField.onValueChanged.AddListener(new UnityAction<string>(OnMaxInputChange));
+				m_MaxInputField.OnValueChange.AddListener(new UnityAction<string>(OnMaxInputChange));
 
 			if (m_ClampInputField != null)
-				m_ClampInputField.onValueChanged.AddListener(new UnityAction<string>(OnClampInputChange));
+				m_ClampInputField.OnValueChange.AddListener(new UnityAction<string>(OnClampInputChange));
 		}
 
 		private void Update()
@@ -117,9 +117,9 @@ namespace SCANsat.Unity.Unity
 
 			if (settingsInterface.LockInput)
 			{
-				if (m_MinInputField != null && !m_MinInputField.isFocused
-					&& m_MaxInputField != null && !m_MaxInputField.isFocused
-					&& m_ClampInputField != null && !m_ClampInputField.isFocused)
+				if (m_MinInputField != null && !m_MinInputField.IsFocused
+					&& m_MaxInputField != null && !m_MaxInputField.IsFocused
+					&& m_ClampInputField != null && !m_ClampInputField.IsFocused)
 					settingsInterface.LockInput = false;
 			}
 		}
@@ -608,6 +608,14 @@ namespace SCANsat.Unity.Unity
 				return;
 
 			colorInterface.TerrainSize = (int)value;
+			
+			ClearPalettes();
+
+			CreatePalettes(colorInterface.TerrainPalettes);
+
+			SetPalettePreviews();
+
+			SetSizeSlider();
 		}
 
 		public void ReverseToggle(bool isOn)

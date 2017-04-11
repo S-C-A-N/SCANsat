@@ -50,6 +50,7 @@
     <Compile Include="SCAN_Color_Config.cs" />
     <Compile Include="SCAN_Data\SCANanomaly.cs" />
     <Compile Include="SCAN_Data\SCANdata.cs" />
+    <Compile Include="SCAN_Data\SCANexperimentType.cs" />
     <Compile Include="SCAN_Data\SCANresourceBody.cs" />
     <Compile Include="SCAN_Data\SCANresourceGlobal.cs" />
     <Compile Include="SCAN_Data\SCANresourceType.cs" />
@@ -61,6 +62,7 @@
     <Compile Include="SCAN_Map\SCANmapLegend.cs" />
     <Compile Include="SCAN_Map\SCANmapProjection.cs" />
     <Compile Include="SCAN_Map\SCANmapType.cs" />
+    <Compile Include="SCAN_PartModules\SCANexperiment.cs" />
     <Compile Include="SCAN_PartModules\SCANresourceDisplay.cs" />
     <Compile Include="SCAN_PartModules\SCANresourceScanner.cs" />
     <Compile Include="SCAN_PartModules\SCANRPMStorage.cs" />
@@ -85,8 +87,6 @@
     <Compile Include="SCAN_Toolbar\SCANappLauncher.cs" />
     <Compile Include="SCAN_Toolbar\SCANtoolbar.cs" />
     <Compile Include="SCAN_Toolbar\SCANtoolbarwrapper.cs" />
-    <Compile Include="SCAN_UI\UI_Framework\SCANlanguagePack.cs" />
-    <Compile Include="SCAN_UI\UI_Framework\SCAN_Localization.cs" />
     <Compile Include="SCAN_UI\UI_Framework\SCANremoteView.cs" />
     <Compile Include="SCANcontroller.cs" />
     <Compile Include="SCAN_UI\UI_Framework\SCANicon.cs" />
@@ -98,6 +98,7 @@
     <Compile Include="SCANmainMenuLoader.cs" />
     <Compile Include="SCAN_UI\UI_Framework\SCANuiUtil.cs" />
     <Compile Include="SCAN_Unity\SCAN_TextMeshPro.cs" />
+    <Compile Include="SCAN_Unity\SCAN_TMP_InputField.cs" />
     <Compile Include="SCAN_Unity\SCAN_UI_BigMap.cs" />
     <Compile Include="SCAN_Unity\SCAN_UI_Color.cs" />
     <Compile Include="SCAN_Unity\SCAN_UI_Instruments.cs" />

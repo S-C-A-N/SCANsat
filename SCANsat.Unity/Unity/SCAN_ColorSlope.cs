@@ -33,7 +33,7 @@ namespace SCANsat.Unity.Unity
 		[SerializeField]
 		private TextHandler m_CutoffText = null;
 		[SerializeField]
-		private InputField m_CutoffInputField = null;
+		private InputHandler m_CutoffInputField = null;
 
 		private bool loaded;
 
@@ -43,9 +43,23 @@ namespace SCANsat.Unity.Unity
 		private void Awake()
 		{
 			if (m_CutoffInputField != null)
-				m_CutoffInputField.onValueChanged.AddListener(new UnityAction<string>(OnCutoffInputChange));
+				m_CutoffInputField.OnValueChange.AddListener(new UnityAction<string>(OnCutoffInputChange));
 		}
 
+		private void Update()
+		{
+			if (settingsInterface == null)
+				return;
+
+			if (settingsInterface.LockInput)
+			{
+				if (m_CutoffInputField != null && !m_CutoffInputField.IsFocused
+					&& m_ColorPickerOne != null && !m_ColorPickerOne.AnyInputActive
+					&& m_ColorPickerTwo != null && !m_ColorPickerTwo.AnyInputActive)
+					settingsInterface.LockInput = false;
+			}
+		}
+	
 		public void SetSlope(ISCAN_Color color, ISCAN_Settings settings)
 		{
 			if (color == null)

@@ -38,7 +38,7 @@ namespace SCANsat.Unity.Unity
 		[SerializeField]
 		private TextHandler m_TypeText = null;
 		[SerializeField]
-		private InputField m_MapWidthInput = null;
+		private InputHandler m_MapWidthInputHandler = null;
 		[SerializeField]
 		private GameObject m_ResetStockResource = null;
 		[SerializeField]
@@ -56,7 +56,7 @@ namespace SCANsat.Unity.Unity
 
 			if (settings.LockInput)
 			{
-				if (m_MapWidthInput != null && !m_MapWidthInput.isFocused)
+				if (m_MapWidthInputHandler != null && !m_MapWidthInputHandler.IsFocused)
 					settings.LockInput = false;
 			}
 		}
@@ -127,14 +127,14 @@ namespace SCANsat.Unity.Unity
 
 		public void SetMapWidth()
 		{
-			if (settings == null || m_MapWidthInput == null)
+			if (settings == null || m_MapWidthInputHandler == null)
 				return;
 
 			settings.LockInput = false;
 
 			int width = settings.MapWidth;
 
-			if (int.TryParse(m_MapWidthInput.text, out width))
+			if (int.TryParse(m_MapWidthInputHandler.Text, out width))
 			{
 				if (width % 2 != 0)
 					width += 1;
@@ -144,7 +144,7 @@ namespace SCANsat.Unity.Unity
 				else if (width < 560)
 					width = 560;
 
-				m_MapWidthInput.text = width.ToString();
+				m_MapWidthInputHandler.OnTextUpdate.Invoke(width.ToString());
 
 				settings.MapWidth = width;
 

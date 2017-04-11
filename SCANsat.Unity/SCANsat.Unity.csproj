@@ -32,11 +32,11 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="UnityEngine">
-      <HintPath>..\..\KSP Dev\Kerbal Space Program\KSP_x64_Data\Managed\UnityEngine.dll</HintPath>
+      <HintPath>..\..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Kerbal Space Program\KSP_x64_Data\Managed\UnityEngine.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.UI">
-      <HintPath>..\..\KSP Dev\Kerbal Space Program\KSP_x64_Data\Managed\UnityEngine.UI.dll</HintPath>
+      <HintPath>..\..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Kerbal Space Program\KSP_x64_Data\Managed\UnityEngine.UI.dll</HintPath>
       <Private>False</Private>
     </Reference>
   </ItemGroup>
@@ -58,6 +58,7 @@
     <Compile Include="HSVPicker\UI\SVBoxSlider.cs" />
     <Compile Include="HSVPicker\UtilityScripts\BoxSlider.cs" />
     <Compile Include="HSVPicker\UtilityScripts\HSVUtil.cs" />
+    <Compile Include="InputHandler.cs" />
     <Compile Include="Interfaces\ISCAN_BigMap.cs" />
     <Compile Include="Interfaces\ISCAN_Color.cs" />
     <Compile Include="Interfaces\ISCAN_Instruments.cs" />
