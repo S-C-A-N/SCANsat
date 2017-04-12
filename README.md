@@ -231,7 +231,7 @@ Anomaly | **Been There, Done That(tm)** | **BTDT**
 ### [:top:][top] 3. Resource Scanning
 ------------------------------------------
 
-**SCANsat** will scan celestial bodies for resources using the new stock resource system. For a full description of both stack and SCANsat resource scanning methods check out the [SCANsat wiki][SCANsat:wiki].
+**SCANsat** will scan celestial bodies for resources using the new stock resource system. For a full description of both stock and SCANsat resource scanning methods check out the [SCANsat wiki][SCANsat:wiki].
 
 #### [:top:][top] 3a. Stock Scanning Mode
 
