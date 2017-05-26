@@ -37,7 +37,7 @@ namespace SCANsat.SCAN_Data
 		{
 			resourceName = rName;
 			body = Body;
-			bodyName = body.name;
+			bodyName = body.bodyName;
 			index = body.flightGlobalsIndex;
 			lowResourceCutoff = defaultMinValue = min;
 			highResourceCutoff = defaultMaxValue = max;

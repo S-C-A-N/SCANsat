@@ -137,7 +137,9 @@ namespace SCANsat.Unity.Interfaces
 
 		void Update();
 
-		void ToggleBody(string name);
+		void ToggleBody(string bodyName);
+
+		bool ToggleBodyActive(string bodyName);
 
 		double BodyPercentage(string bodyName);
 	}

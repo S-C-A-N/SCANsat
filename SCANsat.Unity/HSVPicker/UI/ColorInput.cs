@@ -8,7 +8,6 @@ namespace SCANsat.Unity.HSVPicker.UI
 	/// <summary>
 	/// Displays one of the color values of aColorPicker
 	/// </summary>
-	[RequireComponent(typeof(InputField))]
 	public class ColorInput : MonoBehaviour
 	{
 		public ColorPicker hsvpicker;
@@ -18,18 +17,18 @@ namespace SCANsat.Unity.HSVPicker.UI
 		/// </summary>
 		public ColorValues type;
 
-		private InputField inputField;
+		private InputHandler inputField;
 
 		private void Awake()
 		{
-			inputField = GetComponent<InputField>();
+			inputField = GetComponent<InputHandler>();
 
-			inputField.onValueChanged.AddListener(InputChanged);
+			inputField.OnValueChange.AddListener(InputChanged);
 		}
 
 		private void OnDestroy()
 		{
-			inputField.onValueChanged.RemoveListener(InputChanged);
+			inputField.OnValueChange.RemoveListener(InputChanged);
 		}
 
 		private void InputChanged(string input)

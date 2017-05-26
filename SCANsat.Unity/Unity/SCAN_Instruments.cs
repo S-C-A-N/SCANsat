@@ -154,7 +154,7 @@ namespace SCANsat.Unity.Unity
 			if (insInterface == null || m_ResourceButtons == null)
 				return;
 
-			float y = -1 * lines * 21;
+			float y = -1 * lines * 24;
 
 			if (insInterface.ResourceButtons && m_ResourceButtons != null)
 				m_ResourceButtons.anchoredPosition3D = new Vector3(m_ResourceButtons.anchoredPosition.x, y, 0);

@@ -15,6 +15,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using KSP.Localization;
 using SCANsat.Unity.Interfaces;
 using SCANsat.Unity.Unity;
 using SCANsat.SCAN_Data;
@@ -85,7 +86,7 @@ namespace SCANsat.SCAN_Unity
 			if (currentResource != null)
 			{
 				currentResource.CurrentBodyConfig(_resourcePlanet);
-				_resourceCurrent = currentResource.Name;
+				_resourceCurrent = currentResource.DisplayName;
 				_resourceMin = currentResource.CurrentBody.MinValue;
 				_resourceMax = currentResource.CurrentBody.MaxValue;
 				_resourceTransparency = currentResource.Transparency;
@@ -114,14 +115,16 @@ namespace SCANsat.SCAN_Unity
 
 		public string ResourcePlanet
 		{
-			get { return _resourcePlanet; }
+			get { return currentResource.CurrentBody.Body.displayName.LocalizeBodyName(); }
 			set
 			{
-				_resourcePlanet = value;
+				string body = SCANUtil.bodyFromDisplayName(value);
+
+				_resourcePlanet = body;
 
 				if (currentResource != null)
 				{
-					currentResource.CurrentBodyConfig(value);
+					currentResource.CurrentBodyConfig(body);
 
 					_resourceMin = currentResource.CurrentBody.MinValue;
 					_resourceMax = currentResource.CurrentBody.MaxValue;
@@ -136,13 +139,13 @@ namespace SCANsat.SCAN_Unity
 			{
 				_resourceCurrent = value;
 
-				if (currentResource.Name != value)
+				if (currentResource.DisplayName != value)
 				{
 					for (int i = loadedResources.Count - 1; i >= 0; i--)
 					{
 						SCANresourceGlobal res = loadedResources[i];
 
-						if (res.Name != value)
+						if (res.DisplayName != value)
 							continue;
 
 						currentResource = res;
@@ -156,7 +159,7 @@ namespace SCANsat.SCAN_Unity
 					{
 						currentResource.CurrentBodyConfig(_resourcePlanet);
 
-						_resourceCurrent = currentResource.Name;
+						_resourceCurrent = currentResource.DisplayName;
 						_resourceMin = currentResource.CurrentBody.MinValue;
 						_resourceMax = currentResource.CurrentBody.MaxValue;
 						_resourceTransparency = currentResource.Transparency;
@@ -167,12 +170,14 @@ namespace SCANsat.SCAN_Unity
 
 		public string TerrainPlanet
 		{
-			get { return _terrainPlanet; }
+			get { return currentTerrain.Body.displayName.LocalizeBodyName(); }
 			set
 			{
-				_terrainPlanet = value;
+				string body = SCANUtil.bodyFromDisplayName(value);
 
-				currentTerrain = SCANcontroller.getTerrainNode(value);
+				_terrainPlanet = body;
+
+				currentTerrain = SCANcontroller.getTerrainNode(body);
 
 				if (currentTerrain != null)
 				{
@@ -358,7 +363,18 @@ namespace SCANsat.SCAN_Unity
 			{
 				_terrainSize = value;
 
+				palette.CurrentPalettes = palette.setCurrentPalettesType(currentPalette.kind, _terrainSize);
 
+				for (int i = palette.CurrentPalettes.Length - 1; i >= 0; i--)
+				{
+					Palette p = palette.CurrentPalettes.availablePalettes[i];
+
+					if (p.name != currentPalette.name)
+						continue;
+
+					currentPalette = p;
+					break;
+				}
 			}
 		}
 
@@ -462,12 +478,66 @@ namespace SCANsat.SCAN_Unity
 
 		public IList<string> Resources
 		{
-			get { return new List<string>(loadedResources.Select(r => r.Name)); }
+			get { return new List<string>(loadedResources.Select(r => r.DisplayName)); }
 		}
 
 		public IList<string> CelestialBodies
 		{
-			get { return new List<string>(FlightGlobals.Bodies.Select(d => d.bodyName)); }
+			get
+			{
+				List<string> bodyList = new List<string>();
+
+				var bodies = FlightGlobals.Bodies.Where(b => b.referenceBody == Planetarium.fetch.Sun && b.referenceBody != b);
+
+				var orderedBodies = bodies.OrderBy(b => b.orbit.semiMajorAxis).ToList();
+
+				for (int i = 0; i < orderedBodies.Count; i++)
+				{
+					CelestialBody body = orderedBodies[i];
+
+					bodyList.Add(body.displayName.LocalizeBodyName());
+
+					for (int j = 0; j < body.orbitingBodies.Count; j++)
+					{
+						CelestialBody moon = body.orbitingBodies[j];
+
+						bodyList.Add(moon.displayName.LocalizeBodyName());
+
+						for (int k = 0; k < moon.orbitingBodies.Count; k++)
+						{
+							CelestialBody subMoon = moon.orbitingBodies[k];
+
+							bodyList.Add(subMoon.displayName.LocalizeBodyName());
+
+							for (int l = 0; l < subMoon.orbitingBodies.Count; l++)
+							{
+								CelestialBody subSubMoon = subMoon.orbitingBodies[l];
+
+								bodyList.Add(subSubMoon.displayName.LocalizeBodyName());
+							}
+						}
+					}
+				}
+
+				if (HighLogic.LoadedSceneIsFlight)
+				{
+					for (int i = bodyList.Count - 1; i >= 0; i--)
+					{
+						string b = bodyList[i];
+
+						if (b != FlightGlobals.currentMainBody.displayName.LocalizeBodyName())
+							continue;
+
+						bodyList.RemoveAt(i);
+						bodyList.Insert(0, b);
+						break;
+					}
+				}
+
+				bodyList.Add(Planetarium.fetch.Sun.displayName.LocalizeBodyName());
+
+				return bodyList;
+			}
 		}
 
 		public IList<string> PaletteStyleNames

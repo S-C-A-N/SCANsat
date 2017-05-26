@@ -96,7 +96,7 @@ namespace SCANsat.Unity.Unity
 
 			background.transform.SetParent(m_BodyInfoTransform, false);
 
-			background.Setup(body, true, settings);
+			background.Setup(body, settings.ToggleBodyActive(body), settings);
 
 			backgroundBodies.Add(background);
 		}

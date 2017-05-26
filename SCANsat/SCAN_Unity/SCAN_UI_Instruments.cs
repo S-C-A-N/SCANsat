@@ -235,7 +235,7 @@ namespace SCANsat.SCAN_Unity
 
 		public string ResourceName
 		{
-			get { return resources[currentResource].Name; }
+			get { return resources[currentResource].DisplayName; }
 		}
 
 		public string TypingText
@@ -458,7 +458,7 @@ namespace SCANsat.SCAN_Unity
 			if ((sensors & SCANtype.Biome) != SCANtype.Nothing && v.mainBody.BiomeMap != null)
 			{
 				infoString.AppendLine();
-				infoString.AppendFormat("Biome: {0}", SCANUtil.getBiomeName(v.mainBody, vlon, vlat));
+				infoString.AppendFormat("Biome: {0}", SCANUtil.getBiomeDisplayName(v.mainBody, vlon, vlat));
 				lines++;
 			}
 		}
@@ -507,23 +507,23 @@ namespace SCANsat.SCAN_Unity
 				if (high || !onboard)
 				{
 					infoString.AppendLine();
-					infoString.AppendFormat("{0}: {1:P0}", r.Name, SCANUtil.ResourceOverlay(vlat, vlon, r.Name, v.mainBody, SCAN_Settings_Config.Instance.BiomeLock));
+					infoString.AppendFormat("{0}: {1:P0}", r.DisplayName, SCANUtil.ResourceOverlay(vlat, vlon, r.Name, v.mainBody, SCAN_Settings_Config.Instance.BiomeLock));
 				}
 				else
 				{
 					infoString.AppendLine();
-					infoString.AppendFormat("{0}: {1:P2}", r.Name, SCANUtil.ResourceOverlay(vlat, vlon, r.Name, v.mainBody, SCAN_Settings_Config.Instance.BiomeLock));
+					infoString.AppendFormat("{0}: {1:P2}", r.DisplayName, SCANUtil.ResourceOverlay(vlat, vlon, r.Name, v.mainBody, SCAN_Settings_Config.Instance.BiomeLock));
 				}
 			}
 			else if ((sensors & SCANtype.FuzzyResources) != SCANtype.Nothing)
 			{
 				infoString.AppendLine();
-				infoString.AppendFormat("{0}: {1:P0}", r.Name, SCANUtil.ResourceOverlay(vlat, vlon, r.Name, v.mainBody, SCAN_Settings_Config.Instance.BiomeLock));
+				infoString.AppendFormat("{0}: {1:P0}", r.DisplayName, SCANUtil.ResourceOverlay(vlat, vlon, r.Name, v.mainBody, SCAN_Settings_Config.Instance.BiomeLock));
 			}
 			else if (ResourceButtons)
 			{
 				infoString.AppendLine();
-				infoString.AppendFormat("{0}: No Data", r.Name);
+				infoString.AppendFormat("{0}: No Data", r.DisplayName);
 			}
 		}
 

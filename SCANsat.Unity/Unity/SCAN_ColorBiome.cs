@@ -41,7 +41,7 @@ namespace SCANsat.Unity.Unity
 		[SerializeField]
 		private TextHandler m_TransparencyText = null;
 		[SerializeField]
-		private InputField m_TransInputField = null;
+		private InputHandler m_TransInputField = null;
 
 		private bool loaded;
 
@@ -51,9 +51,22 @@ namespace SCANsat.Unity.Unity
 		private void Awake()
 		{
 			if (m_TransInputField != null)
-				m_TransInputField.onValueChanged.AddListener(new UnityAction<string>(OnTransparencyInputChange));
+				m_TransInputField.OnValueChange.AddListener(new UnityAction<string>(OnTransparencyInputChange));
 		}
 
+		private void Update()
+		{
+			if (settingsInterface == null)
+				return;
+
+			if (settingsInterface.LockInput)
+			{
+				if (m_TransInputField != null && !m_TransInputField.IsFocused
+					&& m_ColorPicker != null && !m_ColorPicker.AnyInputActive)
+					settingsInterface.LockInput = false;
+			}
+		}
+	
 		public void SetBiome(ISCAN_Color color, ISCAN_Settings settings)
 		{
 			if (color == null)

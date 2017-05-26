@@ -21,6 +21,7 @@ using UnityEngine.Events;
 using Contracts;
 using FinePrint.Contracts;
 using FinePrint.Utilities;
+using KSP.Localization;
 using SCANsat.SCAN_UI;
 using SCANsat.SCAN_UI.UI_Framework;
 using SCANsat.SCAN_Unity;
@@ -203,8 +204,8 @@ namespace SCANsat
 		/* Use this method to protect against duplicate dictionary keys */
 		public void addToBodyData (CelestialBody b, SCANdata data)
 		{
-			if (!body_data.Contains(b.name))
-				body_data.Add(b.name, data);
+			if (!body_data.Contains(b.bodyName))
+				body_data.Add(b.bodyName, data);
 			else
 				Debug.LogError("[SCANsat] Warning: SCANdata Dictionary Already Contains Key of This Type");
 		}
@@ -248,7 +249,7 @@ namespace SCANsat
 				if (b == null)
 					continue;
 
-				if (getTerrainNode(b.name) == null)
+				if (getTerrainNode(b.bodyName) == null)
 				{
 					float? clamp = null;
 					if (b.ocean)
@@ -262,13 +263,13 @@ namespace SCANsat
 					}
 					catch (Exception e)
 					{
-						SCANUtil.SCANlog("Error in calculating Max Height for {0}; using default value/n{1}", b.theName, e);
+						SCANUtil.SCANlog("Error in calculating Max Height for {0}; using default value/n{1}", b.bodyName, e);
 						newMax = SCANconfigLoader.SCANNode.DefaultMaxHeightRange;
 					}
 
 					SCANUtil.SCANlog("Generating new SCANsat Terrain Config for [{0}] - Max Height: [{1:F0}m]", b.bodyName, newMax);
 
-					addToTerrainConfigData(b.name, new SCANterrainConfig(SCANconfigLoader.SCANNode.DefaultMinHeightRange, newMax, clamp, SCANUtil.paletteLoader(SCANconfigLoader.SCANNode.DefaultPalette, 7), 7, false, false, b));
+					addToTerrainConfigData(b.bodyName, new SCANterrainConfig(SCANconfigLoader.SCANNode.DefaultMinHeightRange, newMax, clamp, SCANUtil.paletteLoader(SCANconfigLoader.SCANNode.DefaultPalette, 7), 7, false, false, b));
 				}
 			}
 		}
@@ -479,6 +480,11 @@ namespace SCANsat
 			return rList;
 		}
 
+		public static List<SCANresourceGlobal> resources()
+		{
+			return masterResourceNodes.Values.ToList();
+		}
+
 		public List<SCANvessel> Known_Vessels
 		{
 			get { return knownVessels.Values.ToList(); }
@@ -573,7 +579,7 @@ namespace SCANsat
 					CelestialBody body;
 					try
 					{
-						body = FlightGlobals.Bodies.FirstOrDefault(b => b.name == body_name);
+						body = FlightGlobals.Bodies.FirstOrDefault(b => b.bodyName == body_name);
 					}
 					catch (Exception e)
 					{
@@ -583,7 +589,7 @@ namespace SCANsat
 
 					if (body != null)
 					{
-						SCANdata data = getData(body.name);
+						SCANdata data = getData(body.bodyName);
 						if (data == null)
 							data = new SCANdata(body);
 						if (!body_data.Contains(body_name))
@@ -643,7 +649,7 @@ namespace SCANsat
 								pSize = 7;
 							}
 
-							SCANterrainConfig dataTerrainConfig = getTerrainNode(body.name);
+							SCANterrainConfig dataTerrainConfig = getTerrainNode(body.bodyName);
 
 							if (dataTerrainConfig == null)
 								dataTerrainConfig = new SCANterrainConfig(min, max, clampState, dataPalette, pSize, pRev, pDis, body);
@@ -775,6 +781,7 @@ namespace SCANsat
 				finishRegistration(id);
 			}
 
+			GameEvents.OnScienceRecieved.Add(watcher);
 			GameEvents.OnOrbitalSurveyCompleted.Add(onSurvey);
 			GameEvents.onVesselSOIChanged.Add(SOIChange);
 			GameEvents.onVesselCreate.Add(newVesselCheck);
@@ -784,8 +791,8 @@ namespace SCANsat
 
 			if (HighLogic.LoadedSceneIsFlight)
 			{
-				if (!body_data.Contains(FlightGlobals.currentMainBody.name))
-					body_data.Add(FlightGlobals.currentMainBody.name, new SCANdata(FlightGlobals.currentMainBody));
+				if (!body_data.Contains(FlightGlobals.currentMainBody.bodyName))
+					body_data.Add(FlightGlobals.currentMainBody.bodyName, new SCANdata(FlightGlobals.currentMainBody));
 				try
 				{
 					_mainMap = new SCAN_UI_MainMap();
@@ -799,11 +806,13 @@ namespace SCANsat
 				{
 					SCANUtil.SCANlog("Something Went Wrong Initializing UI Objects:\n{0}", e);
 				}
+
+				StartCoroutine(WaitForScienceUpdate());
 			}
 			else if (HighLogic.LoadedSceneHasPlanetarium)
 			{
-				if (!body_data.Contains(Planetarium.fetch.Home.name))
-					body_data.Add(Planetarium.fetch.Home.name, new SCANdata(Planetarium.fetch.Home));
+				if (!body_data.Contains(Planetarium.fetch.Home.bodyName))
+					body_data.Add(Planetarium.fetch.Home.bodyName, new SCANdata(Planetarium.fetch.Home));
 				try
 				{
 					_bigMap = new SCAN_UI_BigMap();
@@ -852,6 +861,14 @@ namespace SCANsat
 				checkHeightMapStatus();
 		}
 
+		private IEnumerator WaitForScienceUpdate()
+		{
+			while (!FlightGlobals.ready || FlightGlobals.ActiveVessel == null)
+				yield return null;
+
+			SCANUtil.UpdateAllVesselData(FlightGlobals.ActiveVessel);
+		}
+
 		public void checkStockResourceScanStatus(CelestialBody body)
 		{
 			if (SCAN_Settings_Config.Instance.DisableStockResource || !SCAN_Settings_Config.Instance.InstantScan)
@@ -866,7 +883,7 @@ namespace SCANsat
 			if (SCANUtil.GetCoverage((int)SCANtype.AllResources, body) >= 100)
 				return;
 
-			SCANdata data = getData(body.name);
+			SCANdata data = getData(body.bodyName);
 
 			if (data == null)
 				return;
@@ -885,14 +902,14 @@ namespace SCANsat
 			if (ResourceMap.Instance.IsPlanetScanned(body.flightGlobalsIndex))
 				return;
 
-			SCANdata data = getData(body.name);
+			SCANdata data = getData(body.bodyName);
 
 			if (data == null)
 				return;
 
 			if (SCANUtil.getCoveragePercentage(data, SCANtype.FuzzyResources) > (SCAN_Settings_Config.Instance.StockTreshold * 100))
 			{
-				SCANUtil.SCANlog("SCANsat resource scanning for {0} meets threshold value [{1:P0}]\nConducting stock orbital resource scan...", body.theName, SCAN_Settings_Config.Instance.StockTreshold);
+				SCANUtil.SCANlog("SCANsat resource scanning for {0} meets threshold value [{1:P0}]\nConducting stock orbital resource scan...", body.bodyName, SCAN_Settings_Config.Instance.StockTreshold);
 				ResourceMap.Instance.UnlockPlanet(body.flightGlobalsIndex);
 			}
 		}
@@ -954,6 +971,7 @@ namespace SCANsat
 
 		private void OnDestroy()
 		{
+			GameEvents.OnScienceRecieved.Remove(watcher);
 			GameEvents.OnOrbitalSurveyCompleted.Remove(onSurvey);
 			GameEvents.onVesselSOIChanged.Remove(SOIChange);
 			GameEvents.onVesselCreate.Remove(newVesselCheck);
@@ -1007,6 +1025,23 @@ namespace SCANsat
 					unloadPQS(b);
 				}
 			}
+		}
+
+		private void watcher(float sci, ScienceSubject sub, ProtoVessel v, bool b)
+		{
+			if (!HighLogic.LoadedSceneIsFlight)
+				return;
+
+			if (FlightGlobals.ActiveVessel == null)
+				return;
+
+			if (sub == null)
+				return;
+
+			if (!sub.id.StartsWith("SCAN"))
+				return;
+
+			SCANUtil.UpdateVesselData(FlightGlobals.ActiveVessel, sub);
 		}
 
 		private void onSurvey(Vessel v, CelestialBody b)
@@ -1091,7 +1126,7 @@ namespace SCANsat
 
 			KopernicusOnDemand = null;
 
-			SCANUtil.SCANlog("Loading Kopernicus On Demand PQSMod For {0}", b.theName);
+			SCANUtil.SCANlog("Loading Kopernicus On Demand PQSMod For {0}", b.bodyName);
 		}
 
 		internal void unloadPQS(CelestialBody b, mapSource s = mapSource.Data)
@@ -1166,7 +1201,7 @@ namespace SCANsat
 
 			KopernicusOnDemand = null;
 
-			SCANUtil.SCANlog("Unloading Kopernicus On Demand PQSMod For {0}", b.theName);
+			SCANUtil.SCANlog("Unloading Kopernicus On Demand PQSMod For {0}", b.bodyName);
 		}
 
 		private void OnGUI()
@@ -1185,7 +1220,7 @@ namespace SCANsat
 			if (b == null)
 				return;
 
-			SCANdata d = getData(b.name);
+			SCANdata d = getData(b.bodyName);
 
 			if (d == null)
 				return;
@@ -1313,7 +1348,7 @@ namespace SCANsat
 		{
 			foreach (SCANsat.SCAN_PartModules.SCANsat s in v.FindPartModulesImplementing<SCANsat.SCAN_PartModules.SCANsat>())
 			{
-				if (s.scanningNow())
+				if (s.scanningNow)
 					registerSensor(v.id, (SCANtype)s.sensorType, s.fov, s.min_alt, s.max_alt, s.best_alt);
 			}
 		}
@@ -1400,7 +1435,7 @@ namespace SCANsat
 
 			CelestialBody b = s.targetBody;
 
-			SCANdata data = getData(b.name);
+			SCANdata data = getData(b.bodyName);
 
 			if (data == null)
 				return;
@@ -1413,8 +1448,8 @@ namespace SCANsat
 
 		private void SOIChange(GameEvents.HostedFromToAction<Vessel, CelestialBody> VC)
 		{
-			if (!body_data.Contains(VC.to.name))
-				body_data.Add(VC.to.name, new SCANdata(VC.to));
+			if (!body_data.Contains(VC.to.bodyName))
+				body_data.Add(VC.to.bodyName, new SCANdata(VC.to));
 		}
 
 		private void setNewTerrainConfigValues(SCANterrainConfig terrain, float min, float max, float? clamp, Palette c, int size, bool reverse, bool discrete)
@@ -1496,7 +1531,7 @@ namespace SCANsat
 
 						if (b != null)
 						{
-							SCANresourceBody res = r.getBodyConfig(b.name);
+							SCANresourceBody res = r.getBodyConfig(b.bodyName);
 							if (res != null)
 							{
 								if (!float.TryParse(sB[1], out min))
@@ -1507,7 +1542,7 @@ namespace SCANsat
 								res.MaxValue = max;
 							}
 							else
-								SCANUtil.SCANlog("No resources found assigned for Celestial Body: {0}, skipping...", b.name);
+								SCANUtil.SCANlog("No resources found assigned for Celestial Body: {0}, skipping...", b.bodyName);
 						}
 						else
 							SCANUtil.SCANlog("No Celestial Body found matching this saved resource value: {0}, skipping...", j);

@@ -30,13 +30,15 @@ namespace SCANsat.Unity
 		[SerializeField]
 		private Image m_OldColorTwo = null;
 		[SerializeField]
-		private InputField m_RInputField = null;
+		private InputHandler m_RInputField = null;
 		[SerializeField]
-		private InputField m_GInputField = null;
+		private InputHandler m_GInputField = null;
 		[SerializeField]
-		private InputField m_BInputField = null;
+		private InputHandler m_BInputField = null;
 
 		private ColorPicker picker;
+
+		private bool anyInputActive;
 
 		public Color GetColorOne
 		{
@@ -48,9 +50,19 @@ namespace SCANsat.Unity
 			get { return m_ColorTwo.CurrentColor; }
 		}
 
+		public bool AnyInputActive
+		{
+			get { return anyInputActive; }
+		}
+
 		private void Awake()
 		{
 			picker = GetComponent<ColorPicker>();
+		}
+
+		private void Update()
+		{
+			anyInputActive = m_RInputField.IsFocused || m_GInputField.IsFocused || m_RInputField.IsFocused;
 		}
 
 		public void Setup(Color one, Color two, bool reset)
@@ -76,13 +88,13 @@ namespace SCANsat.Unity
 				m_OldColorTwo.color = two;
 
 			if (m_RInputField != null)
-				m_RInputField.text = "";
+				m_RInputField.OnTextUpdate.Invoke("");
 
 			if (m_GInputField != null)
-				m_GInputField.text = "";
+				m_GInputField.OnTextUpdate.Invoke("");
 
 			if (m_BInputField != null)
-				m_BInputField.text = "";
+				m_BInputField.OnTextUpdate.Invoke("");
 		}
 
 		public void ColorOne(bool isOn)
@@ -97,13 +109,13 @@ namespace SCANsat.Unity
 				picker.CurrentColor = m_ColorOne.CurrentColor;
 
 				if (m_RInputField != null)
-					m_RInputField.text = "";
+					m_RInputField.OnTextUpdate.Invoke("");
 
 				if (m_GInputField != null)
-					m_GInputField.text = "";
+					m_GInputField.OnTextUpdate.Invoke("");
 
 				if (m_BInputField != null)
-					m_BInputField.text = "";
+					m_BInputField.OnTextUpdate.Invoke("");
 			}
 		}
 
@@ -119,13 +131,13 @@ namespace SCANsat.Unity
 				picker.CurrentColor = m_ColorTwo.CurrentColor;
 
 				if (m_RInputField != null)
-					m_RInputField.text = "";
+					m_RInputField.OnTextUpdate.Invoke("");
 
 				if (m_GInputField != null)
-					m_GInputField.text = "";
+					m_GInputField.OnTextUpdate.Invoke("");
 
 				if (m_BInputField != null)
-					m_BInputField.text = "";
+					m_BInputField.OnTextUpdate.Invoke("");
 			}
 		}
 

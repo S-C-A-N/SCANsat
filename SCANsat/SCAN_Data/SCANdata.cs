@@ -55,7 +55,7 @@ namespace SCANsat.SCAN_Data
 			if (heightMaps.ContainsKey(body.flightGlobalsIndex))
 				built = true;
 
-			terrainConfig = SCANcontroller.getTerrainNode(b.name);
+			terrainConfig = SCANcontroller.getTerrainNode(b.bodyName);
 
 			if (terrainConfig == null)
 			{
@@ -71,12 +71,12 @@ namespace SCANsat.SCAN_Data
 				}
 				catch (Exception e)
 				{
-					SCANUtil.SCANlog("Error in calculating Max Height for {0}; using default value\n{1}", b.theName, e);
+					SCANUtil.SCANlog("Error in calculating Max Height for {0}; using default value\n{1}", b.displayName.LocalizeBodyName(), e);
 					newMax = SCANconfigLoader.SCANNode.DefaultMaxHeightRange;
 				}
 
 				terrainConfig = new SCANterrainConfig(SCANconfigLoader.SCANNode.DefaultMinHeightRange, newMax, clamp, SCANUtil.paletteLoader(SCANconfigLoader.SCANNode.DefaultPalette, 7), 7, false, false, body);
-				SCANcontroller.addToTerrainConfigData(body.name, terrainConfig);
+				SCANcontroller.addToTerrainConfigData(body.bodyName, terrainConfig);
 			}
 		}
 
@@ -529,7 +529,7 @@ namespace SCANsat.SCAN_Data
 				if (!heightMaps.ContainsKey(body.flightGlobalsIndex))
 					heightMaps.Add(body.flightGlobalsIndex, tempHeightMap);
 				tempHeightMap = null;
-				SCANUtil.SCANlog("Height Map Of [{0}] Completed...", body.theName);
+				SCANUtil.SCANlog("Height Map Of [{0}] Completed...", body.displayName.LocalizeBodyName());
 				return;
 			}
 

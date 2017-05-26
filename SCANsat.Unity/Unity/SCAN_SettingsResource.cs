@@ -37,7 +37,7 @@ namespace SCANsat.Unity.Unity
 		[SerializeField]
 		private TextHandler m_StockThresholdValue = null;
 		[SerializeField]
-		private InputField m_ThresholdInput = null;
+		private InputHandler m_ThresholdInput = null;
 		[SerializeField]
 		private SCAN_Toggle m_OverlayTooltipToggle = null;
 		[SerializeField]
@@ -50,6 +50,7 @@ namespace SCANsat.Unity.Unity
 		private TextHandler m_BiomeMapHeight = null;
 
 		private bool loaded;
+		private bool ignoreWarning;
 		private ISCAN_Settings settings;
 
 		private void Update()
@@ -59,7 +60,7 @@ namespace SCANsat.Unity.Unity
 
 			if (settings.LockInput)
 			{
-				if (m_ThresholdInput != null && !m_ThresholdInput.isFocused)
+				if (m_ThresholdInput != null && !m_ThresholdInput.IsFocused)
 					settings.LockInput = false;
 			}
 		}
@@ -166,7 +167,7 @@ namespace SCANsat.Unity.Unity
 			if (!loaded || settings == null)
 				return;
 
-			if (isOn && !settings.ModuleManager)
+			if (isOn && !settings.ModuleManager && !ignoreWarning)
 			{
 				if (SCAN_Settings.Instance == null)
 					return;
@@ -208,6 +209,8 @@ namespace SCANsat.Unity.Unity
 			if (settings == null)
 				return;
 
+			ignoreWarning = true;
+
 			settings.DisableStock = true;
 
 			if (m_InstantScanToggle != null)
@@ -244,7 +247,7 @@ namespace SCANsat.Unity.Unity
 
 			float value = settings.StockThresholdValue;
 
-			if (float.TryParse(m_ThresholdInput.text, out value))
+			if (float.TryParse(m_ThresholdInput.Text, out value))
 			{
 				value /= 100;
 
@@ -253,7 +256,7 @@ namespace SCANsat.Unity.Unity
 				else if (value > 1)
 					value = 1;
 
-				m_ThresholdInput.text = (value * 100).ToString("N0");
+				m_ThresholdInput.OnTextUpdate.Invoke((value * 100).ToString("N0"));
 
 				settings.StockThresholdValue = value;
 

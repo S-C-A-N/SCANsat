@@ -583,7 +583,7 @@ namespace SCANsat.SCAN_Unity
 			if (SCANcontroller.controller.mainMapBiome)
 			{
 				if (SCANUtil.isCovered(lon, lat, data, SCANtype.Biome))
-					units = string.Format("; {0}", SCANUtil.getBiomeName(data.Body, lon, lat));
+					units = string.Format("; {0}", SCANUtil.getBiomeDisplayName(data.Body, lon, lat));
 			}
 			else
 			{
@@ -647,7 +647,7 @@ namespace SCANsat.SCAN_Unity
 				else
 					sunLonCenter = SCANUtil.fixLonShift(sunLon - 90);
 
-				gamma = Math.Abs(sunLatCenter) < 1 ? 50 : Math.Tan(Mathf.Deg2Rad * (90 - Math.Abs(sunLatCenter)));
+				gamma = Math.Abs(sunLatCenter) < 0.55 ? 100 : Math.Tan(Mathf.Deg2Rad * (90 - Math.Abs(sunLatCenter)));
 			}
 
 			for (int ilon = 0; ilon < 360; ilon++)
@@ -742,7 +742,7 @@ namespace SCANsat.SCAN_Unity
 				else
 					sunLonCenter = SCANUtil.fixLonShift(sunLon - 90);
 
-				gamma = Math.Abs(sunLatCenter) < 1 ? 50 : Math.Tan(Mathf.Deg2Rad * (90 - Math.Abs(sunLatCenter)));
+				gamma = Math.Abs(sunLatCenter) < 0.55 ? 100 : Math.Tan(Mathf.Deg2Rad * (90 - Math.Abs(sunLatCenter)));
 			}
 
 			for (int ilon = 0; ilon < 360; ilon++)
