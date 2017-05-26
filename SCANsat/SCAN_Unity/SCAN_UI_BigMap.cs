@@ -26,6 +26,7 @@ using SCANsat.SCAN_Map;
 using SCANsat.SCAN_UI.UI_Framework;
 using Contracts;
 using KSP.UI;
+using KSP.Localization;
 using FinePrint;
 using FinePrint.Utilities;
 using palette = SCANsat.SCAN_UI.UI_Framework.SCANpalette;
@@ -1088,7 +1089,7 @@ namespace SCANsat.SCAN_Unity
 			if (uiElement == null || bigmap == null)
 				return;
 
-			uiElement.UpdateTitle(string.Format("S.C.A.N. {0} Map of {1}", bigmap.MType, body.displayName));
+			uiElement.UpdateTitle(string.Format("S.C.A.N. {0} Map of {1}", bigmap.MType, body.displayName.LocalizeBodyName()));
 		}
 
 		public string Version
@@ -1185,7 +1186,7 @@ namespace SCANsat.SCAN_Unity
 				r = SCANcontroller.GetFirstResource;
 
 			if (r != null)
-				r.CurrentBodyConfig(body.name);
+				r.CurrentBodyConfig(body.bodyName);
 
 			return r;
 		}
@@ -1548,7 +1549,67 @@ namespace SCANsat.SCAN_Unity
 
 		public IList<string> CelestialBodies
 		{
-			get { return new List<string>(SCANcontroller.controller.GetAllData.Select(d => d.Body.displayName)); }
+			get 
+			{
+				List<string> bodyList = new List<string>();
+
+				var bodies = SCANcontroller.controller.GetAllData.Select(d => d.Body).Where(b => b.referenceBody == Planetarium.fetch.Sun && b.referenceBody != b);
+
+				var orderedBodies = bodies.OrderBy(b => b.orbit.semiMajorAxis).ToList();
+
+				for (int i = 0; i < orderedBodies.Count; i++)
+				{
+					CelestialBody body = orderedBodies[i];
+
+					bodyList.Add(body.displayName.LocalizeBodyName());
+
+					for (int j = 0; j < body.orbitingBodies.Count; j++)
+					{
+						CelestialBody moon = body.orbitingBodies[j];
+
+						if (SCANcontroller.controller.getData(moon.bodyName) != null)
+							bodyList.Add(moon.displayName.LocalizeBodyName());
+
+						for (int k = 0; k < moon.orbitingBodies.Count; k++)
+						{
+							CelestialBody subMoon = moon.orbitingBodies[k];
+
+							if (SCANcontroller.controller.getData(subMoon.bodyName) != null)
+								bodyList.Add(subMoon.displayName.LocalizeBodyName());
+
+							for (int l = 0; l < subMoon.orbitingBodies.Count; l++)
+							{
+								CelestialBody subSubMoon = subMoon.orbitingBodies[l];
+
+								if (SCANcontroller.controller.getData(subSubMoon.bodyName) != null)
+									bodyList.Add(subSubMoon.displayName.LocalizeBodyName());
+							}
+						}
+					}
+				}
+
+				if (HighLogic.LoadedSceneIsFlight)
+				{
+					for (int i = bodyList.Count - 1; i >= 0; i--)
+					{
+						string b = bodyList[i];
+
+						if (b != FlightGlobals.currentMainBody.displayName.LocalizeBodyName())
+							continue;
+
+						bodyList.RemoveAt(i);
+						bodyList.Insert(0, b);
+						break;
+					}
+				}
+
+				SCANdata sun = SCANcontroller.controller.getData(Planetarium.fetch.Sun.bodyName);
+
+				if (sun != null)
+					bodyList.Add(sun.Body.displayName.LocalizeBodyName());
+
+				return bodyList;
+			}
 		}
 
 		public IList<string> LegendLabels
@@ -1990,7 +2051,7 @@ namespace SCANsat.SCAN_Unity
 					else if (current < 0)
 						current = 0;
 
-					return body.BiomeMap.Attributes[current].displayname;
+					return Localizer.Format(body.BiomeMap.Attributes[current].displayname);
 				case mapType.Altimetry:
 					float terrain = xPos * data.TerrainConfig.TerrainRange + data.TerrainConfig.MinTerrain;
 
