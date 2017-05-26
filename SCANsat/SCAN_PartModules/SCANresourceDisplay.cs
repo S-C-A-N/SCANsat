@@ -49,7 +49,7 @@ namespace SCANsat.SCAN_PartModules
 			if (state == StartState.Editor)
 				return;
 
-			Fields["abundanceField"].guiName = Localization.Format("#autoLOC_SCANsat_Abundance");
+			Fields["abundanceField"].guiName = Localizer.Format("#autoLOC_SCANsat_Abundance");
 
 			GameEvents.onVesselSOIChanged.Add(onSOIChange);
 
@@ -95,7 +95,7 @@ namespace SCANsat.SCAN_PartModules
 				RequiresUnlock = true;
 			}
 
-			Fields["abundanceField"].guiName = string.Format("{0}[{1}]", resourceDisplayName, Localization.Format("#autoLOC_SCANsat_Surface"));
+			Fields["abundanceField"].guiName = string.Format("{0}[{1}]", resourceDisplayName, Localizer.Format("#autoLOC_SCANsat_Surface"));
 		}
 
 		private void OnDestroy()
@@ -131,12 +131,12 @@ namespace SCANsat.SCAN_PartModules
 
 			if (tooHigh)
 			{
-				abundanceField = Localization.Format("#autoLOC_SCANsat_TooHigh");
+				abundanceField = Localizer.Format("#autoLOC_SCANsat_TooHigh");
 				return;
 			}
 			else if (abundanceValue < 0)
 			{
-				abundanceField = Localization.Format("#autoLOC_SCANsat_NoData");
+				abundanceField = Localizer.Format("#autoLOC_SCANsat_NoData");
 				return;
 			}
 

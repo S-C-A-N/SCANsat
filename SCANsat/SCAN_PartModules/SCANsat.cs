@@ -84,11 +84,11 @@ namespace SCANsat.SCAN_PartModules
 			}
 			if (scanName != null)
 			{
-				Events["startScan"].guiName = string.Format("{0}: {1}", Localization.Format("#autoLOC_SCANsat_StartScan"), scanName);
-				Events["stopScan"].guiName = string.Format("{0}: {1}", Localization.Format("#autoLOC_SCANsat_StopScan"), scanName);
-				Actions["startScanAction"].guiName = string.Format("{0}: {1}", Localization.Format("#autoLOC_SCANsat_StartScan"), scanName);
-				Actions["stopScanAction"].guiName = string.Format("{0}: {1}", Localization.Format("#autoLOC_SCANsat_StopScan"), scanName);
-				Actions["toggleScanAction"].guiName = string.Format("{0}: {1}", Localization.Format("#autoLOC_SCANsat_ToggleScan"), scanName);
+				Events["startScan"].guiName = string.Format("{0}: {1}", Localizer.Format("#autoLOC_SCANsat_StartScan"), scanName);
+				Events["stopScan"].guiName = string.Format("{0}: {1}", Localizer.Format("#autoLOC_SCANsat_StopScan"), scanName);
+				Actions["startScanAction"].guiName = string.Format("{0}: {1}", Localizer.Format("#autoLOC_SCANsat_StartScan"), scanName);
+				Actions["stopScanAction"].guiName = string.Format("{0}: {1}", Localizer.Format("#autoLOC_SCANsat_StopScan"), scanName);
+				Actions["toggleScanAction"].guiName = string.Format("{0}: {1}", Localizer.Format("#autoLOC_SCANsat_ToggleScan"), scanName);
 			}
 
 			if (sensorType == 0)
@@ -181,13 +181,13 @@ namespace SCANsat.SCAN_PartModules
 
 			string str = base.GetInfo();
 			if (min_alt != 0)
-				str += Localization.Format("#autoLOC_SCANsat_AltitudeMin", (min_alt / 1000).ToString("F0"));
+				str += Localizer.Format("#autoLOC_SCANsat_AltitudeMin", (min_alt / 1000).ToString("F0"));
 			if (best_alt != min_alt)
-				str += Localization.Format("#autoLOC_SCANsat_AltitudeBest", (best_alt / 1000).ToString("F0"));
+				str += Localizer.Format("#autoLOC_SCANsat_AltitudeBest", (best_alt / 1000).ToString("F0"));
 			if (max_alt != 0)
-				str += Localization.Format("#autoLOC_SCANsat_AltitudeMax", (max_alt / 1000).ToString("F0"));
+				str += Localizer.Format("#autoLOC_SCANsat_AltitudeMax", (max_alt / 1000).ToString("F0"));
 			if (fov != 0)
-				str += Localization.Format("#autoLOC_SCANsat_FOV", fov.ToString("F0") + "°");
+				str += Localizer.Format("#autoLOC_SCANsat_FOV", fov.ToString("F0") + "°");
 
 			str += resHandler.PrintModuleResources(1);
 			return str;
@@ -304,19 +304,19 @@ namespace SCANsat.SCAN_PartModules
 
 		private string scanAlt(SCANdata d)
 		{
-			string altitude = Localization.Format("#autoLOC_SCANsat_Unknown");
+			string altitude = Localizer.Format("#autoLOC_SCANsat_Unknown");
 			if (!SCAN_Settings_Config.Instance.BackgroundScanning)
-				altitude = Localization.Format("#autoLOC_SCANsat_All_Disabled");
+				altitude = Localizer.Format("#autoLOC_SCANsat_All_Disabled");
 			else if (d.Disabled)
-				altitude = d.Body.displayName + ": " + Localization.Format("#autoLOC_SCANsat_Disabled");
+				altitude = d.Body.displayName.LocalizeBodyName() + ": " + Localizer.Format("#autoLOC_SCANsat_Disabled");
 			else if (vessel.altitude < min_alt)
-				altitude = Localization.Format("#autoLOC_SCANsat_TooLow");
+				altitude = Localizer.Format("#autoLOC_SCANsat_TooLow");
 			else if (vessel.altitude < best_alt)
-				altitude = Localization.Format("#autoLOC_SCANsat_SubOptimal");
+				altitude = Localizer.Format("#autoLOC_SCANsat_SubOptimal");
 			else if (vessel.altitude >= best_alt && vessel.altitude <= max_alt)
-				altitude = Localization.Format("#autoLOC_SCANsat_Ideal");
+				altitude = Localizer.Format("#autoLOC_SCANsat_Ideal");
 			else if (vessel.altitude > max_alt)
-				altitude = Localization.Format("#autoLOC_SCANsat_TooHigh");
+				altitude = Localizer.Format("#autoLOC_SCANsat_TooHigh");
 			return altitude;
 		}
 

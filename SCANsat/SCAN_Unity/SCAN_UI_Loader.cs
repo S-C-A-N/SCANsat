@@ -924,7 +924,7 @@ namespace SCANsat.SCAN_Unity
 
 		private static string GetStringWithName(string tag)
 		{
-			return Localization.Format("#autoLOC_SCANsat_" + tag);
+			return Localizer.Format("#autoLOC_SCANsat_" + tag);
 		}
 
 		public static void ToggleTooltips(bool isOn)

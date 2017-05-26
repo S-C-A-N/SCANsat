@@ -76,10 +76,10 @@ namespace SCANsat.SCAN_PartModules
 					break;
 			}
 
-			Events["analyze"].guiName = string.Format("{0}: {1}", Localization.Format("#autoLOC_SCANsat_Analyze"), dataType);
-			Events["reviewEvent"].guiName = string.Format("{0}: {1}", Localization.Format("#autoLOC_502204"), dataType);
-			Events["EVACollect"].guiName = string.Format("{0}: {1}", Localization.Format("#autoLOC_6004057"), dataType);
-			Actions["analyzeData"].guiName = string.Format("{0}: {1}", Localization.Format("#autoLOC_SCANsat_Analyze"), dataType);
+			Events["analyze"].guiName = string.Format("{0}: {1}", Localizer.Format("#autoLOC_SCANsat_Analyze"), dataType);
+			Events["reviewEvent"].guiName = string.Format("{0}: {1}", Localizer.Format("#autoLOC_502204"), dataType);
+			Events["EVACollect"].guiName = string.Format("{0}: {1}", Localizer.Format("#autoLOC_6004057"), dataType);
+			Actions["analyzeData"].guiName = string.Format("{0}: {1}", Localizer.Format("#autoLOC_SCANsat_Analyze"), dataType);
 		}
 
 		private void Update()
@@ -218,7 +218,7 @@ namespace SCANsat.SCAN_PartModules
 			if (coverage <= 0)
 				coverage = 0.0000001f;
 
-			string title = Localization.Format("#autoLOC_301689", se.experimentTitle, vessel.mainBody.displayName.LocalizeNameNeutral());
+			string title = Localizer.Format("#autoLOC_301689", se.experimentTitle, vessel.mainBody.displayName.LocalizeBodyName());
 
 			su.title = title;
 
@@ -284,9 +284,9 @@ namespace SCANsat.SCAN_PartModules
 				DumpData(data);
 			}
 			else if (CommNet.CommNetScenario.CommNetEnabled)
-				ScreenMessages.PostScreenMessage(Localization.Format("#autoLOC_237738"), 3f, ScreenMessageStyle.UPPER_CENTER);
+				ScreenMessages.PostScreenMessage(Localizer.Format("#autoLOC_237738"), 3f, ScreenMessageStyle.UPPER_CENTER);
 			else
-				ScreenMessages.PostScreenMessage(Localization.Format("#autoLOC_237740"), 3f, ScreenMessageStyle.UPPER_CENTER);
+				ScreenMessages.PostScreenMessage(Localizer.Format("#autoLOC_237740"), 3f, ScreenMessageStyle.UPPER_CENTER);
 		}
 
 		private void LabData(ScienceData data)
