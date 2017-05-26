@@ -143,47 +143,47 @@ namespace SCANsat.SCAN_Unity
 
 		public string DataResetCurrent
 		{
-			get { return Localization.Format("#autoLOC_SCANsat_Warning_DataResetCurrent", _currentDataType, getTargetBody().displayName); }
+			get { return Localizer.Format("#autoLOC_SCANsat_Warning_DataResetCurrent", _currentDataType, getTargetBody().displayName); }
 		}
 
 		public string DataResetAll
 		{
-			get { return Localization.Format("#autoLOC_SCANsat_Warning_DataResetAll", _currentDataType); }
+			get { return Localizer.Format("#autoLOC_SCANsat_Warning_DataResetAll", _currentDataType); }
 		}
 
 		public string StockResourceResetCurrent
 		{
-			get { return Localization.Format("#autoLOC_SCANsat_Warning_StockResourceResetCurrent", getTargetBody().displayName); }
+			get { return Localizer.Format("#autoLOC_SCANsat_Warning_StockResourceResetCurrent", getTargetBody().displayName); }
 		}
 
 		public string StockResourceResetAll
 		{
-			get { return Localization.Format("#autoLOC_SCANsat_Warning_StockResourceResetAll"); }
+			get { return Localizer.Format("#autoLOC_SCANsat_Warning_StockResourceResetAll"); }
 		}
 
 		public string WarningMapFillCurrent
 		{
-			get { return Localization.Format("#autoLOC_SCANsat_Warning_MapFillCurrent", _currentData, getTargetBody().displayName); }
+			get { return Localizer.Format("#autoLOC_SCANsat_Warning_MapFillCurrent", _currentData, getTargetBody().displayName); }
 		}
 
 		public string WarningMapFillAll
 		{
-			get { return Localization.Format("#autoLOC_SCANsat_Warning_MapFillAll", _currentData); }
+			get { return Localizer.Format("#autoLOC_SCANsat_Warning_MapFillAll", _currentData); }
 		}
 
 		public string ModuleManagerWarning
 		{
-			get { return Localization.Format("#autoLOC_SCANsat_Warning_ModuleManagerResource"); }
+			get { return Localizer.Format("#autoLOC_SCANsat_Warning_ModuleManagerResource"); }
 		}
 
 		public string CurrentBody
 		{
-			get { return getTargetBody().displayName; }
+			get { return getTargetBody().displayName.LocalizeBodyName(); }
 		}
 
 		public string SaveToConfig
 		{
-			get { return Localization.Format("#autoLOC_SCANsat_Warning_SaveToConfig"); }
+			get { return Localizer.Format("#autoLOC_SCANsat_Warning_SaveToConfig"); }
 		}
 
 		public string CurrentMapData
@@ -568,7 +568,52 @@ namespace SCANsat.SCAN_Unity
 		
 		public IList<string> BackgroundBodies
 		{
-			get	{ return new List<string>(SCANcontroller.controller.GetAllData.Select(d => d.Body.displayName)); }
+			get 
+			{
+				List<string> bodyList = new List<string>();
+
+				var bodies = SCANcontroller.controller.GetAllData.Select(d => d.Body).Where(b => b.referenceBody == Planetarium.fetch.Sun && b.referenceBody != b);
+
+				var orderedBodies = bodies.OrderBy(b => b.orbit.semiMajorAxis).ToList();
+
+				for (int i = 0; i < orderedBodies.Count; i++)
+				{
+					CelestialBody body = orderedBodies[i];
+
+					bodyList.Add(body.displayName.LocalizeBodyName());
+
+					for (int j = 0; j < body.orbitingBodies.Count; j++)
+					{
+						CelestialBody moon = body.orbitingBodies[j];
+
+						if (SCANcontroller.controller.getData(moon.bodyName) != null)
+							bodyList.Add(moon.displayName.LocalizeBodyName());
+
+						for (int k = 0; k < moon.orbitingBodies.Count; k++)
+						{
+							CelestialBody subMoon = moon.orbitingBodies[k];
+
+							if (SCANcontroller.controller.getData(subMoon.bodyName) != null)
+								bodyList.Add(subMoon.displayName.LocalizeBodyName());
+
+							for (int l = 0; l < subMoon.orbitingBodies.Count; l++)
+							{
+								CelestialBody subSubMoon = subMoon.orbitingBodies[l];
+
+								if (SCANcontroller.controller.getData(subSubMoon.bodyName) != null)
+									bodyList.Add(subSubMoon.displayName.LocalizeBodyName());
+							}
+						}
+					}
+				}
+
+				SCANdata sun = SCANcontroller.controller.getData(Planetarium.fetch.Sun.bodyName);
+
+				if (sun != null)
+					bodyList.Add(sun.Body.displayName.LocalizeBodyName());
+
+				return bodyList;
+			}
 		}
 
 		public IList<string> MapDataTypes
