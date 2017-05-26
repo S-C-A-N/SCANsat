@@ -24,6 +24,7 @@ using SCANsat.SCAN_Data;
 using SCANsat.SCAN_Map;
 using SCANsat.SCAN_UI.UI_Framework;
 using KSP.UI;
+using KSP.Localization;
 using FinePrint;
 using FinePrint.Utilities;
 using palette = SCANsat.SCAN_UI.UI_Framework.SCANpalette;
@@ -339,7 +340,7 @@ namespace SCANsat.SCAN_Unity
 			if (SCANconfigLoader.GlobalResource)
 			{
 				if (currentResource != null)
-					currentResource.CurrentBodyConfig(body.name);
+					currentResource.CurrentBodyConfig(body.bodyName);
 			}
 
 			resetMap(true, SCANUtil.fixLatShift(vessel.latitude), SCANUtil.fixLonShift(vessel.longitude));
@@ -397,7 +398,7 @@ namespace SCANsat.SCAN_Unity
 			else
 			{
 				spotmap.Resource = currentResource;
-				spotmap.Resource.CurrentBodyConfig(body.name);
+				spotmap.Resource.CurrentBodyConfig(body.bodyName);
 			}
 		}
 
@@ -1078,7 +1079,7 @@ namespace SCANsat.SCAN_Unity
 				r = SCANcontroller.GetFirstResource;
 
 			if (r != null)
-				r.CurrentBodyConfig(body.name);
+				r.CurrentBodyConfig(body.bodyName);
 
 			return r;
 		}
@@ -1825,7 +1826,7 @@ namespace SCANsat.SCAN_Unity
 					else if (current < 0)
 						current = 0;
 
-					return biomes[current].displayname;
+					return Localizer.Format(biomes[current].displayname);
 				case mapType.Altimetry:
 					float terrain = xPos * (terrainMax - terrainMin) + terrainMin;
 					
