@@ -15,6 +15,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using KSP.Localization;
 using SCANsat.Unity.Interfaces;
 using SCANsat.Unity.Unity;
 using SCANsat.SCAN_Data;
@@ -114,7 +115,7 @@ namespace SCANsat.SCAN_Unity
 
 		public string ResourcePlanet
 		{
-			get { return _resourcePlanet; }
+			get { return currentResource.CurrentBody.Body.displayName.LocalizeBodyName(); }
 			set
 			{
 				string body = SCANUtil.bodyFromDisplayName(value);
@@ -169,7 +170,7 @@ namespace SCANsat.SCAN_Unity
 
 		public string TerrainPlanet
 		{
-			get { return _terrainPlanet; }
+			get { return currentTerrain.Body.displayName.LocalizeBodyName(); }
 			set
 			{
 				string body = SCANUtil.bodyFromDisplayName(value);
@@ -482,7 +483,61 @@ namespace SCANsat.SCAN_Unity
 
 		public IList<string> CelestialBodies
 		{
-			get { return new List<string>(FlightGlobals.Bodies.Select(d => d.displayName)); }
+			get
+			{
+				List<string> bodyList = new List<string>();
+
+				var bodies = FlightGlobals.Bodies.Where(b => b.referenceBody == Planetarium.fetch.Sun && b.referenceBody != b);
+
+				var orderedBodies = bodies.OrderBy(b => b.orbit.semiMajorAxis).ToList();
+
+				for (int i = 0; i < orderedBodies.Count; i++)
+				{
+					CelestialBody body = orderedBodies[i];
+
+					bodyList.Add(body.displayName.LocalizeBodyName());
+
+					for (int j = 0; j < body.orbitingBodies.Count; j++)
+					{
+						CelestialBody moon = body.orbitingBodies[j];
+
+						bodyList.Add(moon.displayName.LocalizeBodyName());
+
+						for (int k = 0; k < moon.orbitingBodies.Count; k++)
+						{
+							CelestialBody subMoon = moon.orbitingBodies[k];
+
+							bodyList.Add(subMoon.displayName.LocalizeBodyName());
+
+							for (int l = 0; l < subMoon.orbitingBodies.Count; l++)
+							{
+								CelestialBody subSubMoon = subMoon.orbitingBodies[l];
+
+								bodyList.Add(subSubMoon.displayName.LocalizeBodyName());
+							}
+						}
+					}
+				}
+
+				if (HighLogic.LoadedSceneIsFlight)
+				{
+					for (int i = bodyList.Count - 1; i >= 0; i--)
+					{
+						string b = bodyList[i];
+
+						if (b != FlightGlobals.currentMainBody.displayName.LocalizeBodyName())
+							continue;
+
+						bodyList.RemoveAt(i);
+						bodyList.Insert(0, b);
+						break;
+					}
+				}
+
+				bodyList.Add(Planetarium.fetch.Sun.displayName.LocalizeBodyName());
+
+				return bodyList;
+			}
 		}
 
 		public IList<string> PaletteStyleNames
