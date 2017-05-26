@@ -18,6 +18,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
+using KSP.Localization;
 using SCANsat.SCAN_PartModules;
 using SCANsat.SCAN_Platform;
 using SCANsat.SCAN_Platform.Palettes;
@@ -49,7 +50,7 @@ namespace SCANsat
 			int ilat = icLAT(lat);
 			if (badLonLat (ilon, ilat)) return false;
 
-			SCANdata data = getData(body.name);
+			SCANdata data = getData(body.bodyName);
 
 			if (data == null)
 				return false;
@@ -69,7 +70,7 @@ namespace SCANsat
 		{
 			if (badLonLat(lon, lat)) return false;
 
-			SCANdata data = getData(body.name);
+			SCANdata data = getData(body.bodyName);
 
 			if (data == null)
 				return false;
@@ -85,7 +86,7 @@ namespace SCANsat
 		/// <returns>Scanning percentage as a double from 0-100</returns>
 		public static double GetCoverage(int SCANtype, CelestialBody Body)
 		{
-			SCANdata data = getData(Body.name);
+			SCANdata data = getData(Body.bodyName);
 
 			if (data == null)
 				return 0;
@@ -118,7 +119,7 @@ namespace SCANsat
 		/// <returns>SCANdata instance for the given Celestial Body; null if none exists</returns>
 		public static SCANdata getData(CelestialBody body)
 		{
-			return getData(body.name);
+			return getData(body.bodyName);
 		}
 
 		/// <summary>
@@ -501,7 +502,7 @@ namespace SCANsat
 			CBAttributeMapSO.MapAttribute a = getBiome(body, lon, lat);
 			if (a == null)
 				return "unknown";
-			return a.displayname;
+			return Localizer.Format(a.displayname);
 		}
 
 		internal static int countBits(int i)
@@ -517,7 +518,7 @@ namespace SCANsat
 			{
 				CelestialBody b = FlightGlobals.Bodies[i];
 
-				if (b.displayName == display)
+				if (b.displayName.LocalizeBodyName() == display)
 					return b.bodyName;
 			}
 
@@ -531,7 +532,7 @@ namespace SCANsat
 				CelestialBody b = FlightGlobals.Bodies[i];
 
 				if (b.bodyName == body)
-					return b.displayName;
+					return b.displayName.LocalizeBodyName();
 			}
 
 			return body;

@@ -107,10 +107,10 @@ namespace SCANsat
 
 				foreach (CelestialBody body in FlightGlobals.Bodies)
 				{
-					SCANresourceBody newBody = currentGlobal.getBodyConfig(body.name, false);
+					SCANresourceBody newBody = currentGlobal.getBodyConfig(body.bodyName, false);
 
 					if (newBody == null)
-						currentGlobal.addToBodyConfigs(body.name, new SCANresourceBody(rs.ResourceName, body, currentGlobal.DefaultMinValue, currentGlobal.DefaultMaxValue), false);
+						currentGlobal.addToBodyConfigs(body.bodyName, new SCANresourceBody(rs.ResourceName, body, currentGlobal.DefaultMinValue, currentGlobal.DefaultMaxValue), false);
 				}
 
 				SCANcontroller.addToLoadedResourceNames(rs.ResourceName);
@@ -136,10 +136,10 @@ namespace SCANsat
 
 					foreach (CelestialBody body in FlightGlobals.Bodies)
 					{
-						SCANresourceBody newBody = currentGlobal.getBodyConfig(body.name, false);
+						SCANresourceBody newBody = currentGlobal.getBodyConfig(body.bodyName, false);
 
 						if (newBody == null)
-							currentGlobal.addToBodyConfigs(body.name, new SCANresourceBody(rsBody.ResourceName, body, 0, 0.001f), false);
+							currentGlobal.addToBodyConfigs(body.bodyName, new SCANresourceBody(rsBody.ResourceName, body, 0, 0.001f), false);
 					}
 
 					SCANcontroller.addToLoadedResourceNames(rsBody.ResourceName);
@@ -149,7 +149,7 @@ namespace SCANsat
 
 				if (currentBody == null)
 				{
-					CelestialBody body = FlightGlobals.Bodies.FirstOrDefault(a => a.name == rsBody.PlanetName);
+					CelestialBody body = FlightGlobals.Bodies.FirstOrDefault(a => a.bodyName == rsBody.PlanetName);
 					if (body == null)
 						continue;
 

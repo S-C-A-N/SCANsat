@@ -193,7 +193,7 @@ namespace SCANsat.SCAN_UI
 							currentResource = 0;
 
 						if (loadedResources.Count > 0)
-							loadedResources[currentResource].CurrentBodyConfig(vessel.mainBody.name);
+							loadedResources[currentResource].CurrentBodyConfig(vessel.mainBody.bodyName);
 					}
 
 				}
@@ -714,7 +714,7 @@ namespace SCANsat.SCAN_UI
 					currentResource = 0;
 
 				map.Resource = loadedResources[currentResource];
-				map.Resource.CurrentBodyConfig(orbitingBody.name);
+				map.Resource.CurrentBodyConfig(orbitingBody.bodyName);
 			}
 			calcTerrainLimits(orbitingBody);
 			map.resetMap((mapType)mapMode, false, SCANconfigLoader.GlobalResource && resourceOverlay);

@@ -603,7 +603,7 @@ namespace SCANsat.SCAN_Map
 			if (SCANconfigLoader.GlobalResource)
 			{
 				if (resource != null)
-					resource.CurrentBodyConfig(body.name);
+					resource.CurrentBodyConfig(body.bodyName);
 			}
 		}
 
@@ -629,7 +629,7 @@ namespace SCANsat.SCAN_Map
 			if (SCANconfigLoader.GlobalResource && setRes)
 			{ //Make sure that a resource is initialized if necessary
 				if (resource != null && body != null)
-					resource.CurrentBodyConfig(body.name);
+					resource.CurrentBodyConfig(body.bodyName);
 
 				resetResourceMap();
 			}

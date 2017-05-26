@@ -459,12 +459,12 @@ namespace SCANsat.SCAN_Unity
 					if (currentResource == null)
 						currentResource = resources[0];
 
-					currentResource.CurrentBodyConfig(body.name);
+					currentResource.CurrentBodyConfig(body.bodyName);
 				}
 			}
 			else
 			{
-				currentResource.CurrentBodyConfig(body.name);
+				currentResource.CurrentBodyConfig(body.bodyName);
 			}
 
 			bodyBiome = body.BiomeMap != null;
@@ -548,7 +548,7 @@ namespace SCANsat.SCAN_Unity
 
 			SCANdata copy = new SCANdata(data);
 			SCANresourceGlobal resourceCopy = new SCANresourceGlobal(currentResource);
-			resourceCopy.CurrentBodyConfig(body.name);
+			resourceCopy.CurrentBodyConfig(body.bodyName);
 
 			Thread t = new Thread(() => resourceThreadRun(SCAN_Settings_Config.Instance.ResourceMapHeight, SCAN_Settings_Config.Instance.Interpolation, SCAN_Settings_Config.Instance.CoverageTransparency, new System.Random(ResourceScenario.Instance.gameSettings.Seed), copy, resourceCopy));
 			threadRunning = true;
