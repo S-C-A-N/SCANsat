@@ -73,6 +73,7 @@
     <Compile Include="SCAN_Platform\Extensions\ConfigNodes\ConfigExtensions.cs" />
     <Compile Include="SCAN_Platform\Extensions\Math\UnityEngine.Mathf_.cs" />
     <Compile Include="SCAN_Platform\Extensions\MJExtensions.cs" />
+    <Compile Include="SCAN_Platform\Extensions\StringExtensions.cs" />
     <Compile Include="SCAN_Platform\Logging.cs" />
     <Compile Include="SCAN_Platform\Palettes\ColorBrewer\ColorBrewer.cs" />
     <Compile Include="SCAN_Platform\Palettes\ColorBrewer\Include\Original.cs" />
