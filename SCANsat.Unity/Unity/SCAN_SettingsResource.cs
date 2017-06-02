@@ -206,6 +206,9 @@ namespace SCANsat.Unity.Unity
 
 		private void ConfirmStockDisable()
 		{
+			SCAN_Settings.Instance.WarningPopup.FadeOut(true);
+			SCAN_Settings.Instance.WarningPopup = null;
+
 			if (settings == null)
 				return;
 
