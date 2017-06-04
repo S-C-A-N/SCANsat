@@ -468,6 +468,9 @@ namespace SCANsat.Unity.Unity
 
 		private void ConfirmSaveToConfig()
 		{
+			SCAN_Settings.Instance.WarningPopup.FadeOut(true);
+			SCAN_Settings.Instance.WarningPopup = null;
+
 			if (colorInterface == null || m_ColorPicker == null)
 				return;
 

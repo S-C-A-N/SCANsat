@@ -14,6 +14,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using SCANsat.SCAN_Data;
+using KSP.Localization;
 
 namespace SCANsat.SCAN_PartModules
 {
@@ -33,10 +34,9 @@ namespace SCANsat.SCAN_PartModules
 			Actions["startScanAction"].active = false;
 			Actions["stopScanAction"].active = false;
 			Actions["toggleScanAction"].active = false;
-			Actions["analyzeData"].active = false;
-			Actions["startResourceScanAction"].guiName = "Start " + scanName;
-			Actions["stopResourceScanAction"].guiName = "Stop " + scanName;
-			Actions["toggleResourceScanAction"].guiName = "Toggle " + scanName;
+			Actions["startResourceScanAction"].guiName = string.Format("{0}: {1}", Localizer.Format("#autoLOC_SCANsat_StartScan"), scanName);
+			Actions["stopResourceScanAction"].guiName = string.Format("{0}: {1}", Localizer.Format("#autoLOC_SCANsat_StopScan"), scanName);
+			Actions["toggleResourceScanAction"].guiName = string.Format("{0}: {1}", Localizer.Format("#autoLOC_SCANsat_ToggleScan"), scanName);
 
 			if (state == StartState.Editor)
 				return;
@@ -86,7 +86,6 @@ namespace SCANsat.SCAN_PartModules
 			{
 				base.Events["startScan"].active = false;
 				base.Events["stopScan"].active = false;
-				base.Events["analyze"].active = false;
 				if (scanning && loaded)
 					unregisterScanner();
 				return;
@@ -127,7 +126,6 @@ namespace SCANsat.SCAN_PartModules
 			{
 				base.Events["startScan"].active = false;
 				base.Events["stopScan"].active = false;
-				base.Events["analyze"].active = false;
 				if (scanning)
 					unregisterScanner();
 			}
@@ -171,7 +169,6 @@ namespace SCANsat.SCAN_PartModules
 			activated = false;
 			base.Events["startScan"].active = false;
 			base.Events["stopScan"].active = false;
-			base.Events["analyze"].active = false;
 			if (scanning && loaded)
 				unregisterScanner();
 
@@ -196,8 +193,6 @@ namespace SCANsat.SCAN_PartModules
 			activated = true;
 			if (SCAN_Settings_Config.Instance.DisableStockResource)
 			{
-				base.Events["analyze"].active = (sensorType & (int)SCANtype.FuzzyResources) != 0;
-
 				if (mSurvey != null)
 				{
 					foreach (ModuleOrbitalSurveyor m in mSurvey)
