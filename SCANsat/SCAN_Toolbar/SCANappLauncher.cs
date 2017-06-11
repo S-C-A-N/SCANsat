@@ -302,7 +302,8 @@ namespace SCANsat.SCAN_Toolbar
 			set
 			{
 				if (value)
-					SCAN_UI_BigMap.Instance.Open();
+					if (!SCAN_UI_BigMap.Instance.IsVisible)
+						SCAN_UI_BigMap.Instance.Open();
 				else
 					SCAN_UI_BigMap.Instance.Close();
 			}
