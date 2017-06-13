@@ -125,6 +125,12 @@ namespace SCANsat.SCAN_Unity
 
 		public void Open(bool v, double lat = 0, double lon = 0, SCANmap m = null)
 		{
+			if (uiElement != null)
+			{
+				uiElement.gameObject.SetActive(false);
+				MonoBehaviour.DestroyImmediate(uiElement.gameObject);
+			}
+
 			uiElement = GameObject.Instantiate(SCAN_UI_Loader.ZoomMapPrefab).GetComponent<SCAN_ZoomMap>();
 
 			if (uiElement == null)
@@ -181,6 +187,8 @@ namespace SCANsat.SCAN_Unity
 				if (SCANappLauncher.Instance != null && SCANappLauncher.Instance.UIElement != null)
 					SCANappLauncher.Instance.UIElement.SetZoomMapToggle(false);
 			}
+
+			uiElement = null;
 		}
 
 		private void initializeMap()

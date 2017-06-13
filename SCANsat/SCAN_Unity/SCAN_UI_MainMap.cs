@@ -242,6 +242,12 @@ namespace SCANsat.SCAN_Unity
 
 		public void Open()
 		{
+			if (uiElement != null)
+			{
+				uiElement.gameObject.SetActive(false);
+				MonoBehaviour.DestroyImmediate(uiElement.gameObject);
+			}
+
 			v = FlightGlobals.ActiveVessel;
 
 			data = SCANUtil.getData(v.mainBody);
@@ -306,6 +312,8 @@ namespace SCANsat.SCAN_Unity
 						SCANappLauncher.Instance.SCANAppButton.SetFalse(false);
 				}
 			}
+
+			uiElement = null;
 		}
 
 		public bool IsVisible
