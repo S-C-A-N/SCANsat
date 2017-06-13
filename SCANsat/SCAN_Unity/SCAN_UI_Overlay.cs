@@ -216,6 +216,12 @@ namespace SCANsat.SCAN_Unity
 
 		public void Open()
 		{
+			if (uiElement != null)
+			{
+				uiElement.gameObject.SetActive(false);
+				MonoBehaviour.DestroyImmediate(uiElement.gameObject);
+			}
+
 			uiElement = GameObject.Instantiate(SCAN_UI_Loader.OverlayPrefab).GetComponent<SCAN_Overlay>();
 
 			if (uiElement == null)
@@ -250,6 +256,8 @@ namespace SCANsat.SCAN_Unity
 				if (SCANappLauncher.Instance != null && SCANappLauncher.Instance.UIElement != null)
 					SCANappLauncher.Instance.UIElement.SetOverlayToggle(false);
 			}
+
+			uiElement = null;
 		}
 
 		public string Version

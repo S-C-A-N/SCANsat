@@ -147,12 +147,20 @@ namespace SCANsat.SCAN_Unity
 
 		public void Open()
 		{
+			if (uiElement != null)
+			{
+				uiElement.gameObject.SetActive(false);
+				MonoBehaviour.DestroyImmediate(uiElement.gameObject);
+			}
+
 			uiElement = GameObject.Instantiate(SCAN_UI_Loader.BigMapPrefab).GetComponent<SCAN_BigMap>();
 
 			if (uiElement == null)
 				return;
 
 			uiElement.transform.SetParent(UIMasterController.Instance.dialogCanvas.transform, false);
+
+			_isVisible = true;
 
 			if (OrbitToggle && ShowOrbit)
 			{
@@ -180,8 +188,6 @@ namespace SCANsat.SCAN_Unity
 
 			updateMap = true;
 
-			_isVisible = true;
-
 			if (HighLogic.LoadedSceneIsFlight)
 				SCANcontroller.controller.bigMapVisible = true;
 
@@ -192,7 +198,7 @@ namespace SCANsat.SCAN_Unity
 					if (SCAN_Settings_Config.Instance.ToolbarMenu)
 					{
 						if (SCANappLauncher.Instance != null && SCANappLauncher.Instance.UIElement != null)
-							SCANappLauncher.Instance.UIElement.SetBigMapToggle(false);
+							SCANappLauncher.Instance.UIElement.SetBigMapToggle(true);
 					}
 				}
 				else
@@ -231,6 +237,8 @@ namespace SCANsat.SCAN_Unity
 
 			if (HighLogic.LoadedSceneIsFlight)
 				SCANcontroller.controller.bigMapVisible = false;
+
+			uiElement = null;
 		}
 
 		public void RefreshIcons()
@@ -1562,10 +1570,11 @@ namespace SCANsat.SCAN_Unity
 					CelestialBody body = orderedBodies[i];
 
 					bodyList.Add(body.displayName.LocalizeBodyName());
-
+					//SCANUtil.SCANlog("Body: {0} - Orbiting Count: {1}", body.bodyName, body.orbitingBodies.Count);
 					for (int j = 0; j < body.orbitingBodies.Count; j++)
 					{
 						CelestialBody moon = body.orbitingBodies[j];
+						//SCANUtil.SCANlog("Moon: {0} - Orbiting Count: {1}", moon.bodyName, moon.orbitingBodies.Count);
 
 						if (SCANcontroller.controller.getData(moon.bodyName) != null)
 							bodyList.Add(moon.displayName.LocalizeBodyName());
@@ -1573,6 +1582,7 @@ namespace SCANsat.SCAN_Unity
 						for (int k = 0; k < moon.orbitingBodies.Count; k++)
 						{
 							CelestialBody subMoon = moon.orbitingBodies[k];
+							//SCANUtil.SCANlog("Sub Moon: {0} - Orbiting Count: {1}", subMoon.bodyName, subMoon.orbitingBodies.Count);
 
 							if (SCANcontroller.controller.getData(subMoon.bodyName) != null)
 								bodyList.Add(subMoon.displayName.LocalizeBodyName());
@@ -1580,6 +1590,7 @@ namespace SCANsat.SCAN_Unity
 							for (int l = 0; l < subMoon.orbitingBodies.Count; l++)
 							{
 								CelestialBody subSubMoon = subMoon.orbitingBodies[l];
+								//SCANUtil.SCANlog("Sub Sub Moon: {0} - Orbiting Count: {1}", subMoon.bodyName, subMoon.orbitingBodies.Count);
 
 								if (SCANcontroller.controller.getData(subSubMoon.bodyName) != null)
 									bodyList.Add(subSubMoon.displayName.LocalizeBodyName());
