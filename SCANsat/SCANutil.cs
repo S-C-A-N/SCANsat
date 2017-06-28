@@ -502,7 +502,7 @@ namespace SCANsat
 			CBAttributeMapSO.MapAttribute a = getBiome(body, lon, lat);
 			if (a == null)
 				return "unknown";
-			return Localizer.Format(a.displayname);
+			return string.IsNullOrEmpty(a.displayname) ? a.name : Localizer.Format(a.displayname);
 		}
 
 		internal static int countBits(int i)

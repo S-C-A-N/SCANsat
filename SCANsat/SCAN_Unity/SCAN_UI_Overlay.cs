@@ -495,7 +495,7 @@ namespace SCANsat.SCAN_Unity
 			OverlayGenerator.Instance.ClearDisplay();
 
 			if (mapOverlay != null)
-				MonoBehaviour.DestroyImmediate(mapOverlay);
+				MonoBehaviour.Destroy(mapOverlay);
 
 			mapOverlay = null;
 
