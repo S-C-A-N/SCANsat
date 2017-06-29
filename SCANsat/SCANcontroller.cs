@@ -1531,7 +1531,7 @@ namespace SCANsat
 
 						if (b != null)
 						{
-							SCANresourceBody res = r.getBodyConfig(b.bodyName);
+							SCANresourceBody res = r.getBodyConfig(b.bodyName, false);
 							if (res != null)
 							{
 								if (!float.TryParse(sB[1], out min))
@@ -1541,8 +1541,8 @@ namespace SCANsat
 								res.MinValue = min;
 								res.MaxValue = max;
 							}
-							else
-								SCANUtil.SCANlog("No resources found assigned for Celestial Body: {0}, skipping...", b.bodyName);
+							//else
+								//SCANUtil.SCANlog("No resources found assigned for Celestial Body: {0}, skipping...", b.bodyName);
 						}
 						else
 							SCANUtil.SCANlog("No Celestial Body found matching this saved resource value: {0}, skipping...", j);

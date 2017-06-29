@@ -529,7 +529,7 @@ namespace SCANsat.SCAN_Data
 				if (!heightMaps.ContainsKey(body.flightGlobalsIndex))
 					heightMaps.Add(body.flightGlobalsIndex, tempHeightMap);
 				tempHeightMap = null;
-				SCANUtil.SCANlog("Height Map Of [{0}] Completed...", body.displayName.LocalizeBodyName());
+				SCANUtil.SCANlog("Height Map Of [{0}] Completed...", body.bodyName);
 				return;
 			}
 

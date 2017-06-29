@@ -30,6 +30,10 @@ namespace SCANsat.Unity
 		private bool m_Highlighter = false;
 		[SerializeField]
 		private Color m_HighlightColor = Color.white;
+		[SerializeField]
+		private bool m_LocalizedText = false;
+		[SerializeField]
+		private string m_LocalizeName = "";
 
 		public class OnTextEvent : UnityEvent<string> { }
 
@@ -63,6 +67,24 @@ namespace SCANsat.Unity
 		public float OutlineWidth
 		{
 			get { return m_OutlineWidth; }
+		}
+
+		public bool LocalizedText
+		{
+			get { return m_LocalizedText; }
+		}
+
+		public string LocalizeName
+		{
+			get { return m_LocalizeName; }
+		}
+
+		public void SetLocalText(string text)
+		{
+			Text t = GetComponent<Text>();
+
+			if (t != null)
+				t.text = text;
 		}
 
 		public Vector2 PreferredSize

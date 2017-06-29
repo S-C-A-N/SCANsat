@@ -754,7 +754,14 @@ namespace SCANsat.SCAN_Unity
 				return;
 
 			for (int i = 0; i < handlers.Length; i++)
-				TMProFromText(handlers[i]);
+			{
+				TextHandler handler = handlers[i];
+
+				if (handler.LocalizedText)
+					handler.SetLocalText(GetStringWithName(handler.LocalizeName));
+
+				TMProFromText(handler);
+			}
 		}
 
 		private static void TMProFromText(TextHandler handler)

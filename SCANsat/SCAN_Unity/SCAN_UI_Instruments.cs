@@ -185,6 +185,12 @@ namespace SCANsat.SCAN_Unity
 
 		public void Open()
 		{
+			if (uiElement != null)
+			{
+				uiElement.gameObject.SetActive(false);
+				MonoBehaviour.DestroyImmediate(uiElement.gameObject);
+			}
+
 			uiElement = GameObject.Instantiate(SCAN_UI_Loader.InstrumentsPrefab).GetComponent<SCAN_Instruments>();
 
 			if (uiElement == null)
@@ -192,11 +198,11 @@ namespace SCANsat.SCAN_Unity
 
 			uiElement.transform.SetParent(UIMasterController.Instance.dialogCanvas.transform, false);
 
+			_isVisible = true;
+
 			infoString = StringBuilderCache.Acquire();
 
 			uiElement.SetInstruments(this);
-
-			_isVisible = true;
 
 			if (HighLogic.LoadedSceneIsFlight && SCAN_Settings_Config.Instance.StockToolbar && SCAN_Settings_Config.Instance.ToolbarMenu)
 			{
@@ -221,6 +227,8 @@ namespace SCANsat.SCAN_Unity
 				if (SCANappLauncher.Instance != null && SCANappLauncher.Instance.UIElement != null)
 					SCANappLauncher.Instance.UIElement.SetInstrumentToggle(false);
 			}
+
+			uiElement = null;
 		}
 
 		public string Version
