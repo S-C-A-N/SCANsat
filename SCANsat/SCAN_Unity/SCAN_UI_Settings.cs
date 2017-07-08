@@ -304,6 +304,9 @@ namespace SCANsat.SCAN_Unity
 				if (SCAN_UI_MainMap.Instance != null && SCAN_UI_MainMap.Instance.IsVisible)
 					SCAN_UI_MainMap.Instance.SetScale(value);
 
+				if (SCAN_UI_ZoomMap.Instance != null && SCAN_UI_ZoomMap.Instance.IsVisible)
+					SCAN_UI_ZoomMap.Instance.SetScale(value);
+
 				if (SCAN_UI_Instruments.Instance != null && SCAN_UI_Instruments.Instance.IsVisible)
 					SCAN_UI_Instruments.Instance.SetScale(value);
 
