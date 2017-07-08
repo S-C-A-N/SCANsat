@@ -14,6 +14,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using SCANsat.SCAN_Data;
+using KSP.Localization;
 
 namespace SCANsat.SCAN_PartModules
 {
@@ -33,10 +34,9 @@ namespace SCANsat.SCAN_PartModules
 			Actions["startScanAction"].active = false;
 			Actions["stopScanAction"].active = false;
 			Actions["toggleScanAction"].active = false;
-			Actions["analyzeData"].active = false;
-			Actions["startResourceScanAction"].guiName = "Start " + scanName;
-			Actions["stopResourceScanAction"].guiName = "Stop " + scanName;
-			Actions["toggleResourceScanAction"].guiName = "Toggle " + scanName;
+			Actions["startResourceScanAction"].guiName = string.Format("{0}: {1}", Localizer.Format("#autoLOC_SCANsat_StartScan"), scanName);
+			Actions["stopResourceScanAction"].guiName = string.Format("{0}: {1}", Localizer.Format("#autoLOC_SCANsat_StopScan"), scanName);
+			Actions["toggleResourceScanAction"].guiName = string.Format("{0}: {1}", Localizer.Format("#autoLOC_SCANsat_ToggleScan"), scanName);
 
 			if (state == StartState.Editor)
 				return;
@@ -86,7 +86,6 @@ namespace SCANsat.SCAN_PartModules
 			{
 				base.Events["startScan"].active = false;
 				base.Events["stopScan"].active = false;
-				base.Events["analyze"].active = false;
 				if (scanning && loaded)
 					unregisterScanner();
 				return;
@@ -104,7 +103,7 @@ namespace SCANsat.SCAN_PartModules
 			{
 				refreshState = false;
 
-				if (SCANcontroller.controller.disableStockResource)
+				if (SCAN_Settings_Config.Instance.DisableStockResource)
 				{
 					if (mSurvey != null)
 					{
@@ -121,13 +120,12 @@ namespace SCANsat.SCAN_PartModules
 				loaded = true;
 			}
 
-			if (!SCANcontroller.controller.easyModeScanning || SCANcontroller.controller.disableStockResource)
+			if (!SCAN_Settings_Config.Instance.InstantScan || SCAN_Settings_Config.Instance.DisableStockResource)
 				updateEvents();
 			else
 			{
 				base.Events["startScan"].active = false;
 				base.Events["stopScan"].active = false;
-				base.Events["analyze"].active = false;
 				if (scanning)
 					unregisterScanner();
 			}
@@ -136,7 +134,7 @@ namespace SCANsat.SCAN_PartModules
 		[KSPAction("Start Resource Scan")]
 		public void startResourceScanAction(KSPActionParam param)
 		{
-			if (!SCANcontroller.controller.easyModeScanning || SCANcontroller.controller.disableStockResource)
+			if (!SCAN_Settings_Config.Instance.InstantScan || SCAN_Settings_Config.Instance.DisableStockResource)
 			{
 				if (animGroup != null && !scanning && !animGroup.isDeployed)
 					animGroup.DeployModule();
@@ -157,7 +155,7 @@ namespace SCANsat.SCAN_PartModules
 				stopScan();
 			else
 			{
-				if (!SCANcontroller.controller.easyModeScanning || SCANcontroller.controller.disableStockResource)
+				if (!SCAN_Settings_Config.Instance.InstantScan || SCAN_Settings_Config.Instance.DisableStockResource)
 				{
 					if (animGroup != null && !animGroup.isDeployed)
 						animGroup.DeployModule();
@@ -171,11 +169,10 @@ namespace SCANsat.SCAN_PartModules
 			activated = false;
 			base.Events["startScan"].active = false;
 			base.Events["stopScan"].active = false;
-			base.Events["analyze"].active = false;
 			if (scanning && loaded)
 				unregisterScanner();
 
-			if (SCANcontroller.controller != null && SCANcontroller.controller.disableStockResource)
+			if (SCAN_Settings_Config.Instance.DisableStockResource)
 			{
 				if (mSurvey != null)
 				{
@@ -194,10 +191,8 @@ namespace SCANsat.SCAN_PartModules
 		public void EnableModule()
 		{
 			activated = true;
-			if (SCANcontroller.controller != null && SCANcontroller.controller.disableStockResource)
+			if (SCAN_Settings_Config.Instance.DisableStockResource)
 			{
-				base.Events["analyze"].active = (sensorType & (int)SCANtype.FuzzyResources) != 0;
-
 				if (mSurvey != null)
 				{
 					foreach (ModuleOrbitalSurveyor m in mSurvey)

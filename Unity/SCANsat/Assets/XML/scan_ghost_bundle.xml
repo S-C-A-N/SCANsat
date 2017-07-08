@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<KSPBundleDefinition xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" UrlName="scan_ghost" Name="scan_ghost" CreatedTime="-8587192586709718840">
+  <Author />
+  <Info />
+  <Assets>
+    <Asset Name="SCAN_Ghost_Skin" Path="Assets/Prefabs/SCAN_Ghost_Skin.prefab" Type="GameObject" Url="Prefabs/SCAN_Ghost_Skin" AutoLoad="false" />
+  </Assets>
+  <Dependencies>
+    <Dependency>unity_ghost</Dependency>
+  </Dependencies>
+</KSPBundleDefinition>

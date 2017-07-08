@@ -18,6 +18,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
+using KSP.Localization;
 using SCANsat.SCAN_PartModules;
 using SCANsat.SCAN_Platform;
 using SCANsat.SCAN_Platform.Palettes;
@@ -49,7 +50,7 @@ namespace SCANsat
 			int ilat = icLAT(lat);
 			if (badLonLat (ilon, ilat)) return false;
 
-			SCANdata data = getData(body.name);
+			SCANdata data = getData(body.bodyName);
 
 			if (data == null)
 				return false;
@@ -69,7 +70,7 @@ namespace SCANsat
 		{
 			if (badLonLat(lon, lat)) return false;
 
-			SCANdata data = getData(body.name);
+			SCANdata data = getData(body.bodyName);
 
 			if (data == null)
 				return false;
@@ -85,7 +86,7 @@ namespace SCANsat
 		/// <returns>Scanning percentage as a double from 0-100</returns>
 		public static double GetCoverage(int SCANtype, CelestialBody Body)
 		{
-			SCANdata data = getData(Body.name);
+			SCANdata data = getData(Body.bodyName);
 
 			if (data == null)
 				return 0;
@@ -118,13 +119,13 @@ namespace SCANsat
 		/// <returns>SCANdata instance for the given Celestial Body; null if none exists</returns>
 		public static SCANdata getData(CelestialBody body)
 		{
-			return getData(body.name);
+			return getData(body.bodyName);
 		}
 
 		/// <summary>
 		/// For a given Celestial Body name this returns the SCANdata instance if it exists in the SCANcontroller master dictionary; return is null if the SCANdata does not exist for that body (ie it has never been visited while SCANsat has been active), or if the SCANcontroller Scenario Module has not been loaded.
 		/// </summary>
-		/// <param name="BodyName">Name of celestial body (do not use TheName string)</param>
+		/// <param name="BodyName">Name of celestial body (do not use displayName string)</param>
 		/// <returns>SCANdata instance for the given Celestial Body; null if none exists</returns>
 		public static SCANdata getData(string BodyName)
 		{
@@ -140,10 +141,10 @@ namespace SCANsat
 		/// <returns>Returns true if instant scan is enabled</returns>
 		public static bool instantResourceScanEnabled()
 		{
-			if (SCANcontroller.controller == null)
+			if (SCAN_Settings_Config.Instance == null)
 				return true;
 
-			return SCANcontroller.controller.easyModeScanning;
+			return SCAN_Settings_Config.Instance.InstantScan;
 		}
 
 		/// <summary>
@@ -152,10 +153,10 @@ namespace SCANsat
 		/// <returns>Returns true if stock resource scanning is available</returns>
 		public static bool stockResourceScanEnabled()
 		{
-			if (SCANcontroller.controller == null)
+			if (SCAN_Settings_Config.Instance == null)
 				return false;
 
-			return !SCANcontroller.controller.disableStockResource;
+			return !SCAN_Settings_Config.Instance.DisableStockResource;
 		}
 
 		/// <summary>
@@ -164,10 +165,10 @@ namespace SCANsat
 		/// <returns>Returns true if the biome lock is enabled</returns>
 		public static bool resourceBiomeLockEnabled()
 		{
-			if (SCANcontroller.controller == null)
+			if (SCAN_Settings_Config.Instance == null)
 				return true;
 
-			return SCANcontroller.controller.resourceBiomeLock;
+			return SCAN_Settings_Config.Instance.BiomeLock;
 		}
 
 		/// <summary>
@@ -176,10 +177,10 @@ namespace SCANsat
 		/// <returns>Returns true if a narrow-band scanner is required</returns>
 		public static bool narrowBandResourceRestrictionEnabled()
 		{
-			if (SCANcontroller.controller == null)
+			if (SCAN_Settings_Config.Instance == null)
 				return true;
 
-			return SCANcontroller.controller.needsNarrowBand;
+			return SCAN_Settings_Config.Instance.RequireNarrowBand;
 		}
 
 		/// <summary>
@@ -496,11 +497,75 @@ namespace SCANsat
 			return a.name;
 		}
 
+		internal static string getBiomeDisplayName(CelestialBody body, double lon , double lat)
+		{
+			CBAttributeMapSO.MapAttribute a = getBiome(body, lon, lat);
+			if (a == null)
+				return "unknown";
+			return string.IsNullOrEmpty(a.displayname) ? a.name : Localizer.Format(a.displayname);
+		}
+
 		internal static int countBits(int i)
 		{
 			int count;
 			for(count=0; i!=0; ++count) i &= (i - 1);
 			return count;
+		}
+
+		internal static string bodyFromDisplayName(string display)
+		{
+			for (int i = FlightGlobals.Bodies.Count - 1; i >= 0; i--)
+			{
+				CelestialBody b = FlightGlobals.Bodies[i];
+
+				if (b.displayName.LocalizeBodyName() == display)
+					return b.bodyName;
+			}
+
+			return display;
+		}
+
+		internal static string displayNameFromBodyName(string body)
+		{
+			for (int i = FlightGlobals.Bodies.Count - 1; i >= 0; i--)
+			{
+				CelestialBody b = FlightGlobals.Bodies[i];
+
+				if (b.bodyName == body)
+					return b.displayName.LocalizeBodyName();
+			}
+
+			return body;
+		}
+
+		internal static string resourceFromDisplayName(string display)
+		{
+			List<SCANresourceGlobal> resources = SCANcontroller.resources();
+
+			for (int i = resources.Count - 1; i >= 0; i--)
+			{
+				SCANresourceGlobal r = resources[i];
+
+				if (r.DisplayName == display)
+					return r.Name;
+			}
+
+			return display;
+		}
+
+		internal static string displayNameFromResource(string resource)
+		{
+			List<SCANresourceGlobal> resources = SCANcontroller.resources();
+
+			for (int i = resources.Count - 1; i >= 0; i--)
+			{
+				SCANresourceGlobal r = resources[i];
+
+				if (r.Name == resource)
+					return r.DisplayName;
+			}
+
+			return resource;
 		}
 
 		internal static Palette paletteLoader(string name, int size)
@@ -551,10 +616,98 @@ namespace SCANsat
 			}
 		}
 
+		internal static void UpdateAllVesselData(Vessel v)
+		{
+			List<ScienceData> data = new List<ScienceData>();
+
+			var science = v.FindPartModulesImplementing<IScienceDataContainer>();
+
+			for (int i = science.Count - 1; i >= 0; i--)
+			{
+				IScienceDataContainer container = science[i];
+
+				data.AddRange(container.GetData());
+			}
+
+			if (data.Count <= 0)
+				return;
+
+			List<ScienceSubject> subjects = ResearchAndDevelopment.GetSubjects();
+
+			List<ScienceSubject> SCANsubjects = new List<ScienceSubject>();
+
+			for (int i = subjects.Count - 1; i >= 0; i--)
+			{
+				ScienceSubject sub = subjects[i];
+
+				if (sub.id.StartsWith("SCAN"))
+					SCANsubjects.Add(sub);
+			}
+
+			for (int i = SCANsubjects.Count - 1; i >= 0; i--)
+			{
+				ScienceSubject sub = SCANsubjects[i];
+
+				float submittedData = (sub.science / sub.subjectValue) * sub.dataScale;
+
+				for (int j = data.Count - 1; j >= 0; j--)
+				{
+					ScienceData d = data[j];
+
+					if (d.subjectID != sub.id)
+						continue;
+
+					//SCANlog("Original Data: [{0}] - Amount: {1:N2} : New Subject: {2} - Adjusted Amount: {3:N0}"
+						//, d.title, d.dataAmount, sub.title, Math.Max(0.0000001f, d.dataAmount - submittedData));
+
+					d.dataAmount = Math.Max(0.0000001f, d.dataAmount - submittedData);
+				}
+			}
+		}
+
+		internal static void UpdateVesselData(Vessel v, ScienceSubject sub)
+		{
+			List<ScienceData> data = new List<ScienceData>();
+
+			var science = v.FindPartModulesImplementing<IScienceDataContainer>();
+
+			for (int i = science.Count - 1; i >= 0; i--)
+			{
+				IScienceDataContainer container = science[i];
+
+				data.AddRange(container.GetData());
+			}
+
+			if (data.Count <= 0)
+				return;
+
+			float submittedData = (sub.science / sub.subjectValue) * sub.dataScale;
+
+			for (int i = data.Count - 1; i >= 0; i--)
+			{
+				ScienceData d = data[i];
+
+				if (d.subjectID != sub.id)
+					continue;
+
+				SCANlog("Original Data: [{0}] - Amount: {1:N2} : New Subject: {2} - Adjusted Amount: {3:N0}"
+					, d.title, d.dataAmount, sub.title, Math.Max(0.0000001f, d.dataAmount - submittedData));
+
+				d.dataAmount = Math.Max(0.0000001f, d.dataAmount - submittedData);
+			}
+		}
+
 		internal static double waypointDistance(double lat1, double lon1, double alt1, double lat2, double lon2, double alt2, CelestialBody body)
 		{
 			Vector3d pos1 = body.GetWorldSurfacePosition(lat1, lon1, alt1);
 			Vector3d pos2 = body.GetWorldSurfacePosition(lat2, lon2, alt2);
+			return (float)Vector3d.Distance(pos1, pos2);
+		}
+
+		internal static double mapLabelDistance(double lat1, double lon1, double lat2, double lon2, CelestialBody body)
+		{
+			Vector3d pos1 = body.GetWorldSurfacePosition(lat1, lon1, 1000);
+			Vector3d pos2 = body.GetWorldSurfacePosition(lat2, lon2, 1000);
 			return (float)Vector3d.Distance(pos1, pos2);
 		}
 
@@ -632,44 +785,6 @@ namespace SCANsat
 				return false;
 
 			Vector2 pos = new Vector2(Input.mousePosition.x, Screen.height - Input.mousePosition.y);
-
-			switch (HighLogic.LoadedScene)
-			{
-				case GameScenes.FLIGHT:
-					if (SCANcontroller.controller.mainMapVisible && SCANcontroller.controller.mainMap != null && SCANcontroller.controller.mainMap.GetWindowRect.Contains(pos))
-						return true;
-					else if (SCANcontroller.controller.bigMapVisible && SCANcontroller.controller.BigMap != null && SCANcontroller.controller.BigMap.GetWindowRect.Contains(pos))
-						return true;
-					else if (SCANcontroller.controller.zoomMap != null && SCANcontroller.controller.zoomMap.Visible && SCANcontroller.controller.zoomMap.GetWindowRect.Contains(pos))
-						return true;
-					//else if (SCANcontroller.controller.hiDefMap != null && SCANcontroller.controller.hiDefMap.Visible && SCANcontroller.controller.hiDefMap.GetWindowRect.Contains(pos))
-					//	return true;
-					else if (SCANcontroller.controller.settingsWindow != null && SCANcontroller.controller.settingsWindow.Visible && SCANcontroller.controller.settingsWindow.GetWindowRect.Contains(pos))
-						return true;
-					else if (SCANcontroller.controller.resourceSettings != null && SCANcontroller.controller.resourceSettings.Visible && SCANcontroller.controller.resourceSettings.GetWindowRect.Contains(pos))
-						return true;
-					else if (SCANcontroller.controller.instrumentsWindow != null && SCANcontroller.controller.instrumentsWindow.Visible && SCANcontroller.controller.instrumentsWindow.GetWindowRect.Contains(pos))
-						return true;
-					else if (SCANcontroller.controller.resourceOverlay != null && SCANcontroller.controller.resourceOverlay.Visible && SCANcontroller.controller.resourceOverlay.GetWindowRect.Contains(pos))
-						return true;
-					else if (SCANcontroller.controller.colorManager != null && SCANcontroller.controller.colorManager.Visible && SCANcontroller.controller.colorManager.GetWindowRect.Contains(pos))
-						return true;
-					break;
-				case GameScenes.TRACKSTATION:
-					if (SCANcontroller.controller.kscMapVisible && SCANcontroller.controller.kscMap != null && SCANcontroller.controller.kscMap.GetWindowRect.Contains(pos))
-						return true;
-					else if (SCANcontroller.controller.kscMap != null && SCANcontroller.controller.kscMap.spotMap != null && SCANcontroller.controller.kscMap.spotMap.Visible && SCANcontroller.controller.kscMap.spotMap.GetWindowRect.Contains(pos))
-						return true;
-					else if (SCANcontroller.controller.settingsWindow != null && SCANcontroller.controller.settingsWindow.Visible && SCANcontroller.controller.settingsWindow.GetWindowRect.Contains(pos))
-						return true;
-					else if (SCANcontroller.controller.resourceSettings != null && SCANcontroller.controller.resourceSettings.Visible && SCANcontroller.controller.resourceSettings.GetWindowRect.Contains(pos))
-						return true;
-					else if (SCANcontroller.controller.resourceOverlay != null && SCANcontroller.controller.resourceOverlay.Visible && SCANcontroller.controller.resourceOverlay.GetWindowRect.Contains(pos))
-						return true;
-					else if (SCANcontroller.controller.colorManager != null && SCANcontroller.controller.colorManager.Visible && SCANcontroller.controller.colorManager.GetWindowRect.Contains(pos))
-						return true;
-					break;
-			}
 
 			return false;
 		}

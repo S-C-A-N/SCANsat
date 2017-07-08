@@ -25,6 +25,7 @@ using System.Runtime.Serialization.Formatters.Binary;
 using SCANsat.SCAN_Platform;
 using SCANsat.SCAN_Platform.Palettes;
 using SCANsat.SCAN_Platform.Palettes.ColorBrewer;
+using SCANsat.SCAN_Unity;
 using palette = SCANsat.SCAN_UI.UI_Framework.SCANpalette;
 
 namespace SCANsat.SCAN_Data
@@ -54,7 +55,7 @@ namespace SCANsat.SCAN_Data
 			if (heightMaps.ContainsKey(body.flightGlobalsIndex))
 				built = true;
 
-			terrainConfig = SCANcontroller.getTerrainNode(b.name);
+			terrainConfig = SCANcontroller.getTerrainNode(b.bodyName);
 
 			if (terrainConfig == null)
 			{
@@ -70,12 +71,12 @@ namespace SCANsat.SCAN_Data
 				}
 				catch (Exception e)
 				{
-					SCANUtil.SCANlog("Error in calculating Max Height for {0}; using default value\n{1}", b.theName, e);
+					SCANUtil.SCANlog("Error in calculating Max Height for {0}; using default value\n{1}", b.displayName.LocalizeBodyName(), e);
 					newMax = SCANconfigLoader.SCANNode.DefaultMaxHeightRange;
 				}
 
 				terrainConfig = new SCANterrainConfig(SCANconfigLoader.SCANNode.DefaultMinHeightRange, newMax, clamp, SCANUtil.paletteLoader(SCANconfigLoader.SCANNode.DefaultPalette, 7), 7, false, false, body);
-				SCANcontroller.addToTerrainConfigData(body.name, terrainConfig);
+				SCANcontroller.addToTerrainConfigData(body.bodyName, terrainConfig);
 			}
 		}
 
@@ -167,17 +168,27 @@ namespace SCANsat.SCAN_Data
 				if (anomalies == null)
 				{
 					PQSSurfaceObject[] sites = body.pqsSurfaceObjects;
-					//PQSCity[] sites = body.GetComponentsInChildren<PQSCity>(true);
 					anomalies = new SCANanomaly[sites.Length];
 					for (int i = 0; i < sites.Length; ++i)
 					{
-						anomalies[i] = new SCANanomaly(sites[i].SurfaceObjectName, body.GetLongitude(sites[i].transform.position), body.GetLatitude(sites[i].transform.position), sites[i]);
+						anomalies[i] = new SCANanomaly(sites[i].SurfaceObjectName
+							, body.GetLongitude(sites[i].transform.position)
+							, body.GetLatitude(sites[i].transform.position)
+							, sites[i]);
 					}
 				}
+
 				for (int i = 0; i < anomalies.Length; ++i)
 				{
-					anomalies[i].Known = SCANUtil.isCovered(anomalies[i].Longitude, anomalies[i].Latitude, this, SCANtype.Anomaly);
-					anomalies[i].Detail = SCANUtil.isCovered(anomalies[i].Longitude, anomalies[i].Latitude, this, SCANtype.AnomalyDetail);
+					anomalies[i].Known = SCANUtil.isCovered(anomalies[i].Longitude
+						, anomalies[i].Latitude
+						, this
+						, SCANtype.Anomaly);
+
+					anomalies[i].Detail = SCANUtil.isCovered(anomalies[i].Longitude
+						, anomalies[i].Latitude
+						, this
+						, SCANtype.AnomalyDetail);
 				}
 				return anomalies;
 			}
@@ -188,7 +199,6 @@ namespace SCANsat.SCAN_Data
 		#region Waypoints
 
 		private List<SCANwaypoint> waypoints;
-		private bool waypointsLoaded;
 
 		public void addToWaypoints()
 		{
@@ -196,6 +206,12 @@ namespace SCANsat.SCAN_Data
 				return;
 
 			addToWaypoints(SCANcontroller.controller.LandingTarget);
+
+			if (SCAN_UI_ZoomMap.Instance != null && SCAN_UI_ZoomMap.Instance.IsVisible && SCAN_UI_ZoomMap.Body == body)
+				SCAN_UI_ZoomMap.Instance.RefreshIcons();
+
+			if (SCAN_UI_BigMap.Instance != null && SCAN_UI_BigMap.Instance.IsVisible && SCAN_UI_BigMap.Body == body)
+				SCAN_UI_BigMap.Instance.RefreshIcons();
 		}
 
 		public void addToWaypoints(SCANwaypoint w)
@@ -225,9 +241,6 @@ namespace SCANsat.SCAN_Data
 
 		public void addSurveyWaypoints(CelestialBody b, SurveyContract c)
 		{
-			if (!waypointsLoaded)
-				return;
-
 			if (b != body)
 				return;
 
@@ -265,11 +278,23 @@ namespace SCANsat.SCAN_Data
 
 				if (HighLogic.CurrentGame.Mode == Game.Modes.CAREER && !SCANcontroller.controller.ContractsLoaded)
 					return new List<SCANwaypoint>();
-				else if (!waypointsLoaded)
+				else// if (!waypointsLoaded)
 				{
-					waypointsLoaded = true;
+					SCANwaypoint landingTarget = null;
+
+					//waypointsLoaded = true;
 					if (waypoints == null)
 						waypoints = new List<SCANwaypoint>();
+					else
+					{
+						landingTarget = waypoints.FirstOrDefault(w => w.LandingTarget);
+						
+						waypoints.Clear();
+					}
+
+					if (landingTarget != null)
+						waypoints.Add(landingTarget);
+
 					if (ContractSystem.Instance != null)
 					{
 						var surveys = ContractSystem.Instance.GetCurrentActiveContracts<SurveyContract>();
@@ -329,19 +354,30 @@ namespace SCANsat.SCAN_Data
 							{
 								if (p.celestialName == body.GetName())
 								{
-									if (p.contractReference != null)
+									bool add = true;
+
+									for (int j = waypoints.Count - 1; j >= 0; j--)
 									{
-										if (p.contractReference.ContractState == Contract.State.Active)
+										SCANwaypoint w = waypoints[j];
+
+										if (w.Seed != p.uniqueSeed)
+											continue;
+
+										add = false;
+										break;
+									}
+
+									if (add)
+									{
+										if (p.contractReference != null)
 										{
-											if (!waypoints.Any(a => a.Way == p))
+											if (p.contractReference.ContractState == Contract.State.Active)
 											{
 												waypoints.Add(new SCANwaypoint(p));
 											}
 										}
-									}
-									else if (!waypoints.Any(a => a.Way == p))
-									{
-										waypoints.Add(new SCANwaypoint(p));
+										else
+											waypoints.Add(new SCANwaypoint(p));
 									}
 								}
 							}
@@ -493,7 +529,7 @@ namespace SCANsat.SCAN_Data
 				if (!heightMaps.ContainsKey(body.flightGlobalsIndex))
 					heightMaps.Add(body.flightGlobalsIndex, tempHeightMap);
 				tempHeightMap = null;
-				SCANUtil.SCANlog("Height Map Of [{0}] Completed...", body.theName);
+				SCANUtil.SCANlog("Height Map Of [{0}] Completed...", body.bodyName);
 				return;
 			}
 
@@ -515,13 +551,13 @@ namespace SCANsat.SCAN_Data
 
 		#region Map Utilities
 		/* DATA: debug option to fill in the map */
-		internal void fillMap()
+		internal void fillMap(SCANtype type)
 		{
 			for (int i = 0; i < 360; i++)
 			{
 				for (int j = 0; j < 180; j++)
 				{
-					coverage[i, j] |= (Int32)SCANtype.Everything;
+					coverage[i, j] |= (int)type;
 				}
 			}
 		}
@@ -541,25 +577,29 @@ namespace SCANsat.SCAN_Data
 		internal void reset()
 		{
 			coverage = new Int32[360, 180];
-			if (SCANcontroller.controller == null)
-				return;
 
-			if (SCANcontroller.controller.mainMap == null)
-				return;
-
-			SCANcontroller.controller.mainMap.resetImages();
+			if (SCAN_UI_MainMap.Instance != null && SCAN_UI_MainMap.Instance.IsVisible)
+				SCAN_UI_MainMap.Instance.resetImages();
 		}
 
-		internal void resetResources()
+		internal void reset(SCANtype type)
 		{
+			SCANtype mask = type;
+
+			mask ^= SCANtype.Everything;
+
 			for (int x = 0; x < 360; x++)
 			{
 				for (int y = 0; y < 180; y++)
 				{
-					coverage[x, y] &= (int)SCANtype.Everything_SCAN;
+					coverage[x, y] &= (int)mask;
 				}
 			}
+
+			if (SCAN_UI_MainMap.Instance != null && SCAN_UI_MainMap.Instance.IsVisible)
+				SCAN_UI_MainMap.Instance.resetImages();
 		}
+
 		#endregion
 
 		#region Data Serialize/Deserialize
@@ -599,20 +639,6 @@ namespace SCANsat.SCAN_Data
 			return iArray;
 		}
 
-		//One time conversion of single byte[,] to Int32 to recover old scanning data
-		private Int32[,] RecoverToInt(byte[,] bArray)
-		{
-			Int32[,] iArray = new Int32[360, 180];
-			for (int i = 0; i < 360; i++)
-			{
-				for (int j = 0; j < 180; j++)
-				{
-					iArray[i, j] = (Int32)bArray[i, j];
-				}
-			}
-			return iArray;
-		}
-
 		/* DATA: serialization and compression */
 		internal string integerSerialize()
 		{
@@ -624,7 +650,7 @@ namespace SCANsat.SCAN_Data
 			return blob.Replace("/", "-").Replace("=", "_");
 		}
 
-		internal void integerDeserialize(string blob, bool b)
+		internal void integerDeserialize(string blob)
 		{
 			try
 			{
@@ -633,17 +659,8 @@ namespace SCANsat.SCAN_Data
 				bytes = SCAN_CLZF2.Decompress(bytes);
 				MemoryStream mem = new MemoryStream(bytes, false);
 				BinaryFormatter binf = new BinaryFormatter();
-				if (b)
-				{
-					byte[,] bRecover = new byte[360, 180];
-					bRecover = (byte[,])binf.Deserialize(mem);
-					Coverage = RecoverToInt(bRecover);
-				}
-				else
-				{
-					byte[] bArray = (byte[])binf.Deserialize(mem);
-					Coverage = ConvertToInt(bArray);
-				}
+				byte[] bArray = (byte[])binf.Deserialize(mem);
+				Coverage = ConvertToInt(bArray);
 			}
 			catch (Exception e)
 			{

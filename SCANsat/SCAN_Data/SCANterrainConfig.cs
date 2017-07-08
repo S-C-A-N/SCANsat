@@ -74,7 +74,7 @@ namespace SCANsat.SCAN_Data
 			paletteReverse = reverse;
 			paletteDiscrete = discrete;
 			body = b;
-			name = body.name;
+			name = body.bodyName;
 			index = body.flightGlobalsIndex;
 
 			setDefaultValues();
@@ -110,7 +110,7 @@ namespace SCANsat.SCAN_Data
 		{
 			body = FlightGlobals.Bodies.FirstOrDefault(b => b.flightGlobalsIndex == index);
 			if (body != null)
-				name = body.name;
+				name = body.bodyName;
 			else
 				name = "WrongBody" + index;
 

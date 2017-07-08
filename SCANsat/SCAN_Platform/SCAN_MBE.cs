@@ -157,8 +157,8 @@ namespace SCANsat.SCAN_Platform
 			if (!_OnGUI_FirstRun)
 			{
 				_OnGUI_FirstRun = true; 					// set the flag so this only runs once
-				if (!SCAN_SkinsLibrary._Initialized)
-					SCAN_SkinsLibrary.InitSkinList();		// set up the skins library
+				//if (!SCAN_SkinsLibrary._Initialized)
+					//SCAN_SkinsLibrary.InitSkinList();		// set up the skins library
 				OnGUI_FirstRun();							// then actually *do* the firstrun stuff
 			}
 			OnGUIEvery();

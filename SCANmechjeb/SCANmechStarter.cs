@@ -27,6 +27,8 @@ namespace SCANmechjeb
 				print("[SCANsatMechJeb] Starting SCANsat - MechJeb Interface...");
 				SCANmechjebInt = gameObject.AddComponent<SCANmechjeb>();
 			}
+			else
+				Destroy(gameObject);
 		}
 	}
 }
