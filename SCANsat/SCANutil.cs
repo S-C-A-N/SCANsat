@@ -657,8 +657,8 @@ namespace SCANsat
 					if (d.subjectID != sub.id)
 						continue;
 
-					SCANlog("Original Data: [{0}] - Amount: {1:N2} : New Subject: {2} - Adjusted Amount: {3:N0}"
-						, d.title, d.dataAmount, sub.title, Math.Max(0.0000001f, d.dataAmount - submittedData));
+					//SCANlog("Original Data: [{0}] - Amount: {1:N2} : New Subject: {2} - Adjusted Amount: {3:N0}"
+						//, d.title, d.dataAmount, sub.title, Math.Max(0.0000001f, d.dataAmount - submittedData));
 
 					d.dataAmount = Math.Max(0.0000001f, d.dataAmount - submittedData);
 				}
