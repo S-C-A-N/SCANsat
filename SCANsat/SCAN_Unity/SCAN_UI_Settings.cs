@@ -581,7 +581,7 @@ namespace SCANsat.SCAN_Unity
 			{
 				List<string> bodyList = new List<string>();
 
-				var bodies = SCANcontroller.controller.GetAllData.Select(d => d.Body).Where(b => b.referenceBody == Planetarium.fetch.Sun && b.referenceBody != b);
+				var bodies = FlightGlobals.Bodies.Where(b => b.referenceBody == Planetarium.fetch.Sun && b.referenceBody != b);
 
 				var orderedBodies = bodies.OrderBy(b => b.orbit.semiMajorAxis).ToList();
 
@@ -589,7 +589,8 @@ namespace SCANsat.SCAN_Unity
 				{
 					CelestialBody body = orderedBodies[i];
 
-					bodyList.Add(body.displayName.LocalizeBodyName());
+					if (SCANcontroller.controller.getData(body.bodyName) != null)
+						bodyList.Add(body.displayName.LocalizeBodyName());
 
 					for (int j = 0; j < body.orbitingBodies.Count; j++)
 					{
