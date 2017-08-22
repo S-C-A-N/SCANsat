@@ -16,14 +16,15 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using SCANsat.SCAN_Data;
 using SCANsat.Unity;
 using SCANsat.Unity.Unity;
-using SCANsat.SCAN_Platform.Palettes;
+using SCANsat.SCAN_Palettes;
 using KSP.UI;
 using KSP.UI.Screens;
 using KSP.Localization;
 using TMPro;
-using palette = SCANsat.SCAN_UI.UI_Framework.SCANpalette;
+using palette = SCANsat.SCAN_UI.UI_Framework.SCANcolorUtil;
 
 namespace SCANsat.SCAN_Unity
 {
@@ -363,8 +364,8 @@ namespace SCANsat.SCAN_Unity
 
 			if (!prefabsLoaded)
 				loadPrefabBundle();
-
-			palette.CurrentPalettes = palette.setCurrentPalettesType(Palette.Kind.Diverging, 7);
+			
+			palette.CurrentPalettes = palette.SetCurrentPalettesType(SCANPaletteKind.Diverging);
 
 			if (shadersLoaded && spritesLoaded && skinLoaded && iconsLoaded && prefabsLoaded)
 				SCANUtil.SCANlog("All SCANsat asset bundles loaded");
@@ -697,21 +698,6 @@ namespace SCANsat.SCAN_Unity
 
 		private static void processTMPPrefabs()
 		{
-			//foreach (var r in Resources.FindObjectsOfTypeAll<Material>())
-			//{
-			//	SCANUtil.SCANlog("Material: {0}", r.name);
-			//}
-
-			//foreach (var f in Resources.FindObjectsOfTypeAll<TMP_FontAsset>())
-			//{
-			//	SCANUtil.SCANlog("TMP Font: {0}", f.name);
-			//}
-
-			//foreach (var f in Resources.FindObjectsOfTypeAll<Font>())
-			//{
-			//	SCANUtil.SCANlog("Font: {0}", f.name);
-			//}
-
 			for (int i = loadedPrefabs.Length - 1; i >= 0; i--)
 			{
 				GameObject o = loadedPrefabs[i];
