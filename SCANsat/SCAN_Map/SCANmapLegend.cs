@@ -12,9 +12,9 @@
 #endregion
 
 using System;
-using SCANsat.SCAN_Platform.Palettes;
+using SCANsat.SCAN_Palettes;
 using SCANsat.SCAN_Data;
-using palette = SCANsat.SCAN_UI.UI_Framework.SCANpalette;
+using palette = SCANsat.SCAN_UI.UI_Framework.SCANcolorUtil;
 
 using UnityEngine;
 
@@ -24,7 +24,7 @@ namespace SCANsat.SCAN_Map
 	{
 		private Texture2D legend;
 		private float legendMin, legendMax;
-		private Palette dataPalette;
+		private SCANPalette dataPalette;
 		private bool legendScheme;
 		private bool stockScheme;
 		private CelestialBody body;
@@ -37,7 +37,7 @@ namespace SCANsat.SCAN_Map
 
 		public Texture2D getLegend(bool color, SCANterrainConfig terrain)
 		{
-			if (legend != null && legendMin == terrain.MinTerrain && legendMax == terrain.MaxTerrain && legendScheme == color && terrain.ColorPal.hash == dataPalette.hash)
+			if (legend != null && legendMin == terrain.MinTerrain && legendMax == terrain.MaxTerrain && legendScheme == color && terrain.ColorPal.Hash == dataPalette.Hash)
 				return legend;
 
 			body = null;
@@ -60,7 +60,7 @@ namespace SCANsat.SCAN_Map
 
 		public Texture2D getLegend(float min, float max, bool color, SCANterrainConfig terrain)
 		{
-			if (legend != null && legendMin == min && legendMax == max && legendScheme == color && terrain.ColorPal.hash == dataPalette.hash)
+			if (legend != null && legendMin == min && legendMax == max && legendScheme == color && terrain.ColorPal.Hash == dataPalette.Hash)
 				return legend;
 
 			legend = new Texture2D(256, 1, TextureFormat.RGB24, false);
@@ -84,7 +84,7 @@ namespace SCANsat.SCAN_Map
 			if (legend != null && legendScheme == color && stockScheme == stock && body == data.Body && !reset)
 				return legend;
 
-			dataPalette = new Palette();
+			dataPalette = new SCANPalette();
 
 			legend = new Texture2D(256, 1, TextureFormat.RGB24, false);
 			body = data.Body;

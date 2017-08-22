@@ -23,10 +23,9 @@ using FinePrint.Utilities;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
 using SCANsat.SCAN_Platform;
-using SCANsat.SCAN_Platform.Palettes;
-using SCANsat.SCAN_Platform.Palettes.ColorBrewer;
+using SCANsat.SCAN_Palettes;
 using SCANsat.SCAN_Unity;
-using palette = SCANsat.SCAN_UI.UI_Framework.SCANpalette;
+using palette = SCANsat.SCAN_UI.UI_Framework.SCANcolorUtil;
 
 namespace SCANsat.SCAN_Data
 {
@@ -75,7 +74,7 @@ namespace SCANsat.SCAN_Data
 					newMax = SCANconfigLoader.SCANNode.DefaultMaxHeightRange;
 				}
 
-				terrainConfig = new SCANterrainConfig(SCANconfigLoader.SCANNode.DefaultMinHeightRange, newMax, clamp, SCANUtil.paletteLoader(SCANconfigLoader.SCANNode.DefaultPalette, 7), 7, false, false, body);
+				terrainConfig = new SCANterrainConfig(SCANconfigLoader.SCANNode.DefaultMinHeightRange, newMax, clamp, SCANconfigLoader.SCANPalettes.DefaultPalette, 7, false, false, body);
 				SCANcontroller.addToTerrainConfigData(body.bodyName, terrainConfig);
 			}
 		}
