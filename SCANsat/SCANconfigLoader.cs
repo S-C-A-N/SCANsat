@@ -14,12 +14,10 @@
 using System.Linq;
 using SCANsat.SCAN_Data;
 using SCANsat.SCAN_Platform;
-using SCANsat.SCAN_Platform.Palettes;
-using SCANsat.SCAN_Platform.Palettes.ColorBrewer;
-using SCANsat.SCAN_Platform.Palettes.FixedColors;
+using SCANsat.SCAN_Palettes;
 using SCANsat.SCAN_UI.UI_Framework;
 using UnityEngine;
-using palette = SCANsat.SCAN_UI.UI_Framework.SCANpalette;
+using palette = SCANsat.SCAN_UI.UI_Framework.SCANcolorUtil;
 
 namespace SCANsat
 {
@@ -31,11 +29,20 @@ namespace SCANsat
 		private const string configFile = "SCANsat/Resources/SCANcolors";
 		private const string configNodeName = "SCAN_Color_Config";
 
+		private const string paletteFile = "SCANsat/Resources/SCANpalettes";
+		private const string paletteNodeName = "SCAN_Palette_Config";
+
 		private static SCAN_Color_Config SCANnode;
+		private static SCAN_Palette_Config SCANpalettes;
 
 		public static SCAN_Color_Config SCANNode
 		{
 			get { return SCANnode; }
+		}
+
+		public static SCAN_Palette_Config SCANPalettes
+		{
+			get { return SCANpalettes; }
 		}
 
 		public static bool GlobalResource
@@ -52,6 +59,7 @@ namespace SCANsat
 		{
 			loadSCANtypes();
 
+			SCANpalettes = new SCAN_Palette_Config(paletteFile, paletteNodeName);
 			SCANnode = new SCAN_Color_Config(configFile, configNodeName);
 
 			SCANcontroller.checkLoadedTerrainNodes();
