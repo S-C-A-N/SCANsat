@@ -21,7 +21,7 @@ using KSP.UI.Screens.Flight.Dialogs;
 using KSP.Localization;
 
 using UnityEngine;
-using palette = SCANsat.SCAN_UI.UI_Framework.SCANpalette;
+using palette = SCANsat.SCAN_UI.UI_Framework.SCANcolorUtil;
 
 namespace SCANsat.SCAN_PartModules
 {
