@@ -15,7 +15,7 @@ using System.Collections;
 using SCANsat;
 using SCANsat.SCAN_Data;
 using log = SCANsat.SCAN_Platform.Logging.ConsoleLogger;
-using palette = SCANsat.SCAN_UI.UI_Framework.SCANpalette;
+using palette = SCANsat.SCAN_UI.UI_Framework.SCANcolorUtil;
 using MuMech;
 
 using UnityEngine;

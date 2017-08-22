@@ -22,7 +22,7 @@ using SCANsat.Unity.Unity;
 using SCANsat.SCAN_Data;
 using SCANsat.SCAN_UI.UI_Framework;
 using KSP.UI;
-using palette = SCANsat.SCAN_UI.UI_Framework.SCANpalette;
+using palette = SCANsat.SCAN_UI.UI_Framework.SCANcolorUtil;
 
 namespace SCANsat.SCAN_Unity
 {

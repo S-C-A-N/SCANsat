@@ -19,7 +19,7 @@ using SCANsat.SCAN_Platform.Palettes;
 using SCANsat.SCAN_Platform.Logging;
 using SCANsat.SCAN_Data;
 using SCANsat.SCAN_UI.UI_Framework;
-using palette = SCANsat.SCAN_UI.UI_Framework.SCANpalette;
+using palette = SCANsat.SCAN_UI.UI_Framework.SCANcolorUtil;
 
 namespace SCANsat.SCAN_Map
 {

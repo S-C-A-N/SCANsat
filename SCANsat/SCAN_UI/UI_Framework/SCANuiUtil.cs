@@ -23,7 +23,7 @@ using SCANsat.SCAN_Platform;
 using SCANsat.SCAN_Data;
 using SCANsat.SCAN_Map;
 using SCANsat.SCAN_Unity;
-using palette = SCANsat.SCAN_UI.UI_Framework.SCANpalette;
+using palette = SCANsat.SCAN_UI.UI_Framework.SCANcolorUtil;
 using UnityEngine;
 
 namespace SCANsat.SCAN_UI.UI_Framework
