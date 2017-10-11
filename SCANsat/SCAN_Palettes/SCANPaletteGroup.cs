@@ -1,4 +1,16 @@
-﻿
+﻿#region license
+/* 
+ * [Scientific Committee on Advanced Navigation]
+ * 			S.C.A.N. Satellite
+ *
+ * SCANPaletteGroup - Class to hold info on a group of color palettes
+ * 
+ * Copyright (c)2014 David Grandy <david.grandy@gmail.com>;
+ * Copyright (c)2014 technogeeky <technogeeky@gmail.com>;
+ * Copyright (c)2014 (Your Name Here) <your email here>; see LICENSE.txt for licensing details.
+ */
+#endregion
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,7 +22,7 @@ namespace SCANsat.SCAN_Palettes
 	public class SCANPaletteGroup : SCAN_ConfigNodeStorage
 	{
 		[Persistent]
-		private string PaletteName;
+		private string name;
 		[Persistent]
 		private List<SCANPalette> Palettes = new List<SCANPalette>();
 
@@ -20,10 +32,21 @@ namespace SCANsat.SCAN_Palettes
 
 		public SCANPaletteGroup() { }
 
-		public SCANPaletteGroup(string name, SCANPaletteKind kind)
+		public SCANPaletteGroup(string _name, SCANPaletteKind kind)
 		{
-			PaletteName = name;
+			name = _name;
 			_kind = kind;
+		}
+
+		public SCANPaletteGroup(string _name, SCANPaletteKind kind, SCANPalette palette)
+		{
+			name = _name;
+			_kind = kind;
+
+			Palettes.Add(palette);
+
+			if (!MasterPaletteList.Contains(palette.Count))
+				MasterPaletteList.Add(palette.Count, palette);
 		}
 
 		public SCANPaletteKind Kind
@@ -32,9 +55,9 @@ namespace SCANsat.SCAN_Palettes
 			set { _kind = value; }
 		}
 
-		public string _PaletteName
+		public string PaletteName
 		{
-			get { return PaletteName; }
+			get { return name; }
 		}
 
 		public SCANPalette GetPalette(int length)
@@ -46,7 +69,14 @@ namespace SCANsat.SCAN_Palettes
 				return MasterPaletteList[length];
 
 			if (MasterPaletteList.Count > 0)
-				return MasterPaletteList.At(MasterPaletteList.Count - 1);
+			{
+				int max = MasterPaletteList.Values.Max(p => p.Count);
+
+				if (MasterPaletteList.Contains(max))
+					return MasterPaletteList[max];
+
+				return MasterPaletteList.At(0);
+			}
 
 			return null;
 		}
@@ -62,11 +92,14 @@ namespace SCANsat.SCAN_Palettes
 				switch (_kind)
 				{
 					case SCANPaletteKind.Fixed:
-						var fixedPalette = typeof(FixedColorPalettes);
-						var fixedPaletteMethod = fixedPalette.GetMethod(PaletteName);
-						var fixedColorPalette = fixedPaletteMethod.Invoke(null, null);
-						Palettes.Add((SCANPalette)fixedColorPalette);
-						OnDecodeFromConfigNode();
+						if (name != "Default")
+						{
+							var fixedPalette = typeof(FixedColorPalettes);
+							var fixedPaletteMethod = fixedPalette.GetMethod(name);
+							var fixedColorPalette = fixedPaletteMethod.Invoke(null, null);
+							Palettes.Add((SCANPalette)fixedColorPalette);
+							OnDecodeFromConfigNode();
+						}
 						return;
 					case SCANPaletteKind.Diverging:
 						count = 11;
@@ -82,7 +115,7 @@ namespace SCANsat.SCAN_Palettes
 				}
 
 				var brewerPalette = typeof(BrewerPalettes);
-				var brewerPaletteMethod = brewerPalette.GetMethod(PaletteName);
+				var brewerPaletteMethod = brewerPalette.GetMethod(name);
 
 				for (int i = 3; i <= count; i++)
 				{
@@ -96,6 +129,16 @@ namespace SCANsat.SCAN_Palettes
 			}
 
 			OnDecodeFromConfigNode();
+		}
+
+		public void setPaletteKind(SCANPaletteKind kind)
+		{
+			for (int i = MasterPaletteList.Count - 1; i >= 0; i--)
+			{
+				SCANPalette p = MasterPaletteList.At(i);
+
+				p.Kind = kind;
+			}
 		}
 
 		public override void OnDecodeFromConfigNode()
@@ -112,8 +155,7 @@ namespace SCANsat.SCAN_Palettes
 					if (!MasterPaletteList.Contains(p.Count))
 						MasterPaletteList.Add(p.Count, p);
 
-					p.Name = PaletteName;
-					p.Kind = _kind;
+					p.Name = name;
 				}
 			}
 			catch (Exception e)
