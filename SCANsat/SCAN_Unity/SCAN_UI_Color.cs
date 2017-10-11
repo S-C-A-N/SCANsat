@@ -96,7 +96,7 @@ namespace SCANsat.SCAN_Unity
 
 			if (currentTerrain != null)
 			{
-				palette.CurrentPalettes = palette.SetCurrentPalettesType(currentPalette.Kind);
+				palette.CurrentPalettes = palette.SetCurrentPalettesType(currentTerrain.ColorPal.Kind);
 
 				currentPalette = palette.CurrentPalettes.GetPaletteGroup(currentTerrain.ColorPal.Name); 
 
@@ -181,7 +181,7 @@ namespace SCANsat.SCAN_Unity
 
 				if (currentTerrain != null)
 				{
-					palette.CurrentPalettes = palette.SetCurrentPalettesType(currentPalette.Kind);
+					palette.CurrentPalettes = palette.SetCurrentPalettesType(currentTerrain.ColorPal.Kind);
 
 					currentPalette = palette.CurrentPalettes.GetPaletteGroup(currentTerrain.ColorPal.Name); 
 
@@ -232,7 +232,7 @@ namespace SCANsat.SCAN_Unity
 
 				currentPalette = palette.CurrentPalettes.GetFirstGroup();
 
-				_terrainPalette = currentPalette._PaletteName;
+				_terrainPalette = currentPalette.PaletteName;
 			}
 		}
 
