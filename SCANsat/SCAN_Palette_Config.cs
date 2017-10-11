@@ -1,4 +1,17 @@
-﻿using System;
+﻿#region license
+/* 
+ * [Scientific Committee on Advanced Navigation]
+ * 			S.C.A.N. Satellite
+ *
+ * SCAN_Palette_Config - Config object to load and store info on color palettes
+ * 
+ * Copyright (c)2014 David Grandy <david.grandy@gmail.com>;
+ * Copyright (c)2014 technogeeky <technogeeky@gmail.com>;
+ * Copyright (c)2014 (Your Name Here) <your email here>; see LICENSE.txt for licensing details.
+ */
+#endregion
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using SCANsat.SCAN_Palettes;
@@ -15,9 +28,9 @@ namespace SCANsat
 
 		private DictionaryValueList<SCANPaletteKind, SCANPaletteType> MasterPaletteTypeList = new DictionaryValueList<SCANPaletteKind, SCANPaletteType>();
 
-		private SCANPalette _defaultPalette;
+		private static SCANPaletteGroup _defaultPalette;
 
-		public SCANPalette DefaultPalette
+		public static SCANPaletteGroup DefaultPalette
 		{
 			get
 			{
@@ -33,6 +46,8 @@ namespace SCANsat
 			FilePath = filepath;
 			TopNodeName = filepath + "/" + node;
 
+			_defaultPalette = GenerateDefaultPalette();
+
 			if (!Load())
 			{
 				SaveDefaultPalettes();
@@ -41,20 +56,22 @@ namespace SCANsat
 			}
 			else
 				SCANUtil.SCANlog("Palette File Loaded");
-
-			_defaultPalette = GenerateDefaultPalette();
 		}
 
-		private SCANPalette GenerateDefaultPalette()
+		private static SCANPaletteGroup GenerateDefaultPalette()
 		{
 			Color32[] c = new Color32[7] { (Color32)palette.xkcd_DarkPurple, (Color32)palette.xkcd_Cerulean, (Color32)palette.xkcd_ArmyGreen, (Color32)palette.xkcd_Yellow, (Color32)palette.xkcd_Red, (Color32)palette.xkcd_Magenta, (Color32)palette.xkcd_White };
 
-			return new SCANPalette(c, "Default", SCANPaletteKind.Fixed, c.Length);
+			SCANPalette def = new SCANPalette(c, "Default", SCANPaletteKind.Fixed, c.Length);
+
+			SCANPaletteGroup group = new SCANPaletteGroup("Default", SCANPaletteKind.Fixed, def);
+
+			return group;
 		}
 
 		private void SaveDefaultPalettes()
 		{
-			SCANUtil.SCANlog("Generating default palettes");
+			SCANUtil.SCANlog("No SCANsat color palette file located\nGenerating default palettes...");
 
 			PaletteTypes = new List<SCANPaletteType>();
 
