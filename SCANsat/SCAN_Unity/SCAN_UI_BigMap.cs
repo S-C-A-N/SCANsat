@@ -1571,19 +1571,17 @@ namespace SCANsat.SCAN_Unity
 
 					if (SCANcontroller.controller.getData(body.bodyName) != null)
 						bodyList.Add(body.displayName.LocalizeBodyName());
-					SCANUtil.SCANlog("Body: {0} - Orbiting Count: {1}", body.bodyName, body.orbitingBodies.Count);
+
 					for (int j = 0; j < body.orbitingBodies.Count; j++)
 					{
 						CelestialBody moon = body.orbitingBodies[j];
-						SCANUtil.SCANlog("Moon: {0} - Orbiting Count: {1}", moon.bodyName, moon.orbitingBodies.Count);
-
+						
 						if (SCANcontroller.controller.getData(moon.bodyName) != null)
 							bodyList.Add(moon.displayName.LocalizeBodyName());
 
 						for (int k = 0; k < moon.orbitingBodies.Count; k++)
 						{
 							CelestialBody subMoon = moon.orbitingBodies[k];
-							SCANUtil.SCANlog("Sub Moon: {0} - Orbiting Count: {1}", subMoon.bodyName, subMoon.orbitingBodies.Count);
 
 							if (SCANcontroller.controller.getData(subMoon.bodyName) != null)
 								bodyList.Add(subMoon.displayName.LocalizeBodyName());
@@ -1591,7 +1589,6 @@ namespace SCANsat.SCAN_Unity
 							for (int l = 0; l < subMoon.orbitingBodies.Count; l++)
 							{
 								CelestialBody subSubMoon = subMoon.orbitingBodies[l];
-								SCANUtil.SCANlog("Sub Sub Moon: {0} - Orbiting Count: {1}", subMoon.bodyName, subMoon.orbitingBodies.Count);
 
 								if (SCANcontroller.controller.getData(subSubMoon.bodyName) != null)
 									bodyList.Add(subSubMoon.displayName.LocalizeBodyName());
