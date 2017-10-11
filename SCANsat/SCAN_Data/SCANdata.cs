@@ -74,7 +74,7 @@ namespace SCANsat.SCAN_Data
 					newMax = SCANconfigLoader.SCANNode.DefaultMaxHeightRange;
 				}
 
-				terrainConfig = new SCANterrainConfig(SCANconfigLoader.SCANNode.DefaultMinHeightRange, newMax, clamp, SCANconfigLoader.SCANPalettes.DefaultPalette, 7, false, false, body);
+				terrainConfig = new SCANterrainConfig(SCANconfigLoader.SCANNode.DefaultMinHeightRange, newMax, clamp, SCAN_Palette_Config.DefaultPalette.GetPalette(0), 7, false, false, body);
 				SCANcontroller.addToTerrainConfigData(body.bodyName, terrainConfig);
 			}
 		}

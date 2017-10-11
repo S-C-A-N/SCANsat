@@ -569,55 +569,22 @@ namespace SCANsat
 		internal static SCANPalette PaletteLoader(string name, int size)
 		{
 			if (name == "Default" || string.IsNullOrEmpty(name))
-				return SCANconfigLoader.SCANPalettes.DefaultPalette;
+				return SCAN_Palette_Config.DefaultPalette.GetPalette(0);
 			else
 			{
 				SCANPaletteGroup group = SCANconfigLoader.SCANPalettes.GetPaletteGroup(name);
 
 				if (group == null)
-					return SCANconfigLoader.SCANPalettes.DefaultPalette;
-
+					return SCAN_Palette_Config.DefaultPalette.GetPalette(0);
+				
 				SCANPalette pal = group.GetPalette(size);
 
 				if (pal == null)
-					return SCANconfigLoader.SCANPalettes.DefaultPalette;
-
+					return SCAN_Palette_Config.DefaultPalette.GetPalette(0);
+				
 				return pal;
 			}
 		}
-
-		//internal static Palette paletteLoader(string name, int size)
-		//{
-		//	if (name == "Default" || string.IsNullOrEmpty(name))
-		//		return PaletteLoader.defaultPalette;
-		//	else
-		//	{
-		//		try
-		//		{
-		//			if (name == "blackForest" || name == "departure" || name == "northRhine" || name == "mars" || name == "wiki2" || name == "plumbago" || name == "cw1_013" || name == "arctic" || name == "mercury" || name == "venus")
-		//			{
-		//				//Load the fixed size color palette by name through reflection
-		//				var fixedPallete = typeof(FixedColorPalettes);
-		//				var fPaletteMethod = fixedPallete.GetMethod(name);
-		//				var fColorP = fPaletteMethod.Invoke(null, null);
-		//				return (Palette)fColorP;
-		//			}
-		//			else
-		//			{
-		//				//Load the ColorBrewer method by name through reflection
-		//				var brewer = typeof(BrewerPalettes);
-		//				var bPaletteMethod = brewer.GetMethod(name);
-		//				var bColorP = bPaletteMethod.Invoke(null, new object[] { size });
-		//				return (Palette)bColorP;
-		//			}
-		//		}
-		//		catch (Exception e)
-		//		{
-		//			SCANUtil.SCANlog("Error Loading Color Palette; Revert To Default: {0}", e);
-		//			return PaletteLoader.defaultPalette;
-		//		}
-		//	}
-		//}
 
 		internal static CelestialBody getTargetBody(MapObject target)
 		{

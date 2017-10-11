@@ -266,7 +266,7 @@ namespace SCANsat
 					}
 
 					SCANUtil.SCANlog("Generating new SCANsat Terrain Config for [{0}] - Max Height: [{1:F0}m]", b.bodyName, newMax);
-
+					
 					addToTerrainConfigData(b.bodyName, new SCANterrainConfig(SCANconfigLoader.SCANNode.DefaultMinHeightRange, newMax, clamp, SCANUtil.PaletteLoader(SCANconfigLoader.SCANNode.DefaultPalette, 7), 7, false, false, b));
 				}
 			}
@@ -641,7 +641,7 @@ namespace SCANsat
 
 							SCANPalette dataPalette = SCANUtil.PaletteLoader(paletteName, pSize);
 
-							if (dataPalette.Hash == SCANconfigLoader.SCANPalettes.DefaultPalette.Hash)
+							if (dataPalette.Hash == SCAN_Palette_Config.DefaultPalette.GetPalette(0).Hash)
 							{
 								paletteName = "Default";
 								pSize = 7;
