@@ -110,13 +110,15 @@ namespace SCANsat.SCAN_UI.UI_Framework
 								if (!int.TryParse(type, out sType))
 									continue;
 
-								if ((SCANtype)sType != resource.SType)
+								if (((SCANtype)sType & resource.SType) == SCANtype.Nothing)
 									continue;
 
 								if (moduleNode.HasValue("max_alt") && !vessel.Landed)
 								{
 									string alt = moduleNode.GetValue("max_alt");
+
 									float f = 0;
+
 									if (!float.TryParse(alt, out f))
 										continue;
 
@@ -138,7 +140,6 @@ namespace SCANsat.SCAN_UI.UI_Framework
 					}
 					else
 					{
-
 						if (vessel.altitude > 1000000)
 							continue;
 
@@ -175,7 +176,9 @@ namespace SCANsat.SCAN_UI.UI_Framework
 
 								foreach (string mode in displayMode.GetValues("Mode"))
 								{
-									if (mode != "Resources")
+									string[] subMode = mode.Split(',');
+
+									if (subMode[0].Trim() != "Resources")
 										continue;
 
 									scanner = true;
