@@ -1,4 +1,17 @@
-﻿using System;
+﻿#region license
+/* 
+ * [Scientific Committee on Advanced Navigation]
+ * 			S.C.A.N. Satellite
+ *
+ * SCANPaletteType - Class to hold info on related color palette types
+ * 
+ * Copyright (c)2014 David Grandy <david.grandy@gmail.com>;
+ * Copyright (c)2014 technogeeky <technogeeky@gmail.com>;
+ * Copyright (c)2014 (Your Name Here) <your email here>; see LICENSE.txt for licensing details.
+ */
+#endregion
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -9,7 +22,7 @@ namespace SCANsat.SCAN_Palettes
 	public class SCANPaletteType : SCAN_ConfigNodeStorage
 	{
 		[Persistent]
-		private string PaletteType;
+		private string name;
 		[Persistent]
 		private List<SCANPaletteGroup> PaletteGroups = new List<SCANPaletteGroup>();
 		
@@ -23,7 +36,7 @@ namespace SCANsat.SCAN_Palettes
 
 		public SCANPaletteType(string type)
 		{
-			PaletteType = type;
+			name = type;
 
 			try
 			{
@@ -34,7 +47,6 @@ namespace SCANsat.SCAN_Palettes
 				_kind = SCANPaletteKind.Unknown;
 				SCANUtil.SCANlog("Error assigning SCANsat palette type - Type: {0}\n{1}", type, e);
 			}
-
 		}
 
 		public SCANPaletteKind Kind
@@ -104,6 +116,7 @@ namespace SCANsat.SCAN_Palettes
 					PaletteGroups.Add(new SCANPaletteGroup("arctic", _kind));
 					PaletteGroups.Add(new SCANPaletteGroup("mercury", _kind));
 					PaletteGroups.Add(new SCANPaletteGroup("venus", _kind));
+					PaletteGroups.Add(SCAN_Palette_Config.DefaultPalette);
 					break;
 				default:
 					break;
@@ -115,13 +128,21 @@ namespace SCANsat.SCAN_Palettes
 			OnDecodeFromConfigNode();
 		}
 
+		public void AddPaletteGroup(SCANPaletteGroup group)
+		{
+
+		}
+
 		public SCANPaletteGroup GetPaletteGroup(string name)
 		{
+			if (name == "Default" || name == "default")
+				return SCAN_Palette_Config.DefaultPalette;
+
 			for (int i = MasterPaletteGroupList.Count - 1; i >= 0; i--)
 			{
 				SCANPaletteGroup group = MasterPaletteGroupList.At(i);
 
-				if (group._PaletteName != name)
+				if (group.PaletteName != name)
 					continue;
 
 				return group;
@@ -136,7 +157,7 @@ namespace SCANsat.SCAN_Palettes
 
 			for (int i = 0; i < MasterPaletteGroupList.Count; i++)
 			{
-				names[i] = MasterPaletteGroupList.At(i)._PaletteName;
+				names[i] = MasterPaletteGroupList.At(i).PaletteName;
 			}
 
 			return names;
@@ -175,9 +196,11 @@ namespace SCANsat.SCAN_Palettes
 
 				for (int i = 0; i < MasterPaletteGroupList.Count; i++)
 				{
+					SCANPalette palette = MasterPaletteGroupList.At(i).GetPalette(length);
+
 					int k = 0;
 					int m = 120;
-					int paletteSize = length;
+					int paletteSize = palette.Count;
 
 					_swatchLength = length;
 
@@ -211,7 +234,7 @@ namespace SCANsat.SCAN_Palettes
 						if (j % sW == 0)
 							k++;
 
-						pix[j] = MasterPaletteGroupList.At(i).GetPalette(length).ColorsArray[k - 1];
+						pix[j] = palette.ColorsArray[k - 1];
 					}
 
 					t.SetPixels32(pix);
@@ -228,12 +251,12 @@ namespace SCANsat.SCAN_Palettes
 		{
 			try
 			{
-				_kind = (SCANPaletteKind)Enum.Parse(typeof(SCANPaletteKind), PaletteType);
+				_kind = (SCANPaletteKind)Enum.Parse(typeof(SCANPaletteKind), name);
 			}
 			catch (Exception e)
 			{
 				_kind = SCANPaletteKind.Unknown;
-				SCANUtil.SCANlog("Error assigning SCANsat palette type - Type: {0}\n{1}", PaletteType, e);
+				SCANUtil.SCANlog("Error assigning SCANsat palette type - Type: {0}\n{1}", name, e);
 			}
 
 			try
@@ -245,10 +268,18 @@ namespace SCANsat.SCAN_Palettes
 					if (p == null)
 						continue;
 
-					if (!MasterPaletteGroupList.Contains(p._PaletteName))
-						MasterPaletteGroupList.Add(p._PaletteName, p);
+					if (!MasterPaletteGroupList.Contains(p.PaletteName))
+						MasterPaletteGroupList.Add(p.PaletteName, p);
 
 					p.Kind = _kind;
+
+					p.setPaletteKind(_kind);
+				}
+
+				if (_kind == SCANPaletteKind.Fixed)
+				{
+					if (!MasterPaletteGroupList.Contains("Default"))
+						MasterPaletteGroupList.Add("Default", SCAN_Palette_Config.DefaultPalette);
 				}
 			}
 			catch (Exception e)
