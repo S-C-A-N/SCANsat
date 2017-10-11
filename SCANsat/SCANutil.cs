@@ -21,12 +21,10 @@ using System.Linq;
 using KSP.Localization;
 using SCANsat.SCAN_PartModules;
 using SCANsat.SCAN_Platform;
-using SCANsat.SCAN_Platform.Palettes;
-using SCANsat.SCAN_Platform.Palettes.ColorBrewer;
-using SCANsat.SCAN_Platform.Palettes.FixedColors;
+using SCANsat.SCAN_Palettes;
 using SCANsat.SCAN_Data;
 using SCANsat.SCAN_UI.UI_Framework;
-using palette = SCANsat.SCAN_UI.UI_Framework.SCANpalette;
+using palette = SCANsat.SCAN_UI.UI_Framework.SCANcolorUtil;
 
 namespace SCANsat
 {
@@ -568,36 +566,23 @@ namespace SCANsat
 			return resource;
 		}
 
-		internal static Palette paletteLoader(string name, int size)
+		internal static SCANPalette PaletteLoader(string name, int size)
 		{
 			if (name == "Default" || string.IsNullOrEmpty(name))
-				return PaletteLoader.defaultPalette;
+				return SCAN_Palette_Config.DefaultPalette.GetPalette(0);
 			else
 			{
-				try
-				{
-					if (name == "blackForest" || name == "departure" || name == "northRhine" || name == "mars" || name == "wiki2" || name == "plumbago" || name == "cw1_013" || name == "arctic" || name == "mercury" || name == "venus")
-					{
-						//Load the fixed size color palette by name through reflection
-						var fixedPallete = typeof(FixedColorPalettes);
-						var fPaletteMethod = fixedPallete.GetMethod(name);
-						var fColorP = fPaletteMethod.Invoke(null, null);
-						return (Palette)fColorP;
-					}
-					else
-					{
-						//Load the ColorBrewer method by name through reflection
-						var brewer = typeof(BrewerPalettes);
-						var bPaletteMethod = brewer.GetMethod(name);
-						var bColorP = bPaletteMethod.Invoke(null, new object[] { size });
-						return (Palette)bColorP;
-					}
-				}
-				catch (Exception e)
-				{
-					SCANUtil.SCANlog("Error Loading Color Palette; Revert To Default: {0}", e);
-					return PaletteLoader.defaultPalette;
-				}
+				SCANPaletteGroup group = SCANconfigLoader.SCANPalettes.GetPaletteGroup(name);
+
+				if (group == null)
+					return SCAN_Palette_Config.DefaultPalette.GetPalette(0);
+				
+				SCANPalette pal = group.GetPalette(size);
+
+				if (pal == null)
+					return SCAN_Palette_Config.DefaultPalette.GetPalette(0);
+				
+				return pal;
 			}
 		}
 

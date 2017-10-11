@@ -27,7 +27,7 @@ using KSP.UI;
 using KSP.Localization;
 using FinePrint;
 using FinePrint.Utilities;
-using palette = SCANsat.SCAN_UI.UI_Framework.SCANpalette;
+using palette = SCANsat.SCAN_UI.UI_Framework.SCANcolorUtil;
 
 namespace SCANsat.SCAN_Unity
 {

@@ -91,7 +91,7 @@ namespace SCANsat.SCAN_PartModules
 			}
 			else
 			{
-				MaxAbundanceAltitude = 250000;
+				MaxAbundanceAltitude = 500000;
 				RequiresUnlock = true;
 			}
 

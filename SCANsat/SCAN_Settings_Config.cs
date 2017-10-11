@@ -15,7 +15,7 @@ using System;
 using System.IO;
 using System.Reflection;
 using UnityEngine;
-using palette = SCANsat.SCAN_UI.UI_Framework.SCANpalette;
+using palette = SCANsat.SCAN_UI.UI_Framework.SCANcolorUtil;
 
 namespace SCANsat
 {

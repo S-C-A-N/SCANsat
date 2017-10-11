@@ -29,7 +29,7 @@ using KSP.UI;
 using KSP.Localization;
 using FinePrint;
 using FinePrint.Utilities;
-using palette = SCANsat.SCAN_UI.UI_Framework.SCANpalette;
+using palette = SCANsat.SCAN_UI.UI_Framework.SCANcolorUtil;
 
 namespace SCANsat.SCAN_Unity
 {
@@ -1561,7 +1561,7 @@ namespace SCANsat.SCAN_Unity
 			{
 				List<string> bodyList = new List<string>();
 
-				var bodies = SCANcontroller.controller.GetAllData.Select(d => d.Body).Where(b => b.referenceBody == Planetarium.fetch.Sun && b.referenceBody != b);
+				var bodies = FlightGlobals.Bodies.Where(b => b.referenceBody == Planetarium.fetch.Sun && b.referenceBody != b);
 
 				var orderedBodies = bodies.OrderBy(b => b.orbit.semiMajorAxis).ToList();
 
@@ -1569,20 +1569,19 @@ namespace SCANsat.SCAN_Unity
 				{
 					CelestialBody body = orderedBodies[i];
 
-					bodyList.Add(body.displayName.LocalizeBodyName());
-					//SCANUtil.SCANlog("Body: {0} - Orbiting Count: {1}", body.bodyName, body.orbitingBodies.Count);
+					if (SCANcontroller.controller.getData(body.bodyName) != null)
+						bodyList.Add(body.displayName.LocalizeBodyName());
+
 					for (int j = 0; j < body.orbitingBodies.Count; j++)
 					{
 						CelestialBody moon = body.orbitingBodies[j];
-						//SCANUtil.SCANlog("Moon: {0} - Orbiting Count: {1}", moon.bodyName, moon.orbitingBodies.Count);
-
+						
 						if (SCANcontroller.controller.getData(moon.bodyName) != null)
 							bodyList.Add(moon.displayName.LocalizeBodyName());
 
 						for (int k = 0; k < moon.orbitingBodies.Count; k++)
 						{
 							CelestialBody subMoon = moon.orbitingBodies[k];
-							//SCANUtil.SCANlog("Sub Moon: {0} - Orbiting Count: {1}", subMoon.bodyName, subMoon.orbitingBodies.Count);
 
 							if (SCANcontroller.controller.getData(subMoon.bodyName) != null)
 								bodyList.Add(subMoon.displayName.LocalizeBodyName());
@@ -1590,7 +1589,6 @@ namespace SCANsat.SCAN_Unity
 							for (int l = 0; l < subMoon.orbitingBodies.Count; l++)
 							{
 								CelestialBody subSubMoon = subMoon.orbitingBodies[l];
-								//SCANUtil.SCANlog("Sub Sub Moon: {0} - Orbiting Count: {1}", subMoon.bodyName, subMoon.orbitingBodies.Count);
 
 								if (SCANcontroller.controller.getData(subSubMoon.bodyName) != null)
 									bodyList.Add(subSubMoon.displayName.LocalizeBodyName());

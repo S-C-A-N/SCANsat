@@ -11,14 +11,14 @@
 #endregion
 
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 using SCANsat.SCAN_Data;
-using SCANsat.SCAN_Platform.Palettes;
-using SCANsat.SCAN_Platform.Palettes.ColorBrewer;
+using SCANsat.SCAN_Palettes;
 
 namespace SCANsat.SCAN_UI.UI_Framework
 {
-	public class SCANpalette
+	public class SCANcolorUtil
 	{
 
 		// Basic Colors
@@ -129,9 +129,9 @@ namespace SCANsat.SCAN_UI.UI_Framework
 
 		public static Color32 heightToColor(float val, bool color, SCANterrainConfig terrain, float min = 0, float max = 0, float range = 0, bool useCustomRange = false)
 		{
-			Color32[] c = terrain.ColorPal.colors;
+			Color32[] c = terrain.ColorPal.ColorsArray;
 			if (terrain.PalRev)
-				c = terrain.ColorPal.colorsReverse;
+				c = terrain.ColorPal.ColorsReverse;
 			if (useCustomRange)
 			{
 				if (color)
@@ -161,17 +161,17 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			{
 				if (discrete)
 				{
-					val = (greyScalePalette.colorsReverse.Length) * Mathf.Clamp(val, 0, range) / range;
-					if (Math.Floor(val) > greyScalePalette.colorsReverse.Length - 1)
-						val = greyScalePalette.colorsReverse.Length - 0.01f;
-					c = greyScalePalette.colorsReverse[(int)Math.Floor(val)];
+					val = (GreyScalePalette.ColorsReverse.Length) * Mathf.Clamp(val, 0, range) / range;
+					if (Math.Floor(val) > GreyScalePalette.ColorsReverse.Length - 1)
+						val = GreyScalePalette.ColorsReverse.Length - 0.01f;
+					c = GreyScalePalette.ColorsReverse[(int)Math.Floor(val)];
 				}
 				else
 				{
-					val = (greyScalePalette.colorsReverse.Length - 1) * Mathf.Clamp(val, 0, range) / range;
-					if (Math.Floor(val) > greyScalePalette.colorsReverse.Length - 2)
-						val = greyScalePalette.colorsReverse.Length - 1.01f;
-					c = lerp(greyScalePalette.colorsReverse[(int)Math.Floor(val)], greyScalePalette.colorsReverse[(int)Math.Floor(val) + 1], val - (int)Math.Floor(val));
+					val = (GreyScalePalette.ColorsReverse.Length - 1) * Mathf.Clamp(val, 0, range) / range;
+					if (Math.Floor(val) > GreyScalePalette.ColorsReverse.Length - 2)
+						val = GreyScalePalette.ColorsReverse.Length - 1.01f;
+					c = lerp(GreyScalePalette.ColorsReverse[(int)Math.Floor(val)], GreyScalePalette.ColorsReverse[(int)Math.Floor(val) + 1], val - (int)Math.Floor(val));
 				}
 			}
 			return c;
@@ -308,32 +308,30 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			}
 		}
 
-		private static _Palettes currentPaletteSet;
-		private static Palette greyScalePalette = BrewerPalettes.Greys(9);
-
-		private static _Palettes generatePaletteSet(int size, Palette.Kind type)
+		private static SCANPaletteType currentPaletteSet;
+		private static SCANPalette greyScalePalette;
+		
+		public static SCANPaletteType SetCurrentPalettesType(SCANPaletteKind type)
 		{
-			PaletteLoader.generatePalettes(type, size);
-			return new _Palettes(PaletteLoader.palettes.ToArray(), type, size);
+			return SCANconfigLoader.SCANPalettes.GetPaletteType(type);
 		}
 
-		internal static _Palettes setCurrentPalettesType(Palette.Kind type, int size)
+		public static SCANPalette GreyScalePalette
 		{
-			switch (type)
+			get
 			{
-				case Palette.Kind.Fixed:
-					return generatePaletteSet(0, Palette.Kind.Fixed);
-				default:
-					return generatePaletteSet(size, type);
+				if (greyScalePalette == null)
+				{
+					Color32[] c = new Color32[9] { new Color32(255, 255, 255, 255), new Color32(240, 240, 240, 255), new Color32(217, 217, 217, 255), new Color32(189, 189, 189, 255), new Color32(150, 150, 150, 255), new Color32(115, 115, 115, 255), new Color32(082, 082, 082, 255), new Color32(037, 037, 037, 255), new Color32(000, 0, 000, 255) };
+
+					greyScalePalette = new SCANPalette(c, "GreyScalePalette", SCANPaletteKind.Fixed, c.Length);
+				}
+
+				return greyScalePalette;
 			}
 		}
 
-		public static Palette GreyScalePalette
-		{
-			get { return greyScalePalette; }
-		}
-
-		public static _Palettes CurrentPalettes
+		public static SCANPaletteType CurrentPalettes
 		{
 			get { return currentPaletteSet; }
 			internal set
@@ -342,9 +340,16 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			}
 		}
 
-		public static string getPaletteTypeName
+		public static string[] GetPaletteKindNames()
 		{
-			get { return currentPaletteSet.paletteType.ToString(); }
+			SCANPaletteKind[] v = (SCANPaletteKind[])Enum.GetValues(typeof(SCANPaletteKind));
+
+			string[] r = new string[v.Length - 1];
+
+			for (int i = 0; i < v.Length - 1; ++i)
+				r[i] = v[i].ToString();
+
+			return r;
 		}
 
 	}

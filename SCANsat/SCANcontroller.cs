@@ -30,11 +30,9 @@ using SCANsat.SCAN_Map;
 using SCANsat.SCAN_PartModules;
 using SCANsat.SCAN_Platform;
 using SCANsat.SCAN_Platform.Extensions.ConfigNodes;
-using SCANsat.SCAN_Platform.Palettes;
-using SCANsat.SCAN_Platform.Palettes.ColorBrewer;
-using SCANsat.SCAN_Platform.Palettes.FixedColors;
+using SCANsat.SCAN_Palettes;
 using SCANsat.SCAN_Toolbar;
-using palette = SCANsat.SCAN_UI.UI_Framework.SCANpalette;
+using palette = SCANsat.SCAN_UI.UI_Framework.SCANcolorUtil;
 
 namespace SCANsat
 {
@@ -268,8 +266,8 @@ namespace SCANsat
 					}
 
 					SCANUtil.SCANlog("Generating new SCANsat Terrain Config for [{0}] - Max Height: [{1:F0}m]", b.bodyName, newMax);
-
-					addToTerrainConfigData(b.bodyName, new SCANterrainConfig(SCANconfigLoader.SCANNode.DefaultMinHeightRange, newMax, clamp, SCANUtil.paletteLoader(SCANconfigLoader.SCANNode.DefaultPalette, 7), 7, false, false, b));
+					
+					addToTerrainConfigData(b.bodyName, new SCANterrainConfig(SCANconfigLoader.SCANNode.DefaultMinHeightRange, newMax, clamp, SCANUtil.PaletteLoader(SCANconfigLoader.SCANNode.DefaultPalette, 7), 7, false, false, b));
 				}
 			}
 		}
@@ -639,11 +637,11 @@ namespace SCANsat
 							string paletteName = node_body.parse("PaletteName", "");
 
 							if (string.IsNullOrEmpty(paletteName))
-								paletteName = data.TerrainConfig.DefaultPalette.name;
+								paletteName = data.TerrainConfig.DefaultPalette.Name;
 
-							Palette dataPalette = SCANUtil.paletteLoader(paletteName, pSize);
+							SCANPalette dataPalette = SCANUtil.PaletteLoader(paletteName, pSize);
 
-							if (dataPalette.hash == PaletteLoader.defaultPalette.hash)
+							if (dataPalette.Hash == SCAN_Palette_Config.DefaultPalette.GetPalette(0).Hash)
 							{
 								paletteName = "Default";
 								pSize = 7;
@@ -724,7 +722,7 @@ namespace SCANsat
 					node_body.AddValue("MaxHeightRange", body_scan.TerrainConfig.MaxTerrain / body_scan.TerrainConfig.MaxHeightMultiplier);
 					if (body_scan.TerrainConfig.ClampTerrain != null)
 						node_body.AddValue("ClampHeight", body_scan.TerrainConfig.ClampTerrain / body_scan.TerrainConfig.ClampHeightMultiplier);
-					node_body.AddValue("PaletteName", body_scan.TerrainConfig.ColorPal.name);
+					node_body.AddValue("PaletteName", body_scan.TerrainConfig.ColorPal.Name);
 					node_body.AddValue("PaletteSize", body_scan.TerrainConfig.PalSize);
 					node_body.AddValue("PaletteReverse", body_scan.TerrainConfig.PalRev);
 					node_body.AddValue("PaletteDiscrete", body_scan.TerrainConfig.PalDis);
@@ -1452,7 +1450,7 @@ namespace SCANsat
 				body_data.Add(VC.to.bodyName, new SCANdata(VC.to));
 		}
 
-		private void setNewTerrainConfigValues(SCANterrainConfig terrain, float min, float max, float? clamp, Palette c, int size, bool reverse, bool discrete)
+		private void setNewTerrainConfigValues(SCANterrainConfig terrain, float min, float max, float? clamp, SCANPalette c, int size, bool reverse, bool discrete)
 		{
 			terrain.MinTerrain = min * terrain.MinHeightMultiplier;
 			terrain.MaxTerrain = max * terrain.MaxHeightMultiplier;

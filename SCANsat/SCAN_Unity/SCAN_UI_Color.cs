@@ -20,8 +20,8 @@ using SCANsat.Unity.Interfaces;
 using SCANsat.Unity.Unity;
 using SCANsat.SCAN_Data;
 using SCANsat.SCAN_Map;
-using SCANsat.SCAN_Platform.Palettes;
-using palette = SCANsat.SCAN_UI.UI_Framework.SCANpalette;
+using SCANsat.SCAN_Palettes;
+using palette = SCANsat.SCAN_UI.UI_Framework.SCANcolorUtil;
 
 namespace SCANsat.SCAN_Unity
 {
@@ -54,7 +54,7 @@ namespace SCANsat.SCAN_Unity
 		private int _terrainSize;
 
 		private SCANterrainConfig currentTerrain;
-		private Palette currentPalette;
+		private SCANPaletteGroup currentPalette;
 
 		private SCANresourceGlobal currentResource;
 		private List<SCANresourceGlobal> loadedResources;
@@ -96,12 +96,12 @@ namespace SCANsat.SCAN_Unity
 
 			if (currentTerrain != null)
 			{
-				currentPalette = currentTerrain.ColorPal;
+				palette.CurrentPalettes = palette.SetCurrentPalettesType(currentTerrain.ColorPal.Kind);
 
-				palette.CurrentPalettes = palette.setCurrentPalettesType(currentPalette.kind, currentPalette.size);
+				currentPalette = palette.CurrentPalettes.GetPaletteGroup(currentTerrain.ColorPal.Name); 
 
-				_terrainPalette = currentTerrain.ColorPal.name;
-				_terrainPaletteStyle = currentTerrain.ColorPal.kind.ToString();
+				_terrainPalette = currentTerrain.ColorPal.Name;
+				_terrainPaletteStyle = currentTerrain.ColorPal.Kind.ToString();
 
 				_terrainCurrentMin = currentTerrain.MinTerrain;
 				_terrainCurrentMax = currentTerrain.MaxTerrain;
@@ -181,12 +181,12 @@ namespace SCANsat.SCAN_Unity
 
 				if (currentTerrain != null)
 				{
-					currentPalette = currentTerrain.ColorPal;
+					palette.CurrentPalettes = palette.SetCurrentPalettesType(currentTerrain.ColorPal.Kind);
 
-					palette.CurrentPalettes = palette.setCurrentPalettesType(currentPalette.kind, currentPalette.size);
+					currentPalette = palette.CurrentPalettes.GetPaletteGroup(currentTerrain.ColorPal.Name); 
 
-					_terrainPalette = currentTerrain.ColorPal.name;
-					_terrainPaletteStyle = currentTerrain.ColorPal.kind.ToString();
+					_terrainPalette = currentTerrain.ColorPal.Name;
+					_terrainPaletteStyle = currentTerrain.ColorPal.Kind.ToString();
 
 					_terrainCurrentMin = currentTerrain.MinTerrain;
 					_terrainCurrentMax = currentTerrain.MaxTerrain;
@@ -206,16 +206,7 @@ namespace SCANsat.SCAN_Unity
 			{
 				_terrainPalette = value;
 
-				for (int i = palette.CurrentPalettes.Length - 1; i >= 0; i--)
-				{
-					Palette p = palette.CurrentPalettes.availablePalettes[i];
-
-					if (p.name != value)
-						continue;
-
-					currentPalette = p;
-					break;
-				}
+				currentPalette = palette.CurrentPalettes.GetPaletteGroup(value);
 			}
 		}
 
@@ -226,22 +217,22 @@ namespace SCANsat.SCAN_Unity
 			{
 				_terrainPaletteStyle = value;
 
-				Palette.Kind kind = Palette.Kind.Diverging;
+				SCANPaletteKind kind = SCANPaletteKind.Diverging;
 				
 				try
 				{
-					kind = (Palette.Kind)Enum.Parse(typeof(Palette.Kind), value);
+					kind = (SCANPaletteKind)Enum.Parse(typeof(SCANPaletteKind), value);
 				}
 				catch (Exception e)
 				{
 					SCANUtil.SCANlog("Error in palette style type\n{0}", e);
 				}
 
-				palette.CurrentPalettes = palette.setCurrentPalettesType(kind, _terrainSize);
+				palette.CurrentPalettes = palette.SetCurrentPalettesType(kind);
 
-				currentPalette = palette.CurrentPalettes.availablePalettes[0];
+				currentPalette = palette.CurrentPalettes.GetFirstGroup();
 
-				_terrainPalette = currentPalette.name;
+				_terrainPalette = currentPalette.PaletteName;
 			}
 		}
 
@@ -295,7 +286,7 @@ namespace SCANsat.SCAN_Unity
 
 		public bool TerrainHasSize
 		{
-			get { return currentPalette.kind != Palette.Kind.Fixed; }
+			get { return currentPalette.Kind != SCANPaletteKind.Fixed; }
 		}
 
 		public float BiomeTransparency
@@ -362,19 +353,6 @@ namespace SCANsat.SCAN_Unity
 			set
 			{
 				_terrainSize = value;
-
-				palette.CurrentPalettes = palette.setCurrentPalettesType(currentPalette.kind, _terrainSize);
-
-				for (int i = palette.CurrentPalettes.Length - 1; i >= 0; i--)
-				{
-					Palette p = palette.CurrentPalettes.availablePalettes[i];
-
-					if (p.name != currentPalette.name)
-						continue;
-
-					currentPalette = p;
-					break;
-				}
 			}
 		}
 
@@ -387,13 +365,13 @@ namespace SCANsat.SCAN_Unity
 		{
 			get
 			{
-				switch(currentTerrain.ColorPal.kind)
+				switch(currentTerrain.ColorPal.Kind)
 				{
-					case Palette.Kind.Diverging:
+					case SCANPaletteKind.Diverging:
 						return 11;
-					case Palette.Kind.Qualitative:
+					case SCANPaletteKind.Qualitative:
 						return 12;
-					case Palette.Kind.Sequential:
+					case SCANPaletteKind.Sequential:
 						return 9;
 				}
 
@@ -450,10 +428,10 @@ namespace SCANsat.SCAN_Unity
 		{
 			get
 			{
-				Color32[] c = currentPalette.colors;
+				Color32[] c = currentPalette.GetPalette(_terrainSize).ColorsArray;
 
 				if (_terrainReverse)
-					c = currentPalette.colorsReverse;
+					c = currentPalette.GetPalette(_terrainSize).ColorsReverse;
 
 				return SCANmapLegend.getStaticLegend(_terrainCurrentMax, _terrainCurrentMin, _terrainCurrentMax - _terrainCurrentMin, _terrainClampOn ? (float?)_terrainClamp : null, _terrainDiscrete, c);
 			}
@@ -465,11 +443,13 @@ namespace SCANsat.SCAN_Unity
 			{
 				List<KeyValuePair<string, Texture2D>> values = new List<KeyValuePair<string, Texture2D>>();
 
-				for (int i = 0; i < palette.CurrentPalettes.Length; i++)
-				{
-					Palette p = palette.CurrentPalettes.availablePalettes[i];
+				palette.CurrentPalettes.GenerateSwatches(_terrainSize);
 
-					values.Add(new KeyValuePair<string, Texture2D>(p.name, palette.CurrentPalettes.paletteSwatch[i]));
+				string[] names = palette.CurrentPalettes.GetGroupNames();
+
+				for (int i = 0; i < palette.CurrentPalettes.Count; i++)
+				{
+					values.Add(new KeyValuePair<string, Texture2D>(names[i], palette.CurrentPalettes.PaletteSwatch[i]));
 				}
 
 				return values;
@@ -542,7 +522,7 @@ namespace SCANsat.SCAN_Unity
 
 		public IList<string> PaletteStyleNames
 		{
-			get { return new List<string>(Palette.kindNames); }
+			get { return new List<string>(palette.GetPaletteKindNames()); }
 		}
 
 		public void BiomeApply(Color one, Color two)
@@ -733,7 +713,7 @@ namespace SCANsat.SCAN_Unity
 			currentTerrain.PalRev = _terrainReverse;
 			currentTerrain.PalSize = _terrainSize;
 
-			currentTerrain.ColorPal = currentPalette;
+			currentTerrain.ColorPal = currentPalette.GetPalette(_terrainSize);
 
 			SCANcontroller.updateTerrainConfig(currentTerrain);
 
