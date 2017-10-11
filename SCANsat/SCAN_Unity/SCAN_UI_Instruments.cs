@@ -537,14 +537,14 @@ namespace SCANsat.SCAN_Unity
 
 		private void anomalyInfo()
 		{
-			if ((sensors & SCANtype.Anomaly) != SCANtype.Nothing)
-			{
+			//if ((sensors & SCANtype.Anomaly) != SCANtype.Nothing)
+			//{
 				nearest = null;
 				double nearest_dist = -1;
 
 				foreach (SCANanomaly a in data.Anomalies)
 				{
-					if (!a.Known)
+					if (!a.Known && !a.Detail)
 						continue;
 
 					double d = (a.Mod.transform.position - v.transform.position).magnitude;
@@ -563,14 +563,19 @@ namespace SCANsat.SCAN_Unity
 				{
 					infoString.AppendLine();
 
-					if (nearest.Detail)
+					if (nearest.Detail && nearest.Known)
 						infoString.Append(string.Format("{0}: {1}", nearest.Name, SCANuiUtil.distanceString(nearest_dist, 2000)));
 					else
-						infoString.Append(string.Format("Unknown Anomaly: {0}", SCANuiUtil.distanceString(nearest_dist, 2000)));
+					{
+						if (nearest.Detail)
+							infoString.Append(nearest.Name);
+						else if (nearest.Known)
+							infoString.Append(string.Format("Unknown Anomaly: {0}", SCANuiUtil.distanceString(nearest_dist, 2000)));
+					}					
 				}
-			}
-			else
-				nearest = null;
+			//}
+			//else
+				//nearest = null;
 		}
 
 		private void BTDTInfo()
@@ -605,7 +610,7 @@ namespace SCANsat.SCAN_Unity
 			uiElement.UpdateAnomaly(anomalyTex);
 
 			string info = _anomalyView.getInfoString();
-			string aData = _anomalyView.getAnomalyDataString(_mouseInAnomaly);
+			string aData = _anomalyView.getAnomalyDataString(_mouseInAnomaly, nearest.Known);
 
 			uiElement.UpdateAnomalyText(info);
 			uiElement.UpdateAnomalyName(aData);

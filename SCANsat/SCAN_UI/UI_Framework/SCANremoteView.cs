@@ -94,7 +94,12 @@ namespace SCANsat.SCAN_UI.UI_Framework
 
 			if (rt == null || rt.width != width || rt.height != height)
 			{
-				rt = new RenderTexture(width, height, 32, RenderTextureFormat.RGB565);
+				RenderTextureFormat format = RenderTextureFormat.RGB565;
+
+				if (!SystemInfo.SupportsRenderTextureFormat(format))
+					format = RenderTextureFormat.Default;
+
+				rt = new RenderTexture(width, height, 32, format);
 				rt.Create();
 			}
 
@@ -149,13 +154,15 @@ namespace SCANsat.SCAN_UI.UI_Framework
 
 			if (cons.Count > 0)
 				info = string.Format("Identified {0} structure{1}", cons.Count, cons.Count > 1 ? "s" : "");
+			else
+				return "";
 
 			info = "> " + info;
 			
 			return info;
 		}
 
-		public string getAnomalyDataString(bool mouse)
+		public string getAnomalyDataString(bool mouse, bool distance)
 		{
 			string sname = lookat.name;
 
@@ -180,9 +187,14 @@ namespace SCANsat.SCAN_UI.UI_Framework
 				sname = lookdetail.objectName;
 			}
 
-			string dist = SCANuiUtil.distanceString((FlightGlobals.ActiveVessel.transform.position - lookvec).magnitude, 2000);
+			if (distance)
+			{
+				string dist = SCANuiUtil.distanceString((FlightGlobals.ActiveVessel.transform.position - lookvec).magnitude, 2000);
 
-			return string.Format("{0}\n{1}", sname, dist);
+				return string.Format("{0}\n{1}", sname, dist);
+			}
+			else
+				return string.Format("\n{0}", sname);
 		}
 
 	}
