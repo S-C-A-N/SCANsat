@@ -922,9 +922,9 @@ namespace SCANsat.SCAN_Map
 									double v1 = mapline[i];
 									if (i > 0)
 										v1 = Math.Max(v1, mapline[i - 1]);
-									if (i < mapline.Length - 1)
+									if (i < mapline.Length - 1 && mapstep > 0)
 										v1 = Math.Max(v1, mapline[i + 1]);
-									float v = Mathf.Clamp((float)Math.Abs(projVal - v1) / 1000f, 0, 2f);
+									float v = Mathf.Clamp((float)Math.Abs(projVal - v1) / (1000f / (float)mapscale), 0, 2f);
 									if (!colorMap)
 										baseColor = palette.lerp(palette.Black, palette.White, v / 2f);
 									else
