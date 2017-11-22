@@ -1442,6 +1442,9 @@ namespace SCANsat
 
 			if (_bigMap.IsVisible && _bigMap.WaypointToggle)
 				_bigMap.RefreshIcons();
+
+            if (_zoomMap.IsVisible && _zoomMap.IconsToggle)
+                _zoomMap.RefreshIcons();
 		}
 
 		private void SOIChange(GameEvents.HostedFromToAction<Vessel, CelestialBody> VC)

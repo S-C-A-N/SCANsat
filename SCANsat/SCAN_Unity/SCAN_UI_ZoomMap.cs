@@ -1751,7 +1751,7 @@ namespace SCANsat.SCAN_Unity
 			{
 				infoString.AppendLine();
 
-				double range = ContractDefs.Survey.MaximumTriggerRange;
+				double range = (ContractDefs.Survey.MaximumTriggerRange * 10) / spotmap.MapScale;
 
 				for (int i = data.Waypoints.Count - 1; i >= 0; i--)
 				{
