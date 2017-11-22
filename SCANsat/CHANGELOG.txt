@@ -1,3 +1,144 @@
+Version 18.2 - 2017-11-22
+-----------------------
+
+- Overhaul of all SCANsat contracts
+     - Contracts now differ based on difficulty
+     - Easy contracts only generate for home system bodies and ask for one scan
+     - Medium and High difficulty contracts generate for non-home system bodies and ask for a group of scans
+     - Contracts have several dependencies
+            - Unlocking the required parts
+            - Not having already finished all of the required scans for the target
+            - Target bodies are selected based on your progression
+
+- Improvements made to slope maps
+     - Slope maps now account for map scale or zoom factor
+     - Significantly improved usefulness for the zoom map
+
+- Fix some potential bugs when survey contract waypoints are updated
+- Fix bug in background scanning toggles in the settings window
+- Some minor UI performance tweaks
+- Add a KSPedia button to the top of the settings window
+     - It will try to open the SCANsat page, but this only works if KSPedia has already been opened at least once
+
+
+Version 18.1 - 2017-10-11
+-----------------------
+
+- Update for KSP 1.3.1
+
+- Terrain color palettes defined in new config file
+     - Custom color palettes can be added by editing the file or using MM patches
+
+- Fix bug with big map celestial body list
+- Fix bug with narrow band scanner requirement when more than one resource is in use
+- Slight change in how anomaly information is reported by the BTDT
+- Remove unneeded ASET RPM panel Module Manager patches
+- Fix SCANsat agency title
+
+Version 18.0 - 2017-07-8
+-----------------------
+
+- Update for KSP 1.3
+
+- Complete UI overhaul:
+	- All aspects of the SCANsat UI have been replaced with the new Unity UI
+		- This results in a significant reduction in performance impact and garbage creation, particularly when several SCANsat windows are open at the same time
+		- UI scaling is integrated with stock UI scaling (master scale) – separate scaling for SCANsat only is also available
+		- All text is rendered with TextMesh Pro, resulting in clearer text, particularly at small and large scales, and better compatibility with other languages
+		- New option is available to switch between KSP and the old, Unity style UI styling
+	- New stock toolbar menu
+		- In the flight scene, the stock toolbar button will now spawn a small menu with buttons for all of the SCANsat windows
+		- Enable or disable this option in the settings window
+	- New settings window
+		- Features multiple pages for different groups of settings
+
+- Zoom map overhaul:
+	- It now uses an orthographic map projection to eliminate distortion near the map center
+		- This is similar to the polar map projection, but can be centered anywhere
+	- Further separated from the big map
+		- Menu to set the resource selection (if more than one is installed) 
+		- Menu to set the map type (altimetry, biome, slope)
+		- Toggles for all of the map overlays
+	- Three different map size options
+		- Full map with top and bottom control bars
+		- Medium map with only top control bar
+		- Compact map with no control bar
+	- Option to reset the map to the current vessel position
+	- Option to lock the map to the current vessel position
+		- Will re-center the map on the vessel position whenever it is refreshed, zoomed, etc…
+	- Buttons to move the map center in all four directions
+	- Fixes problems with the “Require Narrow Band Scanner” resource scanning requirement
+		- Should function correctly with both stock scanning and SCANsat-style resource scanning
+
+- Localization:
+	- Localization support for most aspects of SCANsat
+		- Part descriptions, science results, part right-click menu fields, tooltips, settings window help tooltips, and some of the UI text
+		- Planet names, biome names, and resources names are all localized
+		- Some aspects of the UI, particularly the settings window, are not localized
+		- The KSPedia entry is not localized
+	- Spanish by Delthiago98
+	- Chinese by Summerfirefly
+	- Russian by Ser and RarogCmex
+	- German by h0yer
+
+- New Features:
+	- Stock waypoint system integration
+		- Big map and zoom map can be used to set stock waypoints
+		- Click the waypoint button in the lower-right corner of the map to activate waypoint mode
+			- Select a point on the map and left-click there to assign the waypoint location
+			- Edit the waypoint name using the text input field
+			- Click set to generate the waypoint
+		- Optional MechJeb integration
+			- MechJeb integration toggled through the settings window
+			- Click the MJ button instead of set to use the waypoint as a MechJeb landing site
+			- Requires MechJeb installed, and a functional and upgraded MechJeb core on the current vessel
+	- Options for map generation speed
+		- A slider in the settings window allows for three map speed options
+			- 1 – One row of all map types will be drawn per frame
+			- 2 – Two rows of all map types will be drawn per frame
+			- 3 – Two to four rows of the maps will be drawn per frame, depending on the map type
+	- Color Management Window updates
+		- Integrated into the new settings window
+		- Text input fields are available for most values with a slider
+		- More biome options for the biome colors used and the white borders
+		- New HSV color picker for all of the color management tabs
+			- Uses a standard, saturation vs brightness (value) square color picker, with a hue slider to the right
+			- Displays the current selection in RGB, HSV, and Hex color values
+			- Allows for manual input of RGB values, using either 0-1, or 0-255 values
+	- Updated KSPedia entry
+		- Reflects all changes made for version 18
+		- Several new pages with information about the different map windows
+	- Miscellaneous new features
+		- Scanning width now properly accounts for latitude, resulting in scans of even width at all latitudes
+		- New settings file; generated in the GameData/SCANsat/PluginData folder after first running KSP
+			- Contains most of the options found in the settings window
+		- Settings windows options for resetting specific sets of scanning data for an individual celestial body, or all bodies
+		- Biome map legend
+			- Displays all of the biome colors as sections on the map legend
+			- The zoom map legend shows only the biomes present in the map window
+		- Map legend tooltips 
+			- Displays altitude or biome name when the mouse is over the map legend
+		- Day/night map terminator overlay for all maps
+			- Toggled with the sun and moon icon
+		- New part module specifically for handling science experiments
+			- Module: SCANexperiment
+		- Celestial body list on the big map is ordered by distance to the sun
+			- The current body is displayed at the top of the list
+			- Moons are grouped together with their parent
+		- New anomaly icon, a question mark with an open circle at the bottom
+			- The open circle denotes the anomaly position
+
+- Bug Fixes:
+	- Fix some floating point errors that cause the big map to break at certain map sizes
+	- Fix shader bugs preventing the BTDT anomaly readout in the Instruments window from working
+	- Fix a science point exploit when collecting the same scan data from two different vessels
+	- Fix a potential error with RPM maps with resource overlays
+	- Fix errors in Module Manager patches for resource scanners used by other mods
+	- Changes from version 17.9
+		- More KSPedia pages
+		- Fix an error with setting the UI scale of the zoom map
+
+
 Version 16.11 - 2016-11-4
 -----------------------
 
