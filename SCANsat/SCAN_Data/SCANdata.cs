@@ -246,22 +246,66 @@ namespace SCANsat.SCAN_Data
 			if (c == null)
 				return;
 
-			for (int i = 0; i < c.AllParameters.Count(); i++)
-			{
-				if (c.AllParameters.ElementAt(i).GetType() == typeof(SurveyWaypointParameter))
-				{
-					SurveyWaypointParameter s = (SurveyWaypointParameter)c.AllParameters.ElementAt(i);
-					if (s.State == ParameterState.Incomplete)
-					{
-						if (waypoints.Any(w => w.Way == s.wp))
-							continue;
+            for (int i = c.ParameterCount - 1; i >= 0; i--)
+            {
+                ContractParameter cp = c.GetParameter(i);
 
-						SCANwaypoint p = new SCANwaypoint(s);
-						if (p.Way != null)
-							waypoints.Add(p);
-					}
-				}
-			}
+                if (cp.GetType() == typeof(SurveyWaypointParameter))
+                {
+                    if (cp.State == ParameterState.Incomplete)
+                    {
+                        Waypoint wp = ((SurveyWaypointParameter)cp).wp;
+
+                        if (wp == null)
+                            continue;
+
+                        bool add = true;
+
+                        for (int j = waypoints.Count - 1; j >= 0; j--)
+                        {
+                            SCANwaypoint w = waypoints[j];
+
+                            if (w == null || w.Way == null)
+                                continue;
+
+                            if (w.Way == wp)
+                            {
+                                add = false;
+                                break;
+                            }
+                        }
+
+                        if (add)
+                        {
+                            SCANwaypoint p = new SCANwaypoint((SurveyWaypointParameter)cp);
+
+                            if (p.Way != null)
+                                waypoints.Add(p);
+                        }
+                    }
+                }
+            }
+
+			//for (int i = 0; i < c.AllParameters.Count(); i++)
+			//{
+   //             ContractParameter cp = c.GetParameter(i);
+
+			//	if (c.AllParameters.ElementAt(i).GetType() == typeof(SurveyWaypointParameter))
+			//	{
+
+
+			//		SurveyWaypointParameter s = (SurveyWaypointParameter)c.AllParameters.ElementAt(i);
+			//		if (s.State == ParameterState.Incomplete)
+			//		{
+			//			if (waypoints.Any(w => w.Way == s.wp))
+			//				continue;
+
+			//			SCANwaypoint p = new SCANwaypoint(s);
+			//			if (p.Way != null)
+			//				waypoints.Add(p);
+			//		}
+			//	}
+			//}
 
 		}
 
