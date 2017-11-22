@@ -21,12 +21,16 @@ using SCANsat.SCAN_Data;
 using SCANsat.SCAN_Toolbar;
 using SCANsat.SCAN_UI.UI_Framework;
 using KSP.UI;
+using KSP.UI.Screens;
 using KSP.Localization;
+using KSPAssets.KSPedia;
 
 namespace SCANsat.SCAN_Unity
 {
 	public class SCAN_UI_Settings : ISCAN_Settings
 	{
+        private static ApplicationLauncherButton dummyButton;
+
 		private bool _isVisible;
 		private bool _inputLock;
 		private string _sensorCount = "";
@@ -660,6 +664,28 @@ namespace SCANsat.SCAN_Unity
 			get { return colorInterface; }
 		}
 
+        public void OpenKSPedia(bool isOn)
+        {
+            if (dummyButton == null)
+                dummyButton = UnityEngine.Object.Instantiate<ApplicationLauncherButton>(ApplicationLauncher.Instance.listItemPrefab);
+            
+            if (isOn)
+            {
+                KSPediaSpawner.Show(dummyButton);
+
+                try
+                {
+                    KSPediaSpawner.Show("SCANsat_Header");
+                }
+                catch (Exception e)
+                {
+                    SCANUtil.SCANlog("KSPedia Database not ready; can't load SCANsat page; loading first page");
+                }
+            }
+            else
+                KSPediaSpawner.Hide();
+        }
+
 		public void ClampToScreen(RectTransform rect)
 		{
 			UIMasterController.ClampToScreen(rect, Vector2.zero);
@@ -766,7 +792,9 @@ namespace SCANsat.SCAN_Unity
 
 		public double BodyPercentage(string bodyName)
 		{
-			SCANdata data = SCANUtil.getData(bodyName);
+			string realName = SCANUtil.bodyFromDisplayName(bodyName);
+
+			SCANdata data = SCANUtil.getData(realName);
 
 			if (data == null)
 				return 0;

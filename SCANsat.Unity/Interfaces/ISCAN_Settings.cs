@@ -137,6 +137,8 @@ namespace SCANsat.Unity.Interfaces
 
 		void Update();
 
+        void OpenKSPedia(bool isOn);
+
 		void ToggleBody(string bodyName);
 
 		bool ToggleBodyActive(string bodyName);

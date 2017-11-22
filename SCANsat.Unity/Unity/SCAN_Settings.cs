@@ -20,262 +20,268 @@ using SCANsat.Unity.Interfaces;
 
 namespace SCANsat.Unity.Unity
 {
-	public class SCAN_Settings : CanvasFader, IDragHandler, IBeginDragHandler, IEndDragHandler, IPointerDownHandler
-	{
-		[SerializeField]
-		private TextHandler m_Version = null;
-		[SerializeField]
-		private Transform m_ContentTransform = null;
-		[SerializeField]
-		private Toggle m_GeneralToggle = null;
-		[SerializeField]
-		private Toggle m_BackgroundToggle = null;
-		[SerializeField]
-		private Toggle m_ResourceToggle = null;
-		[SerializeField]
-		private Toggle m_DataToggle = null;
-		[SerializeField]
-		private Toggle m_ColorToggle = null;
-		[SerializeField]
-		private Toggle m_HelpTips = null;
-		[SerializeField]
-		private GameObject m_GeneralPrefab = null;
-		[SerializeField]
-		private GameObject m_BackgroundPrefab = null;
-		[SerializeField]
-		private GameObject m_ResourcePrefab = null;
-		[SerializeField]
-		private GameObject m_DataPrefab = null;
-		[SerializeField]
-		private GameObject m_ColorPrefab = null;
-		[SerializeField]
-		private GameObject m_PopupPrefab = null;
-		[SerializeField]
-		private GameObject m_DropDownPrefab = null;
+    public class SCAN_Settings : CanvasFader, IDragHandler, IBeginDragHandler, IEndDragHandler, IPointerDownHandler
+    {
+        [SerializeField]
+        private TextHandler m_Version = null;
+        [SerializeField]
+        private Transform m_ContentTransform = null;
+        [SerializeField]
+        private Toggle m_GeneralToggle = null;
+        [SerializeField]
+        private Toggle m_BackgroundToggle = null;
+        [SerializeField]
+        private Toggle m_ResourceToggle = null;
+        [SerializeField]
+        private Toggle m_DataToggle = null;
+        [SerializeField]
+        private Toggle m_ColorToggle = null;
+        [SerializeField]
+        private Toggle m_HelpTips = null;
+        [SerializeField]
+        private GameObject m_GeneralPrefab = null;
+        [SerializeField]
+        private GameObject m_BackgroundPrefab = null;
+        [SerializeField]
+        private GameObject m_ResourcePrefab = null;
+        [SerializeField]
+        private GameObject m_DataPrefab = null;
+        [SerializeField]
+        private GameObject m_ColorPrefab = null;
+        [SerializeField]
+        private GameObject m_PopupPrefab = null;
+        [SerializeField]
+        private GameObject m_DropDownPrefab = null;
 
-		private ISCAN_Settings settingsInterface;
-		private RectTransform rect;
-		private Vector2 mouseStart;
-		private Vector3 windowStart;
-		private int _page;
+        private ISCAN_Settings settingsInterface;
+        private RectTransform rect;
+        private Vector2 mouseStart;
+        private Vector3 windowStart;
+        private int _page;
 
-		private SettingsPage CurrentPage;
-		private SCAN_Popup warningPopup;
-		private SCAN_DropDown dropDown;
+        private SettingsPage CurrentPage;
+        private SCAN_Popup warningPopup;
+        private SCAN_DropDown dropDown;
 
-		private static SCAN_Settings instance;
+        private static SCAN_Settings instance;
 
-		public static SCAN_Settings Instance
-		{
-			get { return instance; }
-		}
+        public static SCAN_Settings Instance
+        {
+            get { return instance; }
+        }
 
-		public int Page
-		{
-			get { return _page; }
-		}
+        public int Page
+        {
+            get { return _page; }
+        }
 
-		public GameObject PopupPrefab
-		{
-			get { return m_PopupPrefab; }
-		}
+        public GameObject PopupPrefab
+        {
+            get { return m_PopupPrefab; }
+        }
 
-		public GameObject DropDownPrefab
-		{
-			get { return m_DropDownPrefab; }
-		}
+        public GameObject DropDownPrefab
+        {
+            get { return m_DropDownPrefab; }
+        }
 
-		public SCAN_Popup WarningPopup
-		{
-			get { return warningPopup; }
-			set { warningPopup = value; }
-		}
+        public SCAN_Popup WarningPopup
+        {
+            get { return warningPopup; }
+            set { warningPopup = value; }
+        }
 
-		public SCAN_DropDown DropDown
-		{
-			get { return dropDown; }
-			set { dropDown = value; }
-		}
-		
-		public void ClearWarningsAndDropDown()
-		{
-			if (dropDown != null)
-			{
-				dropDown.gameObject.SetActive(false);
-				DestroyImmediate(dropDown.gameObject);
-				dropDown = null;
-			}
+        public SCAN_DropDown DropDown
+        {
+            get { return dropDown; }
+            set { dropDown = value; }
+        }
 
-			if (warningPopup != null)
-			{
-				warningPopup.gameObject.SetActive(false);
-				DestroyImmediate(warningPopup.gameObject);
-				warningPopup = null;
-			}
-		}
+        public void ClearWarningsAndDropDown()
+        {
+            if (dropDown != null)
+            {
+                dropDown.gameObject.SetActive(false);
+                DestroyImmediate(dropDown.gameObject);
+                dropDown = null;
+            }
 
-		protected override void Awake()
-		{
-			base.Awake();
+            if (warningPopup != null)
+            {
+                warningPopup.gameObject.SetActive(false);
+                DestroyImmediate(warningPopup.gameObject);
+                warningPopup = null;
+            }
+        }
 
-			instance = this;
+        protected override void Awake()
+        {
+            base.Awake();
 
-			rect = GetComponent<RectTransform>();
+            instance = this;
 
-			Alpha(0);
-		}
+            rect = GetComponent<RectTransform>();
 
-		private void Update()
-		{
-			if (settingsInterface == null || !settingsInterface.IsVisible)
-				return;
+            Alpha(0);
+        }
 
-			settingsInterface.Update();
-		}
+        private void Update()
+        {
+            if (settingsInterface == null || !settingsInterface.IsVisible)
+                return;
 
-		public void setSettings(ISCAN_Settings settings, int page)
-		{
-			if (settings == null)
-				return;
+            settingsInterface.Update();
+        }
 
-			settingsInterface = settings;
+        public void setSettings(ISCAN_Settings settings, int page)
+        {
+            if (settings == null)
+                return;
 
-			if (m_Version != null)
-				m_Version.OnTextUpdate.Invoke(settings.Version);
+            settingsInterface = settings;
 
-			_page = page;
+            if (m_Version != null)
+                m_Version.OnTextUpdate.Invoke(settings.Version);
 
-			switch (page)
-			{
-				case 0:
-					if (m_GeneralToggle != null)
-						m_GeneralToggle.isOn = true;
-					break;
-				case 1:
-					if (m_BackgroundToggle != null)
-						m_BackgroundToggle.isOn = true;
-					break;
-				case 2:
-					if (m_ResourceToggle != null)
-						m_ResourceToggle.isOn = true;
-					break;
-				case 3:
-					if (m_DataToggle != null)
-						m_DataToggle.isOn = true;
-					break;
-				case 4:
-					if (m_ColorToggle != null)
-						m_ColorToggle.isOn = true;
-					break;
-				default:
-					if (m_GeneralToggle != null)
-						m_GeneralToggle.isOn = true;
-					break;
-			}
+            _page = page;
 
-			SetScale(settings.UIScale);
+            switch (page)
+            {
+                case 0:
+                    if (m_GeneralToggle != null)
+                        m_GeneralToggle.isOn = true;
+                    break;
+                case 1:
+                    if (m_BackgroundToggle != null)
+                        m_BackgroundToggle.isOn = true;
+                    break;
+                case 2:
+                    if (m_ResourceToggle != null)
+                        m_ResourceToggle.isOn = true;
+                    break;
+                case 3:
+                    if (m_DataToggle != null)
+                        m_DataToggle.isOn = true;
+                    break;
+                case 4:
+                    if (m_ColorToggle != null)
+                        m_ColorToggle.isOn = true;
+                    break;
+                default:
+                    if (m_GeneralToggle != null)
+                        m_GeneralToggle.isOn = true;
+                    break;
+            }
 
-			FadeIn();
-		}
+            SetScale(settings.UIScale);
 
-		public void FadeIn()
-		{
-			Fade(1, true);
-		}
+            FadeIn();
+        }
 
-		public void FadeOut()
-		{
-			Fade(0, false, Kill, false);
-		}
+        public void FadeIn()
+        {
+            Fade(1, true);
+        }
 
-		private void Kill()
-		{
-			gameObject.SetActive(false);
-			Destroy(gameObject);
-		}
+        public void FadeOut()
+        {
+            Fade(0, false, Kill, false);
+        }
 
-		public void Close()
-		{
-			if (settingsInterface != null)
-				settingsInterface.IsVisible = false;
-		}
+        private void Kill()
+        {
+            gameObject.SetActive(false);
+            Destroy(gameObject);
+        }
 
-		public void ProcessTooltips()
-		{
-			if (settingsInterface == null)
-				return;
+        public void Close()
+        {
+            if (settingsInterface != null)
+                settingsInterface.IsVisible = false;
+        }
 
-			TooltipHandler[] handlers = gameObject.GetComponentsInChildren<TooltipHandler>(true);
+        public void ProcessTooltips()
+        {
+            if (settingsInterface == null)
+                return;
 
-			if (handlers == null)
-				return;
+            TooltipHandler[] handlers = gameObject.GetComponentsInChildren<TooltipHandler>(true);
 
-			for (int j = 0; j < handlers.Length; j++)
-				ProcessTooltip(handlers[j], settingsInterface.WindowTooltips, settingsInterface.TooltipCanvas, settingsInterface.UIScale);
+            if (handlers == null)
+                return;
 
-			if (m_HelpTips != null)
-				ProcessHelpTooltips(m_HelpTips.isOn);
-		}
+            for (int j = 0; j < handlers.Length; j++)
+                ProcessTooltip(handlers[j], settingsInterface.WindowTooltips, settingsInterface.TooltipCanvas, settingsInterface.UIScale);
 
-		private void ProcessTooltip(TooltipHandler handler, bool isOn, Canvas c, float scale)
-		{
-			if (handler == null)
-				return;
+            if (m_HelpTips != null)
+                ProcessHelpTooltips(m_HelpTips.isOn);
+        }
 
-			handler.IsActive = isOn && !handler.HelpTip;
-			handler._Canvas = c;
-			handler.Scale = scale;
-		}
+        private void ProcessTooltip(TooltipHandler handler, bool isOn, Canvas c, float scale)
+        {
+            if (handler == null)
+                return;
 
-		public void SetScale(float scale)
-		{
-			rect.localScale = Vector3.one * scale;
-		}
+            handler.IsActive = isOn && !handler.HelpTip;
+            handler._Canvas = c;
+            handler.Scale = scale;
+        }
 
-		public void SetPosition(Vector2 pos)
-		{
-			if (rect == null)
-				return;
+        public void SetScale(float scale)
+        {
+            rect.localScale = Vector3.one * scale;
+        }
 
-			rect.anchoredPosition = new Vector3(pos.x, pos.y, 0);
-		}
+        public void SetPosition(Vector2 pos)
+        {
+            if (rect == null)
+                return;
 
-		public void OnPointerDown(PointerEventData eventData)
-		{
-			transform.SetAsLastSibling();
+            rect.anchoredPosition = new Vector3(pos.x, pos.y, 0);
+        }
 
-			((SettingsPage)CurrentPage).OnPointerDown(eventData);
-		}
+        public void OnPointerDown(PointerEventData eventData)
+        {
+            transform.SetAsLastSibling();
 
-		public void OnBeginDrag(PointerEventData eventData)
-		{
-			if (rect == null)
-				return;
+            ((SettingsPage)CurrentPage).OnPointerDown(eventData);
+        }
 
-			mouseStart = eventData.position;
-			windowStart = rect.position;
-		}
+        public void OnBeginDrag(PointerEventData eventData)
+        {
+            if (rect == null)
+                return;
 
-		public void OnDrag(PointerEventData eventData)
-		{
-			if (rect == null)
-				return;
+            mouseStart = eventData.position;
+            windowStart = rect.position;
+        }
 
-			rect.position = windowStart + (Vector3)(eventData.position - mouseStart);
+        public void OnDrag(PointerEventData eventData)
+        {
+            if (rect == null)
+                return;
 
-			if (settingsInterface == null)
-				return;
+            rect.position = windowStart + (Vector3)(eventData.position - mouseStart);
 
-			settingsInterface.ClampToScreen(rect);
-		}
+            if (settingsInterface == null)
+                return;
 
-		public void OnEndDrag(PointerEventData eventData)
-		{
-			if (rect == null || settingsInterface == null)
-				return;
+            settingsInterface.ClampToScreen(rect);
+        }
 
-			settingsInterface.Position = new Vector2(rect.anchoredPosition.x, rect.anchoredPosition.y);
-		}
+        public void OnEndDrag(PointerEventData eventData)
+        {
+            if (rect == null || settingsInterface == null)
+                return;
+
+            settingsInterface.Position = new Vector2(rect.anchoredPosition.x, rect.anchoredPosition.y);
+        }
+
+        public void KSPedia(bool isOn)
+        {
+            if (settingsInterface != null)
+                settingsInterface.OpenKSPedia(isOn);
+        }
 
 		public void HelpTips(bool isOn)
 		{
