@@ -436,27 +436,34 @@ namespace SCANsat.SCAN_Data
 
 		#region Scanning coverage
 		/* DATA: coverage */
-		private int[] coverage_count = Enumerable.Repeat(360 * 180, 32).ToArray();
+		private float[] coverage_count = Enumerable.Repeat(41248.020f, 32).ToArray();
 		internal void updateCoverage()
 		{
 			for (int i = 0; i < 32; ++i)
 			{
 				SCANtype t = (SCANtype)(1 << i);
-				int cc = 0;
+				float cc = 0;
 				for (int x = 0; x < 360; ++x)
 				{
 					for (int y = 0; y < 180; ++y)
 					{
 						if ((coverage[x, y] & (Int32)t) == 0)
-							++cc;
+                        {
+                            int shift = y - 90;
+
+                            float adjusted = Mathf.Cos(Mathf.Deg2Rad * Mathf.Abs(shift));
+
+                            cc += adjusted;
+                        }
 					}
 				}
+                
 				coverage_count[i] = cc;
 			}
 		}
-		internal int getCoverage(SCANtype type)
+		internal float getCoverage(SCANtype type)
 		{
-			int uncov = 0;
+			float uncov = 0;
 			if ((type & SCANtype.AltimetryLoRes) != SCANtype.Nothing)
 				uncov += coverage_count[0];
 			if ((type & SCANtype.AltimetryHiRes) != SCANtype.Nothing)
