@@ -1068,14 +1068,14 @@ namespace SCANsat.SCAN_Unity
 		private SCANresourceGlobal AssignResource(string resource)
 		{
 			SCANresourceGlobal r = currentResource;
-
-			if (r == null || r.Name != resource)
+            
+            if (r == null || r.Name != resource)
 			{
 				for (int i = resources.Count - 1; i >= 0; i--)
 				{
 					SCANresourceGlobal res = resources[i];
-
-					if (res.Name != resource)
+                    
+                    if (res.Name != resource)
 						continue;
 
 					r = res;
