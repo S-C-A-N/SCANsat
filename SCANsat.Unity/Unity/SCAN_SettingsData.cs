@@ -313,7 +313,7 @@ namespace SCANsat.Unity.Unity
 
 			SCAN_Settings.Instance.DropDown.transform.SetParent(m_MapTypeOption, false);
 
-			SCAN_Settings.Instance.DropDown.Setup(settings.MapDataTypes, settings.CurrentMapData, 12);
+			SCAN_Settings.Instance.DropDown.Setup(settings.MapDataTypes, settings.CurrentMapData, 12, 14);
 
 			SCAN_Settings.Instance.DropDown.OnSelectUpdate.AddListener(new UnityEngine.Events.UnityAction<string>(MapTypeOption));
 		}
