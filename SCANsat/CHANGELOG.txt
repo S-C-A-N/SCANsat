@@ -1,3 +1,18 @@
+Version 18.3 - 2018-2-7
+-----------------------
+
+- Complete Portuguese translations
+- Updates to localization files
+	- Parts, manufacturer/flag and contract localization
+	
+- Calculate scanning coverage based on approximation of actual spherical surface area instead of simple rectangular area
+	- Affects contract completion and science data collection
+
+- Fix bugs related to some resources for the big map
+- Fix bugs in Overdrive compatibility
+- Fix long resource and planet names in drop down menus
+
+
 Version 18.2 - 2017-11-22
 -----------------------
 
