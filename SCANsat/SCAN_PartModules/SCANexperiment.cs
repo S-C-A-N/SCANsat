@@ -240,7 +240,7 @@ namespace SCANsat.SCAN_PartModules
 
 			su.scienceCap *= mult;
 
-			if (coverage > 98.5)
+			if (coverage > 97.5)
 				coverage = 100;
 			else if (coverage < 30)
 				coverage = 0;
