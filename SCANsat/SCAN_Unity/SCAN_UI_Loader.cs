@@ -435,13 +435,54 @@ namespace SCANsat.SCAN_Unity
 				if (skin == null)
 					return;
 
-				_toggleNormal = Sprite.Create(skin.toggle.normal.background, new Rect(16, 16, skin.toggle.normal.background.width - 32, skin.toggle.normal.background.height - 32), new Vector2(0.5f, 0.5f));
-				_toggleHover = Sprite.Create(skin.toggle.hover.background, new Rect(16, 16, skin.toggle.hover.background.width - 32, skin.toggle.hover.background.height - 32), new Vector2(0.5f, 0.5f));
-				_toggleActive = Sprite.Create(skin.toggle.active.background, new Rect(16, 16, skin.toggle.active.background.width - 32, skin.toggle.active.background.height - 32), new Vector2(0.5f, 0.5f));
-				_toggleOn = Sprite.Create(skin.toggle.onNormal.background, new Rect(16, 16, skin.toggle.onNormal.background.width - 32, skin.toggle.onNormal.background.height - 32), new Vector2(0.5f, 0.5f));
-				_toggleOnHover = Sprite.Create(skin.toggle.onHover.background, new Rect(16, 16, skin.toggle.onHover.background.width - 32, skin.toggle.onHover.background.height - 32), new Vector2(0.5f, 0.5f));
-				_toggleOnActive = Sprite.Create(skin.toggle.onActive.background, new Rect(16, 16, skin.toggle.onActive.background.width - 32, skin.toggle.onActive.background.height - 32), new Vector2(0.5f, 0.5f));
-				
+                if (skin.toggle.normal.background != null)
+                {
+                    if (skin.toggle.normal.background.width > 33 && skin.toggle.normal.background.height > 33)
+                        _toggleNormal = Sprite.Create(skin.toggle.normal.background, new Rect(16, 16, skin.toggle.normal.background.width - 32, skin.toggle.normal.background.height - 32), new Vector2(0.5f, 0.5f));
+                    else
+                        _toggleNormal = Sprite.Create(skin.toggle.normal.background, new Rect(0, 0, skin.toggle.normal.background.width, skin.toggle.normal.background.height), new Vector2(0.5f, 0.5f));
+                }
+
+                if (skin.toggle.hover.background != null)
+                {
+                    if (skin.toggle.hover.background.width > 33 && skin.toggle.hover.background.height > 33)
+                        _toggleHover = Sprite.Create(skin.toggle.hover.background, new Rect(16, 16, skin.toggle.hover.background.width - 32, skin.toggle.hover.background.height - 32), new Vector2(0.5f, 0.5f));
+                    else
+                        _toggleHover = Sprite.Create(skin.toggle.hover.background, new Rect(0, 0, skin.toggle.hover.background.width, skin.toggle.hover.background.height), new Vector2(0.5f, 0.5f));
+                }
+
+                if (skin.toggle.active.background != null)
+                {
+                    if (skin.toggle.active.background.width > 33 && skin.toggle.active.background.height > 33)
+                        _toggleActive = Sprite.Create(skin.toggle.active.background, new Rect(16, 16, skin.toggle.active.background.width - 32, skin.toggle.active.background.height - 32), new Vector2(0.5f, 0.5f));
+                    else
+                        _toggleActive = Sprite.Create(skin.toggle.active.background, new Rect(0, 0, skin.toggle.active.background.width, skin.toggle.active.background.height), new Vector2(0.5f, 0.5f));
+                }
+
+                if (skin.toggle.onNormal.background != null)
+                {
+                    if (skin.toggle.onNormal.background.width > 33 && skin.toggle.onNormal.background.height > 33)
+                        _toggleOn = Sprite.Create(skin.toggle.onNormal.background, new Rect(16, 16, skin.toggle.onNormal.background.width - 32, skin.toggle.onNormal.background.height - 32), new Vector2(0.5f, 0.5f));
+                    else
+                        _toggleOn = Sprite.Create(skin.toggle.onNormal.background, new Rect(0, 0, skin.toggle.onNormal.background.width, skin.toggle.onNormal.background.height), new Vector2(0.5f, 0.5f));
+                }
+
+                if (skin.toggle.onHover.background != null)
+                {
+                    if (skin.toggle.onHover.background.width > 33 && skin.toggle.onHover.background.height > 33)
+                        _toggleOnHover = Sprite.Create(skin.toggle.onHover.background, new Rect(16, 16, skin.toggle.onHover.background.width - 32, skin.toggle.onHover.background.height - 32), new Vector2(0.5f, 0.5f));
+                    else
+                        _toggleOnHover = Sprite.Create(skin.toggle.onHover.background, new Rect(0, 0, skin.toggle.onHover.background.width, skin.toggle.onHover.background.height), new Vector2(0.5f, 0.5f));
+                }
+
+                if (skin.toggle.onActive.background != null)
+                {
+                    if (skin.toggle.onActive.background.width > 33 && skin.toggle.onActive.background.height > 33)
+                        _toggleOnActive = Sprite.Create(skin.toggle.onActive.background, new Rect(16, 16, skin.toggle.onActive.background.width - 32, skin.toggle.onActive.background.height - 32), new Vector2(0.5f, 0.5f));
+                    else
+                        _toggleOnActive = Sprite.Create(skin.toggle.onActive.background, new Rect(0, 0, skin.toggle.onActive.background.width, skin.toggle.onActive.background.height), new Vector2(0.5f, 0.5f));
+                }
+
 				toggleLoaded = true;
 			}
 

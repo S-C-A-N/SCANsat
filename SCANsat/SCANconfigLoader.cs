@@ -98,7 +98,7 @@ namespace SCANsat
 				SCANresourceGlobal currentGlobal = SCANcontroller.getResourceNode(rs.ResourceName);
 
 				PartResourceDefinition pr = PartResourceLibrary.Instance.GetDefinition(rs.ResourceName);
-
+                
 				if (currentGlobal == null)
 				{
 					SCANcontroller.addToResourceData(rs.ResourceName, new SCANresourceGlobal(rs.ResourceName, pr == null ? rs.ResourceName : pr.displayName, 20, rs.Distribution.MinAbundance, rs.Distribution.MaxAbundance, palette.magenta, palette.cb_orange, t));
@@ -106,7 +106,7 @@ namespace SCANsat
 				}
 
 				currentGlobal.DisplayName = pr == null ? rs.ResourceName : pr.displayName;
-
+                
 				if (rs.Distribution.MinAbundance > currentGlobal.DefaultMinValue)
 					currentGlobal.DefaultMinValue = rs.Distribution.MinAbundance;
 

@@ -338,12 +338,12 @@ namespace SCANsat
 				return 0;
 			double cov = 0d;
 			if (type == SCANtype.Nothing)
-				type = SCANtype.AltimetryLoRes | SCANtype.AltimetryHiRes | SCANtype.Biome | SCANtype.Anomaly;          
+				type = SCANtype.AltimetryLoRes | SCANtype.AltimetryHiRes | SCANtype.Biome | SCANtype.Anomaly | SCANtype.FuzzyResources;          
 			cov = data.getCoverage (type);
 			if (cov <= 0)
 				cov = 100;
 			else
-				cov = Math.Min (99.9d , 100 - cov * 100d / (360d * 180d * countBits((int)type)));
+				cov = Math.Min (99.9d , 100 - cov * 100d / (41248.020d * countBits((int)type)));
 			return cov;
 		}
 

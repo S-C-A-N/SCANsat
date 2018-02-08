@@ -35,6 +35,7 @@ namespace SCANsat.Unity.Unity
 		private string currentElement;
 		private OnSelectEvent _onSelectUpdate = new OnSelectEvent();
 		private int fontsize = 14;
+        private int maxLength = 12;
 
 		protected override void Awake()
 		{
@@ -48,7 +49,7 @@ namespace SCANsat.Unity.Unity
 			get { return _onSelectUpdate; }
 		}
 
-		public void Setup(IList<string> elements, string current, int font = 14)
+		public void Setup(IList<string> elements, string current, int font = 14, int max = 12)
 		{
 			if (elements == null)
 				return;
@@ -66,6 +67,7 @@ namespace SCANsat.Unity.Unity
 			}
 
 			fontsize = font;
+            maxLength = 12;
 
 			currentElement = current;
 
@@ -117,7 +119,7 @@ namespace SCANsat.Unity.Unity
 
 			dropDown.transform.SetParent(m_ContentTransform, false);
 
-			dropDown.Setup(element, element == currentElement, this, m_Scrollbar, fontsize);
+			dropDown.Setup(element, element == currentElement, this, m_Scrollbar, fontsize, maxLength);
 		}
 	}
 }
