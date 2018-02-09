@@ -229,7 +229,6 @@ namespace SCANsat.SCAN_Unity
 						_currentDataType = SCANtype.Everything;
 					}
 				}
-
 			}
 		}
 
@@ -731,9 +730,9 @@ namespace SCANsat.SCAN_Unity
 			{
 				data = new SCANdata(thisBody);
 				SCANcontroller.controller.addToBodyData(thisBody, data);
-			}
+            }
 
-			data.fillMap(_currentDataType);
+            data.fillMap(_currentDataType);
 		}
 
 		public void FillAll()
@@ -747,8 +746,8 @@ namespace SCANsat.SCAN_Unity
 					data = new SCANdata(b);
 					SCANcontroller.controller.addToBodyData(b, data);
 				}
-
-				data.fillMap(_currentDataType);
+                
+                data.fillMap(_currentDataType);
 			}
 		}
 
