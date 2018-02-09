@@ -436,42 +436,44 @@ namespace SCANsat.SCAN_Data
 
 		#region Scanning coverage
 		/* DATA: coverage */
-		private float[] coverage_count = Enumerable.Repeat(41248.020f, 32).ToArray();
+		private double[] coverage_count = Enumerable.Repeat(41251.914, 32).ToArray();
 		internal void updateCoverage()
 		{
 			for (int i = 0; i < 32; ++i)
 			{
-				SCANtype t = (SCANtype)(1 << i);
-				float cc = 0;
+                SCANtype t = (SCANtype)(1 << i);
+
+                if (!SCANUtil.scanTypeValid(t))
+                {
+                    coverage_count[i] = 41251.914;
+                    continue;
+                }
+
+                double cc = 0;
+
 				for (int x = 0; x < 360; ++x)
 				{
 					for (int y = 0; y < 180; ++y)
 					{
-						if ((coverage[x, y] & (Int32)t) == 0)
-                        {
-                            int shift = y - 90;
-
-                            float adjusted = Mathf.Cos(Mathf.Deg2Rad * Mathf.Abs(shift));
-
-                            cc += adjusted;
-                        }
+                        if ((coverage[x, y] & (int)t) == 0)
+                            cc += SCANUtil.cosLookUp[y];;
 					}
-				}
-                
-				coverage_count[i] = cc;
+                }
+
+                coverage_count[i] = cc;
 			}
 		}
-		internal float getCoverage(SCANtype type)
+		internal double getCoverage(SCANtype type)
 		{
-			float uncov = 0;
-			if ((type & SCANtype.AltimetryLoRes) != SCANtype.Nothing)
-				uncov += coverage_count[0];
-			if ((type & SCANtype.AltimetryHiRes) != SCANtype.Nothing)
-				uncov += coverage_count[1];
-			if ((type & SCANtype.Biome) != SCANtype.Nothing)
-				uncov += coverage_count[3];
-			if ((type & SCANtype.Anomaly) != SCANtype.Nothing)
-				uncov += coverage_count[4];
+            double uncov = 0;
+            if ((type & SCANtype.AltimetryLoRes) != SCANtype.Nothing)
+                uncov += coverage_count[0];
+            if ((type & SCANtype.AltimetryHiRes) != SCANtype.Nothing)
+                uncov += coverage_count[1];
+            if ((type & SCANtype.Biome) != SCANtype.Nothing)
+                uncov += coverage_count[3];
+            if ((type & SCANtype.Anomaly) != SCANtype.Nothing)
+                uncov += coverage_count[4];
 			if ((type & SCANtype.AnomalyDetail) != SCANtype.Nothing)
 				uncov += coverage_count[5];
 			if ((type & SCANtype.Kethane) != SCANtype.Nothing)
@@ -500,8 +502,8 @@ namespace SCANsat.SCAN_Data
 				uncov += coverage_count[17];
 			if ((type & SCANtype.Karbonite) != SCANtype.Nothing)
 				uncov += coverage_count[18];
-			if ((type & SCANtype.FuzzyResources) != SCANtype.Nothing)
-				uncov += coverage_count[19];
+            if ((type & SCANtype.FuzzyResources) != SCANtype.Nothing)
+                uncov += coverage_count[19];
 			if ((type & SCANtype.Hydrates) != SCANtype.Nothing)
 				uncov += coverage_count[20];
 			if ((type & SCANtype.Gypsum) != SCANtype.Nothing)
@@ -602,23 +604,27 @@ namespace SCANsat.SCAN_Data
 		#region Map Utilities
 		/* DATA: debug option to fill in the map */
 		internal void fillMap(SCANtype type)
-		{
-			for (int i = 0; i < 360; i++)
+        {
+            int fill = (int)type;
+
+            for (int i = 0; i < 360; i++)
 			{
 				for (int j = 0; j < 180; j++)
 				{
-					coverage[i, j] |= (int)type;
+					coverage[i, j] |= fill;
 				}
 			}
 		}
 
 		internal void fillResourceMap()
 		{
+            int fill = (int)SCANtype.AllResources;
+
 			for (int i = 0; i < 360; i++)
 			{
 				for (int j = 0; j < 180; j++)
 				{
-					coverage[i, j] |= (Int32)SCANtype.AllResources;
+					coverage[i, j] |= fill;
 				}
 			}
 		}
@@ -638,11 +644,13 @@ namespace SCANsat.SCAN_Data
 
 			mask ^= SCANtype.Everything;
 
+            int m = (int)mask;
+
 			for (int x = 0; x < 360; x++)
 			{
 				for (int y = 0; y < 180; y++)
 				{
-					coverage[x, y] &= (int)mask;
+					coverage[x, y] &= m;
 				}
 			}
 

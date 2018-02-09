@@ -129,6 +129,7 @@ namespace SCANsat
 
 		/* List of resources currently loaded from resource addons */
 		private static List<string> loadedResources = new List<string>();
+        private static List<SCANtype> loadedResourceTypes = new List<SCANtype>();
 
 		/* Primary SCANsat vessel dictionary; loaded every time */
 		public DictionaryValueList<Guid, SCANvessel> knownVessels = new DictionaryValueList<Guid, SCANvessel>();
@@ -431,7 +432,21 @@ namespace SCANsat
 			return null;
 		}
 
-		public static void addToResourceTypes (string name, SCANresourceType type)
+        public static bool getLoadedResourceTypeStatus(SCANtype type, bool warn = false)
+        {
+            for (int i = loadedResourceTypes.Count - 1; i >= 0; i--)
+            {
+                if (loadedResourceTypes[i] == type)
+                    return true;
+            }
+
+            if (warn)
+                SCANUtil.SCANlog("SCANsat resource type [{0}] cannot be found in loaded resource type storage list", type);
+
+            return false;
+        }
+
+        public static void addToResourceTypes (string name, SCANresourceType type)
 		{
 			if (!resourceTypes.ContainsKey(name))
 			{
@@ -448,6 +463,14 @@ namespace SCANsat
 			else
 				Debug.LogError(string.Format("[SCANsat] Warning: Loaded Resource List Already Contains Resource Of Name: {0}", name));
 		}
+
+        public static void addToLoadedResourceTypes(SCANtype type)
+        {
+            if (!loadedResourceTypes.Contains(type))
+                loadedResourceTypes.Add(type);
+            else
+                Debug.LogError(string.Format("[SCANsat] Warning: Loaded Resource Type List Already Contains Resource Of Type: {0}", type));
+        }
 
 		public static List<SCANresourceGlobal> setLoadedResourceList()
 		{
@@ -848,9 +871,14 @@ namespace SCANsat
 					checkStockResourceScanStatus(b);
 				}
 			}
-		}
 
-		private void Update()
+            for (int i = body_data.Count - 1; i >= 0; i--)
+            {
+                body_data.At(i).updateCoverage();
+            }
+        }
+
+        private void Update()
 		{
 			if (SCAN_Settings_Config.Instance.BackgroundScanning && loaded)
 				scanFromAllVessels();
@@ -1854,6 +1882,8 @@ namespace SCANsat
 			return sensors;
 		}
 
+        //System.Diagnostics.Stopwatch timer = new System.Diagnostics.Stopwatch();
+
 		private int i = 0;
 		private static int last_scan_frame;
 		private static float last_scan_time;
@@ -1876,7 +1906,7 @@ namespace SCANsat
 			maxRes = 0;
 			if (body_data.Count > 0)
 			{
-				body_data.At(i).updateCoverage();     //SCANUtil.getData(FlightGlobals.Bodies[i]); //Update coverage for planets one at a time, rather than all together
+                body_data.At(i).updateCoverage();    //Update coverage for planets one at a time, rather than all together
 				i++;
 				if (i >= body_data.Count) i = 0;
 			}

@@ -122,7 +122,8 @@ namespace SCANsat
 				}
 
 				SCANcontroller.addToLoadedResourceNames(rs.ResourceName);
-			}
+                SCANcontroller.addToLoadedResourceTypes(t.Type);
+            }
 
 			foreach (var rsBody in ResourceCache.Instance.PlanetaryResources)
 			{
@@ -151,7 +152,8 @@ namespace SCANsat
 					}
 
 					SCANcontroller.addToLoadedResourceNames(rsBody.ResourceName);
-				}
+                    SCANcontroller.addToLoadedResourceTypes(t.Type);
+                }
 
 				SCANresourceBody currentBody = currentGlobal.getBodyConfig(rsBody.PlanetName, false);
 
