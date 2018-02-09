@@ -301,9 +301,31 @@ namespace SCANsat
 			return true;
 		}
 
-		#endregion
+        public static bool scanTypeValid(int type)
+        {
+            if ((type & (int)SCANtype.Everything_SCAN) != 0)
+                return true;
+            else if ((type & (int)SCANtype.FuzzyResources) != 0)
+                return true;
 
-		#region Internal Utilities
+            return SCANcontroller.getLoadedResourceTypeStatus((SCANtype)type);
+        }
+
+        public static bool scanTypeValid(SCANtype type)
+        {
+            if ((type & SCANtype.Everything_SCAN) != SCANtype.Nothing)
+                return true;
+            else if ((type & SCANtype.FuzzyResources) != SCANtype.Nothing)
+                return true;
+
+            return SCANcontroller.getLoadedResourceTypeStatus(type);
+        }
+
+        #endregion
+
+        #region Internal Utilities
+
+        public static double[] cosLookUp = new double[180];
 
 		internal static bool isCovered(double lon, double lat, SCANdata data, SCANtype type)
 		{
@@ -336,14 +358,19 @@ namespace SCANsat
 		{
 			if (data == null)
 				return 0;
+
 			double cov = 0d;
+
 			if (type == SCANtype.Nothing)
-				type = SCANtype.AltimetryLoRes | SCANtype.AltimetryHiRes | SCANtype.Biome | SCANtype.Anomaly | SCANtype.FuzzyResources;          
+				type = SCANtype.AltimetryLoRes | SCANtype.AltimetryHiRes | SCANtype.Biome | SCANtype.Anomaly | SCANtype.FuzzyResources;   
+            
 			cov = data.getCoverage (type);
+
 			if (cov <= 0)
 				cov = 100;
 			else
-				cov = Math.Min (99.9d , 100 - cov * 100d / (41248.020d * countBits((int)type)));
+				cov = Math.Min (99.9d , 100 - cov * 100d / (41251.914 * countBits((int)type)));
+
 			return cov;
 		}
 
@@ -506,7 +533,10 @@ namespace SCANsat
 		internal static int countBits(int i)
 		{
 			int count;
-			for(count=0; i!=0; ++count) i &= (i - 1);
+
+            for (count = 0; i != 0; ++count)
+                i &= (i - 1);
+
 			return count;
 		}
 

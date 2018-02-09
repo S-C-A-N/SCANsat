@@ -53,6 +53,8 @@ namespace SCANsat
 
 			loaded = true;
 
+            PopulateCosLookupArray();
+
 			if (orbitIconsMap == null)
 				getOrbitIcons();
 
@@ -61,6 +63,12 @@ namespace SCANsat
 			FinePrintFlightBand = SCANreflection.FinePrintFlightBandReflection();
 			SCANconfigLoader.configLoader();
 		}
+
+        private void PopulateCosLookupArray()
+        {
+            for (int i = 0; i < 180; i++)
+                SCANUtil.cosLookUp[i] = Math.Cos((i - 90) * 0.0174532924);
+        }
 
 		private void getOrbitIcons()
 		{
