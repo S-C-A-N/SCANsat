@@ -863,7 +863,7 @@ sneaky then they can of course be sneaky.
  
 [shield:jenkins-dev]: http://img.shields.io/jenkins/s/https/ksp.sarbian.com/jenkins/SCANsat-dev.svg
 [shield:jenkins-rel]: http://img.shields.io/jenkins/s/https/ksp.sarbian.com/jenkins/SCANsat-release.svg
-[shield:support-ksp]: http://img.shields.io/badge/for%20KSP-v1.3.1-bad455.svg
+[shield:support-ksp]: http://img.shields.io/badge/for%20KSP-v1.4.1-bad455.svg
 [shield:support-rpm]: http://img.shields.io/badge/works%20with%20RPM-v0.28.x-a31f34.svg
 [shield:support-mm]: http://img.shields.io/badge/works%20with%20MM-v3.x-40b7c0.svg
 [shield:support-toolbar]: http://img.shields.io/badge/works%20with%20Blizzy's%20Toolbar-1.7.x-7c69c0.svg
