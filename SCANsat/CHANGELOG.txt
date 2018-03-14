@@ -1,3 +1,12 @@
+Version 18.5 - 2018-3-14
+-----------------------
+
+- Update for KSP 1.4
+
+- Update shaders and asset bundles to Unity 2017
+- Fix a rounding in error in the scanning coverage that was blocking contract offers
+- Anomaly icons show as grey until they are scanned with the BTDT
+
 Version 18.4 - 2018-2-8
 -----------------------
 
