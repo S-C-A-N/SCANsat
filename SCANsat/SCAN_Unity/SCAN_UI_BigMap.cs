@@ -1774,7 +1774,7 @@ namespace SCANsat.SCAN_Unity
 								label = "",
 								image = SCAN_UI_Loader.AnomalyIcon,
 								pos = MapPosition(a.Latitude, a.Longitude),
-								baseColor = ColorToggle ? palette.cb_yellow : palette.cb_skyBlue,
+								baseColor = a.Detail ? (ColorToggle ? palette.cb_yellow : palette.cb_skyBlue) : palette.xkcd_LightGrey,
 								flash = false,
 								width = 20,
 								alignBottom = 8,
