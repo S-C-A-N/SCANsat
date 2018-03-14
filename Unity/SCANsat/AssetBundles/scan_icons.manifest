@@ -1,12 +1,12 @@
 ManifestFileVersion: 0
-CRC: 1304829849
+CRC: 2222263696
 Hashes:
   AssetFileHash:
     serializedVersion: 2
-    Hash: 5a27b852468e71d1fbbf545bde1ffe27
+    Hash: ee25149c565f5467488a7b483f2c0436
   TypeTreeHash:
     serializedVersion: 2
-    Hash: 3a86b9bde1b930a56947f720531fa611
+    Hash: eac84a435714e08b766dd74a3eef26c4
 HashAppended: 0
 ClassTypes:
 - Class: 28
@@ -14,6 +14,8 @@ ClassTypes:
 - Class: 49
   Script: {instanceID: 0}
 - Class: 213
+  Script: {instanceID: 0}
+- Class: 687078895
   Script: {instanceID: 0}
 Assets:
 - Assets/Images/MysteryIcon.png

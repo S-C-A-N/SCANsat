@@ -1,12 +1,12 @@
 ManifestFileVersion: 0
-CRC: 3583271346
+CRC: 541521254
 Hashes:
   AssetFileHash:
     serializedVersion: 2
-    Hash: 2a9f9f3bfb55f9ea23430f7263f023c0
+    Hash: 4c1b5dc978c6e96605968562e5befc9e
   TypeTreeHash:
     serializedVersion: 2
-    Hash: 71741cdf219537d7a1c8b60c8a86fd4e
+    Hash: 793201e907e8e3e904d4a83a9091e08d
 HashAppended: 0
 ClassTypes:
 - Class: 1
@@ -149,6 +149,8 @@ ClassTypes:
   Script: {instanceID: 0}
 - Class: 225
   Script: {instanceID: 0}
+- Class: 687078895
+  Script: {instanceID: 0}
 Assets:
 - Assets/Prefabs/SCAN_PaletteButton.prefab
 - Assets/Prefabs/SCAN_ColorResource.prefab
@@ -177,5 +179,5 @@ Assets:
 - Assets/Prefabs/SCAN_ColorControl.prefab
 - Assets/Prefabs/SCAN_MapLabel.prefab
 Dependencies:
-- AssetBundles/scan_unity_skin
-- AssetBundles/scan_icons
+- C:/Users/DMagic/Documents/KSP/SCANsat/Unity/SCANsat/AssetBundles/scan_unity_skin
+- C:/Users/DMagic/Documents/KSP/SCANsat/Unity/SCANsat/AssetBundles/scan_icons
