@@ -371,6 +371,9 @@ namespace SCANsat
 			else
 				cov = Math.Min (99.9d , 100 - cov * 100d / (41251.914 * countBits((int)type)));
 
+            if (cov < 0)
+                cov = 0;
+
 			return cov;
 		}
 
