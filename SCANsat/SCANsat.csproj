@@ -99,6 +99,7 @@
     <Compile Include="SCAN_UI\SCANsatRPM.cs" />
     <Compile Include="SCANutil.cs" />
     <Compile Include="SCANmainMenuLoader.cs" />
+    <Compile Include="SCAN_UI\UI_Framework\SCANStringBuilderCache.cs" />
     <Compile Include="SCAN_UI\UI_Framework\SCANuiUtil.cs" />
     <Compile Include="SCAN_Unity\SCAN_TextMeshPro.cs" />
     <Compile Include="SCAN_Unity\SCAN_TMP_InputField.cs" />

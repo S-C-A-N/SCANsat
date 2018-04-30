@@ -1,3 +1,22 @@
+Version 18.6 - 2018-4-30
+-----------------------
+
+- Update for KSP 1.4.3
+
+- Significant performance imrovement for the background scanning algorithm
+     - Particularly noticeable when many scanners are active and time warp is at maximum
+
+- Reduce garbage allocation
+     - Particularly related to the information shown when the mouse is over a map window
+	 - Also reduced when the Background Scanning tab of the settings window is open
+	 - Fix a bug that caused increased garbage allocation when waypoint icons were turned on for the maps
+	 
+- Some UI related performance improvements
+
+- Fix some typos in science results localization files
+- Fix German language tags in localization files
+- Updates to Chinese translations
+
 Version 18.5 - 2018-3-14
 -----------------------
 

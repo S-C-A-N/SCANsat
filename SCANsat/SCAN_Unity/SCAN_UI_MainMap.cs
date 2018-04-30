@@ -230,7 +230,7 @@ namespace SCANsat.SCAN_Unity
 			}
 
 			if (sensors != SCANtype.Nothing)
-				uiElement.UpdatePercentage(string.Format("{0:N1}%", SCANUtil.getCoveragePercentage(data, sensors)));
+				uiElement.UpdatePercentage(string.Format("{0}%", SCANUtil.getCoveragePercentage(data, sensors).ToString("N1")));
 			else
 				uiElement.UpdatePercentage("0%");
 		}
@@ -620,7 +620,7 @@ namespace SCANsat.SCAN_Unity
 				}
 			}
 
-			return string.Format("({0:F1}°,{1:F1}°{2})", lat, lon, units);
+			return string.Format("({0}°,{1}°{2})", lat.ToString("F1"), lon.ToString("F1"), units);
 		}
 
 		private void drawPartialMap(SCANtype type, bool apply)

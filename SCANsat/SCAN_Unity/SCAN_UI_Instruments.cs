@@ -143,12 +143,12 @@ namespace SCANsat.SCAN_Unity
 				sensors |= SCANtype.Anomaly;
 			}
 
-			foreach (SCANresourceGlobal s in resources)
-			{
-				if (SCANUtil.isCovered(vlon, vlat, data, s.SType))
-					sensors |= s.SType;
-			}
-
+            for (int i = resources.Count - 1; i >= 0; i--)
+            {
+                if (SCANUtil.isCovered(vlon, vlat, data, resources[i].SType))
+                    sensors |= resources[i].SType;
+            }
+            
 			if (SCANUtil.isCovered(vlon, vlat, data, SCANtype.FuzzyResources))
 				sensors |= SCANtype.FuzzyResources;
 
@@ -199,9 +199,7 @@ namespace SCANsat.SCAN_Unity
 			uiElement.transform.SetParent(UIMasterController.Instance.dialogCanvas.transform, false);
 
 			_isVisible = true;
-
-			infoString = StringBuilderCache.Acquire();
-
+            
 			uiElement.SetInstruments(this);
 
 			if (HighLogic.LoadedSceneIsFlight && SCAN_Settings_Config.Instance.StockToolbar && SCAN_Settings_Config.Instance.ToolbarMenu)
@@ -331,19 +329,21 @@ namespace SCANsat.SCAN_Unity
 
 		private void locationInfo()
 		{
-			infoString.AppendFormat("Lat: {0:F2}°, Lon: {1:F2}°", vlat, vlon);
+			infoString.AppendFormat("Lat: {0}°, Lon: {1}°", vlat.ToString("F2"), vlon.ToString("F2"));
 
 			lines = 1;
 
-			foreach (SCANwaypoint p in data.Waypoints)
-			{
+            for (int i = data.Waypoints.Count - 1; i >= 0; i--)
+            {
+                SCANwaypoint p = data.Waypoints[i];
+
 				if (p.LandingTarget)
 				{
 					double distance = SCANUtil.waypointDistance(vlat, vlon, v.altitude, p.Latitude, p.Longitude, v.altitude, data.Body);
 					if (distance <= 15000)
 					{
 						infoString.AppendLine();
-						infoString.AppendFormat("Target Dist: {0:N1}m", distance);
+						infoString.AppendFormat("Target Dist: {0}m", distance.ToString("N1"));
 						lines++;
 					}
 					continue;
@@ -396,7 +396,7 @@ namespace SCANsat.SCAN_Unity
 				case Vessel.Situations.LANDED:
 				case Vessel.Situations.PRELAUNCH:
 					infoString.AppendLine();
-					infoString.AppendFormat("Terrain: {0:N1}m", pqs);
+					infoString.AppendFormat("Terrain: {0}m", pqs.ToString("N1"));
 					lines++;
 					drawSlope = true;
 					break;
@@ -451,7 +451,7 @@ namespace SCANsat.SCAN_Unity
 						lastUpdate = Time.time;
 
 						slopeAVG = SCANUtil.slope(pqs, v.mainBody, vlon, vlat, degreeOffset);
-						slopeString = string.Format("Slope: {0:F2}°", slopeAVG);
+						slopeString = string.Format("Slope: {0}°", slopeAVG.ToString("F2"));
 					}
 
 					infoString.AppendLine();
@@ -481,8 +481,10 @@ namespace SCANsat.SCAN_Unity
 				bool tooHigh = false;
 				bool scanner = false;
 
-				foreach (SCANresourceDisplay s in resourceScanners)
-				{
+                for (int i = resourceScanners.Count - 1; i >= 0; i--)
+                {
+                    SCANresourceDisplay s = resourceScanners[i];
+
 					if (s == null)
 						continue;
 
@@ -515,18 +517,18 @@ namespace SCANsat.SCAN_Unity
 				if (high || !onboard)
 				{
 					infoString.AppendLine();
-					infoString.AppendFormat("{0}: {1:P0}", r.DisplayName, SCANUtil.ResourceOverlay(vlat, vlon, r.Name, v.mainBody, SCAN_Settings_Config.Instance.BiomeLock));
+					infoString.AppendFormat("{0}: {1}", r.DisplayName, SCANUtil.ResourceOverlay(vlat, vlon, r.Name, v.mainBody, SCAN_Settings_Config.Instance.BiomeLock).ToString("P0"));
 				}
 				else
 				{
 					infoString.AppendLine();
-					infoString.AppendFormat("{0}: {1:P2}", r.DisplayName, SCANUtil.ResourceOverlay(vlat, vlon, r.Name, v.mainBody, SCAN_Settings_Config.Instance.BiomeLock));
+					infoString.AppendFormat("{0}: {1}", r.DisplayName, SCANUtil.ResourceOverlay(vlat, vlon, r.Name, v.mainBody, SCAN_Settings_Config.Instance.BiomeLock).ToString("P2"));
 				}
 			}
 			else if ((sensors & SCANtype.FuzzyResources) != SCANtype.Nothing)
 			{
 				infoString.AppendLine();
-				infoString.AppendFormat("{0}: {1:P0}", r.DisplayName, SCANUtil.ResourceOverlay(vlat, vlon, r.Name, v.mainBody, SCAN_Settings_Config.Instance.BiomeLock));
+				infoString.AppendFormat("{0}: {1}", r.DisplayName, SCANUtil.ResourceOverlay(vlat, vlon, r.Name, v.mainBody, SCAN_Settings_Config.Instance.BiomeLock).ToString("P0"));
 			}
 			else if (ResourceButtons)
 			{
@@ -535,48 +537,45 @@ namespace SCANsat.SCAN_Unity
 			}
 		}
 
-		private void anomalyInfo()
-		{
-			//if ((sensors & SCANtype.Anomaly) != SCANtype.Nothing)
-			//{
-				nearest = null;
-				double nearest_dist = -1;
+        private void anomalyInfo()
+        {
+            nearest = null;
+            double nearest_dist = -1;
 
-				foreach (SCANanomaly a in data.Anomalies)
-				{
-					if (!a.Known && !a.Detail)
-						continue;
+            for (int i = data.Anomalies.Length - 1; i >= 0; i--)
+            {
+                SCANanomaly a = data.Anomalies[i];
 
-					double d = (a.Mod.transform.position - v.transform.position).magnitude;
+                if (!a.Known && !a.Detail)
+                    continue;
 
-					if (d < nearest_dist || nearest_dist < 0)
-					{
-						if (d < maxAnomalyDistance)
-						{
-							nearest = a;
-							nearest_dist = d;
-						}
-					}
-				}
+                double d = (a.Mod.transform.position - v.transform.position).magnitude;
 
-				if (nearest != null)
-				{
-					infoString.AppendLine();
+                if (d < nearest_dist || nearest_dist < 0)
+                {
+                    if (d < maxAnomalyDistance)
+                    {
+                        nearest = a;
+                        nearest_dist = d;
+                    }
+                }
+            }
 
-					if (nearest.Detail && nearest.Known)
-						infoString.Append(string.Format("{0}: {1}", nearest.Name, SCANuiUtil.distanceString(nearest_dist, 2000)));
-					else
-					{
-						if (nearest.Detail)
-							infoString.Append(nearest.Name);
-						else if (nearest.Known)
-							infoString.Append(string.Format("Unknown Anomaly: {0}", SCANuiUtil.distanceString(nearest_dist, 2000)));
-					}					
-				}
-			//}
-			//else
-				//nearest = null;
-		}
+            if (nearest != null)
+            {
+                infoString.AppendLine();
+
+                if (nearest.Detail && nearest.Known)
+                    infoString.Append(string.Format("{0}: {1}", nearest.Name, SCANuiUtil.distanceString(nearest_dist, 2000)));
+                else
+                {
+                    if (nearest.Detail)
+                        infoString.Append(nearest.Name);
+                    else if (nearest.Known)
+                        infoString.Append(string.Format("Unknown Anomaly: {0}", SCANuiUtil.distanceString(nearest_dist, 2000)));
+                }
+            }
+        }
 
 		private void BTDTInfo()
 		{
@@ -608,20 +607,17 @@ namespace SCANsat.SCAN_Unity
 			anomalyTex = _anomalyView.getTexture();
 
 			uiElement.UpdateAnomaly(anomalyTex);
-
-			string info = _anomalyView.getInfoString();
-			string aData = _anomalyView.getAnomalyDataString(_mouseInAnomaly, nearest.Known);
-
-			uiElement.UpdateAnomalyText(info);
-			uiElement.UpdateAnomalyName(aData);
+            
+			uiElement.UpdateAnomalyText(_anomalyView.getInfoString());
+			uiElement.UpdateAnomalyName(_anomalyView.getAnomalyDataString(_mouseInAnomaly, nearest.Known));
 		}
 
 		private string distanceString(double dist)
 		{
 			if (dist < 5000)
-				return string.Format("{0:N1}m", dist);
+				return string.Format("{0}m", dist.ToString("N1"));
 
-			return string.Format("{0:N3}km", dist / 1000);
+			return string.Format("{0}km", (dist / 1000).ToString("N3"));
 		}
 
 		private double waypointRange(SCANwaypoint p)

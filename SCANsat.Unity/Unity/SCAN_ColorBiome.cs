@@ -155,7 +155,7 @@ namespace SCANsat.Unity.Unity
 		public void Transparency(float value)
 		{
 			if (m_TransparencyText != null)
-				m_TransparencyText.OnTextUpdate.Invoke(string.Format("Terrain Transparency: {0:N0}%", value));
+				m_TransparencyText.OnTextUpdate.Invoke(string.Format("Terrain Transparency: {0}%", value.ToString("N0")));
 
 			if (!loaded || colorInterface == null)
 				return;

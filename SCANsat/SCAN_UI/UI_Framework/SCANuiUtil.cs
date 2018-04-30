@@ -14,15 +14,12 @@
 #endregion
 
 using System;
-using System.Collections.Generic;
-using System.Text.RegularExpressions;
 using System.Linq;
 using System.Text;
-using FinePrint;
-using SCANsat.SCAN_Platform;
 using SCANsat.SCAN_Data;
 using SCANsat.SCAN_Map;
 using SCANsat.SCAN_Unity;
+using SCANsat.SCAN_UI.UI_Framework;
 using palette = SCANsat.SCAN_UI.UI_Framework.SCANcolorUtil;
 using UnityEngine;
 
@@ -34,16 +31,12 @@ namespace SCANsat.SCAN_UI.UI_Framework
 
 		internal static string getResourceAbundance(CelestialBody Body, double lat, double lon, bool fuzzy, SCANresourceGlobal resource)
 		{
-			string label = "";
-
 			if (fuzzy)
-				label = resourceLabel(true, lat, lon, resource, Body);
+				return resourceLabel(true, lat, lon, resource, Body);
 			else if (narrowBandInOrbit(Body, lat, resource))
-				label = resourceLabel(false, lat, lon, resource, Body);
+                return resourceLabel(false, lat, lon, resource, Body);
 			else
-				label = resourceLabel(true, lat, lon, resource, Body);
-
-			return label;
+                return resourceLabel(true, lat, lon, resource, Body);
 		}
 
 		internal static bool narrowBandInOrbit(CelestialBody b, double lat, SCANresourceGlobal resource)
@@ -206,9 +199,9 @@ namespace SCANsat.SCAN_UI.UI_Framework
 		internal static string resourceLabel(bool fuzz, double lat, double lon, SCANresourceGlobal resource, CelestialBody b)
 		{
 			if (fuzz)
-				return string.Format("{0}: {1:P0}", resource.DisplayName, SCANUtil.ResourceOverlay(lat, lon, resource.Name, b, SCAN_Settings_Config.Instance.BiomeLock));
+				return string.Format("{0}: {1}", resource.DisplayName, SCANUtil.ResourceOverlay(lat, lon, resource.Name, b, SCAN_Settings_Config.Instance.BiomeLock).ToString("P0"));
 			else
-				return string.Format("{0}: {1:P2}", resource.DisplayName, SCANUtil.ResourceOverlay(lat, lon, resource.Name, b, SCAN_Settings_Config.Instance.BiomeLock));
+				return string.Format("{0}: {1}", resource.DisplayName, SCANUtil.ResourceOverlay(lat, lon, resource.Name, b, SCAN_Settings_Config.Instance.BiomeLock).ToString("P2"));
 		}
 
 		private static double inc(double d)
@@ -223,50 +216,100 @@ namespace SCANsat.SCAN_UI.UI_Framework
 
 		internal static string getMouseOverElevation(double Lon, double Lat, SCANdata d, int precision, bool high)
 		{
-			string s = " ";
-
 			if (high)
 			{
-				s = SCANUtil.getElevation(d.Body, Lon, Lat).ToString("N" + precision) + "m";
+				return string.Format("{0}m", SCANUtil.getElevation(d.Body, Lon, Lat).ToString(string.Format("N{0}", precision.ToString())));
 			}
 			else
 			{
-				s = (((int)SCANUtil.getElevation(d.Body, Lon, Lat) / 500) * 500).ToString() + "m";
+                return string.Format("{0}m", (((int)SCANUtil.getElevation(d.Body, Lon, Lat) / 500) * 500).ToString());
 			}
-
-			return s;
 		}
 
-		/* UI: conversions to and from DMS */
-		/* FIXME: These do not belong here. And they are only used once! */
-		private static string toDMS(double thing, string neg, string pos, int prec)
+        internal static void getMouseOverElevation(StringBuilder sb, double Lon, double Lat, SCANdata d, int precision, bool high)
+        {
+
+            if (high)
+            {
+                sb.Append(SCANUtil.getElevation(d.Body, Lon, Lat).ToString(string.Format("N{0}", precision.ToString())));
+                sb.Append("m");
+            }
+            else
+            {
+                sb.Append((((int)SCANUtil.getElevation(d.Body, Lon, Lat) / 500) * 500).ToString());
+                sb.Append("m");
+            }
+        }
+
+        /* UI: conversions to and from DMS */
+        /* FIXME: These do not belong here. And they are only used once! */
+        private static string toDMS(double thing, string neg, string pos, int prec)
 		{
-			string dms = "";
+            StringBuilder sb = SCANStringBuilderCache.Acquire();
+
 			if (thing >= 0)
 				neg = pos;
+
 			thing = Math.Abs(thing);
-			dms += Math.Floor(thing).ToString() + "°";
-			thing = (thing - Math.Floor(thing)) * 60;
-			dms += Math.Floor(thing).ToString() + "'";
-			thing = (thing - Math.Floor(thing)) * 60;
-			dms += thing.ToString("F" + prec.ToString()) + "\"";
-			dms += neg;
-			return dms;
+
+            sb.Append(Math.Floor(thing).ToString());
+            sb.Append("°");
+
+            sb.Append(Math.Floor(thing).ToString());
+            sb.Append("'");
+
+            sb.Append(thing.ToString(string.Format("F{0}", prec.ToString())));
+            sb.Append("\"");
+
+            return sb.SCANToStringAndRelease();
+
+			//string dms = "";
+			//dms += Math.Floor(thing).ToString() + "°";
+			//thing = (thing - Math.Floor(thing)) * 60;
+			//dms += Math.Floor(thing).ToString() + "'";
+			//thing = (thing - Math.Floor(thing)) * 60;
+			//dms += thing.ToString("F" + prec.ToString()) + "\"";
+			//dms += neg;
+			//return dms;
 		}
 
-		internal static string toDMS(double lat, double lon, int precision = 2)
+        private static void toDMS(StringBuilder sb, double thing, string neg, string pos)
+        {
+            if (thing >= 0)
+                neg = pos;
+
+            thing = Math.Abs(thing);
+
+            sb.Append(Math.Floor(thing).ToString());
+            sb.Append("°");
+
+            sb.Append(Math.Floor(thing).ToString());
+            sb.Append("'");
+
+            sb.Append(thing.ToString("F2"));
+            sb.Append("\"");
+        }
+
+        internal static string toDMS(double lat, double lon, int precision = 2)
 		{
 			return string.Format("{0} {1}", toDMS(lat, "S", "N", precision), toDMS(lon, "W", "E", precision));
 		}
 
+        internal static void toDMS(StringBuilder sb, double lat, double lon)
+        {
+            toDMS(sb, lat, "S", "N");
+            sb.Append(" ");
+            toDMS(sb, lon, "W", "E");
+        }
+
 		internal static string distanceString(double dist, double cutoff, double cutoff2 = double.MaxValue)
 		{
 			if (dist < cutoff)
-				return string.Format("{0:N1}m", dist);
+				return string.Format("{0}m", dist.ToString("N1"));
 			else if (dist < cutoff2)
-				return string.Format("{0:N2}km", dist / 1000d);
+				return string.Format("{0}km", (dist / 1000d).ToString("N2"));
 			else
-				return string.Format("{0:N0}km", dist / 1000d);
+				return string.Format("{0}km", (dist / 1000d).ToString("N0"));
 		}
 
 		//Reset window positions;

@@ -42,14 +42,14 @@ namespace SCANsat.Unity.Unity
 			if (settings == null || !settings.IsVisible)
 				return;
 
-			for (int i = backgroundBodies.Count - 1; i >= 0; i--)
-			{
-				SCAN_BackgroundElement background = backgroundBodies[i];
+            for (int i = backgroundBodies.Count - 1; i >= 0; i--)
+            {
+                SCAN_BackgroundElement background = backgroundBodies[i];
 
-				background.UpdateText(settings.BodyPercentage(background.BodyName));
-			}
+                background.UpdateText(settings.BodyPercentage(background.BodyName));
+            }
 
-			if (m_SensorInfo != null)
+            if (m_SensorInfo != null)
 				m_SensorInfo.OnTextUpdate.Invoke(settings.SensorCount);
 		}
 

@@ -197,9 +197,11 @@ namespace SCANsat.SCAN_Data
 
 		#region Waypoints
 
-		private List<SCANwaypoint> waypoints;
+		private List<SCANwaypoint> waypoints = new List<SCANwaypoint>();
+        private bool waypointsLoaded;
+        private int localWaypointCount;
 
-		public void addToWaypoints()
+        public void addToWaypoints()
 		{
 			if (SCANcontroller.controller == null)
 				return;
@@ -286,30 +288,129 @@ namespace SCANsat.SCAN_Data
                 }
             }
 
-			//for (int i = 0; i < c.AllParameters.Count(); i++)
-			//{
-   //             ContractParameter cp = c.GetParameter(i);
+            int count = GetLocalWaypointCount();
 
-			//	if (c.AllParameters.ElementAt(i).GetType() == typeof(SurveyWaypointParameter))
-			//	{
+            if (count != localWaypointCount + 1)
+                waypointsLoaded = false;
+            else
+                localWaypointCount = count;
+        }
 
+        public void addStationaryWaypoints(CelestialBody b, SatelliteContract c)
+        {
+            for (int i = 0; i < c.AllParameters.Count(); i++)
+            {
+                ContractParameter cp = c.GetParameter(i);
 
-			//		SurveyWaypointParameter s = (SurveyWaypointParameter)c.AllParameters.ElementAt(i);
-			//		if (s.State == ParameterState.Incomplete)
-			//		{
-			//			if (waypoints.Any(w => w.Way == s.wp))
-			//				continue;
+                if (cp.GetType() == typeof(SurveyWaypointParameter))
+                {
+                    SurveyWaypointParameter s = (SurveyWaypointParameter)cp;
 
-			//			SCANwaypoint p = new SCANwaypoint(s);
-			//			if (p.Way != null)
-			//				waypoints.Add(p);
-			//		}
-			//	}
-			//}
+                    if (cp.State == ParameterState.Incomplete)
+                    {
+                        Waypoint wp = ((SurveyWaypointParameter)cp).wp;
 
-		}
+                        if (wp == null)
+                            continue;
 
-		public List<SCANwaypoint> Waypoints
+                        bool add = true;
+
+                        for (int j = waypoints.Count - 1; j >= 0; j--)
+                        {
+                            SCANwaypoint w = waypoints[j];
+
+                            if (w == null || w.Way == null)
+                                continue;
+
+                            if (w.Way == wp)
+                            {
+                                add = false;
+                                break;
+                            }
+                        }
+
+                        if (add)
+                        {
+                            SCANwaypoint p = new SCANwaypoint((SurveyWaypointParameter)cp);
+
+                            if (p.Way != null)
+                                waypoints.Add(p);
+                        }
+                    }
+                }
+            }
+
+            int count = GetLocalWaypointCount();
+
+            if (count != localWaypointCount + 1)
+                waypointsLoaded = false;
+            else
+                localWaypointCount = count;
+        }
+
+        public void addCustomWaypoint(Waypoint wp)
+        {
+            if (wp.isOnSurface && wp.isNavigatable)
+            {
+                if (wp.celestialName == body.GetName())
+                {
+                    bool add = true;
+
+                    for (int j = waypoints.Count - 1; j >= 0; j--)
+                    {
+                        SCANwaypoint w = waypoints[j];
+
+                        if (w.Seed != wp.uniqueSeed)
+                            continue;
+
+                        add = false;
+                        break;
+                    }
+
+                    if (add)
+                    {
+                        waypoints.Add(new SCANwaypoint(wp));
+                    }
+                }
+            }
+
+            int count = GetLocalWaypointCount();
+
+            if (count != localWaypointCount + 1)
+                waypointsLoaded = false;
+            else
+                localWaypointCount = count;
+        }
+
+        private int GetLocalWaypointCount()
+        {
+            if (HighLogic.CurrentGame.Mode != Game.Modes.CAREER)
+                return 0;
+
+            if (WaypointManager.Instance() == null)
+                return 0;
+
+            int count = 0;
+
+            var points = WaypointManager.Instance().Waypoints;
+
+            for (int i = 0; i < points.Count; i++)
+            {
+                Waypoint p = points[i];
+
+                if (p.isOnSurface && p.isNavigatable)
+                {
+                    if (p.celestialName == body.GetName())
+                    {
+                        count++;
+                    }
+                }
+            }
+
+            return count;
+        }
+        
+        public List<SCANwaypoint> Waypoints
 		{
 			get
 			{
@@ -321,11 +422,15 @@ namespace SCANsat.SCAN_Data
 
 				if (HighLogic.CurrentGame.Mode == Game.Modes.CAREER && !SCANcontroller.controller.ContractsLoaded)
 					return new List<SCANwaypoint>();
-				else// if (!waypointsLoaded)
+                
+                if (GetLocalWaypointCount() != localWaypointCount)
+                    waypointsLoaded = false;
+
+                if (!waypointsLoaded)
 				{
 					SCANwaypoint landingTarget = null;
 
-					//waypointsLoaded = true;
+					waypointsLoaded = true;
 					if (waypoints == null)
 						waypoints = new List<SCANwaypoint>();
 					else
@@ -386,18 +491,20 @@ namespace SCANsat.SCAN_Data
 							}
 						}
 					}
-
+                    
 					if (WaypointManager.Instance() != null)
 					{
 						var remaining = WaypointManager.Instance().Waypoints;
+                        
 						for (int i = 0; i < remaining.Count; i++)
 						{
 							Waypoint p = remaining[i];
+
 							if (p.isOnSurface && p.isNavigatable)
 							{
 								if (p.celestialName == body.GetName())
 								{
-									bool add = true;
+                                    bool add = true;
 
 									for (int j = waypoints.Count - 1; j >= 0; j--)
 									{

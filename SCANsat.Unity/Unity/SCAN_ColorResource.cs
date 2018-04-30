@@ -285,7 +285,7 @@ namespace SCANsat.Unity.Unity
 			SetMaxSlider();
 
 			if (m_MinText != null)
-				m_MinText.OnTextUpdate.Invoke(string.Format("Min: {0:N2}%", value));
+				m_MinText.OnTextUpdate.Invoke(string.Format("Min: {0}%", value.ToString("N2")));
 		}
 
 		public void OnMinInputChange(string input)
@@ -316,7 +316,7 @@ namespace SCANsat.Unity.Unity
 			SetMinSlider();
 
 			if (m_MaxText != null)
-				m_MaxText.OnTextUpdate.Invoke(string.Format("Max: {0:N2}%", value));
+				m_MaxText.OnTextUpdate.Invoke(string.Format("Max: {0}%", value.ToString("N2")));
 		}
 
 		public void OnMaxInputChange(string input)
@@ -341,7 +341,7 @@ namespace SCANsat.Unity.Unity
 			m_MinSlider.maxValue = max;
 
 			if (m_MinSliderLabelTwo != null)
-				m_MinSliderLabelTwo.OnTextUpdate.Invoke(string.Format("|\n{0:N1}%", max));
+				m_MinSliderLabelTwo.OnTextUpdate.Invoke(string.Format("|\n{0}%", max.ToString("N1")));
 		}
 
 		private void SetMaxSlider()
@@ -355,13 +355,13 @@ namespace SCANsat.Unity.Unity
 			m_MaxSlider.maxValue = 100;
 
 			if (m_MaxSliderLabelOne != null)
-				m_MaxSliderLabelOne.OnTextUpdate.Invoke(string.Format("|\n{0:N1}%", min));
+				m_MaxSliderLabelOne.OnTextUpdate.Invoke(string.Format("|\n{0}%", min.ToString("N1")));
 		}
 
 		public void OnTransparencyChange(float value)
 		{
 			if (m_TransText != null)
-				m_TransText.OnTextUpdate.Invoke(string.Format("Trans: {0:N0}%", value));
+				m_TransText.OnTextUpdate.Invoke(string.Format("Trans: {0}%", value.ToString("N0")));
 
 			if (colorInterface == null)
 				return;

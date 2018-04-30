@@ -41,7 +41,7 @@ namespace SCANsat.SCAN_Unity
 		private Vessel vessel;
 		private bool updateMap;
 		private bool narrowBand;
-		private StringBuilder infoString;
+		private StringBuilder infoString = new StringBuilder();
 		private System.Random gen;
 		private bool _inputLock;
 		private const string controlLock = "SCANsatZoom";
@@ -1425,11 +1425,11 @@ namespace SCANsat.SCAN_Unity
 				if (data == null)
 					return null;
 
-				string one = string.Format("|\n{0:N0}", (((int)(terrainMin / 100)) * 100));
+				string one = string.Format("|\n{0}", (((int)(terrainMin / 100)) * 100).ToString("N0"));
 
-				string two = string.Format("|\n{0:N0}", (((int)((terrainMin + ((terrainMax - terrainMin) / 2)) / 100)) * 100));
+				string two = string.Format("|\n{0}", (((int)((terrainMin + ((terrainMax - terrainMin) / 2)) / 100)) * 100).ToString("N0"));
 
-				string three = string.Format("|\n{0:N0}", (((int)(terrainMax / 100)) * 100));
+				string three = string.Format("|\n{0}", (((int)(terrainMax / 100)) * 100).ToString("N0"));
 
 				return new List<string>(3) { one, two, three };
 			}
@@ -1703,14 +1703,18 @@ namespace SCANsat.SCAN_Unity
 
 		private string mouseOverInfo(double lon, double lat)
 		{
-			infoString = StringBuilderCache.Acquire();
+            if (infoString == null)
+                infoString = new StringBuilder();
 
+            infoString.Length = 0;
+            
 			bool altimetry = SCANUtil.isCovered(lon, lat, data, SCANtype.Altimetry);
 			bool hires = SCANUtil.isCovered(lon, lat, data, SCANtype.AltimetryHiRes);
 
 			if (altimetry)
 			{
-				infoString.AppendFormat("{0} ", SCANuiUtil.getMouseOverElevation(lon, lat, data, 2, hires));
+                SCANuiUtil.getMouseOverElevation(infoString, lon, lat, data, 2, hires);
+                infoString.Append(" ");
 
 				if (hires)
 				{
@@ -1718,12 +1722,15 @@ namespace SCANsat.SCAN_Unity
 					double eqDistancePerDegree = circum / 360;
 					double degreeOffset = 5 / eqDistancePerDegree;
 
-					infoString.AppendFormat("{0:F1}° ", SCANUtil.slope(SCANUtil.getElevation(body, lon, lat), body, lon, lat, degreeOffset));
+					infoString.AppendFormat("{0}° ", SCANUtil.slope(SCANUtil.getElevation(body, lon, lat), body, lon, lat, degreeOffset).ToString("F1"));
 				}
 			}
 
 			if (SCANUtil.isCovered(lon, lat, data, SCANtype.Biome))
-				infoString.AppendFormat("{0} ", SCANUtil.getBiomeDisplayName(body, lon, lat));
+            {
+                SCANUtil.getBiomeDisplayName(infoString, body, lon, lat);
+                infoString.Append(" ");
+            }
 
 			if (spotmap.ResourceActive && SCANconfigLoader.GlobalResource && spotmap.Resource != null)
 			{
@@ -1744,9 +1751,10 @@ namespace SCANsat.SCAN_Unity
 					infoString.Append(SCANuiUtil.getResourceAbundance(spotmap.Body, lat, lon, fuzzy, spotmap.Resource));
 			}
 
-			infoString.AppendLine();
-			infoString.AppendFormat("{0} (lat: {1:F2}° lon: {2:F2}°)", SCANuiUtil.toDMS(lat, lon), lat, lon);
-
+            infoString.AppendLine();
+            SCANuiUtil.toDMS(infoString, lat, lon);
+            infoString.AppendFormat(" (lat: {0}° lon: {1}°)", lat.ToString("F2"), lon.ToString("F2"));
+            
 			if (SCANcontroller.controller.zoomMapIcons)
 			{
 				infoString.AppendLine();
@@ -1777,8 +1785,9 @@ namespace SCANsat.SCAN_Unity
 						}
 					}
 					else if (SCANUtil.waypointDistance(lat, lon, 1000, p.Latitude, p.Longitude, 1000, body) <= range)
-					{
-						infoString.AppendFormat("MJ: {0} ", SCANuiUtil.toDMS(p.Latitude, p.Longitude, 0));
+                    {
+                        infoString.Append("MJ: ");
+                        SCANuiUtil.toDMS(infoString, p.Latitude, p.Longitude);
 						break;
 					}
 				}
@@ -1805,14 +1814,15 @@ namespace SCANsat.SCAN_Unity
 					Vessel flag = mapFlags[i];
 
 					if (SCANUtil.mapLabelDistance(lat, lon, flag.latitude, flag.longitude, body) <= range)
-					{
-						infoString.AppendFormat("Flag: {0}", flag.vesselName);
+                    {
+                        infoString.Append(" Flag: ");
+                        infoString.Append(flag.vesselName);
 						break;
 					}
 				}
 			}
 
-			return infoString.ToStringAndRelease();
+			return infoString.ToString();
 		}
 
 		public string TooltipText(float xPos)
@@ -1838,7 +1848,7 @@ namespace SCANsat.SCAN_Unity
 				case mapType.Altimetry:
 					float terrain = xPos * (terrainMax - terrainMin) + terrainMin;
 					
-					return string.Format("{0:N0}m", terrain);
+					return string.Format("{0}m", terrain.ToString("N0"));
 			}
 
 			return "";
