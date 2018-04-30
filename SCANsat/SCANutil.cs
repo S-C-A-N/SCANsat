@@ -15,6 +15,7 @@
 #endregion
 
 using System;
+using System.Text;
 using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
@@ -269,8 +270,12 @@ namespace SCANsat
 				return false;
 
 			int sensor = 0;
+            double fov = 0;
+            double min = 0;
+            double max = 0;
+            double best = 0;
 
-			if (prefab.Modules.Contains<SCANsat.SCAN_PartModules.SCANsat>())
+            if (prefab.Modules.Contains<SCANsat.SCAN_PartModules.SCANsat>())
 			{
 				SCANsat.SCAN_PartModules.SCANsat scan = prefab.Modules.GetModule<SCANsat.SCAN_PartModules.SCANsat>();
 
@@ -278,7 +283,11 @@ namespace SCANsat
 					return false;
 
 				sensor = scan.sensorType;
-			}
+                fov = scan.fov;
+                min = scan.min_alt;
+                max = scan.max_alt;
+                best = scan.best_alt;
+            }
 			else if (prefab.Modules.Contains<ModuleSCANresourceScanner>())
 			{
 				SCANsat.SCAN_PartModules.ModuleSCANresourceScanner scan = prefab.Modules.GetModule<SCANsat.SCAN_PartModules.ModuleSCANresourceScanner>();
@@ -287,14 +296,18 @@ namespace SCANsat
 					return false;
 
 				sensor = scan.sensorType;
-			}
+                fov = scan.fov;
+                min = scan.min_alt;
+                max = scan.max_alt;
+                best = scan.best_alt;
+            }
 			else
 				return false;
 
 			if (SCANcontroller.controller == null)
 				return false;
 
-			SCANcontroller.controller.unregisterSensor(v, (SCANtype)sensor);
+			SCANcontroller.controller.unregisterSensor(v, (SCANtype)sensor, fov, min, max, best);
 
 			m.moduleValues.SetValue("scanning", false.ToString());
 
@@ -326,6 +339,7 @@ namespace SCANsat
         #region Internal Utilities
 
         public static double[] cosLookUp = new double[180];
+        public static DictionaryValueList<CelestialBody, string> localizedBodyNames = new DictionaryValueList<CelestialBody, string>();
 
 		internal static bool isCovered(double lon, double lat, SCANdata data, SCANtype type)
 		{
@@ -347,14 +361,21 @@ namespace SCANsat
 			return (data.Coverage[lon, lat] & (Int32)type) == (Int32)type;
 		}
 
-		internal static void registerPass ( double lon, double lat, SCANdata data, SCANtype type ) {
-			int ilon = icLON(lon);
-			int ilat = icLAT(lat);
-			if (badLonLat(ilon, ilat)) return;
-			data.Coverage[ilon, ilat] |= (Int32)type;
-		}
+		internal static void registerPass ( int lon, int lat, SCANdata data, SCANtype type )
+        {
+            int ilon = (lon + 360 + 180) % 360;
+            int ilat = (lat + 180 + 90) % 180;
 
-		internal static double getCoveragePercentage(SCANdata data, SCANtype type )
+            if (ilon < 0 || lon >= 360)
+                return;
+
+            if (ilat < 0 || lon >= 180)
+                return;
+
+            data.Coverage[ilon, ilat] |= (Int32)type;
+        }
+
+        internal static double getCoveragePercentage(SCANdata data, SCANtype type )
 		{
 			if (data == null)
 				return 0;
@@ -379,11 +400,16 @@ namespace SCANsat
 
 		internal static Func<double, int> icLON = (lon) => ((int)(lon + 360 + 180)) % 360;
 		internal static Func<double, int> icLAT = (lat) => ((int)(lat + 180 + 90)) % 180;
-		internal static Func<int, int, bool> badLonLat = (lon, lat) => (lon < 0 || lat < 0 || lon >= 360 || lat >= 180);
+        internal static Func<int, int, bool> badLonLat = (lon, lat) => (lon < 0 || lat < 0 || lon >= 360 || lat >= 180);
 		internal static Func<double, double, bool> badDLonLat = (lon, lat) => (lon < 0 || lat <0 || lon >= 360 || lat >= 180);
 		public static Func<double, double, bool> ApproxEq = (a, b) => Math.Abs(a - b) < 0.01;
 
-		internal static double fixLatShift(double lat)
+        internal static int fixLatShiftInt(double lat)
+        {
+            return (int)Math.Floor((lat + 180 + 90) % 180) - 90;
+        }
+
+        internal static double fixLatShift(double lat)
 		{
 			return (lat + 180 + 90) % 180 - 90;
 		}
@@ -393,7 +419,12 @@ namespace SCANsat
 			return (lat + 180 + 90) % 180;
 		}
 
-		internal static double fixLonShift(double lon)
+        internal static int fixLonShiftInt(double lon)
+        {
+            return (int)Math.Floor((lon + 360 + 180) % 360) - 180;
+        }
+
+        internal static double fixLonShift(double lon)
 		{
 			return (lon + 360 + 180) % 360 - 180;
 		}
@@ -487,6 +518,7 @@ namespace SCANsat
 
 			if (badDLonLat(u, v))
 				return -1;
+
 			CBAttributeMapSO.MapAttribute att = body.BiomeMap.GetAtt (Mathf.Deg2Rad * lat , Mathf.Deg2Rad * lon);
 			for (int i = 0; i < body.BiomeMap.Attributes.Length; ++i) {
 				if (body.BiomeMap.Attributes [i] == att) {
@@ -533,7 +565,17 @@ namespace SCANsat
 			return string.IsNullOrEmpty(a.displayname) ? a.name : Localizer.Format(a.displayname);
 		}
 
-		internal static int countBits(int i)
+        internal static void getBiomeDisplayName(StringBuilder sb, CelestialBody body, double lon, double lat)
+        {
+            CBAttributeMapSO.MapAttribute a = getBiome(body, lon, lat);
+
+            if (a == null)
+                return;
+
+            sb.Append(string.IsNullOrEmpty(a.displayname) ? a.name : Localizer.Format(a.displayname));
+        }
+
+        internal static int countBits(int i)
 		{
 			int count;
 
@@ -543,15 +585,42 @@ namespace SCANsat
 			return count;
 		}
 
+        public static void fillLocalizedNames()
+        {
+            localizedBodyNames.Clear();
+
+            for (int i = FlightGlobals.Bodies.Count - 1; i >= 0; i--)
+            {
+                CelestialBody b = FlightGlobals.Bodies[i];
+
+                string name = b.displayName.LocalizeBodyName();
+
+                if (!localizedBodyNames.Contains(b))
+                    localizedBodyNames.Add(b, name);
+            }
+        }
+
+        public static string displayNameFromBody(CelestialBody body)
+        {
+            if (localizedBodyNames.Contains(body))
+                return localizedBodyNames[body];
+
+            return body.displayName;
+        }
+
 		internal static string bodyFromDisplayName(string display)
 		{
-			for (int i = FlightGlobals.Bodies.Count - 1; i >= 0; i--)
-			{
-				CelestialBody b = FlightGlobals.Bodies[i];
+            for (int i = localizedBodyNames.Count - 1; i >= 0; i--)
+            {
+                if (display == localizedBodyNames.At(i))
+                    return localizedBodyNames.KeyAt(i).bodyName;
+            }
 
-				if (b.displayName.LocalizeBodyName() == display)
-					return b.bodyName;
-			}
+			//for (int i = FlightGlobals.Bodies.Count - 1; i >= 0; i--)
+			//{
+			//	if (FlightGlobals.Bodies[i].displayName.LocalizeBodyName() == display)
+			//		return FlightGlobals.Bodies[i].bodyName;
+			//}
 
 			return display;
 		}
@@ -719,14 +788,14 @@ namespace SCANsat
 		{
 			Vector3d pos1 = body.GetWorldSurfacePosition(lat1, lon1, alt1);
 			Vector3d pos2 = body.GetWorldSurfacePosition(lat2, lon2, alt2);
-			return (float)Vector3d.Distance(pos1, pos2);
+			return Vector3d.Distance(pos1, pos2);
 		}
 
 		internal static double mapLabelDistance(double lat1, double lon1, double lat2, double lon2, CelestialBody body)
 		{
 			Vector3d pos1 = body.GetWorldSurfacePosition(lat1, lon1, 1000);
 			Vector3d pos2 = body.GetWorldSurfacePosition(lat2, lon2, 1000);
-			return (float)Vector3d.Distance(pos1, pos2);
+			return Vector3d.Distance(pos1, pos2);
 		}
 
 		internal static double slope(double centerElevation, CelestialBody body, double lon, double lat, double offset)
