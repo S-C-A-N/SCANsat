@@ -35,14 +35,18 @@ namespace SCANsat.SCAN_Unity
 {
 	public class SCAN_UI_BigMap : ISCAN_BigMap
 	{
-		private bool _isVisible;
+        private const string HI = "HI ";
+        private const string LO = "LO ";
+        private const string MULTI = "MULTI";
+
+        private bool _isVisible;
 
 		private static SCANmap bigmap;
 		private static CelestialBody body;
 		private SCANdata data;
 		private Vessel vessel;
 		private bool updateMap;
-		private StringBuilder infoString;
+		private StringBuilder infoString = new StringBuilder();
 		private System.Random gen;
 		private bool _inputLock;
 		private const string controlLock = "SCANsatBig";
@@ -488,9 +492,9 @@ namespace SCANsat.SCAN_Unity
 				{
 					Orbit o = vessel.orbit;
 
-					UpdateOrbitIcons(o);
+                    UpdateOrbitIcons(o);
 
-					if (o.PeA < 0)
+                    if (o.PeA < 0)
 					{
 						if (!clearMapSet)
 						{
@@ -505,10 +509,10 @@ namespace SCANsat.SCAN_Unity
 							uiElement.UpdateEQMapTexture(eqMap);
 					}
 
-					if (eq_timer >= eq_update)
-						UpdateEQMap(o);
+                    if (eq_timer >= eq_update)
+                        UpdateEQMap(o);
 
-					eq_timer++;
+                    eq_timer++;
 
 					if (eq_timer > eq_update)
 						eq_timer = 0;
@@ -1628,11 +1632,11 @@ namespace SCANsat.SCAN_Unity
 				if (data == null)
 					return null;
 
-				string one = string.Format("|\n{0:N0}", (((int)(data.TerrainConfig.MinTerrain / 100)) * 100));
+				string one = string.Format("|\n{0}", (((int)(data.TerrainConfig.MinTerrain / 100)) * 100).ToString("N0"));
 
-				string two = string.Format("|\n{0:N0}", (((int)((data.TerrainConfig.MinTerrain + (data.TerrainConfig.TerrainRange / 2)) / 100)) * 100));
+				string two = string.Format("|\n{0}", (((int)((data.TerrainConfig.MinTerrain + (data.TerrainConfig.TerrainRange / 2)) / 100)) * 100).ToString("N0"));
 
-				string three = string.Format("|\n{0:N0}", (((int)(data.TerrainConfig.MaxTerrain / 100)) * 100));
+				string three = string.Format("|\n{0}", (((int)(data.TerrainConfig.MaxTerrain / 100)) * 100).ToString("N0"));
 
 				return new List<string>(3) { one, two, three };
 			}
@@ -1889,7 +1893,10 @@ namespace SCANsat.SCAN_Unity
 
 		private string mouseOverInfo(double lon, double lat)
 		{
-			infoString = StringBuilderCache.Acquire();
+            if (infoString == null)
+                infoString = new StringBuilder();
+
+            infoString.Length = 0;
 
 			bool altimetry = SCANUtil.isCovered(lon, lat, data, SCANtype.Altimetry);
 			bool hires = SCANUtil.isCovered(lon, lat, data, SCANtype.AltimetryHiRes);
@@ -1897,49 +1904,53 @@ namespace SCANsat.SCAN_Unity
 			if (SCANUtil.isCovered(lon, lat, data, SCANtype.AltimetryLoRes))
 			{
 				if (body.pqsController == null)
-					infoString.Append(palette.coloredNoQuote(palette.c_bad, "LO "));
-				else
-					infoString.Append(palette.coloredNoQuote(palette.c_good, "LO "));
-			}
-			else
-				infoString.Append(palette.coloredNoQuote(palette.grey, "LO "));
+                    infoString.AppendFormat("<color=#{0}>{1}</color>", palette.c_bad_hex, LO);
+                else
+                    infoString.AppendFormat("<color=#{0}>{1}</color>", palette.c_good_hex, LO);
+            }
+            else
+                infoString.AppendFormat("<color=#{0}>{1}</color>", palette.c_grey_hex, LO);
 
 			if (hires)
 			{
 				if (body.pqsController == null)
-					infoString.Append(palette.coloredNoQuote(palette.c_bad, "HI "));
+                    infoString.AppendFormat("<color=#{0}>{1}</color>", palette.c_bad_hex, HI);
 				else
-					infoString.Append(palette.coloredNoQuote(palette.c_good, "HI "));
-			}
-			else
-				infoString.Append(palette.coloredNoQuote(palette.grey, "HI "));
+                    infoString.AppendFormat("<color=#{0}>{1}</color>", palette.c_good_hex, HI);
+            }
+            else
+                infoString.AppendFormat("<color=#{0}>{1}</color>", palette.c_grey_hex, HI);
 
 			if (SCANUtil.isCovered(lon, lat, data, SCANtype.Biome))
 			{
 				if (body.BiomeMap == null)
-					infoString.Append(palette.coloredNoQuote(palette.c_bad, "MULTI"));
+                    infoString.AppendFormat("<color=#{0}>{1}</color>", palette.c_bad_hex, MULTI);
 				else
-					infoString.Append(palette.coloredNoQuote(palette.c_good, "MULTI"));
+                    infoString.AppendFormat("<color=#{0}>{1}</color>", palette.c_good_hex, MULTI);
 			}
-			else
-				infoString.Append(palette.coloredNoQuote(palette.grey, "MULTI"));
-
+            else
+                infoString.AppendFormat("<color=#{0}>{1}</color>", palette.c_grey_hex, MULTI);
+            
 			if (altimetry)
 			{
-				infoString.AppendFormat(" Terrain Height: {0}", SCANuiUtil.getMouseOverElevation(lon, lat, data, 2, hires));
-
+                infoString.Append(" Terrain Height: ");
+                SCANuiUtil.getMouseOverElevation(infoString, lon, lat, data, 2, hires);
+                
 				if (hires)
 				{
 					double circum = body.Radius * 2 * Math.PI;
 					double eqDistancePerDegree = circum / 360;
 					double degreeOffset = 5 / eqDistancePerDegree;
-
-					infoString.AppendFormat(" Slope: {0:F1}°", SCANUtil.slope(SCANUtil.getElevation(body, lon, lat), body, lon, lat, degreeOffset));
+                    
+					infoString.AppendFormat(" Slope: {0}°", SCANUtil.slope(SCANUtil.getElevation(body, lon, lat), body, lon, lat, degreeOffset).ToString("F1"));
 				}
 			}
-
+            
 			if (SCANUtil.isCovered(lon, lat, data, SCANtype.Biome))
-				infoString.AppendFormat(" Biome: {0}", SCANUtil.getBiomeDisplayName(body, lon, lat));
+            {
+                infoString.Append(" Biome: ");
+                SCANUtil.getBiomeDisplayName(infoString, body, lon, lat);
+            }
 
 			if (bigmap.ResourceActive && SCANconfigLoader.GlobalResource && bigmap.Resource != null)
 			{
@@ -1961,10 +1972,11 @@ namespace SCANsat.SCAN_Unity
 			}
 			
 			infoString.AppendLine();
-			infoString.AppendFormat("{0} (lat: {1:F2}° lon: {2:F2}°)", SCANuiUtil.toDMS(lat, lon), lat, lon);
-
+            SCANuiUtil.toDMS(infoString, lat, lon);
+			infoString.AppendFormat(" (lat: {0}° lon: {1}°)", lat.ToString("F2"), lon.ToString("F2"));
+            
 			double range = ContractDefs.Survey.MaximumTriggerRange;
-
+            
 			if (SCANcontroller.controller.bigMapWaypoint)
 			{
 				for (int i = data.Waypoints.Count - 1; i >= 0; i--)
@@ -1973,31 +1985,32 @@ namespace SCANsat.SCAN_Unity
 
 					if (!p.LandingTarget)
 					{
-						if (p.Root != null)
-						{
-							if (p.Root.ContractState != Contracts.Contract.State.Active)
-								continue;
-						}
-						if (p.Param != null)
-						{
-							if (p.Param.State != Contracts.ParameterState.Incomplete)
-								continue;
-						}
+                        if (p.Root != null)
+                        {
+                            if (p.Root.ContractState != Contract.State.Active)
+                                continue;
+                        }
+                        if (p.Param != null)
+                        {
+                            if (p.Param.State != ParameterState.Incomplete)
+                                continue;
+                        }
 
-						if (SCANUtil.waypointDistance(lat, lon, 1000, p.Latitude, p.Longitude, 1000, body) <= range)
+                        if (SCANUtil.mapLabelDistance(lat, lon, p.Latitude, p.Longitude, body) <= range)
 						{
 							infoString.AppendFormat(" Waypoint: {0}", p.Name);
 							break;
 						}
 					}
-					else if (SCANUtil.waypointDistance(lat, lon, 1000, p.Latitude, p.Longitude, 1000, body) <= range)
+					else if (SCANUtil.mapLabelDistance(lat, lon, p.Latitude, p.Longitude, body) <= range)
 					{
-						infoString.AppendFormat(" MechJeb Target: {0}", SCANuiUtil.toDMS(p.Latitude, p.Longitude, 0));
+                        infoString.Append(" MechJect Target: ");
+                        SCANuiUtil.toDMS(infoString, p.Latitude, p.Longitude);
 						break;
 					}
 				}
 			}
-
+            
 			if (SCANcontroller.controller.bigMapAnomaly)
 			{
 				for (int i = data.Anomalies.Length - 1; i >= 0; i--)
@@ -2005,8 +2018,8 @@ namespace SCANsat.SCAN_Unity
 					SCANanomaly a = data.Anomalies[i];
 
 					if (a.Known)
-					{
-						if (SCANUtil.mapLabelDistance(lat, lon, a.Latitude, a.Longitude, body) <= range)
+                    {
+                        if (SCANUtil.mapLabelDistance(lat, lon, a.Latitude, a.Longitude, body) <= range)
 						{
 							if (a.Detail)
 							{
@@ -2022,7 +2035,7 @@ namespace SCANsat.SCAN_Unity
 					}
 				}
 			}
-
+            
 			if (SCANcontroller.controller.bigMapFlag)
 			{
 				for (int i = mapFlags.Count - 1; i >= 0; i--)
@@ -2037,8 +2050,8 @@ namespace SCANsat.SCAN_Unity
 					}
 				}
 			}
-
-			return infoString.ToStringAndRelease();
+            
+			return infoString.ToString();
 		}
 
 		public string TooltipText(float xPos)
@@ -2064,7 +2077,7 @@ namespace SCANsat.SCAN_Unity
 				case mapType.Altimetry:
 					float terrain = xPos * data.TerrainConfig.TerrainRange + data.TerrainConfig.MinTerrain;
 
-					return string.Format("{0:N0}m", terrain);
+					return string.Format("{0}m", terrain.ToString("N0"));
 			}
 
 			return "";
@@ -2095,6 +2108,8 @@ namespace SCANsat.SCAN_Unity
 			w.navigationId = new Guid();
 
 			ScenarioCustomWaypoints.AddWaypoint(w);
+
+            data.addCustomWaypoint(w);
 		}
 
 		public void SetMJWaypoint(Vector2 pos)

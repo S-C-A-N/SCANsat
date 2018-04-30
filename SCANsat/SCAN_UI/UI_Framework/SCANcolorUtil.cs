@@ -11,7 +11,7 @@
 #endregion
 
 using System;
-using System.Collections.Generic;
+using System.Text;
 using UnityEngine;
 using SCANsat.SCAN_Data;
 using SCANsat.SCAN_Palettes;
@@ -94,7 +94,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 		public static Color32 CB_vermillion = (Color32)cb_vermillion;
 		public static Color32 CB_reddishPurple = (Color32)cb_reddishPurple;
 		public static Color32 CB_orange = (Color32)cb_orange;
-
+        
 		/* SOLARIZED colors: currently unused, so commented out */
 		/*
 		public static Color sol_base03 	= new Color32(0,43,54,255);
@@ -274,14 +274,36 @@ namespace SCANsat.SCAN_UI.UI_Framework
 		}
 
 		public static string colorHex ( Color32 c ) {
-			return string.Format("#{0:X2}{1:X2}{2:X2}", c.r, c.g, c.b);
+			return string.Format("#{0}{1}{2}", c.r.ToString("X2"), c.g.ToString("X2"), c.b.ToString("X2"));
 		}
+
 		public static string coloredNoQuote(Color c, string text)
 		{
 			return string.Format("<color={0}>{1}</color>", colorHex(c), text);
 		}
 
-		internal static Color c_good
+        public static string c_good_hex
+        {
+            get
+            {
+                if (SCANcontroller.controller.mainMapColor)
+                    return "009980";
+                else
+                    return "59b3e6";
+            }
+        }
+
+        public static string c_bad_hex
+        {
+            get { return "e69900"; }
+        }
+
+        public static string c_grey_hex
+        {
+            get { return "808080"; }
+        }
+
+        internal static Color c_good
 		{
 			get
 			{
@@ -308,7 +330,24 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			}
 		}
 
-		private static SCANPaletteType currentPaletteSet;
+        internal static Color32 C_Good
+        {
+            get
+            {
+                if (SCANcontroller.controller.mainMapColor)
+                    return CB_bluishGreen;
+                else
+                    return CB_skyBlue;
+            }
+        }
+        internal static Color32 C_Bad
+        {
+            get
+            {
+                return CB_orange;
+            }
+        }
+        private static SCANPaletteType currentPaletteSet;
 		private static SCANPalette greyScalePalette;
 		
 		public static SCANPaletteType SetCurrentPalettesType(SCANPaletteKind type)

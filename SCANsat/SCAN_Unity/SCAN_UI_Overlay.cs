@@ -180,7 +180,7 @@ namespace SCANsat.SCAN_Unity
 					if (hires)
 					{
 						tooltipText.AppendLine();
-						tooltipText.AppendFormat(string.Format("Slope: {0:F1}°", SCANUtil.slope(SCANUtil.getElevation(body, coords.longitude, coords.latitude), body, coords.longitude, coords.latitude, degreeOffset)));
+						tooltipText.AppendFormat(string.Format("Slope: {0}°", SCANUtil.slope(SCANUtil.getElevation(body, coords.longitude, coords.latitude), body, coords.longitude, coords.latitude, degreeOffset).ToString("F1")));
 					}
 				}
 			}
@@ -231,7 +231,7 @@ namespace SCANsat.SCAN_Unity
 
 			uiElement.SetOverlay(this);
 
-			tooltipText = StringBuilderCache.Acquire();
+			tooltipText = SCANStringBuilderCache.Acquire();
 
 			_isVisible = true;
 
@@ -272,7 +272,7 @@ namespace SCANsat.SCAN_Unity
 
 		public string TooltipText
 		{
-			get { return tooltipText.ToString(); }
+			get { return tooltipText.SCANToStringAndRelease(); }
 		}
 
 		public bool IsVisible

@@ -299,16 +299,16 @@ namespace SCANsat.SCAN_PartModules
 		{
 			scanning = false;
 			if (sensorType > 0 && SCANcontroller.controller != null)
-				SCANcontroller.controller.unregisterSensor(vessel, (SCANtype)sensorType);
+				SCANcontroller.controller.unregisterSensor(vessel, (SCANtype)sensorType, fov, min_alt, max_alt, best_alt);
 		}
 
 		private string scanAlt(SCANdata d)
 		{
 			string altitude = Localizer.Format("#autoLOC_SCANsat_Unknown");
-			if (!SCAN_Settings_Config.Instance.BackgroundScanning)
-				altitude = Localizer.Format("#autoLOC_SCANsat_All_Disabled");
-			else if (d.Disabled)
-				altitude = d.Body.displayName.LocalizeBodyName() + ": " + Localizer.Format("#autoLOC_SCANsat_Disabled");
+            if (!SCAN_Settings_Config.Instance.BackgroundScanning)
+                altitude = Localizer.Format("#autoLOC_SCANsat_All_Disabled");
+            else if (d.Disabled)
+                altitude = string.Format("{0}: {1}", SCANUtil.displayNameFromBody(d.Body), Localizer.Format("#autoLOC_SCANsat_Disabled"));
 			else if (vessel.altitude < min_alt)
 				altitude = Localizer.Format("#autoLOC_SCANsat_TooLow");
 			else if (vessel.altitude < best_alt)

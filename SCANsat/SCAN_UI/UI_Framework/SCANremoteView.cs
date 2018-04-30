@@ -150,16 +150,10 @@ namespace SCANsat.SCAN_UI.UI_Framework
 
 		public string getInfoString()
 		{
-			string info = "No structures found";
-
 			if (cons.Count > 0)
-				info = string.Format("Identified {0} structure{1}", cons.Count, cons.Count > 1 ? "s" : "");
+				return string.Format("> Identified {0} structure{1}", cons.Count.ToString(), cons.Count > 1 ? "s" : "");
 			else
 				return "";
-
-			info = "> " + info;
-			
-			return info;
 		}
 
 		public string getAnomalyDataString(bool mouse, bool distance)

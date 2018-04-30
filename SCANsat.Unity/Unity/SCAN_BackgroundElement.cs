@@ -57,7 +57,7 @@ namespace SCANsat.Unity.Unity
 			if (m_BodyText == null)
 				return;
 
-			m_BodyText.OnTextUpdate.Invoke(string.Format("{0} ({1:P0})", bodyName, amount));
+			m_BodyText.OnTextUpdate.Invoke(string.Format("{0} ({1})", bodyName, amount.ToString("P0")));
 		}
 
 		public void ToggleBody(bool isOn)

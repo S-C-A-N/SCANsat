@@ -96,7 +96,7 @@ namespace SCANsat.Unity.Unity
 		public void Cutoff(float value)
 		{
 			if (m_CutoffText != null)
-				m_CutoffText.OnTextUpdate.Invoke(string.Format("Slope Cutoff: {0:N1}", value));
+				m_CutoffText.OnTextUpdate.Invoke(string.Format("Slope Cutoff: {0}", value.ToString("N1")));
 
 			if (!loaded || colorInterface == null)
 				return;

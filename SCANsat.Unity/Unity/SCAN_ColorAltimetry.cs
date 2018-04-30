@@ -408,7 +408,7 @@ namespace SCANsat.Unity.Unity
 			SetMaxSlider();
 
 			if (m_MinText != null)
-				m_MinText.OnTextUpdate.Invoke(string.Format("Min: {0:N0}m", value));
+				m_MinText.OnTextUpdate.Invoke(string.Format("Min: {0}m", value.ToString("N0")));
 
 			if (colorInterface.TerrainClampOn)
 				SetClamp();
@@ -442,7 +442,7 @@ namespace SCANsat.Unity.Unity
 			SetMinSlider();
 
 			if (m_MaxText != null)
-				m_MaxText.OnTextUpdate.Invoke(string.Format("Max: {0:N0}m", value));
+				m_MaxText.OnTextUpdate.Invoke(string.Format("Max: {0}m", value.ToString("N0")));
 
 			if (colorInterface.TerrainClampOn)
 				SetClamp();
@@ -465,7 +465,7 @@ namespace SCANsat.Unity.Unity
 				return;
 
 			if (m_ClampText != null)
-				m_ClampText.OnTextUpdate.Invoke(string.Format("Clamp: {0:N0}m", value));
+				m_ClampText.OnTextUpdate.Invoke(string.Format("Clamp: {0}m", value.ToString("N0")));
 
 			if (!loaded)
 				return;
@@ -513,10 +513,10 @@ namespace SCANsat.Unity.Unity
 			m_MinSlider.maxValue = max;
 
 			if (m_MinSliderLabelOne != null)
-				m_MinSliderLabelOne.OnTextUpdate.Invoke(string.Format("|\n{0:N0}m", min));
+				m_MinSliderLabelOne.OnTextUpdate.Invoke(string.Format("|\n{0}m", min.ToString("N0")));
 
 			if (m_MinSliderLabelTwo != null)
-				m_MinSliderLabelTwo.OnTextUpdate.Invoke(string.Format("|\n{0:N0}m", max));
+				m_MinSliderLabelTwo.OnTextUpdate.Invoke(string.Format("|\n{0}m", max.ToString("N0")));
 		}
 
 		private void SetMaxSlider()
@@ -532,10 +532,10 @@ namespace SCANsat.Unity.Unity
 			m_MaxSlider.maxValue = max;
 
 			if (m_MaxSliderLabelOne != null)
-				m_MaxSliderLabelOne.OnTextUpdate.Invoke(string.Format("|\n{0:N0}m", min));
+				m_MaxSliderLabelOne.OnTextUpdate.Invoke(string.Format("|\n{0}m", min.ToString("N0")));
 
 			if (m_MaxSliderLabelTwo != null)
-				m_MaxSliderLabelTwo.OnTextUpdate.Invoke(string.Format("|\n{0:N0}m", max));
+				m_MaxSliderLabelTwo.OnTextUpdate.Invoke(string.Format("|\n{0}m", max.ToString("N0")));
 		}
 
 		private void SetClamp()
@@ -551,10 +551,10 @@ namespace SCANsat.Unity.Unity
 			m_ClampSlider.maxValue = max;
 
 			if (m_ClampSliderLabelOne != null)
-				m_ClampSliderLabelOne.OnTextUpdate.Invoke(string.Format("|\n{0:N0}m", min));
+				m_ClampSliderLabelOne.OnTextUpdate.Invoke(string.Format("|\n{0}m", min.ToString("N0")));
 
 			if (m_ClampSliderLabelTwo != null)
-				m_ClampSliderLabelTwo.OnTextUpdate.Invoke(string.Format("|\n{0:N0}m", max));
+				m_ClampSliderLabelTwo.OnTextUpdate.Invoke(string.Format("|\n{0}m", max.ToString("N0")));
 
 			float clamp = colorInterface.TerrainClamp;
 
@@ -602,7 +602,7 @@ namespace SCANsat.Unity.Unity
 		public void OnSizeChange(float value)
 		{
 			if (m_SizeText != null)
-				m_SizeText.OnTextUpdate.Invoke(string.Format("Size: {0}", (int)value));
+				m_SizeText.OnTextUpdate.Invoke(string.Format("Size: {0}", ((int)value).ToString()));
 
 			if (!loaded || colorInterface == null)
 				return;
