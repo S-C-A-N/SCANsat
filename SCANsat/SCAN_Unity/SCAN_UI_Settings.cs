@@ -791,15 +791,8 @@ namespace SCANsat.SCAN_Unity
 
 		public double BodyPercentage(string bodyName)
 		{
-			string realName = SCANUtil.bodyFromDisplayName(bodyName);
-
-			SCANdata data = SCANUtil.getData(realName);
-
-			if (data == null)
-				return 0;
-
-			return SCANUtil.getCoveragePercentage(data, SCANtype.Nothing) / 100;
-		}
+            return SCANUtil.getCoveragePercentage(SCANUtil.getData(SCANUtil.bodyFromDisplayName(bodyName)), SCANtype.Nothing) / 100;
+        }
 
 		private CelestialBody getTargetBody()
 		{
