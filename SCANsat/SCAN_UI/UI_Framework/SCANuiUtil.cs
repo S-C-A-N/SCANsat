@@ -241,9 +241,17 @@ namespace SCANsat.SCAN_UI.UI_Framework
             }
         }
 
+        private const char WEST = 'W';
+        private const char EAST = 'E';
+        private const char SOUTH = 'S';
+        private const char NORTH = 'N';
+        private const char HOURS = '°';
+        private const string MINUTES = "'";
+        private const string SECONDS = "\"";
+
         /* UI: conversions to and from DMS */
         /* FIXME: These do not belong here. And they are only used once! */
-        private static string toDMS(double thing, string neg, string pos, int prec)
+        private static string toDMS(double thing, char neg, char pos, int prec)
 		{
             StringBuilder sb = SCANStringBuilderCache.Acquire();
 
@@ -253,27 +261,22 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			thing = Math.Abs(thing);
 
             sb.Append(Math.Floor(thing).ToString());
-            sb.Append("°");
+            sb.Append(HOURS);
+            thing = (thing - Math.Floor(thing)) * 60;
 
             sb.Append(Math.Floor(thing).ToString());
-            sb.Append("'");
+            sb.Append(MINUTES);
+            thing = (thing - Math.Floor(thing)) * 60;
 
             sb.Append(thing.ToString(string.Format("F{0}", prec.ToString())));
-            sb.Append("\"");
+            sb.Append(SECONDS);
+
+            sb.Append(neg);
 
             return sb.SCANToStringAndRelease();
-
-			//string dms = "";
-			//dms += Math.Floor(thing).ToString() + "°";
-			//thing = (thing - Math.Floor(thing)) * 60;
-			//dms += Math.Floor(thing).ToString() + "'";
-			//thing = (thing - Math.Floor(thing)) * 60;
-			//dms += thing.ToString("F" + prec.ToString()) + "\"";
-			//dms += neg;
-			//return dms;
 		}
 
-        private static void toDMS(StringBuilder sb, double thing, string neg, string pos)
+        private static void toDMS(StringBuilder sb, double thing, char neg, char pos)
         {
             if (thing >= 0)
                 neg = pos;
@@ -281,28 +284,32 @@ namespace SCANsat.SCAN_UI.UI_Framework
             thing = Math.Abs(thing);
 
             sb.Append(Math.Floor(thing).ToString());
-            sb.Append("°");
+            sb.Append(HOURS);
+            thing = (thing - Math.Floor(thing)) * 60;
 
             sb.Append(Math.Floor(thing).ToString());
-            sb.Append("'");
+            sb.Append(MINUTES);
+            thing = (thing - Math.Floor(thing)) * 60;
 
             sb.Append(thing.ToString("F2"));
-            sb.Append("\"");
+            sb.Append(SECONDS);
+
+            sb.Append(neg);
         }
 
         internal static string toDMS(double lat, double lon, int precision = 2)
 		{
-			return string.Format("{0} {1}", toDMS(lat, "S", "N", precision), toDMS(lon, "W", "E", precision));
+			return string.Format("{0} {1}", toDMS(lat, SOUTH, NORTH, precision), toDMS(lon, WEST, EAST, precision));
 		}
 
         internal static void toDMS(StringBuilder sb, double lat, double lon)
         {
-            toDMS(sb, lat, "S", "N");
+            toDMS(sb, lat, SOUTH, NORTH);
             sb.Append(" ");
-            toDMS(sb, lon, "W", "E");
+            toDMS(sb, lon, WEST, EAST);
         }
 
-		internal static string distanceString(double dist, double cutoff, double cutoff2 = double.MaxValue)
+        internal static string distanceString(double dist, double cutoff, double cutoff2 = double.MaxValue)
 		{
 			if (dist < cutoff)
 				return string.Format("{0}m", dist.ToString("N1"));
