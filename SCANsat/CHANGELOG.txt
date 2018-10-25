@@ -1,3 +1,10 @@
+Version 18.8 - 2018-10-25
+-----------------------
+
+- Update for KSP 1.5
+
+- Additional Spanish translations by Fitiales
+
 Version 18.7 - 2018-7-27
 -----------------------
 
