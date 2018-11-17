@@ -174,12 +174,10 @@ namespace SCANsat.SCAN_PartModules
 			}
 		}
 
-		public override string GetInfo()
+		// Return formatted altitude information for GetInfo()
+		protected string FormatAltitudeInfo()
 		{
-			if (sensorType == 0)
-				return "";
-
-			string str = base.GetInfo();
+			string str = "";
 			if (min_alt != 0)
 				str += Localizer.Format("#autoLOC_SCANsat_AltitudeMin", (min_alt / 1000).ToString("F0"));
 			if (best_alt != min_alt)
@@ -188,7 +186,24 @@ namespace SCANsat.SCAN_PartModules
 				str += Localizer.Format("#autoLOC_SCANsat_AltitudeMax", (max_alt / 1000).ToString("F0"));
 			if (fov != 0)
 				str += Localizer.Format("#autoLOC_SCANsat_FOV", fov.ToString("F0") + "°");
+			return str;
+		}
 
+
+		// Return formatted scan type information for GetInfo()
+		protected string FormatScanTypeInfo()
+		{
+			return "Scan type: " + scanName + "\n";
+		}
+
+		public override string GetInfo()
+		{
+			if (sensorType == 0)
+				return "";
+
+			string str = "";
+			str += FormatAltitudeInfo();
+			str += FormatScanTypeInfo();
 			str += resHandler.PrintModuleResources(1);
 			return str;
 		}

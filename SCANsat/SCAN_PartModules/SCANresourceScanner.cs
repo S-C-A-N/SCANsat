@@ -51,12 +51,19 @@ namespace SCANsat.SCAN_PartModules
 			refreshState = true;
 		}
 
+		protected string FormatResourceScanTypeInfo()
+		{
+			return "Resource Scan: " + (SCANtype)sensorType + "\n";
+		}
+
 		public override string GetInfo()
 		{
-			string info = base.GetInfo();
-			info += "Resource Scan: " + (SCANtype)sensorType + "\n";
-
-			return info;
+			string str = "";
+			str += FormatAltitudeInfo();
+			str += FormatScanTypeInfo();
+			str += FormatResourceScanTypeInfo();
+			str += resHandler.PrintModuleResources(1);
+			return str;
 		}
 
 		private List<ModuleOrbitalScanner> findScanner()
