@@ -34,7 +34,7 @@ namespace SCANsat.SCAN_Data
 		private static Dictionary<int, float[,]> heightMaps = new Dictionary<int, float[,]>();
 
 		/* MAP: state */
-		private Int32[,] coverage;
+		internal Int32[,] coverage;
 		private CelestialBody body;
 		private SCANterrainConfig terrainConfig;
 		private bool mapBuilding, overlayBuilding, controllerBuilding, built;

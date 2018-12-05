@@ -361,19 +361,19 @@ namespace SCANsat
 			return (data.Coverage[lon, lat] & (Int32)type) == (Int32)type;
 		}
 
-		internal static void registerPass ( int lon, int lat, SCANdata data, SCANtype type )
-        {
-            int ilon = (lon + 360 + 180) % 360;
-            int ilat = (lat + 180 + 90) % 180;
+		//internal static void registerPass ( int lon, int lat, SCANdata data, int type )
+  //      {
+  //          int ilon = (lon + 360 /*+ 180*/) % 360;
+  //          int ilat = (lat + 180 /*+ 90*/) % 180;
 
-            if (ilon < 0 || lon >= 360)
-                return;
+  //          if (ilon < 0 || lon >= 360)
+  //              return;
 
-            if (ilat < 0 || lon >= 180)
-                return;
+  //          if (ilat < 0 || lon >= 180)
+  //              return;
 
-            data.Coverage[ilon, ilat] |= (Int32)type;
-        }
+  //          data.Coverage[ilon, ilat] |= type;
+  //      }
 
         internal static double getCoveragePercentage(SCANdata data, SCANtype type )
 		{
@@ -409,6 +409,11 @@ namespace SCANsat
             return (int)Math.Floor((lat + 180 + 90) % 180) - 90;
         }
 
+        internal static int fixLatInt(double lat)
+        {
+            return (int)Math.Floor((lat + 180 + 90) % 180);
+        }
+
         internal static double fixLatShift(double lat)
 		{
 			return (lat + 180 + 90) % 180 - 90;
@@ -422,6 +427,11 @@ namespace SCANsat
         internal static int fixLonShiftInt(double lon)
         {
             return (int)Math.Floor((lon + 360 + 180) % 360) - 180;
+        }
+
+        internal static int fixLonInt(double lon)
+        {
+            return (int)Math.Floor((lon + 360 + 180) % 360);
         }
 
         internal static double fixLonShift(double lon)

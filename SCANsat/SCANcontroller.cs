@@ -30,6 +30,7 @@ using SCANsat.SCAN_Palettes;
 using SCANsat.SCAN_Toolbar;
 using palette = SCANsat.SCAN_UI.UI_Framework.SCANcolorUtil;
 using FinePrint.Contracts.Parameters;
+using UnityEngine.Profiling;
 
 namespace SCANsat
 {
@@ -1647,6 +1648,7 @@ namespace SCANsat
         public class SCANsensor
         {
             public SCANtype sensor;
+            public int sensorType;
             public double fov;
             public double min_alt, max_alt, best_alt;
 
@@ -1688,12 +1690,12 @@ namespace SCANsat
                 _fov = 5;
             }
 
-            foreach (SCANtype sensor in Enum.GetValues(typeof(SCANtype)))
+            foreach (SCANtype sensorType in Enum.GetValues(typeof(SCANtype)))
             {
-                if (SCANUtil.countBits((int)sensor) != 1)
+                if (SCANUtil.countBits((int)sensorType) != 1)
                     continue;
 
-                if ((sensor & sensors) == SCANtype.Nothing)
+                if ((sensorType & sensors) == SCANtype.Nothing)
                     continue;
                 
                 bool flag = true;
@@ -1711,7 +1713,8 @@ namespace SCANsat
                             max_alt = _max_alt,
                             best_alt = _best_alt,
                             fov = _fov,
-                            sensor = sen.sensor | sensor,
+                            sensor = sen.sensor | sensorType,
+                            sensorType = (int)sv.sensors[i].sensor,
                         };
 
                         flag = false;
@@ -1728,7 +1731,8 @@ namespace SCANsat
                         max_alt = _max_alt,
                         best_alt = _best_alt,
                         fov = _fov,
-                        sensor = sensor,
+                        sensor = sensorType,
+                        sensorType = (int)sensorType,
                     });
                 }
             }
@@ -1792,11 +1796,11 @@ namespace SCANsat
                 _fov = 5;
             }
 
-            foreach (SCANtype sensor in Enum.GetValues(typeof(SCANtype)))
+            foreach (SCANtype sensorType in Enum.GetValues(typeof(SCANtype)))
             {
-                if (SCANUtil.countBits((int)sensor) != 1)
+                if (SCANUtil.countBits((int)sensorType) != 1)
                     continue;
-                if ((sensor & sensors) == SCANtype.Nothing)
+                if ((sensorType & sensors) == SCANtype.Nothing)
                     continue;
 
                 bool flag = true;
@@ -1814,7 +1818,8 @@ namespace SCANsat
                             max_alt = _max_alt,
                             best_alt = _best_alt,
                             fov = _fov,
-                            sensor = sen.sensor | sensor,
+                            sensor = sen.sensor | sensorType,
+                            sensorType = (int)sv.sensors[i].sensor,
                         };
 
                         flag = false;
@@ -1831,7 +1836,8 @@ namespace SCANsat
                         max_alt = _max_alt,
                         best_alt = _best_alt,
                         fov = _fov,
-                        sensor = sensor,
+                        sensor = sensorType,
+                        sensorType = (int)sensorType,
                     });
                 }
             }
@@ -1954,7 +1960,7 @@ namespace SCANsat
 
             return sensors;
         }
-        
+        //private System.Diagnostics.Stopwatch watch = new System.Diagnostics.Stopwatch();
         private int i = 0;
         private static int last_scan_frame;
         private static float last_scan_time;
@@ -1985,8 +1991,12 @@ namespace SCANsat
             SCANvessel vessel = null;
             SCANdata data = null;
 
+            //watch.Reset();
+            //watch.Start();
+
             for (int j = 0; j < l; j++)
             {
+                //Profiler.BeginSample("SCAN Vessel scan");
                 vessel = knownVessels.At(j);
 
                 data = SCANUtil.getData(vessel.vessel.mainBody);
@@ -1998,7 +2008,7 @@ namespace SCANsat
                 {
                     if (isVesselKnown(vessel.vessel))
                     {
-                        doScanPass(vessel, vessel.vessel, data, scan_UT, scan_UT, vessel.lastUT, vessel.latitude, vessel.longitude);
+                        doScanPass(vessel, vessel.vessel, data, scan_UT, scan_UT, vessel.lastUT);
                         ++currentActiveVessel;
                         currentActiveSensor += knownVessels[vessel.vessel.id].sensors.Count;
                     }
@@ -2009,22 +2019,36 @@ namespace SCANsat
                 vessel.lastUT = scan_UT;
                 vessel.latitude = SCANUtil.fixLatShift(vessel.vessel.latitude);
                 vessel.longitude = SCANUtil.fixLonShift(vessel.vessel.longitude);
+                //Profiler.EndSample();
             }
+
+            //watch.Stop();
+
+            //SCANUtil.SCANlog("SCAN Time: {0} - Passes: {1}", watch.ElapsedMilliseconds.ToString(), actualPasses.ToString());
             activeVessels = currentActiveVessel;
             activeSensors = currentActiveSensor;
         }
 
         private int actualPasses;
         private static Queue<double> scanQueue;
-        private void doScanPass(SCANvessel vessel, Vessel v, SCANdata data, double UT, double startUT, double lastUT, double llat, double llon)
+        private void doScanPass(SCANvessel vessel, Vessel v, SCANdata data, double UT, double startUT, double lastUT)
         {
             double soi_radius = v.mainBody.sphereOfInfluence - v.mainBody.Radius;
             double alt = v.altitude;
-            int lat = SCANUtil.fixLatShiftInt(v.latitude);
-            int lon = SCANUtil.fixLonShiftInt(v.longitude);
+            double llat = SCANUtil.fixLat(v.latitude);
+            double llon = SCANUtil.fixLon(v.longitude);
+            int lat = (int)Math.Floor(llat);
+            int lon = (int)Math.Floor(llon);
             double res = 0;
             Orbit o = v.orbit;
             bool uncovered;
+
+            double surfscale = Planetarium.fetch.Home.Radius / v.mainBody.Radius;
+
+            if (surfscale < 1)
+                surfscale = 1;
+
+            surfscale = Math.Sqrt(surfscale);
 
             if (scanQueue == null)
                 scanQueue = new Queue<double>();
@@ -2048,8 +2072,8 @@ namespace SCANsat
                     rotation = (360 * ((UT - scan_UT) / v.mainBody.rotationPeriod)) % 360;
 
                 alt = v.mainBody.GetAltitude(pos);
-                lat = SCANUtil.fixLatShiftInt(v.mainBody.GetLatitude(pos));
-                lon = SCANUtil.fixLonShiftInt(v.mainBody.GetLongitude(pos) - rotation);
+                lat = SCANUtil.fixLatInt(v.mainBody.GetLatitude(pos));
+                lon = SCANUtil.fixLonInt(v.mainBody.GetLongitude(pos) - rotation);
 
                 if (alt < 0)
                     alt = 0;
@@ -2087,6 +2111,8 @@ namespace SCANsat
                 if (alt > Math.Min(sensor.max_alt, soi_radius))
                     continue;
 
+                //Profiler.BeginSample("SCAN Sensor Check");
+
                 sensor.inRange = true;
 
                 double fov = sensor.fov;
@@ -2096,13 +2122,7 @@ namespace SCANsat
                     fov = (alt / ba) * fov;
                 else
                     sensor.bestRange = true;
-
-                double surfscale = Planetarium.fetch.Home.Radius / v.mainBody.Radius;
-
-                if (surfscale < 1)
-                    surfscale = 1;
-
-                surfscale = Math.Sqrt(surfscale);
+                
                 fov *= surfscale;
 
                 if (fov > 20)
@@ -2114,9 +2134,9 @@ namespace SCANsat
                 int w = f;
                 double fovW = fov;
 
-                if (Math.Abs(lat) < 90)
+                if (lat < 180)
                 {
-                    fovW = fov * (1 / SCANUtil.cosLookUp[lat + 90]);
+                    fovW = fov * (1 / SCANUtil.cosLookUp[lat]);
                     
                     if (fovW > 120)
                         fovW = 120;
@@ -2128,26 +2148,47 @@ namespace SCANsat
 
                 for (int x = -w; x <= w1; ++x)
                 {
+                    int clampLon = lon + x;
+
+                    if (clampLon > 359 || clampLon < 0)
+                    {
+                        clampLon = (clampLon + 360) % 360;
+                    }
+
                     for (int y = -f; y <= f1; ++y)
                     {
-                        int clampLon = lon + x;
                         int clampLat = lat + y;
+                        int clampLonAgain = clampLon;
 
-                        if (clampLat > 89)
+                        if (clampLat > 179)
                         {
-                            clampLat = 179 - clampLat;
-                            clampLon += 180;
-                        }
+                            clampLat = 359 - clampLat;
+                            clampLonAgain += 180;
 
-                        if (clampLat < -90)
+                            clampLat = (clampLat + 180) % 180;
+
+                            if (clampLonAgain > 359 || clampLonAgain < 0)
+                            {
+                                clampLonAgain = (clampLonAgain + 360) % 360;
+                            }
+                        }
+                        else if (clampLat < 0)
                         {
-                            clampLat = -180 - clampLat;
-                            clampLon += 180;
-                        }
+                            clampLat = 0 - clampLat;
+                            clampLonAgain += 180;
 
-                        SCANUtil.registerPass(clampLon, clampLat, data, sensor.sensor);
+                            clampLat = (clampLat + 180) % 180;
+
+                            if (clampLonAgain > 359 || clampLonAgain < 0)
+                            {
+                                clampLonAgain = (clampLonAgain + 360) % 360;
+                            }
+                        }
+                        
+                        data.coverage[clampLonAgain, clampLat] |= sensor.sensorType;
                     }
                 }
+                //Profiler.EndSample();
             }
             if (uncovered)
                 return;
