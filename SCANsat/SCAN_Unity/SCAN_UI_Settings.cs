@@ -615,7 +615,23 @@ namespace SCANsat.SCAN_Unity
 
 								if (SCANcontroller.controller.getData(subSubMoon.bodyName) != null)
 									bodyList.Add(subSubMoon.displayName.LocalizeBodyName());
-							}
+
+                                for (int m = 0; m < subSubMoon.orbitingBodies.Count; m++)
+                                {
+                                    CelestialBody subSubSubMoon = subSubMoon.orbitingBodies[m];
+
+                                    if (SCANcontroller.controller.getData(subSubSubMoon.bodyName) != null)
+                                        bodyList.Add(subSubSubMoon.displayName.LocalizeBodyName());
+
+                                    for (int n = 0; n < subSubSubMoon.orbitingBodies.Count; n++)
+                                    {
+                                        CelestialBody subSubSubSubMoon = subSubSubMoon.orbitingBodies[n];
+
+                                        if (SCANcontroller.controller.getData(subSubSubSubMoon.bodyName) != null)
+                                            bodyList.Add(subSubSubSubMoon.displayName.LocalizeBodyName());
+                                    }
+                                }
+                            }
 						}
 					}
 				}
