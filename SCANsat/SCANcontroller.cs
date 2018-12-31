@@ -1648,7 +1648,6 @@ namespace SCANsat
         public class SCANsensor
         {
             public SCANtype sensor;
-            public int sensorType;
             public double fov;
             public double min_alt, max_alt, best_alt;
 
@@ -1714,7 +1713,7 @@ namespace SCANsat
                             best_alt = _best_alt,
                             fov = _fov,
                             sensor = sen.sensor | sensorType,
-                            sensorType = (int)sv.sensors[i].sensor,
+                            //sensorType = (int)sv.sensors[i].sensor,
                         };
 
                         flag = false;
@@ -1732,7 +1731,6 @@ namespace SCANsat
                         best_alt = _best_alt,
                         fov = _fov,
                         sensor = sensorType,
-                        sensorType = (int)sensorType,
                     });
                 }
             }
@@ -1819,7 +1817,6 @@ namespace SCANsat
                             best_alt = _best_alt,
                             fov = _fov,
                             sensor = sen.sensor | sensorType,
-                            sensorType = (int)sv.sensors[i].sensor,
                         };
 
                         flag = false;
@@ -1837,7 +1834,6 @@ namespace SCANsat
                         best_alt = _best_alt,
                         fov = _fov,
                         sensor = sensorType,
-                        sensorType = (int)sensorType,
                     });
                 }
             }
@@ -2042,6 +2038,7 @@ namespace SCANsat
             double res = 0;
             Orbit o = v.orbit;
             bool uncovered;
+            int sensorType;
 
             double surfscale = Planetarium.fetch.Home.Radius / v.mainBody.Radius;
 
@@ -2095,6 +2092,8 @@ namespace SCANsat
             for (int j = vessel.sensors.Count - 1; j >= 0; j--)
             {
                 SCANsensor sensor = vessel.sensors[j];
+
+                sensorType = (int)sensor.sensor;
 
                 if (res <= 0)
                 {
@@ -2185,7 +2184,7 @@ namespace SCANsat
                             }
                         }
                         
-                        data.coverage[clampLonAgain, clampLat] |= sensor.sensorType;
+                        data.coverage[clampLonAgain, clampLat] |= sensorType;
                     }
                 }
                 //Profiler.EndSample();
