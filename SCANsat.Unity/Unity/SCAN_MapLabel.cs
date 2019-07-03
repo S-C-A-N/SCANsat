@@ -12,7 +12,6 @@
 #endregion
 
 using System;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -86,8 +85,8 @@ namespace SCANsat.Unity.Unity
 				m_Label.OnColorUpdate.Invoke(label.baseColor);
 			}
 		}
-
-		public void Setup(Guid id, MapLabelInfo info)
+        
+        public void Setup(Guid id, MapLabelInfo info)
 		{
 			_guid = id;
 
