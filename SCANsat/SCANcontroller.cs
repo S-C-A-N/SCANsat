@@ -105,6 +105,8 @@ namespace SCANsat
         [KSPField(isPersistant = true)]
         public int zoomMapState = 0;
         [KSPField(isPersistant = true)]
+        public int zoomMapRefresh = 0;
+        [KSPField(isPersistant = true)]
         public int overlaySelection = 0;
         [KSPField(isPersistant = true)]
         public string overlayResource = "Ore";
@@ -163,6 +165,9 @@ namespace SCANsat
 
         /* Used as holder for vessel id's while loading */
         private List<Guid> tempIDs = new List<Guid>();
+
+        /* Is the Breaking Ground Expansion installed */
+        private bool serenityLoaded = false;
 
         private bool heightMapsBuilt = false;
 
@@ -541,6 +546,11 @@ namespace SCANsat
             set { landingTarget = value; }
         }
 
+        public bool SerenityLoaded
+        {
+            get { return serenityLoaded; }
+        }
+
         public class OnMJTargetSet : UnityEvent<Vector2d, CelestialBody> { }
 
         public OnMJTargetSet MJTargetSet = new OnMJTargetSet();
@@ -779,6 +789,8 @@ namespace SCANsat
         public override void OnAwake()
         {
             instance = this;
+
+            serenityLoaded = Expansions.ExpansionsLoader.IsExpansionInstalled("Serenity");
 
             if (SCAN_Settings_Config.Instance == null)
                 return;
