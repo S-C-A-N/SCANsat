@@ -99,7 +99,7 @@ namespace SCANsat.Unity.Interfaces
 
 		Dictionary<string, MapLabelInfo> OrbitLabelList { get; }
 
-		Dictionary<Guid, MapLabelInfo> FlagInfoList { get; }
+		IList<MapLabelInfo> FlagInfoList { get; }
 
 		Dictionary<string, MapLabelInfo> AnomalyInfoList { get; }
 

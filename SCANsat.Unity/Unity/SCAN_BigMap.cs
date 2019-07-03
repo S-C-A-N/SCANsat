@@ -478,7 +478,7 @@ namespace SCANsat.Unity.Unity
 			}
 		}
 
-		private void SetFlagIcons(Dictionary<Guid, MapLabelInfo> flags)
+		private void SetFlagIcons(IList<MapLabelInfo> flags)
 		{
 			if (flags == null)
 				return;
@@ -488,18 +488,13 @@ namespace SCANsat.Unity.Unity
 
 			for (int i = 0; i < flags.Count; i++)
 			{
-				Guid id = flags.ElementAt(i).Key;
-
-				MapLabelInfo info;
-
-				if (!flags.TryGetValue(id, out info))
-					continue;
-
-				createFlag(id, info);
+				MapLabelInfo info = flags[i];
+                
+				createFlag(info);
 			}
 		}
 
-		private void createFlag(Guid id, MapLabelInfo info)
+		private void createFlag(MapLabelInfo info)
 		{
 			SCAN_MapLabel mapLabel = Instantiate(m_MapLabelPrefab).GetComponent<SCAN_MapLabel>();
 
@@ -508,7 +503,7 @@ namespace SCANsat.Unity.Unity
 
 			mapLabel.transform.SetParent(m_MapImage.transform, false);
 
-			mapLabel.Setup(id, info);
+			mapLabel.Setup(info);
 
 			flagLabels.Add(mapLabel);
 		}

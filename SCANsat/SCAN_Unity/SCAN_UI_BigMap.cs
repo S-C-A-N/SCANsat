@@ -1733,11 +1733,11 @@ namespace SCANsat.SCAN_Unity
 			get { return orbitMapLabels; }
 		}
 
-		public Dictionary<Guid, MapLabelInfo> FlagInfoList
+		public IList<MapLabelInfo> FlagInfoList
 		{
 			get
 			{
-				Dictionary<Guid, MapLabelInfo> vessels = new Dictionary<Guid, MapLabelInfo>();
+				List<MapLabelInfo> vessels = new List<MapLabelInfo>();
 				mapFlags.Clear();
 
 				for (int i = FlightGlobals.Vessels.Count - 1; i >= 0; i--)
@@ -1755,7 +1755,7 @@ namespace SCANsat.SCAN_Unity
 
 					mapFlags.Add(v);
 
-					vessels.Add(v.id, new MapLabelInfo()
+					vessels.Add(new MapLabelInfo()
 					{
 						label = "",
 						image = SCAN_UI_Loader.FlagIcon,
@@ -1788,6 +1788,9 @@ namespace SCANsat.SCAN_Unity
 
 						if (!a.Known)
 							continue;
+
+                        if (anomalies.ContainsKey(a.Name))
+                            continue;
 
 						anomalies.Add(a.Name, new MapLabelInfo()
 							{
@@ -1826,6 +1829,9 @@ namespace SCANsat.SCAN_Unity
 
 						if (w.LandingTarget)
 						{
+                            if (waypoints.ContainsKey(w.Seed))
+                                continue;
+
 							waypoints.Add(w.Seed, new MapLabelInfo()
 							{
 								label = "",
@@ -1840,6 +1846,9 @@ namespace SCANsat.SCAN_Unity
 						}
 						else
 						{
+                            if (waypoints.ContainsKey(w.Seed))
+                                continue;
+
 							waypoints.Add(w.Seed, new MapLabelInfo()
 							{
 								label = "",
