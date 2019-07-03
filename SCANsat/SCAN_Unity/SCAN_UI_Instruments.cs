@@ -51,6 +51,11 @@ namespace SCANsat.SCAN_Unity
 		private int oldLines;
 		private int lines;
 
+        private float rocUpdateTimer = 2;
+        private int activeROCCount;
+        
+        private bool showAnomaly = true;
+
 		private Texture anomalyTex;
 
 		private SCAN_Instruments uiElement;
@@ -65,8 +70,8 @@ namespace SCANsat.SCAN_Unity
 		public SCAN_UI_Instruments()
 		{
 			instance = this;
-
-			data = SCANUtil.getData(FlightGlobals.currentMainBody);
+            
+            data = SCANUtil.getData(FlightGlobals.currentMainBody);
 
 			if (data == null)
 			{
@@ -152,6 +157,19 @@ namespace SCANsat.SCAN_Unity
 			if (SCANUtil.isCovered(vlon, vlat, data, SCANtype.FuzzyResources))
 				sensors |= SCANtype.FuzzyResources;
 
+            if (SCANcontroller.controller.SerenityLoaded)
+            {
+                if (Time.realtimeSinceStartup > rocUpdateTimer)
+                {
+                    rocUpdateTimer = Time.realtimeSinceStartup + 2;
+                    activeROCCount = ROCCount(true);
+                }
+                else
+                {
+                    activeROCCount = ROCCount(false);
+                }
+            }
+            
 			infoString.Length = 0;
 
 			locationInfo();
@@ -161,11 +179,15 @@ namespace SCANsat.SCAN_Unity
 			anomalyInfo();
 			BTDTInfo();
 
-			if (oldLines != lines && ResourceButtons)
-			{
-				oldLines = lines;
-				uiElement.SetResourceButtons(lines);
-			}
+            uiElement.SetAnomalyButtons();
+
+            if (oldLines != lines)
+            {
+                oldLines = lines;
+
+                if (ResourceButtons)
+                    uiElement.SetResourceButtons(lines);
+            }
 
 			uiElement.UpdateText(infoString.ToString());			
 		}
@@ -274,7 +296,42 @@ namespace SCANsat.SCAN_Unity
 			get { return SCANcontroller.MasterResourceCount > 1; }
 		}
 
-		public bool MouseAnomaly
+        public bool AnomalyButtons
+        {
+            get
+            {
+                if (!SCANcontroller.controller.SerenityLoaded)
+                    return false;
+
+                if (data == null)
+                    return false;
+
+                if (nearest == null)
+                    return false;
+
+                return activeROCCount > 0;
+            }
+        }
+
+        private int ROCCount(bool update)
+        {
+            if (data == null)
+                return 0;
+
+            List<SCANROC> rocs = data.ROCS(update);
+
+            int c = 0;
+
+            for (int i = rocs.Count - 1; i >= 0; i--)
+            {
+                if (rocs[i].Known)
+                    c++;
+            }
+
+            return c;
+        }
+
+        public bool MouseAnomaly
 		{
 			get { return _mouseInAnomaly; }
 			set { _mouseInAnomaly = value; }
@@ -327,7 +384,12 @@ namespace SCANsat.SCAN_Unity
 				currentResource = resources.Count - 1;
 		}
 
-		private void locationInfo()
+        public void NextAnomaly()
+        {
+            showAnomaly = !showAnomaly;
+        }
+        
+        private void locationInfo()
 		{
 			infoString.AppendFormat("Lat: {0}°, Lon: {1}°", vlat.ToString("F2"), vlon.ToString("F2"));
 
@@ -518,18 +580,18 @@ namespace SCANsat.SCAN_Unity
 				{
 					infoString.AppendLine();
 					infoString.AppendFormat("{0}: {1}", r.DisplayName, SCANUtil.ResourceOverlay(vlat, vlon, r.Name, v.mainBody, SCAN_Settings_Config.Instance.BiomeLock).ToString("P0"));
-				}
+                }
 				else
 				{
 					infoString.AppendLine();
 					infoString.AppendFormat("{0}: {1}", r.DisplayName, SCANUtil.ResourceOverlay(vlat, vlon, r.Name, v.mainBody, SCAN_Settings_Config.Instance.BiomeLock).ToString("P2"));
-				}
+                }
 			}
 			else if ((sensors & SCANtype.FuzzyResources) != SCANtype.Nothing)
 			{
 				infoString.AppendLine();
 				infoString.AppendFormat("{0}: {1}", r.DisplayName, SCANUtil.ResourceOverlay(vlat, vlon, r.Name, v.mainBody, SCAN_Settings_Config.Instance.BiomeLock).ToString("P0"));
-			}
+            }
 			else if (ResourceButtons)
 			{
 				infoString.AppendLine();
@@ -561,7 +623,7 @@ namespace SCANsat.SCAN_Unity
                 }
             }
 
-            if (nearest != null)
+            if ((showAnomaly || activeROCCount <= 0) && nearest != null)
             {
                 infoString.AppendLine();
 
@@ -575,41 +637,106 @@ namespace SCANsat.SCAN_Unity
                         infoString.Append(string.Format("Unknown Anomaly: {0}", SCANuiUtil.distanceString(nearest_dist, 2000)));
                 }
             }
+            else if (SCANcontroller.controller.SerenityLoaded && activeROCCount > 0)
+            {
+                infoString.AppendLine();
+
+                infoString.AppendFormat("{0} Features Detected", activeROCCount.ToString());
+            }
         }
 
 		private void BTDTInfo()
 		{
-			if ((sensors & SCANtype.AnomalyDetail) == SCANtype.Nothing || nearest == null || !nearest.Detail || nearest.Mod == null)
+			if ((sensors & SCANtype.AnomalyDetail) == SCANtype.Nothing)
 			{
 				uiElement.SetDetailState(false);
+
 				if (_anomalyView != null)
 					_anomalyView.free();
+
 				_anomalyView = null;
+
 				return;
 			}
+
+            if (activeROCCount <= 0 && (nearest == null || !nearest.Detail || nearest.Mod == null))
+            {
+                uiElement.SetDetailState(false);
+
+                if (_anomalyView != null)
+                    _anomalyView.free();
+
+                _anomalyView = null;
+
+                return;
+            }
+
+            if ((showAnomaly || activeROCCount <= 0) && nearest != null)
+            {
+                if (_anomalyView == null)
+                {
+                    _anomalyView = new SCANremoteView();
+                    _anomalyView.Initialize(320, 240);
+                    _anomalyView.setup(nearest.Mod.gameObject);
+                }
+
+                if (!_anomalyView.valid(nearest.Mod.gameObject))
+                {
+                    uiElement.SetDetailState(false);
+
+                    if (_anomalyView != null)
+                        _anomalyView.free();
+
+                    _anomalyView = null;
+
+                    return;
+                }
+            }
+            else if (SCANcontroller.controller.SerenityLoaded && activeROCCount > 0)
+            {
+                if (_anomalyView == null)
+                {
+                    _anomalyView = new SCANremoteView();
+                    _anomalyView.Initialize(320, 240);
+                    _anomalyView.setup(data.ROCS(true), v);
+                }
+
+                if (!_anomalyView.validROC())
+                {
+                    uiElement.SetDetailState(false);
+
+                    if (_anomalyView != null)
+                        _anomalyView.free();
+
+                    _anomalyView = null;
+
+                    return;
+                }
+            }
+            else
+            {
+                uiElement.SetDetailState(false);
+
+                if (_anomalyView != null)
+                    _anomalyView.free();
+
+                _anomalyView = null;
+
+                return;
+            }
 
 			uiElement.SetDetailState(true);
-
-			if (_anomalyView == null)
-			{
-				_anomalyView = new SCANremoteView();
-				_anomalyView.setup(320, 240, nearest.Mod.gameObject);//, uiElement.EdgeDetectShader, uiElement.GrayScaleShader);
-			}
-
-			if (!_anomalyView.valid(nearest.Mod.gameObject))
-			{
-				if (_anomalyView != null)
-					_anomalyView.free();
-				_anomalyView = null;
-				return;
-			}
 
 			anomalyTex = _anomalyView.getTexture();
 
 			uiElement.UpdateAnomaly(anomalyTex);
             
 			uiElement.UpdateAnomalyText(_anomalyView.getInfoString());
-			uiElement.UpdateAnomalyName(_anomalyView.getAnomalyDataString(_mouseInAnomaly, nearest.Known));
+
+            if ((showAnomaly || activeROCCount <= 0) && nearest != null)
+                uiElement.UpdateAnomalyName(_anomalyView.getAnomalyDataString(_mouseInAnomaly, nearest.Known));
+            else
+                uiElement.UpdateAnomalyName(_anomalyView.getAnomalyDataString(_mouseInAnomaly, false));
 		}
 
 		private string distanceString(double dist)

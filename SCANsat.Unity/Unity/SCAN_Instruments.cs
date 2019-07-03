@@ -28,7 +28,9 @@ namespace SCANsat.Unity.Unity
 		private TextHandler m_ReadoutText = null;
 		[SerializeField]
 		private RectTransform m_ResourceButtons = null;
-		[SerializeField]
+        [SerializeField]
+        private GameObject m_AnomalyButtons = null;
+        [SerializeField]
 		private RawImage m_AnomalyImage = null;
 		[SerializeField]
 		private TextHandler m_AnomalyPrintText = null;
@@ -62,13 +64,13 @@ namespace SCANsat.Unity.Unity
 
 			rect = GetComponent<RectTransform>();
 
-			string s;
+			//string s;
 
-			if (m_EdgeDetectShader != null)
-				s = m_EdgeDetectShader.name;
+			//if (m_EdgeDetectShader != null)
+			//	s = m_EdgeDetectShader.name;
 
-			if (m_GrayScaleShader != null)
-				s = m_GrayScaleShader.name;
+			//if (m_GrayScaleShader != null)
+			//	s = m_GrayScaleShader.name;
 
 			Alpha(0);
 		}
@@ -93,6 +95,9 @@ namespace SCANsat.Unity.Unity
 
 			if (!ins.ResourceButtons && m_ResourceButtons != null)
 				m_ResourceButtons.gameObject.SetActive(false);
+
+            if (!ins.AnomalyButtons && m_AnomalyButtons != null)
+                m_AnomalyButtons.SetActive(false);
 
 			SetScale(ins.Scale);
 
@@ -156,9 +161,26 @@ namespace SCANsat.Unity.Unity
 
 			float y = -1 * lines * 24;
 
-			if (insInterface.ResourceButtons && m_ResourceButtons != null)
+			if (insInterface.ResourceButtons)
 				m_ResourceButtons.anchoredPosition3D = new Vector3(m_ResourceButtons.anchoredPosition.x, y, 0);
 		}
+
+        public void SetAnomalyButtons()
+        {
+            if (insInterface == null || m_AnomalyButtons == null)
+                return;
+
+            if (!insInterface.AnomalyButtons)
+            {
+                if (m_AnomalyButtons.activeSelf)
+                    m_AnomalyButtons.SetActive(false);
+            }
+            else
+            {
+                if (!m_AnomalyButtons.activeSelf)
+                    m_AnomalyButtons.SetActive(true);
+            }
+        }
 
 		public void SetScale(float scale)
 		{
@@ -255,6 +277,14 @@ namespace SCANsat.Unity.Unity
 
 			insInterface.NextResource();
 		}
+        
+        public void NextAnomaly()
+        {
+            if (insInterface == null)
+                return;
+
+            insInterface.NextAnomaly();
+        }
 
 		public void SetDetailState(bool isOn)
 		{

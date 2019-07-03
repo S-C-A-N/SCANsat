@@ -11,7 +11,7 @@
 */
 #endregion
 
-using System;
+using SCANsat.SCAN_Data;
 using System.Collections.Generic;
 using SCANsat.SCAN_Unity;
 using UnityEngine;
@@ -22,50 +22,114 @@ namespace SCANsat.SCAN_UI.UI_Framework
 {
 	public class SCANremoteView
 	{
+        private const float MAX_DISTANCE = 250;
+        private const float MIN_DISTANCE = 15;
+        
 		private static Camera cam;
 		private static GameObject camgo;
 		private static Material edgeDetectMaterial, grayscaleMaterial;
 		private RenderTexture rt;
 		private int updateFrame, width, height;
 		private List<CrashObjectName> cons;
+        private List<SCANROC> rocs;
 		private Bounds bounds;
 		private int activeCon;
-		public GameObject lookat;
+        private int activeROC;
+        public GameObject lookat;
 		public CrashObjectName lookdetail;
+        public SCANROC rocDetail;
+        public bool rocsMode;
+        
+        public void Initialize(int w, int h)
+        {
+            edgeDetectMaterial = new Material(SCAN_UI_Loader.EdgeDetectShader);
+            edgeDetectMaterial.SetFloat("_Threshold", 0.05f);
 
-		public void setup(int w, int h, GameObject focus)
+            grayscaleMaterial = new Material(SCAN_UI_Loader.GreyScaleShader);
+            Texture2D t = new Texture2D(256, 1, TextureFormat.RGB24, false);
+
+            // ramp texture to render everything in dark shades of Amber,
+            // except originally dark lines, which become bright Amber
+            for (int i = 0; i < 256; ++i)
+                t.SetPixel(i, 0, palette.lerp(palette.black, palette.xkcd_Amber, i / 1024f));
+            for (int i = 0; i < 10; ++i)
+                t.SetPixel(i, 0, palette.xkcd_Amber);
+            t.Apply();
+            grayscaleMaterial.SetTexture("_RampTex", t);
+
+            width = w;
+            height = h;
+        }
+
+        public void setup(GameObject focus)
 		{
-			edgeDetectMaterial = new Material(SCAN_UI_Loader.EdgeDetectShader);
-			edgeDetectMaterial.SetFloat("_Threshold", 0.05f);
-
-			grayscaleMaterial = new Material(SCAN_UI_Loader.GreyScaleShader);
-			Texture2D t = new Texture2D(256, 1, TextureFormat.RGB24, false);
-
-			// ramp texture to render everything in dark shades of Amber,
-			// except originally dark lines, which become bright Amber
-			for (int i = 0; i < 256; ++i)
-				t.SetPixel(i, 0, palette.lerp(palette.black, palette.xkcd_Amber, i / 1024f));
-			for (int i = 0; i < 10; ++i)
-				t.SetPixel(i, 0, palette.xkcd_Amber);
-			t.Apply();
-			grayscaleMaterial.SetTexture("_RampTex", t);
-
 			if (lookat != focus)
 			{
 				lookdetail = null;
-				bounds = new Bounds();
-				foreach (Collider c in focus.GetComponentsInChildren<Collider>())
-					bounds.Encapsulate(c.bounds);
+
+                bounds = new Bounds(focus.transform.position, Vector3.zero);
+                foreach (MeshRenderer c in focus.GetComponentsInChildren<MeshRenderer>())
+                    bounds.Encapsulate(c.bounds);
+
 				cons = new List<CrashObjectName>();
+
 				foreach (CrashObjectName con in focus.GetComponentsInChildren<CrashObjectName>())
 				{
 					cons.Add(con);
 				}
-			}
+
+                if (cons.Count > 0)
+                    lookdetail = cons[0];
+
+                bounds = new Bounds(lookdetail.transform.position, Vector3.zero);
+                foreach (MeshRenderer c in lookdetail.GetComponentsInChildren<MeshRenderer>())
+                    bounds.Encapsulate(c.bounds);
+            }
 			lookat = focus;
-			width = w;
-			height = h;
+
+            rocDetail = null;
+
+            rocsMode = false;
 		}
+
+        public void setup(List<SCANROC> rocList, Vessel v)
+        {
+            double nearest = -1;
+
+            rocs = new List<SCANROC>();
+
+            for (int i = rocList.Count - 1; i >= 0; i--)
+            {
+                SCANROC roc = rocList[i];
+
+                if (!roc.Known)
+                    continue;
+
+                rocs.Add(roc);
+
+                double d = (roc.Roc.transform.position - v.transform.position).sqrMagnitude;
+
+                if (d < nearest || nearest < 0)
+                {
+                    lookat = roc.Roc.gameObject;
+                    rocDetail = roc;
+                    nearest = d;
+                }
+            }
+
+            if (lookat != null)
+            {
+                bounds = new Bounds(lookat.transform.position, Vector3.zero);
+                foreach (MeshRenderer c in lookat.GetComponentsInChildren<MeshRenderer>())
+                    bounds.Encapsulate(c.bounds);
+            }
+            else
+                bounds = new Bounds();
+
+            lookdetail = null;
+
+            rocsMode = true;
+        }
 
 		public bool valid(GameObject focus)
 		{
@@ -77,6 +141,20 @@ namespace SCANsat.SCAN_UI.UI_Framework
 
 			return true;
 		}
+
+        public bool validROC()
+        {
+            if (!rocsMode)
+                return false;
+
+            if (rocDetail.Roc == null)
+                return false;
+
+            if (lookat != rocDetail.Roc.gameObject)
+                return false;
+
+            return true;
+        }
 
 		public void free()
 		{
@@ -110,6 +188,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			{
 				cam = camgo.AddComponent<Camera>();
 				cam.enabled = false;
+                
 				cam.targetTexture = rt;
 				cam.aspect = width * 1f / height;
 				cam.fieldOfView = 90;
@@ -120,10 +199,17 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			if (lookdetail != null)
 				pos_target = lookdetail.transform.position;
 
+            if (rocDetail != null)
+                pos_target = rocDetail.Roc.transform.position;
+
 			Vector3 pos_cam = FlightGlobals.ActiveVessel.transform.position;
 			Vector3 target_up = (pos_target - FlightGlobals.currentMainBody.transform.position).normalized;
 			Vector3 dir = (pos_target - pos_cam).normalized;
-			float dist = 100;
+
+            float dist = 100;
+            float bound = Mathf.Max(bounds.size.x, Mathf.Max(bounds.size.y, bounds.size.z));
+
+            dist = Mathf.Clamp(bound * 1.5f, MIN_DISTANCE, MAX_DISTANCE);
 
 			pos_cam = pos_target - dir * dist / 2 + target_up * dist / 3;
 			Vector3 cam_up = (pos_cam - FlightGlobals.currentMainBody.transform.position).normalized;
@@ -134,7 +220,10 @@ namespace SCANsat.SCAN_UI.UI_Framework
 
 			RenderTexture old = RenderTexture.active;
 			RenderTexture.active = rt;
+            float shadows = QualitySettings.shadowDistance;
+            QualitySettings.shadowDistance = 0;
 			cam.Render();
+            QualitySettings.shadowDistance = shadows;
 			Graphics.Blit(rt, rt, edgeDetectMaterial);
 			Graphics.Blit(rt, rt, grayscaleMaterial);
 
@@ -144,42 +233,85 @@ namespace SCANsat.SCAN_UI.UI_Framework
 
 		public Texture getTexture()
 		{
-			updateCamera();
+            updateCamera();
 			return rt;
 		}
 
 		public string getInfoString()
 		{
-			if (cons.Count > 0)
-				return string.Format("> Identified {0} structure{1}", cons.Count.ToString(), cons.Count > 1 ? "s" : "");
-			else
-				return "";
+            if (!rocsMode && cons.Count > 0)
+                return string.Format("> Identified {0} structure{1}", cons.Count.ToString(), cons.Count > 1 ? "s" : "");
+            else if (rocsMode)
+                return string.Format("> Identified {0} surface object{1}", rocs.Count.ToString(), rocs.Count > 1 ? "s" : "");
+            else
+                return "";
 		}
 
-		public string getAnomalyDataString(bool mouse, bool distance)
+		public string getAnomalyDataString(bool mouse, bool anomalyKnown)
 		{
 			string sname = lookat.name;
 
 			Vector3 lookvec = lookat.transform.position;
 
-			if (cons.Count > 0)
+            bool distance = false;
+
+			if (!rocsMode && cons.Count > 0)
 			{
 				float scroll = Input.GetAxis("Mouse ScrollWheel");
 
-				if (mouse && scroll != 0)
-				{
-					activeCon += (scroll > 0 ? 1 : -1);
+                lookdetail = cons[activeCon];
 
-					if (activeCon >= cons.Count)
-						activeCon = 0;
-					else if (activeCon < 0)
-						activeCon = cons.Count - 1;
-				}
+                if (mouse && scroll != 0)
+                {
+                    activeCon += (scroll > 0 ? 1 : -1);
 
-				lookdetail = cons[activeCon];
-				lookvec = lookdetail.transform.position;
+                    if (activeCon >= cons.Count)
+                        activeCon = 0;
+                    else if (activeCon < 0)
+                        activeCon = cons.Count - 1;
+
+                    lookdetail = cons[activeCon];
+
+                    bounds = new Bounds(lookdetail.transform.position, Vector3.zero);
+                    foreach (MeshRenderer c in lookdetail.GetComponentsInChildren<MeshRenderer>())
+                        bounds.Encapsulate(c.bounds);
+                }
+
+                lookvec = lookdetail.transform.position;
 				sname = lookdetail.objectName;
+
+                rocDetail = null;
+
+                distance = anomalyKnown;
 			}
+            else if (rocsMode && rocs.Count > 0)
+            {
+                float scroll = Input.GetAxis("Mouse ScrollWheel");
+
+                if (mouse && scroll != 0)
+                {
+                    activeROC += (scroll > 0 ? 1 : -1);
+
+                    if (activeROC >= rocs.Count)
+                        activeROC = 0;
+                    else if (activeROC < 0)
+                        activeROC = rocs.Count - 1;
+
+                    rocDetail = rocs[activeROC];
+                    lookat = rocDetail.Roc.gameObject;
+
+                    bounds = new Bounds(lookat.transform.position, Vector3.zero);
+                    foreach (MeshRenderer c in lookat.GetComponentsInChildren<MeshRenderer>())
+                        bounds.Encapsulate(c.bounds);
+                }
+
+                lookvec = rocDetail.Roc.transform.position;
+                sname = rocDetail.Scanned ? rocDetail.Name : "Unknown";
+
+                lookdetail = null;
+
+                distance = true;
+            }
 
 			if (distance)
 			{
