@@ -87,6 +87,9 @@ namespace SCANsat.SCAN_UI.UI_Framework
 
         public void setup(List<SCANROC> rocList, Vessel v)
         {
+            if (rocList == null)
+                return;
+
             double nearest = -1;
 
             rocs = new List<SCANROC>();

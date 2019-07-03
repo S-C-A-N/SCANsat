@@ -1613,6 +1613,9 @@ namespace SCANsat.SCAN_Unity
                 {
                     List<SCANROC> ROCS = data.ROCS(true);
 
+                    if (ROCS == null)
+                        return null;
+
                     for (int i = ROCS.Count - 1; i >= 0; i--)
                     {
                         SCANROC r = ROCS[i];
@@ -1867,19 +1870,22 @@ namespace SCANsat.SCAN_Unity
                 {
                     List<SCANROC> ROCS = data.ROCS(false);
 
-                    for (int i = ROCS.Count - 1; i >= 0; i--)
+                    if (ROCS != null)
                     {
-                        SCANROC r = ROCS[i];
-
-                        if (r.Known)
+                        for (int i = ROCS.Count - 1; i >= 0; i--)
                         {
-                            if (SCANUtil.mapLabelDistance(lat, lon, r.Latitude, r.Longitude, body) <= range)
+                            SCANROC r = ROCS[i];
+
+                            if (r.Known)
                             {
-                                if (r.Scanned)
-                                    infoString.AppendFormat("ROC: {0} ", r.Name);
-                                else
-                                    infoString.Append("ROC: Unknown ");
-                                break;
+                                if (SCANUtil.mapLabelDistance(lat, lon, r.Latitude, r.Longitude, body) <= range)
+                                {
+                                    if (r.Scanned)
+                                        infoString.AppendFormat("ROC: {0} ", r.Name);
+                                    else
+                                        infoString.Append("ROC: Unknown ");
+                                    break;
+                                }
                             }
                         }
                     }

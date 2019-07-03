@@ -320,6 +320,9 @@ namespace SCANsat.SCAN_Unity
 
             List<SCANROC> rocs = data.ROCS(update);
 
+            if (rocs == null)
+                return 0;
+
             int c = 0;
 
             for (int i = rocs.Count - 1; i >= 0; i--)
