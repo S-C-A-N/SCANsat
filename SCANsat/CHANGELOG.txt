@@ -1,3 +1,20 @@
+Version 18.11 - 2019-7-3
+-----------------------
+
+- Allow for detection of Breaking Ground DLC surface features
+    - Use the BTDT scanner to detect surface features
+    - Surface features displayed on the zoom map in the area surrounding the active vessel
+    - Can be viewed in the instruments window
+    - Breaking Ground DLC must be installed for this feature to function
+
+- Add auto-refresh toggle for the zoom map
+    - Toggle between no refresh, 4 second refresh, and 8 second refresh
+
+- Add French translations - by don-vip
+
+- Fix a bug related to flags that was preventing the zoom map and big maps from functioning correctly
+- Fixed a few Chinese localization file language tags
+
 Version 18.10 - 2018-12-31
 -----------------------
 
@@ -32,7 +49,7 @@ Version 18.6 - 2018-4-30
 
 - Update for KSP 1.4.3
 
-- Significant performance imrovement for the background scanning algorithm
+- Significant performance improvement for the background scanning algorithm
      - Particularly noticeable when many scanners are active and time warp is at maximum
 
 - Reduce garbage allocation
