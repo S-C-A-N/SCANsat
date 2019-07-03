@@ -75,7 +75,8 @@ namespace SCANsat.SCAN_Unity
 		private static Sprite _encounterMarker;
 		private static Sprite _exitMarker;
 		private static Sprite _anomalyIcon;
-		private static Sprite _waypointIcon;
+        private static Sprite _rocIcon;
+        private static Sprite _waypointIcon;
 
 		private static Sprite _clearSprite;
 		private static Sprite _toggleNormal;
@@ -254,7 +255,12 @@ namespace SCANsat.SCAN_Unity
 			get { return _anomalyIcon; }
 		}
 
-		public static Sprite WaypointIcon
+        public static Sprite ROCIcon
+        {
+            get { return _rocIcon; }
+        }
+
+        public static Sprite WaypointIcon
 		{
 			get { return _waypointIcon; }
 		}
@@ -689,7 +695,9 @@ namespace SCANsat.SCAN_Unity
 					_exitMarker = s;
 				else if (s.name == "AnomalyIconOutline")
 					_anomalyIcon = s;
-				else if (s.name == "SCAN_WayPointIcon_Outline")
+                else if (s.name == "SCAN_TargetIcon")
+                    _rocIcon = s;
+                else if (s.name == "SCAN_WayPointIcon_Outline")
 					_waypointIcon = s;
 				else if (s.name == "SCANsat_AppLauncherSmall_Icon")
 					_smallMapAppIcon = s;
