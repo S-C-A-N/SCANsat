@@ -77,13 +77,6 @@ namespace SCANsat.SCAN_UI.UI_Framework
 				{
 					cons.Add(con);
 				}
-
-                if (cons.Count > 0)
-                    lookdetail = cons[0];
-
-                bounds = new Bounds(lookdetail.transform.position, Vector3.zero);
-                foreach (MeshRenderer c in lookdetail.GetComponentsInChildren<MeshRenderer>())
-                    bounds.Encapsulate(c.bounds);
             }
 			lookat = focus;
 
