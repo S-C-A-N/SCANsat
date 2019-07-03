@@ -20,7 +20,7 @@
     <WarningLevel>4</WarningLevel>
     <ConsolePause>false</ConsolePause>
     <additionalargs>-debug:full</additionalargs>
-    <DefineConstants>DEBUG;</DefineConstants>
+    <DefineConstants>DEBUG;ENABLE_PROFILER</DefineConstants>
     <DebugSymbols>true</DebugSymbols>
     <NoStdLib>true</NoStdLib>
     <DebugType>full</DebugType>
@@ -43,6 +43,8 @@
       </CustomCommands>
     </CustomCommands>
     <NoStdLib>true</NoStdLib>
+    <DefineConstants>
+    </DefineConstants>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -51,6 +53,7 @@
     <Compile Include="SCAN_Data\SCANanomaly.cs" />
     <Compile Include="SCAN_Data\SCANdata.cs" />
     <Compile Include="SCAN_Data\SCANexperimentType.cs" />
+    <Compile Include="SCAN_Data\SCANROC.cs" />
     <Compile Include="SCAN_Palettes\SCANPalette.cs" />
     <Compile Include="SCAN_Palettes\SCANPaletteGroup.cs" />
     <Compile Include="SCAN_Palettes\SCANPaletteKind.cs" />
@@ -149,4 +152,11 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup />
+  <PropertyGroup>
+    <PostBuildEvent>
+"C:\Users\DMagic\Documents\Visual Studio 2013\Projects\KSP Dev\pdb2mdb\pdb2mdb.exe" "$(TargetFileName)"
+xcopy /Y "$(TargetPath)" "C:\Users\DMagic\Documents\Visual Studio 2013\Projects\KSP Dev\1.7.2\Kerbal Space Program\GameData\SCANsat\Plugins\"
+xcopy /Y "$(TargetDir)$(TargetName).pdb" "C:\Users\DMagic\Documents\Visual Studio 2013\Projects\KSP Dev\1.7.2\Kerbal Space Program\GameData\SCANsat\Plugins\"
+xcopy /Y "$(TargetDir)$(TargetName).dll.mdb" "C:\Users\DMagic\Documents\Visual Studio 2013\Projects\KSP Dev\1.7.2\Kerbal Space Program\GameData\SCANsat\Plugins\"</PostBuildEvent>
+  </PropertyGroup>
 </Project>
