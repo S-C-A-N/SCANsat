@@ -193,11 +193,87 @@ namespace SCANsat.SCAN_Data
 			}
 		}
 
-		#endregion
+        #endregion
 
-		#region Waypoints
+        #region ROCS
 
-		private List<SCANwaypoint> waypoints = new List<SCANwaypoint>();
+        private List<SCANROC> rocs;
+
+        public List<SCANROC> ROCS(bool refresh)
+        {
+            if (!ROCManager.Instance.RocsEnabledInCurrentGame)
+                return null;
+
+            if (!SCANcontroller.controller.SerenityLoaded)
+                return null;
+
+            if (rocs == null)
+                rocs = new List<SCANROC>();
+
+            if (!refresh && rocs.Count > 0)
+                return rocs;
+
+            rocs.Clear();
+
+            PQS controller = body.pqsController;
+
+            for (int i = controller.transform.childCount - 1; i >= 0; i--)
+            {
+                Transform child = controller.transform.GetChild(i);
+
+                if (child.name.StartsWith("ROC"))
+                {
+                    string id = child.name.Substring(child.name.IndexOf(' ') + 1);
+
+                    List<ScienceSubject> subjects = ResearchAndDevelopment.GetSubjects();
+
+                    bool scanned = false;
+
+                    for (int k = subjects.Count - 1; k >= 0; k--)
+                    {
+                        if (subjects[k].id.Contains(id))
+                        {
+                            scanned = true;
+                            break;
+                        }
+                    }
+
+                    for (int j = child.childCount - 1; j >= 0; j--)
+                    {
+                        Transform cache = child.GetChild(j);
+
+                        if (cache.name != ("Unassigned"))
+                        {
+                            ROC roc = cache.GetComponentInChildren<ROC>();
+
+                            if (roc != null)
+                            {
+                                if (!roc.smallROC && !roc.canbetaken)
+                                {
+                                    double lon = body.GetLongitude(roc.transform.position);
+                                    double lat = body.GetLatitude(roc.transform.position);
+
+                                    rocs.Add(new SCANROC(roc
+                                        , roc.displayName
+                                        , lon
+                                        , lat
+                                        , /*SCANUtil.isCovered(lon, lat, this, SCANtype.Anomaly) &&*/ SCANUtil.isCovered(lon, lat, this, SCANtype.AnomalyDetail)
+                                        , scanned));
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            
+            return rocs;
+        }
+
+        #endregion
+
+        #region Waypoints
+
+        private List<SCANwaypoint> waypoints = new List<SCANwaypoint>();
         private bool waypointsLoaded;
         private int localWaypointCount;
 
