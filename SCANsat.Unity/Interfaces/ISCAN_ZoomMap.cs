@@ -73,7 +73,9 @@ namespace SCANsat.Unity.Interfaces
 
 		int WindowState { get; set; }
 
-		float Scale { get; }
+        int MapRefresh { get; set; }
+
+        float Scale { get; }
 
 		Sprite WaypointSprite { get; }
 
@@ -95,11 +97,13 @@ namespace SCANsat.Unity.Interfaces
 
 		Dictionary<string, MapLabelInfo> OrbitLabelList { get; }
 
-		Dictionary<Guid, MapLabelInfo> FlagInfoList { get; }
+		IList<MapLabelInfo> FlagInfoList { get; }
 
 		Dictionary<string, MapLabelInfo> AnomalyInfoList { get; }
 
-		Dictionary<int, MapLabelInfo> WaypointInfoList { get; }
+        IList<MapLabelInfo> ROCInfoList { get; }
+
+        Dictionary<int, MapLabelInfo> WaypointInfoList { get; }
 
 		KeyValuePair<Guid, MapLabelInfo> VesselInfo { get; }
 
