@@ -217,48 +217,59 @@ namespace SCANsat.SCAN_Data
 
             PQS controller = body.pqsController;
 
+            if (controller == null)
+                return null;
+
             for (int i = controller.transform.childCount - 1; i >= 0; i--)
             {
                 Transform child = controller.transform.GetChild(i);
 
                 if (child.name.StartsWith("ROC"))
                 {
-                    string id = child.name.Substring(child.name.IndexOf(' ') + 1);
+                    int index = child.name.IndexOf(' ');
 
-                    List<ScienceSubject> subjects = ResearchAndDevelopment.GetSubjects();
-
-                    bool scanned = false;
-
-                    for (int k = subjects.Count - 1; k >= 0; k--)
+                    if (index > 0 && index < child.name.Length - 1)
                     {
-                        if (subjects[k].id.Contains(id))
+                        string id = child.name.Substring(index + 1);
+
+                        List<ScienceSubject> subjects = ResearchAndDevelopment.GetSubjects();
+
+                        bool scanned = false;
+
+                        for (int k = subjects.Count - 1; k >= 0; k--)
                         {
-                            scanned = true;
-                            break;
-                        }
-                    }
-
-                    for (int j = child.childCount - 1; j >= 0; j--)
-                    {
-                        Transform cache = child.GetChild(j);
-
-                        if (cache.name != ("Unassigned"))
-                        {
-                            ROC roc = cache.GetComponentInChildren<ROC>();
-
-                            if (roc != null)
+                            if (subjects[k].id.Contains(id))
                             {
-                                if (!roc.smallROC && !roc.canbetaken)
-                                {
-                                    double lon = body.GetLongitude(roc.transform.position);
-                                    double lat = body.GetLatitude(roc.transform.position);
+                                scanned = true;
+                                break;
+                            }
+                        }
 
-                                    rocs.Add(new SCANROC(roc
-                                        , roc.displayName
-                                        , lon
-                                        , lat
-                                        , /*SCANUtil.isCovered(lon, lat, this, SCANtype.Anomaly) &&*/ SCANUtil.isCovered(lon, lat, this, SCANtype.AnomalyDetail)
-                                        , scanned));
+                        for (int j = child.childCount - 1; j >= 0; j--)
+                        {
+                            Transform cache = child.GetChild(j);
+
+                            if (cache.name != ("Unassigned"))
+                            {
+                                ROC roc = cache.GetComponentInChildren<ROC>();
+
+                                if (roc != null)
+                                {
+                                    if (!roc.smallROC && !roc.canbetaken)
+                                    {
+                                        if (roc.transform != null)
+                                        {
+                                            double lon = body.GetLongitude(roc.transform.position);
+                                            double lat = body.GetLatitude(roc.transform.position);
+
+                                            rocs.Add(new SCANROC(roc
+                                                , roc.displayName
+                                                , lon
+                                                , lat
+                                                , /*SCANUtil.isCovered(lon, lat, this, SCANtype.Anomaly) &&*/ SCANUtil.isCovered(lon, lat, this, SCANtype.AnomalyDetail)
+                                                , scanned));
+                                        }
+                                    }
                                 }
                             }
                         }
