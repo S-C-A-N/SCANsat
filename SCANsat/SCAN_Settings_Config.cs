@@ -82,8 +82,8 @@ namespace SCANsat
 		public bool BigMapStockBiomes = true;
 		[Persistent]
 		public bool ZoomMapBiomeBorder = true;
-		[Persistent]
-		public bool SmallMapBiomeBorder = false;
+        [Persistent]
+        public bool SmallMapBiomeBorder = false;
 		[Persistent]
 		public bool SmallMapStockBiomes = true;
 		[Persistent]
@@ -100,7 +100,19 @@ namespace SCANsat
 		public Color TopLowSlopeColor = palette.xkcd_Lemon;
 		[Persistent]
 		public Color TopHighSlopeColor = palette.xkcd_OrangeRed;
-		[Persistent]
+        [Persistent]
+        public Color32 LoResAltimetryTrackColor = palette.cb_blue * new Vector4(1, 1, 1, 0.4f);
+        [Persistent]
+        public Color32 HiResAltimetryTrackColor = palette.cb_reddishPurple * new Vector4(1, 1, 1, 0.4f);
+        [Persistent]
+        public Color32 BiomeTrackColor = palette.cb_yellow * new Vector4(1, 1, 1, 0.4f);
+        [Persistent]
+        public Color32 AnomalyTrackColor = palette.cb_orange * new Vector4(1, 1, 1, 0.4f);
+        [Persistent]
+        public Color32 AnomalyDetailTrackColor = palette.xkcd_DarkGreenAlpha;
+        [Persistent]
+        public Color32 FuzzyResourceTrackColor = palette.cb_bluishGreen * new Vector4(1, 1, 1, 0.4f);
+        [Persistent]
 		public bool CheatMapFill = false;
 		[Persistent]
 		public int BigMapWidth = 720;

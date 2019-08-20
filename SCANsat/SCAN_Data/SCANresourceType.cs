@@ -19,11 +19,14 @@ namespace SCANsat.SCAN_Data
 	{
 		private string name;
 		private SCANtype type;
+        private Color32 color;
 
-		internal SCANresourceType(string s, int i)
+		internal SCANresourceType(string s, int i, Color32 c)
 		{
 			name = s;
 			type = (SCANtype)i;
+            color = c;
+
 			if ((type & SCANtype.Everything_SCAN) != SCANtype.Nothing)
 			{
 				Debug.LogWarning("[SCANsat] Attempt To Override Default SCANsat Sensors; Resetting Resource Scanner Type [" + i + "] To 0");
@@ -45,6 +48,11 @@ namespace SCANsat.SCAN_Data
 		{
 			get { return type;}
 		}
+
+        public Color32 Color
+        {
+            get { return color; }
+        }
 
 	}
 }

@@ -16,6 +16,7 @@ using SCANsat.SCAN_Data;
 using SCANsat.SCAN_Platform;
 using SCANsat.SCAN_Palettes;
 using SCANsat.SCAN_UI.UI_Framework;
+using SCANsat.SCAN_Platform.Extensions.ConfigNodes;
 using UnityEngine;
 using palette = SCANsat.SCAN_UI.UI_Framework.SCANcolorUtil;
 
@@ -69,18 +70,22 @@ namespace SCANsat
 
 		private static void loadSCANtypes()
 		{
-			foreach (ConfigNode node in GameDatabase.Instance.GetConfigNodes("SCANSAT_SENSOR"))
-			{
-				string name = "";
-				int i = 0;
-				if (node.HasValue("name"))
-					name = node.GetValue("name");
-				if (node.HasValue("SCANtype"))
-					if (!int.TryParse(node.GetValue("SCANtype"), out i))
-						continue;
+            foreach (ConfigNode node in GameDatabase.Instance.GetConfigNodes("SCANSAT_SENSOR"))
+            {
+                string name = "";
+                int i = 0;
 
-				SCANcontroller.addToResourceTypes(name, new SCANresourceType(name, i));
-			}
+                if (node.HasValue("name"))
+                    name = node.GetValue("name");
+
+                if (node.HasValue("SCANtype"))
+                    if (!int.TryParse(node.GetValue("SCANtype"), out i))
+                        continue;
+
+                Color32 color = node.parse("color", palette.XKCD_DarkGreenAlpha);
+
+                SCANcontroller.addToResourceTypes(name, new SCANresourceType(name, i, color));
+            }
 		}
 
 		private static void loadResources()

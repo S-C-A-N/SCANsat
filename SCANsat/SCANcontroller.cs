@@ -435,6 +435,20 @@ namespace SCANsat
             return null;
         }
 
+        public static SCANresourceType getResourceType(int scantype, bool warn = true)
+        {
+            foreach(SCANresourceType r in resourceTypes.Values)
+            {
+                if (r.Type == (SCANtype)scantype)
+                    return r;
+            }
+
+            if (warn)
+                SCANUtil.SCANlog("SCANsat resource type [{0}] cannot be found in master resource type storage list", scantype.ToString());
+
+            return null;
+        }
+
         public static bool getLoadedResourceTypeStatus(SCANtype type, bool warn = false)
         {
             for (int i = loadedResourceTypes.Count - 1; i >= 0; i--)
@@ -1287,9 +1301,9 @@ namespace SCANsat
                 if (sv == null)
                     return;
 
-                Color col;
+                //Color col;
 
-                double groundWidth = getFOV(sv, body, out col);
+                double groundWidth = getFOV(sv, body);//, out col);
 
                 if (groundWidth < 1)
                     return;
@@ -1298,7 +1312,7 @@ namespace SCANsat
 
                 groundWidth *= surfaceScale;
 
-                SCANuiUtil.drawGroundTrackTris(body, sv.vessel, groundWidth, col);
+                SCANuiUtil.drawGroundTrackTris(body, sv.vessel, groundWidth, sv.trackColor);
             }
             else
             {
@@ -1319,23 +1333,23 @@ namespace SCANsat
                     if (sit == Vessel.Situations.LANDED || sit == Vessel.Situations.PRELAUNCH || sit == Vessel.Situations.SPLASHED)
                         continue;
 
-                    Color col;
+                    //Color col;
 
-                    double groundWidth = getFOV(sv, body, out col);
+                    double groundWidth = getFOV(sv, body);//, out col);
 
                     if (groundWidth < 1)
                         continue;
 
                     groundWidth *= surfaceScale;
 
-                    SCANuiUtil.drawGroundTrackTris(body, sv.vessel, groundWidth, col);
+                    SCANuiUtil.drawGroundTrackTris(body, sv.vessel, groundWidth, sv.trackColor);
                 }
             }
         }
 
-        private double getFOV(SCANvessel v, CelestialBody b, out Color c)
+        private double getFOV(SCANvessel v, CelestialBody b)//, out Color c)
         {
-            c = palette.xkcd_DarkGreenAlpha;
+            //c = palette.xkcd_DarkGreenAlpha;
             double maxFOV = 0;
             double alt = v.vessel.altitude;
             double soi_radius = b.sphereOfInfluence - b.Radius;
@@ -1369,6 +1383,68 @@ namespace SCANsat
             }
 
             return maxFOV;
+        }
+
+        private Color32 getScanTypeColor(SCANtype s)
+        {
+            float r = 0;
+            float g = 0;
+            float b = 0;
+            float a = 0;
+
+            int count = 0;
+
+            for (int i = 0; i < 31; i++)
+            {
+                if ((1 << i & (int)s) != 0)
+                {
+                    Color32 c = typeColor(i);
+
+                    r += (c.r * c.r);
+                    g += (c.g * c.g);
+                    b += (c.b * c.b);
+                    a += (c.a * c.a);
+
+                    count++;
+                }
+            }
+
+            r /= count;
+            g /= count;
+            b /= count;
+            a /= count;
+
+            Color32 col = new Color32((byte)Mathf.Sqrt(r), (byte)Mathf.Sqrt(g), (byte)Mathf.Sqrt(b), (byte)Mathf.Sqrt(a));
+
+            return col;
+        }
+
+        private Color32 typeColor(int i)
+        {
+            switch(i)
+            {
+                case 0:
+                    return SCAN_Settings_Config.Instance.LoResAltimetryTrackColor;
+                case 1:
+                    return SCAN_Settings_Config.Instance.HiResAltimetryTrackColor;
+                case 2:
+                    return palette.XKCD_DarkGreenAlpha;
+                case 3:
+                    return SCAN_Settings_Config.Instance.BiomeTrackColor;
+                case 4:
+                    return SCAN_Settings_Config.Instance.AnomalyTrackColor;
+                case 5:
+                    return SCAN_Settings_Config.Instance.AnomalyDetailTrackColor;
+                case 19:
+                    return SCAN_Settings_Config.Instance.FuzzyResourceTrackColor;
+                default:
+                    SCANresourceType type = getResourceType(1 << i, false);
+
+                    if (type != null)
+                        return type.Color;
+
+                    return palette.XKCD_DarkGreenAlpha;
+            }
         }
 
         private void removeVessel(Vessel v)
@@ -1663,6 +1739,8 @@ namespace SCANsat
             public double fov;
             public double min_alt, max_alt, best_alt;
 
+            public Color32 trackColor;
+
             public bool inRange;
             public bool bestRange;
 
@@ -1673,6 +1751,8 @@ namespace SCANsat
         {
             public Guid id;
             public Vessel vessel;
+
+            public Color32 trackColor;
 
             public List<SCANsensor> sensors = new List<SCANsensor>();
             
@@ -1718,13 +1798,16 @@ namespace SCANsat
                     if (sen.min_alt == _min_alt && sen.max_alt == _max_alt
                         && sen.best_alt == _best_alt && sen.fov == _fov)
                     {
+                        SCANtype t = sen.sensor | sensorType;
+
                         sv.sensors[i] = new SCANsensor()
                         {
                             min_alt = _min_alt,
                             max_alt = _max_alt,
                             best_alt = _best_alt,
                             fov = _fov,
-                            sensor = sen.sensor | sensorType,
+                            sensor = t,
+                            trackColor = getScanTypeColor(t),
                             //sensorType = (int)sv.sensors[i].sensor,
                         };
 
@@ -1743,9 +1826,12 @@ namespace SCANsat
                         best_alt = _best_alt,
                         fov = _fov,
                         sensor = sensorType,
+                        trackColor = getScanTypeColor(sensorType),
                     });
                 }
             }
+
+            sv.trackColor = palette.combineColors(sv.sensors.Select(s => s.trackColor).ToArray());
         }
 
         private void finishRegistration(Guid id)
@@ -1822,13 +1908,16 @@ namespace SCANsat
                     if (sen.min_alt == _min_alt && sen.max_alt == _max_alt
                         && sen.best_alt == _best_alt && sen.fov == _fov)
                     {
+                        SCANtype t = sen.sensor | sensorType;
+
                         sv.sensors[i] = new SCANsensor()
                         {
                             min_alt = _min_alt,
                             max_alt = _max_alt,
                             best_alt = _best_alt,
                             fov = _fov,
-                            sensor = sen.sensor | sensorType,
+                            sensor = t,
+                            trackColor = getScanTypeColor(t),
                         };
 
                         flag = false;
@@ -1846,9 +1935,12 @@ namespace SCANsat
                         best_alt = _best_alt,
                         fov = _fov,
                         sensor = sensorType,
+                        trackColor = getScanTypeColor(sensorType),
                     });
                 }
             }
+
+            sv.trackColor = palette.combineColors(sv.sensors.Select(s => s.trackColor).ToArray());
         }
 
         internal void unregisterSensor(Vessel v, SCANtype sensors, double _fov, double _min_alt, double _max_alt, double _best_alt)
@@ -1882,13 +1974,16 @@ namespace SCANsat
                         if (sen.min_alt == _min_alt && sen.max_alt == _max_alt
                             && sen.best_alt == _best_alt && sen.fov == _fov)
                         {
+                            SCANtype t = sen.sensor ^ sensor;
+
                             sv.sensors[i] = new SCANsensor()
                             {
                                 min_alt = sen.min_alt,
                                 max_alt = sen.max_alt,
                                 best_alt = sen.best_alt,
                                 fov = sen.fov,
-                                sensor = sen.sensor ^ sensor,
+                                sensor = t,
+                                trackColor = getScanTypeColor(t),
                             };
                         }
                     }
@@ -1897,6 +1992,8 @@ namespace SCANsat
                         sv.sensors.RemoveAt(i);
                 }
             }
+
+            sv.trackColor = palette.combineColors(sv.sensors.Select(s => s.trackColor).ToArray());
 
             if (sv.sensors.Count == 0)
             {

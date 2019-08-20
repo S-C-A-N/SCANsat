@@ -94,9 +94,10 @@ namespace SCANsat.SCAN_UI.UI_Framework
 		public static Color32 CB_vermillion = (Color32)cb_vermillion;
 		public static Color32 CB_reddishPurple = (Color32)cb_reddishPurple;
 		public static Color32 CB_orange = (Color32)cb_orange;
-        
-		/* SOLARIZED colors: currently unused, so commented out */
-		/*
+        public static Color32 XKCD_DarkGreenAlpha = (Color32)(XKCDColors.DarkGreen * new Vector4(1, 1, 1, 0.4f));
+
+        /* SOLARIZED colors: currently unused, so commented out */
+        /*
 		public static Color sol_base03 	= new Color32(0,43,54,255);
 		public static Color sol_base02 	= new Color32(7,54,66,255);
 		public static Color sol_base01 	= new Color32(88,110,117,255);
@@ -114,7 +115,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 		public static Color sol_cyan 		= new Color32(42,161,152,255);
 		public static Color sol_green 	= new Color32(133,153,0,255);
 		*/
-		public static Color[] heightGradient = {
+        public static Color[] heightGradient = {
 			xkcd_ArmyGreen,
 			xkcd_Yellow,
 			xkcd_Red,
@@ -122,6 +123,37 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			xkcd_White,
 			xkcd_White
 		};
+
+        public static Color32 combineColors(Color32[] colors)
+        {
+            float r = 0;
+            float g = 0;
+            float b = 0;
+            float a = 0;
+
+            int count = 0;
+
+            for (int i = colors.Length - 1; i >= 0; i--)
+            {
+                Color32 c = colors[i];
+
+                r += (c.r * c.r);
+                g += (c.g * c.g);
+                b += (c.b * c.b);
+                a += (c.a * c.a);
+
+                count++;
+            }
+
+            r /= count;
+            g /= count;
+            b /= count;
+            a /= count;
+
+            Color32 col = new Color32((byte)Mathf.Sqrt(r), (byte)Mathf.Sqrt(g), (byte)Mathf.Sqrt(b), (byte)Mathf.Sqrt(a));
+
+            return col;
+        }
 
 		public static Color32[] redline;
 
