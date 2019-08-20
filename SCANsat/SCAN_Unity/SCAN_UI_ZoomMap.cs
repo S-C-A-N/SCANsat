@@ -304,6 +304,8 @@ namespace SCANsat.SCAN_Unity
             spotmap.ColorMap = SCANcontroller.controller.zoomMapColor;
             spotmap.Terminator = SCANcontroller.controller.zoomMapTerminator;
 
+            rebuilding = true;
+
             spotmap.resetMap(t, false, ResourceToggle, narrowBand);
         }
 

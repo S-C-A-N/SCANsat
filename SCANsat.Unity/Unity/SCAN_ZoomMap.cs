@@ -155,99 +155,89 @@ namespace SCANsat.Unity.Unity
 			Alpha(0);
 		}
 
-		private void Update()
-		{
-			if (zoomInterface == null || !zoomInterface.IsVisible)
-				return;
+        private void Update()
+        {
+            if (zoomInterface == null || !zoomInterface.IsVisible)
+                return;
 
-			if (zoomInterface.LockInput)
-			{
-				if (m_WaypointInput != null && !m_WaypointInput.IsFocused)
-					zoomInterface.LockInput = false;
-			}
+            if (zoomInterface.LockInput)
+            {
+                if (m_WaypointInput != null && !m_WaypointInput.IsFocused)
+                    zoomInterface.LockInput = false;
+            }
 
-			zoomInterface.Update();
+            zoomInterface.Update();
 
-			if (vesselLabel != null)
-			{
-				Vector2 pos = zoomInterface.VesselPosition();
+            if (vesselLabel != null)
+            {
+                Vector2 pos = zoomInterface.VesselPosition();
 
-				if (pos.x < 0 || pos.y < 0)
-					vesselLabel.UpdateActive(false);
-				else
-				{
-					vesselLabel.UpdateActive(true);
-					vesselLabel.UpdatePosition(pos);
-				}
-			}
+                if (pos.x < 0 || pos.y < 0)
+                    vesselLabel.UpdateActive(false);
+                else
+                {
+                    vesselLabel.UpdateActive(true);
+                    vesselLabel.UpdatePosition(pos);
+                }
+            }
 
-			if (inMap && m_ZoomImage != null && m_ReadoutText != null)
-			{
-				RectTransformUtility.ScreenPointToLocalPointInRectangle(m_ZoomImage.rectTransform, Input.mousePosition, zoomInterface.MainCanvas.worldCamera, out rectPos);
+            if (inMap && m_ZoomImage != null && m_ReadoutText != null)
+            {
+                RectTransformUtility.ScreenPointToLocalPointInRectangle(m_ZoomImage.rectTransform, Input.mousePosition, zoomInterface.MainCanvas.worldCamera, out rectPos);
 
-				m_ReadoutText.OnTextUpdate.Invoke(zoomInterface.MapInfo(rectPos));
+                m_ReadoutText.OnTextUpdate.Invoke(zoomInterface.MapInfo(rectPos));
 
-				if (waypointSelecting)
-				{
-					if (hoverWaypointLabel != null)
-					{
-						Vector2 mapPos = new Vector2(rectPos.x, rectPos.y + zoomInterface.Size.y);
+                if (waypointSelecting)
+                {
+                    if (hoverWaypointLabel != null)
+                    {
+                        Vector2 mapPos = new Vector2(rectPos.x, rectPos.y + zoomInterface.Size.y);
 
-						hoverWaypointLabel.UpdateActive(true);
+                        hoverWaypointLabel.UpdateActive(true);
 
-						hoverWaypointLabel.UpdatePosition(mapPos);
-					}
-				}
-			}
-			else if (waypointSelecting)
-			{
-				if (hoverWaypointLabel != null)
-					hoverWaypointLabel.UpdateActive(false);
-			}
+                        hoverWaypointLabel.UpdatePosition(mapPos);
+                    }
+                }
+            }
+            else if (waypointSelecting)
+            {
+                if (hoverWaypointLabel != null)
+                    hoverWaypointLabel.UpdateActive(false);
+            }
 
-			if (tooltipOn)
-			{
-				RectTransformUtility.ScreenPointToLocalPointInRectangle(m_LegendImage.rectTransform, Input.mousePosition, zoomInterface.MainCanvas.worldCamera, out rectPos);
+            if (tooltipOn)
+            {
+                RectTransformUtility.ScreenPointToLocalPointInRectangle(m_LegendImage.rectTransform, Input.mousePosition, zoomInterface.MainCanvas.worldCamera, out rectPos);
 
-				float halfWidth = m_LegendImage.rectTransform.rect.width / 2;
+                float halfWidth = m_LegendImage.rectTransform.rect.width / 2;
 
-				float legendXPos = (rectPos.x + halfWidth) / m_LegendImage.rectTransform.rect.width;
+                float legendXPos = (rectPos.x + halfWidth) / m_LegendImage.rectTransform.rect.width;
 
-				if (_tooltip != null)
-					_tooltip.UpdateText(zoomInterface.TooltipText(legendXPos));
-			}
+                if (_tooltip != null)
+                    _tooltip.UpdateText(zoomInterface.TooltipText(legendXPos));
+            }
 
-			if (zoomInterface.OrbitToggle && zoomInterface.ShowOrbit)
-			{
-				for (int i = orbitLabels.Count - 1; i >= 0; i--)
-				{
-					SCAN_SimpleLabel label = orbitLabels[i];
+            if (zoomInterface.OrbitToggle && zoomInterface.ShowOrbit)
+            {
+                for (int i = orbitLabels.Count - 1; i >= 0; i--)
+                {
+                    SCAN_SimpleLabel label = orbitLabels[i];
 
-					label.UpdateIcon(zoomInterface.OrbitInfo(i));
-				}
+                    label.UpdateIcon(zoomInterface.OrbitInfo(i));
+                }
 
-				for (int i = orbitIconLabels.Count - 1; i >= 0; i--)
-				{
-					SCAN_MapLabel label = orbitIconLabels[i];
+                for (int i = orbitIconLabels.Count - 1; i >= 0; i--)
+                {
+                    SCAN_MapLabel label = orbitIconLabels[i];
 
-					label.UpdatePositionActivation(zoomInterface.OrbitIconInfo(label.StringID));
-				}
-			}
+                    label.UpdatePositionActivation(zoomInterface.OrbitIconInfo(label.StringID));
+                }
+            }
 
             if (zoomInterface.MapRefresh > 0 && !resizing && !zoomInterface.Rebuilding)
             {
-                float time = Time.realtimeSinceStartup;
-
-                if (zoomInterface.MapRefresh == 1)
-                {
-                    if (time > nextRefresh)
-                        RefreshMap();
-                }
-                else
-                {
-                    if (time > nextRefresh)
-                        RefreshMap();
-                }
+                if (Time.realtimeSinceStartup > nextRefresh)
+                    RefreshMap();
             }
         }
 
@@ -521,23 +511,28 @@ namespace SCANsat.Unity.Unity
                         m_AutoRefresh.color = Color.green;
                     break;
             }
-
+            
             ResetRefreshState(i);
         }
 
         private void ResetRefreshState(int i)
         {
-            switch (i)
+            if (zoomInterface.Rebuilding)
+                nextRefresh = float.MaxValue;
+            else
             {
-                case 0:
-                    nextRefresh = float.MaxValue;
-                    break;
-                case 1:
-                    nextRefresh = Time.realtimeSinceStartup + refreshTimeOne;
-                    break;
-                case 2:
-                    nextRefresh = Time.realtimeSinceStartup + refreshTimeTwo;
-                    break;
+                switch (i)
+                {
+                    case 0:
+                        nextRefresh = float.MaxValue;
+                        break;
+                    case 1:
+                        nextRefresh = Time.realtimeSinceStartup + refreshTimeOne;
+                        break;
+                    case 2:
+                        nextRefresh = Time.realtimeSinceStartup + refreshTimeTwo;
+                        break;
+                }
             }
         }
 
@@ -1170,7 +1165,7 @@ namespace SCANsat.Unity.Unity
 
         public void UpdateMapData(bool text)
         {
-            if (text)
+            if (text || zoomInterface.VesselLock)
                 ResetText();
 
             ResetRefreshState(zoomInterface.MapRefresh);
