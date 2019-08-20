@@ -110,9 +110,9 @@
     <PostBuildEvent>copy /y "$(TargetPath)" "C:\Users\DMagic\Documents\KSP\SCANsat\Unity\SCANsat\Assets\Plugins\"
 
 "C:\Users\DMagic\Documents\Visual Studio 2013\Projects\KSP Dev\pdb2mdb\pdb2mdb.exe" "$(TargetFileName)"
-xcopy /Y "$(TargetPath)" "C:\Users\DMagic\Documents\Visual Studio 2013\Projects\KSP Dev\1.7.2\Kerbal Space Program\GameData\SCANsat\Plugins\"
-xcopy /Y "$(TargetDir)$(TargetName).pdb" "C:\Users\DMagic\Documents\Visual Studio 2013\Projects\KSP Dev\1.7.2\Kerbal Space Program\GameData\SCANsat\Plugins\"
-xcopy /Y "$(TargetDir)$(TargetName).dll.mdb" "C:\Users\DMagic\Documents\Visual Studio 2013\Projects\KSP Dev\1.7.2\Kerbal Space Program\GameData\SCANsat\Plugins\"</PostBuildEvent>
+xcopy /Y "$(TargetPath)" "C:\Users\DMagic\Documents\Visual Studio 2013\Projects\KSP Dev\1.7.3\Kerbal Space Program\GameData\SCANsat\Plugins\"
+xcopy /Y "$(TargetDir)$(TargetName).pdb" "C:\Users\DMagic\Documents\Visual Studio 2013\Projects\KSP Dev\1.7.3\Kerbal Space Program\GameData\SCANsat\Plugins\"
+xcopy /Y "$(TargetDir)$(TargetName).dll.mdb" "C:\Users\DMagic\Documents\Visual Studio 2013\Projects\KSP Dev\1.7.3\Kerbal Space Program\GameData\SCANsat\Plugins\"</PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
