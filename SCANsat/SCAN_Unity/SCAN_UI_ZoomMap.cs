@@ -40,6 +40,7 @@ namespace SCANsat.SCAN_Unity
         private SCANdata data;
         private Vessel vessel;
         private bool updateMap;
+        private bool rebuilding;
         private bool narrowBand;
         private StringBuilder infoString = new StringBuilder();
         private System.Random gen;
@@ -326,6 +327,8 @@ namespace SCANsat.SCAN_Unity
 
             calcTerrainLimits();
 
+            rebuilding = true;
+
             spotmap.resetMap(ResourceToggle, narrowBand);
         }
 
@@ -559,6 +562,12 @@ namespace SCANsat.SCAN_Unity
                     spotmap.getPartialMap(false);
 
                 spotmap.getPartialMap(true);
+            }
+            else if (rebuilding)
+            {
+                rebuilding = false;
+
+                uiElement.ResetRefresh();
             }
 
             if (OrbitToggle && ShowOrbit)
@@ -1101,6 +1110,17 @@ namespace SCANsat.SCAN_Unity
 
                 if (!value)
                     Close();
+            }
+        }
+
+        public bool Rebuilding
+        {
+            get
+            {
+                if (spotmap == null)
+                    return false;
+
+                return !spotmap.isMapComplete();
             }
         }
 

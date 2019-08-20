@@ -33,6 +33,8 @@ namespace SCANsat.Unity.Interfaces
 
 		bool IsVisible { get; set; }
 
+        bool Rebuilding { get; }
+
 		bool VesselLock { get; set; }
 
 		bool ColorToggle { get; set; }

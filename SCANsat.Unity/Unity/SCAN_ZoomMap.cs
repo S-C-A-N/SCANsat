@@ -234,29 +234,33 @@ namespace SCANsat.Unity.Unity
 				}
 			}
 
-            if (zoomInterface.MapRefresh > 0 && !resizing)
+            if (zoomInterface.MapRefresh > 0 && !resizing && !zoomInterface.Rebuilding)
             {
                 float time = Time.realtimeSinceStartup;
 
                 if (zoomInterface.MapRefresh == 1)
                 {
                     if (time > nextRefresh)
-                    {
-                        nextRefresh = time + refreshTimeOne;
-
                         RefreshMap();
-                    }
-
                 }
                 else
                 {
                     if (time > nextRefresh)
-                    {
-                        nextRefresh = time + refreshTimeTwo;
-
                         RefreshMap();
-                    }
                 }
+            }
+        }
+
+        public void ResetRefresh()
+        {
+            if (zoomInterface.MapRefresh > 0)
+            {
+                float time = Time.realtimeSinceStartup;
+
+                if (zoomInterface.MapRefresh == 1)
+                    nextRefresh = time + refreshTimeOne;
+                else
+                    nextRefresh = time + refreshTimeTwo;
             }
         }
 
