@@ -201,6 +201,9 @@ namespace SCANsat.SCAN_Data
 
         public List<SCANROC> ROCS(bool refresh)
         {
+            if (ROCManager.Instance == null)
+                return null;
+
             if (!ROCManager.Instance.RocsEnabledInCurrentGame)
                 return null;
 
@@ -215,14 +218,20 @@ namespace SCANsat.SCAN_Data
 
             rocs.Clear();
 
+            if (body == null)
+                return null;
+
             PQS controller = body.pqsController;
 
-            if (controller == null)
+            if (controller == null || controller.transform == null)
                 return null;
 
             for (int i = controller.transform.childCount - 1; i >= 0; i--)
             {
                 Transform child = controller.transform.GetChild(i);
+
+                if (child == null)
+                    continue;
 
                 if (child.name.StartsWith("ROC"))
                 {
@@ -232,22 +241,35 @@ namespace SCANsat.SCAN_Data
                     {
                         string id = child.name.Substring(index + 1);
 
-                        List<ScienceSubject> subjects = ResearchAndDevelopment.GetSubjects();
-
                         bool scanned = false;
 
-                        for (int k = subjects.Count - 1; k >= 0; k--)
+                        if (HighLogic.CurrentGame.Mode == Game.Modes.SANDBOX || HighLogic.CurrentGame.Mode == Game.Modes.MISSION)
                         {
-                            if (subjects[k].id.Contains(id))
+                            scanned = true;
+                        }
+                        else
+                        {
+                            List<ScienceSubject> subjects = ResearchAndDevelopment.GetSubjects();
+
+                            if (subjects != null)
                             {
-                                scanned = true;
-                                break;
+                                for (int k = subjects.Count - 1; k >= 0; k--)
+                                {
+                                    if (subjects[k].id.Contains(id))
+                                    {
+                                        scanned = true;
+                                        break;
+                                    }
+                                }
                             }
                         }
 
                         for (int j = child.childCount - 1; j >= 0; j--)
                         {
                             Transform cache = child.GetChild(j);
+
+                            if (cache == null)
+                                continue;
 
                             if (cache.name != ("Unassigned"))
                             {
