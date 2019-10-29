@@ -497,7 +497,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 		{
 			GL.PushMatrix();
 			if (mat == null)
-				mat = new Material(Shader.Find("Particles/Additive"));
+				mat = new Material(Shader.Find("Legacy Shaders/Particles/Additive"));
 			mat.SetPass(0);
 			GL.LoadOrtho();
 			GL.Begin(GL.TRIANGLES);
