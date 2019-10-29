@@ -72,7 +72,6 @@
     <Compile Include="SCAN_Map\SCANmapProjection.cs" />
     <Compile Include="SCAN_Map\SCANmapType.cs" />
     <Compile Include="SCAN_Palette_Config.cs" />
-    <Compile Include="SCAN_PartModules\SCANBTDT.cs" />
     <Compile Include="SCAN_PartModules\SCANexperiment.cs" />
     <Compile Include="SCAN_PartModules\SCANresourceDisplay.cs" />
     <Compile Include="SCAN_PartModules\SCANresourceScanner.cs" />
