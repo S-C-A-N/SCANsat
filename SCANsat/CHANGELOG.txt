@@ -1,3 +1,11 @@
+Version 18.14 - 2019-10-28
+-----------------------
+
+- Update for KSP 1.9
+- Fix big map control buttons
+- Fix ground track indicators
+- Fix BTDT anomaly viewer shaders
+
 Version 18.13 - 2019-8-21
 -----------------------
 
