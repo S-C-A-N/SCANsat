@@ -27,7 +27,6 @@ namespace SCANsat.SCAN_UI.UI_Framework
         
 		private static Camera cam;
 		private static GameObject camgo;
-		private static Material edgeDetectMaterial, grayscaleMaterial;
 		private RenderTexture rt;
 		private int updateFrame, width, height;
 		private List<CrashObjectName> cons;
@@ -42,21 +41,6 @@ namespace SCANsat.SCAN_UI.UI_Framework
         
         public void Initialize(int w, int h)
         {
-            edgeDetectMaterial = new Material(SCAN_UI_Loader.EdgeDetectShader);
-            edgeDetectMaterial.SetFloat("_Threshold", 0.05f);
-
-            grayscaleMaterial = new Material(SCAN_UI_Loader.GreyScaleShader);
-            Texture2D t = new Texture2D(256, 1, TextureFormat.RGB24, false);
-
-            // ramp texture to render everything in dark shades of Amber,
-            // except originally dark lines, which become bright Amber
-            for (int i = 0; i < 256; ++i)
-                t.SetPixel(i, 0, palette.lerp(palette.black, palette.xkcd_Amber, i / 1024f));
-            for (int i = 0; i < 10; ++i)
-                t.SetPixel(i, 0, palette.xkcd_Amber);
-            t.Apply();
-            grayscaleMaterial.SetTexture("_RampTex", t);
-
             width = w;
             height = h;
         }
@@ -183,6 +167,8 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			if (cam == null)
 			{
 				cam = camgo.AddComponent<Camera>();
+                //Add image processing component to camera game object
+                camgo.AddComponent<SCANEdgeDetect>();
 				cam.enabled = false;
                 
 				cam.targetTexture = rt;
@@ -214,17 +200,9 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			cam.transform.LookAt(pos_target, cam_up);
 			cam.farClipPlane = dist * 3;
 
-			RenderTexture old = RenderTexture.active;
-			RenderTexture.active = rt;
-            float shadows = QualitySettings.shadowDistance;
-            QualitySettings.shadowDistance = 0;
-			cam.Render();
-            QualitySettings.shadowDistance = shadows;
-			Graphics.Blit(rt, rt, edgeDetectMaterial);
-			Graphics.Blit(rt, rt, grayscaleMaterial);
+            cam.Render();
 
-			RenderTexture.active = old;
-			updateFrame = Time.frameCount;
+            updateFrame = Time.frameCount;
 		}
 
 		public Texture getTexture()
