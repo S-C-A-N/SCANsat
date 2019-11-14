@@ -1,4 +1,4 @@
-﻿#region license
+#region license
 /*
  *  [Scientific Committee on Advanced Navigation]
  * 			S.C.A.N. Satellite
@@ -31,6 +31,15 @@ namespace SCANsat.SCAN_Toolbar
 		private IButton ZoomButton;
 
 		public SCANtoolbar()
+		{
+			// NB: There are many restrictions on what can be initialized in a Unity
+			// object constructor.  It is better to use Awake() or Start() to
+			// initialize state.
+			//
+			// Specifically, KSPUtil.ApplicationRootPath cannot be used here.
+		}
+
+		public void Awake()
 		{
 			if (!ToolbarManager.ToolbarAvailable)
 			{
