@@ -17,2180 +17,2327 @@ using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Events;
 using Contracts;
 using FinePrint.Contracts;
 using FinePrint.Utilities;
-using SCANsat.SCAN_UI;
 using SCANsat.SCAN_UI.UI_Framework;
+using SCANsat.SCAN_Unity;
 using SCANsat.SCAN_Data;
 using SCANsat.SCAN_Map;
-using SCANsat.SCAN_PartModules;
-using SCANsat.SCAN_Platform;
 using SCANsat.SCAN_Platform.Extensions.ConfigNodes;
-using SCANsat.SCAN_Platform.Palettes;
-using SCANsat.SCAN_Platform.Palettes.ColorBrewer;
-using SCANsat.SCAN_Platform.Palettes.FixedColors;
+using SCANsat.SCAN_Palettes;
 using SCANsat.SCAN_Toolbar;
-using palette = SCANsat.SCAN_UI.UI_Framework.SCANpalette;
+using palette = SCANsat.SCAN_UI.UI_Framework.SCANcolorUtil;
+using FinePrint.Contracts.Parameters;
+using UnityEngine.Profiling;
 
 namespace SCANsat
 {
-	[KSPScenario(ScenarioCreationOptions.AddToAllGames | ScenarioCreationOptions.AddToExistingGames, GameScenes.FLIGHT, GameScenes.SPACECENTER, GameScenes.TRACKSTATION)]
-	public class SCANcontroller : ScenarioModule
-	{
-		public static SCANcontroller controller
-		{
-			get { return instance; }
-		}
-
-		private static int minScanAlt = 5000;
-		private static int maxScanAlt = 500000;
-		private static int bestScanAlt = 250000;
-		[KSPField(isPersistant = true)]
-		public int colours = 0;
-		[KSPField(isPersistant = true)]
-		public bool map_markers = true;
-		[KSPField(isPersistant = true)]
-		public bool map_flags = true;
-		[KSPField(isPersistant = true)]
-		public bool map_waypoints = true;
-		[KSPField(isPersistant = true)]
-		public bool map_orbit = true;
-		[KSPField(isPersistant = true)]
-		public bool map_asteroids = true;
-		[KSPField(isPersistant = true)]
-		public bool map_grid = true;
-		[KSPField(isPersistant = true)]
-		public bool map_ResourceOverlay = false; //Is the overlay activated for the selected resource
-		[KSPField(isPersistant = true)]
-		public int projection = 0;
-		[KSPField(isPersistant = true)]
-		public int map_width = 0;
-		[KSPField(isPersistant = true)]
-		public int map_x = 100;
-		[KSPField(isPersistant = true)]
-		public int map_y = 50;
-		[KSPField(isPersistant = true)]
-		public string anomalyMarker = "X";
-		public string closeBox = "X";
-		[KSPField(isPersistant = true)]
-		public bool legend = false;
-		[KSPField(isPersistant = true)]
-		public bool scan_background = true;
-		[KSPField(isPersistant = true)]
-		public int timeWarpResolution = 15;
-		[KSPField(isPersistant = true)]
-		public string resourceSelection;
-		[KSPField(isPersistant = true)]
-		public bool dataRebuild = true;
-		[KSPField(isPersistant = true)]
-		public bool mainMapVisible = false;
-		[KSPField(isPersistant = true)]
-		public bool bigMapVisible = false;
-		[KSPField(isPersistant = true)]
-		public bool kscMapVisible = false;
-		[KSPField(isPersistant = true)]
-		public bool toolTips = true;
-		[KSPField(isPersistant = true)]
-		public bool useStockAppLauncher = true;
-		[KSPField(isPersistant = true)]
-		public bool resourceBiomeLock = true;
-		[KSPField(isPersistant = true)]
-		public bool useStockBiomes = false;
-		[KSPField(isPersistant = true)]
-		public float biomeTransparency = 40;
-		[KSPField(isPersistant = true)]
-		public bool mechJebTargetSelection = false;
-		[KSPField(isPersistant = true)]
-		public bool easyModeScanning = true;
-		[KSPField(isPersistant = true)]
-		public bool needsNarrowBand = true;
-		[KSPField(isPersistant = true)]
-		public bool biomeBorder = true;
-		[KSPField(isPersistant = true)]
-		public bool disableStockResource = false;
-		[KSPField(isPersistant = true)]
-		public bool hiDetailZoomMap = false;
-		[KSPField(isPersistant = true)]
-		public bool planetaryOverlayTooltips = true;
-		[KSPField(isPersistant = true)]
-		public int overlayInterpolation = 8;
-		[KSPField(isPersistant = true)]
-		public int overlayMapHeight = 256;
-		[KSPField(isPersistant = true)]
-		public int overlayBiomeHeight = 512;
-		[KSPField(isPersistant = true)]
-		public float overlayTransparency = 0;
-		[KSPField(isPersistant = true)]
-		public bool trueGreyScale = false;
-		[KSPField(isPersistant = true)]
-		public bool groundTracks = true;
-		[KSPField(isPersistant = true)]
-		public bool groundTrackActiveOnly = true;
-		[KSPField(isPersistant = true)]
-		public bool exportCSV = false;
-		[KSPField(isPersistant = true)]
-		public float scanThreshold = 0.90f;
-		[KSPField(isPersistant = true)]
-		public bool useScanThreshold = true;
-		[KSPField(isPersistant = true)]
-		public float slopeCutoff = 1f;
-		[KSPField(isPersistant = true)]
-		public float windowScale = 1f;
-
-		/* Biome and slope colors can't be serialized properly as a KSP Field */
-		public Color lowBiomeColor = new Color(0, 0.46f, 0.02345098f, 1);
-		public Color highBiomeColor = new Color(0.7f, 0.2388235f, 0, 1);
-		public Color lowSlopeColorOne = new Color(0.004705883f, 0.6f, 0.3788235f, 1);
-		public Color highSlopeColorOne = new Color(0.9764706f, 1, 0.4627451f, 1);
-		public Color lowSlopeColorTwo = new Color(0.9764706f, 1, 0.4627451f, 1);
-		public Color highSlopeColorTwo = new Color(0.94f, 0.2727843f, 0.007372549f, 1);
-
-		public Color32 lowBiomeColor32 = new Color(0, 0.46f, 0.02345098f, 1);
-		public Color32 highBiomeColor32 = new Color(0.7f, 0.2388235f, 0, 1);
-		public Color32 lowSlopeColorOne32 = new Color(0.004705883f, 0.6f, 0.3788235f, 1);
-		public Color32 highSlopeColorOne32 = new Color(0.9764706f, 1, 0.4627451f, 1);
-		public Color32 lowSlopeColorTwo32 = new Color(0.9764706f, 1, 0.4627451f, 1);
-		public Color32 highSlopeColorTwo32 = new Color(0.94f, 0.2727843f, 0.007372549f, 1);
-
-		/* Available resources for overlays; loaded from SCANsat configs; only loaded once */
-		private static DictionaryValueList<string, SCANresourceGlobal> masterResourceNodes = new DictionaryValueList<string, SCANresourceGlobal>();
-
-		/* Resource types loaded from SCANsat configs; only needs to be loaded once */
-		private static Dictionary<string, SCANresourceType> resourceTypes = new Dictionary<string, SCANresourceType>();
-
-		/* Terrain height and color option containers loaded from SCANsat configs; only needs to be loaded once */
-		private static Dictionary<string, SCANterrainConfig> masterTerrainNodes = new Dictionary<string, SCANterrainConfig>();
-
-		/* List of resources currently loaded from resource addons */
-		private static List<string> loadedResources = new List<string>();
-
-		/* Primary SCANsat vessel dictionary; loaded every time */
-		public DictionaryValueList<Guid, SCANvessel> knownVessels = new DictionaryValueList<Guid, SCANvessel>();
-
-		/* Primary SCANdata dictionary; loaded every time*/
-		private DictionaryValueList<string, SCANdata> body_data = new DictionaryValueList<string, SCANdata>();
-
-		/* GUI draw function callbacks */
-		private DictionaryValueList<int, Callback> drawQueue = new DictionaryValueList<int, Callback>();
-		private bool showUI = true;
-
-		/* MechJeb Landing Target Integration */
-		private bool mechjebLoaded, targetSelecting, targetSelectingActive;
-		private Vector2d landingTargetCoords;
-		private CelestialBody landingTargetBody;
-		private SCANwaypoint landingTarget;
-
-		/* Kopernicus On Demand Loading Data */
-		private List<CelestialBody> dataBodies = new List<CelestialBody>();
-		private CelestialBody bigMapBody;
-		private CelestialBody zoomMapBody;
-		private PQSMod KopernicusOnDemand;
-
-		/* UI window objects */
-		internal SCANmainMap mainMap;
-		internal SCANsettingsUI settingsWindow;
-		internal SCANinstrumentUI instrumentsWindow;
-		internal SCANBigMap BigMap;
-		internal SCANkscMap kscMap;
-		internal SCANcolorSelection colorManager;
-		internal SCANoverlayController resourceOverlay;
-		internal SCANresourceSettings resourceSettings;
-		//internal SCANzoomHiDef hiDefMap;
-		internal SCANzoomWindow zoomMap;
-
-		/* App launcher object */
-		internal SCANappLauncher appLauncher;
-
-		/* Used in case the loading process is interupted somehow */
-		private bool loaded = false;
-
-		/* Used to make sure all contracts are loaded */
-		private bool contractsLoaded = false;
-
-		/* Used as holder for vessel id's while loading */
-		private List<Guid> tempIDs = new List<Guid>();
-
-		private CelestialBody body = null;
-		private bool bodyScanned = false;
-		private bool bodyCoverage = false;
-		private bool heightMapsBuilt = false;
-
-		private static SCANcontroller instance;
-
-		#region Public Accessors
-
-		public void addToDrawQueue(int id, Callback c)
-		{
-			if (!drawQueue.Contains(id))
-				drawQueue.Add(id, c);
-		}
-
-		public void removeFromDrawQueue(int id)
-		{
-			if (drawQueue.Contains(id))
-				drawQueue.Remove(id);
-		}
-
-		public SCANdata getData(string bodyName)
-		{
-			if (body_data.Contains(bodyName))
-				return body_data[bodyName];
-
-			return null;
-		}
-
-		public SCANdata getData(int index)
-		{
-			if (body_data.Count > index)
-				return body_data.At(index);
-			else
-				SCANUtil.SCANdebugLog("SCANdata dictionary index out of range; something went wrong here...");
-
-			return null;
-		}
-
-		public List<SCANdata> GetAllData
-		{
-			get { return body_data.Values.ToList(); }
-		}
-
-		public int GetDataCount
-		{
-			get { return body_data.Count; }
-		}
-
-		/* Use this method to protect against duplicate dictionary keys */
-		public void addToBodyData (CelestialBody b, SCANdata data)
-		{
-			if (!body_data.Contains(b.name))
-				body_data.Add(b.name, data);
-			else
-				Debug.LogError("[SCANsat] Warning: SCANdata Dictionary Already Contains Key of This Type");
-		}
-
-		public static List<SCANterrainConfig> EncodeTerrainConfigs
-		{
-			get
-			{
-				try
-				{
-					return masterTerrainNodes.Values.ToList();
-				}
-				catch (Exception e)
-				{
-					SCANUtil.SCANlog("Error while saving SCANsat altimetry config data: {0}", e);
-				}
-
-				return new List<SCANterrainConfig>();
-			}
-		}
-
-		public static void setMasterTerrainNodes (List<SCANterrainConfig> terrainConfigs)
-		{
-			masterTerrainNodes.Clear();
-			try
-			{
-				masterTerrainNodes = terrainConfigs.ToDictionary(a => a.Name, a => a);
-			}
-			catch (Exception e)
-			{
-				SCANUtil.SCANlog("Error while loading SCANsat terrain config settings: {0}", e);
-			}
-		}
-
-		public static void checkLoadedTerrainNodes()
-		{
-			for (int i = 0; i < FlightGlobals.Bodies.Count; i++)
-			{
-				CelestialBody b = FlightGlobals.Bodies[i];
-
-				if (b == null)
-					continue;
-
-				if (getTerrainNode(b.name) == null)
-				{
-					float? clamp = null;
-					if (b.ocean)
-						clamp = 0;
-
-					float newMax;
-
-					try
-					{
-						newMax = ((float)CelestialUtilities.GetHighestPeak(b)).Mathf_Round(-2);
-					}
-					catch (Exception e)
-					{
-						SCANUtil.SCANlog("Error in calculating Max Height for {0}; using default value/n{1}", b.theName, e);
-						newMax = SCANconfigLoader.SCANNode.DefaultMaxHeightRange;
-					}
-
-					SCANUtil.SCANlog("Generating new SCANsat Terrain Config for [{0}] - Max Height: [{1:F0}m]", b.bodyName, newMax);
-
-					addToTerrainConfigData(b.name, new SCANterrainConfig(SCANconfigLoader.SCANNode.DefaultMinHeightRange, newMax, clamp, SCANUtil.paletteLoader(SCANconfigLoader.SCANNode.DefaultPalette, 7), 7, false, false, b));
-				}
-			}
-		}
-
-		public static SCANterrainConfig getTerrainNode(string name)
-		{
-			if (masterTerrainNodes.ContainsKey(name))
-				return masterTerrainNodes[name];
-			else
-				SCANUtil.SCANlog("SCANsat terrain config [{0}] cannot be found in master terrain storage list", name);
-
-			return null;
-		}
-
-		public static void updateTerrainConfig (SCANterrainConfig t)
-		{
-			SCANterrainConfig update = getTerrainNode(t.Name);
-			if (update != null)
-			{
-				update.MinTerrain = t.MinTerrain;
-				update.MaxTerrain = t.MaxTerrain;
-				update.ClampTerrain = t.ClampTerrain;
-				update.PalSize = t.PalSize;
-				update.PalRev = t.PalRev;
-				update.PalDis = t.PalDis;
-				update.ColorPal = t.ColorPal;
-			}
-		}
-
-		public static void addToTerrainConfigData (string name, SCANterrainConfig data)
-		{
-			if (!masterTerrainNodes.ContainsKey(name))
-				masterTerrainNodes.Add(name, data);
-			else
-				Debug.LogError("[SCANsat] Warning: SCANterrain Data Dictionary Already Contains Key Of This Type");
-		}
-
-		public static int MasterResourceCount
-		{
-			get { return loadedResources.Count; }
-		}
-
-		public static List<SCANresourceGlobal> EncodeResourceConfigs
-		{
-			get
-			{
-				try
-				{
-					return masterResourceNodes.Values.ToList();
-				}
-				catch (Exception e)
-				{
-					SCANUtil.SCANlog("Error while saving SCANsat resource config data: {0}", e);
-				}
-
-				return new List<SCANresourceGlobal>();
-			}
-		}
-
-		public static void setMasterResourceNodes (List<SCANresourceGlobal> resourceConfigs)
-		{
-			masterResourceNodes.Clear();
-
-			try
-			{
-				int l = resourceConfigs.Count;
-
-				for (int i = 0; i < l; i++)
-				{
-					SCANresourceGlobal r = resourceConfigs[i];
-
-					if (r == null)
-						continue;
-
-					if (!masterResourceNodes.Contains(r.Name))
-						masterResourceNodes.Add(r.Name, r);
-				}
-			}
-			catch (Exception e)
-			{
-				SCANUtil.SCANlog("Error while loading SCANsat resource config settings: {0}", e);
-			}
-		}
-
-		public static SCANresourceGlobal getResourceNode (string resourceName)
-		{
-			if (masterResourceNodes.Contains(resourceName))
-				return masterResourceNodes[resourceName];
-			else
-				SCANUtil.SCANlog("SCANsat resource [{0}] cannot be found in master resource storage list", resourceName);
-
-			return null;
-		}
-
-		public static SCANresourceGlobal GetFirstResource
-		{
-			get
-			{
-				if (masterResourceNodes.Count > 0)
-					return masterResourceNodes.At(0);
-				else
-					SCANUtil.SCANlog("SCANsat resource storage list is empty; something probably went wrong here...");
-
-				return null;
-			}
-		}
-
-		public static void updateSCANresource (SCANresourceGlobal r, bool all)
-		{
-			SCANresourceGlobal update = getResourceNode(r.Name);
-			if (update != null)
-			{
-				update.MinColor = r.MinColor;
-				update.MaxColor = r.MaxColor;
-				update.Transparency = r.Transparency;
-				if (all)
-				{
-					for (int i = 0; i < update.getBodyCount; i++)
-					{
-						SCANresourceBody b = update.getBodyConfig(i);
-						if (b != null)
-						{
-							SCANresourceBody bNew = r.getBodyConfig(b.BodyName);
-							if (bNew != null)
-							{
-								b.MinValue = bNew.MinValue;
-								b.MaxValue = bNew.MaxValue;
-							}
-						}
-					}
-				}
-				else
-				{
-					SCANresourceBody b = update.getBodyConfig(r.CurrentBody.BodyName);
-					if (b != null)
-					{
-						b.MinValue = r.CurrentBody.MinValue;
-						b.MaxValue = r.CurrentBody.MaxValue;
-					}
-				}
-			}
-		}
-
-		public static void addToResourceData (string name, SCANresourceGlobal res)
-		{
-			if (!masterResourceNodes.Contains(name))
-			{
-				masterResourceNodes.Add(name, res);
-			}
-			else
-				Debug.LogError(string.Format("[SCANsat] Warning: SCANResource Dictionary Already Contains Key of This Type: Resource: {0}", name));
-		}
-
-		public static SCANresourceType getResourceType (string name, bool warn = true)
-		{
-			if (resourceTypes.ContainsKey(name))
-				return resourceTypes[name];
-			else if (warn)
-				SCANUtil.SCANlog("SCANsat resource type [{0}] cannot be found in master resource type storage list", name);
-
-			return null;
-		}
-
-		public static void addToResourceTypes (string name, SCANresourceType type)
-		{
-			if (!resourceTypes.ContainsKey(name))
-			{
-				resourceTypes.Add(name, type);
-			}
-			else
-				Debug.LogError(string.Format("[SCANsat] Warning: SCANResourceType Dictionary Already Contains Key of This Name: SCAN Resource Type: {0}", name));
-		}
-
-		public static void addToLoadedResourceNames (string name)
-		{
-			if (!loadedResources.Contains(name))
-				loadedResources.Add(name);
-			else
-				Debug.LogError(string.Format("[SCANsat] Warning: Loaded Resource List Already Contains Resource Of Name: {0}", name));
-		}
-
-		public static List<SCANresourceGlobal> setLoadedResourceList()
-		{
-			List<SCANresourceGlobal> rList = new List<SCANresourceGlobal>();
-			SCANresourceGlobal ore = null;
-
-			int l = loadedResources.Count;
-
-			for (int i = 0; i < l; i++)
-			{
-				string r = loadedResources[i];
-
-				if (string.IsNullOrEmpty(r))
-					continue;
-
-				if (masterResourceNodes.Contains(r))
-				{
-					if (r != "Ore")
-						rList.Add(masterResourceNodes[r]);
-					else
-						ore = masterResourceNodes[r];
-				}
-			}
-
-			if (ore != null)
-				rList.Insert(0, ore);
-
-			return rList;
-		}
-
-		public List<SCANvessel> Known_Vessels
-		{
-			get { return knownVessels.Values.ToList(); }
-		}
-
-		public int ActiveSensors
-		{
-			get { return activeSensors; }
-		}
-
-		public int ActiveVessels
-		{
-			get { return activeVessels; }
-		}
-
-		public int ActualPasses
-		{
-			get { return actualPasses; }
-		}
-
-		public bool ContractsLoaded
-		{
-			get { return contractsLoaded; }
-		}
-
-		public bool MechJebLoaded
-		{
-			get { return mechjebLoaded; }
-			set { mechjebLoaded = value; }
-		}
-
-		public bool TargetSelecting
-		{
-			get { return targetSelecting; }
-			internal set { targetSelecting = value; }
-		}
-
-		public bool TargetSelectingActive
-		{
-			get { return targetSelectingActive; }
-			internal set
-			{
-				if (targetSelecting)
-					targetSelectingActive = value;
-				else
-					targetSelectingActive = false;
-			}
-		}
-
-		public Vector2d LandingTargetCoords
-		{
-			get { return landingTargetCoords; }
-			internal set { landingTargetCoords = value; }
-		}
-
-		public CelestialBody LandingTargetBody
-		{
-			get { return landingTargetBody; }
-			set { landingTargetBody = value; }
-		}
-
-		public SCANwaypoint LandingTarget
-		{
-			get { return landingTarget; }
-			set { landingTarget = value; }
-		}
-		#endregion
-
-		#region save/load
-
-		public override void OnLoad(ConfigNode node)
-		{
-			lowBiomeColor = node.parse("lowBiomeColor", lowBiomeColor);
-			highBiomeColor = node.parse("highBiomeColor", highBiomeColor);
-			lowSlopeColorOne = node.parse("lowSlopeColorOne", lowSlopeColorOne);
-			highSlopeColorOne = node.parse("highSlopeColorOne", highSlopeColorOne);
-			lowSlopeColorTwo = node.parse("lowSlopeColorTwo", lowSlopeColorTwo);
-			highSlopeColorTwo = node.parse("highSlopeColorTwo", highSlopeColorTwo);
-			
-			lowBiomeColor32 = lowBiomeColor;
-			highBiomeColor32 = highBiomeColor;
-			lowSlopeColorOne32 = lowSlopeColorOne;
-			highSlopeColorOne32 = highSlopeColorOne;
-			lowSlopeColorTwo32 = lowSlopeColorTwo;
-			highSlopeColorTwo32 = highSlopeColorTwo;
-
-			ConfigNode node_vessels = node.GetNode("Scanners");
-			if (node_vessels != null)
-			{
-				SCANUtil.SCANlog("SCANsat Controller: Loading {0} known vessels", node_vessels.CountNodes);
-				foreach (ConfigNode node_vessel in node_vessels.GetNodes("Vessel"))
-				{
-					Guid id = node_vessel.parse("guid", new Guid());
-
-					if (id == new Guid())
-					{
-						SCANUtil.SCANlog("Something Went Wrong Loading This SCAN Vessel; Moving On To The Next");
-						continue;
-					}
-
-					foreach (ConfigNode node_sensor in node_vessel.GetNodes("Sensor"))
-					{
-						int sensor = node_sensor.parse("type", (int)0);
-						double fov = node_sensor.parse("fov", 3d);
-						double min_alt = node_sensor.parse("min_alt", (double)minScanAlt);
-						double max_alt = node_sensor.parse("max_alt", (double)maxScanAlt);
-						double best_alt = node_sensor.parse("best_alt", (double)bestScanAlt);
-
-						registerSensorTemp(id, (SCANtype)sensor, fov, min_alt, max_alt, best_alt);
-
-						tempIDs.Add(id);
-					}
-				}
-			}
-
-			ConfigNode node_progress = node.GetNode("Progress");
-			if (node_progress != null)
-			{
-				foreach (ConfigNode node_body in node_progress.GetNodes("Body"))
-				{
-					string body_name = node_body.parse("Name", "");
-
-					if (string.IsNullOrEmpty(body_name))
-					{
-						SCANUtil.SCANlog("SCANsat Controller: Error while loading Celestial Body data; skipping value...");
-						continue;
-					}
-
-					SCANUtil.SCANlog("SCANsat Controller: Loading map for {0}", body_name);
-
-					CelestialBody body;
-					try
-					{
-						body = FlightGlobals.Bodies.FirstOrDefault(b => b.name == body_name);
-					}
-					catch (Exception e)
-					{
-						Debug.LogError(string.Format("[SCANsat] Error in loading Celestial Body [{0}]...\n{1}", body_name, e));
-						continue;
-					}
-
-					if (body != null)
-					{
-						SCANdata data = getData(body.name);
-						if (data == null)
-							data = new SCANdata(body);
-						if (!body_data.Contains(body_name))
-							body_data.Add(body_name, data);
-						else
-							body_data[body_name] = data;
-
-						try
-						{
-							string mapdata = node_body.parse("Map", "");
-							
-							if (string.IsNullOrEmpty(mapdata))
-							{
-								SCANUtil.SCANlog("SCANsat Controller: Error while loading Celestial Body map data; skipping value...");
-								continue;
-							}
-							
-							if (dataRebuild)
-							{ //On the first load deserialize the "Map" value to both coverage arrays
-								data.integerDeserialize(mapdata, true);
-							}
-							else
-							{
-								data.integerDeserialize(mapdata, false);
-							}
-						}
-						catch (Exception e)
-						{
-							SCANUtil.SCANlog("Something Went Wrong Loading Scanning Data; Resetting Coverage: {0}", e);
-							data.reset();
-							// fail somewhat gracefully; don't make the save unloadable 
-						}
-
-						try
-						{
-							SCANwaypoint target = null;
-							string targetName = node_body.parse("LandingTarget", "");
-
-							if (!string.IsNullOrEmpty(targetName))
-								target = loadWaypoint(targetName);
-
-							data.Disabled = node_body.parse("Disabled", false);
-
-							float min = node_body.parse("MinHeightRange", data.TerrainConfig.DefaultMinHeight);
-							float max = node_body.parse("MaxHeightRange", data.TerrainConfig.DefaultMaxHeight);
-							float? clampState = node_body.parse("ClampHeight", (float?)null);
-
-							int pSize = node_body.parse("PaletteSize", data.TerrainConfig.DefaultPaletteSize);
-							bool pRev = node_body.parse("PaletteReverse", data.TerrainConfig.DefaultReverse);
-							bool pDis = node_body.parse("PaletteDiscrete", data.TerrainConfig.DefaultDiscrete);
-
-							string paletteName = node_body.parse("PaletteName", "");
-
-							if (string.IsNullOrEmpty(paletteName))
-								paletteName = data.TerrainConfig.DefaultPalette.name;
-
-							Palette dataPalette = SCANUtil.paletteLoader(paletteName, pSize);
-
-							if (dataPalette.hash == PaletteLoader.defaultPalette.hash)
-							{
-								paletteName = "Default";
-								pSize = 7;
-							}
-
-							SCANterrainConfig dataTerrainConfig = getTerrainNode(body.name);
-
-							if (dataTerrainConfig == null)
-								dataTerrainConfig = new SCANterrainConfig(min, max, clampState, dataPalette, pSize, pRev, pDis, body);
-							else
-								setNewTerrainConfigValues(dataTerrainConfig, min, max, clampState, dataPalette, pSize, pRev, pDis);
-
-							data.TerrainConfig = dataTerrainConfig;
-
-							if (target != null)
-								data.addToWaypoints(target);
-						}
-						catch (Exception e)
-						{
-							SCANUtil.SCANlog("Error Loading SCANdata; Reverting To Default Settings: {0}", e);
-						}
-					}
-				}
-			}
-			dataRebuild = false; //Used for the one-time update to the new integer array
-
-			if (SCANconfigLoader.GlobalResource)
-			{
-				if (masterResourceNodes.Count > 0)
-				{
-					if (string.IsNullOrEmpty(resourceSelection))
-						resourceSelection = masterResourceNodes.Keys.First();
-					else if (!masterResourceNodes.Contains(resourceSelection))
-						resourceSelection = masterResourceNodes.Keys.First();
-				}
-			}
-			ConfigNode node_resources = node.GetNode("SCANResources");
-			if (node_resources != null)
-			{
-				foreach(ConfigNode node_resource_type in node_resources.GetNodes("ResourceType"))
-				{
-					if (node_resource_type != null)
-					{
-						loadCustomResourceValues(node_resource_type);
-					}
-				}
-			}
-			loaded = true;
-		}
-
-		public override void OnSave(ConfigNode node)
-		{
-			node.AddValue("lowBiomeColor", ConfigNode.WriteColor(lowBiomeColor));
-			node.AddValue("highBiomeColor", ConfigNode.WriteColor(highBiomeColor));
-			node.AddValue("lowSlopeColorOne", ConfigNode.WriteColor(lowSlopeColorOne));
-			node.AddValue("highSlopeColorOne", ConfigNode.WriteColor(highSlopeColorOne));
-			node.AddValue("lowSlopeColorTwo", ConfigNode.WriteColor(lowSlopeColorTwo));
-			node.AddValue("highSlopeColorTwo", ConfigNode.WriteColor(highSlopeColorTwo));
-
-			int l = knownVessels.Count;
-			ConfigNode node_vessels = new ConfigNode("Scanners");
-
-			for (int i = 0; i < l; i++)
-			{
-				SCANvessel sv = knownVessels.At(i);
-				ConfigNode node_vessel = new ConfigNode("Vessel");
-				node_vessel.AddValue("guid", sv.id.ToString());
-				if (sv.vessel != null)
-					node_vessel.AddValue("name", sv.vessel.vesselName);
-				foreach (SCANsensor sensor in sv.sensors.Values)
-				{
-					ConfigNode node_sensor = new ConfigNode("Sensor");
-					node_sensor.AddValue("type", (int)sensor.sensor);
-					node_sensor.AddValue("fov", sensor.fov);
-					node_sensor.AddValue("min_alt", sensor.min_alt);
-					node_sensor.AddValue("max_alt", sensor.max_alt);
-					node_sensor.AddValue("best_alt", sensor.best_alt);
-					node_vessel.AddNode(node_sensor);
-				}
-				node_vessels.AddNode(node_vessel);
-			}
-			node.AddNode(node_vessels);
-			if (body_data != null)
-			{
-				ConfigNode node_progress = new ConfigNode("Progress");
-				foreach (string body_name in body_data.Keys)
-				{
-					ConfigNode node_body = new ConfigNode("Body");
-					SCANdata body_scan = body_data[body_name];
-					node_body.AddValue("Name", body_name);
-					node_body.AddValue("Disabled", body_scan.Disabled);
-					SCANwaypoint w = body_scan.Waypoints.FirstOrDefault(a => a.LandingTarget);
-					if (w != null)
-						node_body.AddValue("LandingTarget", string.Format("{0:N4},{1:N4}", w.Latitude, w.Longitude));
-					node_body.AddValue("MinHeightRange", body_scan.TerrainConfig.MinTerrain / body_scan.TerrainConfig.MinHeightMultiplier);
-					node_body.AddValue("MaxHeightRange", body_scan.TerrainConfig.MaxTerrain / body_scan.TerrainConfig.MaxHeightMultiplier);
-					if (body_scan.TerrainConfig.ClampTerrain != null)
-						node_body.AddValue("ClampHeight", body_scan.TerrainConfig.ClampTerrain / body_scan.TerrainConfig.ClampHeightMultiplier);
-					node_body.AddValue("PaletteName", body_scan.TerrainConfig.ColorPal.name);
-					node_body.AddValue("PaletteSize", body_scan.TerrainConfig.PalSize);
-					node_body.AddValue("PaletteReverse", body_scan.TerrainConfig.PalRev);
-					node_body.AddValue("PaletteDiscrete", body_scan.TerrainConfig.PalDis);
-					node_body.AddValue("Map", body_scan.integerSerialize());
-					node_progress.AddNode(node_body);
-				}
-				node.AddNode(node_progress);
-			}
-			if (resourceTypes.Count > 0 && masterResourceNodes.Count > 0)
-			{
-				ConfigNode node_resources = new ConfigNode("SCANResources");
-				foreach (SCANresourceGlobal r in masterResourceNodes.Values)
-				{
-					if (r != null)
-					{
-						ConfigNode node_resource_type = new ConfigNode("ResourceType");
-						node_resource_type.AddValue("Resource", r.Name);
-						node_resource_type.AddValue("MinColor", ConfigNode.WriteColor(r.MinColor));
-						node_resource_type.AddValue("MaxColor", ConfigNode.WriteColor(r.MaxColor));
-						node_resource_type.AddValue("Transparency", r.Transparency);
-
-						string rMinMax = saveResources(r);
-						node_resource_type.AddValue("MinMaxValues", rMinMax);
-						node_resources.AddNode(node_resource_type);
-					}
-				}
-				node.AddNode(node_resources);
-			}
-		}
-
-		#endregion
-
-		public override void OnAwake()
-		{
-			instance = this;
-
-			if (SCANconfigLoader.SCANNode == null)
-				return;
-
-			biomeTransparency = SCANconfigLoader.SCANNode.BiomeTransparency;
-			biomeBorder = SCANconfigLoader.SCANNode.BiomeBorder;
-			useStockBiomes = SCANconfigLoader.SCANNode.StockBiomeMap;
-
-			slopeCutoff = SCANconfigLoader.SCANNode.SlopeCutoff;
-
-			windowScale = SCANconfigLoader.SCANNode.WindowScale;
-
-			lowBiomeColor = SCANconfigLoader.SCANNode.LowBiomeColor;
-			highBiomeColor = SCANconfigLoader.SCANNode.HighBiomeColor;
-			lowSlopeColorOne = SCANconfigLoader.SCANNode.BottomLowSlopeColor;
-			highSlopeColorOne = SCANconfigLoader.SCANNode.BottomHighSlopeColor;
-			lowSlopeColorTwo = SCANconfigLoader.SCANNode.TopLowSlopeColor;
-			highSlopeColorTwo = SCANconfigLoader.SCANNode.TopHighSlopeColor;
-
-			lowBiomeColor32 = lowBiomeColor;
-			highBiomeColor32 = highBiomeColor;
-			lowSlopeColorOne32 = lowSlopeColorOne;
-			highSlopeColorOne32 = highSlopeColorOne;
-			lowSlopeColorTwo32 = lowSlopeColorTwo;
-			highSlopeColorTwo32 = highSlopeColorTwo;
-		}
-
-		private void Start()
-		{
-			for (int i = tempIDs.Count - 1; i >= 0; i--)
-			{
-				Guid id = tempIDs[i];
-
-				finishRegistration(id);
-			}
-
-			GameEvents.onShowUI.Add(UIOn);
-			GameEvents.onHideUI.Add(UIOff);
-			GameEvents.onGUIMissionControlSpawn.Add(UIOff);
-			GameEvents.onGUIMissionControlDespawn.Add(UIOn);
-			GameEvents.onGUIRnDComplexSpawn.Add(UIOff);
-			GameEvents.onGUIRnDComplexDespawn.Add(UIOn);
-			GameEvents.onGUIAdministrationFacilitySpawn.Add(UIOff);
-			GameEvents.onGUIAdministrationFacilityDespawn.Add(UIOn);
-			GameEvents.onGUIAstronautComplexSpawn.Add(UIOff);
-			GameEvents.onGUIAstronautComplexDespawn.Add(UIOn);
-
-			GameEvents.onVesselSOIChanged.Add(SOIChange);
-			GameEvents.onVesselCreate.Add(newVesselCheck);
-			GameEvents.onPartCouple.Add(dockingEventCheck);
-			GameEvents.Contract.onContractsLoaded.Add(contractsCheck);
-			GameEvents.Contract.onParameterChange.Add(onParamChange);
-			if (HighLogic.LoadedSceneIsFlight)
-			{
-				if (!body_data.Contains(FlightGlobals.currentMainBody.name))
-					body_data.Add(FlightGlobals.currentMainBody.name, new SCANdata(FlightGlobals.currentMainBody));
-				try
-				{
-					mainMap = gameObject.AddComponent<SCANmainMap>();
-					settingsWindow = gameObject.AddComponent<SCANsettingsUI>();
-					instrumentsWindow = gameObject.AddComponent<SCANinstrumentUI>();
-					colorManager = gameObject.AddComponent<SCANcolorSelection>();
-					BigMap = gameObject.AddComponent<SCANBigMap>();
-					resourceOverlay = gameObject.AddComponent<SCANoverlayController>();
-					resourceSettings = gameObject.AddComponent<SCANresourceSettings>();
-					zoomMap = gameObject.AddComponent<SCANzoomWindow>();
-				}
-				catch (Exception e)
-				{
-					SCANUtil.SCANlog("Something Went Wrong Initializing UI Objects: {0}", e);
-				}
-			}
-			else if (HighLogic.LoadedSceneHasPlanetarium)
-			{
-				if (!body_data.Contains(Planetarium.fetch.Home.name))
-					body_data.Add(Planetarium.fetch.Home.name, new SCANdata(Planetarium.fetch.Home));
-				try
-				{
-					kscMap = gameObject.AddComponent<SCANkscMap>();
-					settingsWindow = gameObject.AddComponent<SCANsettingsUI>();
-					colorManager = gameObject.AddComponent<SCANcolorSelection>();
-					resourceSettings = gameObject.AddComponent<SCANresourceSettings>();
-					if (HighLogic.LoadedScene == GameScenes.TRACKSTATION)
-					{
-						resourceOverlay = gameObject.AddComponent<SCANoverlayController>();
-					}
-				}
-				catch (Exception e)
-				{
-					SCANUtil.SCANlog("Something Went Wrong Initializing UI Objects: {0}", e);
-				}
-			}
-			if (useStockAppLauncher)
-				appLauncher = gameObject.AddComponent<SCANappLauncher>();
-
-			if (disableStockResource && useScanThreshold)
-			{
-				for (int i = 0; i < FlightGlobals.Bodies.Count; i++)
-				{
-					CelestialBody b = FlightGlobals.Bodies[i];
-
-					checkResourceScanStatus(b);
-				}
-			}
-		}
-
-		private void Update()
-		{
-			if (scan_background && loaded)
-				scanFromAllVessels();
-
-			if (!heightMapsBuilt)
-				checkHeightMapStatus();
-
-			if (!HighLogic.LoadedSceneIsFlight && HighLogic.LoadedScene != GameScenes.TRACKSTATION)
-				return;
-
-			if (!easyModeScanning || disableStockResource)
-				return;
-
-			if (body == null)
-			{
-				if (HighLogic.LoadedSceneIsFlight)
-				{
-					body = FlightGlobals.ActiveVessel.mainBody;
-					bodyScanned = false;
-					bodyCoverage = false;
-				}
-				else if (HighLogic.LoadedScene == GameScenes.TRACKSTATION)
-				{
-					MapObject target = PlanetariumCamera.fetch.target;
-
-					if (target.type != MapObject.ObjectType.CelestialBody)
-					{
-						body = null;
-						return;
-					}
-
-					body = target.celestialBody;
-					bodyScanned = false;
-					bodyCoverage = false;
-				}
-			}
-
-			if (bodyScanned)
-				return;
-
-			if (!bodyCoverage)
-			{
-				if (SCANUtil.GetCoverage((int)SCANtype.AllResources, body) >= 100)
-				{
-					bodyScanned = true;
-					return;
-				}
-				bodyCoverage = true;
-			}
-
-			if (ResourceMap.Instance.IsPlanetScanned(body.flightGlobalsIndex))
-			{
-				SCANdata data = SCANUtil.getData(body);
-				if (data == null)
-				{
-					data = new SCANdata(body);
-					addToBodyData(body, data);
-				}
-				data.fillResourceMap();
-				bodyScanned = true;
-			}
-		}
-
-		public void checkResourceScanStatus(CelestialBody body)
-		{
-			if (!useScanThreshold)
-				return;
-
-			if (body == null)
-				return;
-
-			if (ResourceMap.Instance.IsPlanetScanned(body.flightGlobalsIndex))
-				return;
-
-			SCANdata data = getData(body.name);
-
-			if (data == null)
-				return;
-
-			if (SCANUtil.getCoveragePercentage(data, SCANtype.FuzzyResources) > (scanThreshold * 100))
-			{
-				SCANUtil.SCANlog("SCANsat resource scanning for {0} meets threshold value [{1:P0}]\nConducting stock orbital resource scan...", body.theName, scanThreshold);
-				ResourceMap.Instance.UnlockPlanet(body.flightGlobalsIndex);
-			}
-		}
-
-		private int dataStep, dataStart;
-		private bool currentlyBuilding;
-		private SCANdata buildingData;
-
-		private void checkHeightMapStatus()
-		{
-			if (!currentlyBuilding)
-			{
-				for (int i = 0; i < body_data.Count; i++)
-				{
-					buildingData = getData(i);
-
-					if (buildingData == null)
-						continue;
-
-					if (buildingData.Built)
-						continue;
-
-					if (buildingData.MapBuilding || buildingData.OverlayBuilding)
-						continue;
-
-					buildingData.ControllerBuilding = true;
-					currentlyBuilding = true;
-
-					return;
-				}
-			}
-			else
-			{
-				if (buildingData == null)
-				{
-					currentlyBuilding = false;
-					return;
-				}
-
-				if (buildingData.Built)
-				{
-					currentlyBuilding = false;
-					buildingData.ControllerBuilding = false;
-					return;
-				}
-
-				if (buildingData.ControllerBuilding)
-				{
-					buildingData.generateHeightMap(ref dataStep, ref dataStart, 120);
-					return;
-				}
-			}
-
-			SCANUtil.SCANlog("All Height Maps Generated");
-
-			buildingData = null;
-			heightMapsBuilt = true;
-		}
-
-		private void OnDestroy()
-		{
-			GameEvents.onShowUI.Remove(UIOn);
-			GameEvents.onHideUI.Remove(UIOff);
-			GameEvents.onGUIMissionControlSpawn.Remove(UIOff);
-			GameEvents.onGUIMissionControlDespawn.Remove(UIOn);
-			GameEvents.onGUIRnDComplexSpawn.Remove(UIOff);
-			GameEvents.onGUIRnDComplexDespawn.Remove(UIOn);
-			GameEvents.onGUIAdministrationFacilitySpawn.Remove(UIOff);
-			GameEvents.onGUIAdministrationFacilityDespawn.Remove(UIOn);
-			GameEvents.onGUIAstronautComplexSpawn.Remove(UIOff);
-			GameEvents.onGUIAstronautComplexDespawn.Remove(UIOn);
-
-			GameEvents.onVesselSOIChanged.Remove(SOIChange);
-			GameEvents.onVesselCreate.Remove(newVesselCheck);
-			GameEvents.onPartCouple.Remove(dockingEventCheck);
-			GameEvents.Contract.onContractsLoaded.Remove(contractsCheck);
-			GameEvents.Contract.onParameterChange.Remove(onParamChange);
-			if (mainMap != null)
-				Destroy(mainMap);
-			if (settingsWindow != null)
-				Destroy(settingsWindow);
-			if (instrumentsWindow != null)
-				Destroy(instrumentsWindow);
-			if (kscMap != null)
-				Destroy(kscMap);
-			if (BigMap != null)
-				Destroy(BigMap);
-			if (resourceOverlay != null)
-				Destroy(resourceOverlay);
-			if (resourceSettings != null)
-				Destroy(resourceSettings);
-			if (appLauncher != null)
-				Destroy(appLauncher);
-			//if (hiDefMap != null)
-			//	Destroy(hiDefMap);
-
-			if (!heightMapsBuilt)
-			{
-				for (int i = dataBodies.Count - 1; i >= 0; i--)
-				{
-					CelestialBody b = dataBodies[i];
-
-					unloadPQS(b);
-				}
-			}
-		}
-
-		private void UIOn()
-		{
-			showUI = true;
-		}
-
-		private void UIOff()
-		{
-			showUI = false;
-		}
-
-		internal void loadPQS(CelestialBody b, mapSource s = mapSource.Data)
-		{
-			if (!SCANmainMenuLoader.KopernicusLoaded)
-				return;
-
-			if (b == null)
-				return;
-
-			switch (s)
-			{
-				case mapSource.Data:
-					if (dataBodies.Contains(b))
-						return;
-
-					dataBodies.Add(b);
-
-					if (bigMapBody != null && bigMapBody == b)
-						return;
-
-					if (zoomMapBody != null && zoomMapBody == b)
-						return;
-					break;
-				case mapSource.BigMap:
-					if (bigMapBody != null && bigMapBody == b)
-						return;
-
-					bigMapBody = b;
-
-					if (zoomMapBody != null && zoomMapBody == b)
-						return;
-
-					if (dataBodies.Contains(b))
-						return;
-					break;
-
-				case mapSource.ZoomMap:
-					if (zoomMapBody != null && zoomMapBody == b)
-						return;
-
-					zoomMapBody = b;
-
-					if (bigMapBody != null && bigMapBody == b)
-						return;
-
-					if (dataBodies.Contains(b))
-						return;
-					break;
-				case mapSource.RPM:
-					return;
-			}
-
-			KopernicusOnDemand = b.GetComponentsInChildren<PQSMod>(true).Where(p => p.GetType().Name == "PQSMod_OnDemandHandler").FirstOrDefault();
-
-			if (KopernicusOnDemand == null)
-				return;
-
-			KopernicusOnDemand.OnQuadPreBuild(null);
-
-			KopernicusOnDemand = null;
-
-			SCANUtil.SCANlog("Loading Kopernicus On Demand PQSMod For {0}", b.theName);
-		}
-
-		internal void unloadPQS(CelestialBody b, mapSource s = mapSource.Data)
-		{
-			if (!SCANmainMenuLoader.KopernicusLoaded)
-				return;
-
-			if (b == null)
-				return;
-
-			switch (s)
-			{
-				case mapSource.Data:
-					if (dataBodies.Contains(b))
-						dataBodies.RemoveAll(a => a == b);
-
-					if (bigMapBody != null && bigMapBody == b)
-						return;
-
-					if (zoomMapBody != null && zoomMapBody == b)
-						return;
-					break;
-				case mapSource.BigMap:
-					bigMapBody = null;
-
-					if (zoomMapBody != null && zoomMapBody == b)
-						return;
-
-					if (dataBodies.Contains(b))
-						return;
-					break;
-
-				case mapSource.ZoomMap:
-					zoomMapBody = null;
-
-					if (bigMapBody != null && bigMapBody == b)
-						return;
-
-					if (dataBodies.Contains(b))
-						return;
-					break;
-				case mapSource.RPM:
-					return;
-			}
-
-			bool setInactive = false;
-
-			switch(HighLogic.LoadedScene)
-			{
-				case GameScenes.SPACECENTER:
-					if (b != Planetarium.fetch.Home)
-						setInactive = true;
-					break;
-				case GameScenes.TRACKSTATION:
-					setInactive = true;
-					break;
-				case GameScenes.FLIGHT:
-					if (b != FlightGlobals.currentMainBody)
-						setInactive = true;
-					break;
-			}
-
-			if (!setInactive)
-				return;
-
-			KopernicusOnDemand = b.GetComponentsInChildren<PQSMod>(true).Where(p => p.GetType().Name == "PQSMod_OnDemandHandler").FirstOrDefault();
-
-			if (KopernicusOnDemand == null)
-				return;
-
-			KopernicusOnDemand.OnSphereInactive();
-
-			KopernicusOnDemand = null;
-
-			SCANUtil.SCANlog("Unloading Kopernicus On Demand PQSMod For {0}", b.theName);
-		}
-
-		private void OnGUI()
-		{
-			if (showUI)
-			{
-				Matrix4x4 previousGuiMatrix = GUI.matrix;
-				GUI.matrix = Matrix4x4.TRS(Vector3.zero, Quaternion.identity, new Vector3(windowScale, windowScale, 1));
-
-				for (int i = 0; i < drawQueue.Count; i++)
-				{
-					drawQueue.At(i)();
-				}
-
-				GUI.matrix = previousGuiMatrix;
-			}
-
-			if (HighLogic.LoadedSceneIsFlight || HighLogic.LoadedScene == GameScenes.TRACKSTATION)
-				drawTarget();
-		}
-
-		private void drawTarget()
-		{
-			if (!MapView.MapIsEnabled)
-				return;
-
-			CelestialBody b = SCANUtil.getTargetBody(MapView.MapCamera.target);
-
-			if (b == null)
-				return;
-
-			SCANdata d = getData(b.name);
-
-			if (d == null)
-				return;
-
-			if (groundTracks && HighLogic.LoadedSceneIsFlight && !d.Disabled && scan_background)
-				drawGroundTracks(b);
-
-			if (!mechJebTargetSelection)
-			{
-				SCANwaypoint target = d.Waypoints.FirstOrDefault(a => a.LandingTarget);
-				if (target != null)
-				{
-					SCANuiUtil.drawTargetOverlay(b, target.Latitude, target.Longitude, XKCDColors.DarkGreen);
-				}
-			}
-		}
-
-		private void drawGroundTracks(CelestialBody body)
-		{
-			if (groundTrackActiveOnly)
-			{
-				Vessel v = FlightGlobals.ActiveVessel;
-
-				if (v.mainBody != body)
-					return;
-
-				if (v.situation == Vessel.Situations.LANDED || v.situation == Vessel.Situations.PRELAUNCH || v.situation == Vessel.Situations.SPLASHED)
-					return;
-
-				if (!isVesselKnown(v))
-					return;
-
-				SCANvessel sv = knownVessels[v.id];
-
-				if (sv == null)
-					return;
-
-				Color col;
-
-				double groundWidth = getFOV(sv, body, out col);
-
-				if (groundWidth < 1)
-					return;
-
-				double surfaceScale = (2 * Math.PI * body.Radius) / 360;
-
-				groundWidth *= surfaceScale;
-
-				SCANuiUtil.drawGroundTrackTris(body, sv.vessel, groundWidth, col);
-			}
-			else
-			{
-				double surfaceScale = (2 * Math.PI * body.Radius) / 360;
-
-				for (int j = knownVessels.Count - 1; j >= 0 ; j--)
-				{			 
-					SCANvessel sv = knownVessels.At(j);
-
-					if (sv == null)
-						continue;
-
-					if (sv.vessel.mainBody != body)
-						continue;
-
-					if (sv.vessel.situation == Vessel.Situations.LANDED || sv.vessel.situation == Vessel.Situations.PRELAUNCH || sv.vessel.situation == Vessel.Situations.SPLASHED)
-						continue;
-
-					Color col;
-
-					double groundWidth = getFOV(sv, body, out col);
-
-					if (groundWidth < 1)
-						continue;
-
-					groundWidth *= surfaceScale;
-
-					SCANuiUtil.drawGroundTrackTris(body, sv.vessel, groundWidth, col);
-				}
-			}
-		}
-
-		private double getFOV(SCANvessel v, CelestialBody b, out Color c)
-		{
-			c = XKCDColors.DarkGreen;
-			double maxFOV = 0;
-			double alt = v.vessel.altitude;
-			double soi_radius = b.sphereOfInfluence - b.Radius;
-			double surfscale = Planetarium.fetch.Home.Radius / b.Radius;
-			if (surfscale < 1)
-				surfscale = 1;
-			surfscale = Math.Sqrt(surfscale);
-
-			for (int j = v.sensors.Count - 1; j >= 0; j--)
-			{
-				SCANsensor s = v.sensors.At(j);
-
-				if (alt < s.min_alt)
-					continue;
-				if (alt > Math.Min(s.max_alt, soi_radius))
-					continue;
-
-				double fov = s.fov;
-				double ba = Math.Min(s.best_alt, soi_radius);
-				if (alt < ba)
-				{
-					fov = (alt / ba) * fov;
-				}
-
-				fov *= surfscale;
-				if (fov > 20)
-					fov = 20;
-
-				if (fov > maxFOV)
-					maxFOV = fov;
-			}
-
-			return maxFOV;
-		}
-
-		private void removeVessel(Vessel v)
-		{
-			if (isVesselKnown(v))
-			{
-				foreach (SCANtype t in Enum.GetValues(typeof(SCANtype)))
-					unregisterSensor(v, t);
-			}
-		}
-
-		private void addVessel(Vessel v)
-		{
-			foreach (SCANsat.SCAN_PartModules.SCANsat s in v.FindPartModulesImplementing<SCANsat.SCAN_PartModules.SCANsat>())
-			{
-				if (s.scanningNow())
-					registerSensor(v.id, (SCANtype)s.sensorType, s.fov, s.min_alt, s.max_alt, s.best_alt);
-			}
-		}
-
-		private void dockingEventCheck(GameEvents.FromToAction<Part, Part> Parts)
-		{
-			StartCoroutine(dockingCheckCoRoutine(Parts.to.vessel, Parts.from.vessel));
-		}
-
-		IEnumerator dockingCheckCoRoutine(Vessel to, Vessel from)
-		{
-			int timer = 0;
-
-			while (timer < 45)
-			{
-				timer++;
-				yield return null;
-			}
-
-			if (from != null)
-			{
-				removeVessel(from);
-			}
-
-			if (to != null)
-			{
-				removeVessel(to);
-			}
-
-			addVessel(FlightGlobals.ActiveVessel);
-		}
-
-		private void newVesselCheck(Vessel v)
-		{
-			if (v.loaded)
-			{
-				Vessel newVessel = null;
-
-				if (v.Parts.Count > 1)
-					newVessel = v;
-				else
-					newVessel = null;
-
-				Vessel oldVessel = FlightGlobals.ActiveVessel;
-
-				StartCoroutine(newVesselCoRoutine(newVessel, oldVessel));
-			}
-		}
-
-		IEnumerator newVesselCoRoutine(Vessel newV, Vessel oldV)
-		{
-			int timer = 0;
-
-			while (timer < 45)
-			{
-				timer++;
-				yield return null;
-			}
-
-			if (newV != null)
-			{
-				removeVessel(newV);
-				addVessel(newV);
-			}
-
-			if (oldV != null)
-			{
-				removeVessel(oldV);
-				addVessel(oldV);
-			}
-		}
-
-		private void contractsCheck()
-		{
-			contractsLoaded = true;
-		}
-
-		private void onParamChange(Contract c, ContractParameter p)
-		{
-			if (c.GetType() != typeof(SurveyContract))
-				return;
-
-			SurveyContract s = c as SurveyContract;
-
-			CelestialBody b = s.targetBody;
-
-			SCANdata data = getData(b.name);
-
-			if (data == null)
-				return;
-
-			data.addSurveyWaypoints(b, s);
-		}
-
-		private void SOIChange(GameEvents.HostedFromToAction<Vessel, CelestialBody> VC)
-		{
-			if (!body_data.Contains(VC.to.name))
-				body_data.Add(VC.to.name, new SCANdata(VC.to));
-			body = VC.to;
-			bodyScanned = false;
-			bodyCoverage = false;
-		}
-
-		private void setNewTerrainConfigValues(SCANterrainConfig terrain, float min, float max, float? clamp, Palette c, int size, bool reverse, bool discrete)
-		{
-			terrain.MinTerrain = min * terrain.MinHeightMultiplier;
-			terrain.MaxTerrain = max * terrain.MaxHeightMultiplier;
-			terrain.ClampTerrain = clamp * terrain.ClampHeightMultiplier;
-			terrain.ColorPal = c;
-			terrain.PalSize = size;
-			terrain.PalRev = reverse;
-			terrain.PalDis = discrete;
-		}
-
-		private string saveResources(SCANresourceGlobal resource)
-		{
-			List<string> sL = new List<string>();
-			for (int j = 0; j < resource.getBodyCount; j++)
-			{
-				SCANresourceBody bodyRes = resource.getBodyConfig(j);
-				if (bodyRes != null)
-				{
-					string a = string.Format("{0}|{1:F3}|{2:F3}", bodyRes.Index, bodyRes.MinValue, bodyRes.MaxValue);
-					sL.Add(a);
-				}
-			}
-
-			return string.Join(",", sL.ToArray());
-		}
-
-		private void loadCustomResourceValues(ConfigNode node)
-		{
-			SCANresourceGlobal r;
-
-			string resource = node.parse("Resource", "");
-
-			if (string.IsNullOrEmpty(resource))
-				return;
-
-			if (masterResourceNodes.Contains(resource))
-				r = masterResourceNodes[resource];
-			else
-				return;
-
-			Color lowColor = node.parse("MinColor", r.DefaultLowColor);
-			Color highColor = node.parse("MaxColor", r.DefaultHighColor);
-			float transparent = node.parse("Transparency", r.DefaultTrans);
-
-			r.MinColor = lowColor;
-			r.MaxColor = highColor;
-			r.Transparency = transparent;
-
-			string s = node.parse("MinMaxValues", "");
-
-			if (!string.IsNullOrEmpty(s))
-			{
-				string[] sA = s.Split(',');
-				for (int i = 0; i < sA.Length; i++)
-				{
-					string[] sB = sA[i].Split('|');
-					try
-					{
-						int j = 0;
-						float min = 0;
-						float max = 0;
-						if (!int.TryParse(sB[0], out j))
-							continue;
-
-						CelestialBody b = null;
-
-						try
-						{
-							b = FlightGlobals.Bodies.FirstOrDefault(a => a.flightGlobalsIndex == j);
-						}
-						catch (Exception e)
-						{
-							Debug.LogError("[SCANsat] Error in loading Celestial Body...\n" + e);
-							return;
-						}
-
-						if (b != null)
-						{
-							SCANresourceBody res = r.getBodyConfig(b.name);
-							if (res != null)
-							{
-								if (!float.TryParse(sB[1], out min))
-									min = res.DefaultMinValue;
-								if (!float.TryParse(sB[2], out max))
-									max = res.DefaultMaxValue;
-								res.MinValue = min;
-								res.MaxValue = max;
-							}
-							else
-								SCANUtil.SCANlog("No resources found assigned for Celestial Body: {0}, skipping...", b.name);
-						}
-						else
-							SCANUtil.SCANlog("No Celestial Body found matching this saved resource value: {0}, skipping...", j);
-					}
-					catch (Exception e)
-					{
-						SCANUtil.SCANlog("Something Went Wrong While Loading Custom Resource Settings; Reverting To Default Values: {0}", e);
-					}
-				}
-			}
-		}
-
-		private SCANwaypoint loadWaypoint(string s)
-		{
-			SCANwaypoint w = null;
-			string[] a = s.Split(',');
-			double lat = 0;
-			double lon = 0;
-			if (!double.TryParse(a[0], out lat))
-				return w;
-			if (!double.TryParse(a[1], out lon))
-				return w;
-
-			string name = mechJebTargetSelection ? "MechJeb Landing Target" : "Landing Target Site";
-
-			w = new SCANwaypoint(lat, lon, name);
-
-			return w;
-		}
-
-		public class SCANsensor
-		{
-			public SCANtype sensor;
-			public double fov;
-			public double min_alt, max_alt, best_alt;
-
-			public bool inRange;
-			public bool bestRange;
-
-			public SCANsensor() { }
-
-			public SCANsensor(SCANtype t, double f, double min, double max, double best)
-			{
-				sensor = t;
-				fov = f;
-				min_alt = min;
-				max_alt = max;
-				best_alt = best;
-			}
-		}
-
-		public class SCANvessel
-		{
-			public Guid id;
-			public Vessel vessel;
-			public DictionaryValueList<SCANtype, SCANsensor> sensors = new DictionaryValueList<SCANtype, SCANsensor>();
-
-			public CelestialBody body;
-			public double latitude, longitude;
-			public int frame;
-			public double lastUT;
-		}
-
-		private void registerSensorTemp(Guid id, SCANtype sensors, double fov, double min_alt, double max_alt, double best_alt)
-		{
-			if (id == null)
-				return;
-			if (!knownVessels.Contains(id))
-				knownVessels[id] = new SCANvessel();
-			SCANvessel sv = knownVessels[id];
-			sv.id = id;
-			foreach (SCANtype sensor in Enum.GetValues(typeof(SCANtype)))
-			{
-				if (SCANUtil.countBits((int)sensor) != 1)
-					continue;
-				if ((sensor & sensors) == SCANtype.Nothing)
-					continue;
-				double this_fov = fov;
-				double this_min_alt = min_alt;
-				double this_max_alt = max_alt;
-				double this_best_alt = best_alt;
-				if (this_max_alt <= 0)
-				{
-					this_min_alt = 5000;
-					this_max_alt = 500000;
-					this_best_alt = 200000;
-					this_fov = 5;
-					if ((sensor & SCANtype.AltimetryHiRes) != SCANtype.Nothing) this_fov = 3;
-					if ((sensor & SCANtype.AnomalyDetail) != SCANtype.Nothing)
-					{
-						this_min_alt = 0;
-						this_max_alt = 2000;
-						this_best_alt = 0;
-						this_fov = 1;
-					}
-				}
-				if (!sv.sensors.Contains(sensor))
-					sv.sensors[sensor] = new SCANsensor(sensor, this_fov, this_min_alt, this_max_alt, this_best_alt);
-				else
-				{
-					SCANsensor s = sv.sensors[sensor];
-					s.sensor = sensor;
-					if (this_fov > s.fov)
-						s.fov = this_fov;
-					if (this_min_alt < s.min_alt)
-						s.min_alt = this_min_alt;
-					if (this_max_alt > s.max_alt)
-						s.max_alt = this_max_alt;
-					s.best_alt = this_best_alt;
-				}
-			}
-		}
-
-		private void finishRegistration(Guid id)
-		{
-			if (!knownVessels.Contains(id))
-				return;
-
-			SCANvessel sv = knownVessels[id];
-
-			try
-			{
-				sv.vessel = FlightGlobals.Vessels.FirstOrDefault(a => a.id == id);
-			}
-			catch (Exception e)
-			{
-				Debug.LogError("[SCANsat] Something went wrong while trying to load this SCANsat vessel; moving on the next vessel... \n" + e);
-			}
-
-			if (sv.vessel == null)
-				knownVessels.Remove(id);
-		}
-
-		internal void registerSensor(Vessel v, SCANtype sensors, double fov, double min_alt, double max_alt, double best_alt)
-		{
-			registerSensor(v.id, sensors, fov, min_alt, max_alt, best_alt);
-			knownVessels[v.id].vessel = v;
-			knownVessels[v.id].latitude = SCANUtil.fixLatShift(v.latitude);
-			knownVessels[v.id].longitude = SCANUtil.fixLonShift(v.longitude);
-		}
-
-		private void registerSensor(Guid id, SCANtype sensors, double fov, double min_alt, double max_alt, double best_alt)
-		{
-			if (id == null)
-				return;
-			if (!knownVessels.Contains(id))
-				knownVessels[id] = new SCANvessel();
-			SCANvessel sv = knownVessels[id];
-			sv.id = id;
-			try
-			{
-				sv.vessel = FlightGlobals.Vessels.FirstOrDefault(a => a.id == id);
-			}
-			catch (Exception e)
-			{
-				Debug.LogError("[SCANsat] Something went wrong while trying to load this SCANsat vessel; moving on the next vessel... \n" + e);
-			}
-			if (sv.vessel == null)
-			{
-				knownVessels.Remove(id);
-				return;
-			}
-			foreach (SCANtype sensor in Enum.GetValues(typeof(SCANtype)))
-			{
-				if (SCANUtil.countBits((int)sensor) != 1)
-					continue;
-				if ((sensor & sensors) == SCANtype.Nothing)
-					continue;
-				double this_fov = fov;
-				double this_min_alt = min_alt;
-				double this_max_alt = max_alt;
-				double this_best_alt = best_alt;
-				if (this_max_alt <= 0)
-				{
-					this_min_alt = 5000;
-					this_max_alt = 500000;
-					this_best_alt = 200000;
-					this_fov = 5;
-					if ((sensor & SCANtype.AltimetryHiRes) != SCANtype.Nothing) this_fov = 3;
-					if ((sensor & SCANtype.AnomalyDetail) != SCANtype.Nothing)
-					{
-						this_min_alt = 0;
-						this_max_alt = 2000;
-						this_best_alt = 0;
-						this_fov = 1;
-					}
-				}
-				if (!sv.sensors.Contains(sensor))
-					sv.sensors[sensor] = new SCANsensor(sensor, this_fov, this_min_alt, this_max_alt, this_best_alt);
-				else
-				{
-					SCANsensor s = sv.sensors[sensor];
-					s.sensor = sensor;
-					if (this_fov > s.fov)
-						s.fov = this_fov;
-					if (this_min_alt < s.min_alt)
-						s.min_alt = this_min_alt;
-					if (this_max_alt > s.max_alt)
-						s.max_alt = this_max_alt;
-					s.best_alt = this_best_alt;
-				}
-			}
-		}
-
-		internal void unregisterSensor(Vessel v, SCANtype sensors)
-		{
-			if (!knownVessels.Contains(v.id))
-				return;
-
-			SCANvessel sv = knownVessels[v.id];
-			sv.id = v.id;
-			sv.vessel = v;
-			foreach (SCANtype sensor in Enum.GetValues(typeof(SCANtype)))
-			{
-				if ((sensors & sensor) == SCANtype.Nothing)
-					continue;
-				if (!sv.sensors.Contains(sensor))
-					continue;
-
-				sv.sensors.Remove(sensor);
-			}
-			if (sv.sensors.Count == 0)
-			{
-				knownVessels.Remove(v.id);
-				SCANUtil.SCANdebugLog("Unregister Vessel");
-			}
-		}
-
-		internal bool isVesselKnown(Guid id, SCANtype sensor)
-		{
-			if (!knownVessels.Contains(id))
-				return false;
-
-			SCANtype all = SCANtype.Nothing;
-
-			SCANvessel sv = knownVessels[id];
-
-			for (int i = sv.sensors.Count - 1; i >= 0; i--)
-				all |= sv.sensors.At(i).sensor;
-
-			return (all & sensor) != SCANtype.Nothing;
-		}
-
-		public bool isVesselKnown(Guid id)
-		{
-			if (!knownVessels.Contains(id))
-				return false;
-
-			return knownVessels[id].sensors.Count > 0;
-		}
-
-		public bool isVesselKnown(Vessel v)
-		{
-			if (v.vesselType == VesselType.Debris)
-				return false;
-
-			return isVesselKnown(v.id);
-		}
-
-		internal SCANsensor getSensorStatus(Vessel v, SCANtype sensor)
-		{
-			if (!knownVessels.Contains(v.id))
-				return null;
-			if (!knownVessels[v.id].sensors.Contains(sensor))
-				return null;
-
-			return knownVessels[v.id].sensors[sensor];
-		}
-
-		internal SCANtype activeSensorsOnVessel(Guid id)
-		{
-			if (!knownVessels.Contains(id))
-				return SCANtype.Nothing;
-
-			SCANtype sensors = SCANtype.Nothing;
-
-			SCANvessel sv = knownVessels[id];
-
-			for (int i = sv.sensors.Count - 1; i >= 0; i--)
-				sensors |= sv.sensors.At(i).sensor;
-
-			return sensors;
-		}
-
-		private int i = 0;
-		private static int last_scan_frame;
-		private static float last_scan_time;
-		private static double scan_UT;
-		private int activeSensors, activeVessels;
-		private static int currentActiveSensor, currentActiveVessel;
-		private void scanFromAllVessels()
-		{
-			if (Time.realtimeSinceStartup - last_scan_time < 1 && Time.realtimeSinceStartup > last_scan_time)
-				return;
-			if (last_scan_frame == Time.frameCount)
-				return;
-
-			last_scan_frame = Time.frameCount;
-			last_scan_time = Time.realtimeSinceStartup;
-			scan_UT = Planetarium.GetUniversalTime();
-			currentActiveSensor = 0;
-			currentActiveVessel = 0;
-			actualPasses = 0;
-			maxRes = 0;
-			if (body_data.Count > 0)
-			{
-				body_data.At(i).updateCoverage();     //SCANUtil.getData(FlightGlobals.Bodies[i]); //Update coverage for planets one at a time, rather than all together
-				i++;
-				if (i >= body_data.Count) i = 0;
-			}
-			int l = knownVessels.Count;
-			for (int j = 0; j < l; j++)
-			{
-				SCANvessel vessel = knownVessels.At(j);
-				Vessel v = vessel.vessel;
-				SCANdata data = SCANUtil.getData(v.mainBody);
-				if (data == null)
-					continue;
-
-				if (!data.Disabled)
-				{
-					if (isVesselKnown(v))
-					{
-						doScanPass(vessel, scan_UT, scan_UT, vessel.lastUT, vessel.latitude, vessel.longitude);
-						++currentActiveVessel;
-						currentActiveSensor += knownVessels[v.id].sensors.Count;
-					}
-				}
-
-				vessel.body = v.mainBody;
-				vessel.frame = Time.frameCount;
-				vessel.lastUT = scan_UT;
-				vessel.latitude = SCANUtil.fixLatShift(v.latitude);
-				vessel.longitude = SCANUtil.fixLonShift(v.longitude);
-			}
-			activeVessels = currentActiveVessel;
-			activeSensors = currentActiveSensor;
-		}
-
-		private int actualPasses, maxRes;
-		private static Queue<double> scanQueue;
-		private void doScanPass(SCANvessel vessel, double UT, double startUT, double lastUT, double llat, double llon)
-		{
-			Vessel v = vessel.vessel;
-			SCANdata data = SCANUtil.getData(v.mainBody);
-			if (data == null)
-				return;
-
-			double soi_radius = v.mainBody.sphereOfInfluence - v.mainBody.Radius;
-			double alt = v.altitude, lat = SCANUtil.fixLatShift(v.latitude), lon = SCANUtil.fixLonShift(v.longitude);
-			double res = 0;
-			Orbit o = v.orbit;
-			bool uncovered;
-
-			if (scanQueue == null)
-				scanQueue = new Queue<double>();
-
-			if (scanQueue.Count != 0)
-				scanQueue.Clear();
-
-		loop: // don't look at me like that, I just unrolled the recursion
-			if (res > 0)
-			{
-				if (double.IsNaN(UT))
-					goto dequeue;
-
-				//if (o.ObT <= 0)
-				//{
-				//	SCANUtil.SCANlog("Dequeue {0}", 1);
-				//	goto dequeue;
-				//}
-
-				if (double.IsNaN(o.getObtAtUT(UT)))
-					goto dequeue;
-
-				Vector3d pos = o.getPositionAtUT(UT);
-				double rotation = 0;
-
-				if (v.mainBody.rotates)
-					rotation = (360 * ((UT - scan_UT) / v.mainBody.rotationPeriod)) % 360;
-
-				alt = v.mainBody.GetAltitude(pos);
-				lat = SCANUtil.fixLatShift(v.mainBody.GetLatitude(pos));
-				lon = SCANUtil.fixLonShift(v.mainBody.GetLongitude(pos) - rotation);
-
-				if (alt < 0)
-					alt = 0;
-
-				if (res > maxRes)
-					maxRes = (int)res;
-			}
-			else
-			{
-				alt = v.radarAltitude;
-				if (alt < 0)
-					alt = v.altitude;
-			}
-
-			if (Math.Abs(lat - llat) < 1 && Math.Abs(lon - llon) < 1 && res > 0)
-				goto dequeue;
-			
-			actualPasses++;
-
-			uncovered = res <= 0;
-
-			for (int j = vessel.sensors.Count - 1; j >= 0; j--)
-			{
-				SCANsensor sensor = vessel.sensors.At(j);
-
-				if (res <= 0)
-				{
-					if (data.getCoverage(sensor.sensor) > 0)
-						uncovered = false;
-				}
-
-				sensor.inRange = false;
-				sensor.bestRange = false;
-
-				if (alt < sensor.min_alt)
-					continue;
-
-				if (alt > Math.Min(sensor.max_alt, soi_radius))
-					continue;
-
-				sensor.inRange = true;
-
-				double fov = sensor.fov;
-				double ba = Math.Min(sensor.best_alt, soi_radius);
-
-				if (alt < ba)
-					fov = (alt / ba) * fov;
-				else
-					sensor.bestRange = true;
-
-				double surfscale = Planetarium.fetch.Home.Radius / v.mainBody.Radius;
-
-				if (surfscale < 1)
-					surfscale = 1;
-
-				surfscale = Math.Sqrt(surfscale);
-				fov *= surfscale;
-
-				if (fov > 20)
-					fov = 20;
-
-				int f = (int)Math.Truncate(fov);
-				int f1 = f + (int)Math.Round(fov - f);
-
-				for (int x = -f; x <= f1; ++x)
-				{
-					for (int y = -f; y <= f1; ++y)
-					{
-						double clampLon = lon + x;
-						double clampLat = lat + y;
-						if (clampLat > 89)
-						{
-							clampLat = 179 - clampLat;
-							clampLon += 180;
-						}
-						if (clampLat < -90)
-						{
-							clampLat = -180 - clampLat;
-							clampLon += 180;
-						}
-
-						SCANUtil.registerPass(clampLon, clampLat, data, sensor.sensor);
-					}
-				}
-			}
-			if (uncovered)
-				return;
-			/* 
-			if(v.mainBody == FlightGlobals.currentMainBody) {
-				if(res > 0) data.map_small.SetPixel((int)Math.Round(lon) + 180, (int)Math.Round(lat) + 90, palette.magenta);
-				else data.map_small.SetPixel((int)Math.Round(lon) + 180, (int)Math.Round(lat) + 90, palette.yellow);
-			}
-			*/
-
-			if (vessel.lastUT <= 0)
-				return;
-			if (vessel.frame <= 0)
-				return;
-			if (v.LandedOrSplashed)
-				return;
-			if (res >= timeWarpResolution)
-				goto dequeue;
-
-			if (startUT > UT)
-			{
-				scanQueue.Enqueue((startUT + UT) / 2);
-				scanQueue.Enqueue(startUT);
-				scanQueue.Enqueue(UT);
-				scanQueue.Enqueue(lat);
-				scanQueue.Enqueue(lon);
-				scanQueue.Enqueue(res + 1);
-			}
-			startUT = UT;
-			UT = (lastUT + UT) / 2;
-			llat = lat;
-			llon = lon;
-			res = res + 1;
-			goto loop;
-
-		dequeue:
-			if (scanQueue.Count <= 0)
-				return;
-			UT = scanQueue.Dequeue();
-			startUT = scanQueue.Dequeue();
-			lastUT = scanQueue.Dequeue();
-			llat = scanQueue.Dequeue();
-			llon = scanQueue.Dequeue();
-			res = scanQueue.Dequeue();
-			goto loop;
-		}
-
-	}
+    [KSPScenario(ScenarioCreationOptions.AddToAllGames | ScenarioCreationOptions.AddToExistingGames, GameScenes.FLIGHT, GameScenes.SPACECENTER, GameScenes.TRACKSTATION)]
+    public class SCANcontroller : ScenarioModule
+    {
+        public static SCANcontroller controller
+        {
+            get { return instance; }
+        }
+
+        private static int minScanAlt = 5000;
+        private static int maxScanAlt = 500000;
+        private static int bestScanAlt = 250000;
+
+        [KSPField(isPersistant = true)]
+        public bool mainMapVisible = false;
+        [KSPField(isPersistant = true)]
+        public bool mainMapColor = true;
+        [KSPField(isPersistant = true)]
+        public bool mainMapTerminator = false;
+        [KSPField(isPersistant = true)]
+        public bool mainMapBiome = false;
+        [KSPField(isPersistant = true)]
+        public bool mainMapMinimized = false;
+        [KSPField(isPersistant = true)]
+        public bool bigMapVisible = false;
+        [KSPField(isPersistant = true)]
+        public bool bigMapColor = true;
+        [KSPField(isPersistant = true)]
+        public bool bigMapTerminator = false;
+        [KSPField(isPersistant = true)]
+        public bool bigMapGrid = true;
+        [KSPField(isPersistant = true)]
+        public bool bigMapOrbit = true;
+        [KSPField(isPersistant = true)]
+        public bool bigMapWaypoint = true;
+        [KSPField(isPersistant = true)]
+        public bool bigMapAnomaly = true;
+        [KSPField(isPersistant = true)]
+        public bool bigMapFlag = true;
+        [KSPField(isPersistant = true)]
+        public bool bigMapLegend = true;
+        [KSPField(isPersistant = true)]
+        public bool bigMapResourceOn = false;
+        [KSPField(isPersistant = true)]
+        public string bigMapProjection = "Rectangular";
+        [KSPField(isPersistant = true)]
+        public string bigMapType = "Altimetry";
+        [KSPField(isPersistant = true)]
+        public string bigMapResource = "Ore";
+        [KSPField(isPersistant = true)]
+        public string bigMapBody = "Kerbin";
+        [KSPField(isPersistant = true)]
+        public bool zoomMapVesselLock = false;
+        [KSPField(isPersistant = true)]
+        public bool zoomMapColor = true;
+        [KSPField(isPersistant = true)]
+        public bool zoomMapTerminator = false;
+        [KSPField(isPersistant = true)]
+        public bool zoomMapOrbit = true;
+        [KSPField(isPersistant = true)]
+        public bool zoomMapIcons = true;
+        [KSPField(isPersistant = true)]
+        public bool zoomMapLegend = true;
+        [KSPField(isPersistant = true)]
+        public bool zoomMapResourceOn = false;
+        [KSPField(isPersistant = true)]
+        public string zoomMapType = "Altimetry";
+        [KSPField(isPersistant = true)]
+        public string zoomMapResource = "Ore";
+        [KSPField(isPersistant = true)]
+        public int zoomMapState = 0;
+        [KSPField(isPersistant = true)]
+        public int zoomMapRefresh = 0;
+        [KSPField(isPersistant = true)]
+        public int overlaySelection = 0;
+        [KSPField(isPersistant = true)]
+        public string overlayResource = "Ore";
+
+        public Color32 lowBiomeColor32 = new Color(0, 0.46f, 0.02345098f, 1);
+        public Color32 highBiomeColor32 = new Color(0.7f, 0.2388235f, 0, 1);
+        public Color32 lowSlopeColorOne32 = new Color(0.004705883f, 0.6f, 0.3788235f, 1);
+        public Color32 highSlopeColorOne32 = new Color(0.9764706f, 1, 0.4627451f, 1);
+        public Color32 lowSlopeColorTwo32 = new Color(0.9764706f, 1, 0.4627451f, 1);
+        public Color32 highSlopeColorTwo32 = new Color(0.94f, 0.2727843f, 0.007372549f, 1);
+
+        /* Available resources for overlays; loaded from SCANsat configs; only loaded once */
+        private static DictionaryValueList<string, SCANresourceGlobal> masterResourceNodes = new DictionaryValueList<string, SCANresourceGlobal>();
+
+        /* Resource types loaded from SCANsat configs; only needs to be loaded once */
+        private static Dictionary<string, SCANresourceType> resourceTypes = new Dictionary<string, SCANresourceType>();
+
+        /* Terrain height and color option containers loaded from SCANsat configs; only needs to be loaded once */
+        private static Dictionary<string, SCANterrainConfig> masterTerrainNodes = new Dictionary<string, SCANterrainConfig>();
+
+        /* List of resources currently loaded from resource addons */
+        private static List<string> loadedResources = new List<string>();
+        private static List<SCANtype> loadedResourceTypes = new List<SCANtype>();
+
+        /* Primary SCANsat vessel dictionary; loaded every time */
+        public DictionaryValueList<Guid, SCANvessel> knownVessels = new DictionaryValueList<Guid, SCANvessel>();
+
+        /* Primary SCANdata dictionary; loaded every time*/
+        private DictionaryValueList<string, SCANdata> body_data = new DictionaryValueList<string, SCANdata>();
+
+        /* MechJeb Landing Target Integration */
+        private bool mechjebLoaded;
+        private SCANwaypoint landingTarget;
+
+        /* Kopernicus On Demand Loading Data */
+        private List<CelestialBody> dataBodies = new List<CelestialBody>();
+        private CelestialBody bigMapBodyPQS;
+        private CelestialBody zoomMapBody;
+        private PQSMod KopernicusOnDemand;
+
+        private SCAN_UI_MainMap _mainMap;
+        private SCAN_UI_Instruments _instruments;
+        private SCAN_UI_BigMap _bigMap;
+        private SCAN_UI_ZoomMap _zoomMap;
+        private SCAN_UI_Overlay _overlay;
+        private SCAN_UI_Settings _settings;
+
+        /* App launcher object */
+        internal SCANappLauncher appLauncher;
+
+        /* Used in case the loading process is interupted somehow */
+        private bool loaded = false;
+
+        /* Used to make sure all contracts are loaded */
+        private bool contractsLoaded = false;
+
+        /* Used as holder for vessel id's while loading */
+        private List<Guid> tempIDs = new List<Guid>();
+
+        /* Is the Breaking Ground Expansion installed */
+        private bool serenityLoaded = false;
+
+        private bool heightMapsBuilt = false;
+
+        private static SCANcontroller instance;
+
+        #region Public Accessors
+
+        public SCANdata getData(string bodyName)
+        {
+            if (body_data.Contains(bodyName))
+                return body_data[bodyName];
+
+            return null;
+        }
+
+        public SCANdata getData(int index)
+        {
+            if (body_data.Count > index)
+                return body_data.At(index);
+            else
+                SCANUtil.SCANdebugLog("SCANdata dictionary index out of range; something went wrong here...");
+
+            return null;
+        }
+
+        public List<SCANdata> GetAllData
+        {
+            get { return body_data.Values.ToList(); }
+        }
+
+        public int GetDataCount
+        {
+            get { return body_data.Count; }
+        }
+
+        /* Use this method to protect against duplicate dictionary keys */
+        public void addToBodyData(CelestialBody b, SCANdata data)
+        {
+            if (!body_data.Contains(b.bodyName))
+                body_data.Add(b.bodyName, data);
+            else
+                UnityEngine.Debug.LogError("[SCANsat] Warning: SCANdata Dictionary Already Contains Key of This Type");
+        }
+
+        public static List<SCANterrainConfig> EncodeTerrainConfigs
+        {
+            get
+            {
+                try
+                {
+                    return masterTerrainNodes.Values.ToList();
+                }
+                catch (Exception e)
+                {
+                    SCANUtil.SCANlog("Error while saving SCANsat altimetry config data: {0}", e);
+                }
+
+                return new List<SCANterrainConfig>();
+            }
+        }
+
+        public static void setMasterTerrainNodes(List<SCANterrainConfig> terrainConfigs)
+        {
+            masterTerrainNodes.Clear();
+            try
+            {
+                masterTerrainNodes = terrainConfigs.ToDictionary(a => a.Name, a => a);
+            }
+            catch (Exception e)
+            {
+                SCANUtil.SCANlog("Error while loading SCANsat terrain config settings: {0}", e);
+            }
+        }
+
+        public static void checkLoadedTerrainNodes()
+        {
+            for (int i = 0; i < FlightGlobals.Bodies.Count; i++)
+            {
+                CelestialBody b = FlightGlobals.Bodies[i];
+
+                if (b == null)
+                    continue;
+
+                if (getTerrainNode(b.bodyName) == null)
+                {
+                    float? clamp = null;
+                    if (b.ocean)
+                        clamp = 0;
+
+                    float newMax;
+
+                    try
+                    {
+                        newMax = ((float)CelestialUtilities.GetHighestPeak(b)).Mathf_Round(-2);
+                    }
+                    catch (Exception e)
+                    {
+                        SCANUtil.SCANlog("Error in calculating Max Height for {0}; using default value/n{1}", b.bodyName, e);
+                        newMax = SCANconfigLoader.SCANNode.DefaultMaxHeightRange;
+                    }
+
+                    SCANUtil.SCANlog("Generating new SCANsat Terrain Config for [{0}] - Max Height: [{1:F0}m]", b.bodyName, newMax);
+
+                    addToTerrainConfigData(b.bodyName, new SCANterrainConfig(SCANconfigLoader.SCANNode.DefaultMinHeightRange, newMax, clamp, SCANUtil.PaletteLoader(SCANconfigLoader.SCANNode.DefaultPalette, 7), 7, false, false, b));
+                }
+            }
+        }
+
+        public static SCANterrainConfig getTerrainNode(string name)
+        {
+            if (masterTerrainNodes.ContainsKey(name))
+                return masterTerrainNodes[name];
+            else
+                SCANUtil.SCANlog("SCANsat terrain config [{0}] cannot be found in master terrain storage list", name);
+
+            return null;
+        }
+
+        public static void updateTerrainConfig(SCANterrainConfig t)
+        {
+            SCANterrainConfig update = getTerrainNode(t.Name);
+            if (update != null)
+            {
+                update.MinTerrain = t.MinTerrain;
+                update.MaxTerrain = t.MaxTerrain;
+                update.ClampTerrain = t.ClampTerrain;
+                update.PalSize = t.PalSize;
+                update.PalRev = t.PalRev;
+                update.PalDis = t.PalDis;
+                update.ColorPal = t.ColorPal;
+            }
+        }
+
+        public static void addToTerrainConfigData(string name, SCANterrainConfig data)
+        {
+            if (!masterTerrainNodes.ContainsKey(name))
+                masterTerrainNodes.Add(name, data);
+            else
+                UnityEngine.Debug.LogError("[SCANsat] Warning: SCANterrain Data Dictionary Already Contains Key Of This Type");
+        }
+
+        public static int MasterResourceCount
+        {
+            get { return loadedResources.Count; }
+        }
+
+        public static List<SCANresourceGlobal> EncodeResourceConfigs
+        {
+            get
+            {
+                try
+                {
+                    return masterResourceNodes.Values.ToList();
+                }
+                catch (Exception e)
+                {
+                    SCANUtil.SCANlog("Error while saving SCANsat resource config data: {0}", e);
+                }
+
+                return new List<SCANresourceGlobal>();
+            }
+        }
+
+        public static void setMasterResourceNodes(List<SCANresourceGlobal> resourceConfigs)
+        {
+            masterResourceNodes.Clear();
+
+            try
+            {
+                int l = resourceConfigs.Count;
+
+                for (int i = 0; i < l; i++)
+                {
+                    SCANresourceGlobal r = resourceConfigs[i];
+
+                    if (r == null)
+                        continue;
+
+                    if (!masterResourceNodes.Contains(r.Name))
+                        masterResourceNodes.Add(r.Name, r);
+                }
+            }
+            catch (Exception e)
+            {
+                SCANUtil.SCANlog("Error while loading SCANsat resource config settings: {0}", e);
+            }
+        }
+
+        public static SCANresourceGlobal getResourceNode(string resourceName, bool warn = false)
+        {
+            if (masterResourceNodes.Contains(resourceName))
+                return masterResourceNodes[resourceName];
+            else if (warn)
+                SCANUtil.SCANlog("SCANsat resource [{0}] cannot be found in master resource storage list", resourceName);
+
+            return null;
+        }
+
+        public static SCANresourceGlobal GetFirstResource
+        {
+            get
+            {
+                if (masterResourceNodes.Count > 0)
+                    return masterResourceNodes.At(0);
+                else
+                    SCANUtil.SCANlog("SCANsat resource storage list is empty; something probably went wrong here...");
+
+                return null;
+            }
+        }
+
+        public static void updateSCANresource(SCANresourceGlobal r, bool all)
+        {
+            SCANresourceGlobal update = getResourceNode(r.Name, true);
+            if (update != null)
+            {
+                update.MinColor = r.MinColor;
+                update.MaxColor = r.MaxColor;
+                update.Transparency = r.Transparency;
+                if (all)
+                {
+                    for (int i = 0; i < update.getBodyCount; i++)
+                    {
+                        SCANresourceBody b = update.getBodyConfig(i);
+                        if (b != null)
+                        {
+                            SCANresourceBody bNew = r.getBodyConfig(b.BodyName);
+                            if (bNew != null)
+                            {
+                                b.MinValue = bNew.MinValue;
+                                b.MaxValue = bNew.MaxValue;
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    SCANresourceBody b = update.getBodyConfig(r.CurrentBody.BodyName);
+                    if (b != null)
+                    {
+                        b.MinValue = r.CurrentBody.MinValue;
+                        b.MaxValue = r.CurrentBody.MaxValue;
+                    }
+                }
+            }
+        }
+
+        public static void addToResourceData(string name, SCANresourceGlobal res)
+        {
+            if (!masterResourceNodes.Contains(name))
+            {
+                masterResourceNodes.Add(name, res);
+            }
+            else
+                UnityEngine.Debug.LogError(string.Format("[SCANsat] Warning: SCANResource Dictionary Already Contains Key of This Type: Resource: {0}", name));
+        }
+
+        public static SCANresourceType getResourceType(string name, bool warn = true)
+        {
+            if (resourceTypes.ContainsKey(name))
+                return resourceTypes[name];
+            else if (warn)
+                SCANUtil.SCANlog("SCANsat resource type [{0}] cannot be found in master resource type storage list", name);
+
+            return null;
+        }
+
+        public static SCANresourceType getResourceType(int scantype, bool warn = true)
+        {
+            foreach(SCANresourceType r in resourceTypes.Values)
+            {
+                if (r.Type == (SCANtype)scantype)
+                    return r;
+            }
+
+            if (warn)
+                SCANUtil.SCANlog("SCANsat resource type [{0}] cannot be found in master resource type storage list", scantype.ToString());
+
+            return null;
+        }
+
+        public static bool getLoadedResourceTypeStatus(SCANtype type, bool warn = false)
+        {
+            for (int i = loadedResourceTypes.Count - 1; i >= 0; i--)
+            {
+                if (loadedResourceTypes[i] == type)
+                    return true;
+            }
+
+            if (warn)
+                SCANUtil.SCANlog("SCANsat resource type [{0}] cannot be found in loaded resource type storage list", type);
+
+            return false;
+        }
+
+        public static void addToResourceTypes(string name, SCANresourceType type)
+        {
+            if (!resourceTypes.ContainsKey(name))
+            {
+                resourceTypes.Add(name, type);
+            }
+            else
+                UnityEngine.Debug.LogError(string.Format("[SCANsat] Warning: SCANResourceType Dictionary Already Contains Key of This Name: SCAN Resource Type: {0}", name));
+        }
+
+        public static void addToLoadedResourceNames(string name)
+        {
+            if (!loadedResources.Contains(name))
+                loadedResources.Add(name);
+            else
+                UnityEngine.Debug.LogError(string.Format("[SCANsat] Warning: Loaded Resource List Already Contains Resource Of Name: {0}", name));
+        }
+
+        public static void addToLoadedResourceTypes(SCANtype type)
+        {
+            if (!loadedResourceTypes.Contains(type))
+                loadedResourceTypes.Add(type);
+            else
+                UnityEngine.Debug.LogError(string.Format("[SCANsat] Warning: Loaded Resource Type List Already Contains Resource Of Type: {0}", type));
+        }
+
+        public static List<SCANresourceGlobal> setLoadedResourceList()
+        {
+            List<SCANresourceGlobal> rList = new List<SCANresourceGlobal>();
+            SCANresourceGlobal ore = null;
+
+            int l = loadedResources.Count;
+
+            for (int i = 0; i < l; i++)
+            {
+                string r = loadedResources[i];
+
+                if (string.IsNullOrEmpty(r))
+                    continue;
+
+                if (masterResourceNodes.Contains(r))
+                {
+                    if (r != "Ore")
+                        rList.Add(masterResourceNodes[r]);
+                    else
+                        ore = masterResourceNodes[r];
+                }
+            }
+
+            if (ore != null)
+                rList.Insert(0, ore);
+
+            return rList;
+        }
+
+        public static List<SCANresourceGlobal> resources()
+        {
+            return masterResourceNodes.Values.ToList();
+        }
+
+        public List<SCANvessel> Known_Vessels
+        {
+            get { return knownVessels.Values.ToList(); }
+        }
+
+        public int ActiveSensors
+        {
+            get { return activeSensors; }
+        }
+
+        public int ActiveVessels
+        {
+            get { return activeVessels; }
+        }
+
+        public int ActualPasses
+        {
+            get { return actualPasses; }
+        }
+
+        public bool ContractsLoaded
+        {
+            get { return contractsLoaded; }
+        }
+
+        public bool MechJebLoaded
+        {
+            get { return mechjebLoaded; }
+            set { mechjebLoaded = value; }
+        }
+
+        public SCANwaypoint LandingTarget
+        {
+            get { return landingTarget; }
+            set { landingTarget = value; }
+        }
+
+        public bool SerenityLoaded
+        {
+            get { return serenityLoaded; }
+        }
+
+        public class OnMJTargetSet : UnityEvent<Vector2d, CelestialBody> { }
+
+        public OnMJTargetSet MJTargetSet = new OnMJTargetSet();
+
+        #endregion
+
+        #region save/load
+
+        public override void OnLoad(ConfigNode node)
+        {
+            ConfigNode node_vessels = node.GetNode("Scanners");
+            if (node_vessels != null)
+            {
+                SCANUtil.SCANlog("SCANsat Controller: Loading {0} known vessels", node_vessels.CountNodes);
+                foreach (ConfigNode node_vessel in node_vessels.GetNodes("Vessel"))
+                {
+                    Guid id = node_vessel.parse("guid", new Guid());
+
+                    if (id == new Guid())
+                    {
+                        SCANUtil.SCANlog("Something Went Wrong Loading This SCAN Vessel; Moving On To The Next");
+                        continue;
+                    }
+
+                    foreach (ConfigNode node_sensor in node_vessel.GetNodes("Sensor"))
+                    {
+                        int sensor = node_sensor.parse("type", (int)0);
+                        double fov = node_sensor.parse("fov", 3d);
+                        double min_alt = node_sensor.parse("min_alt", (double)minScanAlt);
+                        double max_alt = node_sensor.parse("max_alt", (double)maxScanAlt);
+                        double best_alt = node_sensor.parse("best_alt", (double)bestScanAlt);
+
+                        registerSensorTemp(id, (SCANtype)sensor, fov, min_alt, max_alt, best_alt);
+
+                        tempIDs.Add(id);
+                    }
+                }
+            }
+
+            ConfigNode node_progress = node.GetNode("Progress");
+            if (node_progress != null)
+            {
+                foreach (ConfigNode node_body in node_progress.GetNodes("Body"))
+                {
+                    string body_name = node_body.parse("Name", "");
+
+                    if (string.IsNullOrEmpty(body_name))
+                    {
+                        SCANUtil.SCANlog("SCANsat Controller: Error while loading Celestial Body data; skipping value...");
+                        continue;
+                    }
+
+                    SCANUtil.SCANlog("SCANsat Controller: Loading map for {0}", body_name);
+
+                    CelestialBody body;
+                    try
+                    {
+                        body = FlightGlobals.Bodies.FirstOrDefault(b => b.bodyName == body_name);
+                    }
+                    catch (Exception e)
+                    {
+                        UnityEngine.Debug.LogError(string.Format("[SCANsat] Error in loading Celestial Body [{0}]...\n{1}", body_name, e));
+                        continue;
+                    }
+
+                    if (body != null)
+                    {
+                        SCANdata data = getData(body.bodyName);
+                        if (data == null)
+                            data = new SCANdata(body);
+                        if (!body_data.Contains(body_name))
+                            body_data.Add(body_name, data);
+                        else
+                            body_data[body_name] = data;
+
+                        try
+                        {
+                            string mapdata = node_body.parse("Map", "");
+
+                            if (string.IsNullOrEmpty(mapdata))
+                            {
+                                SCANUtil.SCANlog("SCANsat Controller: Error while loading Celestial Body map data; skipping value...");
+                                continue;
+                            }
+
+                            data.integerDeserialize(mapdata);
+                        }
+                        catch (Exception e)
+                        {
+                            SCANUtil.SCANlog("Something Went Wrong Loading Scanning Data; Resetting Coverage: {0}", e);
+                            data.reset();
+                            // fail somewhat gracefully; don't make the save unloadable 
+                        }
+
+                        try
+                        {
+                            if (SCANmainMenuLoader.MechJebLoaded && SCAN_Settings_Config.Instance.MechJebTarget && SCAN_Settings_Config.Instance.MechJebTargetLoad)
+                            {
+                                string targetName = node_body.parse("LandingTarget", "");
+
+                                if (!string.IsNullOrEmpty(targetName))
+                                    loadWaypoint(targetName, body);
+                            }
+
+                            data.Disabled = node_body.parse("Disabled", false);
+
+                            float min = node_body.parse("MinHeightRange", data.TerrainConfig.DefaultMinHeight);
+                            float max = node_body.parse("MaxHeightRange", data.TerrainConfig.DefaultMaxHeight);
+                            float? clampState = node_body.parse("ClampHeight", (float?)null);
+
+                            int pSize = node_body.parse("PaletteSize", data.TerrainConfig.DefaultPaletteSize);
+                            bool pRev = node_body.parse("PaletteReverse", data.TerrainConfig.DefaultReverse);
+                            bool pDis = node_body.parse("PaletteDiscrete", data.TerrainConfig.DefaultDiscrete);
+
+                            string paletteName = node_body.parse("PaletteName", "");
+
+                            if (string.IsNullOrEmpty(paletteName))
+                                paletteName = data.TerrainConfig.DefaultPalette.Name;
+
+                            SCANPalette dataPalette = SCANUtil.PaletteLoader(paletteName, pSize);
+
+                            if (dataPalette.Hash == SCAN_Palette_Config.DefaultPalette.GetPalette(0).Hash)
+                            {
+                                paletteName = "Default";
+                                pSize = 7;
+                            }
+
+                            SCANterrainConfig dataTerrainConfig = getTerrainNode(body.bodyName);
+
+                            if (dataTerrainConfig == null)
+                                dataTerrainConfig = new SCANterrainConfig(min, max, clampState, dataPalette, pSize, pRev, pDis, body);
+                            else
+                                setNewTerrainConfigValues(dataTerrainConfig, min, max, clampState, dataPalette, pSize, pRev, pDis);
+
+                            data.TerrainConfig = dataTerrainConfig;
+                        }
+                        catch (Exception e)
+                        {
+                            SCANUtil.SCANlog("Error Loading SCANdata; Reverting To Default Settings: {0}", e);
+                        }
+                    }
+                }
+            }
+
+            ConfigNode node_resources = node.GetNode("SCANResources");
+            if (node_resources != null)
+            {
+                foreach (ConfigNode node_resource_type in node_resources.GetNodes("ResourceType"))
+                {
+                    if (node_resource_type != null)
+                    {
+                        loadCustomResourceValues(node_resource_type);
+                    }
+                }
+            }
+            loaded = true;
+        }
+
+        public override void OnSave(ConfigNode node)
+        {
+            int l = knownVessels.Count;
+            ConfigNode node_vessels = new ConfigNode("Scanners");
+
+            for (int i = 0; i < l; i++)
+            {
+                SCANvessel sv = knownVessels.At(i);
+                ConfigNode node_vessel = new ConfigNode("Vessel");
+                node_vessel.AddValue("guid", sv.id.ToString());
+                if (sv.vessel != null)
+                    node_vessel.AddValue("name", sv.vessel.vesselName);
+                foreach (SCANsensor sensor in sv.sensors)
+                {
+                    ConfigNode node_sensor = new ConfigNode("Sensor");
+                    node_sensor.AddValue("type", (int)sensor.sensor);
+                    node_sensor.AddValue("fov", sensor.fov);
+                    node_sensor.AddValue("min_alt", sensor.min_alt);
+                    node_sensor.AddValue("max_alt", sensor.max_alt);
+                    node_sensor.AddValue("best_alt", sensor.best_alt);
+                    node_vessel.AddNode(node_sensor);
+                }
+                node_vessels.AddNode(node_vessel);
+            }
+            node.AddNode(node_vessels);
+            if (body_data != null)
+            {
+                ConfigNode node_progress = new ConfigNode("Progress");
+                foreach (string body_name in body_data.Keys)
+                {
+                    ConfigNode node_body = new ConfigNode("Body");
+                    SCANdata body_scan = body_data[body_name];
+                    node_body.AddValue("Name", body_name);
+                    node_body.AddValue("Disabled", body_scan.Disabled);
+                    if (SCANmainMenuLoader.MechJebLoaded && SCAN_Settings_Config.Instance.MechJebTarget && SCAN_Settings_Config.Instance.MechJebTargetLoad)
+                    {
+                        SCANwaypoint w = body_scan.Waypoints.FirstOrDefault(a => a.LandingTarget);
+                        if (w != null)
+                            node_body.AddValue("LandingTarget", string.Format("{0:N4},{1:N4}", w.Latitude, w.Longitude));
+                    }
+                    node_body.AddValue("MinHeightRange", body_scan.TerrainConfig.MinTerrain / body_scan.TerrainConfig.MinHeightMultiplier);
+                    node_body.AddValue("MaxHeightRange", body_scan.TerrainConfig.MaxTerrain / body_scan.TerrainConfig.MaxHeightMultiplier);
+                    if (body_scan.TerrainConfig.ClampTerrain != null)
+                        node_body.AddValue("ClampHeight", body_scan.TerrainConfig.ClampTerrain / body_scan.TerrainConfig.ClampHeightMultiplier);
+                    node_body.AddValue("PaletteName", body_scan.TerrainConfig.ColorPal.Name);
+                    node_body.AddValue("PaletteSize", body_scan.TerrainConfig.PalSize);
+                    node_body.AddValue("PaletteReverse", body_scan.TerrainConfig.PalRev);
+                    node_body.AddValue("PaletteDiscrete", body_scan.TerrainConfig.PalDis);
+                    node_body.AddValue("Map", body_scan.integerSerialize());
+                    node_progress.AddNode(node_body);
+                }
+                node.AddNode(node_progress);
+            }
+            if (resourceTypes.Count > 0 && masterResourceNodes.Count > 0)
+            {
+                ConfigNode node_resources = new ConfigNode("SCANResources");
+                foreach (SCANresourceGlobal r in masterResourceNodes.Values)
+                {
+                    if (r != null)
+                    {
+                        ConfigNode node_resource_type = new ConfigNode("ResourceType");
+                        node_resource_type.AddValue("Resource", r.Name);
+                        node_resource_type.AddValue("MinColor", ConfigNode.WriteColor(r.MinColor));
+                        node_resource_type.AddValue("MaxColor", ConfigNode.WriteColor(r.MaxColor));
+                        node_resource_type.AddValue("Transparency", r.Transparency);
+
+                        string rMinMax = saveResources(r);
+                        node_resource_type.AddValue("MinMaxValues", rMinMax);
+                        node_resources.AddNode(node_resource_type);
+                    }
+                }
+                node.AddNode(node_resources);
+            }
+        }
+
+        #endregion
+
+        public override void OnAwake()
+        {
+            instance = this;
+
+            serenityLoaded = Expansions.ExpansionsLoader.IsExpansionInstalled("Serenity");
+
+            if (SCAN_Settings_Config.Instance == null)
+                return;
+
+            SCANUtil.fillLocalizedNames();
+
+            lowBiomeColor32 = SCAN_Settings_Config.Instance.LowBiomeColor;
+            highBiomeColor32 = SCAN_Settings_Config.Instance.HighBiomeColor;
+            lowSlopeColorOne32 = SCAN_Settings_Config.Instance.BottomLowSlopeColor;
+            highSlopeColorOne32 = SCAN_Settings_Config.Instance.BottomHighSlopeColor;
+            lowSlopeColorTwo32 = SCAN_Settings_Config.Instance.TopLowSlopeColor;
+            highSlopeColorTwo32 = SCAN_Settings_Config.Instance.TopHighSlopeColor;
+        }
+
+        private void Start()
+        {
+            for (int i = tempIDs.Count - 1; i >= 0; i--)
+            {
+                finishRegistration(tempIDs[i]);
+            }
+
+            GameEvents.OnScienceRecieved.Add(watcher);
+            GameEvents.OnOrbitalSurveyCompleted.Add(onSurvey);
+            GameEvents.onVesselSOIChanged.Add(SOIChange);
+            GameEvents.onVesselCreate.Add(newVesselCheck);
+            GameEvents.onPartCouple.Add(dockingEventCheck);
+            GameEvents.Contract.onContractsLoaded.Add(contractsCheck);
+            GameEvents.Contract.onParameterChange.Add(onParamChange);
+
+            if (HighLogic.LoadedSceneIsFlight)
+            {
+                if (!body_data.Contains(FlightGlobals.currentMainBody.bodyName))
+                    body_data.Add(FlightGlobals.currentMainBody.bodyName, new SCANdata(FlightGlobals.currentMainBody));
+                try
+                {
+                    _mainMap = new SCAN_UI_MainMap();
+                    _bigMap = new SCAN_UI_BigMap();
+                    _zoomMap = new SCAN_UI_ZoomMap();
+                    _instruments = new SCAN_UI_Instruments();
+                    _overlay = new SCAN_UI_Overlay();
+                    _settings = new SCAN_UI_Settings();
+                }
+                catch (Exception e)
+                {
+                    SCANUtil.SCANlog("Something Went Wrong Initializing UI Objects:\n{0}", e);
+                }
+
+                StartCoroutine(WaitForScienceUpdate());
+            }
+            else if (HighLogic.LoadedSceneHasPlanetarium)
+            {
+                if (!body_data.Contains(Planetarium.fetch.Home.bodyName))
+                    body_data.Add(Planetarium.fetch.Home.bodyName, new SCANdata(Planetarium.fetch.Home));
+                try
+                {
+                    _bigMap = new SCAN_UI_BigMap();
+                    _settings = new SCAN_UI_Settings();
+                    _zoomMap = new SCAN_UI_ZoomMap();
+
+                    if (HighLogic.LoadedScene == GameScenes.TRACKSTATION)
+                    {
+                        _overlay = new SCAN_UI_Overlay();
+                    }
+                }
+                catch (Exception e)
+                {
+                    SCANUtil.SCANlog("Something Went Wrong Initializing UI Objects:\n{0}", e);
+                }
+            }
+            if (SCAN_Settings_Config.Instance.StockToolbar)
+                appLauncher = gameObject.AddComponent<SCANappLauncher>();
+
+            if (SCAN_Settings_Config.Instance.DisableStockResource && SCAN_Settings_Config.Instance.UseStockTreshold)
+            {
+                for (int i = FlightGlobals.Bodies.Count - 1; i >= 0; i--)
+                {
+                    CelestialBody b = FlightGlobals.Bodies[i];
+
+                    checkResourceScanStatus(b);
+                }
+            }
+            else if (!SCAN_Settings_Config.Instance.DisableStockResource && SCAN_Settings_Config.Instance.InstantScan)
+            {
+                for (int i = FlightGlobals.Bodies.Count - 1; i >= 0; i--)
+                {
+                    CelestialBody b = FlightGlobals.Bodies[i];
+
+                    checkStockResourceScanStatus(b);
+                }
+            }
+
+            for (int i = body_data.Count - 1; i >= 0; i--)
+            {
+                body_data.At(i).updateCoverage();
+            }
+        }
+
+        private void Update()
+        {
+            if (SCAN_Settings_Config.Instance.BackgroundScanning && loaded)
+                scanFromAllVessels();
+
+            if (!heightMapsBuilt)
+                checkHeightMapStatus();
+        }
+
+        private IEnumerator WaitForScienceUpdate()
+        {
+            while (!FlightGlobals.ready || FlightGlobals.ActiveVessel == null)
+                yield return null;
+
+            SCANUtil.UpdateAllVesselData(FlightGlobals.ActiveVessel);
+        }
+
+        public void checkStockResourceScanStatus(CelestialBody body)
+        {
+            if (SCAN_Settings_Config.Instance.DisableStockResource || !SCAN_Settings_Config.Instance.InstantScan)
+                return;
+
+            if (body == null)
+                return;
+
+            if (!ResourceMap.Instance.IsPlanetScanned(body.flightGlobalsIndex))
+                return;
+
+            if (SCANUtil.GetCoverage((int)SCANtype.AllResources, body) >= 100)
+                return;
+
+            SCANdata data = getData(body.bodyName);
+
+            if (data == null)
+                return;
+
+            data.fillResourceMap();
+        }
+
+        public void checkResourceScanStatus(CelestialBody body)
+        {
+            if (!SCAN_Settings_Config.Instance.UseStockTreshold)
+                return;
+
+            if (body == null)
+                return;
+
+            if (ResourceMap.Instance.IsPlanetScanned(body.flightGlobalsIndex))
+                return;
+
+            SCANdata data = getData(body.bodyName);
+
+            if (data == null)
+                return;
+
+            if (SCANUtil.getCoveragePercentage(data, SCANtype.FuzzyResources) > (SCAN_Settings_Config.Instance.StockTreshold * 100))
+            {
+                SCANUtil.SCANlog("SCANsat resource scanning for {0} meets threshold value [{1:P0}]\nConducting stock orbital resource scan...", body.bodyName, SCAN_Settings_Config.Instance.StockTreshold);
+                ResourceMap.Instance.UnlockPlanet(body.flightGlobalsIndex);
+            }
+        }
+
+        private int dataStep, dataStart;
+        private bool currentlyBuilding;
+        private SCANdata buildingData;
+
+        private void checkHeightMapStatus()
+        {
+            if (!currentlyBuilding)
+            {
+                for (int i = 0; i < body_data.Count; i++)
+                {
+                    buildingData = getData(i);
+
+                    if (buildingData == null)
+                        continue;
+
+                    if (buildingData.Built)
+                        continue;
+
+                    if (buildingData.MapBuilding || buildingData.OverlayBuilding)
+                        continue;
+
+                    buildingData.ControllerBuilding = true;
+                    currentlyBuilding = true;
+
+                    return;
+                }
+            }
+            else
+            {
+                if (buildingData == null)
+                {
+                    currentlyBuilding = false;
+                    return;
+                }
+
+                if (buildingData.Built)
+                {
+                    currentlyBuilding = false;
+                    buildingData.ControllerBuilding = false;
+                    return;
+                }
+
+                if (buildingData.ControllerBuilding)
+                {
+                    buildingData.generateHeightMap(ref dataStep, ref dataStart, 120);
+                    return;
+                }
+            }
+
+            SCANUtil.SCANlog("All Height Maps Generated");
+
+            buildingData = null;
+            heightMapsBuilt = true;
+        }
+
+        private void OnDestroy()
+        {
+            GameEvents.OnScienceRecieved.Remove(watcher);
+            GameEvents.OnOrbitalSurveyCompleted.Remove(onSurvey);
+            GameEvents.onVesselSOIChanged.Remove(SOIChange);
+            GameEvents.onVesselCreate.Remove(newVesselCheck);
+            GameEvents.onPartCouple.Remove(dockingEventCheck);
+            GameEvents.Contract.onContractsLoaded.Remove(contractsCheck);
+            GameEvents.Contract.onParameterChange.Remove(onParamChange);
+
+            if (appLauncher != null)
+                Destroy(appLauncher);
+
+            if (_mainMap != null)
+            {
+                _mainMap.OnDestroy();
+                _mainMap = null;
+            }
+            if (_bigMap != null)
+            {
+                _bigMap.OnDestroy();
+                _bigMap = null;
+            }
+            if (_instruments != null)
+            {
+                _instruments.OnDestroy();
+                _instruments = null;
+            }
+            if (_overlay != null)
+            {
+                _overlay.OnDestroy();
+                _overlay = null;
+            }
+            if (_settings != null)
+            {
+                _settings.OnDestroy();
+                _settings = null;
+            }
+            if (_zoomMap != null)
+            {
+                _zoomMap.OnDestroy();
+                _settings = null;
+            }
+
+            if (SCAN_Settings_Config.Instance != null)
+                SCAN_Settings_Config.Instance.Save();
+
+            if (!heightMapsBuilt)
+            {
+                for (int i = dataBodies.Count - 1; i >= 0; i--)
+                {
+                    CelestialBody b = dataBodies[i];
+
+                    unloadPQS(b);
+                }
+            }
+        }
+
+        private void watcher(float sci, ScienceSubject sub, ProtoVessel v, bool b)
+        {
+            if (!HighLogic.LoadedSceneIsFlight)
+                return;
+
+            if (FlightGlobals.ActiveVessel == null)
+                return;
+
+            if (sub == null)
+                return;
+
+            if (!sub.id.StartsWith("SCAN"))
+                return;
+
+            SCANUtil.UpdateVesselData(FlightGlobals.ActiveVessel, sub);
+        }
+
+        private void onSurvey(Vessel v, CelestialBody b)
+        {
+            if (!SCAN_Settings_Config.Instance.InstantScan || SCAN_Settings_Config.Instance.DisableStockResource)
+                return;
+
+            if (b == null)
+                return;
+
+            if (SCANUtil.GetCoverage((int)SCANtype.AllResources, b) >= 100)
+                return;
+
+            SCANdata data = SCANUtil.getData(b);
+
+            if (data == null)
+            {
+                data = new SCANdata(b);
+                addToBodyData(b, data);
+            }
+
+            data.fillResourceMap();
+        }
+
+        internal void loadPQS(CelestialBody b, mapSource s = mapSource.Data)
+        {
+            if (!SCANmainMenuLoader.KopernicusLoaded)
+                return;
+
+            if (b == null)
+                return;
+
+            switch (s)
+            {
+                case mapSource.Data:
+                    if (dataBodies.Contains(b))
+                        return;
+
+                    dataBodies.Add(b);
+
+                    if (bigMapBodyPQS != null && bigMapBodyPQS == b)
+                        return;
+
+                    if (zoomMapBody != null && zoomMapBody == b)
+                        return;
+                    break;
+                case mapSource.BigMap:
+                    if (bigMapBodyPQS != null && bigMapBodyPQS == b)
+                        return;
+
+                    bigMapBodyPQS = b;
+
+                    if (zoomMapBody != null && zoomMapBody == b)
+                        return;
+
+                    if (dataBodies.Contains(b))
+                        return;
+                    break;
+
+                case mapSource.ZoomMap:
+                    if (zoomMapBody != null && zoomMapBody == b)
+                        return;
+
+                    zoomMapBody = b;
+
+                    if (bigMapBodyPQS != null && bigMapBodyPQS == b)
+                        return;
+
+                    if (dataBodies.Contains(b))
+                        return;
+                    break;
+                case mapSource.RPM:
+                    return;
+            }
+
+            KopernicusOnDemand = b.GetComponentsInChildren<PQSMod>(true).Where(p => p.GetType().Name == "PQSMod_OnDemandHandler").FirstOrDefault();
+
+            if (KopernicusOnDemand == null)
+                return;
+
+            KopernicusOnDemand.OnQuadPreBuild(null);
+
+            KopernicusOnDemand = null;
+
+            SCANUtil.SCANlog("Loading Kopernicus On Demand PQSMod For {0}", b.bodyName);
+        }
+
+        internal void unloadPQS(CelestialBody b, mapSource s = mapSource.Data)
+        {
+            if (!SCANmainMenuLoader.KopernicusLoaded)
+                return;
+
+            if (b == null)
+                return;
+
+            switch (s)
+            {
+                case mapSource.Data:
+                    if (dataBodies.Contains(b))
+                        dataBodies.RemoveAll(a => a == b);
+
+                    if (bigMapBodyPQS != null && bigMapBodyPQS == b)
+                        return;
+
+                    if (zoomMapBody != null && zoomMapBody == b)
+                        return;
+                    break;
+                case mapSource.BigMap:
+                    bigMapBodyPQS = null;
+
+                    if (zoomMapBody != null && zoomMapBody == b)
+                        return;
+
+                    if (dataBodies.Contains(b))
+                        return;
+                    break;
+
+                case mapSource.ZoomMap:
+                    zoomMapBody = null;
+
+                    if (bigMapBodyPQS != null && bigMapBodyPQS == b)
+                        return;
+
+                    if (dataBodies.Contains(b))
+                        return;
+                    break;
+                case mapSource.RPM:
+                    return;
+            }
+
+            bool setInactive = false;
+
+            switch (HighLogic.LoadedScene)
+            {
+                case GameScenes.SPACECENTER:
+                    if (b != Planetarium.fetch.Home)
+                        setInactive = true;
+                    break;
+                case GameScenes.TRACKSTATION:
+                    setInactive = true;
+                    break;
+                case GameScenes.FLIGHT:
+                    if (b != FlightGlobals.currentMainBody)
+                        setInactive = true;
+                    break;
+            }
+
+            if (!setInactive)
+                return;
+
+            KopernicusOnDemand = b.GetComponentsInChildren<PQSMod>(true).Where(p => p.GetType().Name == "PQSMod_OnDemandHandler").FirstOrDefault();
+
+            if (KopernicusOnDemand == null)
+                return;
+
+            KopernicusOnDemand.OnSphereInactive();
+
+            KopernicusOnDemand = null;
+
+            SCANUtil.SCANlog("Unloading Kopernicus On Demand PQSMod For {0}", b.bodyName);
+        }
+
+        private void OnGUI()
+        {
+            if (HighLogic.LoadedSceneIsFlight || HighLogic.LoadedScene == GameScenes.TRACKSTATION)
+                drawTarget();
+        }
+
+        private void drawTarget()
+        {
+            if (!MapView.MapIsEnabled)
+                return;
+
+            CelestialBody b = SCANUtil.getTargetBody(MapView.MapCamera.target);
+
+            if (b == null)
+                return;
+
+            SCANdata d = getData(b.bodyName);
+
+            if (d == null)
+                return;
+
+            if (SCAN_Settings_Config.Instance.ShowGroundTracks && HighLogic.LoadedSceneIsFlight && !d.Disabled && SCAN_Settings_Config.Instance.BackgroundScanning)
+                drawGroundTracks(b);
+
+            return;
+        }
+
+        private void drawGroundTracks(CelestialBody body)
+        {
+            if (SCAN_Settings_Config.Instance.GroundTracksActiveOnly)
+            {
+                Vessel v = FlightGlobals.ActiveVessel;
+
+                if (v.mainBody != body)
+                    return;
+
+                if (v.situation == Vessel.Situations.LANDED || v.situation == Vessel.Situations.PRELAUNCH || v.situation == Vessel.Situations.SPLASHED)
+                    return;
+
+                if (!isVesselKnown(v))
+                    return;
+
+                SCANvessel sv = knownVessels[v.id];
+
+                if (sv == null)
+                    return;
+
+                //Color col;
+
+                double groundWidth = getFOV(sv, body);//, out col);
+
+                if (groundWidth < 1)
+                    return;
+
+                double surfaceScale = (2 * Math.PI * body.Radius) / 360;
+
+                groundWidth *= surfaceScale;
+
+                SCANuiUtil.drawGroundTrackTris(body, sv.vessel, groundWidth, sv.trackColor);
+            }
+            else
+            {
+                double surfaceScale = (2 * Math.PI * body.Radius) / 360;
+
+                for (int j = knownVessels.Count - 1; j >= 0; j--)
+                {
+                    SCANvessel sv = knownVessels.At(j);
+
+                    if (sv == null)
+                        continue;
+
+                    if (sv.vessel.mainBody != body)
+                        continue;
+
+                    Vessel.Situations sit = sv.vessel.loaded ? sv.vessel.situation : sv.vessel.protoVessel.situation;
+
+                    if (sit == Vessel.Situations.LANDED || sit == Vessel.Situations.PRELAUNCH || sit == Vessel.Situations.SPLASHED)
+                        continue;
+
+                    //Color col;
+
+                    double groundWidth = getFOV(sv, body);//, out col);
+
+                    if (groundWidth < 1)
+                        continue;
+
+                    groundWidth *= surfaceScale;
+
+                    SCANuiUtil.drawGroundTrackTris(body, sv.vessel, groundWidth, sv.trackColor);
+                }
+            }
+        }
+
+        private double getFOV(SCANvessel v, CelestialBody b)//, out Color c)
+        {
+            //c = palette.xkcd_DarkGreenAlpha;
+            double maxFOV = 0;
+            double alt = v.vessel.altitude;
+            double soi_radius = b.sphereOfInfluence - b.Radius;
+            double surfscale = Planetarium.fetch.Home.Radius / b.Radius;
+            if (surfscale < 1)
+                surfscale = 1;
+            surfscale = Math.Sqrt(surfscale);
+
+            for (int j = v.sensors.Count - 1; j >= 0; j--)
+            {
+                SCANsensor s = v.sensors[j];
+
+                if (alt < s.min_alt)
+                    continue;
+                if (alt > Math.Min(s.max_alt, soi_radius))
+                    continue;
+
+                double fov = s.fov;
+                double ba = Math.Min(s.best_alt, soi_radius);
+                if (alt < ba)
+                {
+                    fov = (alt / ba) * fov;
+                }
+
+                fov *= surfscale;
+                if (fov > 20)
+                    fov = 20;
+
+                if (fov > maxFOV)
+                    maxFOV = fov;
+            }
+
+            return maxFOV;
+        }
+
+        private Color32 getScanTypeColor(SCANtype s)
+        {
+            float r = 0;
+            float g = 0;
+            float b = 0;
+            float a = 0;
+
+            int count = 0;
+
+            for (int i = 0; i < 31; i++)
+            {
+                if ((1 << i & (int)s) != 0)
+                {
+                    Color32 c = typeColor(i);
+
+                    r += (c.r * c.r);
+                    g += (c.g * c.g);
+                    b += (c.b * c.b);
+                    a += (c.a * c.a);
+
+                    count++;
+                }
+            }
+
+            r /= count;
+            g /= count;
+            b /= count;
+            a /= count;
+
+            Color32 col = new Color32((byte)Mathf.Sqrt(r), (byte)Mathf.Sqrt(g), (byte)Mathf.Sqrt(b), (byte)Mathf.Sqrt(a));
+
+            return col;
+        }
+
+        private Color32 typeColor(int i)
+        {
+            switch(i)
+            {
+                case 0:
+                    return SCAN_Settings_Config.Instance.LoResAltimetryTrackColor;
+                case 1:
+                    return SCAN_Settings_Config.Instance.HiResAltimetryTrackColor;
+                case 2:
+                    return palette.XKCD_DarkGreenAlpha;
+                case 3:
+                    return SCAN_Settings_Config.Instance.BiomeTrackColor;
+                case 4:
+                    return SCAN_Settings_Config.Instance.AnomalyTrackColor;
+                case 5:
+                    return SCAN_Settings_Config.Instance.AnomalyDetailTrackColor;
+                case 19:
+                    return SCAN_Settings_Config.Instance.FuzzyResourceTrackColor;
+                default:
+                    SCANresourceType type = getResourceType(1 << i, false);
+
+                    if (type != null)
+                        return type.Color;
+
+                    return palette.XKCD_DarkGreenAlpha;
+            }
+        }
+
+        private void removeVessel(Vessel v)
+        {
+            if (isVesselKnown(v))
+            {
+                unregisterVessel(v);
+                //foreach (SCANtype t in Enum.GetValues(typeof(SCANtype)))
+                    //unregisterSensor(v, t);
+            }
+        }
+
+        private void addVessel(Vessel v)
+        {
+            foreach (SCANsat.SCAN_PartModules.SCANsat s in v.FindPartModulesImplementing<SCANsat.SCAN_PartModules.SCANsat>())
+            {
+                if (s.scanningNow)
+                    registerSensor(v.id, (SCANtype)s.sensorType, s.fov, s.min_alt, s.max_alt, s.best_alt);
+            }
+        }
+
+        private void dockingEventCheck(GameEvents.FromToAction<Part, Part> Parts)
+        {
+            StartCoroutine(dockingCheckCoRoutine(Parts.to.vessel, Parts.from.vessel));
+        }
+
+        IEnumerator dockingCheckCoRoutine(Vessel to, Vessel from)
+        {
+            int timer = 0;
+
+            while (timer < 45)
+            {
+                timer++;
+                yield return null;
+            }
+
+            if (from != null)
+            {
+                removeVessel(from);
+            }
+
+            if (to != null)
+            {
+                removeVessel(to);
+            }
+
+            addVessel(FlightGlobals.ActiveVessel);
+        }
+
+        private void newVesselCheck(Vessel v)
+        {
+            if (v.loaded)
+            {
+                Vessel newVessel = null;
+
+                if (v.Parts.Count > 1)
+                    newVessel = v;
+                else
+                    newVessel = null;
+
+                Vessel oldVessel = FlightGlobals.ActiveVessel;
+
+                StartCoroutine(newVesselCoRoutine(newVessel, oldVessel));
+            }
+        }
+
+        IEnumerator newVesselCoRoutine(Vessel newV, Vessel oldV)
+        {
+            int timer = 0;
+
+            while (timer < 45)
+            {
+                timer++;
+                yield return null;
+            }
+
+            if (newV != null)
+            {
+                removeVessel(newV);
+                addVessel(newV);
+            }
+
+            if (oldV != null)
+            {
+                removeVessel(oldV);
+                addVessel(oldV);
+            }
+        }
+
+        private void contractsCheck()
+        {
+            contractsLoaded = true;
+        }
+
+        private void onParamChange(Contract c, ContractParameter p)
+        {
+            if (c.GetType() == typeof(SurveyContract))
+            {
+                SurveyContract s = c as SurveyContract;
+
+                CelestialBody b = s.targetBody;
+
+                SCANdata data = getData(b.bodyName);
+
+                if (data == null)
+                    return;
+
+                data.addSurveyWaypoints(b, s);
+            }
+            else if (c.GetType() == typeof(SatelliteContract))
+            {
+                SatelliteContract s = c as SatelliteContract;
+
+                SpecificOrbitParameter orbit = s.GetParameter<SpecificOrbitParameter>();
+
+                if (orbit == null)
+                    return;
+
+                CelestialBody b = orbit.TargetBody;
+
+                SCANdata data = getData(b.bodyName);
+
+                if (data == null)
+                    return;
+
+                data.addStationaryWaypoints(b, s);
+            }
+
+            if (_bigMap.IsVisible && _bigMap.WaypointToggle)
+                _bigMap.RefreshIcons();
+
+            if (_zoomMap.IsVisible && _zoomMap.IconsToggle)
+                _zoomMap.RefreshIcons();
+        }
+
+        private void SOIChange(GameEvents.HostedFromToAction<Vessel, CelestialBody> VC)
+        {
+            if (!body_data.Contains(VC.to.bodyName))
+                body_data.Add(VC.to.bodyName, new SCANdata(VC.to));
+        }
+
+        private void setNewTerrainConfigValues(SCANterrainConfig terrain, float min, float max, float? clamp, SCANPalette c, int size, bool reverse, bool discrete)
+        {
+            terrain.MinTerrain = min * terrain.MinHeightMultiplier;
+            terrain.MaxTerrain = max * terrain.MaxHeightMultiplier;
+            terrain.ClampTerrain = clamp * terrain.ClampHeightMultiplier;
+            terrain.ColorPal = c;
+            terrain.PalSize = size;
+            terrain.PalRev = reverse;
+            terrain.PalDis = discrete;
+        }
+
+        private string saveResources(SCANresourceGlobal resource)
+        {
+            List<string> sL = new List<string>();
+            for (int j = 0; j < resource.getBodyCount; j++)
+            {
+                SCANresourceBody bodyRes = resource.getBodyConfig(j);
+                if (bodyRes != null)
+                {
+                    string a = string.Format("{0}|{1:F3}|{2:F3}", bodyRes.Index, bodyRes.MinValue, bodyRes.MaxValue);
+                    sL.Add(a);
+                }
+            }
+
+            return string.Join(",", sL.ToArray());
+        }
+
+        private void loadCustomResourceValues(ConfigNode node)
+        {
+            SCANresourceGlobal r;
+
+            string resource = node.parse("Resource", "");
+
+            if (string.IsNullOrEmpty(resource))
+                return;
+
+            if (masterResourceNodes.Contains(resource))
+                r = masterResourceNodes[resource];
+            else
+                return;
+
+            Color lowColor = node.parse("MinColor", r.DefaultLowColor);
+            Color highColor = node.parse("MaxColor", r.DefaultHighColor);
+            float transparent = node.parse("Transparency", r.DefaultTrans);
+
+            r.MinColor = lowColor;
+            r.MaxColor = highColor;
+            r.Transparency = transparent;
+
+            string s = node.parse("MinMaxValues", "");
+
+            if (!string.IsNullOrEmpty(s))
+            {
+                string[] sA = s.Split(',');
+                for (int i = 0; i < sA.Length; i++)
+                {
+                    string[] sB = sA[i].Split('|');
+                    try
+                    {
+                        int j = 0;
+                        float min = 0;
+                        float max = 0;
+                        if (!int.TryParse(sB[0], out j))
+                            continue;
+
+                        CelestialBody b = null;
+
+                        try
+                        {
+                            b = FlightGlobals.Bodies.FirstOrDefault(a => a.flightGlobalsIndex == j);
+                        }
+                        catch (Exception e)
+                        {
+                            UnityEngine.Debug.LogError("[SCANsat] Error in loading Celestial Body...\n" + e);
+                            return;
+                        }
+
+                        if (b != null)
+                        {
+                            SCANresourceBody res = r.getBodyConfig(b.bodyName, false);
+                            if (res != null)
+                            {
+                                if (!float.TryParse(sB[1], out min))
+                                    min = res.DefaultMinValue;
+                                if (!float.TryParse(sB[2], out max))
+                                    max = res.DefaultMaxValue;
+                                res.MinValue = min;
+                                res.MaxValue = max;
+                            }
+                            //else
+                            //SCANUtil.SCANlog("No resources found assigned for Celestial Body: {0}, skipping...", b.bodyName);
+                        }
+                        else
+                            SCANUtil.SCANlog("No Celestial Body found matching this saved resource value: {0}, skipping...", j);
+                    }
+                    catch (Exception e)
+                    {
+                        SCANUtil.SCANlog("Something Went Wrong While Loading Custom Resource Settings; Reverting To Default Values: {0}", e);
+                    }
+                }
+            }
+        }
+
+        private void loadWaypoint(string s, CelestialBody b)
+        {
+            if (!HighLogic.LoadedSceneIsFlight)
+                return;
+
+            StartCoroutine(WaitForWaypoint(s, b));
+        }
+
+        private IEnumerator WaitForWaypoint(string s, CelestialBody b)
+        {
+            while (!FlightGlobals.ready || FlightGlobals.ActiveVessel == null)
+                yield return null;
+
+            int timer = 0;
+
+            while (timer < 5)
+            {
+                timer++;
+                yield return null;
+            }
+
+            if (!mechjebLoaded || b != FlightGlobals.currentMainBody)
+                yield break;
+
+            SCANwaypoint w = null;
+            string[] a = s.Split(',');
+            double lat = 0;
+            double lon = 0;
+
+            if (!double.TryParse(a[0], out lat))
+                yield break;
+            if (!double.TryParse(a[1], out lon))
+                yield break;
+
+            w = new SCANwaypoint(lat, lon, "MechJeb Landing Target");
+
+            MJTargetSet.Invoke(new Vector2d(lon, lat), b);
+
+            SCANdata d = getData(b.bodyName);
+
+            if (d != null)
+                d.addToWaypoints(w);
+        }
+
+        public class SCANsensor
+        {
+            public SCANtype sensor;
+            public double fov;
+            public double min_alt, max_alt, best_alt;
+
+            public Color32 trackColor;
+
+            public bool inRange;
+            public bool bestRange;
+
+            public SCANsensor() { }
+        }
+
+        public class SCANvessel
+        {
+            public Guid id;
+            public Vessel vessel;
+
+            public Color32 trackColor;
+
+            public List<SCANsensor> sensors = new List<SCANsensor>();
+            
+            public CelestialBody body;
+            public double latitude, longitude;
+            public int frame;
+            public double lastUT;
+        }
+
+        private void registerSensorTemp(Guid id, SCANtype sensors, double _fov, double _min_alt, double _max_alt, double _best_alt)
+        {
+            if (id == null)
+                return;
+
+            if (!knownVessels.Contains(id))
+                knownVessels[id] = new SCANvessel();
+
+            SCANvessel sv = knownVessels[id];
+            sv.id = id;
+
+            if (_max_alt <= 0)
+            {
+                _min_alt = 5000;
+                _max_alt = 500000;
+                _best_alt = 200000;
+                _fov = 5;
+            }
+
+            foreach (SCANtype sensorType in Enum.GetValues(typeof(SCANtype)))
+            {
+                if (SCANUtil.countBits((int)sensorType) != 1)
+                    continue;
+
+                if ((sensorType & sensors) == SCANtype.Nothing)
+                    continue;
+                
+                bool flag = true;
+
+                for (int i = sv.sensors.Count - 1; i >= 0; i--)
+                {
+                    SCANsensor sen = sv.sensors[i];
+
+                    if (sen.min_alt == _min_alt && sen.max_alt == _max_alt
+                        && sen.best_alt == _best_alt && sen.fov == _fov)
+                    {
+                        SCANtype t = sen.sensor | sensorType;
+
+                        sv.sensors[i] = new SCANsensor()
+                        {
+                            min_alt = _min_alt,
+                            max_alt = _max_alt,
+                            best_alt = _best_alt,
+                            fov = _fov,
+                            sensor = t,
+                            trackColor = getScanTypeColor(t),
+                            //sensorType = (int)sv.sensors[i].sensor,
+                        };
+
+                        flag = false;
+
+                        break;
+                    }
+                }
+
+                if (flag)
+                {
+                    sv.sensors.Add(new SCANsensor()
+                    {
+                        min_alt = _min_alt,
+                        max_alt = _max_alt,
+                        best_alt = _best_alt,
+                        fov = _fov,
+                        sensor = sensorType,
+                        trackColor = getScanTypeColor(sensorType),
+                    });
+                }
+            }
+
+            sv.trackColor = palette.combineColors(sv.sensors.Select(s => s.trackColor).ToArray());
+        }
+
+        private void finishRegistration(Guid id)
+        {
+            if (!knownVessels.Contains(id))
+                return;
+
+            SCANvessel sv = knownVessels[id];
+
+            try
+            {
+                sv.vessel = FlightGlobals.Vessels.FirstOrDefault(a => a.id == id);
+            }
+            catch (Exception e)
+            {
+                UnityEngine.Debug.LogError("[SCANsat] Something went wrong while trying to load this SCANsat vessel; moving on the next vessel... \n" + e);
+            }
+
+            if (sv.vessel == null)
+                knownVessels.Remove(id);
+        }
+
+        internal void registerSensor(Vessel v, SCANtype sensors, double fov, double min_alt, double max_alt, double best_alt)
+        {
+            registerSensor(v.id, sensors, fov, min_alt, max_alt, best_alt);
+            knownVessels[v.id].vessel = v;
+            knownVessels[v.id].latitude = SCANUtil.fixLatShift(v.latitude);
+            knownVessels[v.id].longitude = SCANUtil.fixLonShift(v.longitude);
+        }
+
+        private void registerSensor(Guid id, SCANtype sensors, double _fov, double _min_alt, double _max_alt, double _best_alt)
+        {
+            if (id == null)
+                return;
+            if (!knownVessels.Contains(id))
+                knownVessels[id] = new SCANvessel();
+            SCANvessel sv = knownVessels[id];
+            sv.id = id;
+            try
+            {
+                sv.vessel = FlightGlobals.Vessels.FirstOrDefault(a => a.id == id);
+            }
+            catch (Exception e)
+            {
+                UnityEngine.Debug.LogError("[SCANsat] Something went wrong while trying to load this SCANsat vessel; moving on the next vessel... \n" + e);
+            }
+            if (sv.vessel == null)
+            {
+                knownVessels.Remove(id);
+                return;
+            }
+
+            if (_max_alt <= 0)
+            {
+                _min_alt = 5000;
+                _max_alt = 500000;
+                _best_alt = 200000;
+                _fov = 5;
+            }
+
+            foreach (SCANtype sensorType in Enum.GetValues(typeof(SCANtype)))
+            {
+                if (SCANUtil.countBits((int)sensorType) != 1)
+                    continue;
+                if ((sensorType & sensors) == SCANtype.Nothing)
+                    continue;
+
+                bool flag = true;
+
+                for (int i = sv.sensors.Count - 1; i >= 0; i--)
+                {
+                    SCANsensor sen = sv.sensors[i];
+
+                    if (sen.min_alt == _min_alt && sen.max_alt == _max_alt
+                        && sen.best_alt == _best_alt && sen.fov == _fov)
+                    {
+                        SCANtype t = sen.sensor | sensorType;
+
+                        sv.sensors[i] = new SCANsensor()
+                        {
+                            min_alt = _min_alt,
+                            max_alt = _max_alt,
+                            best_alt = _best_alt,
+                            fov = _fov,
+                            sensor = t,
+                            trackColor = getScanTypeColor(t),
+                        };
+
+                        flag = false;
+
+                        break;
+                    }
+                }
+
+                if (flag)
+                {
+                    sv.sensors.Add(new SCANsensor()
+                    {
+                        min_alt = _min_alt,
+                        max_alt = _max_alt,
+                        best_alt = _best_alt,
+                        fov = _fov,
+                        sensor = sensorType,
+                        trackColor = getScanTypeColor(sensorType),
+                    });
+                }
+            }
+
+            sv.trackColor = palette.combineColors(sv.sensors.Select(s => s.trackColor).ToArray());
+        }
+
+        internal void unregisterSensor(Vessel v, SCANtype sensors, double _fov, double _min_alt, double _max_alt, double _best_alt)
+        {
+            if (!knownVessels.Contains(v.id))
+                return;
+
+            SCANvessel sv = knownVessels[v.id];
+            sv.id = v.id;
+            sv.vessel = v;
+
+            if (_max_alt <= 0)
+            {
+                _min_alt = 5000;
+                _max_alt = 500000;
+                _best_alt = 200000;
+                _fov = 5;
+            }
+
+            foreach (SCANtype sensor in Enum.GetValues(typeof(SCANtype)))
+            {
+                if ((sensors & sensor) == SCANtype.Nothing)
+                    continue;
+
+                for (int i = sv.sensors.Count - 1; i >= 0; i--)
+                {
+                    SCANsensor sen = sv.sensors[i];
+
+                    if ((sen.sensor & sensor) != SCANtype.Nothing)
+                    {
+                        if (sen.min_alt == _min_alt && sen.max_alt == _max_alt
+                            && sen.best_alt == _best_alt && sen.fov == _fov)
+                        {
+                            SCANtype t = sen.sensor ^ sensor;
+
+                            sv.sensors[i] = new SCANsensor()
+                            {
+                                min_alt = sen.min_alt,
+                                max_alt = sen.max_alt,
+                                best_alt = sen.best_alt,
+                                fov = sen.fov,
+                                sensor = t,
+                                trackColor = getScanTypeColor(t),
+                            };
+                        }
+                    }
+
+                    if (sv.sensors[i].sensor == SCANtype.Nothing)
+                        sv.sensors.RemoveAt(i);
+                }
+            }
+
+            sv.trackColor = palette.combineColors(sv.sensors.Select(s => s.trackColor).ToArray());
+
+            if (sv.sensors.Count == 0)
+            {
+                knownVessels.Remove(v.id);
+                SCANUtil.SCANdebugLog("Unregister Vessel");
+            }
+        }
+
+        public void unregisterVessel(Vessel v)
+        {
+            if (!knownVessels.Contains(v.id))
+                return;
+
+            knownVessels.Remove(v.id);
+        }
+
+        internal bool isVesselKnown(Guid id, SCANtype sensor)
+        {
+            if (!knownVessels.Contains(id))
+                return false;
+
+            SCANtype all = SCANtype.Nothing;
+            
+            for (int i = knownVessels[id].sensors.Count - 1; i >= 0; i--)
+                all |= knownVessels[id].sensors[i].sensor;
+
+            return (all & sensor) != SCANtype.Nothing;
+        }
+
+        public bool isVesselKnown(Guid id)
+        {
+            if (!knownVessels.Contains(id))
+                return false;
+
+            return knownVessels[id].sensors.Count > 0;
+        }
+
+        public bool isVesselKnown(Vessel v)
+        {
+            if (v.vesselType == VesselType.Debris)
+                return false;
+
+            return isVesselKnown(v.id);
+        }
+
+        internal SCANsensor getSensorStatus(Vessel v, SCANtype sensor)
+        {
+            if (!knownVessels.Contains(v.id))
+                return null;
+
+            for (int i = knownVessels[v.id].sensors.Count - 1; i >= 0; i--)
+            {
+                if ((knownVessels[v.id].sensors[i].sensor & sensor) != SCANtype.Nothing)
+                    return knownVessels[v.id].sensors[i];
+            }
+
+            return null;
+        }
+
+        internal SCANtype activeSensorsOnVessel(Guid id)
+        {
+            if (!knownVessels.Contains(id))
+                return SCANtype.Nothing;
+
+            SCANtype sensors = SCANtype.Nothing;
+            
+            for (int i = knownVessels[id].sensors.Count - 1; i >= 0; i--)
+                sensors |= knownVessels[id].sensors[i].sensor;
+
+            return sensors;
+        }
+        //private System.Diagnostics.Stopwatch watch = new System.Diagnostics.Stopwatch();
+        private int i = 0;
+        private static int last_scan_frame;
+        private static float last_scan_time;
+        private static double scan_UT;
+        private int activeSensors, activeVessels;
+        private static int currentActiveSensor, currentActiveVessel;
+        private void scanFromAllVessels()
+        {
+            if (Time.realtimeSinceStartup - last_scan_time < 1 && Time.realtimeSinceStartup > last_scan_time)
+                return;
+            if (last_scan_frame == Time.frameCount)
+                return;
+            
+            last_scan_frame = Time.frameCount;
+            last_scan_time = Time.realtimeSinceStartup;
+            scan_UT = Planetarium.GetUniversalTime();
+            currentActiveSensor = 0;
+            currentActiveVessel = 0;
+            actualPasses = 0;
+            if (body_data.Count > 0)
+            {
+                body_data.At(i).updateCoverage();    //Update coverage for planets one at a time, rather than all together
+                i++;
+                if (i >= body_data.Count) i = 0;
+            }
+            int l = knownVessels.Count;
+
+            SCANvessel vessel = null;
+            SCANdata data = null;
+
+            //watch.Reset();
+            //watch.Start();
+
+            for (int j = 0; j < l; j++)
+            {
+                //Profiler.BeginSample("SCAN Vessel scan");
+                vessel = knownVessels.At(j);
+
+                data = SCANUtil.getData(vessel.vessel.mainBody);
+
+                if (data == null)
+                    continue;
+
+                if (!data.Disabled)
+                {
+                    if (isVesselKnown(vessel.vessel))
+                    {
+                        doScanPass(vessel, vessel.vessel, data, scan_UT, scan_UT, vessel.lastUT);
+                        ++currentActiveVessel;
+                        currentActiveSensor += knownVessels[vessel.vessel.id].sensors.Count;
+                    }
+                }
+
+                vessel.body = vessel.vessel.mainBody;
+                vessel.frame = Time.frameCount;
+                vessel.lastUT = scan_UT;
+                vessel.latitude = SCANUtil.fixLatShift(vessel.vessel.latitude);
+                vessel.longitude = SCANUtil.fixLonShift(vessel.vessel.longitude);
+                //Profiler.EndSample();
+            }
+
+            //watch.Stop();
+
+            //SCANUtil.SCANlog("SCAN Time: {0} - Passes: {1}", watch.ElapsedMilliseconds.ToString(), actualPasses.ToString());
+            activeVessels = currentActiveVessel;
+            activeSensors = currentActiveSensor;
+        }
+
+        private int actualPasses;
+        private static Queue<double> scanQueue;
+        private void doScanPass(SCANvessel vessel, Vessel v, SCANdata data, double UT, double startUT, double lastUT)
+        {
+            double soi_radius = v.mainBody.sphereOfInfluence - v.mainBody.Radius;
+            double alt = v.altitude;
+            double llat = SCANUtil.fixLat(v.latitude);
+            double llon = SCANUtil.fixLon(v.longitude);
+            int lat = (int)Math.Floor(llat);
+            int lon = (int)Math.Floor(llon);
+            double res = 0;
+            Orbit o = v.orbit;
+            bool uncovered;
+            int sensorType;
+
+            double surfscale = Planetarium.fetch.Home.Radius / v.mainBody.Radius;
+
+            if (surfscale < 1)
+                surfscale = 1;
+
+            surfscale = Math.Sqrt(surfscale);
+
+            if (scanQueue == null)
+                scanQueue = new Queue<double>();
+
+            if (scanQueue.Count != 0)
+                scanQueue.Clear();
+
+            loop: // don't look at me like that, I just unrolled the recursion
+            if (res > 0)
+            {
+                if (double.IsNaN(UT))
+                    goto dequeue;
+                
+                if (double.IsNaN(o.getObtAtUT(UT)))
+                    goto dequeue;
+
+                Vector3d pos = o.getPositionAtUT(UT);
+                double rotation = 0;
+
+                if (v.mainBody.rotates)
+                    rotation = (360 * ((UT - scan_UT) / v.mainBody.rotationPeriod)) % 360;
+
+                alt = v.mainBody.GetAltitude(pos);
+                lat = SCANUtil.fixLatInt(v.mainBody.GetLatitude(pos));
+                lon = SCANUtil.fixLonInt(v.mainBody.GetLongitude(pos) - rotation);
+
+                if (alt < 0)
+                    alt = 0;
+            }
+            else
+            {
+                alt = v.radarAltitude;
+                if (alt < 0)
+                    alt = v.altitude;
+            }
+
+            if (Math.Abs((lat * 1d) - llat) < 1 && Math.Abs((lon * 1d) - llon) < 1 && res > 0)
+                goto dequeue;
+
+            actualPasses++;
+
+            uncovered = res <= 0;
+
+            for (int j = vessel.sensors.Count - 1; j >= 0; j--)
+            {
+                SCANsensor sensor = vessel.sensors[j];
+
+                sensorType = (int)sensor.sensor;
+
+                if (res <= 0)
+                {
+                    if (data.getCoverage(sensor.sensor) > 0)
+                        uncovered = false;
+                }
+
+                sensor.inRange = false;
+                sensor.bestRange = false;
+
+                if (alt < sensor.min_alt)
+                    continue;
+
+                if (alt > Math.Min(sensor.max_alt, soi_radius))
+                    continue;
+
+                //Profiler.BeginSample("SCAN Sensor Check");
+
+                sensor.inRange = true;
+
+                double fov = sensor.fov;
+                double ba = Math.Min(sensor.best_alt, soi_radius);
+
+                if (alt < ba)
+                    fov = (alt / ba) * fov;
+                else
+                    sensor.bestRange = true;
+                
+                fov *= surfscale;
+
+                if (fov > 20)
+                    fov = 20;
+
+                int f = (int)Math.Truncate(fov);
+                int f1 = f + (int)Math.Round(fov - f);
+
+                int w = f;
+                double fovW = fov;
+
+                if (lat < 180)
+                {
+                    fovW = fov * (1 / SCANUtil.cosLookUp[lat]);
+                    
+                    if (fovW > 120)
+                        fovW = 120;
+
+                    w = (int)Math.Truncate(fovW);
+                }
+
+                int w1 = w + (int)Math.Round(fovW - w);
+
+                for (int x = -w; x <= w1; ++x)
+                {
+                    int clampLon = lon + x;
+
+                    if (clampLon > 359 || clampLon < 0)
+                    {
+                        clampLon = (clampLon + 360) % 360;
+                    }
+
+                    for (int y = -f; y <= f1; ++y)
+                    {
+                        int clampLat = lat + y;
+                        int clampLonAgain = clampLon;
+
+                        if (clampLat > 179)
+                        {
+                            clampLat = 359 - clampLat;
+                            clampLonAgain += 180;
+
+                            clampLat = (clampLat + 180) % 180;
+
+                            if (clampLonAgain > 359 || clampLonAgain < 0)
+                            {
+                                clampLonAgain = (clampLonAgain + 360) % 360;
+                            }
+                        }
+                        else if (clampLat < 0)
+                        {
+                            clampLat = 0 - clampLat;
+                            clampLonAgain += 180;
+
+                            clampLat = (clampLat + 180) % 180;
+
+                            if (clampLonAgain > 359 || clampLonAgain < 0)
+                            {
+                                clampLonAgain = (clampLonAgain + 360) % 360;
+                            }
+                        }
+                        
+                        data.coverage[clampLonAgain, clampLat] |= sensorType;
+                    }
+                }
+                //Profiler.EndSample();
+            }
+            if (uncovered)
+                return;
+
+            if (vessel.lastUT <= 0)
+                return;
+            if (vessel.frame <= 0)
+                return;
+            if (v.LandedOrSplashed)
+                return;
+            if (res >= SCAN_Settings_Config.Instance.TimeWarpResolution)
+                goto dequeue;
+
+            if (startUT > UT)
+            {
+                scanQueue.Enqueue((startUT + UT) / 2);
+                scanQueue.Enqueue(startUT);
+                scanQueue.Enqueue(UT);
+                scanQueue.Enqueue(lat);
+                scanQueue.Enqueue(lon);
+                scanQueue.Enqueue(res + 1);
+            }
+
+            startUT = UT;
+            UT = (lastUT + UT) / 2;
+            llat = lat;
+            llon = lon;
+            res = res + 1;
+            goto loop;
+
+            dequeue:
+            if (scanQueue.Count <= 0)
+                return;
+            UT = scanQueue.Dequeue();
+            startUT = scanQueue.Dequeue();
+            lastUT = scanQueue.Dequeue();
+            llat = scanQueue.Dequeue();
+            llon = scanQueue.Dequeue();
+            res = scanQueue.Dequeue();
+            goto loop;
+        }
+
+    }
 }

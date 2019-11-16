@@ -26,25 +26,27 @@ namespace SCANsat.SCAN_Platform
 {
 	public abstract class SCAN_MBE : MonoBehaviour
 	{
-		#region Constructor
-		//private MonoBehaviourExtended()
+		//#region Constructor
+		////private MonoBehaviourExtended()
+		////{
+		////}
+		////internal static MonoBehaviourExtended CreateComponent(GameObject AttachTo)
+		////{
+		////    MonoBehaviourExtended monoReturn;
+		////    monoReturn = AttachTo.AddComponent<MonoBehaviourExtended>();
+		////    return monoReturn;
+		////}
+		//static SCAN_MBE()
 		//{
+		//	UnityEngine.Random.seed = (int)(DateTime.Now - DateTime.Now.Date).TotalSeconds;
+		//	Log.Now("Seed Generated...");
 		//}
-		//internal static MonoBehaviourExtended CreateComponent(GameObject AttachTo)
-		//{
-		//    MonoBehaviourExtended monoReturn;
-		//    monoReturn = AttachTo.AddComponent<MonoBehaviourExtended>();
-		//    return monoReturn;
-		//}
-		static SCAN_MBE()
-		{
-			UnityEngine.Random.seed = (int)(DateTime.Now - DateTime.Now.Date).TotalSeconds;
-		}
-		#endregion
+		//#endregion
 		internal T AddComponent<T>() where T : UnityEngine.Component { return gameObject.AddComponent<T>(); }
 
-		private bool _RepeatRunning = false;
-		private bool _OnGUI_FirstRun = false;
+		private static bool _seedGenerated;
+		private bool _RepeatRunning;
+		private bool _OnGUI_FirstRun;
 		private float _RepeatInitialWait;
 		private float _RepeatSecs;
 		private double LooperUTLastStart { get; set; }
@@ -125,7 +127,17 @@ namespace SCANsat.SCAN_Platform
 
 		//See this for info on order of execuction
 		//  http://docs.unity3d.com/Documentation/Manual/ExecutionOrder.html
-		protected virtual void Awake() { Log.Debug("MBE Awakened"); }		// 1.
+		protected virtual void Awake()
+		{
+			Log.Debug("MBE Awakened");
+
+			if (!_seedGenerated)
+			{
+				UnityEngine.Random.InitState((int)(DateTime.Now - DateTime.Now.Date).TotalSeconds);
+
+				_seedGenerated = true;
+			}
+		}		// 1.
 		//internal virtual void OnEnable()		{ }								// 2.
 		protected virtual void Start() { Log.Debug("MBE Started"); }		// 3.
 		protected virtual void FixedUpdate() { }								// 4a. called (>1) per frame
@@ -145,8 +157,8 @@ namespace SCANsat.SCAN_Platform
 			if (!_OnGUI_FirstRun)
 			{
 				_OnGUI_FirstRun = true; 					// set the flag so this only runs once
-				if (!SCAN_SkinsLibrary._Initialized)
-					SCAN_SkinsLibrary.InitSkinList();		// set up the skins library
+				//if (!SCAN_SkinsLibrary._Initialized)
+					//SCAN_SkinsLibrary.InitSkinList();		// set up the skins library
 				OnGUI_FirstRun();							// then actually *do* the firstrun stuff
 			}
 			OnGUIEvery();

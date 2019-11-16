@@ -32,6 +32,8 @@ namespace SCANmechjeb
 			loaded = checkLoaded();
 
 			print(loaded ? "[SCANsatMechJeb] SCANsat and MechJeb Assemblies Detected" : "[SCANsatMechJeb] SCANsat or MechJeb Assembly Not Detected; Shutting Down...");
+
+			Destroy(gameObject);
 		}
 
 		public static bool Loaded

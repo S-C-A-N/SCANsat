@@ -11,175 +11,106 @@
  */
 #endregion
 
+using System.Collections;
 using SCANsat;
 using SCANsat.SCAN_Data;
-using SCANsat.SCAN_Platform;
 using log = SCANsat.SCAN_Platform.Logging.ConsoleLogger;
-using palette = SCANsat.SCAN_UI.UI_Framework.SCANpalette;
+using palette = SCANsat.SCAN_UI.UI_Framework.SCANcolorUtil;
 using MuMech;
 
 using UnityEngine;
+using UnityEngine.Events;
 
 namespace SCANmechjeb
 {
-	class SCANmechjeb : SCAN_MBE
+	class SCANmechjeb : MonoBehaviour
 	{
 		private const string siteName = "MechJeb Landing Target";
-		private Vessel v;
+		private Vessel vessel;
+		private CelestialBody body;
 		private MechJebCore mjCore;
 		private MechJebModuleTargetController target;
 		private DisplayModule guidanceModule;
 		private SCANwaypoint way;
 		private SCANdata data;
 		private Vector2d coords = new Vector2d();
-		private bool selectingTarget, selectingInMap, shutdown;
+		private bool shutdown, mjOnboard, mjTechTreeLocked;
 
-		protected override void LateUpdate()
+		private void Start()
 		{
-			if (shutdown)
+			GameEvents.onVesselWasModified.Add(VesselChange);
+			GameEvents.onVesselChange.Add(VesselChange);
+			GameEvents.onVesselSOIChanged.Add(SOIChange);
+			SCANcontroller.controller.MJTargetSet.AddListener(new UnityAction<Vector2d, CelestialBody>(OnTargetSet));
+
+			StartCoroutine(WaitForReady());
+		}
+
+		private IEnumerator WaitForReady()
+		{
+			shutdown = true;
+
+			while (!FlightGlobals.ready || FlightGlobals.ActiveVessel == null)
+				yield return null;
+
+			vessel = FlightGlobals.ActiveVessel;
+
+			if (vessel == null)
+				yield break;
+
+			VesselChange(vessel);
+
+			body = vessel.mainBody;
+
+			data = SCANUtil.getData(body);
+
+			if (data == null)
+				shutdown = true;
+			else
+				shutdown = false;
+		}
+
+		private void OnDestroy()
+		{
+			GameEvents.onVesselChange.Remove(VesselChange);
+			GameEvents.onVesselWasModified.Remove(VesselChange);
+			GameEvents.onVesselSOIChanged.Remove(SOIChange);
+			SCANcontroller.controller.MJTargetSet.RemoveListener(OnTargetSet);
+		}
+
+		private void LateUpdate()
+		{
+			if (shutdown || !mjOnboard || mjTechTreeLocked || body == null || vessel == null || data == null)
 				return;
 
 			if (!HighLogic.LoadedSceneIsFlight || !FlightGlobals.ready)
 				return;
 
+			way = null;
+
+			if (!SCAN_Settings_Config.Instance.MechJebTarget)
+				return;
+
 			if (SCANcontroller.controller == null)
-			{
-				way = null;
 				return;
-			}
-
-			if (!SCANcontroller.controller.mechJebTargetSelection)
-			{
-				way = null;
-				return;
-			}
-
-			v = FlightGlobals.ActiveVessel;
-
-			if (v == null)
-			{
-				SCANcontroller.controller.MechJebLoaded = false;
-				way = null;
-				return;
-			}
-
-			if (v.mainBody != SCANcontroller.controller.LandingTargetBody)
-				SCANcontroller.controller.LandingTargetBody = v.mainBody;
-
-			data = SCANUtil.getData(v.mainBody);
-
-			if (data == null)
-			{
-				SCANcontroller.controller.MechJebLoaded = false;
-				way = null;
-				return;
-			}
-
-			if (v.FindPartModulesImplementing<MechJebCore>().Count <= 0)
-			{
-				SCANcontroller.controller.MechJebLoaded = false;
-				way = null;
-				return;
-			}
-
-			mjCore = v.GetMasterMechJeb();
-
-			if (mjCore == null)
-			{
-				SCANcontroller.controller.MechJebLoaded = false;
-				way = null;
-				return;
-			}
-
-			if (HighLogic.CurrentGame.Mode != Game.Modes.SANDBOX)
-			{
-				if (guidanceModule == null)
-					guidanceModule = (DisplayModule)mjCore.GetComputerModule("MechJebModuleLandingGuidance");
-
-				if (guidanceModule == null)
-				{
-					SCANcontroller.controller.MechJebLoaded = false;
-					way = null;
-					return;
-				}
-
-				if (!guidanceModule.unlockChecked)
-					return;
-
-				if (guidanceModule.hidden)
-				{
-					SCANcontroller.controller.MechJebLoaded = false;
-					shutdown = true;
-					way = null;
-					return;
-				}
-			}
-
-			target = mjCore.target;
-
-			if (target == null)
-			{
-				SCANcontroller.controller.MechJebLoaded = false;
-				way = null;
-				return;
-			}
 
 			if (!SCANcontroller.controller.MechJebLoaded)
-			{
 				SCANcontroller.controller.MechJebLoaded = true;
-			}
-
-			if (SCANcontroller.controller.LandingTarget != null)
-			{
-				way = SCANcontroller.controller.LandingTarget;
-			}
-
-			if (SCANcontroller.controller.TargetSelecting)
-			{
-				way = null;
-				selectingTarget = true;
-				if (SCANcontroller.controller.TargetSelectingActive)
-					selectingInMap = true;
-				else
-					selectingInMap = false;
-				coords = SCANcontroller.controller.LandingTargetCoords;
-				return;
-			}
-			else if (selectingTarget)
-			{
-				selectingTarget = false;
-				if (selectingInMap)
-				{
-					selectingInMap = false;
-					coords = SCANcontroller.controller.LandingTargetCoords;
-					way = new SCANwaypoint(coords.y, coords.x, siteName);
-					target.SetPositionTarget(SCANcontroller.controller.LandingTargetBody, way.Latitude, way.Longitude);
-				}
-			}
-
-			selectingInMap = false;
-			selectingTarget = false;
 
 			if (target.Target == null)
-			{
-				way = null;
 				return;
-			}
 
-			if (target.targetBody != v.mainBody)
-			{
-				way = null;
+			if (target.targetBody != body)
 				return;
-			}
 
 			if ((target.Target is DirectionTarget))
-			{
-				way = null;
 				return;
-			}
 
 			coords.x = target.targetLongitude;
 			coords.y = target.targetLatitude;
+
+			if (SCANcontroller.controller.LandingTarget != null)
+				way = SCANcontroller.controller.LandingTarget;
 
 			if (way != null)
 			{
@@ -198,34 +129,94 @@ namespace SCANmechjeb
 			}
 		}
 
-		protected override void OnGUIEvery()
+		private void OnTargetSet(Vector2d pos, CelestialBody b)
 		{
-			if (SCANcontroller.controller == null)
+			if (!mjOnboard || target == null)
 				return;
 
-			if (!SCANcontroller.controller.MechJebLoaded)
-				return;
-
-			if (!selectingInMap)
-				return;
-
-			drawTarget();
+			target.SetPositionTarget(b, pos.y, pos.x);
 		}
 
-		//Draw the mapview MechJeb target arrows
-		private void drawTarget()
+		private void SOIChange(GameEvents.HostedFromToAction<Vessel, CelestialBody> action)
 		{
-			if (!selectingInMap)
+			if (vessel == null)
 				return;
 
-			target.pickingPositionTarget = false;
-
-			if (!MapView.MapIsEnabled)
-				return;
-			if (!v.isActiveVessel || v.GetMasterMechJeb() != mjCore)
+			if (vessel != action.host)
 				return;
 
-			GLUtils.DrawGroundMarker(SCANcontroller.controller.LandingTargetBody, coords.y, coords.x, palette.mechjebYellow, true);
+			body = action.to;
+
+			data = SCANUtil.getData(body);
+
+			if (data == null)
+				shutdown = true;
+		}
+
+		private void VesselChange(Vessel v)
+		{
+			if (vessel != v)
+				return;
+
+			body = v.mainBody;
+
+			if (vessel.FindPartModulesImplementing<MechJebCore>().Count <= 0)
+			{
+				SCANcontroller.controller.MechJebLoaded = false;
+				mjOnboard = false;
+				mjCore = null;
+				return;
+			}
+
+			mjCore = vessel.GetMasterMechJeb();
+
+			if (mjCore == null)
+			{
+				SCANcontroller.controller.MechJebLoaded = false;
+				mjOnboard = false;
+				target = null;
+				return;
+			}
+
+			target = mjCore.target;
+
+			if (target == null)
+			{
+				SCANcontroller.controller.MechJebLoaded = false;
+				mjOnboard = false;
+				return;
+			}
+
+			mjOnboard = true;
+
+			if (HighLogic.CurrentGame.Mode != Game.Modes.SANDBOX)
+			{
+				if (guidanceModule == null)
+					guidanceModule = (DisplayModule)mjCore.GetComputerModule("MechJebModuleLandingGuidance");
+
+				if (guidanceModule == null)
+				{
+					SCANcontroller.controller.MechJebLoaded = false;
+					way = null;
+					mjOnboard = false;
+					mjTechTreeLocked = true;
+					return;
+				}
+
+				guidanceModule.UnlockCheck();
+
+				if (guidanceModule.hidden)
+				{
+					SCANcontroller.controller.MechJebLoaded = false;
+					way = null;
+					mjOnboard = false;
+					mjTechTreeLocked = true;
+					return;
+				}
+			}
+
+			SCANcontroller.controller.MechJebLoaded = true;
+			mjTechTreeLocked = false;
 		}
 	}
 }

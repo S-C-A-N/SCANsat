@@ -47,12 +47,14 @@ namespace SCANsat.SCAN_Data
 		private Color32 lowColor32;
 		private Color32 highColor32;
 		private float defaultTrans;
+		private string displayName;
 
 		private SCANresourceBody currentBody;
 
-		internal SCANresourceGlobal(string resource, float trans, float defMin, float defMax, Color minC, Color maxC, SCANresourceType t)
+		internal SCANresourceGlobal(string resource, string display, float trans, float defMin, float defMax, Color minC, Color maxC, SCANresourceType t)
 		{
 			name = resource;
+			displayName = display;
 			resourceTransparency = trans;
 			lowResourceColor = minC;
 			highResourceColor = maxC;
@@ -73,6 +75,7 @@ namespace SCANsat.SCAN_Data
 		internal SCANresourceGlobal(SCANresourceGlobal copy)
 		{
 			name = copy.name;
+			displayName = copy.displayName;
 			resourceTransparency = copy.resourceTransparency;
 			lowResourceColor = copy.lowResourceColor;
 			highResourceColor = copy.highResourceColor;
@@ -177,6 +180,12 @@ namespace SCANsat.SCAN_Data
 		public string Name
 		{
 			get { return name; }
+		}
+
+		public string DisplayName
+		{
+			get { return displayName; }
+			set { displayName = value; }
 		}
 
 		public float Transparency

@@ -13,7 +13,7 @@
 
 using System.Linq;
 using SCANsat.SCAN_Platform;
-using SCANsat.SCAN_Platform.Palettes;
+using SCANsat.SCAN_Palettes;
 
 namespace SCANsat.SCAN_Data
 {
@@ -44,13 +44,13 @@ namespace SCANsat.SCAN_Data
 		[Persistent]
 		private bool paletteDiscrete;
 
-		private Palette colorPal;
+		private SCANPalette colorPal;
 		private CelestialBody body;
 		private float? clampTerrain;
 
 		private float defaultMinHeight, defaultMaxHeight;
 		private float terrainRange;
-		private Palette defaultPalette;
+		private SCANPalette defaultPalette;
 		private int defaultPaletteSize;
 		private bool defaultReverse, defaultDiscrete;
 		private float? defaultClamp;
@@ -58,7 +58,7 @@ namespace SCANsat.SCAN_Data
 		private float internalMinHeightMult = 1;
 		private float internalClampHeightMult = 1;
 
-		internal SCANterrainConfig(float min, float max, float? clamp, Palette color, int size, bool reverse, bool discrete, CelestialBody b)
+		internal SCANterrainConfig(float min, float max, float? clamp, SCANPalette color, int size, bool reverse, bool discrete, CelestialBody b)
 		{
 			minHeightRange = min;
 			maxHeightRange = max;
@@ -69,12 +69,12 @@ namespace SCANsat.SCAN_Data
 			else
 				clampHeight = clampTerrain.Value.ToString("F0");
 			colorPal = color;
-			paletteName = colorPal.name;
+			paletteName = colorPal.Name;
 			paletteSize = size;
 			paletteReverse = reverse;
 			paletteDiscrete = discrete;
 			body = b;
-			name = body.name;
+			name = body.bodyName;
 			index = body.flightGlobalsIndex;
 
 			setDefaultValues();
@@ -110,11 +110,11 @@ namespace SCANsat.SCAN_Data
 		{
 			body = FlightGlobals.Bodies.FirstOrDefault(b => b.flightGlobalsIndex == index);
 			if (body != null)
-				name = body.name;
+				name = body.bodyName;
 			else
 				name = "WrongBody" + index;
 
-			colorPal = SCANUtil.paletteLoader(paletteName, paletteSize);
+			colorPal = SCANUtil.PaletteLoader(paletteName, paletteSize);
 
 			float tempClamp = 0;
 			if (clampHeight == "Null" || clampHeight == "null" || string.IsNullOrEmpty(clampHeight))
@@ -150,7 +150,7 @@ namespace SCANsat.SCAN_Data
 			else
 				clampHeight = clampTerrain.Value.ToString("F0");
 
-			paletteName = colorPal.name;
+			paletteName = colorPal.Name;
 
 			maxHeightMultiplier = 1;
 			minHeightMultiplier = 1;
@@ -229,7 +229,7 @@ namespace SCANsat.SCAN_Data
 			}
 		}
 
-		public Palette ColorPal
+		public SCANPalette ColorPal
 		{
 			get { return colorPal; }
 			internal set { colorPal = value; }
@@ -278,7 +278,7 @@ namespace SCANsat.SCAN_Data
 			get { return defaultClamp; }
 		}
 
-		public Palette DefaultPalette
+		public SCANPalette DefaultPalette
 		{
 			get { return defaultPalette; }
 		}

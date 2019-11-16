@@ -50,7 +50,10 @@ namespace SCANsat
 				Destroy(gameObject);
 				return;
 			}
+
 			loaded = true;
+
+            PopulateCosLookupArray();
 
 			if (orbitIconsMap == null)
 				getOrbitIcons();
@@ -60,6 +63,12 @@ namespace SCANsat
 			FinePrintFlightBand = SCANreflection.FinePrintFlightBandReflection();
 			SCANconfigLoader.configLoader();
 		}
+
+        private void PopulateCosLookupArray()
+        {
+            for (int i = 0; i < 180; i++)
+                SCANUtil.cosLookUp[i] = Math.Cos((i - 90) * 0.0174532924);
+        }
 
 		private void getOrbitIcons()
 		{
@@ -99,7 +108,7 @@ namespace SCANsat
 		{
 			foreach (AssemblyLog log in assemblyList)
 			{
-				print(string.Format("[SCANlogger] Assembly: {0} found; Version: {1}; File Version: {2}; Info Version: {3}; Location: {4}", log.name, log.version, log.fileVersion, log.infoVersion, log.location));
+				print(string.Format("[SCANsat] Assembly: {0} found; Version: {1}; File Version: {2}; Info Version: {3}; Location: {4}", log.name, log.version, log.fileVersion, log.infoVersion, log.location));
 			}
 		}
 

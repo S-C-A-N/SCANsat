@@ -56,7 +56,7 @@ namespace SCANsat.SCAN_Platform
 			}
 			catch (Exception ex)
 			{
-				Log.Now("Failed to Load ConfigNode from file ({0}) - Error:{1}", fileFullName, ex.Message);
+				Log.Now("Failed to Load ConfigNode from file ({0}) - Error:{1}", fileFullName, ex);
 				Log.Now("Storing old config - {0}", fileFullName + ".err-" + timeNow);
 				System.IO.File.Copy(fileFullName, fileFullName + ".err-" + timeNow, true);
 				return false;

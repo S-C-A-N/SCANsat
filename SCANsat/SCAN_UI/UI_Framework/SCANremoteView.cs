@@ -11,192 +11,292 @@
 */
 #endregion
 
-using System;
+using SCANsat.SCAN_Data;
 using System.Collections.Generic;
+using SCANsat.SCAN_Unity;
 using UnityEngine;
-using palette = SCANsat.SCAN_UI.UI_Framework.SCANpalette;
+using palette = SCANsat.SCAN_UI.UI_Framework.SCANcolorUtil;
 
 
 namespace SCANsat.SCAN_UI.UI_Framework
 {
-	public class SCANremoteView {
-
+	public class SCANremoteView
+	{
+        private const float MAX_DISTANCE = 250;
+        private const float MIN_DISTANCE = 15;
+        
 		private static Camera cam;
 		private static GameObject camgo;
-		private static Shader edgeDetectShader, grayscaleShader;
-		private static Material edgeDetectMaterial, grayscaleMaterial;
-		private static AudioClip tick;
 		private RenderTexture rt;
-		/* FIXME: unused */ //private Rect camRect;
 		private int updateFrame, width, height;
 		private List<CrashObjectName> cons;
+        private List<SCANROC> rocs;
 		private Bounds bounds;
 		private int activeCon;
-		private double switchTime;
-		public GameObject lookat;
+        private int activeROC;
+        public GameObject lookat;
 		public CrashObjectName lookdetail;
+        public SCANROC rocDetail;
+        public bool rocsMode;
+        
+        public void Initialize(int w, int h)
+        {
+            width = w;
+            height = h;
+        }
 
-		public void setup ( int w , int h , GameObject focus ) {
-			if (edgeDetectShader == null) {
-				// simple colour based edge detection that comes with Unity Pro
-				edgeDetectShader = Shader.Find ("Hidden/Edge Detect X");
-				edgeDetectMaterial = new Material (edgeDetectShader);
-				edgeDetectMaterial.SetFloat ("_Threshold" , 0.05f);
-
-				// greyscale shader that comes with Unity Pro
-				grayscaleShader = Shader.Find ("Hidden/Grayscale Effect");
-				grayscaleMaterial = new Material (grayscaleShader);
-				Texture2D t = new Texture2D (256 , 1 , TextureFormat.RGB24 , false);
-				// ramp texture to render everything in dark shades of Amber,
-				// except originally dark lines, which become bright Amber
-				for (int i=0; i<256; ++i)
-					t.SetPixel (i , 0 , palette.lerp (palette.black , palette.xkcd_Amber , i / 1024f));
-				for (int i=0; i<10; ++i)
-					t.SetPixel (i , 0 , palette.xkcd_Amber);
-				t.Apply ();
-				grayscaleMaterial.SetTexture ("_RampTex" , t);
-			}
-			if (lookat != focus) {
-				switchTime = Time.realtimeSinceStartup;
+        public void setup(GameObject focus)
+		{
+			if (lookat != focus)
+			{
 				lookdetail = null;
-				bounds = new Bounds ();
-				foreach (Collider c in focus.GetComponentsInChildren<Collider>())
-						bounds.Encapsulate (c.bounds);
-				cons = new List<CrashObjectName> ();
-				foreach (CrashObjectName con in focus.GetComponentsInChildren<CrashObjectName>()) {
-					cons.Add (con);
+
+                bounds = new Bounds(focus.transform.position, Vector3.zero);
+                foreach (MeshRenderer c in focus.GetComponentsInChildren<MeshRenderer>())
+                    bounds.Encapsulate(c.bounds);
+
+				cons = new List<CrashObjectName>();
+
+				foreach (CrashObjectName con in focus.GetComponentsInChildren<CrashObjectName>())
+				{
+					cons.Add(con);
 				}
-			}
+            }
 			lookat = focus;
-			width = w;
-			height = h;
-			/* FIXME: unused */ //camRect = new Rect (0 , 0 , width , height);
+
+            rocDetail = null;
+
+            rocsMode = false;
 		}
 
-		public void free () {
-			GameObject.Destroy (camgo);
-			RenderTexture.Destroy (rt);
+        public void setup(List<SCANROC> rocList, Vessel v)
+        {
+            if (rocList == null)
+                return;
+
+            double nearest = -1;
+
+            rocs = new List<SCANROC>();
+
+            for (int i = rocList.Count - 1; i >= 0; i--)
+            {
+                SCANROC roc = rocList[i];
+
+                if (!roc.Known)
+                    continue;
+
+                rocs.Add(roc);
+
+                double d = (roc.Roc.transform.position - v.transform.position).sqrMagnitude;
+
+                if (d < nearest || nearest < 0)
+                {
+                    lookat = roc.Roc.gameObject;
+                    rocDetail = roc;
+                    nearest = d;
+                }
+            }
+
+            if (lookat != null)
+            {
+                bounds = new Bounds(lookat.transform.position, Vector3.zero);
+                foreach (MeshRenderer c in lookat.GetComponentsInChildren<MeshRenderer>())
+                    bounds.Encapsulate(c.bounds);
+            }
+            else
+                bounds = new Bounds();
+
+            lookdetail = null;
+
+            rocsMode = true;
+        }
+
+		public bool valid(GameObject focus)
+		{
+			if (focus == null)
+				return false;
+
+			if (focus != lookat)
+				return false;
+
+			return true;
+		}
+
+        public bool validROC()
+        {
+            if (!rocsMode)
+                return false;
+
+            if (rocDetail.Roc == null)
+                return false;
+
+            if (lookat != rocDetail.Roc.gameObject)
+                return false;
+
+            return true;
+        }
+
+		public void free()
+		{
+			GameObject.Destroy(camgo);
+			RenderTexture.Destroy(rt);
 			cam = null;
 			camgo = null;
 			rt = null;
 		}
 
-		public void updateCamera () {
+		private void updateCamera()
+		{
 			if (updateFrame > Time.frameCount - 5)
 				return;
-			if (rt == null || rt.width != width || rt.height != height) {
-				rt = new RenderTexture (width , height , 32 , RenderTextureFormat.RGB565);
-				rt.Create ();
+
+			if (rt == null || rt.width != width || rt.height != height)
+			{
+				RenderTextureFormat format = RenderTextureFormat.RGB565;
+
+				if (!SystemInfo.SupportsRenderTextureFormat(format))
+					format = RenderTextureFormat.Default;
+
+				rt = new RenderTexture(width, height, 32, format);
+				rt.Create();
 			}
-			if (camgo == null) {
-				camgo = new GameObject ();
-			}
-			if (cam == null) {
-				cam = camgo.AddComponent<Camera> ();
-				cam.enabled = false; // so we can render on demand
+
+			if (camgo == null)
+				camgo = new GameObject();
+
+			if (cam == null)
+			{
+				cam = camgo.AddComponent<Camera>();
+                //Add image processing component to camera game object
+                camgo.AddComponent<SCANEdgeDetect>();
+				cam.enabled = false;
+                
 				cam.targetTexture = rt;
 				cam.aspect = width * 1f / height;
 				cam.fieldOfView = 90;
 			}
 
 			Vector3 pos_target = lookat.transform.position;
+
 			if (lookdetail != null)
 				pos_target = lookdetail.transform.position;
+
+            if (rocDetail != null)
+                pos_target = rocDetail.Roc.transform.position;
+
 			Vector3 pos_cam = FlightGlobals.ActiveVessel.transform.position;
 			Vector3 target_up = (pos_target - FlightGlobals.currentMainBody.transform.position).normalized;
 			Vector3 dir = (pos_target - pos_cam).normalized;
-			float dist = 100; // TODO: replace with something useful for given object size
+
+            float dist = 100;
+            float bound = Mathf.Max(bounds.size.x, Mathf.Max(bounds.size.y, bounds.size.z));
+
+            dist = Mathf.Clamp(bound * 1.5f, MIN_DISTANCE, MAX_DISTANCE);
+
 			pos_cam = pos_target - dir * dist / 2 + target_up * dist / 3;
 			Vector3 cam_up = (pos_cam - FlightGlobals.currentMainBody.transform.position).normalized;
 
 			cam.transform.position = pos_cam;
-			cam.transform.LookAt (pos_target , cam_up);
+			cam.transform.LookAt(pos_target, cam_up);
 			cam.farClipPlane = dist * 3;
 
-			RenderTexture old = RenderTexture.active;
-			RenderTexture.active = rt;
-			cam.Render ();
-			Graphics.Blit (rt , rt , edgeDetectMaterial);
-			Graphics.Blit (rt , rt , grayscaleMaterial);
+            cam.Render();
 
-			RenderTexture.active = old;
-			updateFrame = Time.frameCount;
+            updateFrame = Time.frameCount;
 		}
 
-		private bool ticking;
-		private double lastTick;
-		private int tickRate = 10;
-
-		public void drawOverlay ( Rect where , GUIStyle style , bool identified ) {
-			if (tick == null) {
-				tick = GameDatabase.Instance.GetAudioClip ("Squad/Sounds/sound_click_tick");
-			}
-			ticking = false;
-			int chars = (int)((Time.realtimeSinceStartup - switchTime) * tickRate);
-			Rect r = new Rect (0 , 0 , 240 , 30);
-			string info = "no structures found";
-			if (cons.Count == 1) {
-				info = "identified 1 structure";
-			} else if (cons.Count > 1) {
-				info = "identified " + cons.Count.ToString () + " structures";
-			}
-			if (!identified)
-				info = "scanning...";
-			info = "> " + info;
-			if (Math.Round (Time.realtimeSinceStartup) % 2 == 0)
-				info += "_";
-			r.x = where.x + 4;
-			r.y = where.y + 8;
-			GUI.Label (r , left (info , chars) , style);
-			if (!identified)
-				return;
-
-			r.x = where.x + 4;
-			r.y = where.y + where.height - 60;
-			string sname = lookat.name;
-			Vector3 lookvec = lookat.transform.position;
-			if (cons.Count > 0) {
-				if (Event.current.type == EventType.ScrollWheel && where.Contains (Event.current.mousePosition)) {
-					activeCon += cons.Count + (Event.current.delta.y > 0 ? 1 : -1);
-					Event.current.Use ();
-					switchTime = Time.realtimeSinceStartup;
-				}
-				activeCon = activeCon % cons.Count;
-				lookdetail = cons [activeCon];
-				/* FIXME: unused */ //Vector3 pos = cam.WorldToScreenPoint (lookdetail.transform.position);
-				lookvec = lookdetail.transform.position;
-				sname = lookdetail.objectName;
-			}
-			if (sname != null) {
-				GUI.Label (r , left (sname , chars) , style);
-				r.y += 30;
-				GUI.Label (r , left (distanceString ((FlightGlobals.ActiveVessel.transform.position - lookvec).magnitude) , chars) , style);
-			}
-			if (ticking) {
-				if (Time.realtimeSinceStartup - lastTick > 1f / tickRate) {
-					AudioSource.PlayClipAtPoint (tick , Camera.main.transform.position);
-					lastTick = Time.realtimeSinceStartup;
-				}
-			}
-		}
-
-		public string left ( string s , int cnt ) {
-			if (cnt >= s.Length)
-				return s;
-			ticking = true;
-			return s.Substring (0 , cnt);
-		}
-
-		public string distanceString ( double dist ) {
-			if (dist < 5000)
-				return dist.ToString ("N1") + "m";
-			return (dist / 1000d).ToString ("N3") + "km";
-		}
-
-		public Texture getTexture () {
-			updateCamera ();
+		public Texture getTexture()
+		{
+            updateCamera();
 			return rt;
 		}
+
+		public string getInfoString()
+		{
+            if (!rocsMode && cons.Count > 0)
+                return string.Format("> Identified {0} structure{1}", cons.Count.ToString(), cons.Count > 1 ? "s" : "");
+            else if (rocsMode)
+                return string.Format("> Identified {0} surface object{1}", rocs.Count.ToString(), rocs.Count > 1 ? "s" : "");
+            else
+                return "";
+		}
+
+		public string getAnomalyDataString(bool mouse, bool anomalyKnown)
+		{
+			string sname = lookat.name;
+
+			Vector3 lookvec = lookat.transform.position;
+
+            bool distance = false;
+
+			if (!rocsMode && cons.Count > 0)
+			{
+				float scroll = Input.GetAxis("Mouse ScrollWheel");
+
+                lookdetail = cons[activeCon];
+
+                if (mouse && scroll != 0)
+                {
+                    activeCon += (scroll > 0 ? 1 : -1);
+
+                    if (activeCon >= cons.Count)
+                        activeCon = 0;
+                    else if (activeCon < 0)
+                        activeCon = cons.Count - 1;
+
+                    lookdetail = cons[activeCon];
+
+                    bounds = new Bounds(lookdetail.transform.position, Vector3.zero);
+                    foreach (MeshRenderer c in lookdetail.GetComponentsInChildren<MeshRenderer>())
+                        bounds.Encapsulate(c.bounds);
+                }
+
+                lookvec = lookdetail.transform.position;
+				sname = lookdetail.objectName;
+
+                rocDetail = null;
+
+                distance = anomalyKnown;
+			}
+            else if (rocsMode && rocs.Count > 0)
+            {
+                float scroll = Input.GetAxis("Mouse ScrollWheel");
+
+                if (mouse && scroll != 0)
+                {
+                    activeROC += (scroll > 0 ? 1 : -1);
+
+                    if (activeROC >= rocs.Count)
+                        activeROC = 0;
+                    else if (activeROC < 0)
+                        activeROC = rocs.Count - 1;
+
+                    rocDetail = rocs[activeROC];
+                    lookat = rocDetail.Roc.gameObject;
+
+                    bounds = new Bounds(lookat.transform.position, Vector3.zero);
+                    foreach (MeshRenderer c in lookat.GetComponentsInChildren<MeshRenderer>())
+                        bounds.Encapsulate(c.bounds);
+                }
+
+                lookvec = rocDetail.Roc.transform.position;
+                sname = rocDetail.Scanned ? rocDetail.Name : "Unknown";
+
+                lookdetail = null;
+
+                distance = true;
+            }
+
+			if (distance)
+			{
+				string dist = SCANuiUtil.distanceString((FlightGlobals.ActiveVessel.transform.position - lookvec).magnitude, 2000);
+
+				return string.Format("{0}\n{1}", sname, dist);
+			}
+			else
+				return string.Format("\n{0}", sname);
+		}
+
 	}
 }
 

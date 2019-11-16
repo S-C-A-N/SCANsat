@@ -34,5 +34,6 @@ namespace SCANsat.SCAN_Map
 		Rectangular = 0,
 		KavrayskiyVII = 1,
 		Polar = 2,
+		Orthographic = 3,
 	}
 }

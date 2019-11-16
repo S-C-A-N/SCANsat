@@ -38,12 +38,12 @@ namespace SCANsat.SCAN_Map
 				case mapType.Biome: mode = "biome"; break;
 			}
 
-			if (map.ResourceActive && SCANconfigLoader.GlobalResource && !string.IsNullOrEmpty(SCANcontroller.controller.resourceSelection))
-				mode += "-" + SCANcontroller.controller.resourceSelection;
-			if (SCANcontroller.controller.colours == 1)
+			if (map.ResourceActive && SCANconfigLoader.GlobalResource && !string.IsNullOrEmpty(SCANcontroller.controller.bigMapResource))
+				mode += "-" + SCANcontroller.controller.bigMapResource;
+			if (!SCANcontroller.controller.bigMapColor)
 				mode += "-grey";
 
-			string baseFileName = string.Format("{0}_{1}_{2}x{3}", map.Body.name, mode, map.Map.width, map.Map.height);
+			string baseFileName = string.Format("{0}_{1}_{2}x{3}", map.Body.bodyName, mode, map.Map.width, map.Map.height);
 
 			if (map.Projection != MapProjection.Rectangular)
 				baseFileName += "_" + map.Projection.ToString();
@@ -58,9 +58,9 @@ namespace SCANsat.SCAN_Map
 
 			ScreenMessages.PostScreenMessage("SCANsat Map saved: GameData/SCANsat/PluginData/" + filename, 8, ScreenMessageStyle.UPPER_CENTER);
 
-			SCANUtil.SCANlog("Map of [{0}] saved\nMap Size: {1} X {2}\nMinimum Altitude: {3:F0}m; Maximum Altitude: {4:F0}m\nPixel Width At Equator: {5:F6}m", map.Body.theName, map.Map.width, map.Map.height, data.TerrainConfig.MinTerrain, data.TerrainConfig.MaxTerrain, (map.Body.Radius * 2 * Math.PI) / (map.Map.width * 1f));
+			SCANUtil.SCANlog("Map of [{0}] saved\nMap Size: {1} X {2}\nMinimum Altitude: {3:F0}m; Maximum Altitude: {4:F0}m\nPixel Width At Equator: {5:F6}m", map.Body.displayName.LocalizeBodyName(), map.Map.width, map.Map.height, data.TerrainConfig.MinTerrain, data.TerrainConfig.MaxTerrain, (map.Body.Radius * 2 * Math.PI) / (map.Map.width * 1f));
 
-			if (SCANcontroller.controller.exportCSV && map.MType == mapType.Altimetry)
+			if (SCAN_Settings_Config.Instance.ExportCSV && map.MType == mapType.Altimetry)
 				StartCoroutine(exportCSV(path, baseFileName, map, data));
 			else
 				exporting = false;

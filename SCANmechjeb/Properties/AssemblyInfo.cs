@@ -32,10 +32,10 @@ using System.Runtime.InteropServices;
 // You can specify all the values or you can default the Build and Revision Numbers 
 // by using the '*' as shown below:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("1.6.0.9")]
-[assembly: AssemblyFileVersion("1.6.0.9")]
-[assembly: AssemblyInformationalVersion ("v16.9")]
+[assembly: AssemblyVersion("1.8.14.0")]
+[assembly: AssemblyFileVersion("1.8.14.0")]
+[assembly: AssemblyInformationalVersion ("v18.14")]
 
-[assembly: KSPAssembly ("SCANmechjeb", 0, 4)]
-[assembly: KSPAssemblyDependency ("SCANsat", 1, 6)]
+[assembly: KSPAssembly ("SCANmechjeb", 0, 5)]
+[assembly: KSPAssemblyDependency ("SCANsat", 1, 8)]
 [assembly: KSPAssemblyDependency("MechJeb2", 2, 5)]

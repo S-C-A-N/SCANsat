@@ -53,8 +53,8 @@ namespace SCANsat.SCAN_Data
 		Science = 524299,				// All science collection types
 		AllResources = 2147483584,		// All resource types
 		DefinedResources = 536346496,		// All defined resource types
-		MKSResources = 32613504,			// All standard MKS/USI resources
-		KSPIResourece = 437272320,					// All KSPI standard resources
+		MKSResources = 301048960,			// All standard MKS/USI resources
+		KSPIResourece = 437272064,					// All KSPI standard resources
 		Everything = Int32.MaxValue      // All scanner types
 	}
 }

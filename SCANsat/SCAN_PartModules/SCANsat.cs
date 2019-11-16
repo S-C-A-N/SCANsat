@@ -16,20 +16,46 @@ using System.Linq;
 using SCANsat.SCAN_Data;
 using SCANsat.SCAN_Toolbar;
 using SCANsat.SCAN_UI;
+using SCANsat.SCAN_Unity;
 using KSP.UI.Screens.Flight.Dialogs;
+using KSP.Localization;
 
 using UnityEngine;
-using palette = SCANsat.SCAN_UI.UI_Framework.SCANpalette;
+using palette = SCANsat.SCAN_UI.UI_Framework.SCANcolorUtil;
 
 namespace SCANsat.SCAN_PartModules
 {
-	public class SCANsat : PartModule, IScienceDataContainer
+	public class SCANsat : PartModule
 	{
+		[KSPField]
+		public int sensorType;
+		[KSPField]
+		public int experimentType;
+		[KSPField]
+		public float fov;
+		[KSPField]
+		public float min_alt;
+		[KSPField]
+		public float max_alt;
+		[KSPField]
+		public float best_alt;
+		[KSPField]
+		public string scanName;
+		[KSPField]
+		public string animationName;
+		[KSPField(guiName = "SCANsat Altitude", guiActive = false)]
+		public string alt_indicator;
+		[KSPField(isPersistant = true)]
+		protected bool scanning = false;
+
+		public bool scanningNow
+		{
+			get { return scanning; }
+		}
+
 		private bool powerIsProblem;
 		private int powerTimer;
 		private Animation anim = null;
-		private List<ScienceData> storedData = new List<ScienceData>();
-		private ExperimentsResultDialog expDialog = null;
 
 		/* SAT: KSP entry points */
 		public override void OnStart(StartState state)
@@ -57,34 +83,12 @@ namespace SCANsat.SCAN_PartModules
 				}
 			}
 			if (scanName != null)
-			{ // Use bitwise operators to check if the part has valid science collection scanners
-				if ((sensorType & (Int32)SCANtype.AltimetryLoRes) == 0 && (sensorType & (Int32)SCANtype.AltimetryHiRes) == 0 && (sensorType & (Int32)SCANtype.Biome) == 0)
-				{
-					Events["startScan"].guiName = "Start " + scanName;
-					Events["stopScan"].guiName = "Stop " + scanName;
-					Actions["startScanAction"].guiName = "Start " + scanName;
-					Actions["stopScanAction"].guiName = "Stop " + scanName;
-					Actions["toggleScanAction"].guiName = "Toggle " + scanName;
-				}
-				else
-				{
-					Events["startScan"].guiName = "Start " + scanName;
-					Events["stopScan"].guiName = "Stop " + scanName;
-					Actions["startScanAction"].guiName = "Start " + scanName;
-					Actions["stopScanAction"].guiName = "Stop " + scanName;
-					Actions["toggleScanAction"].guiName = "Toggle " + scanName;
-				}
-
-				if ((sensorType & (int)SCANtype.Science) == 0)
-				{
-					Events["analyze"].active = false;
-					Actions["analyzeData"].active = false;
-				}
-				else
-				{
-					Events["analyze"].active = true;
-					Actions["analyzeData"].active = false;
-				}
+			{
+				Events["startScan"].guiName = string.Format("{0}: {1}", Localizer.Format("#autoLOC_SCANsat_StartScan"), scanName);
+				Events["stopScan"].guiName = string.Format("{0}: {1}", Localizer.Format("#autoLOC_SCANsat_StopScan"), scanName);
+				Actions["startScanAction"].guiName = string.Format("{0}: {1}", Localizer.Format("#autoLOC_SCANsat_StartScan"), scanName);
+				Actions["stopScanAction"].guiName = string.Format("{0}: {1}", Localizer.Format("#autoLOC_SCANsat_StopScan"), scanName);
+				Actions["toggleScanAction"].guiName = string.Format("{0}: {1}", Localizer.Format("#autoLOC_SCANsat_ToggleScan"), scanName);
 			}
 
 			if (sensorType == 0)
@@ -93,12 +97,10 @@ namespace SCANsat.SCAN_PartModules
 				// and we also disable the analyze button (it does nothing)
 				Events["startScan"].active = false;
 				Events["stopScan"].active = false;
-				Events["analyze"].active = false;
 				Events["editorExtend"].active = false;
 				Actions["startScanAction"].active = false;
 				Actions["stopScanAction"].active = false;
 				Actions["toggleScanAction"].active = false;
-				Actions["analyzeData"].active = false;
 			}
 
 			if (scanning) animate(1, 1);
@@ -117,8 +119,6 @@ namespace SCANsat.SCAN_PartModules
 			if (sensorType == 0)
 				return;
 
-			Events["reviewEvent"].active = storedData.Count > 0;
-			Events["EVACollect"].active = storedData.Count > 0;
 			Events["startScan"].active = !scanning && !powerIsProblem;
 			Events["stopScan"].active = scanning || powerIsProblem;
 			if (sensorType != 32)
@@ -160,47 +160,17 @@ namespace SCANsat.SCAN_PartModules
 			{
 				if (sensorType != 0 || SCANcontroller.controller.isVesselKnown(vessel.id, (SCANtype)sensorType))
 				{
-					if (TimeWarp.CurrentRate < 15000)
+					if (!resHandler.UpdateModuleResourceInputs(ref alt_indicator, 1, 0.9, false, true))
 					{
-						if (!resHandler.UpdateModuleResourceInputs(ref alt_indicator, 1, 0.9, false, true))
-						{
-							unregisterScanner();
-							powerIsProblem = true;
-							powerTimer = 0;
-						}
-						else
-							powerIsProblem = false;
+						unregisterScanner();
+						powerIsProblem = true;
+						powerTimer = 0;
 					}
-					else if (powerIsProblem)
-					{
-						registerScanner();
+					else
 						powerIsProblem = false;
-					}
 				}
 				else
 					unregisterScanner();
-			}
-		}
-
-		public override void OnLoad(ConfigNode node)
-		{
-			if (node.HasNode("ScienceData"))
-			{
-				foreach (ConfigNode storedDataNode in node.GetNodes("ScienceData"))
-				{
-					ScienceData data = new ScienceData(storedDataNode);
-					storedData.Add(data);
-				}
-			}
-		}
-
-		public override void OnSave(ConfigNode node)
-		{
-			node.RemoveNodes("ScienceData"); //** Prevent duplicates
-			foreach (ScienceData SCANData in storedData)
-			{
-				ConfigNode storedDataNode = node.AddNode("ScienceData");
-				SCANData.Save(storedDataNode);
 			}
 		}
 
@@ -211,49 +181,26 @@ namespace SCANsat.SCAN_PartModules
 
 			string str = base.GetInfo();
 			if (min_alt != 0)
-				str += "Altitude ( min): " + (min_alt / 1000).ToString("F0") + " km\n";
+				str += Localizer.Format("#autoLOC_SCANsat_AltitudeMin", (min_alt / 1000).ToString("F0"));
 			if (best_alt != min_alt)
-				str += "Altitude (best): " + (best_alt / 1000).ToString("F0") + " km\n";
+				str += Localizer.Format("#autoLOC_SCANsat_AltitudeBest", (best_alt / 1000).ToString("F0"));
 			if (max_alt != 0)
-				str += "Altitude ( max): " + (max_alt / 1000).ToString("F0") + " km\n";
+				str += Localizer.Format("#autoLOC_SCANsat_AltitudeMax", (max_alt / 1000).ToString("F0"));
 			if (fov != 0)
-				str += "FOV: " + fov.ToString("F0") + " Â°";
+				str += Localizer.Format("#autoLOC_SCANsat_FOV", fov.ToString("F0") + "°");
 
 			str += resHandler.PrintModuleResources(1);
 			return str;
 		}
-
-		/* SAT: KSP fields */
-		[KSPField]
-		public int sensorType;
-		[KSPField]
-		public float fov;
-		[KSPField]
-		public float min_alt;
-		[KSPField]
-		public float max_alt;
-		[KSPField]
-		public float best_alt;
-		[KSPField]
-		public string scanName;
-		[KSPField]
-		public string animationName;
-		[KSPField(guiName = "SCANsat Altitude", guiActive = false)]
-		public string alt_indicator;
-
-		/* SCAN: all of these fields and only scanning is persistant */
-		[KSPField(isPersistant = true)]
-		protected bool scanning = false;
-		public bool scanningNow() { return scanning; }
-
+				
 		/* SCAN: context (right click) buttons in FLIGHT */
 		[KSPEvent(guiActive = true, guiName = "Start RADAR Scan", active = true)]
 		public void startScan()
 		{
 			if (!ToolbarManager.ToolbarAvailable && SCANcontroller.controller != null)
 			{
-				if (!SCANcontroller.controller.useStockAppLauncher)
-					SCANcontroller.controller.mainMap.Visible = true;
+				if (!SCAN_Settings_Config.Instance.StockToolbar && SCAN_UI_MainMap.Instance != null && !SCAN_UI_MainMap.Instance.IsVisible)
+					SCAN_UI_MainMap.Instance.Open();
 			}
 			registerScanner();
 			animate(1, 0);
@@ -265,39 +212,6 @@ namespace SCANsat.SCAN_PartModules
 			unregisterScanner();
 			powerIsProblem = false;
 			animate(-1, 1);
-		}
-
-		[KSPEvent(guiActive = true, guiName = "Analyze Data", active = true)]
-		public void analyze()
-		{
-			gatherScienceData();
-		}
-
-		public void gatherScienceData(bool silent = false)
-		{
-			makeScienceData(true);
-			if (!silent)
-				ReviewData();
-		}
-
-		[KSPEvent(guiActive = true, guiName = "Review Data", active = false)]
-		public void reviewEvent()
-		{
-			ReviewData();
-		}
-
-		[KSPEvent(guiActiveUnfocused = true, guiName = "Collect Stored Data", externalToEVAOnly = true, unfocusedRange = 1.5f, active = false)]
-		public void EVACollect()
-		{
-			List<ModuleScienceContainer> EVACont = FlightGlobals.ActiveVessel.FindPartModulesImplementing<ModuleScienceContainer>();
-			if (storedData.Count > 0)
-			{
-				if (EVACont.First().StoreData(new List<IScienceDataContainer>() { this }, false))
-				{
-					foreach (ScienceData data in storedData)
-						DumpData(data);
-				}
-			}
 		}
 
 		/* SCAN: context (right click) buttons in EDTIOR */
@@ -354,29 +268,22 @@ namespace SCANsat.SCAN_PartModules
 				startScan();
 		}
 
-		[KSPAction("Analyze Data")]
-		public void analyzeData(KSPActionParam param)
-		{
-			//if (scanning) ** Always available
-			gatherScienceData();
-		}
-
 		/* SCAN: add static (a warning that we're low on electric charge) */
 		private void addStatic()
 		{
 			if (SCANcontroller.controller == null)
 				return;
 
-			if (SCANcontroller.controller.mainMap == null)
-				return;
+			//if (SCANcontroller.controller.mainMap == null)
+			//	return;
 
-			if (SCANcontroller.controller.mainMap.Map == null)
-				return;
+			//if (SCANcontroller.controller.mainMap.Map == null)
+			//	return;
 
-			for (int i = 0; i < 1000; i++)
-			{
-				SCANcontroller.controller.mainMap.Map.SetPixel(UnityEngine.Random.Range(0, 360), UnityEngine.Random.Range(0, 180), palette.lerp(palette.black, palette.white, UnityEngine.Random.value));
-			}
+			//for (int i = 0; i < 1000; i++)
+			//{
+			//	SCANcontroller.controller.mainMap.Map.SetPixel(UnityEngine.Random.Range(0, 360), UnityEngine.Random.Range(0, 180), palette.lerp(palette.black, palette.white, UnityEngine.Random.value));
+			//}
 		}
 
 		/* SCAN: register scanners without going through animation */
@@ -392,180 +299,26 @@ namespace SCANsat.SCAN_PartModules
 		{
 			scanning = false;
 			if (sensorType > 0 && SCANcontroller.controller != null)
-				SCANcontroller.controller.unregisterSensor(vessel, (SCANtype)sensorType);
+				SCANcontroller.controller.unregisterSensor(vessel, (SCANtype)sensorType, fov, min_alt, max_alt, best_alt);
 		}
 
 		private string scanAlt(SCANdata d)
 		{
-			string altitude = "Unknown";
-			if (!SCANcontroller.controller.scan_background)
-				altitude = "All Scanning Disabled";
-			else if (d.Disabled)
-				altitude = d.Body.name + " Scanning Disabled";
+			string altitude = Localizer.Format("#autoLOC_SCANsat_Unknown");
+            if (!SCAN_Settings_Config.Instance.BackgroundScanning)
+                altitude = Localizer.Format("#autoLOC_SCANsat_All_Disabled");
+            else if (d.Disabled)
+                altitude = string.Format("{0}: {1}", SCANUtil.displayNameFromBody(d.Body), Localizer.Format("#autoLOC_SCANsat_Disabled"));
 			else if (vessel.altitude < min_alt)
-				altitude = "Too low";
+				altitude = Localizer.Format("#autoLOC_SCANsat_TooLow");
 			else if (vessel.altitude < best_alt)
-				altitude = "Sub-optimal";
+				altitude = Localizer.Format("#autoLOC_SCANsat_SubOptimal");
 			else if (vessel.altitude >= best_alt && vessel.altitude <= max_alt)
-				altitude = "Ideal";
+				altitude = Localizer.Format("#autoLOC_SCANsat_Ideal");
 			else if (vessel.altitude > max_alt)
-				altitude = "Too high";
+				altitude = Localizer.Format("#autoLOC_SCANsat_TooHigh");
 			return altitude;
 		}
 
-		/* SCAN: SCIENCE! make, store, transmit, keep
-		 * 	discard, review, count DATA */
-		private void makeScienceData(bool notZero)
-		{
-			storedData.Clear();
-			ScienceData sd = getAvailableScience((SCANtype)sensorType, notZero);
-			if (sd == null)
-				return;
-			storedData.Add(sd);
-		}
-
-		private ScienceData getAvailableScience(SCANtype sensor, bool notZero)
-		{
-			SCANdata data = SCANUtil.getData(vessel.mainBody);
-			if (data == null)
-				return null;
-			ScienceData sd = null;
-			ScienceExperiment se = null;
-			ScienceSubject su = null;
-			bool found = false;
-			string id = null;
-			double coverage = 0f;
-			float multiplier = 1f;
-
-			if (!found && (sensor & SCANtype.AltimetryLoRes) != SCANtype.Nothing)
-			{
-				found = true;
-				if (vessel.mainBody.pqsController == null)
-					multiplier = 0.5f;
-				id = "SCANsatAltimetryLoRes";
-				coverage = SCANUtil.getCoveragePercentage(data, SCANtype.AltimetryLoRes);
-			}
-			else if (!found && (sensor & SCANtype.AltimetryHiRes) != SCANtype.Nothing)
-			{
-				found = true;
-				if (vessel.mainBody.pqsController == null)
-					multiplier = 0.5f;
-				id = "SCANsatAltimetryHiRes";
-				coverage = SCANUtil.getCoveragePercentage(data, SCANtype.AltimetryHiRes);
-			}
-			else if (!found && (sensor & SCANtype.Biome) != SCANtype.Nothing)
-			{
-				found = true;
-				if (vessel.mainBody.BiomeMap == null)
-					multiplier = 0.5f;
-				id = "SCANsatBiomeAnomaly";
-				coverage = SCANUtil.getCoveragePercentage(data, SCANtype.Biome);
-			}
-			else if (!found && (sensor & SCANtype.FuzzyResources) != SCANtype.Nothing)
-			{
-				found = true;
-				if (vessel.mainBody.pqsController == null)
-					multiplier = 0.5f;
-				id = "SCANsatResources";
-				coverage = SCANUtil.getCoveragePercentage(data, SCANtype.FuzzyResources);
-			}
-			if (!found) return null;
-			se = ResearchAndDevelopment.GetExperiment(id);
-			if (se == null) return null;
-
-			su = ResearchAndDevelopment.GetExperimentSubject(se, ExperimentSituations.InSpaceHigh, vessel.mainBody, "surface");
-			if (su == null) return null;
-
-			su.scienceCap *= multiplier;
-
-			SCANUtil.SCANlog("Coverage: {0}, Science cap: {1}, Subject value: {2}, Scientific value: {3}, Science: {4}", new object[5] { coverage.ToString("F1"), su.scienceCap.ToString("F1"), su.subjectValue.ToString("F2"), su.scientificValue.ToString("F2"), su.science.ToString("F2") });
-
-			su.scientificValue = 1;
-
-			float science = (float)coverage;
-			if (science > 95) science = 100;
-			if (science < 30) science = 0;
-			science = science / 100f;
-			science = Mathf.Max(0, (science * su.scienceCap) - su.science);
-
-			SCANUtil.SCANlog("Remaining science: {0}, Base value: {1}", new object[2] { science.ToString("F1"), se.baseValue.ToString("F1") });
-
-			science /= Mathf.Max(0.1f, su.scientificValue); //look 10 lines up; this is always 1...
-			science /= su.subjectValue;
-
-			SCANUtil.SCANlog("Resulting science value: {0}", new object[1] { science.ToString("F2") });
-
-			if (notZero && science <= 0) science = 0.00001f;
-
-			sd = new ScienceData(science * su.dataScale, 1f, 0f, su.id, se.experimentTitle + " of " + vessel.mainBody.theName, false, part.flightID);
-			su.title = sd.title;
-			return sd;
-		}
-
-		public ScienceData[] GetData()
-		{
-			return storedData.ToArray();
-		}
-
-		public void ReturnData(ScienceData data)
-		{
-			if (data == null)
-				return;
-
-			storedData.Clear();
-
-			storedData.Add(data);
-		}
-
-		private void KeepData(ScienceData data)
-		{
-			expDialog = null;
-		}
-
-		private void TransmitData(ScienceData data)
-		{
-			expDialog = null;
-			List<IScienceDataTransmitter> tranList = vessel.FindPartModulesImplementing<IScienceDataTransmitter>();
-			if (tranList.Count > 0 && storedData.Count > 0)
-			{
-				tranList.OrderBy(ScienceUtil.GetTransmitterScore).First().TransmitData(storedData);
-				DumpData(storedData[0]);
-			}
-			else ScreenMessages.PostScreenMessage("No transmitters available on this vessel.", 4f, ScreenMessageStyle.UPPER_LEFT);
-		}
-
-		public void DumpData(ScienceData data)
-		{
-			expDialog = null;
-			while (storedData.Contains(data))
-			{
-				storedData.Remove(data);
-			}
-		}
-
-		public void ReviewDataItem(ScienceData sd)
-		{
-			ReviewData();
-		}
-
-		public void ReviewData()
-		{
-			if (storedData.Count < 1)
-				return;
-			expDialog = null;
-			ScienceData sd = storedData[0];
-			expDialog = ExperimentsResultDialog.DisplayResult(new ExperimentResultDialogPage(part, sd, 1f, 0f, false, "", true, new ScienceLabSearch(vessel, sd), DumpData, KeepData, TransmitData, null));
-		}
-
-		public bool IsRerunnable()
-		{
-			return true;
-		}
-
-		public int GetScienceCount()
-		{
-			return storedData.Count;
-		}
 	}
 }
-
