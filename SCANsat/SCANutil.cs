@@ -1155,7 +1155,7 @@ namespace SCANsat
 						//		"   Blend SrcAlpha OneMinusSrcAlpha" +
 						//		"   ZWrite Off Cull Off Fog { Mode Off }" +
 						//		"} } }");
-						var lineMaterial = new Material(Shader.Find("Particles/Alpha Blended"));
+						var lineMaterial = new Material(Shader.Find("KSP/Particles/Alpha Blended"));
 						lineMaterial.hideFlags = HideFlags.HideAndDontSave;
 						lineMaterial.shader.hideFlags = HideFlags.HideAndDontSave;
 
