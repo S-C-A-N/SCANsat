@@ -1,10 +1,8 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 using System.Collections;
-using SCANsat.Unity.HSVPicker.Utility;
-using SCANsat.Unity.HSVPicker.Enum;
 
-namespace SCANsat.Unity.HSVPicker.UI
+namespace SCANsat.Unity.HSVPicker
 {
 	[RequireComponent(typeof(BoxSlider), typeof(RawImage)), ExecuteInEditMode()]
 	public class SVBoxSlider : MonoBehaviour

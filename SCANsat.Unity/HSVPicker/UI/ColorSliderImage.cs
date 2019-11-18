@@ -1,10 +1,8 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 using System.Collections;
-using SCANsat.Unity.HSVPicker.Enum;
-using SCANsat.Unity.HSVPicker.Utility;
 
-namespace SCANsat.Unity.HSVPicker.UI
+namespace SCANsat.Unity.HSVPicker
 {
 	[RequireComponent(typeof(RawImage)), ExecuteInEditMode()]
 	public class ColorSliderImage : MonoBehaviour

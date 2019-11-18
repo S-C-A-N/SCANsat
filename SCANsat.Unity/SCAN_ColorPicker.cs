@@ -15,16 +15,15 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
-using SCANsat.Unity.HSVPicker.UI;
 
 namespace SCANsat.Unity
 {
 	public class SCAN_ColorPicker : MonoBehaviour
 	{
 		[SerializeField]
-		private ColorImage m_ColorOne = null;
+		private HSVPicker.ColorImage m_ColorOne = null;
 		[SerializeField]
-		private ColorImage m_ColorTwo = null;
+		private HSVPicker.ColorImage m_ColorTwo = null;
 		[SerializeField]
 		private Image m_OldColorOne = null;
 		[SerializeField]
@@ -36,7 +35,7 @@ namespace SCANsat.Unity
 		[SerializeField]
 		private InputHandler m_BInputField = null;
 
-		private ColorPicker picker;
+		private HSVPicker.ColorPicker picker;
 
 		private bool anyInputActive;
 
@@ -57,7 +56,7 @@ namespace SCANsat.Unity
 
 		private void Awake()
 		{
-			picker = GetComponent<ColorPicker>();
+			picker = GetComponent<HSVPicker.ColorPicker>();
 		}
 
 		private void Update()

@@ -2,7 +2,7 @@
 using UnityEngine.UI;
 using System.Collections;
 
-namespace SCANsat.Unity.HSVPicker.UI
+namespace SCANsat.Unity.HSVPicker
 {
 	[RequireComponent(typeof(Image))]
 	public class ColorImage : MonoBehaviour

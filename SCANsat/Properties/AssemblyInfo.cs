@@ -19,5 +19,4 @@ using System.Runtime.CompilerServices;
 [assembly: AssemblyInformationalVersion ("v18.14")]
 
 [assembly: KSPAssembly ("SCANsat", 1, 8)]
-
-
+[assembly: KSPAssemblyDependency("SCANsat.Unity", 1, 0)]
