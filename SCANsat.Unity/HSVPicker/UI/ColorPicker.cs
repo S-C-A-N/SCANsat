@@ -2,11 +2,8 @@
 using System.Collections;
 using UnityEngine.UI;
 using UnityEngine.Events;
-using SCANsat.Unity.HSVPicker.Utility;
-using SCANsat.Unity.HSVPicker.Enum;
-using SCANsat.Unity.HSVPicker.Events;
 
-namespace SCANsat.Unity.HSVPicker.UI
+namespace SCANsat.Unity.HSVPicker
 {
 	public class ColorPicker : MonoBehaviour
 	{

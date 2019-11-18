@@ -1,9 +1,8 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 using System;
-using SCANsat.Unity.HSVPicker.Enum;
 
-namespace SCANsat.Unity.HSVPicker.UI
+namespace SCANsat.Unity.HSVPicker
 {
 	[RequireComponent(typeof(TextHandler))]
 	public class ColorLabel : MonoBehaviour

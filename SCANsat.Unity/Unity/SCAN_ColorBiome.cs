@@ -18,7 +18,6 @@ using UnityEngine.UI;
 using UnityEngine.Events;
 using UnityEngine.EventSystems;
 using SCANsat.Unity.Interfaces;
-using SCANsat.Unity.HSVPicker.UI;
 
 namespace SCANsat.Unity.Unity
 {

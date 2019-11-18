@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System;
 
-namespace SCANsat.Unity.HSVPicker.Utility
+namespace SCANsat.Unity.HSVPicker
 {
 	#region ColorUtilities
 

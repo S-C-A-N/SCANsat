@@ -4,7 +4,7 @@ using UnityEngine.UI;
 using UnityEngine.Events;
 using UnityEngine.EventSystems;
 
-namespace SCANsat.Unity.HSVPicker.Utility
+namespace SCANsat.Unity.HSVPicker
 {
 	[AddComponentMenu("UI/BoxSlider", 35)]
 	[RequireComponent(typeof(RectTransform))]
