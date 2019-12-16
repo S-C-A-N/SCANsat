@@ -30,7 +30,7 @@ namespace SCANsat.SCAN_Toolbar
 		private IButton KSCButton;
 		private IButton ZoomButton;
 
-		public SCANtoolbar()
+		public void Awake() // SCANtoolbar()
 		{
 			if (!ToolbarManager.ToolbarAvailable)
 			{
