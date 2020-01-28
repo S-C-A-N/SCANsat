@@ -20,25 +20,25 @@ using palette = SCANsat.SCAN_UI.UI_Framework.SCANcolorUtil;
 
 namespace SCANsat.SCAN_UI.UI_Framework
 {
-	public class SCANremoteView
-	{
+    public class SCANremoteView
+    {
         private const float MAX_DISTANCE = 250;
         private const float MIN_DISTANCE = 15;
-        
-		private static Camera cam;
-		private static GameObject camgo;
-		private RenderTexture rt;
-		private int updateFrame, width, height;
-		private List<CrashObjectName> cons;
+
+        private static Camera cam;
+        private static GameObject camgo;
+        private RenderTexture rt;
+        private int updateFrame, width, height;
+        private List<CrashObjectName> cons;
         private List<SCANROC> rocs;
-		private Bounds bounds;
-		private int activeCon;
+        private Bounds bounds;
+        private int activeCon;
         private int activeROC;
         public GameObject lookat;
-		public CrashObjectName lookdetail;
+        public CrashObjectName lookdetail;
         public SCANROC rocDetail;
         public bool rocsMode;
-        
+
         public void Initialize(int w, int h)
         {
             width = w;
@@ -46,28 +46,28 @@ namespace SCANsat.SCAN_UI.UI_Framework
         }
 
         public void setup(GameObject focus)
-		{
-			if (lookat != focus)
-			{
-				lookdetail = null;
+        {
+            if (lookat != focus)
+            {
+                lookdetail = null;
 
                 bounds = new Bounds(focus.transform.position, Vector3.zero);
                 foreach (MeshRenderer c in focus.GetComponentsInChildren<MeshRenderer>())
                     bounds.Encapsulate(c.bounds);
 
-				cons = new List<CrashObjectName>();
+                cons = new List<CrashObjectName>();
 
-				foreach (CrashObjectName con in focus.GetComponentsInChildren<CrashObjectName>())
-				{
-					cons.Add(con);
-				}
+                foreach (CrashObjectName con in focus.GetComponentsInChildren<CrashObjectName>())
+                {
+                    cons.Add(con);
+                }
             }
-			lookat = focus;
+            lookat = focus;
 
             rocDetail = null;
 
             rocsMode = false;
-		}
+        }
 
         public void setup(List<SCANROC> rocList, Vessel v)
         {
@@ -111,16 +111,16 @@ namespace SCANsat.SCAN_UI.UI_Framework
             rocsMode = true;
         }
 
-		public bool valid(GameObject focus)
-		{
-			if (focus == null)
-				return false;
+        public bool valid(GameObject focus)
+        {
+            if (focus == null)
+                return false;
 
-			if (focus != lookat)
-				return false;
+            if (focus != lookat)
+                return false;
 
-			return true;
-		}
+            return true;
+        }
 
         public bool validROC()
         {
@@ -136,102 +136,102 @@ namespace SCANsat.SCAN_UI.UI_Framework
             return true;
         }
 
-		public void free()
-		{
-			GameObject.Destroy(camgo);
-			RenderTexture.Destroy(rt);
-			cam = null;
-			camgo = null;
-			rt = null;
-		}
+        public void free()
+        {
+            GameObject.Destroy(camgo);
+            RenderTexture.Destroy(rt);
+            cam = null;
+            camgo = null;
+            rt = null;
+        }
 
-		private void updateCamera()
-		{
-			if (updateFrame > Time.frameCount - 5)
-				return;
+        private void updateCamera()
+        {
+            if (updateFrame > Time.frameCount - 5)
+                return;
 
-			if (rt == null || rt.width != width || rt.height != height)
-			{
-				RenderTextureFormat format = RenderTextureFormat.RGB565;
+            if (rt == null || rt.width != width || rt.height != height)
+            {
+                RenderTextureFormat format = RenderTextureFormat.RGB565;
 
-				if (!SystemInfo.SupportsRenderTextureFormat(format))
-					format = RenderTextureFormat.Default;
+                if (!SystemInfo.SupportsRenderTextureFormat(format))
+                    format = RenderTextureFormat.Default;
 
-				rt = new RenderTexture(width, height, 32, format);
-				rt.Create();
-			}
+                rt = new RenderTexture(width, height, 32, format);
+                rt.Create();
+            }
 
-			if (camgo == null)
-				camgo = new GameObject();
+            if (camgo == null)
+                camgo = new GameObject();
 
-			if (cam == null)
-			{
-				cam = camgo.AddComponent<Camera>();
+            if (cam == null)
+            {
+                cam = camgo.AddComponent<Camera>();
                 //Add image processing component to camera game object
                 camgo.AddComponent<SCANEdgeDetect>();
-				cam.enabled = false;
-                
-				cam.targetTexture = rt;
-				cam.aspect = width * 1f / height;
-				cam.fieldOfView = 90;
-			}
+                cam.enabled = false;
 
-			Vector3 pos_target = lookat.transform.position;
+                cam.targetTexture = rt;
+                cam.aspect = width * 1f / height;
+                cam.fieldOfView = 90;
+            }
 
-			if (lookdetail != null)
-				pos_target = lookdetail.transform.position;
+            Vector3 pos_target = lookat.transform.position;
+
+            if (lookdetail != null)
+                pos_target = lookdetail.transform.position;
 
             if (rocDetail != null)
                 pos_target = rocDetail.Roc.transform.position;
 
-			Vector3 pos_cam = FlightGlobals.ActiveVessel.transform.position;
-			Vector3 target_up = (pos_target - FlightGlobals.currentMainBody.transform.position).normalized;
-			Vector3 dir = (pos_target - pos_cam).normalized;
+            Vector3 pos_cam = FlightGlobals.ActiveVessel.transform.position;
+            Vector3 target_up = (pos_target - FlightGlobals.currentMainBody.transform.position).normalized;
+            Vector3 dir = (pos_target - pos_cam).normalized;
 
             float dist = 100;
             float bound = Mathf.Max(bounds.size.x, Mathf.Max(bounds.size.y, bounds.size.z));
 
             dist = Mathf.Clamp(bound * 1.5f, MIN_DISTANCE, MAX_DISTANCE);
 
-			pos_cam = pos_target - dir * dist / 2 + target_up * dist / 3;
-			Vector3 cam_up = (pos_cam - FlightGlobals.currentMainBody.transform.position).normalized;
+            pos_cam = pos_target - dir * dist / 2 + target_up * dist / 3;
+            Vector3 cam_up = (pos_cam - FlightGlobals.currentMainBody.transform.position).normalized;
 
-			cam.transform.position = pos_cam;
-			cam.transform.LookAt(pos_target, cam_up);
-			cam.farClipPlane = dist * 3;
+            cam.transform.position = pos_cam;
+            cam.transform.LookAt(pos_target, cam_up);
+            cam.farClipPlane = dist * 3;
 
             cam.Render();
 
             updateFrame = Time.frameCount;
-		}
+        }
 
-		public Texture getTexture()
-		{
+        public Texture getTexture()
+        {
             updateCamera();
-			return rt;
-		}
+            return rt;
+        }
 
-		public string getInfoString()
-		{
+        public string getInfoString()
+        {
             if (!rocsMode && cons.Count > 0)
                 return string.Format("> Identified {0} structure{1}", cons.Count.ToString(), cons.Count > 1 ? "s" : "");
             else if (rocsMode)
                 return string.Format("> Identified {0} surface object{1}", rocs.Count.ToString(), rocs.Count > 1 ? "s" : "");
             else
                 return "";
-		}
+        }
 
-		public string getAnomalyDataString(bool mouse, bool anomalyKnown)
-		{
-			string sname = lookat.name;
+        public string getAnomalyDataString(bool mouse, bool anomalyKnown)
+        {
+            string sname = lookat.name;
 
-			Vector3 lookvec = lookat.transform.position;
+            Vector3 lookvec = lookat.transform.position;
 
             bool distance = false;
 
-			if (!rocsMode && cons.Count > 0)
-			{
-				float scroll = Input.GetAxis("Mouse ScrollWheel");
+            if (!rocsMode && cons.Count > 0)
+            {
+                float scroll = Input.GetAxis("Mouse ScrollWheel");
 
                 lookdetail = cons[activeCon];
 
@@ -252,12 +252,12 @@ namespace SCANsat.SCAN_UI.UI_Framework
                 }
 
                 lookvec = lookdetail.transform.position;
-				sname = lookdetail.objectName;
+                sname = lookdetail.objectName;
 
                 rocDetail = null;
 
                 distance = anomalyKnown;
-			}
+            }
             else if (rocsMode && rocs.Count > 0)
             {
                 float scroll = Input.GetAxis("Mouse ScrollWheel");
@@ -287,16 +287,15 @@ namespace SCANsat.SCAN_UI.UI_Framework
                 distance = true;
             }
 
-			if (distance)
-			{
-				string dist = SCANuiUtil.distanceString((FlightGlobals.ActiveVessel.transform.position - lookvec).magnitude, 2000);
+            if (distance)
+            {
+                string dist = SCANuiUtil.distanceString((FlightGlobals.ActiveVessel.transform.position - lookvec).magnitude, 2000);
 
-				return string.Format("{0}\n{1}", sname, dist);
-			}
-			else
-				return string.Format("\n{0}", sname);
-		}
+                return string.Format("{0}\n{1}", sname, dist);
+            }
+            else
+                return string.Format("\n{0}", sname);
+        }
 
-	}
+    }
 }
-
