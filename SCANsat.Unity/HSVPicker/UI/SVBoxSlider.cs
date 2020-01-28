@@ -35,21 +35,22 @@ namespace SCANsat.Unity.HSVPicker.UI
 
 		private void OnEnable()
 		{
-			if (Application.isPlaying && picker != null)
-			{
-				slider.onValueChanged.AddListener(SliderChanged);
-				picker.onHSVChanged.AddListener(HSVChanged);
-			}
-		}
+			if (Application.isPlaying)
+            {
+                if (picker != null)
+                    picker.onHSVChanged.AddListener(HSVChanged);
+                if (slider != null)
+                    slider.onValueChanged.AddListener(SliderChanged);
+            }
+        }
 
 		private void OnDisable()
 		{
 			if (picker != null)
-			{
-				slider.onValueChanged.RemoveListener(SliderChanged);
 				picker.onHSVChanged.RemoveListener(HSVChanged);
-			}
-		}
+            if (slider != null)
+                slider.onValueChanged.RemoveListener(SliderChanged);
+        }
 
 		private void OnDestroy()
 		{
