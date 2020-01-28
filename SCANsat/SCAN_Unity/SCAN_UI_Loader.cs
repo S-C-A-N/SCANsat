@@ -103,7 +103,6 @@ namespace SCANsat.SCAN_Unity
 		private static Sprite _mechJebIcon;
 
 		private static Shader _edgeDetectShader;
-		private static Shader _greyScaleShader;
 
 		private static GameObject[] loadedPrefabs;
 
@@ -324,11 +323,6 @@ namespace SCANsat.SCAN_Unity
 			get {return _edgeDetectShader;}
 		}
 
-		public static Shader GreyScaleShader
-		{
-			get { return _greyScaleShader; }
-		}
-
 		public static void ResetUIStyle()
 		{
 			if (loadedPrefabs != null)
@@ -412,10 +406,8 @@ namespace SCANsat.SCAN_Unity
 			{
 				Shader s = loadedShaders[i];
 
-				if (s.name == "Hidden/Edge Detect X")
-					_edgeDetectShader = s;
-				else if (s.name == "Hidden/Grayscale Effect")
-					_greyScaleShader = s;
+                if (s.name == "Hidden/EdgeDetectColors")
+                    _edgeDetectShader = s;
 			}
 
 			SCANUtil.SCANlog("Shader asset bundle loaded; using platform bundle: {0}", shaderPath);
