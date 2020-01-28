@@ -87,6 +87,8 @@ namespace SCANsat.Unity.Interfaces
 
 		bool MechJebAvailable { get; }
 
+        bool DaylightCheck { get; set; }
+
 		bool BiomeLock { get; set; }
 
 		bool NarrowBand { get; set; }

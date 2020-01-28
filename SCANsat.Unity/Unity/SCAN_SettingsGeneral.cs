@@ -40,7 +40,9 @@ namespace SCANsat.Unity.Unity
 		private SCAN_Toggle m_MechJebToggle = null;
 		[SerializeField]
 		private SCAN_Toggle m_MechJebLoadToggle = null;
-		[SerializeField]
+        [SerializeField]
+        private SCAN_Toggle m_DaylightCheckToggle = null;
+        [SerializeField]
 		private GameObject m_MechJebBar = null;
 		[SerializeField]
 		private TextHandler m_UIScale = null;
@@ -89,7 +91,10 @@ namespace SCANsat.Unity.Unity
 					m_MechJebLoadToggle.isOn = set.MechJebLoad;
 					m_MechJebLoadToggle.gameObject.SetActive(set.MechJebTarget);
 				}
-			}				
+			}			
+            
+            if (m_DaylightCheckToggle != null)
+                m_DaylightCheckToggle.isOn = set.DaylightCheck;
 
 			if (m_ToolbarMenuToggle != null)
 			{
@@ -173,6 +178,14 @@ namespace SCANsat.Unity.Unity
 
 			settings.StockUIStyle = isOn;
 		}
+
+        public void DaylightCheck(bool isOn)
+        {
+            if (!loaded || settings == null)
+                return;
+
+            settings.DaylightCheck = isOn;
+        }
 
 		public void MechJebTargetSelection(bool isOn)
 		{
