@@ -21,8 +21,10 @@ using SCANsat.Unity.Interfaces;
 namespace SCANsat.Unity.Unity
 {
 	public class SCAN_ColorControl : SettingsPage
-	{
-		[SerializeField]
+    {
+        [SerializeField]
+        private GameObject m_MapPrefab = null;
+        [SerializeField]
 		private GameObject m_AltimetryPrefab = null;
 		[SerializeField]
 		private GameObject m_SlopePrefab = null;
@@ -46,7 +48,7 @@ namespace SCANsat.Unity.Unity
 			settingsInterface = settings;
 			colorInterface = color;
 
-			AltimetrySettings(true);
+            AltimetrySettings(true);
 		}
 
 		public override void OnPointerDown(PointerEventData eventData)
@@ -54,6 +56,39 @@ namespace SCANsat.Unity.Unity
 			if (currentPage != null)
 				currentPage.OnPointerDown(eventData);
 		}
+
+        public void MapSettings(bool isOn)
+        {
+            if (!isOn)
+                return;
+
+            if (currentPage != null)
+            {
+                currentPage.gameObject.SetActive(false);
+                DestroyImmediate(currentPage.gameObject);
+            }
+
+            if (m_ContentTransform == null || m_MapPrefab == null || settingsInterface == null)
+                return;
+
+            if (settingsInterface.LockInput)
+                settingsInterface.LockInput = false;
+
+            currentPage = Instantiate(m_MapPrefab).GetComponent<SettingsPage>();
+
+            if (currentPage == null)
+                return;
+
+            currentPage.transform.SetParent(m_ContentTransform, false);
+
+            ((SCAN_ColorMap)currentPage).SetMap(colorInterface, settingsInterface);
+
+            if (SCAN_Settings.Instance != null)
+                SCAN_Settings.Instance.ProcessTooltips();
+
+            if (SCAN_Settings.Instance != null)
+                SCAN_Settings.Instance.ClearWarningsAndDropDown();
+        }
 
 		public void AltimetrySettings(bool isOn)
 		{
