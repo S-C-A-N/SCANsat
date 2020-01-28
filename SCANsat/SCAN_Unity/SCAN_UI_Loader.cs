@@ -69,7 +69,8 @@ namespace SCANsat.SCAN_Unity
 		private static Sprite _planetIcon;
 		private static Sprite _mysteryIcon;
 		private static Sprite _flagIcon;
-		private static Sprite _apMarker;
+        private static Sprite _scienceControllerIcon;
+        private static Sprite _apMarker;
 		private static Sprite _peMarker;
 		private static Sprite _maneuverMarker;
 		private static Sprite _encounterMarker;
@@ -102,6 +103,7 @@ namespace SCANsat.SCAN_Unity
 		private static Sprite _mechJebIcon;
 
 		private static Shader _edgeDetectShader;
+		private static Shader _greyScaleShader;
 
 		private static GameObject[] loadedPrefabs;
 
@@ -294,6 +296,9 @@ namespace SCANsat.SCAN_Unity
 					return _stationIcon;
 				case VesselType.Unknown:
 					return _mysteryIcon;
+                case VesselType.DeployedScienceController:
+                case VesselType.DeployedSciencePart:
+                    return _scienceControllerIcon;
 				default:
 					return _mysteryIcon;
 			}
@@ -317,6 +322,11 @@ namespace SCANsat.SCAN_Unity
 		public static Shader EdgeDetectShader
 		{
 			get {return _edgeDetectShader;}
+		}
+
+		public static Shader GreyScaleShader
+		{
+			get { return _greyScaleShader; }
 		}
 
 		public static void ResetUIStyle()
@@ -402,8 +412,10 @@ namespace SCANsat.SCAN_Unity
 			{
 				Shader s = loadedShaders[i];
 
-				if (s.name == "Hidden/EdgeDetectColors")
+				if (s.name == "Hidden/Edge Detect X")
 					_edgeDetectShader = s;
+				else if (s.name == "Hidden/Grayscale Effect")
+					_greyScaleShader = s;
 			}
 
 			SCANUtil.SCANlog("Shader asset bundle loaded; using platform bundle: {0}", shaderPath);
@@ -428,7 +440,7 @@ namespace SCANsat.SCAN_Unity
 
 			if (!toggleLoaded)
 			{
-				GUISkin skin = HighLogic.Skin;
+				UnityEngine.GUISkin skin = HighLogic.Skin;
 
 				if (skin == null)
 					return;
@@ -675,7 +687,9 @@ namespace SCANsat.SCAN_Unity
 					_mysteryIcon = s;
 				else if (s.name == "FlagIcon")
 					_flagIcon = s;
-				else if (s.name == "APMarker")
+                else if (s.name == "DeployedScienceIcon")
+                    _scienceControllerIcon = s;
+                else if (s.name == "APMarker")
 					_apMarker = s;
 				else if (s.name == "PEMarker")
 					_peMarker = s;
