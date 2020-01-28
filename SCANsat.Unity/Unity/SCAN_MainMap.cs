@@ -47,7 +47,11 @@ namespace SCANsat.Unity.Unity
 		private TextHandler m_MultiText = null;
 		[SerializeField]
 		private TextHandler m_M700Text = null;
-		[SerializeField]
+        [SerializeField]
+        private TextHandler m_VisLoText = null;
+        [SerializeField]
+        private TextHandler m_VisHiText = null;
+        [SerializeField]
 		private TextHandler m_OreText = null;
 		[SerializeField]
 		private TextHandler m_PercentageText = null;
@@ -381,7 +385,23 @@ namespace SCANsat.Unity.Unity
 			m_M700Text.OnColorUpdate.Invoke(c);
 		}
 
-		public void UpdateOreColor(Color c)
+        public void UpdateVisLoColor(Color c)
+        {
+            if (m_VisLoText == null)
+                return;
+
+            m_VisLoText.OnColorUpdate.Invoke(c);
+        }
+
+        public void UpdateVisHiColor(Color c)
+        {
+            if (m_VisHiText == null)
+                return;
+
+            m_VisHiText.OnColorUpdate.Invoke(c);
+        }
+
+        public void UpdateOreColor(Color c)
 		{
 			if (m_OreText == null)
 				return;
