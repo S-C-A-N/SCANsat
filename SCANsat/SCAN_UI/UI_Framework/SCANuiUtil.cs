@@ -68,69 +68,133 @@ namespace SCANsat.SCAN_UI.UI_Framework
 					if (SCAN_Settings_Config.Instance.DisableStockResource)
 					{
 						var scanners = from pref in vessel.protoVessel.protoPartSnapshots
-									   where pref.modules.Any(a => a.moduleName == "ModuleSCANresourceScanner")
+									   where pref.modules.Any(a => a.moduleName == "SCANsat")
 									   select pref;
 
-						if (scanners.Count() == 0)
-							continue;
+                        if (scanners.Count() > 0)
+                        {
+                            foreach (var p in scanners)
+                            {
+                                if (p.partInfo == null)
+                                    continue;
 
-						foreach (var p in scanners)
-						{
-							if (p.partInfo == null)
-								continue;
+                                ConfigNode node = p.partInfo.partConfig;
 
-							ConfigNode node = p.partInfo.partConfig;
+                                if (node == null)
+                                    continue;
 
-							if (node == null)
-								continue;
+                                var moduleNodes = from nodes in node.GetNodes("MODULE")
+                                                  where nodes.GetValue("name") == "SCANsat"
+                                                  select nodes;
 
-							var moduleNodes = from nodes in node.GetNodes("MODULE")
-											  where nodes.GetValue("name") == "ModuleSCANresourceScanner"
-											  select nodes;
+                                foreach (ConfigNode moduleNode in moduleNodes)
+                                {
+                                    if (moduleNode == null)
+                                        continue;
 
-							foreach (ConfigNode moduleNode in moduleNodes)
-							{
-								if (moduleNode == null)
-									continue;
+                                    if (!moduleNode.HasValue("sensorType"))
+                                        continue;
 
-								if (!moduleNode.HasValue("sensorType"))
-									continue;
+                                    string type = moduleNode.GetValue("sensorType");
 
-								string type = moduleNode.GetValue("sensorType");
+                                    int sType = 0;
 
-								int sType = 0;
+                                    if (!int.TryParse(type, out sType))
+                                        continue;
 
-								if (!int.TryParse(type, out sType))
-									continue;
+                                    if (((SCANtype)sType & SCANtype.ResourceHiRes) == SCANtype.Nothing)
+                                        continue;
 
-								if (((SCANtype)sType & resource.SType) == SCANtype.Nothing)
-									continue;
+                                    if (moduleNode.HasValue("max_alt") && !vessel.Landed)
+                                    {
+                                        string alt = moduleNode.GetValue("max_alt");
 
-								if (moduleNode.HasValue("max_alt") && !vessel.Landed)
-								{
-									string alt = moduleNode.GetValue("max_alt");
+                                        float f = 0;
 
-									float f = 0;
+                                        if (!float.TryParse(alt, out f))
+                                            continue;
 
-									if (!float.TryParse(alt, out f))
-										continue;
+                                        if (f < vessel.altitude)
+                                        {
+                                            scanner = false;
+                                            continue;
+                                        }
+                                    }
 
-									if (f < vessel.altitude)
-									{
-										scanner = false;
-										continue;
-									}
-								}
+                                    scanner = true;
+                                    break;
+                                }
+                                if (scanner)
+                                    break;
+                            }
+                            if (scanner)
+                                break;
+                        }
 
-								scanner = true;
-								break;
-							}
-							if (scanner)
-								break;
-						}
-						if (scanner)
-							break;
-					}
+                        scanners = from pref in vessel.protoVessel.protoPartSnapshots
+                                       where pref.modules.Any(a => a.moduleName == "ModuleSCANresourceScanner")
+                                       select pref;
+
+                        if (scanners.Count() > 0)
+                        {
+                            foreach (var p in scanners)
+                            {
+                                if (p.partInfo == null)
+                                    continue;
+
+                                ConfigNode node = p.partInfo.partConfig;
+
+                                if (node == null)
+                                    continue;
+
+                                var moduleNodes = from nodes in node.GetNodes("MODULE")
+                                                  where nodes.GetValue("name") == "ModuleSCANresourceScanner"
+                                                  select nodes;
+
+                                foreach (ConfigNode moduleNode in moduleNodes)
+                                {
+                                    if (moduleNode == null)
+                                        continue;
+
+                                    if (!moduleNode.HasValue("sensorType"))
+                                        continue;
+
+                                    string type = moduleNode.GetValue("sensorType");
+
+                                    int sType = 0;
+
+                                    if (!int.TryParse(type, out sType))
+                                        continue;
+
+                                    if (((SCANtype)sType & SCANtype.ResourceHiRes) == SCANtype.Nothing)
+                                        continue;
+
+                                    if (moduleNode.HasValue("max_alt") && !vessel.Landed)
+                                    {
+                                        string alt = moduleNode.GetValue("max_alt");
+
+                                        float f = 0;
+
+                                        if (!float.TryParse(alt, out f))
+                                            continue;
+
+                                        if (f < vessel.altitude)
+                                        {
+                                            scanner = false;
+                                            continue;
+                                        }
+                                    }
+
+                                    scanner = true;
+                                    break;
+                                }
+                                if (scanner)
+                                    break;
+                            }
+                            if (scanner)
+                                break;
+                        }
+                    }
 					else
 					{
 						if (vessel.altitude > 1000000)
@@ -1165,7 +1229,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 		/* Converts resource amount to pixel color */
 		internal static Color resourceToColor(Color BaseColor, SCANresourceGlobal Resource, float Abundance, SCANdata Data, double Lon, double Lat)
 		{
-			if (SCANUtil.isCovered(Lon, Lat, Data, Resource.SType))
+			if (SCANUtil.isCovered(Lon, Lat, Data, SCANtype.ResourceHiRes))
 			{
 				if (Abundance >= Resource.CurrentBody.MinValue)
 				{
@@ -1175,7 +1239,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 				else
 					Abundance = 0;
 			}
-			else if (SCANUtil.isCovered(Lon, Lat, Data, SCANtype.FuzzyResources))
+			else if (SCANUtil.isCovered(Lon, Lat, Data, SCANtype.ResourceLoRes))
 			{
 				Abundance = Mathf.RoundToInt(Abundance);
 				if (Abundance >= Resource.CurrentBody.MinValue)
@@ -1197,7 +1261,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 
 		internal static Color32 resourceToColor32(Color32 BaseColor, SCANresourceGlobal Resource, float Abundance, SCANdata Data, double Lon, double Lat, float Transparency = 0.3f)
 		{
-			if (SCANUtil.isCovered(Lon, Lat, Data, Resource.SType))
+			if (SCANUtil.isCovered(Lon, Lat, Data, SCANtype.ResourceHiRes))
 			{
 				if (Abundance >= Resource.CurrentBody.MinValue)
 				{
@@ -1207,7 +1271,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 				else
 					Abundance = 0;
 			}
-			else if (SCANUtil.isCovered(Lon, Lat, Data, SCANtype.FuzzyResources))
+			else if (SCANUtil.isCovered(Lon, Lat, Data, SCANtype.ResourceLoRes))
 			{
 				Abundance = Mathf.RoundToInt(Abundance);
 				if (Abundance >= Resource.CurrentBody.MinValue)

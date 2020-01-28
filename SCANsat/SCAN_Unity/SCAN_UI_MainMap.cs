@@ -179,7 +179,9 @@ namespace SCANsat.SCAN_Unity
 			s = SCANcontroller.controller.getSensorStatus(v, SCANtype.AltimetryLoRes);
 			if (s == null)
 				uiElement.UpdateLoColor(palette.grey);
-			else if (!s.inRange)
+            else if (s.inDarkness)
+                uiElement.UpdateLoColor(palette.c_bad);
+            else if (!s.inRange)
 				uiElement.UpdateLoColor(palette.c_bad);
 			else if (!s.bestRange && flip)
 				uiElement.UpdateLoColor(palette.c_bad);
@@ -189,7 +191,9 @@ namespace SCANsat.SCAN_Unity
 			s = SCANcontroller.controller.getSensorStatus(v, SCANtype.AltimetryHiRes);
 			if (s == null)
 				uiElement.UpdateHiColor(palette.grey);
-			else if (!s.inRange)
+            else if (s.inDarkness)
+                uiElement.UpdateHiColor(palette.c_bad);
+            else if (!s.inRange)
 				uiElement.UpdateHiColor(palette.c_bad);
 			else if (!s.bestRange && flip)
 				uiElement.UpdateHiColor(palette.c_bad);
@@ -199,29 +203,59 @@ namespace SCANsat.SCAN_Unity
 			s = SCANcontroller.controller.getSensorStatus(v, SCANtype.Biome);
 			if (s == null)
 				uiElement.UpdateMultiColor(palette.grey);
-			else if (!s.inRange)
+            else if (s.inDarkness)
+                uiElement.UpdateMultiColor(palette.c_bad);
+            else if (!s.inRange)
 				uiElement.UpdateMultiColor(palette.c_bad);
 			else if (!s.bestRange && flip)
 				uiElement.UpdateMultiColor(palette.c_bad);
 			else
 				uiElement.UpdateMultiColor(palette.c_good);
 
-			if (ResourcesOn)
+            s = SCANcontroller.controller.getSensorStatus(v, SCANtype.VisualLoRes);
+            if (s == null)
+                uiElement.UpdateVisLoColor(palette.grey);
+            else if (s.inDarkness)
+                uiElement.UpdateVisHiColor(palette.c_bad);
+            else if (!s.inRange)
+                uiElement.UpdateVisLoColor(palette.c_bad);
+            else if (!s.bestRange && flip)
+                uiElement.UpdateVisLoColor(palette.c_bad);
+            else
+                uiElement.UpdateVisLoColor(palette.c_good);
+
+            s = SCANcontroller.controller.getSensorStatus(v, SCANtype.VisualHiRes);
+            if (s == null)
+                uiElement.UpdateVisHiColor(palette.grey);
+            else if (s.inDarkness)
+                uiElement.UpdateVisHiColor(palette.c_bad);
+            else if (!s.inRange)
+                uiElement.UpdateVisHiColor(palette.c_bad);
+            else if (!s.bestRange && flip)
+                uiElement.UpdateVisHiColor(palette.c_bad);
+            else
+                uiElement.UpdateVisHiColor(palette.c_good);
+
+            if (ResourcesOn)
 			{
-				s = SCANcontroller.controller.getSensorStatus(v, SCANtype.FuzzyResources);
+				s = SCANcontroller.controller.getSensorStatus(v, SCANtype.ResourceLoRes);
 				if (s == null)
 					uiElement.UpdateM700Color(palette.grey);
-				else if (!s.inRange)
+                else if (s.inDarkness)
+                    uiElement.UpdateM700Color(palette.c_bad);
+                else if (!s.inRange)
 					uiElement.UpdateM700Color(palette.c_bad);
 				else if (!s.bestRange && flip)
 					uiElement.UpdateM700Color(palette.c_bad);
 				else
 					uiElement.UpdateM700Color(palette.c_good);
 
-				s = SCANcontroller.controller.getSensorStatus(v, SCANtype.Ore);
+				s = SCANcontroller.controller.getSensorStatus(v, SCANtype.ResourceHiRes);
 				if (s == null)
 					uiElement.UpdateOreColor(palette.grey);
-				else if (!s.inRange)
+                else if (s.inDarkness)
+                    uiElement.UpdateOreColor(palette.c_bad);
+                else if (!s.inRange)
 					uiElement.UpdateOreColor(palette.c_bad);
 				else if (!s.bestRange && flip)
 					uiElement.UpdateOreColor(palette.c_bad);

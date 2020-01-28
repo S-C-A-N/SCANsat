@@ -54,7 +54,12 @@ namespace SCANsat
 			if (data == null)
 				return false;
 
-			return (data.Coverage[ilon, ilat] & SCANtype) != 0;
+            if (SCANtype > Int16.MaxValue)
+                return false;
+
+            short type = (short)SCANtype;
+
+            return (data.Coverage[ilon, ilat] & type) != 0;
 		}
 
 		/// <summary>
@@ -74,7 +79,12 @@ namespace SCANsat
 			if (data == null)
 				return false;
 
-			return (data.Coverage[lon, lat] & SCANtype) != 0;
+            if (SCANtype > Int16.MaxValue)
+                return false;
+
+            short type = (short)SCANtype;
+
+            return (data.Coverage[lon, lat] & type) != 0;
 		}
 
 		/// <summary>
@@ -90,7 +100,12 @@ namespace SCANsat
 			if (data == null)
 				return 0;
 
-			return getCoveragePercentage(data, (SCANtype)SCANtype);
+            if (SCANtype > Int16.MaxValue)
+                return 0;
+
+            short type = (short)SCANtype;
+
+			return getCoveragePercentage(data, (SCANtype)type);
 		}
 
 		/// <summary>
@@ -208,6 +223,7 @@ namespace SCANsat
 			double min = 0;
 			double max = 0;
 			double best = 0;
+            bool light = false;
 
 			if (prefab.Modules.Contains<SCANsat.SCAN_PartModules.SCANsat>())
 			{
@@ -221,6 +237,7 @@ namespace SCANsat
 				min = scan.min_alt;
 				max = scan.max_alt;
 				best = scan.best_alt;
+                light = scan.requireLight;
 			}
 			else if (prefab.Modules.Contains<ModuleSCANresourceScanner>())
 			{
@@ -234,14 +251,15 @@ namespace SCANsat
 				min = scan.min_alt;
 				max = scan.max_alt;
 				best = scan.best_alt;
-			}
+                light = scan.requireLight;
+            }
 			else
 				return false;
 
 			if (SCANcontroller.controller == null)
 				return false;
 
-			SCANcontroller.controller.registerSensor(v, (SCANtype)sensor, fov, min, max, best);
+			SCANcontroller.controller.registerSensor(v, (SCANtype)sensor, fov, min, max, best, light);
 
 			m.moduleValues.SetValue("scanning", true.ToString());
 
@@ -274,6 +292,7 @@ namespace SCANsat
             double min = 0;
             double max = 0;
             double best = 0;
+            bool light = false;
 
             if (prefab.Modules.Contains<SCANsat.SCAN_PartModules.SCANsat>())
 			{
@@ -287,6 +306,7 @@ namespace SCANsat
                 min = scan.min_alt;
                 max = scan.max_alt;
                 best = scan.best_alt;
+                light = scan.requireLight;
             }
 			else if (prefab.Modules.Contains<ModuleSCANresourceScanner>())
 			{
@@ -300,6 +320,7 @@ namespace SCANsat
                 min = scan.min_alt;
                 max = scan.max_alt;
                 best = scan.best_alt;
+                light = scan.requireLight;
             }
 			else
 				return false;
@@ -307,7 +328,7 @@ namespace SCANsat
 			if (SCANcontroller.controller == null)
 				return false;
 
-			SCANcontroller.controller.unregisterSensor(v, (SCANtype)sensor, fov, min, max, best);
+			SCANcontroller.controller.unregisterSensor(v, (SCANtype)sensor, fov, min, max, best, light);
 
 			m.moduleValues.SetValue("scanning", false.ToString());
 
@@ -316,22 +337,23 @@ namespace SCANsat
 
         public static bool scanTypeValid(int type)
         {
-            if ((type & (int)SCANtype.Everything_SCAN) != 0)
-                return true;
-            else if ((type & (int)SCANtype.FuzzyResources) != 0)
+            if (type > Int16.MaxValue)
+                return false;
+
+            short stype = (short)type;
+
+            if ((stype & (short)SCANtype.Everything_SCAN) != 0)
                 return true;
 
-            return SCANcontroller.getLoadedResourceTypeStatus((SCANtype)type);
+            return false;
         }
 
         public static bool scanTypeValid(SCANtype type)
         {
             if ((type & SCANtype.Everything_SCAN) != SCANtype.Nothing)
                 return true;
-            else if ((type & SCANtype.FuzzyResources) != SCANtype.Nothing)
-                return true;
 
-            return SCANcontroller.getLoadedResourceTypeStatus(type);
+            return false;
         }
 
         #endregion
@@ -346,34 +368,20 @@ namespace SCANsat
 			int ilon = icLON(lon);
 			int ilat = icLAT(lat);
 			if (badLonLat(ilon, ilat)) return false;
-			return (data.Coverage[ilon, ilat] & (Int32)type) != 0;
+			return (data.Coverage[ilon, ilat] & (Int16)type) != 0;
 		}
 
 		internal static bool isCovered(int lon, int lat, SCANdata data, SCANtype type)
 		{
 			if (badLonLat(lon, lat)) return false;
-			return (data.Coverage[lon, lat] & (Int32)type) != 0;
+			return (data.Coverage[lon, lat] & (Int16)type) != 0;
 		}
 
 		internal static bool isCoveredByAll (int lon, int lat, SCANdata data, SCANtype type)
 		{
 			if (badLonLat(lon,lat)) return false;
-			return (data.Coverage[lon, lat] & (Int32)type) == (Int32)type;
+			return (data.Coverage[lon, lat] & (Int16)type) == (Int16)type;
 		}
-
-		//internal static void registerPass ( int lon, int lat, SCANdata data, int type )
-  //      {
-  //          int ilon = (lon + 360 /*+ 180*/) % 360;
-  //          int ilat = (lat + 180 /*+ 90*/) % 180;
-
-  //          if (ilon < 0 || lon >= 360)
-  //              return;
-
-  //          if (ilat < 0 || lon >= 180)
-  //              return;
-
-  //          data.Coverage[ilon, ilat] |= type;
-  //      }
 
         internal static double getCoveragePercentage(SCANdata data, SCANtype type )
 		{
@@ -383,7 +391,7 @@ namespace SCANsat
 			double cov = 0d;
 
 			if (type == SCANtype.Nothing)
-				type = SCANtype.AltimetryLoRes | SCANtype.AltimetryHiRes | SCANtype.Biome | SCANtype.Anomaly | SCANtype.FuzzyResources;   
+				type = SCANtype.AltimetryLoRes | SCANtype.AltimetryHiRes | SCANtype.Biome | SCANtype.Anomaly | SCANtype.VisualLoRes | SCANtype.VisualHiRes | SCANtype.ResourceLoRes | SCANtype.ResourceHiRes;   
             
 			cov = data.getCoverage (type);
 
@@ -1155,7 +1163,7 @@ namespace SCANsat
 						//		"   Blend SrcAlpha OneMinusSrcAlpha" +
 						//		"   ZWrite Off Cull Off Fog { Mode Off }" +
 						//		"} } }");
-						var lineMaterial = new Material(Shader.Find("Particles/Alpha Blended"));
+						var lineMaterial = new Material(Shader.Find("KSP/Particles/Alpha Blended"));
 						lineMaterial.hideFlags = HideFlags.HideAndDontSave;
 						lineMaterial.shader.hideFlags = HideFlags.HideAndDontSave;
 

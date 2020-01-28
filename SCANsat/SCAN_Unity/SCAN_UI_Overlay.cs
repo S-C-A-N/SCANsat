@@ -197,11 +197,11 @@ namespace SCANsat.SCAN_Unity
 			bool resources = false;
 			bool fuzzy = false;
 
-			if (SCANUtil.isCovered(coords.longitude, coords.latitude, data, currentResource.SType))
+			if (SCANUtil.isCovered(coords.longitude, coords.latitude, data, SCANtype.ResourceHiRes))
 			{
 				resources = true;
 			}
-			else if (SCANUtil.isCovered(coords.longitude, coords.latitude, data, SCANtype.FuzzyResources))
+			else if (SCANUtil.isCovered(coords.longitude, coords.latitude, data, SCANtype.ResourceLoRes))
 			{
 				resources = true;
 				fuzzy = true;
