@@ -13,6 +13,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using SCANsat.SCAN_Data;
 using SCANsat.SCAN_Toolbar;
 using SCANsat.SCAN_UI;
@@ -41,6 +42,8 @@ namespace SCANsat.SCAN_PartModules
 		public float best_alt;
 		[KSPField]
 		public string scanName;
+        [KSPField]
+        public bool requireLight;
 		[KSPField]
 		public string animationName;
 		[KSPField(guiName = "SCANsat Altitude", guiActive = false)]
@@ -174,24 +177,83 @@ namespace SCANsat.SCAN_PartModules
 			}
 		}
 
-		public override string GetInfo()
-		{
-			if (sensorType == 0)
-				return "";
+        public override string GetInfo()
+        {
+            if (sensorType == 0)
+                return "";
 
-			string str = base.GetInfo();
-			if (min_alt != 0)
-				str += Localizer.Format("#autoLOC_SCANsat_AltitudeMin", (min_alt / 1000).ToString("F0"));
-			if (best_alt != min_alt)
-				str += Localizer.Format("#autoLOC_SCANsat_AltitudeBest", (best_alt / 1000).ToString("F0"));
-			if (max_alt != 0)
-				str += Localizer.Format("#autoLOC_SCANsat_AltitudeMax", (max_alt / 1000).ToString("F0"));
-			if (fov != 0)
-				str += Localizer.Format("#autoLOC_SCANsat_FOV", fov.ToString("F0") + "°");
+            StringBuilder sb = StringBuilderCache.Acquire();
 
-			str += resHandler.PrintModuleResources(1);
-			return str;
-		}
+            sb.Append(base.GetInfo());
+
+            if (min_alt != 0)
+                sb.Append(Localizer.Format("#autoLOC_SCANsat_AltitudeMin", (min_alt / 1000).ToString("F0")));
+            if (best_alt != min_alt)
+                sb.Append(Localizer.Format("#autoLOC_SCANsat_AltitudeBest", (best_alt / 1000).ToString("F0")));
+            if (max_alt != 0)
+                sb.Append(Localizer.Format("#autoLOC_SCANsat_AltitudeMax", (max_alt / 1000).ToString("F0")));
+            if (fov != 0)
+                sb.Append(Localizer.Format("#autoLOC_SCANsat_FOV", fov.ToString("F1") + "°"));
+            
+            sb.AppendLine();
+
+            sb.Append(Localizer.Format("#autoLOC_SCANsat_Daylight", RUIutils.GetYesNoUIString(requireLight)));
+
+            sb.AppendLine();
+            sb.AppendLine();
+            sb.Append(Localizer.Format("#autoLOC_SCANsat_Types"));
+
+            if ((sensorType & (short)SCANtype.AltimetryLoRes) != 0)
+            {
+                sb.AppendLine();
+                sb.Append(SCANtype.AltimetryLoRes.ToString());
+            }
+            if ((sensorType & (short)SCANtype.AltimetryHiRes) != 0)
+            {
+                sb.AppendLine();
+                sb.Append(SCANtype.AltimetryHiRes.ToString());
+            }
+            if ((sensorType & (short)SCANtype.Biome) != 0)
+            {
+                sb.AppendLine();
+                sb.Append(SCANtype.Biome.ToString());
+            }
+            if ((sensorType & (short)SCANtype.Anomaly) != 0)
+            {
+                sb.AppendLine();
+                sb.Append(SCANtype.Anomaly.ToString());
+            }
+            if ((sensorType & (short)SCANtype.AnomalyDetail) != 0)
+            {
+                sb.AppendLine();
+                sb.Append(SCANtype.AnomalyDetail.ToString());
+            }
+            if ((sensorType & (short)SCANtype.VisualLoRes) != 0)
+            {
+                sb.AppendLine();
+                sb.Append(SCANtype.VisualLoRes.ToString());
+            }
+            if ((sensorType & (short)SCANtype.VisualHiRes) != 0)
+            {
+                sb.AppendLine();
+                sb.Append(SCANtype.VisualHiRes.ToString());
+            }
+            if ((sensorType & (short)SCANtype.ResourceLoRes) != 0)
+            {
+                sb.AppendLine();
+                sb.Append(SCANtype.ResourceLoRes.ToString());
+            }
+            if ((sensorType & (short)SCANtype.ResourceHiRes) != 0)
+            {
+                sb.AppendLine();
+                sb.Append(SCANtype.ResourceHiRes.ToString());
+            }
+
+            sb.AppendLine();
+            sb.Append(resHandler.PrintModuleResources(1));
+
+            return sb.ToStringAndRelease();
+        }
 				
 		/* SCAN: context (right click) buttons in FLIGHT */
 		[KSPEvent(guiActive = true, guiName = "Start RADAR Scan", active = true)]
@@ -292,14 +354,14 @@ namespace SCANsat.SCAN_PartModules
 			scanning = true;
 			powerTimer = 0;
 			if (sensorType > 0 && SCANcontroller.controller != null)
-				SCANcontroller.controller.registerSensor(vessel, (SCANtype)sensorType, fov, min_alt, max_alt, best_alt);
+				SCANcontroller.controller.registerSensor(vessel, (SCANtype)sensorType, fov, min_alt, max_alt, best_alt, requireLight);
 		}
 
 		protected void unregisterScanner()
 		{
 			scanning = false;
 			if (sensorType > 0 && SCANcontroller.controller != null)
-				SCANcontroller.controller.unregisterSensor(vessel, (SCANtype)sensorType, fov, min_alt, max_alt, best_alt);
+				SCANcontroller.controller.unregisterSensor(vessel, (SCANtype)sensorType, fov, min_alt, max_alt, best_alt, requireLight);
 		}
 
 		private string scanAlt(SCANdata d)
