@@ -1,7 +1,30 @@
+Version 19.0 - 2012-1-
+-----------------------
+
+- Warning: Save files cannot be downgraded to a previous version of SCANsat after updating to version 19.0 or higher
+
+- Update for KSP 1.8.1
+
+- Visual scanning mode
+     - New visual scanner part (Nertea)
+     - Visual map mode
+     - Visual scan science data
+
+- Daylight scanner requirement
+     - Some scanners require that the surface be in daylight to be scanned
+     - Requirement can be disabled in the settings menu
+
+- Overhaul of resource scanning
+     - All high resolution resources are scanned through a single scanner type
+     - Existing data will be converted to the new system
+
+- Fix some Unity script initialization errors
+- Fix RPM map display errors
+
 Version 18.14 - 2019-10-28
 -----------------------
 
-- Update for KSP 1.9
+- Update for KSP 1.8
 - Fix big map control buttons
 - Fix ground track indicators
 - Fix BTDT anomaly viewer shaders
