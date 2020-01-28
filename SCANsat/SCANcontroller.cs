@@ -47,6 +47,8 @@ namespace SCANsat
         private static int bestScanAlt = 250000;
 
         [KSPField(isPersistant = true)]
+        public bool storageUpgraded = false;
+        [KSPField(isPersistant = true)]
         public bool mainMapVisible = false;
         [KSPField(isPersistant = true)]
         public bool mainMapColor = true;
@@ -121,15 +123,11 @@ namespace SCANsat
         /* Available resources for overlays; loaded from SCANsat configs; only loaded once */
         private static DictionaryValueList<string, SCANresourceGlobal> masterResourceNodes = new DictionaryValueList<string, SCANresourceGlobal>();
 
-        /* Resource types loaded from SCANsat configs; only needs to be loaded once */
-        private static Dictionary<string, SCANresourceType> resourceTypes = new Dictionary<string, SCANresourceType>();
-
         /* Terrain height and color option containers loaded from SCANsat configs; only needs to be loaded once */
         private static Dictionary<string, SCANterrainConfig> masterTerrainNodes = new Dictionary<string, SCANterrainConfig>();
 
         /* List of resources currently loaded from resource addons */
         private static List<string> loadedResources = new List<string>();
-        private static List<SCANtype> loadedResourceTypes = new List<SCANtype>();
 
         /* Primary SCANsat vessel dictionary; loaded every time */
         public DictionaryValueList<Guid, SCANvessel> knownVessels = new DictionaryValueList<Guid, SCANvessel>();
@@ -425,68 +423,12 @@ namespace SCANsat
                 UnityEngine.Debug.LogError(string.Format("[SCANsat] Warning: SCANResource Dictionary Already Contains Key of This Type: Resource: {0}", name));
         }
 
-        public static SCANresourceType getResourceType(string name, bool warn = true)
-        {
-            if (resourceTypes.ContainsKey(name))
-                return resourceTypes[name];
-            else if (warn)
-                SCANUtil.SCANlog("SCANsat resource type [{0}] cannot be found in master resource type storage list", name);
-
-            return null;
-        }
-
-        public static SCANresourceType getResourceType(int scantype, bool warn = true)
-        {
-            foreach(SCANresourceType r in resourceTypes.Values)
-            {
-                if (r.Type == (SCANtype)scantype)
-                    return r;
-            }
-
-            if (warn)
-                SCANUtil.SCANlog("SCANsat resource type [{0}] cannot be found in master resource type storage list", scantype.ToString());
-
-            return null;
-        }
-
-        public static bool getLoadedResourceTypeStatus(SCANtype type, bool warn = false)
-        {
-            for (int i = loadedResourceTypes.Count - 1; i >= 0; i--)
-            {
-                if (loadedResourceTypes[i] == type)
-                    return true;
-            }
-
-            if (warn)
-                SCANUtil.SCANlog("SCANsat resource type [{0}] cannot be found in loaded resource type storage list", type);
-
-            return false;
-        }
-
-        public static void addToResourceTypes(string name, SCANresourceType type)
-        {
-            if (!resourceTypes.ContainsKey(name))
-            {
-                resourceTypes.Add(name, type);
-            }
-            else
-                UnityEngine.Debug.LogError(string.Format("[SCANsat] Warning: SCANResourceType Dictionary Already Contains Key of This Name: SCAN Resource Type: {0}", name));
-        }
-
         public static void addToLoadedResourceNames(string name)
         {
             if (!loadedResources.Contains(name))
                 loadedResources.Add(name);
             else
                 UnityEngine.Debug.LogError(string.Format("[SCANsat] Warning: Loaded Resource List Already Contains Resource Of Name: {0}", name));
-        }
-
-        public static void addToLoadedResourceTypes(SCANtype type)
-        {
-            if (!loadedResourceTypes.Contains(type))
-                loadedResourceTypes.Add(type);
-            else
-                UnityEngine.Debug.LogError(string.Format("[SCANsat] Warning: Loaded Resource Type List Already Contains Resource Of Type: {0}", type));
         }
 
         public static List<SCANresourceGlobal> setLoadedResourceList()
@@ -575,31 +517,35 @@ namespace SCANsat
 
         public override void OnLoad(ConfigNode node)
         {
-            ConfigNode node_vessels = node.GetNode("Scanners");
-            if (node_vessels != null)
+            if (storageUpgraded)
             {
-                SCANUtil.SCANlog("SCANsat Controller: Loading {0} known vessels", node_vessels.CountNodes);
-                foreach (ConfigNode node_vessel in node_vessels.GetNodes("Vessel"))
+                ConfigNode node_vessels = node.GetNode("Scanners");
+                if (node_vessels != null)
                 {
-                    Guid id = node_vessel.parse("guid", new Guid());
-
-                    if (id == new Guid())
+                    SCANUtil.SCANlog("SCANsat Controller: Loading {0} known vessels", node_vessels.CountNodes);
+                    foreach (ConfigNode node_vessel in node_vessels.GetNodes("Vessel"))
                     {
-                        SCANUtil.SCANlog("Something Went Wrong Loading This SCAN Vessel; Moving On To The Next");
-                        continue;
-                    }
+                        Guid id = node_vessel.parse("guid", new Guid());
 
-                    foreach (ConfigNode node_sensor in node_vessel.GetNodes("Sensor"))
-                    {
-                        int sensor = node_sensor.parse("type", (int)0);
-                        double fov = node_sensor.parse("fov", 3d);
-                        double min_alt = node_sensor.parse("min_alt", (double)minScanAlt);
-                        double max_alt = node_sensor.parse("max_alt", (double)maxScanAlt);
-                        double best_alt = node_sensor.parse("best_alt", (double)bestScanAlt);
+                        if (id == new Guid())
+                        {
+                            SCANUtil.SCANlog("Something Went Wrong Loading This SCAN Vessel; Moving On To The Next");
+                            continue;
+                        }
 
-                        registerSensorTemp(id, (SCANtype)sensor, fov, min_alt, max_alt, best_alt);
+                        foreach (ConfigNode node_sensor in node_vessel.GetNodes("Sensor"))
+                        {
+                            int sensor = node_sensor.parse("type", (int)0);
+                            double fov = node_sensor.parse("fov", 3d);
+                            double min_alt = node_sensor.parse("min_alt", (double)minScanAlt);
+                            double max_alt = node_sensor.parse("max_alt", (double)maxScanAlt);
+                            double best_alt = node_sensor.parse("best_alt", (double)bestScanAlt);
+                            bool require_light = node_sensor.parse("require_light", (bool)false);
 
-                        tempIDs.Add(id);
+                            registerSensorTemp(id, (SCANtype)sensor, fov, min_alt, max_alt, best_alt, require_light);
+
+                            tempIDs.Add(id);
+                        }
                     }
                 }
             }
@@ -650,7 +596,15 @@ namespace SCANsat
                                 continue;
                             }
 
-                            data.integerDeserialize(mapdata);
+                            if (storageUpgraded)
+                            {
+                                data.shortDeserialize(mapdata);
+                            }
+                            else
+                            {
+                                data.ConvertStorage(mapdata);
+                            }
+
                         }
                         catch (Exception e)
                         {
@@ -721,6 +675,7 @@ namespace SCANsat
                 }
             }
             loaded = true;
+            storageUpgraded = true;
         }
 
         public override void OnSave(ConfigNode node)
@@ -743,6 +698,7 @@ namespace SCANsat
                     node_sensor.AddValue("min_alt", sensor.min_alt);
                     node_sensor.AddValue("max_alt", sensor.max_alt);
                     node_sensor.AddValue("best_alt", sensor.best_alt);
+                    node_sensor.AddValue("require_light", sensor.requireLight);
                     node_vessel.AddNode(node_sensor);
                 }
                 node_vessels.AddNode(node_vessel);
@@ -771,12 +727,12 @@ namespace SCANsat
                     node_body.AddValue("PaletteSize", body_scan.TerrainConfig.PalSize);
                     node_body.AddValue("PaletteReverse", body_scan.TerrainConfig.PalRev);
                     node_body.AddValue("PaletteDiscrete", body_scan.TerrainConfig.PalDis);
-                    node_body.AddValue("Map", body_scan.integerSerialize());
+                    node_body.AddValue("Map", body_scan.shortSerialize());
                     node_progress.AddNode(node_body);
                 }
                 node.AddNode(node_progress);
             }
-            if (resourceTypes.Count > 0 && masterResourceNodes.Count > 0)
+            if (masterResourceNodes.Count > 0)
             {
                 ConfigNode node_resources = new ConfigNode("SCANResources");
                 foreach (SCANresourceGlobal r in masterResourceNodes.Values)
@@ -930,7 +886,7 @@ namespace SCANsat
             if (!ResourceMap.Instance.IsPlanetScanned(body.flightGlobalsIndex))
                 return;
 
-            if (SCANUtil.GetCoverage((int)SCANtype.AllResources, body) >= 100)
+            if (SCANUtil.GetCoverage((short)SCANtype.ResourceHiRes, body) >= 100)
                 return;
 
             SCANdata data = getData(body.bodyName);
@@ -957,7 +913,7 @@ namespace SCANsat
             if (data == null)
                 return;
 
-            if (SCANUtil.getCoveragePercentage(data, SCANtype.FuzzyResources) > (SCAN_Settings_Config.Instance.StockTreshold * 100))
+            if (SCANUtil.getCoveragePercentage(data, SCANtype.ResourceLoRes) > (SCAN_Settings_Config.Instance.StockTreshold * 100))
             {
                 SCANUtil.SCANlog("SCANsat resource scanning for {0} meets threshold value [{1:P0}]\nConducting stock orbital resource scan...", body.bodyName, SCAN_Settings_Config.Instance.StockTreshold);
                 ResourceMap.Instance.UnlockPlanet(body.flightGlobalsIndex);
@@ -1102,7 +1058,7 @@ namespace SCANsat
             if (b == null)
                 return;
 
-            if (SCANUtil.GetCoverage((int)SCANtype.AllResources, b) >= 100)
+            if (SCANUtil.GetCoverage((short)SCANtype.ResourceHiRes, b) >= 100)
                 return;
 
             SCANdata data = SCANUtil.getData(b);
@@ -1428,20 +1384,20 @@ namespace SCANsat
                 case 1:
                     return SCAN_Settings_Config.Instance.HiResAltimetryTrackColor;
                 case 2:
-                    return palette.XKCD_DarkGreenAlpha;
+                    return SCAN_Settings_Config.Instance.LoResVisualTrackColor;
                 case 3:
                     return SCAN_Settings_Config.Instance.BiomeTrackColor;
                 case 4:
                     return SCAN_Settings_Config.Instance.AnomalyTrackColor;
                 case 5:
                     return SCAN_Settings_Config.Instance.AnomalyDetailTrackColor;
-                case 19:
+                case 6:
+                    return SCAN_Settings_Config.Instance.HiResVisualTrackColor;
+                case 7:
                     return SCAN_Settings_Config.Instance.FuzzyResourceTrackColor;
+                case 8:
+                    return SCAN_Settings_Config.Instance.HiResResourceTrackColor;
                 default:
-                    SCANresourceType type = getResourceType(1 << i, false);
-
-                    if (type != null)
-                        return type.Color;
 
                     return palette.XKCD_DarkGreenAlpha;
             }
@@ -1452,8 +1408,6 @@ namespace SCANsat
             if (isVesselKnown(v))
             {
                 unregisterVessel(v);
-                //foreach (SCANtype t in Enum.GetValues(typeof(SCANtype)))
-                    //unregisterSensor(v, t);
             }
         }
 
@@ -1462,7 +1416,7 @@ namespace SCANsat
             foreach (SCANsat.SCAN_PartModules.SCANsat s in v.FindPartModulesImplementing<SCANsat.SCAN_PartModules.SCANsat>())
             {
                 if (s.scanningNow)
-                    registerSensor(v.id, (SCANtype)s.sensorType, s.fov, s.min_alt, s.max_alt, s.best_alt);
+                    registerSensor(v.id, (SCANtype)s.sensorType, s.fov, s.min_alt, s.max_alt, s.best_alt, s.requireLight);
             }
         }
 
@@ -1743,6 +1697,9 @@ namespace SCANsat
 
             public bool inRange;
             public bool bestRange;
+            public bool inDarkness;
+
+            public bool requireLight;
 
             public SCANsensor() { }
         }
@@ -1762,7 +1719,7 @@ namespace SCANsat
             public double lastUT;
         }
 
-        private void registerSensorTemp(Guid id, SCANtype sensors, double _fov, double _min_alt, double _max_alt, double _best_alt)
+        private void registerSensorTemp(Guid id, SCANtype sensors, double _fov, double _min_alt, double _max_alt, double _best_alt, bool _require_light)
         {
             if (id == null)
                 return;
@@ -1796,7 +1753,8 @@ namespace SCANsat
                     SCANsensor sen = sv.sensors[i];
 
                     if (sen.min_alt == _min_alt && sen.max_alt == _max_alt
-                        && sen.best_alt == _best_alt && sen.fov == _fov)
+                        && sen.best_alt == _best_alt && sen.fov == _fov
+                        && sen.requireLight == _require_light)
                     {
                         SCANtype t = sen.sensor | sensorType;
 
@@ -1807,6 +1765,7 @@ namespace SCANsat
                             best_alt = _best_alt,
                             fov = _fov,
                             sensor = t,
+                            requireLight = _require_light,
                             trackColor = getScanTypeColor(t),
                             //sensorType = (int)sv.sensors[i].sensor,
                         };
@@ -1825,6 +1784,7 @@ namespace SCANsat
                         max_alt = _max_alt,
                         best_alt = _best_alt,
                         fov = _fov,
+                        requireLight = _require_light,
                         sensor = sensorType,
                         trackColor = getScanTypeColor(sensorType),
                     });
@@ -1854,15 +1814,15 @@ namespace SCANsat
                 knownVessels.Remove(id);
         }
 
-        internal void registerSensor(Vessel v, SCANtype sensors, double fov, double min_alt, double max_alt, double best_alt)
+        internal void registerSensor(Vessel v, SCANtype sensors, double fov, double min_alt, double max_alt, double best_alt, bool _require_light)
         {
-            registerSensor(v.id, sensors, fov, min_alt, max_alt, best_alt);
+            registerSensor(v.id, sensors, fov, min_alt, max_alt, best_alt, _require_light);
             knownVessels[v.id].vessel = v;
             knownVessels[v.id].latitude = SCANUtil.fixLatShift(v.latitude);
             knownVessels[v.id].longitude = SCANUtil.fixLonShift(v.longitude);
         }
 
-        private void registerSensor(Guid id, SCANtype sensors, double _fov, double _min_alt, double _max_alt, double _best_alt)
+        private void registerSensor(Guid id, SCANtype sensors, double _fov, double _min_alt, double _max_alt, double _best_alt, bool _require_light)
         {
             if (id == null)
                 return;
@@ -1906,7 +1866,8 @@ namespace SCANsat
                     SCANsensor sen = sv.sensors[i];
 
                     if (sen.min_alt == _min_alt && sen.max_alt == _max_alt
-                        && sen.best_alt == _best_alt && sen.fov == _fov)
+                        && sen.best_alt == _best_alt && sen.fov == _fov
+                        && sen.requireLight == _require_light)
                     {
                         SCANtype t = sen.sensor | sensorType;
 
@@ -1917,6 +1878,7 @@ namespace SCANsat
                             best_alt = _best_alt,
                             fov = _fov,
                             sensor = t,
+                            requireLight = _require_light,
                             trackColor = getScanTypeColor(t),
                         };
 
@@ -1935,6 +1897,7 @@ namespace SCANsat
                         best_alt = _best_alt,
                         fov = _fov,
                         sensor = sensorType,
+                        requireLight = _require_light,
                         trackColor = getScanTypeColor(sensorType),
                     });
                 }
@@ -1943,7 +1906,7 @@ namespace SCANsat
             sv.trackColor = palette.combineColors(sv.sensors.Select(s => s.trackColor).ToArray());
         }
 
-        internal void unregisterSensor(Vessel v, SCANtype sensors, double _fov, double _min_alt, double _max_alt, double _best_alt)
+        internal void unregisterSensor(Vessel v, SCANtype sensors, double _fov, double _min_alt, double _max_alt, double _best_alt, bool require_light)
         {
             if (!knownVessels.Contains(v.id))
                 return;
@@ -1972,7 +1935,8 @@ namespace SCANsat
                     if ((sen.sensor & sensor) != SCANtype.Nothing)
                     {
                         if (sen.min_alt == _min_alt && sen.max_alt == _max_alt
-                            && sen.best_alt == _best_alt && sen.fov == _fov)
+                            && sen.best_alt == _best_alt && sen.fov == _fov
+                            && sen.requireLight == require_light)
                         {
                             SCANtype t = sen.sensor ^ sensor;
 
@@ -1983,6 +1947,7 @@ namespace SCANsat
                                 best_alt = sen.best_alt,
                                 fov = sen.fov,
                                 sensor = t,
+                                requireLight = require_light,
                                 trackColor = getScanTypeColor(t),
                             };
                         }
@@ -2134,10 +2099,38 @@ namespace SCANsat
             activeSensors = currentActiveSensor;
         }
 
+        private bool InDarkness(Vector3d vesselPos, Vector3d pos, Vector3d sun)
+        {
+            if (!SCAN_UI_Settings.Instance.DaylightCheck)
+                return false;
+
+            Vector3d solarDirection = pos - sun;
+
+            Vector3d surfaceDirection = pos - vesselPos;
+
+            double angle = Vector3d.Angle(surfaceDirection, solarDirection);
+
+            //SCANUtil.SCANlog("Daylight Check Angle: {0}", angle);
+
+            return angle > 90;
+        }
+
+        private CelestialBody LocalSun(CelestialBody body)
+        {
+            while (body.referenceBody != body)
+            {
+                body = body.referenceBody;
+            }
+
+            return body;
+        }
+
         private int actualPasses;
         private static Queue<double> scanQueue;
         private void doScanPass(SCANvessel vessel, Vessel v, SCANdata data, double UT, double startUT, double lastUT)
         {
+            //SCANUtil.SCANlog("Start New Scan Pass");
+            CelestialBody sun = LocalSun(v.mainBody);
             double soi_radius = v.mainBody.sphereOfInfluence - v.mainBody.Radius;
             double alt = v.altitude;
             double llat = SCANUtil.fixLat(v.latitude);
@@ -2147,7 +2140,8 @@ namespace SCANsat
             double res = 0;
             Orbit o = v.orbit;
             bool uncovered;
-            int sensorType;
+            bool darkness = InDarkness(o.getPositionAtUT(UT), v.mainBody.position, sun.position);
+            short sensorType;
 
             double surfscale = Planetarium.fetch.Home.Radius / v.mainBody.Radius;
 
@@ -2180,6 +2174,7 @@ namespace SCANsat
                 alt = v.mainBody.GetAltitude(pos);
                 lat = SCANUtil.fixLatInt(v.mainBody.GetLatitude(pos));
                 lon = SCANUtil.fixLonInt(v.mainBody.GetLongitude(pos) - rotation);
+                darkness = InDarkness(pos, v.mainBody.position, sun.position);
 
                 if (alt < 0)
                     alt = 0;
@@ -2197,12 +2192,12 @@ namespace SCANsat
             actualPasses++;
 
             uncovered = res <= 0;
-
+            //SCANUtil.SCANlog("Begin scan pass: {0}", vessel.sensors.Count);
             for (int j = vessel.sensors.Count - 1; j >= 0; j--)
             {
                 SCANsensor sensor = vessel.sensors[j];
 
-                sensorType = (int)sensor.sensor;
+                sensorType = (short)sensor.sensor;
 
                 if (res <= 0)
                 {
@@ -2210,6 +2205,15 @@ namespace SCANsat
                         uncovered = false;
                 }
 
+                sensor.inDarkness = sensor.requireLight;
+
+                if (sensor.requireLight && darkness)
+                {
+                    //SCANUtil.SCANlog("Sensor {0} fail light check...", sensorType);
+                    continue;
+                }
+
+                sensor.inDarkness = false;
                 sensor.inRange = false;
                 sensor.bestRange = false;
 
