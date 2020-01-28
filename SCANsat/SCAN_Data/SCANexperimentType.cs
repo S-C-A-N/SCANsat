@@ -8,6 +8,7 @@ namespace SCANsat.SCAN_Data
 		SCANsatAltimetryLoRes,
 		SCANsatAltimetryHiRes,
 		SCANsatBiomeAnomaly,
-		SCANsatResources
+		SCANsatResources,
+        SCANsatVisual
 	}
 }

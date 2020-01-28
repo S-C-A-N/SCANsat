@@ -36,6 +36,7 @@ namespace SCANsat.SCAN_Map
 				case mapType.Altimetry: mode = "elevation"; break;
 				case mapType.Slope: mode = "slope"; break;
 				case mapType.Biome: mode = "biome"; break;
+                case mapType.Visual: mode = "visual"; break;
 			}
 
 			if (map.ResourceActive && SCANconfigLoader.GlobalResource && !string.IsNullOrEmpty(SCANcontroller.controller.bigMapResource))

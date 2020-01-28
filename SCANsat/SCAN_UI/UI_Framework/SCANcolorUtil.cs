@@ -423,6 +423,201 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			return r;
 		}
 
-	}
+        public static Color32 ConvertToGrayscale(Color32 color)
+        {
+            double r, g, b, l;
+
+            r = color.r / 255f;
+            g = color.g / 255f;
+            b = color.b / 255f;
+
+            r *= 0.2126f;
+            g *= 0.7152f;
+            b *= 0.0722f;
+
+            l = r + g + b;
+
+            if (l >= 1)
+                l = 1;
+            if (l <= 0)
+                l = 0;
+
+            byte lum = (byte)Math.Round(l * 255d);
+
+            return new Color32(lum, lum, lum, color.a);
+        }
+
+        public static HslColor ConvertRgbToHsl(Color32 color)
+        {
+            return ConvertRgbToHsl((color.r / 255d), (color.g / 255d), (color.b / 255d));
+        }
+
+        //Converts an RGB color to an HSL color.
+        public static HslColor ConvertRgbToHsl(double r, double b, double g)
+        {
+            double delta, min, max;
+            double h, s, l;
+
+            min = Math.Min(Math.Min(r, g), b);
+            max = Math.Max(Math.Max(r, g), b);
+
+            l = (min + max) / 2d;
+
+            if (min == max)
+            {
+                s = 0;
+                h = 0;
+            }
+            else
+            {
+                delta = max - min;
+
+                if (l < 0.5)
+                    s = (delta) / (max + min);
+                else
+                    s = (delta) / (2 - max - min);
+
+                if (r == max)
+                    h = (g - b) / delta;
+                else if (g == max)
+                    h = 2 + ((b - r) / delta);
+                else
+                    h = 4 + ((r - g) / delta);
+
+                h *= 60;
+
+                if (h <= 0)
+                    h += 360;
+
+                h = 360 - h;
+            }
+
+            return new HslColor() { H = h, S = s, L = l };
+        }
+
+        // Converts an HSL color to an RGB color.
+        public static Color32 ConvertHslToRgb(double h, double s, double l)
+        {
+            double r = 0, g = 0, b = 0;
+
+            if (s == 0)
+            {
+                r = l;
+                g = l;
+                b = l;
+            }
+            else
+            {
+                double tr, tg, tb;
+
+                double t1, t2, th;
+
+                if (l < 0.5)
+                    t1 = l * (1 + s);
+                else
+                    t1 = (l + s) - (l * s);
+
+                t2 = 2 * l - t1;
+
+                th = h / 360d;
+
+                tr = th + (1d / 3d);
+                tg = th;
+                tb = th - (1d / 3d);
+
+                r = ColorTest(tr, t1, t2);
+                g = ColorTest(tg, t1, t2);
+                b = ColorTest(tb, t1, t2);
+            }
+
+            return new Color32((byte)Math.Round(r * 255d), (byte)Math.Round(g * 255d), (byte)Math.Round(b * 255d), 255);
+        }
+
+        private static double ColorTest(double c, double t1, double t2)
+        {
+            if (c < 0)
+                c += 1d;
+
+            if (c > 1)
+                c -= 1d;
+
+            if (6d * c < 1d)
+                return t2 + (t1 - t2) * 6d * c;
+
+            if (2d * c < 1d)
+                return t1;
+
+            if (3d * c < 2d)
+                return t2 + (t1 - t2) * ((2d / 3d) - c) * 6d;
+
+            return t2;
+        }
+
+    }
+
+    public struct HslColor
+    {
+        /// <summary>
+        /// The Hue, ranges between 0 and 360
+        /// </summary>
+        public double H;
+
+        /// <summary>
+        /// The saturation, ranges between 0 and 1
+        /// </summary>
+        public double S;
+
+        // The luminence, ranges between 0 and 1
+        public double L;
+
+        public float normalizedH
+        {
+            get
+            {
+                return (float)H / 360f;
+            }
+
+            set
+            {
+                H = (double)value * 360;
+            }
+        }
+
+        public float normalizedS
+        {
+            get
+            {
+                return (float)S;
+            }
+            set
+            {
+                S = (double)value;
+            }
+        }
+
+        public float normalizedVL
+        {
+            get
+            {
+                return (float)L;
+            }
+            set
+            {
+                L = (double)value;
+            }
+        }
+
+        public HslColor(double h, double s, double l)
+        {
+            this.H = h;
+            this.S = s;
+            this.L = l;
+        }
+
+        public override string ToString()
+        {
+            return "{" + H.ToString("f2") + "," + S.ToString("f2") + "," + L.ToString("f2") + "}";
+        }
+    }
 }
 

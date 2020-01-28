@@ -34,6 +34,7 @@ namespace SCANsat.SCAN_Map
 		Altimetry = 0,
 		Slope = 1,
 		Biome = 2,
+        Visual = 3,
 	}
 
 	public enum mapSource
