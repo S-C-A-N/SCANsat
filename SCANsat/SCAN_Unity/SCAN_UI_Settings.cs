@@ -432,7 +432,7 @@ namespace SCANsat.SCAN_Unity
 					SCAN_UI_BigMap.Instance.Open();
 				}
 
-				if (SCAN_UI_MainMap.Instance != null && SCAN_UI_MainMap.Instance.IsVisible)
+				if (SCAN_UI_MainMap.Instance != null && SCAN_UI_MainMap.Instance.IsVisible && HighLogic.LoadedSceneIsFlight)
 				{ 
 					SCAN_UI_MainMap.Instance.Close();
 					SCAN_UI_MainMap.Instance.Open();
@@ -444,13 +444,13 @@ namespace SCANsat.SCAN_Unity
 					SCAN_UI_ZoomMap.Instance.Open(true);
 				}
 
-				if (SCAN_UI_Instruments.Instance != null && SCAN_UI_Instruments.Instance.IsVisible)
+				if (SCAN_UI_Instruments.Instance != null && SCAN_UI_Instruments.Instance.IsVisible && HighLogic.LoadedSceneIsFlight)
 				{
 					SCAN_UI_Instruments.Instance.Close();
 					SCAN_UI_Instruments.Instance.Open();
 				}
 
-				if (SCAN_UI_Overlay.Instance != null && SCAN_UI_Overlay.Instance.IsVisible)
+				if (SCAN_UI_Overlay.Instance != null && SCAN_UI_Overlay.Instance.IsVisible && HighLogic.LoadedScene != GameScenes.SPACECENTER)
 				{
 					SCAN_UI_Overlay.Instance.Close();
 					SCAN_UI_Overlay.Instance.Open();
