@@ -1,4 +1,15 @@
-Version 19.0 - 2012-1-
+Version 19.1 - 2012-2-20
+-----------------------
+
+- Fix compatibility with Kopernicus
+
+- Add new scanner info group in the right click menu of all scanner parts
+- Fix stock resource scanner modules
+
+- Fix scanning contracts (maybe?)
+
+
+Version 19.0 - 2012-1-29
 -----------------------
 
 - Warning: Save files cannot be downgraded to a previous version of SCANsat after updating to version 19.0 or higher
