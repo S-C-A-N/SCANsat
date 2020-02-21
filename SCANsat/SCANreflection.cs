@@ -22,13 +22,89 @@ namespace SCANsat
 {
 	static class SCANreflection
 	{
-		private static bool FinePrintFlightBandRun = false;
+        //private const string KOPERNICUSASSEMBLY = "Kopernicus.OnDemand.ScaledSpaceOnDemand";
+        public const string KOPERNICUSONDEMANDTYPE = "ScaledSpaceOnDemand";
+        private const string KOPERNICUSONDEMANDLOAD = "LoadTextures";
+        private const string KOPERNICUSONDEMANDUNLOAD = "UnloadTextures";
+
+        private static bool FinePrintFlightBandRun = false;
 		private static bool FinePrintStationaryWaypointRun = false;
 
 		private static FieldInfo _FinePrintFlightBand;
 		private static FieldInfo _FinePrintStationaryWaypoint;
 
-		internal static Waypoint FinePrintStationaryWaypointObject(StationaryPointParameter p)
+        //private static Type _scaledSpaceOnDemand;
+
+        //private static MethodInfo _scaledSpaceOnDemandLoad;
+        //private static MethodInfo _scaledSpaceOnDemandUnload;
+
+        internal static void LoadOnDemand(MonoBehaviour scaledSpaceOnDemand)
+        {
+            //if (_scaledSpaceOnDemandLoad == null)
+            //    return;
+
+            scaledSpaceOnDemand.GetType().InvokeMember(KOPERNICUSONDEMANDLOAD
+                , BindingFlags.Instance | BindingFlags.Public | BindingFlags.IgnoreReturn | BindingFlags.InvokeMethod, null, scaledSpaceOnDemand, null);
+
+            //_scaledSpaceOnDemandLoad.Invoke(scaledSpaceOnDemand, null);
+        }
+
+        internal static void UnloadOnDemand(MonoBehaviour scaledSpaceOnDemand)
+        {
+            //if (_scaledSpaceOnDemandUnload == null)
+            //    return;
+
+            scaledSpaceOnDemand.GetType().InvokeMember(KOPERNICUSONDEMANDUNLOAD
+                , BindingFlags.Instance | BindingFlags.Public | BindingFlags.IgnoreReturn | BindingFlags.InvokeMethod, null, scaledSpaceOnDemand, null);
+
+            //_scaledSpaceOnDemandUnload.Invoke(scaledSpaceOnDemand, null);
+        }
+
+        //internal static void LoadKopernicusReflection()
+        //{
+        //    //try
+        //    //{
+        //    //    AssemblyLoader.loadedAssemblies.TypeOperation(t =>
+        //    //    {
+        //    //        if (t.FullName == KOPERNICUSASSEMBLY)
+        //    //        {
+        //    //            _scaledSpaceOnDemand = t;
+        //    //        }
+        //    //    });
+
+        //    //    if (_scaledSpaceOnDemand == null)
+        //    //    {
+        //    //        SCANUtil.SCANlog("Error in detecting Kopernicus On Demand Scaled Space Loader Type");
+        //    //        return;
+        //    //    }
+
+        //    //    _scaledSpaceOnDemandLoad = _scaledSpaceOnDemand.GetMethod(KOPERNICUSONDEMANDLOAD, BindingFlags.Instance | BindingFlags.Public);
+
+        //    //    if (_scaledSpaceOnDemandLoad == null)
+        //    //    {
+        //    //        SCANUtil.SCANlog("Error in detecting Kopernicus On Demand Scaled Space Loader Method");
+        //    //        return;
+        //    //    }
+
+        //    //    SCANUtil.SCANlog("Kopernicus On Demand Scaled Space Loader Method Assigned");
+
+        //    //    _scaledSpaceOnDemandUnload = _scaledSpaceOnDemand.GetMethod(KOPERNICUSONDEMANDUNLOAD, BindingFlags.Instance | BindingFlags.Public);
+
+        //    //    if (_scaledSpaceOnDemandUnload == null)
+        //    //    {
+        //    //        SCANUtil.SCANlog("Error in detecting Kopernicus On Demand Scaled Space Unloader Method");
+        //    //        return;
+        //    //    }
+
+        //    //    SCANUtil.SCANlog("Kopernicus On Demand Scaled Space Unloader Method Assigned");
+        //    //}
+        //    //catch (Exception e)
+        //    //{
+        //    //    SCANUtil.SCANlog("Error Kopernicus On Demand Scaled Space Reflection Methods: {0}", e);
+        //    //}
+        //}
+
+        internal static Waypoint FinePrintStationaryWaypointObject(StationaryPointParameter p)
 		{
 			Waypoint w = null;
 			try

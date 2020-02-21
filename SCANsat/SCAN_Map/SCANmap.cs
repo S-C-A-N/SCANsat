@@ -28,10 +28,11 @@ namespace SCANsat.SCAN_Map
 		internal SCANmap(CelestialBody Body, bool Cache, mapSource s)
 		{
 			body = Body;
-			mSource = s;
+            mSource = s;
 			pqs = body.pqsController != null;
 			biomeMap = body.BiomeMap != null;
 			data = SCANUtil.getData(body);
+            SCANcontroller.controller.loadOnDemandScaledSpace(body);
             setVisualMaps();
 			if (data == null)
 			{
@@ -589,8 +590,10 @@ namespace SCANsat.SCAN_Map
         public void setBody(CelestialBody b)
         {
             SCANcontroller.controller.unloadPQS(body, mSource);
+            SCANcontroller.controller.unloadOnDemandScaledSpace(body);
             body = b;
             SCANcontroller.controller.loadPQS(body, mSource);
+            SCANcontroller.controller.loadOnDemandScaledSpace(body);
             pqs = body.pqsController != null;
             biomeMap = body.BiomeMap != null;
             data = SCANUtil.getData(body);
@@ -634,6 +637,9 @@ namespace SCANsat.SCAN_Map
 
         private Texture2D readableTexture(Texture tex, Material mat, bool useMat)
         {
+            if (tex == null)
+                return null;
+
             Texture2D readable = new Texture2D(tex.width, tex.height);
 
             var rt = RenderTexture.GetTemporary(tex.width, tex.height, 0, RenderTextureFormat.ARGB32, RenderTextureReadWrite.sRGB, 1);

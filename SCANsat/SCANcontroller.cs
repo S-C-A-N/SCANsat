@@ -144,6 +144,7 @@ namespace SCANsat
         private CelestialBody bigMapBodyPQS;
         private CelestialBody zoomMapBody;
         private PQSMod KopernicusOnDemand;
+        private MonoBehaviour kopernicusScaledSpaceLoader;
 
         private SCAN_UI_MainMap _mainMap;
         private SCAN_UI_Instruments _instruments;
@@ -1210,6 +1211,41 @@ namespace SCANsat
             SCANUtil.SCANlog("Unloading Kopernicus On Demand PQSMod For {0}", b.bodyName);
         }
 
+        internal void loadOnDemandScaledSpace(CelestialBody b)
+        {
+            if (!SCANmainMenuLoader.KopernicusLoaded)
+                return;
+
+            if (b == null)
+                return;
+
+            if (b.scaledBody == null)
+                return;
+
+            kopernicusScaledSpaceLoader = b.scaledBody.GetComponents<MonoBehaviour>().Where(s => s.GetType().Name == SCANreflection.KOPERNICUSONDEMANDTYPE).FirstOrDefault();
+
+            if (kopernicusScaledSpaceLoader == null)
+                return;
+
+            SCANreflection.LoadOnDemand(kopernicusScaledSpaceLoader);
+        }
+
+        internal void unloadOnDemandScaledSpace(CelestialBody b)
+        {
+            if (!SCANmainMenuLoader.KopernicusLoaded)
+                return;
+
+            if (kopernicusScaledSpaceLoader == null)
+                return;
+
+            if (b == null)
+                return;
+
+            SCANreflection.UnloadOnDemand(kopernicusScaledSpaceLoader);
+
+            kopernicusScaledSpaceLoader = null;
+        }
+
         private void OnGUI()
         {
             if (HighLogic.LoadedSceneIsFlight || HighLogic.LoadedScene == GameScenes.TRACKSTATION)
@@ -2099,38 +2135,12 @@ namespace SCANsat
             activeSensors = currentActiveSensor;
         }
 
-        private bool InDarkness(Vector3d vesselPos, Vector3d pos, Vector3d sun)
-        {
-            if (!SCAN_UI_Settings.Instance.DaylightCheck)
-                return false;
-
-            Vector3d solarDirection = pos - sun;
-
-            Vector3d surfaceDirection = pos - vesselPos;
-
-            double angle = Vector3d.Angle(surfaceDirection, solarDirection);
-
-            //SCANUtil.SCANlog("Daylight Check Angle: {0}", angle);
-
-            return angle > 90;
-        }
-
-        private CelestialBody LocalSun(CelestialBody body)
-        {
-            while (body.referenceBody != body)
-            {
-                body = body.referenceBody;
-            }
-
-            return body;
-        }
-
         private int actualPasses;
         private static Queue<double> scanQueue;
         private void doScanPass(SCANvessel vessel, Vessel v, SCANdata data, double UT, double startUT, double lastUT)
         {
             //SCANUtil.SCANlog("Start New Scan Pass");
-            CelestialBody sun = LocalSun(v.mainBody);
+            CelestialBody sun = SCANUtil.LocalSun(v.mainBody);
             double soi_radius = v.mainBody.sphereOfInfluence - v.mainBody.Radius;
             double alt = v.altitude;
             double llat = SCANUtil.fixLat(v.latitude);
@@ -2140,7 +2150,7 @@ namespace SCANsat
             double res = 0;
             Orbit o = v.orbit;
             bool uncovered;
-            bool darkness = InDarkness(o.getPositionAtUT(UT), v.mainBody.position, sun.position);
+            bool darkness = SCANUtil.InDarkness(o.getPositionAtUT(UT), v.mainBody.position, sun.position);
             short sensorType;
 
             double surfscale = Planetarium.fetch.Home.Radius / v.mainBody.Radius;
@@ -2174,7 +2184,7 @@ namespace SCANsat
                 alt = v.mainBody.GetAltitude(pos);
                 lat = SCANUtil.fixLatInt(v.mainBody.GetLatitude(pos));
                 lon = SCANUtil.fixLonInt(v.mainBody.GetLongitude(pos) - rotation);
-                darkness = InDarkness(pos, v.mainBody.position, sun.position);
+                darkness = SCANUtil.InDarkness(pos, v.mainBody.position, sun.position);
 
                 if (alt < 0)
                     alt = 0;
