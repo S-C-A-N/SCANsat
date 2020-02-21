@@ -1368,12 +1368,12 @@ namespace SCANsat.SCAN_Unity
 				switch (bigmap.MType)
 				{
 					case mapType.Altimetry:
-						return body.pqsController != null;
+                        return body.pqsController != null;
 					case mapType.Biome:
-						return body.BiomeMap != null && SCAN_Settings_Config.Instance.LegendTooltips;
+                        return body.BiomeMap != null && SCAN_Settings_Config.Instance.LegendTooltips;
 				}
 
-				return false;
+                return false;
 			}
 		}
 
