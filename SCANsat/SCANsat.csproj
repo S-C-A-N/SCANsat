@@ -94,6 +94,7 @@
     <Compile Include="SCAN_Toolbar\SCANappLauncher.cs" />
     <Compile Include="SCAN_Toolbar\SCANtoolbar.cs" />
     <Compile Include="SCAN_Toolbar\SCANtoolbarwrapper.cs" />
+    <Compile Include="SCAN_UI\UI_Framework\SCANEdgeDetect.cs" />
     <Compile Include="SCAN_UI\UI_Framework\SCANremoteView.cs" />
     <Compile Include="SCANcontroller.cs" />
     <Compile Include="SCAN_UI\UI_Framework\SCANicon.cs" />
