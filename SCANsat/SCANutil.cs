@@ -26,6 +26,7 @@ using SCANsat.SCAN_Palettes;
 using SCANsat.SCAN_Data;
 using SCANsat.SCAN_UI.UI_Framework;
 using palette = SCANsat.SCAN_UI.UI_Framework.SCANcolorUtil;
+using SCANsat.SCAN_Unity;
 
 namespace SCANsat
 {
@@ -62,15 +63,37 @@ namespace SCANsat
             return (data.Coverage[ilon, ilat] & type) != 0;
 		}
 
-		/// <summary>
-		/// Determines scanning coverage for a given area with a given scanner type
-		/// </summary>
-		/// <param name="lon">Clamped integer in the 0-360 degree range</param>
-		/// <param name="lat">Clamped integer in the 0-180 degree range</param>
-		/// <param name="body">Celestial body in question</param>
-		/// <param name="SCANtype">SCANtype cast as an integer</param>
-		/// <returns></returns>
-		public static bool isCovered(int lon, int lat, CelestialBody body, int SCANtype)
+        /// <summary>
+        /// Determines scanning coverage for a given area with a given scanner type
+        /// </summary>
+        /// <param name="lon">Clamped double in the -180 - 180 degree range</param>
+        /// <param name="lat">Clamped double in the -90 - 90 degree range</param>
+        /// <param name="body">Celestial body in question</param>
+        /// <param name="SCANtype">SCANtype cast as an integer</param>
+        /// <returns></returns>
+        public static bool isCovered(double lon, double lat, CelestialBody body, short SCANtype)
+        {
+            int ilon = icLON(lon);
+            int ilat = icLAT(lat);
+            if (badLonLat(ilon, ilat)) return false;
+
+            SCANdata data = getData(body.bodyName);
+
+            if (data == null)
+                return false;
+            
+            return (data.Coverage[ilon, ilat] & SCANtype) != 0;
+        }
+
+        /// <summary>
+        /// Determines scanning coverage for a given area with a given scanner type
+        /// </summary>
+        /// <param name="lon">Clamped integer in the 0-360 degree range</param>
+        /// <param name="lat">Clamped integer in the 0-180 degree range</param>
+        /// <param name="body">Celestial body in question</param>
+        /// <param name="SCANtype">SCANtype cast as an integer</param>
+        /// <returns></returns>
+        public static bool isCovered(int lon, int lat, CelestialBody body, int SCANtype)
 		{
 			if (badLonLat(lon, lat)) return false;
 
@@ -87,13 +110,33 @@ namespace SCANsat
             return (data.Coverage[lon, lat] & type) != 0;
 		}
 
-		/// <summary>
-		/// Public method to return the scanning coverage for a given sensor type on a give body
-		/// </summary>
-		/// <param name="SCANtype">Integer corresponding to the desired SCANtype</param>
-		/// <param name="Body">Desired Celestial Body</param>
-		/// <returns>Scanning percentage as a double from 0-100</returns>
-		public static double GetCoverage(int SCANtype, CelestialBody Body)
+        /// <summary>
+        /// Determines scanning coverage for a given area with a given scanner type
+        /// </summary>
+        /// <param name="lon">Clamped integer in the 0-360 degree range</param>
+        /// <param name="lat">Clamped integer in the 0-180 degree range</param>
+        /// <param name="body">Celestial body in question</param>
+        /// <param name="SCANtype">SCANtype cast as an integer</param>
+        /// <returns></returns>
+        public static bool isCovered(int lon, int lat, CelestialBody body, short SCANtype)
+        {
+            if (badLonLat(lon, lat)) return false;
+
+            SCANdata data = getData(body.bodyName);
+
+            if (data == null)
+                return false;
+
+            return (data.Coverage[lon, lat] & SCANtype) != 0;
+        }
+
+        /// <summary>
+        /// Public method to return the scanning coverage for a given sensor type on a give body
+        /// </summary>
+        /// <param name="SCANtype">Integer corresponding to the desired SCANtype</param>
+        /// <param name="Body">Desired Celestial Body</param>
+        /// <returns>Scanning percentage as a double from 0-100</returns>
+        public static double GetCoverage(int SCANtype, CelestialBody Body)
 		{
 			SCANdata data = getData(Body.bodyName);
 
@@ -452,7 +495,31 @@ namespace SCANsat
 			return (lon + 360 + 180) % 360;
 		}
 
-		internal static Vector2d fixRetardCoordinates(Vector2d coords)
+        internal static bool InDarkness(Vector3d vesselPos, Vector3d pos, Vector3d sun)
+        {
+            if (!SCAN_Settings_Config.Instance.DaylightCheck)
+                return false;
+
+            Vector3d solarDirection = pos - sun;
+
+            Vector3d surfaceDirection = pos - vesselPos;
+
+            double angle = Vector3d.Angle(surfaceDirection, solarDirection);
+
+            return angle > 90;
+        }
+
+        internal static CelestialBody LocalSun(CelestialBody body)
+        {
+            while (body.referenceBody != body)
+            {
+                body = body.referenceBody;
+            }
+
+            return body;
+        }
+
+        internal static Vector2d fixRetardCoordinates(Vector2d coords)
 		{
 			if (coords.y < -90)
 			{
