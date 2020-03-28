@@ -1,3 +1,18 @@
+Version 19.2 - 2012-3-
+-----------------------
+
+- Add all new scanner parts
+- Old parts soft-deprecated
+
+- Initial part balance
+	- Tech tree
+	- Part cost
+	- Scanning variables
+	
+- Fix contract configurator integration
+
+- Fix KSPedia
+
 Version 19.1 - 2012-2-20
 -----------------------
 
