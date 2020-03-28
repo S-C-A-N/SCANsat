@@ -1,4 +1,4 @@
-Version 19.2 - 2012-3-
+Version 19.2 - 2012-3-28
 -----------------------
 
 - Add all new scanner parts
