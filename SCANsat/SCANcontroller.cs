@@ -2227,7 +2227,9 @@ namespace SCANsat
                 sensor.inRange = false;
                 sensor.bestRange = false;
 
-                if (alt < sensor.min_alt)
+                double ma = Math.Max(0, Math.Min(sensor.min_alt, soi_radius - 100000));
+
+                if (alt < ma)
                     continue;
 
                 if (alt > Math.Min(sensor.max_alt, soi_radius))
