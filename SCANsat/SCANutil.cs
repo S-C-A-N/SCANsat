@@ -69,9 +69,9 @@ namespace SCANsat
         /// <param name="lon">Clamped double in the -180 - 180 degree range</param>
         /// <param name="lat">Clamped double in the -90 - 90 degree range</param>
         /// <param name="body">Celestial body in question</param>
-        /// <param name="SCANtype">SCANtype cast as an integer</param>
+        /// <param name="SCANtype">SCANtype cast as a 16 bit integer</param>
         /// <returns></returns>
-        public static bool isCovered(double lon, double lat, CelestialBody body, short SCANtype)
+        public static bool isCoveredShort(double lon, double lat, CelestialBody body, short SCANtype)
         {
             int ilon = icLON(lon);
             int ilat = icLAT(lat);
@@ -116,9 +116,9 @@ namespace SCANsat
         /// <param name="lon">Clamped integer in the 0-360 degree range</param>
         /// <param name="lat">Clamped integer in the 0-180 degree range</param>
         /// <param name="body">Celestial body in question</param>
-        /// <param name="SCANtype">SCANtype cast as an integer</param>
+        /// <param name="SCANtype">SCANtype cast as a 16 bit integer</param>
         /// <returns></returns>
-        public static bool isCovered(int lon, int lat, CelestialBody body, short SCANtype)
+        public static bool isCoveredShort(int lon, int lat, CelestialBody body, short SCANtype)
         {
             if (badLonLat(lon, lat)) return false;
 
@@ -151,16 +151,37 @@ namespace SCANsat
 			return getCoveragePercentage(data, (SCANtype)type);
 		}
 
-		/// <summary>
-		/// Given the name of the SCANtype, returns the int value.
-		/// </summary>
-		/// <param name="SCANname">The name of the SCANtype.</param>
-		/// <returns>The int value that can be used in other public methods.</returns>
-		public static int GetSCANtype(string SCANname)
+        /// <summary>
+        /// Public method to return the scanning coverage for a given sensor type on a give body
+        /// </summary>
+        /// <param name="SCANtype">16 bit integer corresponding to the desired SCANtype</param>
+        /// <param name="Body">Desired Celestial Body</param>
+        /// <returns>Scanning percentage as a double from 0-100</returns>
+        public static double GetCoverageShort(short SCANtype, CelestialBody Body)
+        {
+            SCANdata data = getData(Body.bodyName);
+
+            if (data == null)
+                return 0;
+
+            return getCoveragePercentage(data, (SCANtype)SCANtype);
+        }
+
+        /// <summary>
+        /// Given the name of the SCANtype, returns the int value.
+        /// </summary>
+        /// <param name="SCANname">The name of the SCANtype.</param>
+        /// <returns>The int value that can be used in other public methods.</returns>
+        public static int GetSCANtype(string SCANname)
 		{
 			try
 			{
-				return (int)Enum.Parse(typeof(SCANtype), SCANname);
+                short type = (short)Enum.Parse(typeof(SCANtype), SCANname);
+
+                if (type > Int16.MaxValue)
+                    return 0;
+
+                return (int)type;
 			}
 			catch (ArgumentException e)
 			{
@@ -169,12 +190,30 @@ namespace SCANsat
 			}
 		}
 
-		/// <summary>
-		/// For a given Celestial Body this returns the SCANdata instance if it exists in the SCANcontroller master dictionary; return is null if the SCANdata does not exist for that body (ie it has never been visited while SCANsat has been active)
+        /// <summary>
+		/// Given the name of the SCANtype, returns the short value.
 		/// </summary>
-		/// <param name="body">Celestial Body object</param>
-		/// <returns>SCANdata instance for the given Celestial Body; null if none exists</returns>
-		public static SCANdata getData(CelestialBody body)
+		/// <param name="SCANname">The name of the SCANtype.</param>
+		/// <returns>The short value that can be used in other public methods.</returns>
+		public static int GetSCANtypeShort(string SCANname)
+        {
+            try
+            {
+                return (short)Enum.Parse(typeof(SCANtype), SCANname);
+            }
+            catch (ArgumentException e)
+            {
+                throw new ArgumentException("An invalid SCANtype name was provided.  Valid values are: " +
+                    string.Join(", ", ((IEnumerable<SCANtype>)Enum.GetValues(typeof(SCANtype))).Select<SCANtype, string>(x => x.ToString()).ToArray()) + "\n" + e.ToString());
+            }
+        }
+
+        /// <summary>
+        /// For a given Celestial Body this returns the SCANdata instance if it exists in the SCANcontroller master dictionary; return is null if the SCANdata does not exist for that body (ie it has never been visited while SCANsat has been active)
+        /// </summary>
+        /// <param name="body">Celestial Body object</param>
+        /// <returns>SCANdata instance for the given Celestial Body; null if none exists</returns>
+        public static SCANdata getData(CelestialBody body)
 		{
 			return getData(body.bodyName);
 		}
@@ -386,6 +425,14 @@ namespace SCANsat
             short stype = (short)type;
 
             if ((stype & (short)SCANtype.Everything_SCAN) != 0)
+                return true;
+
+            return false;
+        }
+
+        public static bool scanTypeValidShort(short type)
+        {
+            if ((type & (short)SCANtype.Everything_SCAN) != 0)
                 return true;
 
             return false;
