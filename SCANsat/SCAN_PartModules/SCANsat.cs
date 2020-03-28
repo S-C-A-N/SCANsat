@@ -123,6 +123,10 @@ namespace SCANsat.SCAN_PartModules
                 {
                     print("[SCANsat] using animation #1 out of " + a.Length.ToString() + " animations named '" + animationName + "'");
                     anim = a[0];
+                    anim.playAutomatically = false;
+                    anim.cullingType = AnimationCullingType.BasedOnRenderers;
+                    anim[animationName].wrapMode = WrapMode.Once;
+                    anim[animationName].speed = 0;
                 }
             }
             if (scanName != null)
@@ -146,7 +150,9 @@ namespace SCANsat.SCAN_PartModules
                 Actions["toggleScanAction"].active = false;
             }
 
-            if (scanning) animate(1, 1);
+            if (scanning)
+                animate(1, 1);
+
             powerIsProblem = false;
             print("[SCANsat] sensorType: " + sensorType.ToString() + " fov: " + fov.ToString() + " min_alt: " + min_alt.ToString() + " max_alt: " + max_alt.ToString() + " best_alt: " + best_alt.ToString());
         }
