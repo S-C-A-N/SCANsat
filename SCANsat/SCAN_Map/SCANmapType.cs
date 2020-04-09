@@ -43,5 +43,6 @@ namespace SCANsat.SCAN_Map
 		BigMap = 1,
 		ZoomMap = 2,
 		RPM = 3,
+        Overlay = 4,
 	}
 }
