@@ -263,10 +263,17 @@ namespace SCANsat.SCAN_UI.UI_Framework
 		internal static string resourceLabel(bool fuzz, double lat, double lon, SCANresourceGlobal resource, CelestialBody b)
 		{
 			if (fuzz)
-				return string.Format("{0}: {1}", resource.DisplayName, SCANUtil.ResourceOverlay(lat, lon, resource.Name, b, SCAN_Settings_Config.Instance.BiomeLock).ToString("P0"));
+				return string.Format("{0}: {1}", resource.DisplayName, LoResourceGroup(SCANUtil.ResourceOverlay(lat, lon, resource.Name, b, SCAN_Settings_Config.Instance.BiomeLock)));
 			else
 				return string.Format("{0}: {1}", resource.DisplayName, SCANUtil.ResourceOverlay(lat, lon, resource.Name, b, SCAN_Settings_Config.Instance.BiomeLock).ToString("P2"));
 		}
+
+        private static string LoResourceGroup(float abundance)
+        {
+            abundance = Mathf.Floor(abundance * 100 / 5) * 5;
+
+            return string.Format("{0}-{1}%", abundance.ToString("F0"), (abundance + 5).ToString("F0"));
+        }
 
 		private static double inc(double d)
 		{
@@ -1273,7 +1280,8 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			}
 			else if (SCANUtil.isCovered(Lon, Lat, Data, SCANtype.ResourceLoRes))
 			{
-				Abundance = Mathf.RoundToInt(Abundance);
+                Abundance = Mathf.Floor(Abundance / 5) * 5 + 2.5f;
+
 				if (Abundance >= Resource.CurrentBody.MinValue)
 				{
 					if (Abundance > Resource.CurrentBody.MaxValue)
