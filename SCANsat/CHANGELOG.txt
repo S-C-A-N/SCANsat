@@ -1,3 +1,18 @@
+Version 19.3 - 2012-4-8
+-----------------------
+
+- Updated KSPedia entry
+
+- Fix MechJeb integration
+
+- Make low resolution resource scan less effective 
+
+- Part texture and model updates
+- Minor part balance updates
+- Part attachment rule fixes
+
+- Some minor UI updates
+
 Version 19.2 - 2012-3-28
 -----------------------
 
