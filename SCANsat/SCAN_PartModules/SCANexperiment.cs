@@ -73,6 +73,9 @@ namespace SCANsat.SCAN_PartModules
 					break;
 				case SCANexperimentType.SCANsatResources:
 					dataType = "Resources";
+                    break;
+                case SCANexperimentType.SCANsatVisual:
+                    dataType = "Visual";
 					break;
 			}
 
