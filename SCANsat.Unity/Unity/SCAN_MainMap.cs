@@ -132,11 +132,11 @@ namespace SCANsat.Unity.Unity
 			if (m_MinimizeToggle != null)
 				m_MinimizeToggle.isOn = map.Minimized;
 
-			if (m_M700Text != null && !map.ResourcesOn)
-				m_M700Text.gameObject.SetActive(false);
+			//if (m_M700Text != null && !map.ResourcesOn)
+			//	m_M700Text.gameObject.SetActive(false);
 
-			if (m_OreText != null && !map.ResourcesOn)
-				m_OreText.gameObject.SetActive(false);
+			//if (m_OreText != null && !map.ResourcesOn)
+			//	m_OreText.gameObject.SetActive(false);
 
 			CreateVessels(map.VesselInfoList);
 
