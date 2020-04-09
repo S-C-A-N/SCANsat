@@ -22,8 +22,10 @@ namespace SCANsat.SCAN_UI.UI_Framework
 {
     public class SCANremoteView
     {
-        private const float MAX_DISTANCE = 250;
+        private const float MAX_DISTANCE = 400;
         private const float MIN_DISTANCE = 15;
+        private const float MAX_DISTANCE_UP = 75;
+        private const float MIN_DISTANCE_UP = 30;
 
         private static Camera cam;
         private static GameObject camgo;
@@ -192,8 +194,9 @@ namespace SCANsat.SCAN_UI.UI_Framework
             float bound = Mathf.Max(bounds.size.x, Mathf.Max(bounds.size.y, bounds.size.z));
 
             dist = Mathf.Clamp(bound * 1.5f, MIN_DISTANCE, MAX_DISTANCE);
+            float distUp = Mathf.Clamp(bound * 1.5f, MIN_DISTANCE_UP, MAX_DISTANCE_UP);
 
-            pos_cam = pos_target - dir * dist / 2 + target_up * dist / 3;
+            pos_cam = pos_target - dir * dist / 1.75f + target_up * distUp / 2f;
             Vector3 cam_up = (pos_cam - FlightGlobals.currentMainBody.transform.position).normalized;
 
             cam.transform.position = pos_cam;
