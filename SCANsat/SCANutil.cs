@@ -195,7 +195,7 @@ namespace SCANsat
 		/// </summary>
 		/// <param name="SCANname">The name of the SCANtype.</param>
 		/// <returns>The short value that can be used in other public methods.</returns>
-		public static int GetSCANtypeShort(string SCANname)
+		public static short GetSCANtypeShort(string SCANname)
         {
             try
             {
