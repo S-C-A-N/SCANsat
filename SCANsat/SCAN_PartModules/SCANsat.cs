@@ -75,12 +75,14 @@ namespace SCANsat.SCAN_PartModules
         private int powerTimer;
         private Animation anim = null;
 
-        private BaseField scanInfoStatus;
-        private BaseField scanInfoAltitude;
-        private BaseField scanInfoType;
-        private BaseField scanInfoFOV;
-        private BaseField scanInfoPower;
-        private BaseField scanInfoDaylight;
+        protected BaseField scanInfoStatus;
+        protected BaseField scanInfoAltitude;
+        protected BaseField scanInfoType;
+        protected BaseField scanInfoFOV;
+        protected BaseField scanInfoPower;
+        protected BaseField scanInfoDaylight;
+
+        protected bool UpdateScannerInfo = true;
         
         /* SAT: KSP entry points */
         public override void OnStart(StartState state)
@@ -181,7 +183,7 @@ namespace SCANsat.SCAN_PartModules
             if (data == null)
                 return;
 
-            if (part.PartActionWindow != null)
+            if (part.PartActionWindow != null && UpdateScannerInfo)
             {
                 scanAlt(data, scanning);
             }

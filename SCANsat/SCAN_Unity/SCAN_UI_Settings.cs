@@ -654,34 +654,23 @@ namespace SCANsat.SCAN_Unity
 
 		public IList<string> MapDataTypes
 		{
-			get
-			{
-                List<int> availableTypes = new List<int>() { 0, 1, 3, 4, 5, 2, 6 };//, 7, 8 };
+            get
+            {
+                List<int> availableTypes = new List<int>() { 0, 1, 3, 4, 5, 2, 6, 7, 8 };
 
-				if (SCAN_Settings_Config.Instance.DisableStockResource || !SCAN_Settings_Config.Instance.InstantScan)
-                {
-                    availableTypes.Add(7);
-                    availableTypes.Add(8);
-                }
+                //if (SCAN_Settings_Config.Instance.DisableStockResource || !SCAN_Settings_Config.Instance.InstantScan)
+                //            {
+                //                availableTypes.Add(7);
+                //                availableTypes.Add(8);
+                //            }
 
                 List<string> types = new List<string>() { "All Data" };//, "SCAN Data Types" };
 
-				for (int i = 0; i < availableTypes.Count; i++)
-					types.Add(((SCANtype)(1 << availableTypes[i])).ToString());
+                for (int i = 0; i < availableTypes.Count; i++)
+                    types.Add(((SCANtype)(1 << availableTypes[i])).ToString());
 
-				//if (SCAN_Settings_Config.Instance.DisableStockResource || !SCAN_Settings_Config.Instance.InstantScan)
-				//{
-				//	List<SCANresourceGlobal> resources = SCANcontroller.setLoadedResourceList();
-
-				//	if (resources.Count > 1)
-				//		types.Add("All Resource Types");
-
-				//	for (int i = 0; i < resources.Count; i++)
-				//		types.Add(resources[i].SType.ToString());
-				//}
-
-				return types;
-			}
+                return types;
+            }
 		}
 
 		public ISCAN_Color ColorInterface

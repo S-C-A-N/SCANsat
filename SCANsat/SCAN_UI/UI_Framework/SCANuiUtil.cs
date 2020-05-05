@@ -53,7 +53,11 @@ namespace SCANsat.SCAN_UI.UI_Framework
 					if (vessel.protoVessel.protoPartSnapshots.Count <= 1)
 						continue;
 
-					if (vessel.vesselType == VesselType.Debris || vessel.vesselType == VesselType.Unknown || vessel.vesselType == VesselType.EVA || vessel.vesselType == VesselType.Flag)
+                    VesselType vType = vessel.vesselType;
+
+					if (vType == VesselType.Debris || vType == VesselType.Unknown 
+                        || vType == VesselType.EVA || vType == VesselType.Flag 
+                        || vType == VesselType.DeployedScienceController || vType == VesselType.DeployedSciencePart)
 						continue;
 
 					if (vessel.mainBody != b)
@@ -268,7 +272,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 				return string.Format("{0}: {1}", resource.DisplayName, SCANUtil.ResourceOverlay(lat, lon, resource.Name, b, SCAN_Settings_Config.Instance.BiomeLock).ToString("P2"));
 		}
 
-        private static string LoResourceGroup(float abundance)
+        internal static string LoResourceGroup(float abundance)
         {
             abundance = Mathf.Floor(abundance * 100 / 5) * 5;
 

@@ -167,33 +167,33 @@ namespace SCANsat.Unity.Unity
 			if (!loaded || settings == null)
 				return;
 
-			if (isOn && !settings.ModuleManager && !ignoreWarning)
-			{
-				if (SCAN_Settings.Instance == null)
-					return;
+			//if (isOn && !settings.ModuleManager && !ignoreWarning)
+			//{
+			//	if (SCAN_Settings.Instance == null)
+			//		return;
 
-				if (SCAN_Settings.Instance.WarningPopup != null)
-				{
-					SCAN_Settings.Instance.WarningPopup.FadeOut(true);
-					SCAN_Settings.Instance.WarningPopup = null;
-				}
+			//	if (SCAN_Settings.Instance.WarningPopup != null)
+			//	{
+			//		SCAN_Settings.Instance.WarningPopup.FadeOut(true);
+			//		SCAN_Settings.Instance.WarningPopup = null;
+			//	}
 
-				if (SCAN_Settings.Instance.PopupPrefab == null)
-					return;
+			//	if (SCAN_Settings.Instance.PopupPrefab == null)
+			//		return;
 
-				SCAN_Settings.Instance.WarningPopup = Instantiate(SCAN_Settings.Instance.PopupPrefab).GetComponent<SCAN_Popup>();
+			//	SCAN_Settings.Instance.WarningPopup = Instantiate(SCAN_Settings.Instance.PopupPrefab).GetComponent<SCAN_Popup>();
 
-				if (SCAN_Settings.Instance.WarningPopup == null)
-					return;
+			//	if (SCAN_Settings.Instance.WarningPopup == null)
+			//		return;
 
-				SCAN_Settings.Instance.WarningPopup.transform.SetParent(transform, false);
+			//	SCAN_Settings.Instance.WarningPopup.transform.SetParent(transform, false);
 
-				SCAN_Settings.Instance.WarningPopup.Setup(settings.ModuleManagerWarning);
+			//	SCAN_Settings.Instance.WarningPopup.Setup(settings.ModuleManagerWarning);
 
-				SCAN_Settings.Instance.WarningPopup.OnSelectUpdate.AddListener(ConfirmStockDisable);
+			//	SCAN_Settings.Instance.WarningPopup.OnSelectUpdate.AddListener(ConfirmStockDisable);
 
-				return;
-			}
+			//	return;
+			//}
 
 			settings.DisableStock = isOn;
 

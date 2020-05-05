@@ -236,8 +236,8 @@ namespace SCANsat.SCAN_Unity
             else
                 uiElement.UpdateVisHiColor(palette.c_good);
 
-            if (ResourcesOn)
-			{
+   //         if (ResourcesOn)
+			//{
 				s = SCANcontroller.controller.getSensorStatus(v, SCANtype.ResourceLoRes);
 				if (s == null)
 					uiElement.UpdateM700Color(palette.grey);
@@ -261,7 +261,7 @@ namespace SCANsat.SCAN_Unity
 					uiElement.UpdateOreColor(palette.c_bad);
 				else
 					uiElement.UpdateOreColor(palette.c_good);
-			}
+			//}
 
 			if (sensors != SCANtype.Nothing)
 				uiElement.UpdatePercentage(string.Format("{0}%", SCANUtil.getCoveragePercentage(data, sensors).ToString("N1")));

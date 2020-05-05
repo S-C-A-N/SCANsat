@@ -596,7 +596,7 @@ namespace SCANsat.SCAN_Unity
 			else if ((sensors & SCANtype.ResourceLoRes) != SCANtype.Nothing)
 			{
 				infoString.AppendLine();
-				infoString.AppendFormat("{0}: {1}", r.DisplayName, SCANUtil.ResourceOverlay(vlat, vlon, r.Name, v.mainBody, SCAN_Settings_Config.Instance.BiomeLock).ToString("P0"));
+				infoString.AppendFormat("{0}: {1}", r.DisplayName, SCANuiUtil.LoResourceGroup(SCANUtil.ResourceOverlay(vlat, vlon, r.Name, v.mainBody, SCAN_Settings_Config.Instance.BiomeLock)));
             }
 			else if (ResourceButtons)
 			{
