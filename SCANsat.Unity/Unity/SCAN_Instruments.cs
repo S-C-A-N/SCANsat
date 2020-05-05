@@ -48,15 +48,15 @@ namespace SCANsat.Unity.Unity
 		private Vector2 mouseStart;
 		private Vector3 windowStart;
 
-		public Shader EdgeDetectShader
-		{
-			get { return m_EdgeDetectShader; }
-		}
+		//public Shader EdgeDetectShader
+		//{
+		//	get { return m_EdgeDetectShader; }
+		//}
 
-		public Shader GrayScaleShader
-		{
-			get { return m_GrayScaleShader; }
-		}
+		//public Shader GrayScaleShader
+		//{
+		//	get { return m_GrayScaleShader; }
+		//}
 
 		protected override void Awake()
 		{
