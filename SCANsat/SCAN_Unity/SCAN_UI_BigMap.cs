@@ -35,9 +35,9 @@ namespace SCANsat.SCAN_Unity
 {
 	public class SCAN_UI_BigMap : ISCAN_BigMap
 	{
-        private const string HI = "HI ";
-        private const string LO = "LO ";
-        private const string MULTI = "MULTI";
+        //private const string HI = "HI ";
+        //private const string LO = "LO ";
+        //private const string MULTI = "MULTI";
 
         private bool _isVisible;
 
@@ -1926,35 +1926,35 @@ namespace SCANsat.SCAN_Unity
 			bool altimetry = SCANUtil.isCovered(lon, lat, data, SCANtype.Altimetry);
 			bool hires = SCANUtil.isCovered(lon, lat, data, SCANtype.AltimetryHiRes);
 
-			if (SCANUtil.isCovered(lon, lat, data, SCANtype.AltimetryLoRes))
-			{
-				if (body.pqsController == null)
-                    infoString.AppendFormat("<color=#{0}>{1}</color>", palette.c_bad_hex, LO);
-                else
-                    infoString.AppendFormat("<color=#{0}>{1}</color>", palette.c_good_hex, LO);
-            }
-            else
-                infoString.AppendFormat("<color=#{0}>{1}</color>", palette.c_grey_hex, LO);
+			//if (SCANUtil.isCovered(lon, lat, data, SCANtype.AltimetryLoRes))
+			//{
+			//	if (body.pqsController == null)
+   //                 infoString.AppendFormat("<color=#{0}>{1}</color>", palette.c_bad_hex, LO);
+   //             else
+   //                 infoString.AppendFormat("<color=#{0}>{1}</color>", palette.c_good_hex, LO);
+   //         }
+   //         else
+   //             infoString.AppendFormat("<color=#{0}>{1}</color>", palette.c_grey_hex, LO);
 
-			if (hires)
-			{
-				if (body.pqsController == null)
-                    infoString.AppendFormat("<color=#{0}>{1}</color>", palette.c_bad_hex, HI);
-				else
-                    infoString.AppendFormat("<color=#{0}>{1}</color>", palette.c_good_hex, HI);
-            }
-            else
-                infoString.AppendFormat("<color=#{0}>{1}</color>", palette.c_grey_hex, HI);
+			//if (hires)
+			//{
+			//	if (body.pqsController == null)
+   //                 infoString.AppendFormat("<color=#{0}>{1}</color>", palette.c_bad_hex, HI);
+			//	else
+   //                 infoString.AppendFormat("<color=#{0}>{1}</color>", palette.c_good_hex, HI);
+   //         }
+   //         else
+   //             infoString.AppendFormat("<color=#{0}>{1}</color>", palette.c_grey_hex, HI);
 
-			if (SCANUtil.isCovered(lon, lat, data, SCANtype.Biome))
-			{
-				if (body.BiomeMap == null)
-                    infoString.AppendFormat("<color=#{0}>{1}</color>", palette.c_bad_hex, MULTI);
-				else
-                    infoString.AppendFormat("<color=#{0}>{1}</color>", palette.c_good_hex, MULTI);
-			}
-            else
-                infoString.AppendFormat("<color=#{0}>{1}</color>", palette.c_grey_hex, MULTI);
+			//if (SCANUtil.isCovered(lon, lat, data, SCANtype.Biome))
+			//{
+			//	if (body.BiomeMap == null)
+   //                 infoString.AppendFormat("<color=#{0}>{1}</color>", palette.c_bad_hex, MULTI);
+			//	else
+   //                 infoString.AppendFormat("<color=#{0}>{1}</color>", palette.c_good_hex, MULTI);
+			//}
+   //         else
+   //             infoString.AppendFormat("<color=#{0}>{1}</color>", palette.c_grey_hex, MULTI);
             
 			if (altimetry)
 			{
