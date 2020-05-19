@@ -193,9 +193,9 @@
   <ItemGroup />
   <PropertyGroup>
     <PostBuildEvent>
-"C:\Users\DMagic\Documents\Visual Studio 2013\Projects\KSP Dev\pdb2mdb\pdb2mdb.exe" "$(TargetFileName)"
-xcopy /Y "$(TargetPath)" "C:\Users\DMagic\Documents\Visual Studio 2013\Projects\KSP Dev\1.8\Kerbal Space Program\GameData\SCANsat\Plugins\"
-xcopy /Y "$(TargetDir)$(TargetName).pdb" "C:\Users\DMagic\Documents\Visual Studio 2013\Projects\KSP Dev\1.8\Kerbal Space Program\GameData\SCANsat\Plugins\"
-xcopy /Y "$(TargetDir)$(TargetName).dll.mdb" "C:\Users\DMagic\Documents\Visual Studio 2013\Projects\KSP Dev\1.8\Kerbal Space Program\GameData\SCANsat\Plugins\"</PostBuildEvent>
+REM "C:\Users\david\Documents\Visual Studio 2013\Projects\KSP Dev\pdb2mdb\pdb2mdb.exe" "$(TargetFileName)"
+xcopy /Y "$(TargetPath)" "C:\Users\david\Documents\KSP\Dev Environment\1.9.1\Kerbal Space Program\GameData\SCANsat\Plugins\"
+REM xcopy /Y "$(TargetDir)$(TargetName).pdb" "C:\Users\david\Documents\Visual Studio 2013\Projects\KSP Dev\1.8\Kerbal Space Program\GameData\SCANsat\Plugins\"
+REM xcopy /Y "$(TargetDir)$(TargetName).dll.mdb" "C:\Users\david\Documents\Visual Studio 2013\Projects\KSP Dev\1.8\Kerbal Space Program\GameData\SCANsat\Plugins\"</PostBuildEvent>
   </PropertyGroup>
 </Project>
