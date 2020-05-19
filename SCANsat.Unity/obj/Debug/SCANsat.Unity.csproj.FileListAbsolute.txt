@@ -1,6 +1,0 @@
-C:\Users\david\Documents\GitHub\SCANsat\SCANsat.Unity\bin\Debug\SCANsat.Unity.dll
-C:\Users\david\Documents\GitHub\SCANsat\SCANsat.Unity\bin\Debug\SCANsat.Unity.pdb
-C:\Users\david\Documents\GitHub\SCANsat\SCANsat.Unity\obj\Debug\SCANsat.Unity.csprojAssemblyReference.cache
-C:\Users\david\Documents\GitHub\SCANsat\SCANsat.Unity\obj\Debug\SCANsat.Unity.csproj.CoreCompileInputs.cache
-C:\Users\david\Documents\GitHub\SCANsat\SCANsat.Unity\obj\Debug\SCANsat.Unity.dll
-C:\Users\david\Documents\GitHub\SCANsat\SCANsat.Unity\obj\Debug\SCANsat.Unity.pdb

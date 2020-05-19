@@ -1,7 +1,0 @@
-C:\Users\david\Documents\GitHub\SCANsat\GameData\SCANsat\SCANsat.dll
-C:\Users\david\Documents\GitHub\SCANsat\GameData\SCANsat\SCANsat.pdb
-C:\Users\david\Documents\GitHub\SCANsat\SCANsat\obj\Debug\SCANsat.csprojAssemblyReference.cache
-C:\Users\david\Documents\GitHub\SCANsat\SCANsat\obj\Debug\SCANsat.csproj.CoreCompileInputs.cache
-C:\Users\david\Documents\GitHub\SCANsat\SCANsat\obj\Debug\SCANsat.csproj.CopyComplete
-C:\Users\david\Documents\GitHub\SCANsat\SCANsat\obj\Debug\SCANsat.dll
-C:\Users\david\Documents\GitHub\SCANsat\SCANsat\obj\Debug\SCANsat.pdb
