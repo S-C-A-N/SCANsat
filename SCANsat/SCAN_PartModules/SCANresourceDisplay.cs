@@ -46,7 +46,7 @@ namespace SCANsat.SCAN_PartModules
 
         public float MaxAbundanceAltitude
         {
-            get { return MaxAbundanceAltitude; }
+            get { return maxAbundanceAltitude; }
         }
 
         public override void OnStart(PartModule.StartState state)
