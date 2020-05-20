@@ -2054,18 +2054,34 @@ namespace SCANsat
             return null;
         }
 
-        internal SCANtype activeSensorsOnVessel(Guid id)
+        internal SCANtype activeSensorsOnVessel(Guid id, bool daylight)
         {
             if (!knownVessels.Contains(id))
                 return SCANtype.Nothing;
 
             SCANtype sensors = SCANtype.Nothing;
-            
-            for (int i = knownVessels[id].sensors.Count - 1; i >= 0; i--)
-                sensors |= knownVessels[id].sensors[i].sensor;
 
+            for (int i = knownVessels[id].sensors.Count - 1; i >= 0; i--)
+            {
+                if (daylight)
+                {
+                    SCANsensor sen = knownVessels[id].sensors[i];
+
+                    if (sen.requireLight)
+                    {
+                        Vessel ves = knownVessels[id].vessel;
+                        if (SCANUtil.InDarkness(ves.orbit.getPositionAtUT(Planetarium.GetUniversalTime()), ves.mainBody.position, SCANUtil.LocalSun(ves.mainBody).position))
+                        {
+                            continue;
+                        }
+                    }
+                }
+
+                sensors |= knownVessels[id].sensors[i].sensor;
+            }
             return sensors;
         }
+
         //private System.Diagnostics.Stopwatch watch = new System.Diagnostics.Stopwatch();
         private int i = 0;
         private static int last_scan_frame;

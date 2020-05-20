@@ -126,7 +126,7 @@ namespace SCANsat.SCAN_Unity
 			vlat = SCANUtil.fixLatShift(v.latitude);
 			vlon = SCANUtil.fixLonShift(v.longitude);
 
-			sensors = SCANcontroller.controller.activeSensorsOnVessel(v.id);
+			sensors = SCANcontroller.controller.activeSensorsOnVessel(v.id, true);
 
 			if (SCANUtil.isCovered(vlon, vlat, data, SCANtype.AltimetryLoRes))
 			{

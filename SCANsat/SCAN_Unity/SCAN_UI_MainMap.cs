@@ -146,7 +146,7 @@ namespace SCANsat.SCAN_Unity
 			if (!_isVisible || data == null)
 				return;
 
-			sensors = SCANcontroller.controller.activeSensorsOnVessel(v.id);
+			sensors = SCANcontroller.controller.activeSensorsOnVessel(v.id, false);
 
 			if (!SCANcontroller.controller.mainMapBiome)
 			{
