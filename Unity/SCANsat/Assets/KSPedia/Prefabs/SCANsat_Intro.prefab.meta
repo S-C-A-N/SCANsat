@@ -1,8 +1,7 @@
 fileFormatVersion: 2
 guid: f9937bebb2ebece4986143c7aaad64f7
-timeCreated: 1487971664
-licenseType: Free
-NativeFormatImporter:
+PrefabImporter:
+  externalObjects: {}
   userData: 
-  assetBundleName: 
+  assetBundleName: scansat_core
   assetBundleVariant: 
