@@ -1532,10 +1532,10 @@ namespace SCANsat.SCAN_Unity
 				switch (bigmap.MType)
 				{
 					case mapType.Altimetry:
-						return bigmap.MapLegend.getLegend(SCANcontroller.controller.zoomMapColor, data.TerrainConfig);
+						return bigmap.MapLegend.getLegend(SCANcontroller.controller.bigMapColor, data.TerrainConfig);
 					case mapType.Biome:
 						if (body != null && body.BiomeMap != null && body.BiomeMap.Attributes != null)
-							return bigmap.MapLegend.getLegend(data, SCANcontroller.controller.zoomMapColor, SCAN_Settings_Config.Instance.BigMapStockBiomes, body.BiomeMap.Attributes);
+							return bigmap.MapLegend.getLegend(data, SCANcontroller.controller.bigMapColor, SCAN_Settings_Config.Instance.BigMapStockBiomes, body.BiomeMap.Attributes);
 						else
 							return null;
 				}
