@@ -20,7 +20,8 @@ using UnityEngine.EventSystems;
 
 namespace SCANsat.Unity
 {
-	public class SCAN_DoubleButton : Button, IPointerClickHandler
+    [AddComponentMenu("UI/SCAN Double Button", 31)]
+    public class SCAN_DoubleButton : Button, IPointerClickHandler
 	{
 		private int clickCount;
 

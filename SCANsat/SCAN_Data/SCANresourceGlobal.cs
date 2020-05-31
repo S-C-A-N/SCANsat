@@ -39,9 +39,6 @@ namespace SCANsat.SCAN_Data
 
 		private DictionaryValueList<string, SCANresourceBody> masterBodyConfigs = new DictionaryValueList<string, SCANresourceBody>();
 
-		private SCANtype sType;
-		private SCANresourceType resourceType;
-
 		private Color defaultLowColor;
 		private Color defaultHighColor;
 		private Color32 lowColor32;
@@ -51,7 +48,7 @@ namespace SCANsat.SCAN_Data
 
 		private SCANresourceBody currentBody;
 
-		internal SCANresourceGlobal(string resource, string display, float trans, float defMin, float defMax, Color minC, Color maxC, SCANresourceType t)
+		internal SCANresourceGlobal(string resource, string display, float trans, float defMin, float defMax, Color minC, Color maxC)
 		{
 			name = resource;
 			displayName = display;
@@ -62,8 +59,6 @@ namespace SCANsat.SCAN_Data
 			highColor32 = (Color32)highResourceColor;
 			defaultMinValue = defMin;
 			defaultMaxValue = defMax;
-			resourceType = t;
-			sType = resourceType.Type;
 
 			setDefaultValues();
 		}
@@ -81,8 +76,6 @@ namespace SCANsat.SCAN_Data
 			highResourceColor = copy.highResourceColor;
 			lowColor32 = copy.lowColor32;
 			highColor32 = copy.highColor32;
-			sType = copy.sType;
-			resourceType = copy.resourceType;
 			masterBodyConfigs = copyBodyConfigs(copy);
 			defaultLowColor = copy.defaultLowColor;
 			defaultHighColor = copy.defaultHighColor;
@@ -109,12 +102,6 @@ namespace SCANsat.SCAN_Data
 
 		public override void OnDecodeFromConfigNode()
 		{
-			resourceType = SCANcontroller.getResourceType(name);
-			if (resourceType == null)
-				return;
-
-			sType = resourceType.Type;
-
 			lowColor32 = (Color32)lowResourceColor;
 			highColor32 = (Color32)highResourceColor;
 
@@ -250,16 +237,6 @@ namespace SCANsat.SCAN_Data
 				if (value >= 0 && value > defaultMinValue && value <= 100)
 					defaultMaxValue = value;
 			}
-		}
-
-		public SCANtype SType
-		{
-			get { return sType; }
-		}
-
-		public SCANresourceType ResourceType
-		{
-			get { return resourceType; }
 		}
 
 		public int getBodyCount

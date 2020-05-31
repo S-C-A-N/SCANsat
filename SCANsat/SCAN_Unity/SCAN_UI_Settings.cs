@@ -205,17 +205,18 @@ namespace SCANsat.SCAN_Unity
 
 				if (value == "All Data")
 					_currentDataType = SCANtype.Everything;
-				else if (value == "SCAN Data Types")
-					_currentDataType = SCANtype.Everything_SCAN;
-				else if (value == "All Resource Types")
-				{
-					_currentDataType = 0;
+				//else if (value == "SCAN Data Types")
+				//	_currentDataType = SCANtype.Everything_SCAN;
+				//else if (value == "All Resource Types")
+				//{
+    //                _currentDataType = SCANtype.ResourceHiRes;
+				//	//_currentDataType = 0;
 
-					List<SCANresourceGlobal> resources = SCANcontroller.setLoadedResourceList();
+				//	//List<SCANresourceGlobal> resources = SCANcontroller.setLoadedResourceList();
 
-					for (int i = 0; i < resources.Count; i++)
-						_currentDataType |= resources[i].SType;
-				}
+				//	//for (int i = 0; i < resources.Count; i++)
+				//	//	_currentDataType |= resources[i].SType;
+				//}
 				else
 				{
 					try
@@ -431,7 +432,7 @@ namespace SCANsat.SCAN_Unity
 					SCAN_UI_BigMap.Instance.Open();
 				}
 
-				if (SCAN_UI_MainMap.Instance != null && SCAN_UI_MainMap.Instance.IsVisible)
+				if (SCAN_UI_MainMap.Instance != null && SCAN_UI_MainMap.Instance.IsVisible && HighLogic.LoadedSceneIsFlight)
 				{ 
 					SCAN_UI_MainMap.Instance.Close();
 					SCAN_UI_MainMap.Instance.Open();
@@ -443,13 +444,13 @@ namespace SCANsat.SCAN_Unity
 					SCAN_UI_ZoomMap.Instance.Open(true);
 				}
 
-				if (SCAN_UI_Instruments.Instance != null && SCAN_UI_Instruments.Instance.IsVisible)
+				if (SCAN_UI_Instruments.Instance != null && SCAN_UI_Instruments.Instance.IsVisible && HighLogic.LoadedSceneIsFlight)
 				{
 					SCAN_UI_Instruments.Instance.Close();
 					SCAN_UI_Instruments.Instance.Open();
 				}
 
-				if (SCAN_UI_Overlay.Instance != null && SCAN_UI_Overlay.Instance.IsVisible)
+				if (SCAN_UI_Overlay.Instance != null && SCAN_UI_Overlay.Instance.IsVisible && HighLogic.LoadedScene != GameScenes.SPACECENTER)
 				{
 					SCAN_UI_Overlay.Instance.Close();
 					SCAN_UI_Overlay.Instance.Open();
@@ -476,6 +477,12 @@ namespace SCANsat.SCAN_Unity
 		{
 			get { return SCANmainMenuLoader.MechJebLoaded; }
 		}
+
+        public bool DaylightCheck
+        {
+            get { return SCAN_Settings_Config.Instance.DaylightCheck; }
+            set { SCAN_Settings_Config.Instance.DaylightCheck = value; }
+        }
 
 		public bool BiomeLock
 		{
@@ -647,31 +654,23 @@ namespace SCANsat.SCAN_Unity
 
 		public IList<string> MapDataTypes
 		{
-			get
-			{
-				List<int> availableTypes = new List<int>() { 0, 1, 3, 4, 5 };
+            get
+            {
+                List<int> availableTypes = new List<int>() { 0, 1, 3, 4, 5, 2, 6, 7, 8 };
 
-				if (SCAN_Settings_Config.Instance.DisableStockResource || !SCAN_Settings_Config.Instance.InstantScan)
-					availableTypes.Add(19);
+                //if (SCAN_Settings_Config.Instance.DisableStockResource || !SCAN_Settings_Config.Instance.InstantScan)
+                //            {
+                //                availableTypes.Add(7);
+                //                availableTypes.Add(8);
+                //            }
 
-				List<string> types = new List<string>() { "All Data", "SCAN Data Types" };
+                List<string> types = new List<string>() { "All Data" };//, "SCAN Data Types" };
 
-				for (int i = 0; i < availableTypes.Count; i++)
-					types.Add(((SCANtype)(1 << availableTypes[i])).ToString());
+                for (int i = 0; i < availableTypes.Count; i++)
+                    types.Add(((SCANtype)(1 << availableTypes[i])).ToString());
 
-				if (SCAN_Settings_Config.Instance.DisableStockResource || !SCAN_Settings_Config.Instance.InstantScan)
-				{
-					List<SCANresourceGlobal> resources = SCANcontroller.setLoadedResourceList();
-
-					if (resources.Count > 1)
-						types.Add("All Resource Types");
-
-					for (int i = 0; i < resources.Count; i++)
-						types.Add(resources[i].SType.ToString());
-				}
-
-				return types;
-			}
+                return types;
+            }
 		}
 
 		public ISCAN_Color ColorInterface

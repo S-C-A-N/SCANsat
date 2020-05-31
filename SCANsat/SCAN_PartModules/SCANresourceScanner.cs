@@ -41,7 +41,16 @@ namespace SCANsat.SCAN_PartModules
 			if (state == StartState.Editor)
 				return;
 
-			mSurvey = findSurvey();
+            scanInfoAltitude.guiActive = false;
+            scanInfoStatus.guiActive = false;
+            scanInfoType.guiActive = false;
+            scanInfoFOV.guiActive = false;
+            scanInfoPower.guiActive = false;
+            scanInfoDaylight.guiActive = false;
+
+            UpdateScannerInfo = !SCAN_Settings_Config.Instance.InstantScan || SCAN_Settings_Config.Instance.DisableStockResource;
+
+            mSurvey = findSurvey();
 			mScanner = findScanner();
 			animGroup = findAnimator();
 
@@ -184,28 +193,53 @@ namespace SCANsat.SCAN_PartModules
 				{
 					foreach (ModuleOrbitalScanner m in mScanner)
 						m.DisableModule();
-				}
-			}
-		}
+                }
+            }
 
-		public void EnableModule()
+            UpdateScannerInfo = !SCAN_Settings_Config.Instance.InstantScan || SCAN_Settings_Config.Instance.DisableStockResource;
+
+            if (!UpdateScannerInfo)
+            {
+                scanInfoAltitude.guiActive = false;
+                scanInfoStatus.guiActive = false;
+                scanInfoType.guiActive = false;
+                scanInfoFOV.guiActive = false;
+                scanInfoPower.guiActive = false;
+                scanInfoDaylight.guiActive = false;
+            }
+        }
+
+        public void EnableModule()
 		{
 			activated = true;
-			if (SCAN_Settings_Config.Instance.DisableStockResource)
-			{
-				if (mSurvey != null)
-				{
-					foreach (ModuleOrbitalSurveyor m in mSurvey)
-						m.DisableModule();
-				}
+            if (SCAN_Settings_Config.Instance.DisableStockResource)
+            {
+                if (mSurvey != null)
+                {
+                    foreach (ModuleOrbitalSurveyor m in mSurvey)
+                        m.DisableModule();
+                }
 
-				if (mScanner != null)
-				{
-					foreach (ModuleOrbitalScanner m in mScanner)
-						m.DisableModule();
-				}
-			}
-		}
+                if (mScanner != null)
+                {
+                    foreach (ModuleOrbitalScanner m in mScanner)
+                        m.DisableModule();
+                }
+            }
+            else
+
+            UpdateScannerInfo = !SCAN_Settings_Config.Instance.InstantScan || SCAN_Settings_Config.Instance.DisableStockResource;
+
+            if (!UpdateScannerInfo)
+            {
+                scanInfoAltitude.guiActive = false;
+                scanInfoStatus.guiActive = false;
+                scanInfoType.guiActive = false;
+                scanInfoFOV.guiActive = false;
+                scanInfoPower.guiActive = false;
+                scanInfoDaylight.guiActive = false;
+            }
+        }
 
 		public bool IsSituationValid()
 		{

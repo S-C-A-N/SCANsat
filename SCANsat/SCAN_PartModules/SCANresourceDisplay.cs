@@ -11,256 +11,279 @@
  */
 #endregion
 
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using SCANsat.SCAN_Data;
+using SCANsat.SCAN_UI.UI_Framework;
 using KSP.Localization;
 
 namespace SCANsat.SCAN_PartModules
 {
-	public class SCANresourceDisplay : PartModule, IAnimatedModule
-	{
-		[KSPField]
-		public int sensorType;
-		[KSPField(guiActive = true)]
-		public string abundanceField;
-		[KSPField]
-		public string ResourceName;
-		[KSPField]
-		public float MaxAbundanceAltitude;
-		[KSPField]
-		public bool RequiresUnlock;
+    public class SCANresourceDisplay : PartModule, IAnimatedModule
+    {
+        [KSPField(guiActive = true, groupName = "SCANResourceDisplayGroup", groupDisplayName = "#autoLOC_SCANsat_ScanResourceDisplay", groupStartCollapsed = true)]
+        public string abundance;
+        [KSPField]
+        public string ResourceName;
+        [KSPField]
+        public bool RequiresUnlock;
 
-		private float abundanceValue;
+        private float abundanceValue;
 
-		private List<ModuleResourceScanner> stockScanners;
-		private ModuleAnimationGroup animGroup;
-		private Dictionary<string, ResourceCache.AbundanceSummary> abundanceSummary;
-		private CelestialBody body;
-		private bool tooHigh;
-		private bool fuzzy;
-		private bool refreshState;
-		private bool activated;
-		private string resourceDisplayName;
+        private List<ModuleResourceScanner> stockScanners;
+        private SCANsat scanScanner;
+        private ModuleAnimationGroup animGroup;
+        private Dictionary<string, ResourceCache.AbundanceSummary> abundanceSummary;
+        private CelestialBody body;
+        private float maxAbundanceAltitude;
+        private bool tooHigh;
+        private bool fuzzy;
+        private bool refreshState;
+        private bool activated;
+        private string resourceDisplayName;
 
-		public override void OnStart(PartModule.StartState state)
-		{
-			if (state == StartState.Editor)
-				return;
+        private BaseField abundanceField;
 
-			Fields["abundanceField"].guiName = Localizer.Format("#autoLOC_SCANsat_Abundance");
+        public float MaxAbundanceAltitude
+        {
+            get { return maxAbundanceAltitude; }
+        }
 
-			GameEvents.onVesselSOIChanged.Add(onSOIChange);
+        public override void OnStart(PartModule.StartState state)
+        {
+            if (state == StartState.Editor)
+                return;
 
-			part.force_activate();
-			this.isEnabled = true;
-			activated = true;
-			refreshState = true;
-			resourceDisplayName = SCANUtil.displayNameFromResource(ResourceName);
+            abundanceField = Fields["abundance"];
 
-			stockScanners = findScanners();
-			animGroup = findAnimator();
+            GameEvents.onVesselSOIChanged.Add(onSOIChange);
 
-			if (animGroup == null || animGroup.isDeployed)
-				enableConnectedScanners();
+            part.force_activate();
+            this.isEnabled = true;
+            activated = true;
+            refreshState = true;
+            resourceDisplayName = SCANUtil.displayNameFromResource(ResourceName);
 
-			setupFields(stockScanners.FirstOrDefault());
+            abundanceField.guiName = resourceDisplayName;
 
-			body = FlightGlobals.currentMainBody;
-			refreshAbundance(body.flightGlobalsIndex);
-		}
+            stockScanners = findScanners();
+            scanScanner = findSCANScanner();
+            animGroup = findAnimator();
 
-		private List<ModuleResourceScanner> findScanners()
-		{
-			return part.FindModulesImplementing<ModuleResourceScanner>().Where(r => r.ScannerType == 0 && r.ResourceName == ResourceName).ToList();
-		}
+            if (animGroup == null || animGroup.isDeployed)
+                enableConnectedScanners();
 
-		private ModuleAnimationGroup findAnimator()
-		{
-			return part.FindModulesImplementing<ModuleAnimationGroup>().FirstOrDefault();
-		}
+            setupFields(stockScanners.FirstOrDefault(), scanScanner);
 
-		private void setupFields(ModuleResourceScanner m)
-		{
-			if (m != null)
-			{
-				SCANUtil.SCANlog("{0} Resource Display Module set to Max Alt: {1} ; Unlock: {2}", m.ResourceName, m.MaxAbundanceAltitude, m.RequiresUnlock);
-				MaxAbundanceAltitude = m.MaxAbundanceAltitude;
-				RequiresUnlock = m.RequiresUnlock;
-			}
-			else
-			{
-				MaxAbundanceAltitude = 500000;
-				RequiresUnlock = true;
-			}
+            body = FlightGlobals.currentMainBody;
+            refreshAbundance(body.flightGlobalsIndex);
+        }
 
-			Fields["abundanceField"].guiName = string.Format("{0}[{1}]", resourceDisplayName, Localizer.Format("#autoLOC_SCANsat_Surface"));
-		}
+        public override void OnStartFinished(StartState state)
+        {
+            base.OnStartFinished(state);
 
-		private void OnDestroy()
-		{
-			GameEvents.onVesselSOIChanged.Remove(onSOIChange);
-		}
+        }
 
-		private void Update()
-		{
-			if (!activated)
-			{
-				Fields["abundanceField"].guiActive = false;
-				return;
-			}
+        private List<ModuleResourceScanner> findScanners()
+        {
+            return part.FindModulesImplementing<ModuleResourceScanner>().Where(r => r.ScannerType == 0 && r.ResourceName == ResourceName).ToList();
+        }
 
-			if (!HighLogic.LoadedSceneIsFlight || !FlightGlobals.ready)
-				return;
+        private SCANsat findSCANScanner()
+        {
+            return part.FindModuleImplementing<SCANsat>();
+        }
 
-			if (refreshState)
-			{
-				if (SCAN_Settings_Config.Instance.DisableStockResource)
-					disableConnectedScanners();
-				refreshState = false;
-			}
+        private ModuleAnimationGroup findAnimator()
+        {
+            return part.FindModulesImplementing<ModuleAnimationGroup>().FirstOrDefault();
+        }
 
-			if (!SCAN_Settings_Config.Instance.DisableStockResource)
-			{
-				Fields["abundanceField"].guiActive = false;
-				return;
-			}
+        private void setupFields(ModuleResourceScanner m, SCANsat s)
+        {
+            if (m != null)
+            {
+                //SCANUtil.SCANlog("{0} Resource Display Module set to Max Alt: {1} ; Unlock: {2}", m.ResourceName, m.MaxAbundanceAltitude, m.RequiresUnlock);
+                maxAbundanceAltitude = m.MaxAbundanceAltitude;
+                RequiresUnlock = m.RequiresUnlock;
+            }
+            else if (s != null)
+            {
+                maxAbundanceAltitude = s.max_alt;
+                RequiresUnlock = true;
+            }
+            else
+            {
+                RequiresUnlock = true;
+            }
 
-			Fields["abundanceField"].guiActive = true;
+            abundanceField.guiName = string.Format("{0}[{1}]", resourceDisplayName, Localizer.Format("#autoLOC_SCANsat_Surface"));
+        }
 
-			if (tooHigh)
-			{
-				abundanceField = Localizer.Format("#autoLOC_SCANsat_TooHigh");
-				return;
-			}
-			else if (abundanceValue < 0)
-			{
-				abundanceField = Localizer.Format("#autoLOC_SCANsat_NoData");
-				return;
-			}
+        private void OnDestroy()
+        {
+            GameEvents.onVesselSOIChanged.Remove(onSOIChange);
+        }
 
-			string biome = "Landed";
+        private void Update()
+        {
+            if (!HighLogic.LoadedSceneIsFlight || !FlightGlobals.ready)
+                return;
 
-			if (body.BiomeMap != null)
-				biome = SCANUtil.getBiomeName(body, SCANUtil.fixLonShift(vessel.longitude), SCANUtil.fixLatShift(vessel.latitude));
+            if (!activated)
+            {
+                abundanceField.guiActive = false;
+                return;
+            }
 
-			if (checkBiome(biome) || !SCAN_Settings_Config.Instance.BiomeLock)
-			{
-				if (fuzzy)
-					abundanceField = abundanceValue.ToString("P0");
-				else
-					abundanceField = abundanceValue.ToString("P2");
-			}
-			else
-			{
-				float biomeAbundance = abundanceSummary.ContainsKey(biome) ? abundanceSummary[biome].Abundance : 0f;
-				if (fuzzy)
-					abundanceField = biomeAbundance.ToString("P0") + "avg.";
-				else
-					abundanceField = biomeAbundance.ToString("P2") + "avg.";
-			}
-		}
+            if (refreshState)
+            {
+                if (SCAN_Settings_Config.Instance.DisableStockResource)
+                    disableConnectedScanners();
+                refreshState = false;
+            }
 
-		private bool checkBiome (string b)
-		{
-			return ResourceMap.Instance.IsBiomeUnlocked(body.flightGlobalsIndex, b);
-		}
+            //if (!SCAN_Settings_Config.Instance.DisableStockResource)
+            //{
+            //    abundanceField.guiActive = false;
+            //    return;
+            //}
 
-		private void FixedUpdate()
-		{
-			if (!activated)
-			{
-				abundanceValue = -1f;
-				tooHigh = false;
-				return;
-			}
+            abundanceField.guiActive = true;
 
-			if (!vessel.Landed && ResourceUtilities.GetAltitude(vessel) > MaxAbundanceAltitude)
-			{
-				tooHigh = true;
-				return;
-			}
+            if (tooHigh)
+            {
+                abundance = Localizer.Format("#autoLOC_SCANsat_TooHigh");
+                return;
+            }
+            else if (abundanceValue < 0)
+            {
+                abundance = Localizer.Format("#autoLOC_SCANsat_NoData");
+                return;
+            }
 
-			tooHigh = false;
-			double lat = SCANUtil.fixLatShift(vessel.latitude);
-			double lon = SCANUtil.fixLonShift(vessel.longitude);
-			if (SCANUtil.isCovered(lon, lat, vessel.mainBody, sensorType))
-			{
-				abundanceValue = SCANUtil.ResourceOverlay(lat, lon, ResourceName, vessel.mainBody, RequiresUnlock && SCAN_Settings_Config.Instance.BiomeLock);
-				fuzzy = false;
-			}
-			else if (SCANUtil.isCovered(lon, lat, vessel.mainBody, 524288))
-			{
-				abundanceValue = SCANUtil.ResourceOverlay(lat, lon, ResourceName, vessel.mainBody, RequiresUnlock && SCAN_Settings_Config.Instance.BiomeLock);
-				fuzzy = true;
-			}
-			else
-			{
-				abundanceValue = -1;
-			}
-		}
+            string biome = "Landed";
 
-		private void onSOIChange(GameEvents.HostedFromToAction<Vessel, CelestialBody> VB)
-		{
-			body = VB.to;
-			refreshAbundance(body.flightGlobalsIndex);
-		}
+            if (body.BiomeMap != null)
+                biome = SCANUtil.getBiomeName(body, SCANUtil.fixLonShift(vessel.longitude), SCANUtil.fixLatShift(vessel.latitude));
 
-		private void refreshAbundance(int bodyID)
-		{
-			abundanceSummary = new Dictionary<string, ResourceCache.AbundanceSummary>();
+            if (checkBiome(biome) || !SCAN_Settings_Config.Instance.BiomeLock)
+            {
+                if (fuzzy)
+                    abundance = SCANuiUtil.LoResourceGroup(abundanceValue);
+                else
+                    abundance = abundanceValue.ToString("P2");
+            }
+            else
+            {
+                float biomeAbundance = abundanceSummary.ContainsKey(biome) ? abundanceSummary[biome].Abundance : 0f;
+                if (fuzzy)
+                    abundance = SCANuiUtil.LoResourceGroup(biomeAbundance);
+                else
+                    abundance = string.Format("{0} avg.", biomeAbundance.ToString("P2"));
+            }
+        }
 
-			abundanceSummary = ResourceCache.Instance.AbundanceCache.
-				Where(a => a.ResourceName == ResourceName && a.HarvestType == HarvestTypes.Planetary && a.BodyId == bodyID).
-				GroupBy(a => a.BiomeName).
-				ToDictionary(b => b.Key, b => b.First());
-		}
+        private bool checkBiome(string b)
+        {
+            return ResourceMap.Instance.IsBiomeUnlocked(body.flightGlobalsIndex, b);
+        }
 
-		private void disableConnectedScanners()
-		{
-			if (stockScanners != null)
-			{
-				foreach (ModuleResourceScanner m in stockScanners)
-				{
-					m.DisableModule();
-				}
-			}
-		}
+        private void FixedUpdate()
+        {
+            if (!activated)
+            {
+                abundanceValue = -1f;
+                tooHigh = false;
+                return;
+            }
 
-		private void enableConnectedScanners()
-		{
-			if (stockScanners != null)
-			{
-				foreach (ModuleResourceScanner m in stockScanners)
-				{
-					m.EnableModule();
-				}
-			}
-		}
+            if (!vessel.Landed && ResourceUtilities.GetAltitude(vessel) > maxAbundanceAltitude)
+            {
+                tooHigh = true;
+                return;
+            }
 
-		public void EnableModule()
-		{
-			activated = true;
-			if (SCAN_Settings_Config.Instance.DisableStockResource)
-				disableConnectedScanners();
-		}
+            tooHigh = false;
+            double lat = SCANUtil.fixLatShift(vessel.latitude);
+            double lon = SCANUtil.fixLonShift(vessel.longitude);
+            if (SCANUtil.isCovered(lon, lat, vessel.mainBody, (short)SCANtype.ResourceHiRes))
+            {
+                abundanceValue = SCANUtil.ResourceOverlay(lat, lon, ResourceName, vessel.mainBody, RequiresUnlock && SCAN_Settings_Config.Instance.BiomeLock);
+                fuzzy = false;
+            }
+            else if (SCANUtil.isCovered(lon, lat, vessel.mainBody, (short)SCANtype.ResourceLoRes))
+            {
+                abundanceValue = SCANUtil.ResourceOverlay(lat, lon, ResourceName, vessel.mainBody, RequiresUnlock && SCAN_Settings_Config.Instance.BiomeLock);
+                fuzzy = true;
+            }
+            else
+            {
+                abundanceValue = -1;
+            }
+        }
 
-		public void DisableModule()
-		{
-			activated = false;
-			if (SCAN_Settings_Config.Instance.DisableStockResource)
-				disableConnectedScanners();
-		}
+        private void onSOIChange(GameEvents.HostedFromToAction<Vessel, CelestialBody> VB)
+        {
+            body = VB.to;
+            refreshAbundance(body.flightGlobalsIndex);
+        }
 
-		public bool ModuleIsActive()
-		{
-			return activated;
-		}
+        private void refreshAbundance(int bodyID)
+        {
+            abundanceSummary = new Dictionary<string, ResourceCache.AbundanceSummary>();
 
-		public bool IsSituationValid()
-		{
-			return true;
-		}
-	}
+            abundanceSummary = ResourceCache.Instance.AbundanceCache.
+                Where(a => a.ResourceName == ResourceName && a.HarvestType == HarvestTypes.Planetary && a.BodyId == bodyID).
+                GroupBy(a => a.BiomeName).
+                ToDictionary(b => b.Key, b => b.First());
+        }
+
+        private void disableConnectedScanners()
+        {
+            if (stockScanners != null)
+            {
+                foreach (ModuleResourceScanner m in stockScanners)
+                {
+                    m.DisableModule();
+                }
+            }
+        }
+
+        private void enableConnectedScanners()
+        {
+            if (stockScanners != null)
+            {
+                foreach (ModuleResourceScanner m in stockScanners)
+                {
+                    m.EnableModule();
+                }
+            }
+        }
+
+        public void EnableModule()
+        {
+            activated = true;
+            if (SCAN_Settings_Config.Instance.DisableStockResource)
+                disableConnectedScanners();
+        }
+
+        public void DisableModule()
+        {
+            activated = false;
+            if (SCAN_Settings_Config.Instance.DisableStockResource)
+                disableConnectedScanners();
+        }
+
+        public bool ModuleIsActive()
+        {
+            return activated;
+        }
+
+        public bool IsSituationValid()
+        {
+            return true;
+        }
+    }
 }

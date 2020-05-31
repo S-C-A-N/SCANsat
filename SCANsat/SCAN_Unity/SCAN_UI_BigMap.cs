@@ -35,9 +35,9 @@ namespace SCANsat.SCAN_Unity
 {
 	public class SCAN_UI_BigMap : ISCAN_BigMap
 	{
-        private const string HI = "HI ";
-        private const string LO = "LO ";
-        private const string MULTI = "MULTI";
+        //private const string HI = "HI ";
+        //private const string LO = "LO ";
+        //private const string MULTI = "MULTI";
 
         private bool _isVisible;
 
@@ -1368,12 +1368,12 @@ namespace SCANsat.SCAN_Unity
 				switch (bigmap.MType)
 				{
 					case mapType.Altimetry:
-						return body.pqsController != null;
+                        return body.pqsController != null;
 					case mapType.Biome:
-						return body.BiomeMap != null && SCAN_Settings_Config.Instance.LegendTooltips;
+                        return body.BiomeMap != null && SCAN_Settings_Config.Instance.LegendTooltips;
 				}
 
-				return false;
+                return false;
 			}
 		}
 
@@ -1532,10 +1532,10 @@ namespace SCANsat.SCAN_Unity
 				switch (bigmap.MType)
 				{
 					case mapType.Altimetry:
-						return bigmap.MapLegend.getLegend(SCANcontroller.controller.zoomMapColor, data.TerrainConfig);
+						return bigmap.MapLegend.getLegend(SCANcontroller.controller.bigMapColor, data.TerrainConfig);
 					case mapType.Biome:
 						if (body != null && body.BiomeMap != null && body.BiomeMap.Attributes != null)
-							return bigmap.MapLegend.getLegend(data, SCANcontroller.controller.zoomMapColor, SCAN_Settings_Config.Instance.BigMapStockBiomes, body.BiomeMap.Attributes);
+							return bigmap.MapLegend.getLegend(data, SCANcontroller.controller.bigMapColor, SCAN_Settings_Config.Instance.BigMapStockBiomes, body.BiomeMap.Attributes);
 						else
 							return null;
 				}
@@ -1551,7 +1551,7 @@ namespace SCANsat.SCAN_Unity
 
 		public IList<string> MapTypes
 		{
-			get { return new List<string>(3) { "Altimetry", "Slope", "Biome" }; }
+			get { return new List<string>(3) { "Altimetry", "Slope", "Biome", "Visual" }; }
 		}
 
 		public IList<string> Resources
@@ -1926,35 +1926,35 @@ namespace SCANsat.SCAN_Unity
 			bool altimetry = SCANUtil.isCovered(lon, lat, data, SCANtype.Altimetry);
 			bool hires = SCANUtil.isCovered(lon, lat, data, SCANtype.AltimetryHiRes);
 
-			if (SCANUtil.isCovered(lon, lat, data, SCANtype.AltimetryLoRes))
-			{
-				if (body.pqsController == null)
-                    infoString.AppendFormat("<color=#{0}>{1}</color>", palette.c_bad_hex, LO);
-                else
-                    infoString.AppendFormat("<color=#{0}>{1}</color>", palette.c_good_hex, LO);
-            }
-            else
-                infoString.AppendFormat("<color=#{0}>{1}</color>", palette.c_grey_hex, LO);
+			//if (SCANUtil.isCovered(lon, lat, data, SCANtype.AltimetryLoRes))
+			//{
+			//	if (body.pqsController == null)
+   //                 infoString.AppendFormat("<color=#{0}>{1}</color>", palette.c_bad_hex, LO);
+   //             else
+   //                 infoString.AppendFormat("<color=#{0}>{1}</color>", palette.c_good_hex, LO);
+   //         }
+   //         else
+   //             infoString.AppendFormat("<color=#{0}>{1}</color>", palette.c_grey_hex, LO);
 
-			if (hires)
-			{
-				if (body.pqsController == null)
-                    infoString.AppendFormat("<color=#{0}>{1}</color>", palette.c_bad_hex, HI);
-				else
-                    infoString.AppendFormat("<color=#{0}>{1}</color>", palette.c_good_hex, HI);
-            }
-            else
-                infoString.AppendFormat("<color=#{0}>{1}</color>", palette.c_grey_hex, HI);
+			//if (hires)
+			//{
+			//	if (body.pqsController == null)
+   //                 infoString.AppendFormat("<color=#{0}>{1}</color>", palette.c_bad_hex, HI);
+			//	else
+   //                 infoString.AppendFormat("<color=#{0}>{1}</color>", palette.c_good_hex, HI);
+   //         }
+   //         else
+   //             infoString.AppendFormat("<color=#{0}>{1}</color>", palette.c_grey_hex, HI);
 
-			if (SCANUtil.isCovered(lon, lat, data, SCANtype.Biome))
-			{
-				if (body.BiomeMap == null)
-                    infoString.AppendFormat("<color=#{0}>{1}</color>", palette.c_bad_hex, MULTI);
-				else
-                    infoString.AppendFormat("<color=#{0}>{1}</color>", palette.c_good_hex, MULTI);
-			}
-            else
-                infoString.AppendFormat("<color=#{0}>{1}</color>", palette.c_grey_hex, MULTI);
+			//if (SCANUtil.isCovered(lon, lat, data, SCANtype.Biome))
+			//{
+			//	if (body.BiomeMap == null)
+   //                 infoString.AppendFormat("<color=#{0}>{1}</color>", palette.c_bad_hex, MULTI);
+			//	else
+   //                 infoString.AppendFormat("<color=#{0}>{1}</color>", palette.c_good_hex, MULTI);
+			//}
+   //         else
+   //             infoString.AppendFormat("<color=#{0}>{1}</color>", palette.c_grey_hex, MULTI);
             
 			if (altimetry)
 			{
@@ -1982,11 +1982,11 @@ namespace SCANsat.SCAN_Unity
 				bool resources = false;
 				bool fuzzy = false;
 
-				if (SCANUtil.isCovered(lon, lat, data, bigmap.Resource.SType))
+				if (SCANUtil.isCovered(lon, lat, data, SCANtype.ResourceHiRes))
 				{
 					resources = true;
 				}
-				else if (SCANUtil.isCovered(lon, lat, data, SCANtype.FuzzyResources))
+				else if (SCANUtil.isCovered(lon, lat, data, SCANtype.ResourceLoRes))
 				{
 					resources = true;
 					fuzzy = true;

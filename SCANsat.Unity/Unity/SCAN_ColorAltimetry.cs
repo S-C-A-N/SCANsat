@@ -10,15 +10,13 @@
  * Copyright (c)2014 (Your Name Here) <your email here>; see LICENSE.txt for licensing details.
  */
 #endregion
-
-using System;
+ 
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.Events;
 using UnityEngine.EventSystems;
 using SCANsat.Unity.Interfaces;
-using SCANsat.Unity.HSVPicker.UI;
 
 namespace SCANsat.Unity.Unity
 {

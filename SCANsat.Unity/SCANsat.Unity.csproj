@@ -35,27 +35,23 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="UnityEngine">
-      <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Kerbal Space Program\KSP_x64_Data\Managed\UnityEngine.dll</HintPath>
+      <HintPath>..\..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Kerbal Space Program\KSP_x64_Data\Managed\UnityEngine.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.CoreModule">
-      <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Kerbal Space Program\KSP_x64_Data\Managed\UnityEngine.CoreModule.dll</HintPath>
+      <HintPath>..\..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Kerbal Space Program\KSP_x64_Data\Managed\UnityEngine.CoreModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.InputLegacyModule">
-      <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Kerbal Space Program\KSP_x64_Data\Managed\UnityEngine.InputLegacyModule.dll</HintPath>
+      <HintPath>..\..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Kerbal Space Program\KSP_x64_Data\Managed\UnityEngine.InputLegacyModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.UI">
-      <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Kerbal Space Program\KSP_x64_Data\Managed\UnityEngine.UI.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="UnityEngine.UIElementsModule">
-      <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Kerbal Space Program\KSP_x64_Data\Managed\UnityEngine.UIElementsModule.dll</HintPath>
+      <HintPath>..\..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Kerbal Space Program\KSP_x64_Data\Managed\UnityEngine.UI.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.UIModule">
-      <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Kerbal Space Program\KSP_x64_Data\Managed\UnityEngine.UIModule.dll</HintPath>
+      <HintPath>..\..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Kerbal Space Program\KSP_x64_Data\Managed\UnityEngine.UIModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
   </ItemGroup>
@@ -100,6 +96,7 @@
     <Compile Include="Unity\SCAN_BigMap.cs" />
     <Compile Include="Unity\SCAN_ColorBiome.cs" />
     <Compile Include="Unity\SCAN_ColorControl.cs" />
+    <Compile Include="Unity\SCAN_ColorMap.cs" />
     <Compile Include="Unity\SCAN_ColorResource.cs" />
     <Compile Include="Unity\SCAN_ColorSlope.cs" />
     <Compile Include="Unity\SCAN_DropDown.cs" />
@@ -126,8 +123,12 @@
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>
-    </PostBuildEvent>
+    <PostBuildEvent>:: copy /y "$(TargetPath)" "C:\Users\david\Documents\KSP\SCANsat\Unity\SCANsat\Assets\Plugins\"
+
+:: "C:\Users\david\Documents\KSP\Dev Environment\1.9.1\pdb2mdb\pdb2mdb.exe" "$(TargetFileName)"
+xcopy /Y "$(TargetPath)" "C:\Users\david\Documents\KSP\Dev Environment\1.9.1\Kerbal Space Program\GameData\SCANsat\Plugins\"
+:: xcopy /Y "$(TargetDir)$(TargetName).pdb" "C:\Users\david\Documents\KSP\Dev Environment\1.9.1\Kerbal Space Program\GameData\SCANsat\Plugins\"
+:: xcopy /Y "$(TargetDir)$(TargetName).dll.mdb" "C:\Users\david\Documents\KSP\Dev Environment\1.9.1\Kerbal Space Program\GameData\SCANsat\Plugins\"</PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

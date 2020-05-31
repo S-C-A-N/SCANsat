@@ -15,9 +15,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using KSP.Localization;
 using SCANsat.Unity.Interfaces;
-using SCANsat.Unity.Unity;
 using SCANsat.SCAN_Data;
 using SCANsat.SCAN_Map;
 using SCANsat.SCAN_Palettes;
@@ -33,7 +31,8 @@ namespace SCANsat.SCAN_Unity
 		private string _terrainPalette;
 		private string _terrainPaletteStyle;
 
-		private bool _biomeBigMapStockColor;
+        private bool _mapVignette;
+        private bool _biomeBigMapStockColor;
 		private bool _biomeBigMapWhiteBorder;
 		private bool _biomeZoomMapWhiteBorder;
 		private bool _biomeSmallMapStockColor;
@@ -42,7 +41,28 @@ namespace SCANsat.SCAN_Unity
 		private bool _terrainReverse;
 		private bool _terrainDiscrete;
 
-		private float _biomeTransparency;
+
+        private int _mapWidth;
+
+        private bool _useMapWidth;
+        private bool _pixelFiltering;
+        private bool _normalMap;
+        private bool _colorMap;
+
+        private float _normalOpacity;
+        private float _luminanceReduction;
+
+        private static SCAN_UI_Color instance;
+
+        public static SCAN_UI_Color Instance
+        {
+            get { return instance; }
+        }
+
+
+        private float _unscannedTransparency;
+        private float _backgroundTransparency;
+        private float _biomeTransparency;
 		private float _slopeCutoff;
 		private float _resourceMin;
 		private float _resourceMax;
@@ -60,8 +80,9 @@ namespace SCANsat.SCAN_Unity
 		private List<SCANresourceGlobal> loadedResources;
 
 		public SCAN_UI_Color()
-		{
-			if (HighLogic.LoadedScene == GameScenes.SPACECENTER || HighLogic.LoadedScene == GameScenes.TRACKSTATION)
+        {
+            instance = this;
+            if (HighLogic.LoadedScene == GameScenes.SPACECENTER || HighLogic.LoadedScene == GameScenes.TRACKSTATION)
 				_resourcePlanet = Planetarium.fetch.Home.bodyName;
 			else if (HighLogic.LoadedSceneIsFlight)
 				_resourcePlanet = FlightGlobals.currentMainBody.bodyName;
@@ -236,6 +257,12 @@ namespace SCANsat.SCAN_Unity
 			}
 		}
 
+        public bool MapVignette
+        {
+            get { return _mapVignette; }
+            set { _mapVignette = value; }
+        }
+
 		public bool BiomeBigMapStockColor
 		{
 			get { return _biomeBigMapStockColor; }
@@ -289,7 +316,63 @@ namespace SCANsat.SCAN_Unity
 			get { return currentPalette.Kind != SCANPaletteKind.Fixed; }
 		}
 
-		public float BiomeTransparency
+
+        public int MapWidth
+        {
+            get { return _mapWidth; }
+            set { _mapWidth = value; }
+        }
+
+        public bool UseMapWidth
+        {
+            get { return _useMapWidth; }
+            set { _useMapWidth = value; }
+        }
+
+        public bool PixelFiltering
+        {
+            get { return _pixelFiltering; }
+            set { _pixelFiltering = value; }
+        }
+
+        public bool NormalMap
+        {
+            get { return _normalMap; }
+            set { _normalMap = value; }
+        }
+
+        public bool ColorMap
+        {
+            get { return _colorMap; }
+            set { _colorMap = value; }
+        }
+
+        public float NormalOpacity
+        {
+            get { return _normalOpacity; }
+            set { _normalOpacity = value; }
+        }
+
+        public float LuminanceReduction
+        {
+            get { return _luminanceReduction; }
+            set { _luminanceReduction = value; }
+        }
+
+
+        public float UnscannedTransparency
+        {
+            get { return _unscannedTransparency; }
+            set { _unscannedTransparency = value; }
+        }
+
+        public float BackgroundTransparency
+        {
+            get { return _backgroundTransparency; }
+            set { _backgroundTransparency = value; }
+        }
+
+        public float BiomeTransparency
 		{
 			get { return _biomeTransparency; }
 			set { _biomeTransparency = value; }
@@ -379,7 +462,17 @@ namespace SCANsat.SCAN_Unity
 			}
 		}
 
-		public Color BiomeColorOne
+        public Color MapBackgroundColor
+        {
+            get { return SCAN_Settings_Config.Instance.MapBackgroundColor; }
+        }
+
+        public Color UnscannedColor
+        {
+            get { return SCAN_Settings_Config.Instance.UnscannedColor; }
+        }
+
+        public Color BiomeColorOne
 		{
 			get { return SCAN_Settings_Config.Instance.LowBiomeColor; }
 		}
@@ -540,6 +633,42 @@ namespace SCANsat.SCAN_Unity
 		{
 			get { return new List<string>(palette.GetPaletteKindNames()); }
 		}
+
+        public void MapApply(Color background, Color unscanned)
+        {
+            SCAN_Settings_Config.Instance.MapBackgroundColor = background;
+            SCAN_Settings_Config.Instance.UnscannedColor = unscanned;
+
+            SCAN_Settings_Config.Instance.MapVignette = _mapVignette;
+            SCAN_Settings_Config.Instance.BackgroundTransparency = _backgroundTransparency / 100;
+            SCAN_Settings_Config.Instance.UnscannedTransparency = _unscannedTransparency / 100;
+
+            if (SCAN_UI_BigMap.Instance != null && SCAN_UI_BigMap.Instance.IsVisible)
+                SCAN_UI_BigMap.Instance.RefreshMap();
+
+            if (SCAN_UI_ZoomMap.Instance != null && SCAN_UI_ZoomMap.Instance.IsVisible)
+                SCAN_UI_ZoomMap.Instance.RefreshMap();
+        }
+
+        public void MapDefault()
+        {
+            SCAN_Settings_Config.Instance.MapBackgroundColor = palette.grey;
+            SCAN_Settings_Config.Instance.UnscannedColor = palette.grey;
+
+            SCAN_Settings_Config.Instance.MapVignette = false;
+            SCAN_Settings_Config.Instance.BackgroundTransparency = 0.4f;
+            SCAN_Settings_Config.Instance.UnscannedTransparency = 0.4f;            
+
+            _mapVignette = false;
+            _backgroundTransparency = 40;
+            _unscannedTransparency = 100;
+
+            if (SCAN_UI_BigMap.Instance != null && SCAN_UI_BigMap.Instance.IsVisible)
+                SCAN_UI_BigMap.Instance.RefreshMap();
+            
+            if (SCAN_UI_ZoomMap.Instance != null && SCAN_UI_ZoomMap.Instance.IsVisible)
+                SCAN_UI_ZoomMap.Instance.RefreshMap();
+        }
 
 		public void BiomeApply(Color one, Color two)
 		{

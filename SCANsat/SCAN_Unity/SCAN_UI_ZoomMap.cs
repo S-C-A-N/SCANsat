@@ -361,7 +361,7 @@ namespace SCANsat.SCAN_Unity
 
         protected void calcTerrainLimits()
         {
-            if (spotmap.MType == mapType.Slope)
+            if (spotmap.MType == mapType.Slope || spotmap.MType == mapType.Visual)
                 return;
 
             int w = spotmap.MapWidth / 4;
@@ -1438,7 +1438,7 @@ namespace SCANsat.SCAN_Unity
 
 		public IList<string> MapTypes
 		{
-			get { return new List<string>(3) { "Altimetry", "Slope", "Biome" }; }
+			get { return new List<string>(3) { "Altimetry", "Slope", "Biome", "Visual" }; }
 		}
 
 		public IList<string> Resources
@@ -1816,11 +1816,11 @@ namespace SCANsat.SCAN_Unity
                 bool resources = false;
                 bool fuzzy = false;
 
-                if (SCANUtil.isCovered(lon, lat, data, spotmap.Resource.SType))
+                if (SCANUtil.isCovered(lon, lat, data, SCANtype.ResourceHiRes))
                 {
                     resources = true;
                 }
-                else if (SCANUtil.isCovered(lon, lat, data, SCANtype.FuzzyResources))
+                else if (SCANUtil.isCovered(lon, lat, data, SCANtype.ResourceLoRes))
                 {
                     resources = true;
                     fuzzy = true;

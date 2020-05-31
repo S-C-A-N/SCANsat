@@ -26,6 +26,7 @@ using SCANsat.SCAN_Palettes;
 using SCANsat.SCAN_Data;
 using SCANsat.SCAN_UI.UI_Framework;
 using palette = SCANsat.SCAN_UI.UI_Framework.SCANcolorUtil;
+using SCANsat.SCAN_Unity;
 
 namespace SCANsat
 {
@@ -54,18 +55,45 @@ namespace SCANsat
 			if (data == null)
 				return false;
 
-			return (data.Coverage[ilon, ilat] & SCANtype) != 0;
+            if (SCANtype > Int16.MaxValue)
+                return false;
+
+            short type = (short)SCANtype;
+
+            return (data.Coverage[ilon, ilat] & type) != 0;
 		}
 
-		/// <summary>
-		/// Determines scanning coverage for a given area with a given scanner type
-		/// </summary>
-		/// <param name="lon">Clamped integer in the 0-360 degree range</param>
-		/// <param name="lat">Clamped integer in the 0-180 degree range</param>
-		/// <param name="body">Celestial body in question</param>
-		/// <param name="SCANtype">SCANtype cast as an integer</param>
-		/// <returns></returns>
-		public static bool isCovered(int lon, int lat, CelestialBody body, int SCANtype)
+        /// <summary>
+        /// Determines scanning coverage for a given area with a given scanner type
+        /// </summary>
+        /// <param name="lon">Clamped double in the -180 - 180 degree range</param>
+        /// <param name="lat">Clamped double in the -90 - 90 degree range</param>
+        /// <param name="body">Celestial body in question</param>
+        /// <param name="SCANtype">SCANtype cast as a 16 bit integer</param>
+        /// <returns></returns>
+        public static bool isCoveredShort(double lon, double lat, CelestialBody body, short SCANtype)
+        {
+            int ilon = icLON(lon);
+            int ilat = icLAT(lat);
+            if (badLonLat(ilon, ilat)) return false;
+
+            SCANdata data = getData(body.bodyName);
+
+            if (data == null)
+                return false;
+            
+            return (data.Coverage[ilon, ilat] & SCANtype) != 0;
+        }
+
+        /// <summary>
+        /// Determines scanning coverage for a given area with a given scanner type
+        /// </summary>
+        /// <param name="lon">Clamped integer in the 0-360 degree range</param>
+        /// <param name="lat">Clamped integer in the 0-180 degree range</param>
+        /// <param name="body">Celestial body in question</param>
+        /// <param name="SCANtype">SCANtype cast as an integer</param>
+        /// <returns></returns>
+        public static bool isCovered(int lon, int lat, CelestialBody body, int SCANtype)
 		{
 			if (badLonLat(lon, lat)) return false;
 
@@ -74,35 +102,86 @@ namespace SCANsat
 			if (data == null)
 				return false;
 
-			return (data.Coverage[lon, lat] & SCANtype) != 0;
+            if (SCANtype > Int16.MaxValue)
+                return false;
+
+            short type = (short)SCANtype;
+
+            return (data.Coverage[lon, lat] & type) != 0;
 		}
 
-		/// <summary>
-		/// Public method to return the scanning coverage for a given sensor type on a give body
-		/// </summary>
-		/// <param name="SCANtype">Integer corresponding to the desired SCANtype</param>
-		/// <param name="Body">Desired Celestial Body</param>
-		/// <returns>Scanning percentage as a double from 0-100</returns>
-		public static double GetCoverage(int SCANtype, CelestialBody Body)
+        /// <summary>
+        /// Determines scanning coverage for a given area with a given scanner type
+        /// </summary>
+        /// <param name="lon">Clamped integer in the 0-360 degree range</param>
+        /// <param name="lat">Clamped integer in the 0-180 degree range</param>
+        /// <param name="body">Celestial body in question</param>
+        /// <param name="SCANtype">SCANtype cast as a 16 bit integer</param>
+        /// <returns></returns>
+        public static bool isCoveredShort(int lon, int lat, CelestialBody body, short SCANtype)
+        {
+            if (badLonLat(lon, lat)) return false;
+
+            SCANdata data = getData(body.bodyName);
+
+            if (data == null)
+                return false;
+
+            return (data.Coverage[lon, lat] & SCANtype) != 0;
+        }
+
+        /// <summary>
+        /// Public method to return the scanning coverage for a given sensor type on a give body
+        /// </summary>
+        /// <param name="SCANtype">Integer corresponding to the desired SCANtype</param>
+        /// <param name="Body">Desired Celestial Body</param>
+        /// <returns>Scanning percentage as a double from 0-100</returns>
+        public static double GetCoverage(int SCANtype, CelestialBody Body)
 		{
 			SCANdata data = getData(Body.bodyName);
 
 			if (data == null)
 				return 0;
 
-			return getCoveragePercentage(data, (SCANtype)SCANtype);
+            if (SCANtype > Int16.MaxValue)
+                return 0;
+
+            short type = (short)SCANtype;
+
+			return getCoveragePercentage(data, (SCANtype)type);
 		}
 
-		/// <summary>
-		/// Given the name of the SCANtype, returns the int value.
-		/// </summary>
-		/// <param name="SCANname">The name of the SCANtype.</param>
-		/// <returns>The int value that can be used in other public methods.</returns>
-		public static int GetSCANtype(string SCANname)
+        /// <summary>
+        /// Public method to return the scanning coverage for a given sensor type on a give body
+        /// </summary>
+        /// <param name="SCANtype">16 bit integer corresponding to the desired SCANtype</param>
+        /// <param name="Body">Desired Celestial Body</param>
+        /// <returns>Scanning percentage as a double from 0-100</returns>
+        public static double GetCoverageShort(short SCANtype, CelestialBody Body)
+        {
+            SCANdata data = getData(Body.bodyName);
+
+            if (data == null)
+                return 0;
+
+            return getCoveragePercentage(data, (SCANtype)SCANtype);
+        }
+
+        /// <summary>
+        /// Given the name of the SCANtype, returns the int value.
+        /// </summary>
+        /// <param name="SCANname">The name of the SCANtype.</param>
+        /// <returns>The int value that can be used in other public methods.</returns>
+        public static int GetSCANtype(string SCANname)
 		{
 			try
 			{
-				return (int)Enum.Parse(typeof(SCANtype), SCANname);
+                short type = (short)Enum.Parse(typeof(SCANtype), SCANname);
+
+                if (type > Int16.MaxValue)
+                    return 0;
+
+                return (int)type;
 			}
 			catch (ArgumentException e)
 			{
@@ -111,12 +190,30 @@ namespace SCANsat
 			}
 		}
 
-		/// <summary>
-		/// For a given Celestial Body this returns the SCANdata instance if it exists in the SCANcontroller master dictionary; return is null if the SCANdata does not exist for that body (ie it has never been visited while SCANsat has been active)
+        /// <summary>
+		/// Given the name of the SCANtype, returns the short value.
 		/// </summary>
-		/// <param name="body">Celestial Body object</param>
-		/// <returns>SCANdata instance for the given Celestial Body; null if none exists</returns>
-		public static SCANdata getData(CelestialBody body)
+		/// <param name="SCANname">The name of the SCANtype.</param>
+		/// <returns>The short value that can be used in other public methods.</returns>
+		public static short GetSCANtypeShort(string SCANname)
+        {
+            try
+            {
+                return (short)Enum.Parse(typeof(SCANtype), SCANname);
+            }
+            catch (ArgumentException e)
+            {
+                throw new ArgumentException("An invalid SCANtype name was provided.  Valid values are: " +
+                    string.Join(", ", ((IEnumerable<SCANtype>)Enum.GetValues(typeof(SCANtype))).Select<SCANtype, string>(x => x.ToString()).ToArray()) + "\n" + e.ToString());
+            }
+        }
+
+        /// <summary>
+        /// For a given Celestial Body this returns the SCANdata instance if it exists in the SCANcontroller master dictionary; return is null if the SCANdata does not exist for that body (ie it has never been visited while SCANsat has been active)
+        /// </summary>
+        /// <param name="body">Celestial Body object</param>
+        /// <returns>SCANdata instance for the given Celestial Body; null if none exists</returns>
+        public static SCANdata getData(CelestialBody body)
 		{
 			return getData(body.bodyName);
 		}
@@ -208,6 +305,7 @@ namespace SCANsat
 			double min = 0;
 			double max = 0;
 			double best = 0;
+            bool light = false;
 
 			if (prefab.Modules.Contains<SCANsat.SCAN_PartModules.SCANsat>())
 			{
@@ -221,6 +319,7 @@ namespace SCANsat
 				min = scan.min_alt;
 				max = scan.max_alt;
 				best = scan.best_alt;
+                light = scan.requireLight;
 			}
 			else if (prefab.Modules.Contains<ModuleSCANresourceScanner>())
 			{
@@ -234,14 +333,15 @@ namespace SCANsat
 				min = scan.min_alt;
 				max = scan.max_alt;
 				best = scan.best_alt;
-			}
+                light = scan.requireLight;
+            }
 			else
 				return false;
 
 			if (SCANcontroller.controller == null)
 				return false;
 
-			SCANcontroller.controller.registerSensor(v, (SCANtype)sensor, fov, min, max, best);
+			SCANcontroller.controller.registerSensor(v, (SCANtype)sensor, fov, min, max, best, light);
 
 			m.moduleValues.SetValue("scanning", true.ToString());
 
@@ -274,6 +374,7 @@ namespace SCANsat
             double min = 0;
             double max = 0;
             double best = 0;
+            bool light = false;
 
             if (prefab.Modules.Contains<SCANsat.SCAN_PartModules.SCANsat>())
 			{
@@ -287,6 +388,7 @@ namespace SCANsat
                 min = scan.min_alt;
                 max = scan.max_alt;
                 best = scan.best_alt;
+                light = scan.requireLight;
             }
 			else if (prefab.Modules.Contains<ModuleSCANresourceScanner>())
 			{
@@ -300,6 +402,7 @@ namespace SCANsat
                 min = scan.min_alt;
                 max = scan.max_alt;
                 best = scan.best_alt;
+                light = scan.requireLight;
             }
 			else
 				return false;
@@ -307,7 +410,7 @@ namespace SCANsat
 			if (SCANcontroller.controller == null)
 				return false;
 
-			SCANcontroller.controller.unregisterSensor(v, (SCANtype)sensor, fov, min, max, best);
+			SCANcontroller.controller.unregisterSensor(v, (SCANtype)sensor, fov, min, max, best, light);
 
 			m.moduleValues.SetValue("scanning", false.ToString());
 
@@ -316,22 +419,31 @@ namespace SCANsat
 
         public static bool scanTypeValid(int type)
         {
-            if ((type & (int)SCANtype.Everything_SCAN) != 0)
-                return true;
-            else if ((type & (int)SCANtype.FuzzyResources) != 0)
+            if (type > Int16.MaxValue)
+                return false;
+
+            short stype = (short)type;
+
+            if ((stype & (short)SCANtype.Everything_SCAN) != 0)
                 return true;
 
-            return SCANcontroller.getLoadedResourceTypeStatus((SCANtype)type);
+            return false;
+        }
+
+        public static bool scanTypeValidShort(short type)
+        {
+            if ((type & (short)SCANtype.Everything_SCAN) != 0)
+                return true;
+
+            return false;
         }
 
         public static bool scanTypeValid(SCANtype type)
         {
             if ((type & SCANtype.Everything_SCAN) != SCANtype.Nothing)
                 return true;
-            else if ((type & SCANtype.FuzzyResources) != SCANtype.Nothing)
-                return true;
 
-            return SCANcontroller.getLoadedResourceTypeStatus(type);
+            return false;
         }
 
         #endregion
@@ -346,34 +458,20 @@ namespace SCANsat
 			int ilon = icLON(lon);
 			int ilat = icLAT(lat);
 			if (badLonLat(ilon, ilat)) return false;
-			return (data.Coverage[ilon, ilat] & (Int32)type) != 0;
+			return (data.Coverage[ilon, ilat] & (Int16)type) != 0;
 		}
 
 		internal static bool isCovered(int lon, int lat, SCANdata data, SCANtype type)
 		{
 			if (badLonLat(lon, lat)) return false;
-			return (data.Coverage[lon, lat] & (Int32)type) != 0;
+			return (data.Coverage[lon, lat] & (Int16)type) != 0;
 		}
 
 		internal static bool isCoveredByAll (int lon, int lat, SCANdata data, SCANtype type)
 		{
 			if (badLonLat(lon,lat)) return false;
-			return (data.Coverage[lon, lat] & (Int32)type) == (Int32)type;
+			return (data.Coverage[lon, lat] & (Int16)type) == (Int16)type;
 		}
-
-		//internal static void registerPass ( int lon, int lat, SCANdata data, int type )
-  //      {
-  //          int ilon = (lon + 360 /*+ 180*/) % 360;
-  //          int ilat = (lat + 180 /*+ 90*/) % 180;
-
-  //          if (ilon < 0 || lon >= 360)
-  //              return;
-
-  //          if (ilat < 0 || lon >= 180)
-  //              return;
-
-  //          data.Coverage[ilon, ilat] |= type;
-  //      }
 
         internal static double getCoveragePercentage(SCANdata data, SCANtype type )
 		{
@@ -383,7 +481,7 @@ namespace SCANsat
 			double cov = 0d;
 
 			if (type == SCANtype.Nothing)
-				type = SCANtype.AltimetryLoRes | SCANtype.AltimetryHiRes | SCANtype.Biome | SCANtype.Anomaly | SCANtype.FuzzyResources;   
+				type = SCANtype.AltimetryLoRes | SCANtype.AltimetryHiRes | SCANtype.Biome | SCANtype.Anomaly | SCANtype.VisualLoRes | SCANtype.VisualHiRes | SCANtype.ResourceLoRes | SCANtype.ResourceHiRes;   
             
 			cov = data.getCoverage (type);
 
@@ -444,7 +542,31 @@ namespace SCANsat
 			return (lon + 360 + 180) % 360;
 		}
 
-		internal static Vector2d fixRetardCoordinates(Vector2d coords)
+        internal static bool InDarkness(Vector3d vesselPos, Vector3d pos, Vector3d sun)
+        {
+            if (!SCAN_Settings_Config.Instance.DaylightCheck)
+                return false;
+
+            Vector3d solarDirection = pos - sun;
+
+            Vector3d surfaceDirection = pos - vesselPos;
+
+            double angle = Vector3d.Angle(surfaceDirection, solarDirection);
+
+            return angle > 90;
+        }
+
+        internal static CelestialBody LocalSun(CelestialBody body)
+        {
+            while (body.referenceBody != body)
+            {
+                body = body.referenceBody;
+            }
+
+            return body;
+        }
+
+        internal static Vector2d fixRetardCoordinates(Vector2d coords)
 		{
 			if (coords.y < -90)
 			{
@@ -1155,7 +1277,7 @@ namespace SCANsat
 						//		"   Blend SrcAlpha OneMinusSrcAlpha" +
 						//		"   ZWrite Off Cull Off Fog { Mode Off }" +
 						//		"} } }");
-						var lineMaterial = new Material(Shader.Find("Particles/Alpha Blended"));
+						var lineMaterial = new Material(Shader.Find("KSP/Particles/Alpha Blended"));
 						lineMaterial.hideFlags = HideFlags.HideAndDontSave;
 						lineMaterial.shader.hideFlags = HideFlags.HideAndDontSave;
 

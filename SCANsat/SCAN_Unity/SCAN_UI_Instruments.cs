@@ -126,7 +126,7 @@ namespace SCANsat.SCAN_Unity
 			vlat = SCANUtil.fixLatShift(v.latitude);
 			vlon = SCANUtil.fixLonShift(v.longitude);
 
-			sensors = SCANcontroller.controller.activeSensorsOnVessel(v.id);
+			sensors = SCANcontroller.controller.activeSensorsOnVessel(v.id, true);
 
 			if (SCANUtil.isCovered(vlon, vlat, data, SCANtype.AltimetryLoRes))
 			{
@@ -148,14 +148,17 @@ namespace SCANsat.SCAN_Unity
 				sensors |= SCANtype.Anomaly;
 			}
 
-            for (int i = resources.Count - 1; i >= 0; i--)
-            {
-                if (SCANUtil.isCovered(vlon, vlat, data, resources[i].SType))
-                    sensors |= resources[i].SType;
-            }
+            //for (int i = resources.Count - 1; i >= 0; i--)
+            //{
+            //    if (SCANUtil.isCovered(vlon, vlat, data, resources[i].SType))
+            //        sensors |= resources[i].SType;
+            //}
             
-			if (SCANUtil.isCovered(vlon, vlat, data, SCANtype.FuzzyResources))
-				sensors |= SCANtype.FuzzyResources;
+			if (SCANUtil.isCovered(vlon, vlat, data, SCANtype.ResourceLoRes))
+				sensors |= SCANtype.ResourceLoRes;
+
+            if (SCANUtil.isCovered(vlon, vlat, data, SCANtype.ResourceHiRes))
+                sensors |= SCANtype.ResourceHiRes;
 
             if (SCANcontroller.controller.SerenityLoaded)
             {
@@ -577,7 +580,7 @@ namespace SCANsat.SCAN_Unity
 
 		private void resourceLabel(SCANresourceGlobal r, bool high, bool onboard)
 		{
-			if ((sensors & r.SType) != SCANtype.Nothing)
+			if ((sensors & SCANtype.ResourceHiRes) != SCANtype.Nothing)
 			{
 				if (high || !onboard)
 				{
@@ -590,10 +593,10 @@ namespace SCANsat.SCAN_Unity
 					infoString.AppendFormat("{0}: {1}", r.DisplayName, SCANUtil.ResourceOverlay(vlat, vlon, r.Name, v.mainBody, SCAN_Settings_Config.Instance.BiomeLock).ToString("P2"));
                 }
 			}
-			else if ((sensors & SCANtype.FuzzyResources) != SCANtype.Nothing)
+			else if ((sensors & SCANtype.ResourceLoRes) != SCANtype.Nothing)
 			{
 				infoString.AppendLine();
-				infoString.AppendFormat("{0}: {1}", r.DisplayName, SCANUtil.ResourceOverlay(vlat, vlon, r.Name, v.mainBody, SCAN_Settings_Config.Instance.BiomeLock).ToString("P0"));
+				infoString.AppendFormat("{0}: {1}", r.DisplayName, SCANuiUtil.LoResourceGroup(SCANUtil.ResourceOverlay(vlat, vlon, r.Name, v.mainBody, SCAN_Settings_Config.Instance.BiomeLock)));
             }
 			else if (ResourceButtons)
 			{

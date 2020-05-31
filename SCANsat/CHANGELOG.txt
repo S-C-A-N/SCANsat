@@ -1,7 +1,108 @@
+Version 20.0 - 2020-5-16
+-----------------------
+
+- Warning: Save files cannot be downgraded to a previous version of SCANsat after updating to version 20.0 or higher
+
+- Scanning part revamp
+    - 15 new parts by Nertea
+	- Multiple instruments for each scanner type
+	- Old parts are soft-deprecated; they are still loaded but won't appear in the VAB/SPH part list
+	
+- New visual scan mode
+    - Low and high resolution RGB color visual map scans
+	- New science results for high resolution visual map scans
+	
+- Overhaul of scanner instrument types
+    - Some scanners require the surface to be in daylight to function
+    - New combination of scan types for each instrument
+	- Resource scanning now handled mostly independently from stock resource scanning
+	- All high resolution resource scans fall under a single scanner type
+	- Updated contract types
+	
+- Other improvements
+    - Added more scanner information to scanner right-click part menus
+	- Added more scanner information to VAB/SPH part list info
+	
+- Bug fixes and other updates
+    - Fix KSPedia entry for KSP 1.8 and above
+	- Fix various Unity script issues
+	- Fix RPM map display errors
+	- Fix MechJeb landing site integration
+
+- Changes from version 19.3
+    - Fix KSPedia entry in KSP 1.9
+    - Minor part balance updates
+	- Resource scanning updates
+	- Fix Breaking Ground surface feature detection
+
+Version 19.3 - 2020-4-8
+-----------------------
+
+- Updated KSPedia entry
+
+- Fix MechJeb integration
+
+- Make low resolution resource scan less effective 
+
+- Part texture and model updates
+- Minor part balance updates
+- Part attachment rule fixes
+
+- Some minor UI updates
+
+Version 19.2 - 2020-3-28
+-----------------------
+
+- Add all new scanner parts
+- Old parts soft-deprecated
+
+- Initial part balance
+	- Tech tree
+	- Part cost
+	- Scanning variables
+	
+- Fix contract configurator integration
+
+- Fix KSPedia
+
+Version 19.1 - 2020-2-20
+-----------------------
+
+- Fix compatibility with Kopernicus
+
+- Add new scanner info group in the right click menu of all scanner parts
+- Fix stock resource scanner modules
+
+- Fix scanning contracts (maybe?)
+
+
+Version 19.0 - 2020-1-29
+-----------------------
+
+- Warning: Save files cannot be downgraded to a previous version of SCANsat after updating to version 19.0 or higher
+
+- Update for KSP 1.8.1
+
+- Visual scanning mode
+     - New visual scanner part (Nertea)
+     - Visual map mode
+     - Visual scan science data
+
+- Daylight scanner requirement
+     - Some scanners require that the surface be in daylight to be scanned
+     - Requirement can be disabled in the settings menu
+
+- Overhaul of resource scanning
+     - All high resolution resources are scanned through a single scanner type
+     - Existing data will be converted to the new system
+
+- Fix some Unity script initialization errors
+- Fix RPM map display errors
+
 Version 18.14 - 2019-10-28
 -----------------------
 
-- Update for KSP 1.9
+- Update for KSP 1.8
 - Fix big map control buttons
 - Fix ground track indicators
 - Fix BTDT anomaly viewer shaders

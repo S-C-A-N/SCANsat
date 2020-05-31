@@ -73,6 +73,9 @@ namespace SCANsat.SCAN_PartModules
 					break;
 				case SCANexperimentType.SCANsatResources:
 					dataType = "Resources";
+                    break;
+                case SCANexperimentType.SCANsatVisual:
+                    dataType = "Visual";
 					break;
 			}
 
@@ -201,11 +204,16 @@ namespace SCANsat.SCAN_PartModules
 					coverage = GetScienceCoverage(expType.ToString(), ref se, ref su, coverage, multiplier);
 					break;
 				case SCANexperimentType.SCANsatResources:
-					coverage = (float)SCANUtil.getCoveragePercentage(data, SCANtype.FuzzyResources);
+					coverage = (float)SCANUtil.getCoveragePercentage(data, SCANtype.ResourceHiRes);
 
 					coverage = GetScienceCoverage(expType.ToString(), ref se, ref su, coverage, multiplier);
 					break;
-			}
+                case SCANexperimentType.SCANsatVisual:
+                    coverage = (float)SCANUtil.getCoveragePercentage(data, SCANtype.VisualHiRes);
+
+                    coverage = GetScienceCoverage(expType.ToString(), ref se, ref su, coverage, multiplier);
+                    break;
+            }
 
 			if (su == null || se == null)
 				return null;

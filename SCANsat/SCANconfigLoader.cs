@@ -13,11 +13,6 @@
 
 using System.Linq;
 using SCANsat.SCAN_Data;
-using SCANsat.SCAN_Platform;
-using SCANsat.SCAN_Palettes;
-using SCANsat.SCAN_UI.UI_Framework;
-using SCANsat.SCAN_Platform.Extensions.ConfigNodes;
-using UnityEngine;
 using palette = SCANsat.SCAN_UI.UI_Framework.SCANcolorUtil;
 
 namespace SCANsat
@@ -58,34 +53,12 @@ namespace SCANsat
 
 		internal static void configLoader()
 		{
-			loadSCANtypes();
-
 			SCANpalettes = new SCAN_Palette_Config(paletteFile, paletteNodeName);
 			SCANnode = new SCAN_Color_Config(configFile, configNodeName);
 
 			SCANcontroller.checkLoadedTerrainNodes();
 
 			loadResources();
-		}
-
-		private static void loadSCANtypes()
-		{
-            foreach (ConfigNode node in GameDatabase.Instance.GetConfigNodes("SCANSAT_SENSOR"))
-            {
-                string name = "";
-                int i = 0;
-
-                if (node.HasValue("name"))
-                    name = node.GetValue("name");
-
-                if (node.HasValue("SCANtype"))
-                    if (!int.TryParse(node.GetValue("SCANtype"), out i))
-                        continue;
-
-                Color32 color = node.parse("color", palette.XKCD_DarkGreenAlpha);
-
-                SCANcontroller.addToResourceTypes(name, new SCANresourceType(name, i, color));
-            }
 		}
 
 		private static void loadResources()
@@ -95,18 +68,13 @@ namespace SCANsat
 				if ((HarvestTypes)rs.ResourceType != HarvestTypes.Planetary)
 					continue;
 
-				SCANresourceType t = OverlayResourceType(rs.ResourceName);
-
-				if (t == null)
-					continue;
-
 				SCANresourceGlobal currentGlobal = SCANcontroller.getResourceNode(rs.ResourceName);
 
 				PartResourceDefinition pr = PartResourceLibrary.Instance.GetDefinition(rs.ResourceName);
                 
 				if (currentGlobal == null)
 				{
-					SCANcontroller.addToResourceData(rs.ResourceName, new SCANresourceGlobal(rs.ResourceName, pr == null ? rs.ResourceName : pr.displayName, 20, rs.Distribution.MinAbundance, rs.Distribution.MaxAbundance, palette.magenta, palette.cb_orange, t));
+                    SCANcontroller.addToResourceData(rs.ResourceName, new SCANresourceGlobal(rs.ResourceName, pr == null ? rs.ResourceName : pr.displayName, 20, rs.Distribution.MinAbundance, rs.Distribution.MaxAbundance, palette.magenta, palette.cb_orange));//, t));
 					currentGlobal = SCANcontroller.getResourceNode(rs.ResourceName, true);
 				}
 
@@ -127,7 +95,6 @@ namespace SCANsat
 				}
 
 				SCANcontroller.addToLoadedResourceNames(rs.ResourceName);
-                SCANcontroller.addToLoadedResourceTypes(t.Type);
             }
 
 			foreach (var rsBody in ResourceCache.Instance.PlanetaryResources)
@@ -139,13 +106,8 @@ namespace SCANsat
 
 				if (currentGlobal == null)
 				{
-					SCANresourceType t = OverlayResourceType(rsBody.ResourceName);
-
-					if (t == null)
-						continue;
-
 					PartResourceDefinition pr = PartResourceLibrary.Instance.GetDefinition(rsBody.ResourceName);
-					SCANcontroller.addToResourceData(rsBody.ResourceName, new SCANresourceGlobal(rsBody.ResourceName, pr == null ? rsBody.ResourceName : pr.displayName, 20, 0, 0.001f, palette.magenta, palette.cb_orange, t));
+                    SCANcontroller.addToResourceData(rsBody.ResourceName, new SCANresourceGlobal(rsBody.ResourceName, pr == null ? rsBody.ResourceName : pr.displayName, 20, 0, 0.001f, palette.magenta, palette.cb_orange));//, t));
 					currentGlobal = SCANcontroller.getResourceNode(rsBody.ResourceName, true);
 
 					foreach (CelestialBody body in FlightGlobals.Bodies)
@@ -157,7 +119,6 @@ namespace SCANsat
 					}
 
 					SCANcontroller.addToLoadedResourceNames(rsBody.ResourceName);
-                    SCANcontroller.addToLoadedResourceTypes(t.Type);
                 }
 
 				SCANresourceBody currentBody = currentGlobal.getBodyConfig(rsBody.PlanetName, false);
@@ -183,11 +144,6 @@ namespace SCANsat
 				globalResource = false;
 			else
 				globalResource = true;
-		}
-
-		private static SCANresourceType OverlayResourceType(string s)
-		{
-			return SCANcontroller.getResourceType(s, false);
 		}
 	}
 }

@@ -87,14 +87,18 @@ namespace SCANsat
 			assemblyList.Add(new AssemblyLog(AssemblyLoader.loadedAssemblies.GetByAssembly(Assembly.GetExecutingAssembly()))); //More reliable method for SCANsat.dll
 			foreach (string name in assemblies)
 			{ //Search for the relevant plugins among the loaded assemblies
-				var assembly = AssemblyLoader.loadedAssemblies.FirstOrDefault(a => a.assembly.GetName().Name.StartsWith(name));
+				var assembly = AssemblyLoader.loadedAssemblies.FirstOrDefault(a => a.assembly.GetName().Name == name);
 				if (assembly != null)
 				{
-					assemblyList.Add(new AssemblyLog(assembly));
-					if (name == "ModuleManager")
-						MMLoaded = true;
-					else if (name == "Kopernicus.OnDemand")
-						KopernicusLoaded = true;
+                    AssemblyLog alog = new AssemblyLog(assembly);
+					assemblyList.Add(alog);
+                    if (alog.name == "ModuleManager")
+                        MMLoaded = true;
+                    else if (alog.name == "Kopernicus")
+                    {
+                        KopernicusLoaded = true;
+                        //SCANreflection.LoadKopernicusReflection();
+                    }
 				}
 			}
 			if (assemblyList.Count > 0)
@@ -102,7 +106,16 @@ namespace SCANsat
 				SCANsatVersion = assemblyList[0].infoVersion;
 				debugWriter();
 			}
-		}
+
+            //foreach(AssemblyLoader.LoadedAssembly ass in AssemblyLoader.loadedAssemblies)
+            //{
+            //    AssemblyLog asslog = new AssemblyLog(ass);
+
+            //    print(string.Format("[SCANsat] Assembly: {0} found; Version: {1}; File Version: {2}; Info Version: {3}; Location: {4}"
+            //        , asslog.name, asslog.version, asslog.fileVersion, asslog.infoVersion, asslog.location));
+
+            //}
+        }
 
 		private void debugWriter()
 		{
