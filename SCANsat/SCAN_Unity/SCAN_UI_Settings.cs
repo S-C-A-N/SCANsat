@@ -589,58 +589,30 @@ namespace SCANsat.SCAN_Unity
 		{
 			get 
 			{
-				List<string> bodyList = new List<string>();
-
 				var bodies = FlightGlobals.Bodies.Where(b => b.referenceBody == Planetarium.fetch.Sun && b.referenceBody != b);
 
 				var orderedBodies = bodies.OrderBy(b => b.orbit.semiMajorAxis).ToList();
 
-				for (int i = 0; i < orderedBodies.Count; i++)
+				List<string> bodyList = SCANUtil.RecursiveCelestialBodies(orderedBodies);
+
+				bool missingHome = true;
+
+				for (int i = bodyList.Count - 1; i >= 0; i--)
 				{
-					CelestialBody body = orderedBodies[i];
+					string b = bodyList[i];
 
-					if (SCANcontroller.controller.getData(body.bodyName) != null)
-						bodyList.Add(body.displayName.LocalizeBodyName());
-
-					for (int j = 0; j < body.orbitingBodies.Count; j++)
+					if (b == FlightGlobals.GetHomeBody().displayName.LocalizeBodyName())
 					{
-						CelestialBody moon = body.orbitingBodies[j];
-
-						if (SCANcontroller.controller.getData(moon.bodyName) != null)
-							bodyList.Add(moon.displayName.LocalizeBodyName());
-
-						for (int k = 0; k < moon.orbitingBodies.Count; k++)
-						{
-							CelestialBody subMoon = moon.orbitingBodies[k];
-
-							if (SCANcontroller.controller.getData(subMoon.bodyName) != null)
-								bodyList.Add(subMoon.displayName.LocalizeBodyName());
-
-							for (int l = 0; l < subMoon.orbitingBodies.Count; l++)
-							{
-								CelestialBody subSubMoon = subMoon.orbitingBodies[l];
-
-								if (SCANcontroller.controller.getData(subSubMoon.bodyName) != null)
-									bodyList.Add(subSubMoon.displayName.LocalizeBodyName());
-
-                                for (int m = 0; m < subSubMoon.orbitingBodies.Count; m++)
-                                {
-                                    CelestialBody subSubSubMoon = subSubMoon.orbitingBodies[m];
-
-                                    if (SCANcontroller.controller.getData(subSubSubMoon.bodyName) != null)
-                                        bodyList.Add(subSubSubMoon.displayName.LocalizeBodyName());
-
-                                    for (int n = 0; n < subSubSubMoon.orbitingBodies.Count; n++)
-                                    {
-                                        CelestialBody subSubSubSubMoon = subSubSubMoon.orbitingBodies[n];
-
-                                        if (SCANcontroller.controller.getData(subSubSubSubMoon.bodyName) != null)
-                                            bodyList.Add(subSubSubSubMoon.displayName.LocalizeBodyName());
-                                    }
-                                }
-                            }
-						}
+						missingHome = false;
+						break;
 					}
+				}
+
+				if (missingHome)
+				{
+					List<string> missingHomeBodies = SCANUtil.RecursiveCelestialBodies(new List<CelestialBody>() { FlightGlobals.GetHomeBody() });
+
+					bodyList.InsertRange(0, missingHomeBodies);
 				}
 
 				SCANdata sun = SCANcontroller.controller.getData(Planetarium.fetch.Sun.bodyName);
@@ -658,13 +630,7 @@ namespace SCANsat.SCAN_Unity
             {
                 List<int> availableTypes = new List<int>() { 0, 1, 3, 4, 5, 2, 6, 7, 8 };
 
-                //if (SCAN_Settings_Config.Instance.DisableStockResource || !SCAN_Settings_Config.Instance.InstantScan)
-                //            {
-                //                availableTypes.Add(7);
-                //                availableTypes.Add(8);
-                //            }
-
-                List<string> types = new List<string>() { "All Data" };//, "SCAN Data Types" };
+                List<string> types = new List<string>() { "All Data" };
 
                 for (int i = 0; i < availableTypes.Count; i++)
                     types.Add(((SCANtype)(1 << availableTypes[i])).ToString());

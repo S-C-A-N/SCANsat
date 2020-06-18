@@ -593,6 +593,60 @@ namespace SCANsat
 			return coords;
 		}
 
+		internal static List<string> RecursiveCelestialBodies(List<CelestialBody> bodies)
+		{
+			List<string> bodyList = new List<string>();
+
+			for (int i = 0; i < bodies.Count; i++)
+			{
+				CelestialBody body = bodies[i];
+				if (SCANcontroller.controller.getData(body.bodyName) != null)
+					bodyList.Add(body.displayName.LocalizeBodyName());
+
+				for (int j = 0; j < body.orbitingBodies.Count; j++)
+				{
+					CelestialBody moon = body.orbitingBodies[j];
+
+					if (SCANcontroller.controller.getData(moon.bodyName) != null)
+						bodyList.Add(moon.displayName.LocalizeBodyName());
+
+					for (int k = 0; k < moon.orbitingBodies.Count; k++)
+					{
+						CelestialBody subMoon = moon.orbitingBodies[k];
+
+						if (SCANcontroller.controller.getData(subMoon.bodyName) != null)
+							bodyList.Add(subMoon.displayName.LocalizeBodyName());
+
+						for (int l = 0; l < subMoon.orbitingBodies.Count; l++)
+						{
+							CelestialBody subSubMoon = subMoon.orbitingBodies[l];
+
+							if (SCANcontroller.controller.getData(subSubMoon.bodyName) != null)
+								bodyList.Add(subSubMoon.displayName.LocalizeBodyName());
+
+							for (int m = 0; m < subSubMoon.orbitingBodies.Count; m++)
+							{
+								CelestialBody subSubSubMoon = subSubMoon.orbitingBodies[m];
+
+								if (SCANcontroller.controller.getData(subSubSubMoon.bodyName) != null)
+									bodyList.Add(subSubSubMoon.displayName.LocalizeBodyName());
+
+								for (int n = 0; n < subSubSubMoon.orbitingBodies.Count; n++)
+								{
+									CelestialBody subSubSubSubMoon = subSubSubMoon.orbitingBodies[n];
+
+									if (SCANcontroller.controller.getData(subSubSubSubMoon.bodyName) != null)
+										bodyList.Add(subSubSubSubMoon.displayName.LocalizeBodyName());
+								}
+							}
+						}
+					}
+				}
+			}
+
+			return bodyList;
+		}
+
 		internal static double getElevation(CelestialBody body, double lon, double lat)
 		{
 			if (body.pqsController == null) return 0;

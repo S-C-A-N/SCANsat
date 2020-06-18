@@ -30,6 +30,7 @@ using KSP.Localization;
 using FinePrint;
 using FinePrint.Utilities;
 using palette = SCANsat.SCAN_UI.UI_Framework.SCANcolorUtil;
+using KSPAchievements;
 
 namespace SCANsat.SCAN_Unity
 {
@@ -1563,59 +1564,31 @@ namespace SCANsat.SCAN_Unity
 		{
 			get 
 			{
-				List<string> bodyList = new List<string>();
 
 				var bodies = FlightGlobals.Bodies.Where(b => b.referenceBody == Planetarium.fetch.Sun && b.referenceBody != b);
-
 				var orderedBodies = bodies.OrderBy(b => b.orbit.semiMajorAxis).ToList();
 
-                for (int i = 0; i < orderedBodies.Count; i++)
-                {
-                    CelestialBody body = orderedBodies[i];
+				List<string> bodyList = SCANUtil.RecursiveCelestialBodies(orderedBodies);
 
-                    if (SCANcontroller.controller.getData(body.bodyName) != null)
-                        bodyList.Add(body.displayName.LocalizeBodyName());
+				bool missingHome = true;
 
-                    for (int j = 0; j < body.orbitingBodies.Count; j++)
-                    {
-                        CelestialBody moon = body.orbitingBodies[j];
+				for (int i = bodyList.Count - 1; i >= 0; i--)
+				{
+					string b = bodyList[i];
 
-                        if (SCANcontroller.controller.getData(moon.bodyName) != null)
-                            bodyList.Add(moon.displayName.LocalizeBodyName());
+					if (b == FlightGlobals.GetHomeBody().displayName.LocalizeBodyName())
+					{
+						missingHome = false;
+						break;
+					}
+				}
 
-                        for (int k = 0; k < moon.orbitingBodies.Count; k++)
-                        {
-                            CelestialBody subMoon = moon.orbitingBodies[k];
+				if (missingHome)
+				{
+					List<string> missingHomeBodies = SCANUtil.RecursiveCelestialBodies(new List<CelestialBody>() { FlightGlobals.GetHomeBody() });
 
-                            if (SCANcontroller.controller.getData(subMoon.bodyName) != null)
-                                bodyList.Add(subMoon.displayName.LocalizeBodyName());
-
-                            for (int l = 0; l < subMoon.orbitingBodies.Count; l++)
-                            {
-                                CelestialBody subSubMoon = subMoon.orbitingBodies[l];
-
-                                if (SCANcontroller.controller.getData(subSubMoon.bodyName) != null)
-                                    bodyList.Add(subSubMoon.displayName.LocalizeBodyName());
-
-                                for (int m = 0; m < subSubMoon.orbitingBodies.Count; m++)
-                                {
-                                    CelestialBody subSubSubMoon = subSubMoon.orbitingBodies[m];
-
-                                    if (SCANcontroller.controller.getData(subSubSubMoon.bodyName) != null)
-                                        bodyList.Add(subSubSubMoon.displayName.LocalizeBodyName());
-
-                                    for (int n = 0; n < subSubSubMoon.orbitingBodies.Count; n++)
-                                    {
-                                        CelestialBody subSubSubSubMoon = subSubSubMoon.orbitingBodies[n];
-
-                                        if (SCANcontroller.controller.getData(subSubSubSubMoon.bodyName) != null)
-                                            bodyList.Add(subSubSubSubMoon.displayName.LocalizeBodyName());
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
+					bodyList.InsertRange(0, missingHomeBodies);
+				}
 
 				if (HighLogic.LoadedSceneIsFlight)
 				{
@@ -1977,7 +1950,7 @@ namespace SCANsat.SCAN_Unity
                 SCANUtil.getBiomeDisplayName(infoString, body, lon, lat);
             }
 
-			if (bigmap.ResourceActive && SCANconfigLoader.GlobalResource && bigmap.Resource != null)
+			if (SCANconfigLoader.GlobalResource && bigmap.Resource != null)
 			{
 				bool resources = false;
 				bool fuzzy = false;
