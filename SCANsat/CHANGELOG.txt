@@ -1,3 +1,13 @@
+Version 20.1 - 2020-6-17
+-----------------------
+
+- Fix big map body selection menu with some Kopernicus planet packs (also fixes a few settings menus)
+
+- Various adjustments to part tech tree position and scanner values
+
+- Properly hide old versions of parts
+- Minor UI bug fixes
+
 Version 20.0 - 2020-5-16
 -----------------------
 
