@@ -645,6 +645,8 @@ namespace SCANsat.Unity.Unity
 				settingsInterface.LockInput = false;
 
 			colorInterface.TerrainApply();
+
+			SetPalettePreviews();
 		}
 
 		public void Default()
