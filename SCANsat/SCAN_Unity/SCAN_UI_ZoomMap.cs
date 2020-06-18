@@ -1811,7 +1811,7 @@ namespace SCANsat.SCAN_Unity
                 infoString.Append(" ");
             }
 
-            if (spotmap.ResourceActive && SCANconfigLoader.GlobalResource && spotmap.Resource != null)
+            if (SCANconfigLoader.GlobalResource && spotmap.Resource != null)
             {
                 bool resources = false;
                 bool fuzzy = false;
