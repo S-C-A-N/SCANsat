@@ -1102,7 +1102,7 @@ namespace SCANsat.SCAN_Unity
 			if (uiElement == null || bigmap == null)
 				return;
 
-			uiElement.UpdateTitle(string.Format("S.C.A.N. {0} Map of {1}", bigmap.MType, body.displayName.LocalizeBodyName()));
+			uiElement.UpdateTitle(Localizer.Format("#autoLOC_SCANsat_MapTitle", bigmap.MType.LocalizeMapType(), body.displayName.LocalizeBodyName())); // #autoLOC_SCANsat_MapTitle = S.C.A.N. <<1>> Map of <<2>>
 		}
 
 		public string Version
@@ -1552,7 +1552,7 @@ namespace SCANsat.SCAN_Unity
 
 		public IList<string> MapTypes
 		{
-			get { return new List<string>(3) { "Altimetry", "Slope", "Biome", "Visual" }; }
+			get { return new List<string>(Enum.GetNames(typeof(mapType))); }
 		}
 
 		public IList<string> Resources
