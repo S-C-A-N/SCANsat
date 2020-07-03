@@ -148,6 +148,7 @@ namespace SCANsat
 		public Vector2 OverlayPosition = new Vector2(600, -200);
 
 		private const string filePath = "GameData/SCANsat/PluginData/Settings.cfg";
+		private const string directoryPath = "GameData/SCANsat/PluginData";
 		private string fullPath;
 
 		private static bool loaded;
@@ -225,6 +226,14 @@ namespace SCANsat
 
 			try
 			{
+				string dirPath = Path.Combine(KSPUtil.ApplicationRootPath, directoryPath).Replace("\\", "/");
+
+				if (!Directory.Exists(dirPath))
+				{
+					Directory.CreateDirectory(dirPath);
+					SCANUtil.SCANlog("Settings directory not found; generating PluginData directory at:\n{0}", dirPath);
+				}
+
 				ConfigNode node = AsConfigNode();
 				ConfigNode wrapper = new ConfigNode(GetType().Name);
 				wrapper.AddNode(node);
