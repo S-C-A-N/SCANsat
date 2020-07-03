@@ -109,6 +109,10 @@ namespace SCANsat
         [KSPField(isPersistant = true)]
         public int zoomMapRefresh = 0;
         [KSPField(isPersistant = true)]
+        public bool zoomMapZoomPersist = false;
+        [KSPField(isPersistant = true)]
+        public float zoomMapZoom = 10f;
+        [KSPField(isPersistant = true)]
         public int overlaySelection = 0;
         [KSPField(isPersistant = true)]
         public string overlayResource = "Ore";
