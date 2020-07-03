@@ -51,6 +51,7 @@ namespace SCANsat.SCAN_Unity
 		private System.Random gen;
 		private bool _inputLock;
 		private const string controlLock = "SCANsatBig";
+		private byte scanStatus;
 
 		private SCANresourceGlobal currentResource;
 		private List<SCANresourceGlobal> resources;
@@ -1476,6 +1477,51 @@ namespace SCANsat.SCAN_Unity
 			get { return SCAN_Settings_Config.Instance.UIScale; }
 		}
 
+		public float LoAltScan
+		{
+			get { return (float)SCANUtil.getCoveragePercentage(data, SCANtype.AltimetryLoRes); }
+		}
+
+		public float HiAltScan
+		{
+			get { return (float)SCANUtil.getCoveragePercentage(data, SCANtype.AltimetryHiRes); }
+		}
+
+		public float MultiScan
+		{
+			get { return (float)SCANUtil.getCoveragePercentage(data, SCANtype.Biome); }
+		}
+
+		public float LoVisScan
+		{
+			get { return (float)SCANUtil.getCoveragePercentage(data, SCANtype.VisualLoRes); }
+		}
+
+		public float HiVisScan
+		{
+			get { return (float)SCANUtil.getCoveragePercentage(data, SCANtype.VisualHiRes); }
+		}
+
+		public float AnomalyScan
+		{
+			get { return (float)SCANUtil.getCoveragePercentage(data, SCANtype.Anomaly); }
+		}
+
+		public float LoResScan
+		{
+			get { return (float)SCANUtil.getCoveragePercentage(data, SCANtype.ResourceLoRes); }
+		}
+
+		public float HiResScan
+		{
+			get { return (float)SCANUtil.getCoveragePercentage(data, SCANtype.ResourceHiRes); }
+		}
+
+		public byte ScanStatus
+		{
+			get { return scanStatus; }
+		}
+
 		public Sprite WaypointSprite
 		{
 			get { return SCAN_UI_Loader.WaypointIcon; }
@@ -1878,6 +1924,8 @@ namespace SCANsat.SCAN_Unity
 
 		public string MapInfo(Vector2 mapPos)
 		{
+			scanStatus = 0;
+
 			Vector2d pos = MousePosition(mapPos);
 
 			double mlon = pos.x;
@@ -1888,7 +1936,7 @@ namespace SCANsat.SCAN_Unity
 			else
 				return "";
 		}
-
+		
 		private string mouseOverInfo(double lon, double lat)
 		{
             if (infoString == null)
@@ -1899,36 +1947,9 @@ namespace SCANsat.SCAN_Unity
 			bool altimetry = SCANUtil.isCovered(lon, lat, data, SCANtype.Altimetry);
 			bool hires = SCANUtil.isCovered(lon, lat, data, SCANtype.AltimetryHiRes);
 
-			//if (SCANUtil.isCovered(lon, lat, data, SCANtype.AltimetryLoRes))
-			//{
-			//	if (body.pqsController == null)
-   //                 infoString.AppendFormat("<color=#{0}>{1}</color>", palette.c_bad_hex, LO);
-   //             else
-   //                 infoString.AppendFormat("<color=#{0}>{1}</color>", palette.c_good_hex, LO);
-   //         }
-   //         else
-   //             infoString.AppendFormat("<color=#{0}>{1}</color>", palette.c_grey_hex, LO);
+			scanStatus |= altimetry ? (byte)(1 << 0) : (byte)0;
+			scanStatus |= hires ? (byte)(1 << 1) : (byte)0;
 
-			//if (hires)
-			//{
-			//	if (body.pqsController == null)
-   //                 infoString.AppendFormat("<color=#{0}>{1}</color>", palette.c_bad_hex, HI);
-			//	else
-   //                 infoString.AppendFormat("<color=#{0}>{1}</color>", palette.c_good_hex, HI);
-   //         }
-   //         else
-   //             infoString.AppendFormat("<color=#{0}>{1}</color>", palette.c_grey_hex, HI);
-
-			//if (SCANUtil.isCovered(lon, lat, data, SCANtype.Biome))
-			//{
-			//	if (body.BiomeMap == null)
-   //                 infoString.AppendFormat("<color=#{0}>{1}</color>", palette.c_bad_hex, MULTI);
-			//	else
-   //                 infoString.AppendFormat("<color=#{0}>{1}</color>", palette.c_good_hex, MULTI);
-			//}
-   //         else
-   //             infoString.AppendFormat("<color=#{0}>{1}</color>", palette.c_grey_hex, MULTI);
-            
 			if (altimetry)
 			{
                 infoString.Append(" Terrain Height: ");
@@ -1948,25 +1969,30 @@ namespace SCANsat.SCAN_Unity
             {
                 infoString.Append(" Biome: ");
                 SCANUtil.getBiomeDisplayName(infoString, body, lon, lat);
-            }
+				scanStatus |= (byte)(1 << 2);
+			}
+
+			if (SCANUtil.isCovered(lon, lat, data, SCANtype.VisualLoRes))
+				scanStatus |= (byte)(1 << 3);
+
+			if (SCANUtil.isCovered(lon, lat, data, SCANtype.VisualHiRes))
+				scanStatus |= (byte)(1 << 4);
+
+			if (SCANUtil.isCovered(lon, lat, data, SCANtype.Anomaly))
+				scanStatus |= (byte)(1 << 5);
 
 			if (SCANconfigLoader.GlobalResource && bigmap.Resource != null)
 			{
-				bool resources = false;
-				bool fuzzy = false;
+				bool resourcesLo = SCANUtil.isCovered(lon, lat, data, SCANtype.ResourceLoRes);
+				bool resourcesHi = SCANUtil.isCovered(lon, lat, data, SCANtype.ResourceHiRes);
 
-				if (SCANUtil.isCovered(lon, lat, data, SCANtype.ResourceHiRes))
-				{
-					resources = true;
-				}
-				else if (SCANUtil.isCovered(lon, lat, data, SCANtype.ResourceLoRes))
-				{
-					resources = true;
-					fuzzy = true;
-				}
+				scanStatus |= resourcesLo ? (byte)(1 << 6) : (byte)0;
+				scanStatus |= resourcesHi ? (byte)(1 << 7) : (byte)0;
 
-				if (resources)
-					infoString.AppendFormat(" {0}", SCANuiUtil.getResourceAbundance(bigmap.Body, lat, lon, fuzzy, bigmap.Resource));
+				if (resourcesHi)
+					infoString.AppendFormat(" {0}", SCANuiUtil.getResourceAbundance(bigmap.Body, lat, lon, false, bigmap.Resource));
+				else if (resourcesLo)
+					infoString.AppendFormat(" {0}", SCANuiUtil.getResourceAbundance(bigmap.Body, lat, lon, true, bigmap.Resource));
 			}
 			
 			infoString.AppendLine();

@@ -75,6 +75,24 @@ namespace SCANsat.Unity.Interfaces
 
 		float Scale { get; }
 
+		float LoAltScan { get; }
+
+		float HiAltScan { get; }
+
+		float MultiScan { get; }
+
+		float LoVisScan { get; }
+
+		float HiVisScan { get; }
+
+		float AnomalyScan { get; }
+
+		float LoResScan { get; }
+
+		float HiResScan { get; }
+
+		byte ScanStatus { get; }
+
 		Sprite WaypointSprite { get; }
 
 		Canvas MainCanvas { get; }

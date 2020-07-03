@@ -103,7 +103,46 @@ namespace SCANsat.Unity.Unity
 		private GameObject m_NorthSouthMarkers = null;
 		[SerializeField]
 		private GameObject m_TooltipPrefab = null;
-
+		[SerializeField]
+		private Slider m_LoSlider = null;
+		[SerializeField]
+		private Slider m_HiSlider = null;
+		[SerializeField]
+		private Slider m_MultiSlider = null;
+		[SerializeField]
+		private Slider m_LoVisSlider = null;
+		[SerializeField]
+		private Slider m_HiVisSlider = null;
+		[SerializeField]
+		private Slider m_AnomalySlider = null;
+		[SerializeField]
+		private Slider m_LoResSlider = null;
+		[SerializeField]
+		private Slider m_HiResSlider = null;
+		[SerializeField]
+		private TextHandler m_LoText = null;
+		[SerializeField]
+		private TextHandler m_HiText = null;
+		[SerializeField]
+		private TextHandler m_MultiText = null;
+		[SerializeField]
+		private TextHandler m_LoVisText = null;
+		[SerializeField]
+		private TextHandler m_HiVisText = null;
+		[SerializeField]
+		private TextHandler m_AnomalyText = null;
+		[SerializeField]
+		private TextHandler m_LoResText = null;
+		[SerializeField]
+		private TextHandler m_HiResText = null;
+		[SerializeField]
+		private Color m_StatusCoverage = new Color(0.35f, 0.7f, 0.9f);
+		[SerializeField]
+		private Color m_StatusGrey = new Color(1f, 1f, 1f);
+		[SerializeField]
+		private Color m_StatusOrange = new Color(0.9f, 0.6f, 0);
+		[SerializeField]
+		private Color m_StatusGreen = new Color(0, 0.6f, 0.5f);
 
 		private ISCAN_BigMap bigInterface;
 		private bool loaded;
@@ -115,6 +154,9 @@ namespace SCANsat.Unity.Unity
 
 		private bool waypointSelecting;
 		private string waypoint;
+
+		private float lastStatusTimer;
+		private const float StatusTimerValue = 1;
 
 		private List<SCAN_SimpleLabel> orbitLabels = new List<SCAN_SimpleLabel>();
 		private List<SCAN_MapLabel> orbitIconLabels = new List<SCAN_MapLabel>();
@@ -129,6 +171,10 @@ namespace SCANsat.Unity.Unity
 
 		private bool tooltipOn;
 		private SCAN_Tooltip _tooltip;
+
+		private bool statusTooltipOn;
+		private byte statusTooltipType;
+		private SCAN_Tooltip _statusTooltip;
 
 		protected override void Awake()
 		{
@@ -161,6 +207,8 @@ namespace SCANsat.Unity.Unity
 
 				m_ReadoutText.OnTextUpdate.Invoke(bigInterface.MapInfo(rectPos));
 
+				SetStatusText(bigInterface.ScanStatus, false);
+
 				if (waypointSelecting)
 				{
 					if (hoverWaypointLabel != null)
@@ -177,7 +225,11 @@ namespace SCANsat.Unity.Unity
 			{
 				if (hoverWaypointLabel != null)
 					hoverWaypointLabel.UpdateActive(false);
+
+				SetStatusText(0, true);
 			}
+			else
+				SetStatusText(0, true);
 
 			if (tooltipOn)
 			{
@@ -189,6 +241,44 @@ namespace SCANsat.Unity.Unity
 
 				if (_tooltip != null)
 					_tooltip.UpdateText(bigInterface.TooltipText(legendXPos));
+			}
+			
+			if (statusTooltipOn)
+			{
+				if(_statusTooltip != null)
+				{
+					string status = "0%";
+
+					switch(statusTooltipType)
+					{
+						case 0:
+							status = (bigInterface.LoAltScan / 100).ToString("P1");
+							break;
+						case 1:
+							status = (bigInterface.HiAltScan / 100).ToString("P1");
+							break;
+						case 2:
+							status = (bigInterface.MultiScan / 100).ToString("P1");
+							break;
+						case 3:
+							status = (bigInterface.LoVisScan / 100).ToString("P1");
+							break;
+						case 4:
+							status = (bigInterface.HiVisScan / 100).ToString("P1");
+							break;
+						case 5:
+							status = (bigInterface.AnomalyScan / 100).ToString("P1");
+							break;
+						case 6:
+							status = (bigInterface.LoResScan / 100).ToString("P1");
+							break;
+						case 7:
+							status = (bigInterface.HiResScan / 100).ToString("P1");
+							break;
+					}
+
+					_statusTooltip.UpdateText(status);
+				}
 			}
 
 			if (bigInterface.OrbitToggle && bigInterface.ShowOrbit)
@@ -206,6 +296,99 @@ namespace SCANsat.Unity.Unity
 
 					label.UpdatePositionActivation(bigInterface.OrbitIconInfo(label.StringID));
 				}
+			}
+
+			if (Time.time > lastStatusTimer + StatusTimerValue)
+			{
+				lastStatusTimer = Time.time;
+
+				SetStatusSliders();
+			}
+		}
+
+		private void SetStatusText(byte status, bool grey)
+		{
+			if (m_LoText != null)
+			{
+				m_LoText.OnColorUpdate.Invoke(grey ? m_StatusGrey : (status & 1 << 0) != 0 ? m_StatusGreen : m_StatusOrange);
+			}
+
+			if (m_HiText != null)
+			{
+				m_HiText.OnColorUpdate.Invoke(grey ? m_StatusGrey : (status & 1 << 1) != 0 ? m_StatusGreen : m_StatusOrange);
+			}
+
+			if (m_MultiText != null)
+			{
+				m_MultiText.OnColorUpdate.Invoke(grey ? m_StatusGrey : (status & 1 << 2) != 0 ? m_StatusGreen : m_StatusOrange);
+			}
+
+			if (m_LoVisText != null)
+			{
+				m_LoVisText.OnColorUpdate.Invoke(grey ? m_StatusGrey : (status & 1 << 3) != 0 ? m_StatusGreen : m_StatusOrange);
+			}
+
+			if (m_HiVisText != null)
+			{
+				m_HiVisText.OnColorUpdate.Invoke(grey ? m_StatusGrey : (status & 1 << 4) != 0 ? m_StatusGreen : m_StatusOrange);
+			}
+
+			if (m_AnomalyText != null)
+			{
+				m_AnomalyText.OnColorUpdate.Invoke(grey ? m_StatusGrey : (status & 1 << 5) != 0 ? m_StatusGreen : m_StatusOrange);
+			}
+
+			if (m_LoResText != null)
+			{
+				m_LoResText.OnColorUpdate.Invoke(grey ? m_StatusGrey : (status & 1 << 6) != 0 ? m_StatusGreen : m_StatusOrange);
+			}
+
+			if (m_HiResText != null)
+			{
+				m_HiResText.OnColorUpdate.Invoke(grey ? m_StatusGrey : (status & 1 << 7) != 0 ? m_StatusGreen : m_StatusOrange);
+			}
+		}
+
+		private void SetStatusSliders()
+		{
+			if (m_LoSlider != null)
+			{
+				m_LoSlider.value = bigInterface.LoAltScan;
+			}
+
+			if (m_HiSlider != null)
+			{
+				m_HiSlider.value = bigInterface.HiAltScan;
+			}
+
+			if (m_MultiSlider != null)
+			{
+				m_MultiSlider.value = bigInterface.MultiScan;
+			}
+
+			if (m_LoVisSlider != null)
+			{
+				m_LoVisSlider.value = bigInterface.LoVisScan;
+			}
+
+			if (m_HiVisSlider != null)
+			{
+				m_HiVisSlider.value = bigInterface.HiVisScan;
+			}
+
+			if (m_AnomalySlider != null)
+			{
+				m_AnomalySlider.value = bigInterface.AnomalyScan;
+			}
+
+			if (m_LoResSlider != null)
+			{
+				m_LoResSlider.value = bigInterface.LoResScan;
+			}
+
+			if (m_HiResSlider != null)
+			{
+				m_HiResSlider.value = bigInterface.HiResScan;
 			}
 		}
 
@@ -751,6 +934,160 @@ namespace SCANsat.Unity.Unity
 			}
 
 			SetVesselIcon(bigInterface.VesselInfo);
+		}
+
+		public void OnEnterLoStatus(BaseEventData eventData)
+		{
+			if (_statusTooltip != null)
+				CloseStatusTooltip();
+
+			statusTooltipOn = true;
+			statusTooltipType = 0;
+			OpenStatusTooltip();
+		}
+
+		public void OnExitLoStatus(BaseEventData eventData)
+		{
+			statusTooltipOn = false;
+			CloseStatusTooltip();
+		}
+
+		public void OnEnterHiStatus(BaseEventData eventData)
+		{
+			if (_statusTooltip != null)
+				CloseStatusTooltip();
+
+			statusTooltipOn = true;
+			statusTooltipType = 1;
+			OpenStatusTooltip();
+		}
+
+		public void OnExitHiStatus(BaseEventData eventData)
+		{
+			statusTooltipOn = false;
+			CloseStatusTooltip();
+		}
+
+		public void OnEnterMultiStatus(BaseEventData eventData)
+		{
+			if (_statusTooltip != null)
+				CloseStatusTooltip();
+
+			statusTooltipOn = true;
+			statusTooltipType = 2;
+			OpenStatusTooltip();
+		}
+
+		public void OnExitMultiStatus(BaseEventData eventData)
+		{
+			statusTooltipOn = false;
+			CloseStatusTooltip();
+		}
+
+		public void OnEnterLoVisStatus(BaseEventData eventData)
+		{
+			if (_statusTooltip != null)
+				CloseStatusTooltip();
+
+			statusTooltipOn = true;
+			statusTooltipType = 3;
+			OpenStatusTooltip();
+		}
+
+		public void OnExitLoVisStatus(BaseEventData eventData)
+		{
+			statusTooltipOn = false;
+			CloseStatusTooltip();
+		}
+
+		public void OnEnterHiVisStatus(BaseEventData eventData)
+		{
+			if (_statusTooltip != null)
+				CloseStatusTooltip();
+
+			statusTooltipOn = true;
+			statusTooltipType = 4;
+			OpenStatusTooltip();
+		}
+
+		public void OnExitHiVisStatus(BaseEventData eventData)
+		{
+			statusTooltipOn = false;
+			CloseStatusTooltip();
+		}
+
+		public void OnEnterAnomalyStatus(BaseEventData eventData)
+		{
+			if (_statusTooltip != null)
+				CloseStatusTooltip();
+
+			statusTooltipOn = true;
+			statusTooltipType = 5;
+			OpenStatusTooltip();
+		}
+
+		public void OnExitAnomalyStatus(BaseEventData eventData)
+		{
+			statusTooltipOn = false;
+			CloseStatusTooltip();
+		}
+
+		public void OnEnterLoResStatus(BaseEventData eventData)
+		{
+			if (_statusTooltip != null)
+				CloseStatusTooltip();
+
+			statusTooltipOn = true;
+			statusTooltipType = 6;
+			OpenStatusTooltip();
+		}
+
+		public void OnExitLoResStatus(BaseEventData eventData)
+		{
+			statusTooltipOn = false;
+			CloseStatusTooltip();
+		}
+
+		public void OnEnterHiResStatus(BaseEventData eventData)
+		{
+			if (_statusTooltip != null)
+				CloseStatusTooltip();
+
+			statusTooltipOn = true;
+			statusTooltipType = 7;
+			OpenStatusTooltip();
+		}
+
+		public void OnExitHiResStatus(BaseEventData eventData)
+		{
+			statusTooltipOn = false;
+			CloseStatusTooltip();
+		}
+
+		private void OpenStatusTooltip()
+		{
+			if (m_TooltipPrefab == null || bigInterface.TooltipCanvas == null)
+				return;
+
+			_statusTooltip = Instantiate(m_TooltipPrefab).GetComponent<SCAN_Tooltip>();
+
+			if (_statusTooltip == null)
+				return;
+
+			_statusTooltip.transform.SetParent(bigInterface.TooltipCanvas.transform, false);
+			_statusTooltip.transform.SetAsLastSibling();
+
+			_statusTooltip.Setup(bigInterface.TooltipCanvas, "_", bigInterface.Scale);
+		}
+
+		private void CloseStatusTooltip()
+		{
+			if (_statusTooltip == null)
+				return;
+
+			_statusTooltip.gameObject.SetActive(false);
+			Destroy(_statusTooltip.gameObject);
+			_statusTooltip = null;
 		}
 
 		public void OnEnterLegend(BaseEventData eventData)
