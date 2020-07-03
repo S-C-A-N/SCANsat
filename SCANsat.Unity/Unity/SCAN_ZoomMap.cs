@@ -100,6 +100,12 @@ namespace SCANsat.Unity.Unity
 		[SerializeField]
 		private Sprite m_VesselUnlock = null;
 		[SerializeField]
+		private Image m_ZoomPersistImage = null;
+		[SerializeField]
+		private Sprite m_ZoomPersistSprite = null;
+		[SerializeField]
+		private Sprite m_ZoomForgetSprite = null;
+		[SerializeField]
 		private Image m_WindowState = null;
 		[SerializeField]
 		private Sprite m_WindowMax = null;
@@ -144,6 +150,10 @@ namespace SCANsat.Unity.Unity
 		private SCAN_MapLabel hoverWaypointLabel;
 
 		private ISCAN_ZoomMap zoomInterface;
+
+		private readonly Color WHITE_REFRESH = new Color(0.68f, 0.68f, 0.68f);
+		private readonly Color YELLOW_REFRESH = new Color(0.92f, 0.55f, 0.03f);
+		private readonly Color GREEN_REFRESH = new Color(0.64f, 0.91f, 0.26f);
 
 		protected override void Awake()
 		{
@@ -293,6 +303,9 @@ namespace SCANsat.Unity.Unity
 
 			if (m_VesselLockImage != null && m_VesselLock != null && m_VesselUnlock != null)
 				m_VesselLockImage.sprite = map.VesselLock ? m_VesselLock : m_VesselUnlock;
+
+			if (m_ZoomPersistImage != null && m_ZoomPersistSprite != null && m_ZoomForgetSprite != null)
+				m_ZoomPersistImage.sprite = map.ZoomPersist ? m_ZoomPersistSprite : m_ZoomForgetSprite;
 
 			if (!map.ShowVessel)
 			{
@@ -499,16 +512,16 @@ namespace SCANsat.Unity.Unity
             switch (i)
             {
                 case 0:
-                    if (m_AutoRefresh != null)
-                        m_AutoRefresh.color = Color.white;
+					if (m_AutoRefresh != null)
+						m_AutoRefresh.color = WHITE_REFRESH;
                     break;
                 case 1:
-                    if (m_AutoRefresh != null)
-                        m_AutoRefresh.color = Color.yellow;
+					if (m_AutoRefresh != null)
+						m_AutoRefresh.color = YELLOW_REFRESH;
                     break;
                 case 2:
-                    if (m_AutoRefresh != null)
-                        m_AutoRefresh.color = Color.green;
+					if (m_AutoRefresh != null)
+						m_AutoRefresh.color = GREEN_REFRESH;
                     break;
             }
             
@@ -1391,6 +1404,17 @@ namespace SCANsat.Unity.Unity
 
             UpdateMapData(false);
         }
+
+		public void ToggleZoomPersist()
+		{
+			if (!loaded || zoomInterface == null)
+				return;
+
+			zoomInterface.ZoomPersist = !zoomInterface.ZoomPersist;
+
+			if (m_ZoomPersistImage != null && m_ZoomPersistSprite != null && m_ZoomForgetSprite != null)
+				m_ZoomPersistImage.sprite = zoomInterface.ZoomPersist ? m_ZoomPersistSprite : m_ZoomForgetSprite;
+		}
 
 		public void ZoomOut()
 		{

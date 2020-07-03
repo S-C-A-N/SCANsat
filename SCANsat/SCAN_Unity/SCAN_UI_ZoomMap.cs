@@ -33,6 +33,7 @@ namespace SCANsat.SCAN_Unity
 {
     public class SCAN_UI_ZoomMap : ISCAN_ZoomMap
     {
+
         private bool _isVisible;
 
         private static SCANmap spotmap;
@@ -52,8 +53,6 @@ namespace SCANsat.SCAN_Unity
         private float terrainMin;
         private float terrainMax;
 
-        private const float minZoom = 2;
-        private const float maxZoom = 1000;
 
         private SCANresourceGlobal currentResource;
         private List<SCANresourceGlobal> resources;
@@ -65,6 +64,9 @@ namespace SCANsat.SCAN_Unity
         private SCAN_ZoomMap uiElement;
 
         private const int orbitSteps = 80;
+        private const float minZoom = 2;
+        private const float maxZoom = 1000;
+        private const float DefaultMapScale = 10f;
         private List<SimpleLabelInfo> orbitLabels = new List<SimpleLabelInfo>();
         private Dictionary<string, MapLabelInfo> orbitMapLabels = new Dictionary<string, MapLabelInfo>();
         private const string Aplabel = "Ap";
@@ -266,9 +268,13 @@ namespace SCANsat.SCAN_Unity
                 dat = new SCANdata(b);
 
             data = dat;
-            body = data.Body;
 
-            spotmap.setBody(body);
+            if (body != b)
+            {
+                body = data.Body;
+
+                spotmap.setBody(body);
+            }
 
             if (SCANconfigLoader.GlobalResource)
             {
@@ -281,7 +287,10 @@ namespace SCANsat.SCAN_Unity
             if (ResourceToggle && currentResource != null)
                 checkForScanners();
 
-            spotmap.MapScale = 10;
+            if (SCANcontroller.controller.zoomMapZoomPersist)
+                spotmap.MapScale = SCANcontroller.controller.zoomMapZoom;
+            else
+                spotmap.MapScale = DefaultMapScale;
 
             spotmap.centerAround(lon, lat);
 
@@ -315,6 +324,8 @@ namespace SCANsat.SCAN_Unity
                 resetMapToVessel();
             else
                 resetMap(withCenter, lat, lon);
+
+            SCANcontroller.controller.zoomMapZoom = (float)spotmap.MapScale;
         }
 
         public void resetMap(bool withCenter, double lat, double lon)
@@ -338,17 +349,20 @@ namespace SCANsat.SCAN_Unity
         {
             vessel = FlightGlobals.ActiveVessel;
 
-            body = vessel.mainBody;
+            if (body != vessel.mainBody)
+            {
+                body = vessel.mainBody;
 
-            SCANdata dat = SCANUtil.getData(body);
+                SCANdata dat = SCANUtil.getData(body);
 
-            if (dat == null)
-                dat = new SCANdata(body);
+                if (dat == null)
+                    dat = new SCANdata(body);
 
-            data = dat;
-            body = data.Body;
+                data = dat;
+                body = data.Body;
 
-            spotmap.setBody(body);
+                spotmap.setBody(body);
+            }
 
             if (SCANconfigLoader.GlobalResource)
             {
@@ -1292,6 +1306,12 @@ namespace SCANsat.SCAN_Unity
                 else
                     InputLockManager.RemoveControlLock(controlLock);
             }
+        }
+
+        public bool ZoomPersist
+        {
+            get { return SCANcontroller.controller.zoomMapZoomPersist; }
+            set { SCANcontroller.controller.zoomMapZoomPersist = value; }
         }
 
         public int OrbitSteps

@@ -69,6 +69,8 @@ namespace SCANsat.Unity.Interfaces
 
 		bool LockInput { get; set; }
 
+		bool ZoomPersist { get; set; }
+
 		int OrbitSteps { get; }
 
 		int CurrentScene { get; }
