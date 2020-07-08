@@ -1,3 +1,22 @@
+Version 20.2 - 2020-7-07
+-----------------------
+
+- Fix memory leak related to visual maps
+
+- Add scanning coverage indicators to big map
+
+- Add function to allow the zoom map to remember the last used zoom level
+
+- Update French translations (don-vip)
+
+- Reduced memory usage by visual maps
+- Fixed several errors related to visual maps when using Kopernicus
+
+- Allow vessels with old scanner parts to be loaded in VAB/SPH
+- Fix error when PluginData folder for settings file has been deleted
+- Clarified surface-in-daylight requirement for certain scanners
+- Updated KSPedia entry to reflect newer features of big map, zoom map, and Breaking Ground surface feature detection
+
 Version 20.1 - 2020-6-17
 -----------------------
 
