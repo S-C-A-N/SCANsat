@@ -32,8 +32,6 @@ namespace SCANsat.SCAN_Map
 			pqs = body.pqsController != null;
 			biomeMap = body.BiomeMap != null;
 			data = SCANUtil.getData(body);
-            SCANcontroller.controller.loadOnDemandScaledSpace(body);
-            setVisualMaps();
 			if (data == null)
 			{
 				data = new SCANdata(body);
@@ -566,10 +564,6 @@ namespace SCANsat.SCAN_Map
 		private mapSource mSource;
 		private Texture2D map; // refs above: 214,215,216,232, below, and JSISCANsatRPM.
 		private CelestialBody body = null; // all refs are below
-        //private Texture scaledSpaceMap;
-        //private Texture scaledSpaceNormalMap;
-        private Texture2D readableScaledSpaceMap;
-        private Texture2D readableScaledSpaceNormalMap;
         private SCANresourceGlobal resource;
 		private SCANdata data;
 		private SCANmapLegend mapLegend;
@@ -586,68 +580,45 @@ namespace SCANsat.SCAN_Map
 		private bool terminator;
 		private float mapRedlineDraw = 10;
 
-        /* MAP: nearly trivial functions */
-        public void setBody(CelestialBody b)
-        {
+		/* MAP: nearly trivial functions */
+		public void setBody(CelestialBody b)
+		{
+			SCANcontroller.controller.unloadPQS(body, mSource);
+			SCANcontroller.controller.unloadOnDemandScaledSpace(body, mSource);
+
 			if (body != b)
 			{
-				SCANcontroller.controller.unloadPQS(body, mSource);
-				SCANcontroller.controller.unloadOnDemandScaledSpace(body);
+				SCANcontroller.controller.UnloadVisualMapTexture(body, mSource);
 				body = b;
-				SCANcontroller.controller.loadPQS(body, mSource);
-				SCANcontroller.controller.loadOnDemandScaledSpace(body);
-				pqs = body.pqsController != null;
-				biomeMap = body.BiomeMap != null;
 				data = SCANUtil.getData(body);
+				SCANcontroller.controller.loadOnDemandScaledSpace(body, mSource);
+				SCANcontroller.controller.LoadVisualMapTexture(body, mSource);
+			}
+			else
+			{
+				SCANcontroller.controller.loadOnDemandScaledSpace(body, mSource);
+				SCANcontroller.controller.LoadVisualMapTexture(body, mSource);
+			}
 
-				setVisualMaps();
+			SCANcontroller.controller.loadPQS(body, mSource);
+			pqs = body.pqsController != null;
+			biomeMap = body.BiomeMap != null;
 
-				/* clear cache in place if necessary */
-				if (cache)
+			/* clear cache in place if necessary */
+			if (cache)
+			{
+				for (int x = 0; x < mapwidth; x++)
 				{
-					for (int x = 0; x < mapwidth; x++)
-					{
-						for (int y = 0; y < mapwidth / 2; y++)
-							big_heightmap[x, y] = 0f;
-					}
+					for (int y = 0; y < mapwidth / 2; y++)
+						big_heightmap[x, y] = 0f;
 				}
 			}
+
 
 			if (SCANconfigLoader.GlobalResource)
 			{
 				if (resource != null)
 					resource.CurrentBodyConfig(body.bodyName);
-			}
-		}
-
-        private void setVisualMaps()
-        {
-			DestroyScaledMaps();
-
-            if (body.scaledBody != null)
-            {
-                MeshRenderer scaledMesh = body.scaledBody.GetComponent<MeshRenderer>();
-                if (scaledMesh != null)
-                {
-                    readableScaledSpaceMap = readableTexture(scaledMesh.material.GetTexture("_MainTex"), scaledMesh.material, true);
-
-                    readableScaledSpaceNormalMap = readableTexture(scaledMesh.material.GetTexture("_BumpMap"), scaledMesh.material, false);
-                }
-            }
-        }
-
-		private void DestroyScaledMaps()
-		{
-			if (readableScaledSpaceMap != null)
-			{
-				GameObject.Destroy(readableScaledSpaceMap);
-				readableScaledSpaceMap = null;
-			}
-
-			if (readableScaledSpaceNormalMap != null)
-			{
-				GameObject.Destroy(readableScaledSpaceNormalMap);
-				readableScaledSpaceNormalMap = null;
 			}
 		}
 
@@ -874,6 +845,9 @@ namespace SCANsat.SCAN_Map
 					}
 				}
 			}
+
+			Texture2D readableScaledSpaceMap = SCANcontroller.controller.getVisualMapTexture(body);
+			Texture2D readableScaledSpaceNormalMap = SCANcontroller.controller.getVisualMapNormalTexture(body);
 
 			for (int i = 0; i < map.width; i++)
 			{

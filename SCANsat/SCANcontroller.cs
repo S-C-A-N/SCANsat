@@ -146,9 +146,17 @@ namespace SCANsat
         /* Kopernicus On Demand Loading Data */
         private List<CelestialBody> dataBodies = new List<CelestialBody>();
         private CelestialBody bigMapBodyPQS;
-        private CelestialBody zoomMapBody;
+        private CelestialBody zoomMapBodyPQS;
         private PQSMod KopernicusOnDemand;
         private MonoBehaviour kopernicusScaledSpaceLoader;
+        private CelestialBody bigMapBodyVisual;
+        private CelestialBody zoomMapBodyVisual;
+
+        /* Visual Map Texture Data */
+        private Dictionary<CelestialBody, Texture2D> readableScaledSpaceMaps = new Dictionary<CelestialBody, Texture2D>();
+        private Dictionary<CelestialBody, Texture2D> readableScaledSpaceNormalMaps = new Dictionary<CelestialBody, Texture2D>();
+        private CelestialBody bigMapBodyScaledSpace;
+        private CelestialBody zoomMapBodyScaledSpace;
 
         private SCAN_UI_MainMap _mainMap;
         private SCAN_UI_Instruments _instruments;
@@ -213,6 +221,22 @@ namespace SCANsat
                 body_data.Add(b.bodyName, data);
             else
                 UnityEngine.Debug.LogError("[SCANsat] Warning: SCANdata Dictionary Already Contains Key of This Type");
+        }
+
+        public Texture2D getVisualMapTexture(CelestialBody b)
+        {
+            if (readableScaledSpaceMaps.ContainsKey(b))
+                return readableScaledSpaceMaps[b];
+
+            return null;
+        }
+
+        public Texture2D getVisualMapNormalTexture(CelestialBody b)
+        {
+            if (readableScaledSpaceNormalMaps.ContainsKey(b))
+                return readableScaledSpaceNormalMaps[b];
+
+            return null;
         }
 
         public static List<SCANterrainConfig> EncodeTerrainConfigs
@@ -1096,7 +1120,7 @@ namespace SCANsat
                     if (bigMapBodyPQS != null && bigMapBodyPQS == b)
                         return;
 
-                    if (zoomMapBody != null && zoomMapBody == b)
+                    if (zoomMapBodyPQS != null && zoomMapBodyPQS == b)
                         return;
                     break;
                 case mapSource.BigMap:
@@ -1105,7 +1129,7 @@ namespace SCANsat
 
                     bigMapBodyPQS = b;
 
-                    if (zoomMapBody != null && zoomMapBody == b)
+                    if (zoomMapBodyPQS != null && zoomMapBodyPQS == b)
                         return;
 
                     if (dataBodies.Contains(b))
@@ -1113,10 +1137,10 @@ namespace SCANsat
                     break;
 
                 case mapSource.ZoomMap:
-                    if (zoomMapBody != null && zoomMapBody == b)
+                    if (zoomMapBodyPQS != null && zoomMapBodyPQS == b)
                         return;
 
-                    zoomMapBody = b;
+                    zoomMapBodyPQS = b;
 
                     if (bigMapBodyPQS != null && bigMapBodyPQS == b)
                         return;
@@ -1157,13 +1181,13 @@ namespace SCANsat
                     if (bigMapBodyPQS != null && bigMapBodyPQS == b)
                         return;
 
-                    if (zoomMapBody != null && zoomMapBody == b)
+                    if (zoomMapBodyPQS != null && zoomMapBodyPQS == b)
                         return;
                     break;
                 case mapSource.BigMap:
                     bigMapBodyPQS = null;
 
-                    if (zoomMapBody != null && zoomMapBody == b)
+                    if (zoomMapBodyPQS != null && zoomMapBodyPQS == b)
                         return;
 
                     if (dataBodies.Contains(b))
@@ -1171,7 +1195,7 @@ namespace SCANsat
                     break;
 
                 case mapSource.ZoomMap:
-                    zoomMapBody = null;
+                    zoomMapBodyPQS = null;
 
                     if (bigMapBodyPQS != null && bigMapBodyPQS == b)
                         return;
@@ -1215,7 +1239,7 @@ namespace SCANsat
             SCANUtil.SCANlog("Unloading Kopernicus On Demand PQSMod For {0}", b.bodyName);
         }
 
-        internal void loadOnDemandScaledSpace(CelestialBody b)
+        internal void loadOnDemandScaledSpace(CelestialBody b, mapSource s)
         {
             if (!SCANmainMenuLoader.KopernicusLoaded)
                 return;
@@ -1226,28 +1250,242 @@ namespace SCANsat
             if (b.scaledBody == null)
                 return;
 
-            kopernicusScaledSpaceLoader = b.scaledBody.GetComponents<MonoBehaviour>().Where(s => s.GetType().Name == SCANreflection.KOPERNICUSONDEMANDTYPE).FirstOrDefault();
+            switch(s)
+            {
+                case mapSource.BigMap:
+                    if (bigMapBodyVisual != null && bigMapBodyVisual == b)
+                        return;
+
+                    bigMapBodyVisual = b;
+
+                    if (zoomMapBodyVisual != null && zoomMapBodyVisual == b)
+                        return;
+
+                    break;
+                case mapSource.ZoomMap:
+                    if (zoomMapBodyVisual != null && zoomMapBodyVisual == b)
+                        return;
+
+                    zoomMapBodyVisual = b;
+
+                    if (bigMapBodyVisual != null && bigMapBodyVisual == b)
+                        return;
+                    break;
+            }
+
+            kopernicusScaledSpaceLoader = b.scaledBody.GetComponents<MonoBehaviour>().Where(p => p.GetType().Name == SCANreflection.KOPERNICUSONDEMANDTYPE).FirstOrDefault();
 
             if (kopernicusScaledSpaceLoader == null)
                 return;
 
             SCANreflection.LoadOnDemand(kopernicusScaledSpaceLoader);
+
+            kopernicusScaledSpaceLoader = null;
+
+            SCANUtil.SCANlog("Loading Kopernicus On Demand Scaled Space Map For {0}", b.bodyName);
         }
 
-        internal void unloadOnDemandScaledSpace(CelestialBody b)
+        internal void unloadOnDemandScaledSpace(CelestialBody b, mapSource s)
         {
             if (!SCANmainMenuLoader.KopernicusLoaded)
-                return;
-
-            if (kopernicusScaledSpaceLoader == null)
                 return;
 
             if (b == null)
                 return;
 
+            if (b.scaledBody == null)
+                return;
+
+            switch(s)
+            {
+                case mapSource.BigMap:
+                    bigMapBodyVisual = null;
+
+                    if (zoomMapBodyVisual != null && zoomMapBodyVisual == b)
+                        return;
+                    break;
+                case mapSource.ZoomMap:
+                    zoomMapBodyVisual = null;
+
+                    if (bigMapBodyVisual != null && bigMapBodyVisual == b)
+                        return;
+                    break;
+            }
+
+            bool setInactive = false;
+
+            switch (HighLogic.LoadedScene)
+            {
+                case GameScenes.SPACECENTER:
+                    setInactive = true;
+                    break;
+                case GameScenes.TRACKSTATION:
+                    setInactive = !InCurrentBodyFamily(b);
+                    break;
+                case GameScenes.FLIGHT:
+                    setInactive = !InCurrentBodyFamily(b);
+                    break;
+            }
+
+            if (!setInactive)
+                return;
+
+            kopernicusScaledSpaceLoader = b.scaledBody.GetComponents<MonoBehaviour>().Where(p => p.GetType().Name == SCANreflection.KOPERNICUSONDEMANDTYPE).FirstOrDefault();
+
+            if (kopernicusScaledSpaceLoader == null)
+                return;
+
             SCANreflection.UnloadOnDemand(kopernicusScaledSpaceLoader);
 
             kopernicusScaledSpaceLoader = null;
+
+            SCANUtil.SCANlog("Unloading Kopernicus On Demand Scaled Space Map For {0}", b.bodyName);
+        }
+
+        private bool InCurrentBodyFamily(CelestialBody b)
+        {
+            switch (HighLogic.LoadedScene)
+            {
+                case GameScenes.TRACKSTATION:
+                    MapObject mo = PlanetariumCamera.fetch.target;
+
+                    CelestialBody tgt = null;
+
+                    if (mo.vessel != null)
+                    {
+                        tgt = mo.vessel.mainBody;
+                    }
+                    else if (mo.celestialBody != null)
+                    {
+                        tgt = mo.celestialBody;
+                    }
+
+                    if (tgt == null)
+                        return false;
+
+                    if (b == tgt)
+                        return true;
+
+                    if (tgt.HasChild(b))
+                        return true;
+
+                    if (tgt.HasParent(b))
+                        return true;
+
+                    break;
+                case GameScenes.FLIGHT:
+                    if (b == FlightGlobals.currentMainBody)
+                        return true;
+
+                    if (FlightGlobals.currentMainBody.HasChild(b))
+                        return true;
+
+                    if (FlightGlobals.currentMainBody.HasParent(b))
+                        return true;
+                    break;
+            }
+
+            return false;
+        }
+
+        internal void LoadVisualMapTexture(CelestialBody b, mapSource s)
+        {
+            if (b == null)
+                return;
+
+            if (b.scaledBody == null)
+                return;
+
+            MeshRenderer scaledMesh = b.scaledBody.GetComponent<MeshRenderer>();
+
+            if (scaledMesh == null)
+                return;
+
+            if (!readableScaledSpaceMaps.ContainsKey(b) || readableScaledSpaceMaps[b] == null)
+            {
+                readableScaledSpaceMaps.Add(b, readableTexture(scaledMesh.material.GetTexture("_MainTex"), scaledMesh.material, true));
+            }
+
+            if (!readableScaledSpaceNormalMaps.ContainsKey(b) || readableScaledSpaceNormalMaps[b] == null)
+            {
+                readableScaledSpaceNormalMaps.Add(b, readableTexture(scaledMesh.material.GetTexture("_BumpMap"), scaledMesh.material, false));
+            }
+
+            switch (s)
+            {
+                case mapSource.BigMap:
+                    bigMapBodyScaledSpace = b;
+                    break;
+                case mapSource.ZoomMap:
+                    zoomMapBodyScaledSpace = b;
+                    break;
+            }
+        }
+
+        internal void UnloadVisualMapTexture(CelestialBody b, mapSource s)
+        {
+            if (b == null)
+                return;
+
+            switch (s)
+            {
+                case mapSource.BigMap:
+                    bigMapBodyScaledSpace = null;
+
+                    if (zoomMapBodyScaledSpace != null && zoomMapBodyScaledSpace == b)
+                        return;
+                    break;
+                case mapSource.ZoomMap:
+                    zoomMapBodyScaledSpace = null;
+
+                    if (bigMapBodyScaledSpace != null && bigMapBodyScaledSpace == b)
+                        return;
+                    break;
+            }
+
+            if (readableScaledSpaceMaps.ContainsKey(b))
+            {
+                GameObject.Destroy(readableScaledSpaceMaps[b]);
+                readableScaledSpaceMaps[b] = null;
+                readableScaledSpaceMaps.Remove(b);
+            }
+
+            if (readableScaledSpaceNormalMaps.ContainsKey(b))
+            {
+                GameObject.Destroy(readableScaledSpaceNormalMaps[b]);
+                readableScaledSpaceNormalMaps[b] = null;
+                readableScaledSpaceNormalMaps.Remove(b);
+            }
+        }
+
+        private Texture2D readableTexture(Texture tex, Material mat, bool useMat)
+        {
+            if (tex == null)
+                return null;
+
+            Texture2D readable = new Texture2D(tex.width, tex.height);
+
+            var rt = RenderTexture.GetTemporary(tex.width, tex.height, 0, RenderTextureFormat.ARGB32, RenderTextureReadWrite.sRGB, 1);
+
+            if (useMat)
+                Graphics.Blit(tex, rt, mat);
+            else
+                Graphics.Blit(tex, rt);
+
+            RenderTexture.active = rt;
+
+            readable.ReadPixels(new Rect(0, 0, tex.width, tex.height), 0, 0);
+
+            RenderTexture.active = null;
+            RenderTexture.ReleaseTemporary(rt);
+
+            rt = null;
+
+            readable.Apply();
+
+            tex = null;
+
+            return readable;
         }
 
         private void OnGUI()
