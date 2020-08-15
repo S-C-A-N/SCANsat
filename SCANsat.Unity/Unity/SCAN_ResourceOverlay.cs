@@ -60,7 +60,10 @@ namespace SCANsat.Unity.Unity
 			parent.SetResource(resource, active);
 
 			if (m_ResourceName != null)
+			{
+				m_ResourceName.OnColorUpdate.Invoke(parent.ActiveColor);
 				m_ResourceName.SetNormalColor(parent.ActiveColor);
+			}
 		}
 
 		public void Inactivate()
