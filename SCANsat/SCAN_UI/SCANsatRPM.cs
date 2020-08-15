@@ -750,7 +750,9 @@ namespace SCANsat.SCAN_UI
 
 			float max = -200000;
 			float min = 100000;
-			float terrain = 0;
+
+			float resourceMax = 0;
+			float resourceMin = 100;
 
 			for (int i = 0; i < map.MapHeight; i += 4)
 			{
@@ -762,7 +764,22 @@ namespace SCANsat.SCAN_UI
 					lat = map.unprojectLatitude(lo, la);
 					lon = map.unprojectLongitude(lo, la);
 
-					terrain = (float)SCANUtil.getElevation(b, lon, lat);
+					float terrain = (float)SCANUtil.getElevation(b, lon, lat);
+
+					if (map.Resource != null)
+					{
+						float resource = SCANUtil.ResourceOverlay(lat, lon, map.Resource.Name, orbitingBody, false) * 100f;
+
+						if (resource < resourceMin)
+							resourceMin = resource;
+						if (resource > resourceMax)
+							resourceMax = resource;
+					}
+					else
+					{
+						resourceMax = 100;
+						resourceMin = 0;
+					}
 
 					if (terrain < min)
 						min = terrain;
@@ -777,7 +794,22 @@ namespace SCANsat.SCAN_UI
 			if (min == max)
 				min = max - 1f;
 
-			map.setCustomRange(min, max);
+			if (map.Resource != null && map.Resource.CurrentBody != null && resourceMin < map.Resource.CurrentBody.MinValue)
+				resourceMin = map.Resource.CurrentBody.MinValue;
+
+			if (resourceMin >= resourceMax)
+				resourceMax = resourceMin + 1f;
+
+			if (resourceMin < 0)
+				resourceMin = 0;
+
+			if (map.Resource != null && map.Resource.CurrentBody != null && resourceMax > map.Resource.CurrentBody.MaxValue)
+				resourceMax = map.Resource.CurrentBody.MaxValue;
+
+			if (resourceMin >= resourceMax)
+				resourceMin = resourceMax - 1f;
+
+			map.setCustomRange(min, max, resourceMin, resourceMax);
 		}
 
 		private bool UpdateCheck()
