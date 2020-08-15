@@ -105,6 +105,10 @@ namespace SCANsat.Unity.Interfaces
 
 		Texture2D LegendImage { get; }
 
+		Texture2D ResourceLegendImage { get; }
+
+		Vector2 ResourceLegendLabels { get; }
+
 		IList<string> Projections { get; }
 
 		IList<string> MapTypes { get; }
@@ -138,6 +142,12 @@ namespace SCANsat.Unity.Interfaces
 		void OpenZoomMap();
 
 		void OpenSettings();
+
+		void IncreaseResourceCutoff();
+
+		void DecreaseResourceCutoff();
+
+		void OpenResourceSettings();
 
 		void OpenOverlay();
 

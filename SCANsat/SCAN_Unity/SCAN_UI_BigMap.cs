@@ -88,6 +88,9 @@ namespace SCANsat.SCAN_Unity
 
 		private Texture2D gridMap;
 
+		private Texture2D resourceLegend;
+		private const int RESOURCELEGENDWIDTH = 90;
+
 		private static SCAN_UI_BigMap instance;
 
 		public static SCAN_UI_BigMap Instance
@@ -338,6 +341,8 @@ namespace SCANsat.SCAN_Unity
 
 			clearMap.SetPixel(0, 0, palette.clear);
 			clearMap.Apply();
+
+			bigmap.resetMap(SCANcontroller.controller.bigMapResourceOn);
 		}
 
 		private void AddOrbitMapLabels()
@@ -452,6 +457,24 @@ namespace SCANsat.SCAN_Unity
 			{
 				uiElement.gameObject.SetActive(false);
 				MonoBehaviour.Destroy(uiElement.gameObject);
+			}
+
+			if (resourceLegend != null)
+			{
+				GameObject.Destroy(resourceLegend);
+				resourceLegend = null;
+			}
+
+			if (gridMap != null)
+            {
+				GameObject.Destroy(gridMap);
+				gridMap = null;
+            }
+
+			if (eqMap != null)
+			{
+				GameObject.Destroy(eqMap);
+				eqMap = null;
 			}
 
 			SCANcontroller.controller.unloadPQS(bigmap.Body, mapSource.BigMap);
@@ -1020,7 +1043,9 @@ namespace SCANsat.SCAN_Unity
 
 		private void RefreshEQMap()
 		{
-			eqMap = new Texture2D(bigmap.MapWidth, eq_height, TextureFormat.ARGB32, false);
+			if (eqMap == null || eqMap.width != bigmap.MapWidth)
+				eqMap = new Texture2D(bigmap.MapWidth, eq_height, TextureFormat.ARGB32, false);
+
 			eq_an = new bool[bigmap.MapWidth];
 			eq_dn = new bool[bigmap.MapWidth];
 			eq_pix = new Color32[bigmap.MapWidth * eq_height];
@@ -1051,7 +1076,8 @@ namespace SCANsat.SCAN_Unity
 
 		private void GenerateGridMap()
 		{
-			gridMap = new Texture2D(bigmap.MapWidth, bigmap.MapHeight, TextureFormat.ARGB32, false);
+			if (gridMap == null || gridMap.width != bigmap.MapWidth)
+				gridMap = new Texture2D(bigmap.MapWidth, bigmap.MapHeight, TextureFormat.ARGB32, false);
 
 			Color32[] pix = gridMap.GetPixels32();
 
@@ -1591,6 +1617,51 @@ namespace SCANsat.SCAN_Unity
 			}
 		}
 
+		public Texture2D ResourceLegendImage
+		{
+			get
+            {
+				if (resourceLegend == null)
+					resourceLegend = new Texture2D(RESOURCELEGENDWIDTH, 1, TextureFormat.RGB24, false);
+
+				if (currentResource == null)
+					return null;
+
+				Color32[] pix = new Color32[RESOURCELEGENDWIDTH];
+
+                for (int i = 0; i < RESOURCELEGENDWIDTH; i++)
+                {
+					float val = (i * 1f) / (RESOURCELEGENDWIDTH * 1f);
+					pix[i] = palette.lerp(currentResource.MinColor32, currentResource.MaxColor32, val);
+                }
+
+				resourceLegend.SetPixels32(pix);
+				resourceLegend.Apply();
+
+				return resourceLegend;
+            }
+        }
+
+		public Vector2 ResourceLegendLabels
+		{
+			get
+            {
+				if (currentResource != null)
+				{
+					SCANresourceBody resBody = currentResource.getBodyConfig(body.bodyName);
+
+					if (resBody != null)
+                    {
+						return new Vector2(resBody.MinValue / 100f, resBody.MaxValue / 100f);
+                    }
+
+					return new Vector2(currentResource.DefaultMinValue / 100f, currentResource.DefaultMaxValue/ 100f);
+				}
+
+				return new Vector2(0, 0.1f);
+            }
+        }
+
 		public IList<string> Projections
 		{
 			get { return new List<string>(3) { "Rectangular", "KavrayskiyVII", "Polar" }; }
@@ -1603,7 +1674,40 @@ namespace SCANsat.SCAN_Unity
 
 		public IList<string> Resources
 		{
-			get { return new List<string>(resources.Select(r => r.DisplayName)); }
+			get
+			{
+				List<string> rList = new List<string>();
+
+				bool threshold;
+
+				if (!SCAN_Settings_Config.Instance.HideZeroResources)
+					threshold = SCANUtil.getCoveragePercentage(data, SCANtype.ResourceLoRes) > (SCAN_Settings_Config.Instance.StockTreshold * 100) || SCANUtil.getCoveragePercentage(data, SCANtype.ResourceHiRes) > (SCAN_Settings_Config.Instance.StockTreshold * 100);
+				else
+					threshold = true;
+
+				for (int i = 0; i < resources.Count; i++)
+				{
+					SCANresourceGlobal res = resources[i];
+
+					if (threshold)
+					{
+						SCANresourceBody resBody = res.getBodyConfig(body.bodyName);
+
+						if (resBody != null)
+						{
+							if (resBody.DefaultZero)
+								continue;
+						}
+						else if (res.DefaultZero)
+							continue;
+					}
+
+					rList.Add(res.DisplayName);
+				}
+
+				return rList;
+				//return new List<string>(resources.Select(r => r.DisplayName));
+			}
 		}
 
 		public IList<string> CelestialBodies
@@ -1967,8 +2071,11 @@ namespace SCANsat.SCAN_Unity
             
 			if (SCANUtil.isCovered(lon, lat, data, SCANtype.Biome))
             {
-                infoString.Append(" Biome: ");
-                SCANUtil.getBiomeDisplayName(infoString, body, lon, lat);
+				if (body.BiomeMap != null)
+				{
+					infoString.Append(" Biome: ");
+					SCANUtil.getBiomeDisplayName(infoString, body, lon, lat);
+				}
 				scanStatus |= (byte)(1 << 2);
 			}
 
@@ -2171,7 +2278,7 @@ namespace SCANsat.SCAN_Unity
 		{
 			bigmap.resetMap(SCANcontroller.controller.bigMapResourceOn);
 
-			uiElement.SetLegend(LegendToggle);
+			uiElement.SetLegends(LegendToggle);			
 		}
 
 		public void OpenMainMap()
@@ -2212,6 +2319,111 @@ namespace SCANsat.SCAN_Unity
 				SCAN_UI_Settings.Instance.Close();
 			else
 				SCAN_UI_Settings.Instance.Open();
+		}
+
+		public void IncreaseResourceCutoff()
+        {
+			if (currentResource != null)
+			{
+				SCANresourceBody resBody = currentResource.getBodyConfig(body.bodyName);
+
+				if (resBody != null)
+				{
+					float divisor = resBody.MaxValue / 10f;
+					float min = resBody.MinValue;
+
+					float current = min / divisor;
+					float floor = Mathf.Floor(current);
+
+					floor += 1;
+
+					resBody.MinValue = floor * divisor;
+
+					if (floor * divisor >= resBody.MaxValue)
+						resBody.MinValue = resBody.MaxValue - divisor;
+				}
+
+				bigmap.resetMap(SCANcontroller.controller.bigMapResourceOn);
+
+
+				if (SCAN_UI_ZoomMap.Instance != null && SCAN_UI_ZoomMap.Instance.IsVisible && SCAN_UI_ZoomMap.Instance.ResourceToggle)
+					SCAN_UI_ZoomMap.Instance.RefreshMap();
+
+				if (SCANcontroller.controller.overlaySelection == 2 && SCAN_UI_Overlay.Instance != null && SCAN_UI_Overlay.Instance.DrawOverlay)
+					SCAN_UI_Overlay.Instance.Refresh();
+			}
+		}
+
+		public void DecreaseResourceCutoff()
+		{
+			if (currentResource != null)
+			{
+				SCANresourceBody resBody = currentResource.getBodyConfig(body.bodyName);
+
+				if (resBody != null)
+				{
+					float divisor = resBody.MaxValue / 10f;
+					float min = resBody.MinValue;
+
+					float current = min / divisor;
+					float floor = Mathf.Floor(current);
+
+					if (Mathf.FloorToInt(floor * 100) == Mathf.FloorToInt(current * 100))
+					{
+						floor -= 1;
+					}
+
+					resBody.MinValue = floor * divisor;
+
+					if (floor * divisor >= resBody.MaxValue)
+						resBody.MinValue = resBody.MaxValue - divisor;
+				}
+
+				bigmap.resetMap(SCANcontroller.controller.bigMapResourceOn);
+
+				if (SCAN_UI_ZoomMap.Instance != null && SCAN_UI_ZoomMap.Instance.IsVisible && SCAN_UI_ZoomMap.Instance.ResourceToggle)
+					SCAN_UI_ZoomMap.Instance.RefreshMap();
+
+				if (SCANcontroller.controller.overlaySelection == 2 && SCAN_UI_Overlay.Instance != null && SCAN_UI_Overlay.Instance.DrawOverlay)
+					SCAN_UI_Overlay.Instance.Refresh();
+			}
+		}
+
+		public void OpenResourceSettings()
+		{
+			if (SCAN_UI_Settings.Instance.IsVisible)
+			{
+				if (SCAN_UI_Settings.Instance.Page == 4)
+				{
+					if (SCAN_UI_Settings.Instance.IsCurrentResource(body.bodyName, currentResource.DisplayName))
+					{
+						SCAN_UI_Settings.Instance.Close();
+					}
+					else
+					{
+						SCAN_UI_Settings.Instance.Close();
+						ISCAN_Color col = SCAN_UI_Settings.Instance.ColorInterface;
+						col.ResourcePlanet = body.bodyName;
+						col.ResourceCurrent = currentResource.DisplayName;
+						SCAN_UI_Settings.Instance.Open(4, true, true);
+					}
+				}
+				else
+				{
+					SCAN_UI_Settings.Instance.Close();
+					ISCAN_Color col = SCAN_UI_Settings.Instance.ColorInterface;
+					col.ResourcePlanet = body.bodyName;
+					col.ResourceCurrent = currentResource.DisplayName;
+					SCAN_UI_Settings.Instance.Open(4, true, true);
+				}
+			}
+			else
+			{
+				ISCAN_Color col = SCAN_UI_Settings.Instance.ColorInterface;
+				col.ResourcePlanet = body.bodyName;
+				col.ResourceCurrent = currentResource.DisplayName;
+				SCAN_UI_Settings.Instance.Open(4, false, true);
+			}
 		}
 
 		public void ExportMap()

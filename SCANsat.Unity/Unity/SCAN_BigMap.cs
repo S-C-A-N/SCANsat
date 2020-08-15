@@ -104,6 +104,14 @@ namespace SCANsat.Unity.Unity
 		[SerializeField]
 		private GameObject m_TooltipPrefab = null;
 		[SerializeField]
+		private GameObject m_ResourceBar = null;
+		[SerializeField]
+		private RawImage m_ResourceLegendImage = null;
+		[SerializeField]
+		private TextHandler m_ResourceLegendLabelOne = null;
+		[SerializeField]
+		private TextHandler m_ResourceLegendLabelTwo = null;
+		[SerializeField]
 		private Slider m_LoSlider = null;
 		[SerializeField]
 		private Slider m_HiSlider = null;
@@ -175,6 +183,8 @@ namespace SCANsat.Unity.Unity
 		private bool statusTooltipOn;
 		private byte statusTooltipType;
 		private SCAN_Tooltip _statusTooltip;
+
+		private const float MAXMAPWIDTH = 8200;
 
 		protected override void Awake()
 		{
@@ -450,6 +460,9 @@ namespace SCANsat.Unity.Unity
 			if (m_ResourcesToggle != null)
 				m_ResourcesToggle.isOn = map.ResourceToggle;
 
+			if (m_ResourceBar != null)
+				m_ResourceBar.SetActive(map.ResourceToggle);
+
 			if (!map.OrbitAvailable && m_OrbitObject != null)
 				m_OrbitObject.SetActive(false);
 
@@ -460,6 +473,9 @@ namespace SCANsat.Unity.Unity
 				m_Resources.gameObject.SetActive(false);
 			
 			SetLegend(map.LegendToggle);
+
+			if (map.ResourceToggle)
+				SetResourceLegend();
 
 			SetButtons(map.CurrentScene);
 
@@ -604,7 +620,15 @@ namespace SCANsat.Unity.Unity
 			m_MapLayout.preferredHeight = m_MapLayout.preferredWidth / 2 + 8;
 		}
 
-		public void SetLegend(bool isOn)
+		public void SetLegends(bool isOn)
+        {
+			SetLegend(isOn);
+
+			if (bigInterface.ResourceToggle)
+				SetResourceLegend();
+        }
+
+		private void SetLegend(bool isOn)
 		{
 			if (m_LegendObject == null)
 				return;
@@ -659,6 +683,20 @@ namespace SCANsat.Unity.Unity
 					m_LegendLabelThree.OnTextUpdate.Invoke(labels[2]);
 				}
 			}
+		}
+
+		public void SetResourceLegend()
+        {
+			if (m_ResourceLegendImage != null)
+				m_ResourceLegendImage.texture = bigInterface.ResourceLegendImage;
+
+			Vector2 res = bigInterface.ResourceLegendLabels;
+
+			if (m_ResourceLegendLabelOne != null)
+				m_ResourceLegendLabelOne.OnTextUpdate.Invoke(res.x.ToString(res.x < 0.1 ? "P1" : "P0"));
+
+			if (m_ResourceLegendLabelTwo != null)
+				m_ResourceLegendLabelTwo.OnTextUpdate.Invoke(res.y.ToString(res.y < 0.1 ? "P1" : "P0"));
 		}
 
 		private void SetFlagIcons(IList<MapLabelInfo> flags)
@@ -1195,8 +1233,8 @@ namespace SCANsat.Unity.Unity
 
 			if (m_MapLayout.preferredWidth < m_MapLayout.minWidth)
 				m_MapLayout.preferredWidth = m_MapLayout.minWidth;
-			else if (m_MapLayout.preferredWidth > 8200)
-				m_MapLayout.preferredWidth = 8200;
+			else if (m_MapLayout.preferredWidth > MAXMAPWIDTH)
+				m_MapLayout.preferredWidth = MAXMAPWIDTH;
 
 			if (m_MapLayout.preferredWidth % 2 != 0)
 				m_MapLayout.preferredWidth += 1;
@@ -1434,6 +1472,8 @@ namespace SCANsat.Unity.Unity
 
 			bigInterface.ResourceToggle = true;
 
+			SetResourceLegend();
+
 			dropDown.FadeOut();
 			dropDown = null;
 
@@ -1475,6 +1515,9 @@ namespace SCANsat.Unity.Unity
 			bigInterface.CurrentCelestialBody = selection;
 
 			SetLegend(bigInterface.LegendToggle);
+
+			if (bigInterface.ResourceToggle)
+				SetResourceLegend();
 
 			dropDown.FadeOut();
 			dropDown = null;
@@ -1621,7 +1664,41 @@ namespace SCANsat.Unity.Unity
 
 			bigInterface.ResourceToggle = isOn;
 
+			if (m_ResourceBar != null)
+				m_ResourceBar.SetActive(isOn);
+
 			RefreshIcons();
+
+			if (isOn)
+				SetResourceLegend();
+		}
+
+		public void ResourceCutoffMinus()
+		{
+			if (bigInterface == null)
+				return;
+
+			bigInterface.DecreaseResourceCutoff();
+
+			SetResourceLegend();
+		}
+
+		public void ResourceCutoffPlus()
+		{
+			if (bigInterface == null)
+				return;
+
+			bigInterface.IncreaseResourceCutoff();
+
+			SetResourceLegend();
+		}
+
+		public void OpenResourceSettings()
+		{
+			if (bigInterface == null)
+				return;
+
+			bigInterface.OpenResourceSettings();
 		}
 
 		public void OpenSmallMap()
