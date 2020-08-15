@@ -88,6 +88,12 @@ namespace SCANsat.SCAN_Unity
 				MonoBehaviour.Destroy(uiElement.gameObject);
 			}
 
+			if (map_small != null)
+            {
+				GameObject.Destroy(map_small);
+				map_small = null;
+            }
+
 			GameEvents.onVesselSOIChanged.Remove(soiChange);
 			GameEvents.onVesselChange.Remove(vesselChange);
 			GameEvents.onVesselWasModified.Remove(vesselChange);
@@ -769,7 +775,7 @@ namespace SCANsat.SCAN_Unity
 		{
 			bool biomeMap = data.Body.BiomeMap != null;
 
-			if (biomeBuilding)
+			if (biomeBuilding && biomeMap)
 				buildBiomeCache();
 
 			if (scanline == 0 && TerminatorToggle)
