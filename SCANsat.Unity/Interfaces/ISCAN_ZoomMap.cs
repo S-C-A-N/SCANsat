@@ -93,6 +93,10 @@ namespace SCANsat.Unity.Interfaces
 
 		Texture2D LegendImage { get; }
 
+		Texture2D ResourceLegendImage { get; }
+
+		Vector2 ResourceLegendLabels { get; }
+
 		IList<string> MapTypes { get; }
 
 		IList<string> Resources { get; }

@@ -78,6 +78,14 @@ namespace SCANsat.Unity.Unity
 		[SerializeField]
 		private LayoutElement m_MapLayout = null;
 		[SerializeField]
+		private GameObject m_ResourceBar = null;
+		[SerializeField]
+		private RawImage m_ResourceLegendImage = null;
+		[SerializeField]
+		private TextHandler m_ResourceLegendLabelOne = null;
+		[SerializeField]
+		private TextHandler m_ResourceLegendLabelTwo = null;
+		[SerializeField]
 		private RawImage m_LegendImage = null;
 		[SerializeField]
 		private TextHandler m_LegendLabelOne = null;
@@ -292,6 +300,9 @@ namespace SCANsat.Unity.Unity
 			if (m_ResourceToggle != null)
 				m_ResourceToggle.isOn = map.ResourceToggle;
 
+			if (m_ResourceBar != null)
+				m_ResourceBar.SetActive(map.ResourceToggle);
+
 			if (!map.OrbitAvailable && m_OrbitObject != null)
 				m_OrbitObject.SetActive(false);
 
@@ -317,6 +328,9 @@ namespace SCANsat.Unity.Unity
 			}
 
 			SetLegend(map.LegendToggle);
+
+			if (map.ResourceToggle)
+				SetResourceLegend();
 
 			SetWindowState(map.WindowState);
 
@@ -549,7 +563,15 @@ namespace SCANsat.Unity.Unity
             }
         }
 
-		public void SetLegend(bool isOn)
+		public void SetLegends(bool isOn)
+        {
+			SetLegend(isOn);
+
+			if (zoomInterface.ResourceToggle)
+				SetResourceLegend();
+        }
+
+		private void SetLegend(bool isOn)
 		{
 			if (m_LegendBar == null)
 				return;
@@ -604,6 +626,20 @@ namespace SCANsat.Unity.Unity
 					m_LegendLabelThree.OnTextUpdate.Invoke(labels[2]);
 				}
 			}
+		}
+
+		public void SetResourceLegend()
+		{
+			if (m_ResourceLegendImage != null)
+				m_ResourceLegendImage.texture = zoomInterface.ResourceLegendImage;
+
+			Vector2 res = zoomInterface.ResourceLegendLabels;
+
+			if (m_ResourceLegendLabelOne != null)
+				m_ResourceLegendLabelOne.OnTextUpdate.Invoke(res.x.ToString(res.x < 0.1 ? "P1" : "P0"));
+
+			if (m_ResourceLegendLabelTwo != null)
+				m_ResourceLegendLabelTwo.OnTextUpdate.Invoke(res.y.ToString(res.y < 0.1 ? "P1" : "P0"));
 		}
 
 		private void SetFlagIcons(IList<MapLabelInfo> flags)
@@ -1134,7 +1170,7 @@ namespace SCANsat.Unity.Unity
             resizing = false;
 
 			zoomInterface.Size = new Vector2(m_MapLayout.preferredWidth - 8, m_MapLayout.preferredHeight - 8);
-            
+
             UpdateMapData(true);
 		}
 
@@ -1185,7 +1221,10 @@ namespace SCANsat.Unity.Unity
 
             RefreshIcons();
 
-            SetLegend(zoomInterface.LegendToggle);
+			if (zoomInterface.ResourceToggle)
+				SetResourceLegend();
+
+			SetLegend(zoomInterface.LegendToggle);
         }
 
 		public void ToggleWindowState()
@@ -1257,7 +1296,7 @@ namespace SCANsat.Unity.Unity
 			if (m_DropDownToggles != null)
 				m_DropDownToggles.SetAllTogglesOff();
 
-            UpdateMapData(false);
+			UpdateMapData(false);
 		}
 
 		public void ToggleResourceSelection(bool isOn)
@@ -1306,7 +1345,7 @@ namespace SCANsat.Unity.Unity
 			if (m_DropDownToggles != null)
 				m_DropDownToggles.SetAllTogglesOff();
 
-            UpdateMapData(false);
+			UpdateMapData(false);
         }
 
 		public void RefreshMap()
@@ -1316,7 +1355,7 @@ namespace SCANsat.Unity.Unity
 
 			zoomInterface.RefreshMap();
 
-            UpdateMapData(false);
+			UpdateMapData(false);
         }
 
 		public void ToggleColor(bool isOn)
@@ -1326,7 +1365,7 @@ namespace SCANsat.Unity.Unity
 
 			zoomInterface.ColorToggle = isOn;
 
-            UpdateMapData(false);
+			UpdateMapData(false);
         }
 
 		public void ToggleTerminator(bool isOn)
@@ -1336,7 +1375,7 @@ namespace SCANsat.Unity.Unity
 
 			zoomInterface.TerminatorToggle = isOn;
 
-            UpdateMapData(false);
+			UpdateMapData(false);
         }
 
 		public void ToggleOrbit(bool isOn)
@@ -1376,7 +1415,10 @@ namespace SCANsat.Unity.Unity
 
 			zoomInterface.ResourceToggle = isOn;
 
-            UpdateMapData(false);
+			if (m_ResourceBar != null)
+				m_ResourceBar.SetActive(isOn);
+
+			UpdateMapData(false);
         }
 
 		public void SyncVessel()

@@ -53,6 +53,8 @@ namespace SCANsat.SCAN_Unity
         private float terrainMin;
         private float terrainMax;
 
+        private float resourceMin;
+        private float resourceMax;
 
         private SCANresourceGlobal currentResource;
         private List<SCANresourceGlobal> resources;
@@ -62,6 +64,9 @@ namespace SCANsat.SCAN_Unity
         private List<Vessel> mapFlags = new List<Vessel>();
 
         private SCAN_ZoomMap uiElement;
+
+        private Texture2D resourceLegend;
+        private const int RESOURCELEGENDWIDTH = 90;
 
         private const int orbitSteps = 80;
         private const float minZoom = 2;
@@ -381,9 +386,11 @@ namespace SCANsat.SCAN_Unity
             int w = spotmap.MapWidth / 4;
             int h = spotmap.MapHeight / 4;
 
+            resourceMax = 0;
+            resourceMin = 100;
+
             terrainMax = -200000;
             terrainMin = 100000;
-            float terrain = 0;
 
             for (int i = 0; i < spotmap.MapHeight; i += 4)
             {
@@ -395,10 +402,25 @@ namespace SCANsat.SCAN_Unity
                     lat = spotmap.unprojectLatitude(lo, la);
                     lon = spotmap.unprojectLongitude(lo, la);
 
-                    if (lon < -180 || lon >= 180 || lat < -90 && lat >= 90 || double.IsNaN(lon) || double.IsNaN(lat))
+                    if (double.IsNaN(lon) || double.IsNaN(lat) || lon < -180 || lon >= 180 || lat < -90 && lat >= 90)
                         continue;
 
-                    terrain = (float)SCANUtil.getElevation(body, lon, lat);
+                    float terrain = (float)SCANUtil.getElevation(body, lon, lat);
+
+                    if (currentResource != null)
+                    {
+                        float resource = SCANUtil.ResourceOverlay(lat, lon, currentResource.Name, body, false) * 100f;
+
+                        if (resource < resourceMin)
+                            resourceMin = resource;
+                        if (resource > resourceMax)
+                            resourceMax = resource;
+                    }
+                    else
+                    {
+                        resourceMax = 100;
+                        resourceMin = 0;
+                    }
 
                     if (terrain < terrainMin)
                         terrainMin = terrain;
@@ -413,7 +435,22 @@ namespace SCANsat.SCAN_Unity
             if (terrainMin == terrainMax)
                 terrainMin = terrainMax - 1f;
 
-            spotmap.setCustomRange(terrainMin, terrainMax);
+            if (currentResource != null && currentResource.CurrentBody != null && resourceMin < currentResource.CurrentBody.MinValue)
+                resourceMin = currentResource.CurrentBody.MinValue;
+
+            if (resourceMin >= resourceMax)
+                resourceMax = resourceMin + 1f;
+
+            if (resourceMin < 0)
+                resourceMin = 0;
+
+            if (currentResource != null && currentResource.CurrentBody != null && resourceMax > currentResource.CurrentBody.MaxValue)
+                resourceMax = currentResource.CurrentBody.MaxValue;
+
+            if (resourceMin >= resourceMax)
+                resourceMin = resourceMax - 1f;
+
+            spotmap.setCustomRange(terrainMin, terrainMax, resourceMin, resourceMax);
         }
 
         private void checkForScanners()
@@ -543,6 +580,12 @@ namespace SCANsat.SCAN_Unity
             {
                 uiElement.gameObject.SetActive(false);
                 MonoBehaviour.Destroy(uiElement.gameObject);
+            }
+
+            if (resourceLegend != null)
+            {
+                GameObject.Destroy(resourceLegend);
+                resourceLegend = null;
             }
         }
 
@@ -1463,7 +1506,40 @@ namespace SCANsat.SCAN_Unity
 
 		public IList<string> Resources
 		{
-			get { return new List<string>(resources.Select(r => r.DisplayName)); }
+            get
+            {
+                List<string> rList = new List<string>();
+
+                bool threshold;
+
+                if (!SCAN_Settings_Config.Instance.HideZeroResources)
+                    threshold = SCANUtil.getCoveragePercentage(data, SCANtype.ResourceLoRes) > (SCAN_Settings_Config.Instance.StockTreshold * 100) || SCANUtil.getCoveragePercentage(data, SCANtype.ResourceHiRes) > (SCAN_Settings_Config.Instance.StockTreshold * 100);
+                else
+                    threshold = true;
+
+                for (int i = 0; i < resources.Count; i++)
+                {
+                    SCANresourceGlobal res = resources[i];
+
+                    if (threshold)
+                    {
+                        SCANresourceBody resBody = res.getBodyConfig(body.bodyName);
+
+                        if (resBody != null)
+                        {
+                            if (resBody.DefaultZero)
+                                continue;
+                        }
+                        else if (res.DefaultZero)
+                            continue;
+                    }
+
+                    rList.Add(res.DisplayName);
+                }
+
+                return rList;
+            }
+            //get { return new List<string>(resources.Select(r => r.DisplayName)); }
 		}
 
 		public IList<string> LegendLabels
@@ -1558,6 +1634,36 @@ namespace SCANsat.SCAN_Unity
 
 			return new Vector2((float)Lon, (float)Lat);
 		}
+        
+		public Texture2D ResourceLegendImage
+		{
+			get
+            {
+				if (resourceLegend == null)
+					resourceLegend = new Texture2D(RESOURCELEGENDWIDTH, 1, TextureFormat.RGB24, false);
+
+				if (currentResource == null)
+					return null;
+
+				Color32[] pix = new Color32[RESOURCELEGENDWIDTH];
+
+                for (int i = 0; i < RESOURCELEGENDWIDTH; i++)
+                {
+					float val = (i * 1f) / (RESOURCELEGENDWIDTH * 1f);
+					pix[i] = palette.lerp(currentResource.MinColor32, currentResource.MaxColor32, val);
+                }
+
+				resourceLegend.SetPixels32(pix);
+				resourceLegend.Apply();
+
+				return resourceLegend;
+            }
+        }
+
+		public Vector2 ResourceLegendLabels
+        {
+            get { return new Vector2(resourceMin / 100f, resourceMax / 100f); }
+        }
 
 		public Dictionary<string, MapLabelInfo> OrbitLabelList
 		{
@@ -1789,7 +1895,7 @@ namespace SCANsat.SCAN_Unity
 
 		public string MapInfo(Vector2 mapPos)
 		{
-			Vector2d pos = MousePosition(mapPos);
+            Vector2d pos = MousePosition(mapPos);
 
 			double mlon = pos.x;
 			double mlat = pos.y;
@@ -1827,8 +1933,11 @@ namespace SCANsat.SCAN_Unity
 
             if (SCANUtil.isCovered(lon, lat, data, SCANtype.Biome))
             {
-                SCANUtil.getBiomeDisplayName(infoString, body, lon, lat);
-                infoString.Append(" ");
+                if (body.BiomeMap != null)
+                {
+                    SCANUtil.getBiomeDisplayName(infoString, body, lon, lat);
+                    infoString.Append(" ");
+                }
             }
 
             if (SCANconfigLoader.GlobalResource && spotmap.Resource != null)
@@ -1982,7 +2091,7 @@ namespace SCANsat.SCAN_Unity
 		{
 			resetMap();
 
-			uiElement.SetLegend(LegendToggle);
+			uiElement.SetLegends(LegendToggle);
 		}
 
 		public void VesselSync()
