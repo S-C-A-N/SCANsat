@@ -40,7 +40,27 @@ namespace SCANsat.Unity.Unity
 
 		private SettingsPage currentPage;
 
-		public void setup(ISCAN_Settings settings, ISCAN_Color color)
+		public bool IsResourcePage(string body, string resource)
+		{
+			if (currentPage != null)
+			{
+				if (currentPage is SCAN_ColorResource)
+				{
+					if (colorInterface != null)
+					{
+						if (colorInterface.ResourcePlanet == body)
+						{
+							if (colorInterface.ResourceCurrent == resource)
+								return true;
+						}
+					}
+				}
+			}
+
+			return false;
+		}
+
+		public void setup(ISCAN_Settings settings, ISCAN_Color color, bool resource)
 		{
 			if (settings == null || color == null)
 				return;
@@ -48,7 +68,10 @@ namespace SCANsat.Unity.Unity
 			settingsInterface = settings;
 			colorInterface = color;
 
-            AltimetrySettings(true);
+			if (resource)
+				ResourceSettings(true);
+			else
+	            AltimetrySettings(true);
 		}
 
 		public override void OnPointerDown(PointerEventData eventData)

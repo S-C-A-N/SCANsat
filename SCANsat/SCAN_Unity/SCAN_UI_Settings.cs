@@ -69,6 +69,16 @@ namespace SCANsat.SCAN_Unity
 			}
 		}
 
+		public bool IsCurrentResource(string body, string resource)
+        {
+			if (uiElement != null)
+            {
+				return uiElement.IsCurrentResourceActive(body, resource);
+            }
+
+			return false;
+        }
+
 		public void OnDestroy()
 		{
 			if (uiElement != null)
@@ -89,7 +99,7 @@ namespace SCANsat.SCAN_Unity
 				, SCANcontroller.controller.ActualPasses);
 		}
 
-		public void Open(int page = 0, bool savePosition = false)
+		public void Open(int page = 0, bool savePosition = false, bool forceResource = false)
 		{
 			if (uiElement != null)
 			{
@@ -104,7 +114,7 @@ namespace SCANsat.SCAN_Unity
 
 			uiElement.transform.SetParent(UIMasterController.Instance.dialogCanvas.transform, false);
 
-			uiElement.setSettings(this, page);
+			uiElement.setSettings(this, page, forceResource);
 
 			if (!savePosition)
 				_position = new Vector2(0, 100);
@@ -533,6 +543,12 @@ namespace SCANsat.SCAN_Unity
 			get { return SCAN_Settings_Config.Instance.UseStockTreshold; }
 			set { SCAN_Settings_Config.Instance.UseStockTreshold = value; }
 		}
+
+		public bool HideZeroResources
+        {
+			get { return SCAN_Settings_Config.Instance.HideZeroResources; }
+			set { SCAN_Settings_Config.Instance.HideZeroResources = value; }
+        }
 
 		public bool GreyScale
 		{

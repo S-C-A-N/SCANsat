@@ -58,6 +58,7 @@ namespace SCANsat.Unity.Unity
         private Vector2 mouseStart;
         private Vector3 windowStart;
         private int _page;
+        private bool _forceResource;
 
         private SettingsPage CurrentPage;
         private SCAN_Popup warningPopup;
@@ -97,6 +98,19 @@ namespace SCANsat.Unity.Unity
             set { dropDown = value; }
         }
 
+        public bool IsCurrentResourceActive(string body, string resource)
+        {
+            if (CurrentPage != null)
+            {
+                if (CurrentPage is SCAN_ColorControl)
+                {
+                    return ((SCAN_ColorControl)CurrentPage).IsResourcePage(body, resource);
+                }
+            }
+
+            return false;
+        }
+
         public void ClearWarningsAndDropDown()
         {
             if (dropDown != null)
@@ -133,7 +147,7 @@ namespace SCANsat.Unity.Unity
             settingsInterface.Update();
         }
 
-        public void setSettings(ISCAN_Settings settings, int page)
+        public void setSettings(ISCAN_Settings settings, int page, bool resource)
         {
             if (settings == null)
                 return;
@@ -144,6 +158,7 @@ namespace SCANsat.Unity.Unity
                 m_Version.OnTextUpdate.Invoke(settings.Version);
 
             _page = page;
+            _forceResource = resource;
 
             switch (page)
             {
@@ -469,7 +484,7 @@ namespace SCANsat.Unity.Unity
 
 			CurrentPage.transform.SetParent(m_ContentTransform, false);
 
-			((SCAN_ColorControl)CurrentPage).setup(settingsInterface, settingsInterface.ColorInterface);
+			((SCAN_ColorControl)CurrentPage).setup(settingsInterface, settingsInterface.ColorInterface, _forceResource);
 
 			ProcessTooltips();
 

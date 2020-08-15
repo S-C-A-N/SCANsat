@@ -59,7 +59,6 @@ namespace SCANsat.SCAN_Unity
             get { return instance; }
         }
 
-
         private float _unscannedTransparency;
         private float _backgroundTransparency;
         private float _biomeTransparency;
@@ -87,6 +86,8 @@ namespace SCANsat.SCAN_Unity
 			else if (HighLogic.LoadedSceneIsFlight)
 				_resourcePlanet = FlightGlobals.currentMainBody.bodyName;
 
+			loadedResources = SCANcontroller.setLoadedResourceList();
+
 			_terrainPlanet = _resourcePlanet;
 		}
 
@@ -101,8 +102,12 @@ namespace SCANsat.SCAN_Unity
 
 			_slopeCutoff = SCAN_Settings_Config.Instance.SlopeCutoff;
 
-			loadedResources = SCANcontroller.setLoadedResourceList();
-			currentResource = new SCANresourceGlobal(loadedResources[0]);
+			//loadedResources = SCANcontroller.setLoadedResourceList();
+
+			if (currentResource == null || currentResource.CurrentBody == null || currentResource.CurrentBody.Body.bodyName != _resourcePlanet)
+			{
+				currentResource = new SCANresourceGlobal(loadedResources[0]);
+			}
 
 			if (currentResource != null)
 			{
@@ -112,7 +117,7 @@ namespace SCANsat.SCAN_Unity
 				_resourceMax = currentResource.CurrentBody.MaxValue;
 				_resourceTransparency = currentResource.Transparency;
 			}
-
+			
 			currentTerrain = SCANcontroller.getTerrainNode(_terrainPlanet);
 
 			if (currentTerrain != null)
@@ -160,7 +165,7 @@ namespace SCANsat.SCAN_Unity
 			{
 				_resourceCurrent = value;
 
-				if (currentResource.DisplayName != value)
+				if (currentResource == null || currentResource.DisplayName != value)
 				{
 					for (int i = loadedResources.Count - 1; i >= 0; i--)
 					{
@@ -756,6 +761,9 @@ namespace SCANsat.SCAN_Unity
 
 			if (SCAN_UI_ZoomMap.Instance != null && SCAN_UI_ZoomMap.Instance.IsVisible && SCAN_UI_ZoomMap.Instance.ResourceToggle)
 				SCAN_UI_ZoomMap.Instance.RefreshMap();
+
+			if (SCANcontroller.controller.overlaySelection == 2 && SCAN_UI_Overlay.Instance != null && SCAN_UI_Overlay.Instance.DrawOverlay)
+				SCAN_UI_Overlay.Instance.Refresh();
 		}
 
 		public void ResourceApplyToAll(Color one, Color two)
@@ -773,6 +781,9 @@ namespace SCANsat.SCAN_Unity
 
 			if (SCAN_UI_ZoomMap.Instance != null && SCAN_UI_ZoomMap.Instance.IsVisible && SCAN_UI_ZoomMap.Instance.ResourceToggle)
 				SCAN_UI_ZoomMap.Instance.RefreshMap();
+
+			if (SCANcontroller.controller.overlaySelection == 2 && SCAN_UI_Overlay.Instance != null && SCAN_UI_Overlay.Instance.DrawOverlay)
+				SCAN_UI_Overlay.Instance.Refresh();
 		}
 
 		public void ResourceDefault()
@@ -783,10 +794,20 @@ namespace SCANsat.SCAN_Unity
 			currentResource.MaxColor = currentResource.DefaultHighColor;
 			currentResource.Transparency = currentResource.DefaultTrans;
 
+			_resourceMin = currentResource.CurrentBody.MinValue;
+			_resourceMax = currentResource.CurrentBody.MaxValue;
+			_resourceTransparency = currentResource.Transparency;
+
 			SCANcontroller.updateSCANresource(currentResource, false);
 
 			if (SCAN_UI_BigMap.Instance != null && SCAN_UI_BigMap.Instance.IsVisible && SCAN_UI_BigMap.Instance.ResourceToggle)
 				SCAN_UI_BigMap.Instance.RefreshMap();
+
+			if (SCAN_UI_ZoomMap.Instance != null && SCAN_UI_ZoomMap.Instance.IsVisible && SCAN_UI_ZoomMap.Instance.ResourceToggle)
+				SCAN_UI_ZoomMap.Instance.RefreshMap();
+
+			if (SCANcontroller.controller.overlaySelection == 2 && SCAN_UI_Overlay.Instance != null && SCAN_UI_Overlay.Instance.DrawOverlay)
+				SCAN_UI_Overlay.Instance.Refresh();
 		}
 
 		public void ResourceDefaultToAll()
@@ -797,6 +818,10 @@ namespace SCANsat.SCAN_Unity
 			currentResource.MaxColor = currentResource.DefaultHighColor;
 			currentResource.Transparency = currentResource.DefaultTrans;
 
+			_resourceMin = currentResource.CurrentBody.MinValue;
+			_resourceMax = currentResource.CurrentBody.MaxValue;
+			_resourceTransparency = currentResource.Transparency;
+
 			SCANcontroller.updateSCANresource(currentResource, true);
 
 			if (SCAN_UI_BigMap.Instance != null && SCAN_UI_BigMap.Instance.IsVisible && SCAN_UI_BigMap.Instance.ResourceToggle)
@@ -804,6 +829,9 @@ namespace SCANsat.SCAN_Unity
 
 			if (SCAN_UI_ZoomMap.Instance != null && SCAN_UI_ZoomMap.Instance.IsVisible && SCAN_UI_ZoomMap.Instance.ResourceToggle)
 				SCAN_UI_ZoomMap.Instance.RefreshMap();
+
+			if (SCANcontroller.controller.overlaySelection == 2 && SCAN_UI_Overlay.Instance != null && SCAN_UI_Overlay.Instance.DrawOverlay)
+				SCAN_UI_Overlay.Instance.Refresh();
 		}
 
 		public void ResourceSaveToConfig(Color one, Color two)
@@ -821,6 +849,9 @@ namespace SCANsat.SCAN_Unity
 
 			if (SCAN_UI_ZoomMap.Instance != null && SCAN_UI_ZoomMap.Instance.IsVisible && SCAN_UI_ZoomMap.Instance.ResourceToggle)
 				SCAN_UI_ZoomMap.Instance.RefreshMap();
+
+			if (SCANcontroller.controller.overlaySelection == 2 && SCAN_UI_Overlay.Instance != null && SCAN_UI_Overlay.Instance.DrawOverlay)
+				SCAN_UI_Overlay.Instance.Refresh();
 
 			SCANconfigLoader.SCANNode.Save();
 		}
@@ -846,6 +877,9 @@ namespace SCANsat.SCAN_Unity
 
 			if (SCAN_UI_ZoomMap.Instance != null && SCAN_UI_ZoomMap.Instance.IsVisible && SCAN_UI_ZoomMap.Instance.CurrentMapType == "Altimetry")
 				SCAN_UI_ZoomMap.Instance.RefreshMap();
+
+			if (SCANcontroller.controller.overlaySelection == 1 && SCAN_UI_Overlay.Instance != null && SCAN_UI_Overlay.Instance.DrawOverlay)
+				SCAN_UI_Overlay.Instance.Refresh();
 		}
 
 		public void TerrainDefault()
@@ -870,6 +904,9 @@ namespace SCANsat.SCAN_Unity
 
 			if (SCAN_UI_ZoomMap.Instance != null && SCAN_UI_ZoomMap.Instance.IsVisible && SCAN_UI_ZoomMap.Instance.CurrentMapType == "Altimetry")
 				SCAN_UI_ZoomMap.Instance.RefreshMap();
+
+			if (SCANcontroller.controller.overlaySelection == 1 && SCAN_UI_Overlay.Instance != null && SCAN_UI_Overlay.Instance.DrawOverlay)
+				SCAN_UI_Overlay.Instance.Refresh();
 		}
 
 		public void TerrainSaveToConfig()
@@ -893,6 +930,9 @@ namespace SCANsat.SCAN_Unity
 
 			if (SCAN_UI_ZoomMap.Instance != null && SCAN_UI_ZoomMap.Instance.IsVisible && SCAN_UI_ZoomMap.Instance.CurrentMapType == "Altimetry")
 				SCAN_UI_ZoomMap.Instance.RefreshMap();
+
+			if (SCANcontroller.controller.overlaySelection == 1 && SCAN_UI_Overlay.Instance != null && SCAN_UI_Overlay.Instance.DrawOverlay)
+				SCAN_UI_Overlay.Instance.Refresh();
 		}
 	}
 }

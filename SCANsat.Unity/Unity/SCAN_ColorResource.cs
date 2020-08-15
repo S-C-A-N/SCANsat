@@ -114,8 +114,14 @@ namespace SCANsat.Unity.Unity
 			if (m_MinSlider != null)
 				m_MinSlider.value = colorInterface.ResourceMin;
 
+			if (m_MinText != null)
+				m_MinText.OnTextUpdate.Invoke(string.Format("Min: {0}%", colorInterface.ResourceMin.ToString("N2")));
+
 			if (m_MaxSlider != null)
 				m_MaxSlider.value = colorInterface.ResourceMax;
+
+			if (m_MaxText != null)
+				m_MaxText.OnTextUpdate.Invoke(string.Format("Max: {0}%", colorInterface.ResourceMax.ToString("N2")));
 
 			if (m_TransSlider != null)
 				m_TransSlider.value = colorInterface.ResourceTransparency;
