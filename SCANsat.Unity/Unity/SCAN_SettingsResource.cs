@@ -35,6 +35,8 @@ namespace SCANsat.Unity.Unity
 		[SerializeField]
 		private SCAN_Toggle m_StockThresholdToggle = null;
 		[SerializeField]
+		private SCAN_Toggle m_HideZeroResourcesToggle = null;
+		[SerializeField]
 		private TextHandler m_StockThresholdValue = null;
 		[SerializeField]
 		private InputHandler m_ThresholdInput = null;
@@ -95,6 +97,9 @@ namespace SCANsat.Unity.Unity
 
 			if (m_StockThresholdValue != null)
 				m_StockThresholdValue.OnTextUpdate.Invoke("Stock Scan Threshold: " + set.StockThresholdValue.ToString("P0"));
+
+			if (m_HideZeroResourcesToggle != null)
+				m_HideZeroResourcesToggle.isOn = set.HideZeroResources;
 
 			if (set.DisableStock)
 			{
@@ -266,6 +271,14 @@ namespace SCANsat.Unity.Unity
 				if (m_StockThresholdValue != null)
 					m_StockThresholdValue.OnTextUpdate.Invoke("Stock Scan Threshold: " + value.ToString("P0"));
 			}
+		}
+
+		public void HideZeroResources(bool isOn)
+		{
+			if (!loaded || settings == null)
+				return;
+
+			settings.HideZeroResources = isOn;
 		}
 
 		public void OnInputClick(BaseEventData eventData)

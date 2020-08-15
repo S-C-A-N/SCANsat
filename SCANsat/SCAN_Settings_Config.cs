@@ -63,6 +63,8 @@ namespace SCANsat
 		[Persistent]
 		public float StockTreshold = 0.9f;
 		[Persistent]
+		public bool HideZeroResources = true;
+		[Persistent]
 		public int Interpolation = 8;
 		[Persistent]
 		public int ResourceMapHeight = 256;

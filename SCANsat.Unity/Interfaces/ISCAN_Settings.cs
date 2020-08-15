@@ -99,6 +99,8 @@ namespace SCANsat.Unity.Interfaces
 
 		bool StockThreshold { get; set; }
 
+		bool HideZeroResources { get; set; }
+
 		bool GreyScale { get; set; }
 
 		bool ExportCSV { get; set; }
