@@ -12,8 +12,10 @@
 #endregion
 
 using System.Linq;
+using System;
 using SCANsat.SCAN_Data;
 using palette = SCANsat.SCAN_UI.UI_Framework.SCANcolorUtil;
+using Contracts.Parameters;
 
 namespace SCANsat
 {
@@ -67,20 +69,20 @@ namespace SCANsat
 			{
 				if ((HarvestTypes)rs.ResourceType != HarvestTypes.Planetary)
 					continue;
-
 				SCANresourceGlobal currentGlobal = SCANcontroller.getResourceNode(rs.ResourceName);
 
 				PartResourceDefinition pr = PartResourceLibrary.Instance.GetDefinition(rs.ResourceName);
                 
 				if (currentGlobal == null)
 				{
-                    SCANcontroller.addToResourceData(rs.ResourceName, new SCANresourceGlobal(rs.ResourceName, pr == null ? rs.ResourceName : pr.displayName, 20, rs.Distribution.MinAbundance, rs.Distribution.MaxAbundance, palette.magenta, palette.cb_orange));//, t));
+					SCANcontroller.addToResourceData(rs.ResourceName, new SCANresourceGlobal(rs.ResourceName, pr == null || string.IsNullOrEmpty(pr.displayName) ? rs.ResourceName : pr.displayName, 20, rs.Distribution.MinAbundance, rs.Distribution.MaxAbundance, palette.magenta, palette.cb_orange));//, t));
 					currentGlobal = SCANcontroller.getResourceNode(rs.ResourceName, true);
 				}
 
-				currentGlobal.DisplayName = pr == null ? rs.ResourceName : pr.displayName;
-                
-				if (rs.Distribution.MinAbundance > currentGlobal.DefaultMinValue)
+				currentGlobal.DisplayName = pr == null || string.IsNullOrEmpty(pr.displayName) ? rs.ResourceName : pr.displayName;
+				currentGlobal.DefaultZero = rs.Distribution.PresenceChance <= 0;
+
+				if (rs.Distribution.MinAbundance < currentGlobal.DefaultMinValue)
 					currentGlobal.DefaultMinValue = rs.Distribution.MinAbundance;
 
 				if (rs.Distribution.MaxAbundance > currentGlobal.DefaultMaxValue)
@@ -91,7 +93,9 @@ namespace SCANsat
 					SCANresourceBody newBody = currentGlobal.getBodyConfig(body.bodyName, false);
 
 					if (newBody == null)
-						currentGlobal.addToBodyConfigs(body.bodyName, new SCANresourceBody(rs.ResourceName, body, currentGlobal.DefaultMinValue, currentGlobal.DefaultMaxValue), false);
+						currentGlobal.addToBodyConfigs(body.bodyName, new SCANresourceBody(rs.ResourceName, body, currentGlobal.DefaultMinValue, currentGlobal.DefaultMaxValue, currentGlobal.DefaultZero), false);
+					else
+						newBody.DefaultZero = currentGlobal.DefaultZero;
 				}
 
 				SCANcontroller.addToLoadedResourceNames(rs.ResourceName);
@@ -107,18 +111,18 @@ namespace SCANsat
 				if (currentGlobal == null)
 				{
 					PartResourceDefinition pr = PartResourceLibrary.Instance.GetDefinition(rsBody.ResourceName);
-                    SCANcontroller.addToResourceData(rsBody.ResourceName, new SCANresourceGlobal(rsBody.ResourceName, pr == null ? rsBody.ResourceName : pr.displayName, 20, 0, 0.001f, palette.magenta, palette.cb_orange));//, t));
+					SCANcontroller.addToResourceData(rsBody.ResourceName, new SCANresourceGlobal(rsBody.ResourceName, pr == null || string.IsNullOrEmpty(pr.displayName) ? rsBody.ResourceName : pr.displayName, 20, 0, 10f, palette.magenta, palette.cb_orange));//, t));
 					currentGlobal = SCANcontroller.getResourceNode(rsBody.ResourceName, true);
+
+					currentGlobal.DefaultZero = true;
 
 					foreach (CelestialBody body in FlightGlobals.Bodies)
 					{
 						SCANresourceBody newBody = currentGlobal.getBodyConfig(body.bodyName, false);
 
 						if (newBody == null)
-							currentGlobal.addToBodyConfigs(body.bodyName, new SCANresourceBody(rsBody.ResourceName, body, 0, 0.001f), false);
+							currentGlobal.addToBodyConfigs(body.bodyName, new SCANresourceBody(rsBody.ResourceName, body, 0, 0.001f, true), false);
 					}
-
-					SCANcontroller.addToLoadedResourceNames(rsBody.ResourceName);
                 }
 
 				SCANresourceBody currentBody = currentGlobal.getBodyConfig(rsBody.PlanetName, false);
@@ -129,16 +133,88 @@ namespace SCANsat
 					if (body == null)
 						continue;
 
-					currentGlobal.addToBodyConfigs(rsBody.PlanetName, new SCANresourceBody(rsBody.ResourceName, body, rsBody.Distribution.MinAbundance, rsBody.Distribution.MaxAbundance), false);
+					currentGlobal.addToBodyConfigs(rsBody.PlanetName, new SCANresourceBody(rsBody.ResourceName, body, rsBody.Distribution.MinAbundance, rsBody.Distribution.MaxAbundance, rsBody.Distribution.PresenceChance <= 0), false);
 					currentBody = currentGlobal.getBodyConfig(rsBody.PlanetName, false);
 				}
 
-				if (rsBody.Distribution.MinAbundance > currentBody.DefaultMinValue)
+				if (rsBody.Distribution.MinAbundance < currentBody.DefaultMinValue)
 					currentBody.DefaultMinValue = rsBody.Distribution.MinAbundance;
 
 				if (rsBody.Distribution.MaxAbundance > currentBody.DefaultMaxValue)
 					currentBody.DefaultMaxValue = rsBody.Distribution.MaxAbundance;
+
+				if (rsBody.Distribution.PresenceChance <= 0)
+					currentBody.DefaultZero = true;
+				else
+					currentBody.DefaultZero = false;
+
+				SCANcontroller.addToLoadedResourceNames(rsBody.ResourceName, false);
 			}
+
+			foreach (CelestialBody body in FlightGlobals.Bodies)
+			{
+				foreach (var rsBiome in ResourceCache.Instance.BiomeResources)
+				{
+					if ((HarvestTypes)rsBiome.ResourceType != HarvestTypes.Planetary)
+						continue;
+
+					if (body.bodyName != rsBiome.PlanetName)
+						continue;
+
+					SCANresourceGlobal currentGlobal = SCANcontroller.getResourceNode(rsBiome.ResourceName);
+
+					if (currentGlobal == null)
+					{
+						//SCANUtil.SCANlog("Adding biome resource node global config: {0}", rsBiome.ResourceName);
+						PartResourceDefinition pr = PartResourceLibrary.Instance.GetDefinition(rsBiome.ResourceName);
+						SCANcontroller.addToResourceData(rsBiome.ResourceName, new SCANresourceGlobal(rsBiome.ResourceName, pr == null || string.IsNullOrEmpty(pr.displayName) ? rsBiome.ResourceName : pr.displayName, 20, 0, 10, palette.magenta, palette.cb_orange));//, t));
+						currentGlobal = SCANcontroller.getResourceNode(rsBiome.ResourceName, true);
+
+						currentGlobal.DefaultZero = true;
+
+						foreach (CelestialBody globalBody in FlightGlobals.Bodies)
+						{
+							SCANresourceBody newBody = currentGlobal.getBodyConfig(globalBody.bodyName, false);
+
+							if (newBody == null)
+								currentGlobal.addToBodyConfigs(globalBody.bodyName, new SCANresourceBody(rsBiome.ResourceName, globalBody, 0, 10f, true), false);
+						}
+					}
+
+					SCANresourceBody currentBody = currentGlobal.getBodyConfig(body.bodyName, false);
+
+					if (currentBody == null)
+					{
+						currentGlobal.addToBodyConfigs(rsBiome.PlanetName, new SCANresourceBody(rsBiome.ResourceName, body, 0, 10f, true), false);
+						currentBody = currentGlobal.getBodyConfig(rsBiome.PlanetName, false);
+					}
+
+					if (rsBiome.Distribution.MinAbundance < currentBody.DefaultMinValue)
+						currentBody.DefaultMinValue = rsBiome.Distribution.MinAbundance;
+
+					if (rsBiome.Distribution.MaxAbundance > currentBody.DefaultMaxValue)
+						currentBody.DefaultMaxValue = rsBiome.Distribution.MaxAbundance;
+
+					if (rsBiome.Distribution.PresenceChance > 0)
+						currentBody.DefaultZero = false;
+
+					SCANcontroller.addToLoadedResourceNames(rsBiome.ResourceName, false);
+				}
+			}
+
+			foreach (SCANresourceGlobal global in SCANcontroller.setLoadedResourceList())
+            {
+				if (global == null)
+					continue;
+
+				foreach (CelestialBody body in FlightGlobals.Bodies)
+                {
+					SCANresourceBody newBody = global.getBodyConfig(body.bodyName, false);
+
+					if (newBody == null)
+						global.addToBodyConfigs(body.bodyName, new SCANresourceBody(global.Name, body, global.DefaultMinValue, global.DefaultMaxValue, global.DefaultZero), false);
+				}
+            }
 
 			if (SCANcontroller.MasterResourceCount == 0)
 				globalResource = false;
