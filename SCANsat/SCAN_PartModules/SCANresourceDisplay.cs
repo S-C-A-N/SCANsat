@@ -16,6 +16,7 @@ using System.Linq;
 using SCANsat.SCAN_Data;
 using SCANsat.SCAN_UI.UI_Framework;
 using KSP.Localization;
+using UnityEngine;
 
 namespace SCANsat.SCAN_PartModules
 {
@@ -40,9 +41,18 @@ namespace SCANsat.SCAN_PartModules
         private bool fuzzy;
         private bool refreshState;
         private bool activated;
+        private bool zeroResource;
         private string resourceDisplayName;
 
+        private SCANresourceGlobal scanResource;
+        private SCANresourceBody scanResourceBody;
+
+        private bool resourceScanThreshold;
+
         private BaseField abundanceField;
+
+        private const float RESOURCE_TIME = 2;
+        private float resourceTimer = 0;
 
         public float MaxAbundanceAltitude
         {
@@ -77,12 +87,11 @@ namespace SCANsat.SCAN_PartModules
 
             body = FlightGlobals.currentMainBody;
             refreshAbundance(body.flightGlobalsIndex);
-        }
 
-        public override void OnStartFinished(StartState state)
-        {
-            base.OnStartFinished(state);
+            scanResource = SCANcontroller.getResourceNode(ResourceName);
 
+            if (scanResource != null)
+                scanResourceBody = scanResource.getBodyConfig(body.bodyName, false);
         }
 
         private List<ModuleResourceScanner> findScanners()
@@ -131,9 +140,31 @@ namespace SCANsat.SCAN_PartModules
             if (!HighLogic.LoadedSceneIsFlight || !FlightGlobals.ready)
                 return;
 
+            if (part.PartActionWindow == null)
+                return;
+
+            if (!SCAN_Settings_Config.Instance.HideZeroResources && Time.realtimeSinceStartup > resourceTimer)
+            {
+                resourceTimer = Time.realtimeSinceStartup + RESOURCE_TIME;
+
+                SCANdata data = SCANUtil.getData(part.vessel.mainBody);
+
+                if (data != null)
+                    resourceScanThreshold = SCANUtil.getCoveragePercentage(data, SCANtype.ResourceLoRes) > (SCAN_Settings_Config.Instance.StockTreshold * 100) || SCANUtil.getCoveragePercentage(data, SCANtype.ResourceHiRes) > (SCAN_Settings_Config.Instance.StockTreshold * 100);
+                else
+                    resourceScanThreshold = false;
+            }
+
             if (!activated)
             {
                 abundanceField.guiActive = false;
+                return;
+            }
+
+            if (scanResourceBody != null && scanResourceBody.DefaultZero && (SCAN_Settings_Config.Instance.HideZeroResources || resourceScanThreshold))
+            {
+                abundanceField.guiActive = false;
+                zeroResource = true;
                 return;
             }
 
@@ -151,6 +182,7 @@ namespace SCANsat.SCAN_PartModules
             //}
 
             abundanceField.guiActive = true;
+            zeroResource = false;
 
             if (tooHigh)
             {
@@ -199,6 +231,12 @@ namespace SCANsat.SCAN_PartModules
                 return;
             }
 
+            if (zeroResource)
+                return;
+
+            if (part.PartActionWindow == null)
+                return;
+
             if (!vessel.Landed && ResourceUtilities.GetAltitude(vessel) > maxAbundanceAltitude)
             {
                 tooHigh = true;
@@ -228,6 +266,9 @@ namespace SCANsat.SCAN_PartModules
         {
             body = VB.to;
             refreshAbundance(body.flightGlobalsIndex);
+
+            if (scanResource != null)
+                scanResourceBody = scanResource.getBodyConfig(body.bodyName, false);
         }
 
         private void refreshAbundance(int bodyID)
