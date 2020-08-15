@@ -575,6 +575,8 @@ namespace SCANsat.SCAN_Map
 		private float customMin;
 		private float customMax;
 		private float customRange;
+		private float customResourceMin;
+		private float customResourceMax;
 		private bool useCustomRange;
 		private bool colorMap;
 		private bool terminator;
@@ -590,7 +592,6 @@ namespace SCANsat.SCAN_Map
 			{
 				SCANcontroller.controller.UnloadVisualMapTexture(body, mSource);
 				body = b;
-				data = SCANUtil.getData(body);
 				SCANcontroller.controller.loadOnDemandScaledSpace(body, mSource);
 				SCANcontroller.controller.LoadVisualMapTexture(body, mSource);
 			}
@@ -599,6 +600,8 @@ namespace SCANsat.SCAN_Map
 				SCANcontroller.controller.loadOnDemandScaledSpace(body, mSource);
 				SCANcontroller.controller.LoadVisualMapTexture(body, mSource);
 			}
+
+			data = SCANUtil.getData(body);
 
 			SCANcontroller.controller.loadPQS(body, mSource);
 			pqs = body.pqsController != null;
@@ -614,7 +617,6 @@ namespace SCANsat.SCAN_Map
 				}
 			}
 
-
 			if (SCANconfigLoader.GlobalResource)
 			{
 				if (resource != null)
@@ -622,42 +624,14 @@ namespace SCANsat.SCAN_Map
 			}
 		}
 
-        private Texture2D readableTexture(Texture tex, Material mat, bool useMat)
-        {
-            if (tex == null)
-                return null;
-
-            Texture2D readable = new Texture2D(tex.width, tex.height);
-
-            var rt = RenderTexture.GetTemporary(tex.width, tex.height, 0, RenderTextureFormat.ARGB32, RenderTextureReadWrite.sRGB, 1);
-
-            if (useMat)
-                Graphics.Blit(tex, rt, mat);
-            else
-                Graphics.Blit(tex, rt);
-
-            RenderTexture.active = rt;
-
-            readable.ReadPixels(new Rect(0, 0, tex.width, tex.height), 0, 0);
-
-            RenderTexture.active = null;
-            RenderTexture.ReleaseTemporary(rt);
-
-            rt = null;
-
-            readable.Apply();
-
-			tex = null;
-
-            return readable;
-        }
-        
-        public void setCustomRange(float min, float max)
+        public void setCustomRange(float min, float max, float rMin, float rMax)
 		{
 			useCustomRange = true;
 			customMin = min;
 			customMax = max;
 			customRange = max - min;
+			customResourceMin = rMin;
+			customResourceMax = rMax;
 		}
 
 		internal bool isMapComplete()
@@ -1169,7 +1143,10 @@ namespace SCANsat.SCAN_Map
 								abundance = resourceCache[Mathf.RoundToInt(i * (resourceMapWidth / mapwidth)), Mathf.RoundToInt(mapstep * (resourceMapWidth / mapwidth))];
 								break;
 					}
-					baseColor = SCANuiUtil.resourceToColor32(baseColor, resource, abundance, data, lon, lat);
+					if (useCustomRange)
+						baseColor = SCANuiUtil.resourceToColor32(baseColor, resource, customResourceMin, customResourceMax, abundance, data, lon, lat);
+					else
+						baseColor = SCANuiUtil.resourceToColor32(baseColor, resource, resource.CurrentBody.MinValue, resource.CurrentBody.MaxValue, abundance, data, lon, lat);
 				}
 
 				if (terminator)
