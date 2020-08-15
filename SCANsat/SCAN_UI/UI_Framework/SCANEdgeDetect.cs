@@ -13,27 +13,38 @@ namespace SCANsat.SCAN_UI.UI_Framework
 
         private Material _edgeDetectMaterial = null;
 
+        private Texture2D _rampTexture;
+
         private void Start()
         {
             SetMaterial();
+        }
+
+        private void OnDestroy()
+        {
+            if (_rampTexture != null)
+            {
+                Destroy(_rampTexture);
+                _rampTexture = null;
+            }
         }
 
         private void SetMaterial()
         {
             _edgeDetectMaterial = new Material(SCAN_UI_Loader.EdgeDetectShader);
 
-            Texture2D t = new Texture2D(256, 1, TextureFormat.RGB24, false);
+            _rampTexture = new Texture2D(256, 1, TextureFormat.RGB24, false);
 
             // ramp texture to render everything in dark shades of Amber,
             // except originally dark lines, which become bright Amber
             for (int i = 0; i < 256; ++i)
-                t.SetPixel(i, 0, palette.lerp(palette.black, palette.xkcd_Amber, i / 1024f));
+                _rampTexture.SetPixel(i, 0, palette.lerp(palette.black, palette.xkcd_Amber, i / 1024f));
             for (int i = 0; i < 10; ++i)
-                t.SetPixel(i, 0, palette.xkcd_Amber);
+                _rampTexture.SetPixel(i, 0, palette.xkcd_Amber);
 
-            t.Apply();
+            _rampTexture.Apply();
 
-            _edgeDetectMaterial.SetTexture("_RampTex", t);
+            _edgeDetectMaterial.SetTexture("_RampTex", _rampTexture);
             Vector2 sensitivity = new Vector2(_sensitivityDepth, _sensitivityNormals);
             _edgeDetectMaterial.SetVector("_Sensitivity", new Vector4(sensitivity.x, sensitivity.y, 1.0f, sensitivity.y));
             _edgeDetectMaterial.SetFloat("_SampleDistance", _sampleDist);
