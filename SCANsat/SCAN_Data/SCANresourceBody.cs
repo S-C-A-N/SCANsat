@@ -11,6 +11,7 @@
  */
 #endregion
 
+using System.CodeDom;
 using System.Linq;
 using SCANsat.SCAN_Platform;
 
@@ -32,8 +33,9 @@ namespace SCANsat.SCAN_Data
 		private CelestialBody body;
 		private float defaultMinValue, defaultMaxValue;
 		private float fraction;
+		private bool defaultZero;
 
-		internal SCANresourceBody(string rName, CelestialBody Body, float min, float max)
+		internal SCANresourceBody(string rName, CelestialBody Body, float min, float max, bool zero)
 		{
 			resourceName = rName;
 			body = Body;
@@ -41,6 +43,7 @@ namespace SCANsat.SCAN_Data
 			index = body.flightGlobalsIndex;
 			lowResourceCutoff = defaultMinValue = min;
 			highResourceCutoff = defaultMaxValue = max;
+			defaultZero = zero;
 		}
 
 		public SCANresourceBody()
@@ -61,10 +64,10 @@ namespace SCANsat.SCAN_Data
 
 		public override void OnDecodeFromConfigNode()
 		{
-			body = FlightGlobals.Bodies.FirstOrDefault(b => b.flightGlobalsIndex == index);
-
 			defaultMinValue = lowResourceCutoff;
 			defaultMaxValue = highResourceCutoff;
+
+			body = FlightGlobals.Bodies.FirstOrDefault(b => b.flightGlobalsIndex == index);
 		}
 
 		public string BodyName
@@ -92,7 +95,13 @@ namespace SCANsat.SCAN_Data
 			get { return lowResourceCutoff; }
 			internal set
 			{
-				if (value >= 0 && value < highResourceCutoff && value < 100)
+				if (value < 0)
+					lowResourceCutoff = 0;
+				else if (value >= highResourceCutoff)
+					lowResourceCutoff = highResourceCutoff - 1;
+				else if (value >= 100)
+					lowResourceCutoff = 99;
+				else
 					lowResourceCutoff = value;
 			}
 		}
@@ -102,7 +111,13 @@ namespace SCANsat.SCAN_Data
 			get { return highResourceCutoff; }
 			internal set
 			{
-				if (value >= 0 && value > lowResourceCutoff && value <= 100)
+				if (value <= lowResourceCutoff)
+					highResourceCutoff = lowResourceCutoff + 1;
+				else if (value <= 0)
+					highResourceCutoff = 1;
+				else if (value > 100)
+					highResourceCutoff = 100;
+				else
 					highResourceCutoff = value;
 			}
 		}
@@ -112,7 +127,13 @@ namespace SCANsat.SCAN_Data
 			get { return defaultMinValue; }
 			internal set
 			{
-				if (value >= 0 && value < defaultMaxValue && value <= 100)
+				if (value < 0)
+					defaultMinValue = 0;
+				else if (value >= defaultMaxValue)
+					defaultMinValue = defaultMaxValue - 1;
+				else if (value >= 100)
+					defaultMinValue = 99;
+				else
 					defaultMinValue = value;
 			}
 		}
@@ -122,9 +143,21 @@ namespace SCANsat.SCAN_Data
 			get { return defaultMaxValue; }
 			internal set
 			{
-				if (value >= 0 && value > defaultMinValue && value <= 100)
+				if (value <= defaultMinValue)
+					defaultMaxValue = defaultMinValue + 1;
+				else if (value <= 0)
+					defaultMaxValue = 1;
+				else if (value > 100)
+					defaultMaxValue = 100;
+				else
 					defaultMaxValue = value;
 			}
+		}
+
+		public bool DefaultZero
+		{
+			get { return defaultZero; }
+			set { defaultZero = value; }
 		}
 
 		public float Fraction
