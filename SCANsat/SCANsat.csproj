@@ -23,7 +23,7 @@
     <DefineConstants>DEBUG;ENABLE_PROFILER</DefineConstants>
     <DebugSymbols>true</DebugSymbols>
     <NoStdLib>true</NoStdLib>
-    <DebugType>full</DebugType>
+    <DebugType>portable</DebugType>
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
@@ -194,8 +194,9 @@
   <PropertyGroup>
     <PostBuildEvent>
 REM "C:\Users\david\Documents\Visual Studio 2013\Projects\KSP Dev\pdb2mdb\pdb2mdb.exe" "$(TargetFileName)"
-xcopy /Y "$(TargetPath)" "C:\Users\david\Documents\KSP\Dev Environment\1.9.1\Kerbal Space Program\GameData\SCANsat\Plugins\"
-REM xcopy /Y "$(TargetDir)$(TargetName).pdb" "C:\Users\david\Documents\Visual Studio 2013\Projects\KSP Dev\1.8\Kerbal Space Program\GameData\SCANsat\Plugins\"
-REM xcopy /Y "$(TargetDir)$(TargetName).dll.mdb" "C:\Users\david\Documents\Visual Studio 2013\Projects\KSP Dev\1.8\Kerbal Space Program\GameData\SCANsat\Plugins\"</PostBuildEvent>
+xcopy /Y "$(TargetPath)" "C:\Users\david\Documents\KSP\Dev Environment\1.10\Kerbal Space Program\GameData\SCANsat\Plugins\"
+xcopy /Y "$(TargetPath)" "C:\Users\david\Documents\KSP\Dev Environment\Debugging\Kerbal Space Program\GameData\SCANsat\Plugins\"
+xcopy /Y "$(TargetDir)$(TargetName).pdb" "C:\Users\david\Documents\KSP\Dev Environment\Debugging\Kerbal Space Program\GameData\SCANsat\Plugins\"
+::xcopy /Y "$(TargetDir)$(TargetName).dll.mdb" "C:\Users\david\Documents\KSP\Dev Environment\Debugging\Kerbal Space Program\GameData\SCANsat\Plugins\"</PostBuildEvent>
   </PropertyGroup>
 </Project>

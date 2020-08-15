@@ -15,7 +15,7 @@
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
+    <DebugType>portable</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>bin\Debug\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
@@ -130,9 +130,10 @@
     <PostBuildEvent>::copy /y "$(TargetPath)" "C:\Users\david\Documents\KSP\SCANsat\Unity 2017 UI\SCANsat\Assets\Plugins\"
 
 :: "C:\Users\david\Documents\KSP\Dev Environment\1.9.1\pdb2mdb\pdb2mdb.exe" "$(TargetFileName)"
-xcopy /Y "$(TargetPath)" "C:\Users\david\Documents\KSP\Dev Environment\1.9.1\Kerbal Space Program\GameData\SCANsat\Plugins\"
-:: xcopy /Y "$(TargetDir)$(TargetName).pdb" "C:\Users\david\Documents\KSP\Dev Environment\1.9.1\Kerbal Space Program\GameData\SCANsat\Plugins\"
-:: xcopy /Y "$(TargetDir)$(TargetName).dll.mdb" "C:\Users\david\Documents\KSP\Dev Environment\1.9.1\Kerbal Space Program\GameData\SCANsat\Plugins\"</PostBuildEvent>
+xcopy /Y "$(TargetPath)" "C:\Users\david\Documents\KSP\Dev Environment\1.10\Kerbal Space Program\GameData\SCANsat\Plugins\"
+xcopy /Y "$(TargetPath)" "C:\Users\david\Documents\KSP\Dev Environment\Debugging\Kerbal Space Program\GameData\SCANsat\Plugins\"
+xcopy /Y "$(TargetDir)$(TargetName).pdb" "C:\Users\david\Documents\KSP\Dev Environment\Debugging\Kerbal Space Program\GameData\SCANsat\Plugins\"
+::xcopy /Y "$(TargetDir)$(TargetName).dll.mdb" "C:\Users\david\Documents\KSP\Dev Environment\Debugging\Kerbal Space Program\GameData\SCANsat\Plugins\"</PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
