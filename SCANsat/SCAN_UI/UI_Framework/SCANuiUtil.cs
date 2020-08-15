@@ -272,12 +272,17 @@ namespace SCANsat.SCAN_UI.UI_Framework
 				return string.Format("{0}: {1}", resource.DisplayName, SCANUtil.ResourceOverlay(lat, lon, resource.Name, b, SCAN_Settings_Config.Instance.BiomeLock).ToString("P2"));
 		}
 
-        internal static string LoResourceGroup(float abundance)
-        {
-            abundance = Mathf.Floor(abundance * 100 / 5) * 5;
+		internal static string LoResourceGroup(float abundance)
+		{
+			if (abundance > 0)
+			{
+				abundance = Mathf.Floor(abundance * 100 / 5) * 5;
 
-            return string.Format("{0}-{1}%", abundance.ToString("F0"), (abundance + 5).ToString("F0"));
-        }
+				return string.Format("{0}-{1}%", abundance.ToString("F0"), (abundance + 5).ToString("F0"));
+			}
+			else
+				return "0%";
+		}
 
 		private static double inc(double d)
 		{
@@ -667,7 +672,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 				{
 					double lat = (j / scale) - 90;
 
-					pix[j * width + i] = resourceToColor32(palette.Clear, resource, values[i, j], data, lon, lat, transparency);
+					pix[j * width + i] = resourceToColor32(palette.Clear, resource, resource.CurrentBody.MinValue, resource.CurrentBody.MaxValue, values[i, j], data, lon, lat, transparency);
 				}
 			}
 		}
@@ -711,7 +716,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 				{
 					double lat = (j / scale) - 90;
 
-					pix[j * width + i] = resourceToColor32(palette.Clear, resource, values[i, j], data, lon, lat, transparency);
+					pix[j * width + i] = resourceToColor32(palette.Clear, resource, resource.CurrentBody.MinValue, resource.CurrentBody.MaxValue, values[i, j], data, lon, lat, transparency);
 				}
 			}
 
@@ -1083,7 +1088,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 
 						Color32 c = pix[j * width + i];
 
-						pix[j * width + i] = resourceToColor32(c, map.Resource, values[i, j], data, lon, lat);
+						pix[j * width + i] = resourceToColor32(c, map.Resource, map.Resource.CurrentBody.MinValue, map.Resource.CurrentBody.MaxValue, values[i, j], data, lon, lat);
 					}
 				}
 			}
@@ -1129,6 +1134,44 @@ namespace SCANsat.SCAN_UI.UI_Framework
 				}
 			}
 		}
+
+		//internal static void generateResourceCache(Texture2D tex, int height, int width, int stepScale, double scale, SCANmap map)
+		//{
+		//	for (int j = 0; j < height; j += stepScale)
+		//	{
+		//		for (int i = 0; i < width; i += stepScale)
+		//		{
+		//			Vector2d coords;
+		//			if (map.Projection == MapProjection.Orthographic)
+		//			{
+		//				double rLon = (i * 1.0f / scale) - 180f + map.Lon_Offset;
+		//				double rLat = (j * 1.0f / scale) - 90f + map.Lat_Offset;
+
+		//				double la = rLat, lo = rLon;
+		//				rLat = map.unprojectLatitude(lo, la);
+		//				rLon = map.unprojectLongitude(lo, la);
+
+		//				if (double.IsNaN(rLat) || double.IsNaN(rLon) || rLat < -90 || rLat > 90 || rLon < -180 || rLon > 180)
+		//				{
+		//					tex.SetPixel(i, j, palette.clear);
+		//					continue;
+		//				}
+
+		//				coords = new Vector2d(rLon, rLat);
+		//			}
+		//			else
+		//			{
+		//				double rLon = SCANUtil.fixLonShift((i * 1.0f / scale) - 180f + map.Lon_Offset);
+		//				double rLat = (j * 1.0f / scale) - 90f + map.Lat_Offset;
+		//				coords = SCANUtil.fixRetardCoordinates(new Vector2d(rLon, rLat));
+		//			}
+
+		//			float abundance = SCANUtil.ResourceOverlay(coords.y, coords.x, map.Resource.Name, map.Body, SCAN_Settings_Config.Instance.BiomeLock) * 100f;
+
+		//			tex.SetPixel(i, j, resourceToColor(palette.clear, map.Resource, abundance, );
+		//		}
+		//	}
+		//}
 
 		private static float getLerp(System.Random rand, int l)
 		{
@@ -1270,29 +1313,32 @@ namespace SCANsat.SCAN_UI.UI_Framework
 				return palette.lerp(palette.lerp(Resource.MinColor, Resource.MaxColor, (Abundance - Resource.CurrentBody.MinValue) / (Resource.CurrentBody.MaxValue - Resource.CurrentBody.MinValue)), BaseColor, Resource.Transparency / 100f);
 		}
 
-		internal static Color32 resourceToColor32(Color32 BaseColor, SCANresourceGlobal Resource, float Abundance, SCANdata Data, double Lon, double Lat, float Transparency = 0.3f)
+		internal static Color32 resourceToColor32(Color32 BaseColor, SCANresourceGlobal Resource, float MinRange, float MaxRange, float Abundance, SCANdata Data, double Lon, double Lat, float Transparency = 0.3f)
 		{
 			if (SCANUtil.isCovered(Lon, Lat, Data, SCANtype.ResourceHiRes))
 			{
-				if (Abundance >= Resource.CurrentBody.MinValue)
+				if (Abundance >= MinRange)
 				{
-					if (Abundance > Resource.CurrentBody.MaxValue)
-						Abundance = Resource.CurrentBody.MaxValue;
+					if (Abundance > MaxRange)
+						Abundance = MaxRange;
 				}
 				else
 					Abundance = 0;
 			}
 			else if (SCANUtil.isCovered(Lon, Lat, Data, SCANtype.ResourceLoRes))
 			{
-                Abundance = Mathf.Floor(Abundance / 5) * 5 + 2.5f;
-
-				if (Abundance >= Resource.CurrentBody.MinValue)
+				if (Abundance > 0)
 				{
-					if (Abundance > Resource.CurrentBody.MaxValue)
-						Abundance = Resource.CurrentBody.MaxValue;
+					Abundance = Mathf.Floor(Abundance / 5) * 5 + 2.5f;
+
+					if (Abundance >= MinRange)
+					{
+						if (Abundance > MaxRange)
+							Abundance = MaxRange;
+					}
+					else
+						Abundance = 0;
 				}
-				else
-					Abundance = 0;
 			}
 			else
 				return BaseColor;
@@ -1300,7 +1346,7 @@ namespace SCANsat.SCAN_UI.UI_Framework
 			if (Abundance == 0)
 				return palette.lerp(BaseColor, palette.Grey, Transparency);
 			else
-				return palette.lerp(palette.lerp(Resource.MinColor32, Resource.MaxColor32, (Abundance - Resource.CurrentBody.MinValue) / (Resource.CurrentBody.MaxValue - Resource.CurrentBody.MinValue)), BaseColor, Resource.Transparency / 100f);
+				return palette.lerp(palette.lerp(Resource.MinColor32, Resource.MaxColor32, (Abundance - MinRange) / (MaxRange - MinRange)), BaseColor, Resource.Transparency / 100f);
 		}
 
 		#endregion
