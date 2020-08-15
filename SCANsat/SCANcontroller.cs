@@ -16,6 +16,7 @@ using System;
 using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using UnityEngine;
 using UnityEngine.Events;
 using Contracts;
@@ -370,9 +371,9 @@ namespace SCANsat
                 {
                     SCANresourceGlobal r = resourceConfigs[i];
 
-                    if (r == null)
+                    if (r == null || string.IsNullOrEmpty(r.Name))
                         continue;
-
+                    //SCANUtil.SCANlog("Loading SCANsat resource config settings: {0}", r.Name);
                     if (!masterResourceNodes.Contains(r.Name))
                         masterResourceNodes.Add(r.Name, r);
                 }
@@ -452,11 +453,11 @@ namespace SCANsat
                 UnityEngine.Debug.LogError(string.Format("[SCANsat] Warning: SCANResource Dictionary Already Contains Key of This Type: Resource: {0}", name));
         }
 
-        public static void addToLoadedResourceNames(string name)
+        public static void addToLoadedResourceNames(string name, bool warn = true)
         {
             if (!loadedResources.Contains(name))
                 loadedResources.Add(name);
-            else
+            else if (warn)
                 UnityEngine.Debug.LogError(string.Format("[SCANsat] Warning: Loaded Resource List Already Contains Resource Of Name: {0}", name));
         }
 
@@ -942,7 +943,7 @@ namespace SCANsat
             if (data == null)
                 return;
 
-            if (SCANUtil.getCoveragePercentage(data, SCANtype.ResourceLoRes) > (SCAN_Settings_Config.Instance.StockTreshold * 100))
+            if (SCANUtil.getCoveragePercentage(data, SCANtype.ResourceLoRes) > (SCAN_Settings_Config.Instance.StockTreshold * 100) || SCANUtil.getCoveragePercentage(data, SCANtype.ResourceHiRes) > (SCAN_Settings_Config.Instance.StockTreshold * 100))
             {
                 SCANUtil.SCANlog("SCANsat resource scanning for {0} meets threshold value [{1:P0}]\nConducting stock orbital resource scan...", body.bodyName, SCAN_Settings_Config.Instance.StockTreshold);
                 ResourceMap.Instance.UnlockPlanet(body.flightGlobalsIndex);
@@ -1403,12 +1404,35 @@ namespace SCANsat
 
             if (!readableScaledSpaceMaps.ContainsKey(b) || readableScaledSpaceMaps[b] == null)
             {
-                readableScaledSpaceMaps.Add(b, readableTexture(scaledMesh.material.GetTexture("_MainTex"), scaledMesh.material, true));
+                if (scaledMesh.material.shader.name == "Terrain/Gas Giant")
+                {
+                    if (scaledMesh.material.HasProperty("_DetailCloudPatternTexture"))
+                        readableScaledSpaceMaps.Add(b, readableTexture(scaledMesh.material.GetTexture("_DetailCloudPatternTexture"), scaledMesh.material, true));
+                }
+                //else if (scaledMesh.material.shader.name == "Emissive Multi Ramp Sunspots")
+                //{
+                //    if (scaledMesh.material.HasProperty("_MainTex"))
+                //        readableScaledSpaceMaps.Add(b, readableTexture(scaledMesh.material.GetTexture("_MainTex"), scaledMesh.material, true));
+                //}
+                else
+                {
+                    if (scaledMesh.material.HasProperty("_MainTex"))
+                        readableScaledSpaceMaps.Add(b, readableTexture(scaledMesh.material.GetTexture("_MainTex"), scaledMesh.material, true));
+                }
             }
 
             if (!readableScaledSpaceNormalMaps.ContainsKey(b) || readableScaledSpaceNormalMaps[b] == null)
             {
-                readableScaledSpaceNormalMaps.Add(b, readableTexture(scaledMesh.material.GetTexture("_BumpMap"), scaledMesh.material, false));
+                if (scaledMesh.material.shader.name == "Terrain/Gas Giant")
+                {
+                    if (scaledMesh.material.HasProperty("_NormalMap"))
+                        readableScaledSpaceNormalMaps.Add(b, readableTexture(scaledMesh.material.GetTexture("_NormalMap"), scaledMesh.material, false));
+                }
+                else
+                {
+                    if (scaledMesh.material.HasProperty("_BumpMap"))
+                        readableScaledSpaceNormalMaps.Add(b, readableTexture(scaledMesh.material.GetTexture("_BumpMap"), scaledMesh.material, false));
+                }
             }
 
             switch (s)
@@ -2241,7 +2265,7 @@ namespace SCANsat
             if (sv.sensors.Count == 0)
             {
                 knownVessels.Remove(v.id);
-                SCANUtil.SCANdebugLog("Unregister Vessel");
+                //SCANUtil.SCANdebugLog("Unregister Vessel");
             }
         }
 
