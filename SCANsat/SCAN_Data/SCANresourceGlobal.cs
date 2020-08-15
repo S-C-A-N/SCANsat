@@ -46,6 +46,8 @@ namespace SCANsat.SCAN_Data
 		private float defaultTrans;
 		private string displayName;
 
+		private bool defaultZero;
+
 		private SCANresourceBody currentBody;
 
 		internal SCANresourceGlobal(string resource, string display, float trans, float defMin, float defMax, Color minC, Color maxC)
@@ -106,6 +108,8 @@ namespace SCANsat.SCAN_Data
 			highColor32 = (Color32)highResourceColor;
 
 			setDefaultValues();
+
+			//SCANUtil.SCANlog("Loading SCANsat global resource config settings: {0}", name);
 			try
 			{
 				int l = Resource_Planetary_Config.Count;
@@ -117,6 +121,7 @@ namespace SCANsat.SCAN_Data
 					if (r == null)
 						continue;
 
+					//SCANUtil.SCANlog("Loading SCANsat body resource config settings: {0} - {1}", name, r.BodyName);
 					if (!masterBodyConfigs.Contains(r.BodyName))
 						masterBodyConfigs.Add(r.BodyName, r);
 				}
@@ -142,12 +147,13 @@ namespace SCANsat.SCAN_Data
 			}
 			catch (Exception e)
 			{
-				SCANUtil.SCANlog("Error while saving SCANsat altimetry config data: {0}", e);
+				SCANUtil.SCANlog("Error while saving SCANsat resource config data: {0}", e);
 			}
 		}
 
 		public void addToBodyConfigs(string s, SCANresourceBody r, bool warn)
 		{
+			//SCANUtil.SCANlog("Adding SCANsat body resource config data: {0} - {1}", name, s);
 			if (!masterBodyConfigs.Contains(s))
 				masterBodyConfigs.Add(s, r);
 			else if (warn)
@@ -171,7 +177,13 @@ namespace SCANsat.SCAN_Data
 
 		public string DisplayName
 		{
-			get { return displayName; }
+			get
+			{
+				if (string.IsNullOrEmpty(displayName))
+					return name;
+
+				return displayName; 
+			}
 			set { displayName = value; }
 		}
 
@@ -188,6 +200,12 @@ namespace SCANsat.SCAN_Data
 					resourceTransparency = value;
 			}
 		}
+
+		public bool DefaultZero
+        {
+			get { return defaultZero; }
+			set { defaultZero = value; }
+        }
 
 		public Color MinColor
 		{
@@ -244,7 +262,7 @@ namespace SCANsat.SCAN_Data
 			get { return masterBodyConfigs.Count; }
 		}
 
-		public SCANresourceBody getBodyConfig (string body, bool warn = true)
+		public SCANresourceBody getBodyConfig(string body, bool warn = true)
 		{
 			if (masterBodyConfigs.Contains(body))
 				return masterBodyConfigs[body];
