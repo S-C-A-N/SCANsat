@@ -1,3 +1,24 @@
+Version 20.3 - 2020-8-30
+-----------------------
+
+- New resource overlay quick setting controls
+	- Adjust low resource concentration cutoff for all maps
+	- Quickly adjust resource color settings
+	- Display small resource overlay legend on maps
+	
+- Option to hide resources that are not present on a given celestial body from the resource selection menus
+- Zoom map resource overlay calculates local min and max resource concentration values
+
+- Fix numerous bugs related to custom resources and resource UI features
+
+- Fix bug causing big map data source to not update properly
+
+- Adjust part masses
+
+- Fix visual maps for new gas giants (KSP 1.10 and up)
+- Fix bug when trying to draw biome map for planets with no biomes
+- Add some missing localization fields for resource scanners
+
 Version 20.2 - 2020-7-07
 -----------------------
 
