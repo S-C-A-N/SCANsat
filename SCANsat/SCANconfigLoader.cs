@@ -110,8 +110,9 @@ namespace SCANsat
 
 				if (currentGlobal == null)
 				{
+					//SCANUtil.SCANlog("Adding new global resource from planetary config: {0}", rsBody.ResourceName);
 					PartResourceDefinition pr = PartResourceLibrary.Instance.GetDefinition(rsBody.ResourceName);
-					SCANcontroller.addToResourceData(rsBody.ResourceName, new SCANresourceGlobal(rsBody.ResourceName, pr == null || string.IsNullOrEmpty(pr.displayName) ? rsBody.ResourceName : pr.displayName, 20, 0, 10f, palette.magenta, palette.cb_orange));//, t));
+					SCANcontroller.addToResourceData(rsBody.ResourceName, new SCANresourceGlobal(rsBody.ResourceName, pr == null || string.IsNullOrEmpty(pr.displayName) ? rsBody.ResourceName : pr.displayName, 20, 1f, 10f, palette.magenta, palette.cb_orange));//, t));
 					currentGlobal = SCANcontroller.getResourceNode(rsBody.ResourceName, true);
 
 					currentGlobal.DefaultZero = true;
@@ -121,7 +122,9 @@ namespace SCANsat
 						SCANresourceBody newBody = currentGlobal.getBodyConfig(body.bodyName, false);
 
 						if (newBody == null)
-							currentGlobal.addToBodyConfigs(body.bodyName, new SCANresourceBody(rsBody.ResourceName, body, 0, 0.001f, true), false);
+							currentGlobal.addToBodyConfigs(body.bodyName, new SCANresourceBody(rsBody.ResourceName, body, 1f, 10f, true), false);
+						else
+							newBody.DefaultZero = true;
 					}
                 }
 
@@ -167,7 +170,7 @@ namespace SCANsat
 					{
 						//SCANUtil.SCANlog("Adding biome resource node global config: {0}", rsBiome.ResourceName);
 						PartResourceDefinition pr = PartResourceLibrary.Instance.GetDefinition(rsBiome.ResourceName);
-						SCANcontroller.addToResourceData(rsBiome.ResourceName, new SCANresourceGlobal(rsBiome.ResourceName, pr == null || string.IsNullOrEmpty(pr.displayName) ? rsBiome.ResourceName : pr.displayName, 20, 0, 10, palette.magenta, palette.cb_orange));//, t));
+						SCANcontroller.addToResourceData(rsBiome.ResourceName, new SCANresourceGlobal(rsBiome.ResourceName, pr == null || string.IsNullOrEmpty(pr.displayName) ? rsBiome.ResourceName : pr.displayName, 20, 1f, 10, palette.magenta, palette.cb_orange));//, t));
 						currentGlobal = SCANcontroller.getResourceNode(rsBiome.ResourceName, true);
 
 						currentGlobal.DefaultZero = true;
@@ -177,7 +180,9 @@ namespace SCANsat
 							SCANresourceBody newBody = currentGlobal.getBodyConfig(globalBody.bodyName, false);
 
 							if (newBody == null)
-								currentGlobal.addToBodyConfigs(globalBody.bodyName, new SCANresourceBody(rsBiome.ResourceName, globalBody, 0, 10f, true), false);
+								currentGlobal.addToBodyConfigs(globalBody.bodyName, new SCANresourceBody(rsBiome.ResourceName, globalBody, 1, 10f, true), false);
+							else
+								newBody.DefaultZero = true;
 						}
 					}
 
@@ -185,7 +190,7 @@ namespace SCANsat
 
 					if (currentBody == null)
 					{
-						currentGlobal.addToBodyConfigs(rsBiome.PlanetName, new SCANresourceBody(rsBiome.ResourceName, body, 0, 10f, true), false);
+						currentGlobal.addToBodyConfigs(rsBiome.PlanetName, new SCANresourceBody(rsBiome.ResourceName, body, 1, 10f, true), false);
 						currentBody = currentGlobal.getBodyConfig(rsBiome.PlanetName, false);
 					}
 
@@ -212,7 +217,7 @@ namespace SCANsat
 					SCANresourceBody newBody = global.getBodyConfig(body.bodyName, false);
 
 					if (newBody == null)
-						global.addToBodyConfigs(body.bodyName, new SCANresourceBody(global.Name, body, global.DefaultMinValue, global.DefaultMaxValue, global.DefaultZero), false);
+						global.addToBodyConfigs(body.bodyName, new SCANresourceBody(global.Name, body, global.DefaultMinValue, global.DefaultMaxValue, true), false);
 				}
             }
 
