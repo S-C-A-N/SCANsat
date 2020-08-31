@@ -42,6 +42,14 @@ namespace SCANsat.Unity.Unity
 		private Color m_NormalColor = Color.white;
 		[SerializeField]
 		private GameObject m_TooltipPrefab = null;
+		[SerializeField]
+		private GameObject m_ResourceBar = null;
+		[SerializeField]
+		private RawImage m_ResourceLegendImage = null;
+		[SerializeField]
+		private TextHandler m_ResourceLegendLabelOne = null;
+		[SerializeField]
+		private TextHandler m_ResourceLegendLabelTwo = null;
 
 		private ISCAN_Overlay overInterface;
 		private bool loaded;
@@ -152,6 +160,9 @@ namespace SCANsat.Unity.Unity
 					m_BiomeText.OnColorUpdate.Invoke(m_ActiveColor);
 					m_BiomeText.SetNormalColor(m_ActiveColor);
 				}
+
+				if (m_ResourceBar != null)
+					m_ResourceBar.SetActive(false);
 			}
 			else if (over.DrawTerrain)
 			{
@@ -160,6 +171,16 @@ namespace SCANsat.Unity.Unity
 					m_TerrainText.OnColorUpdate.Invoke(m_ActiveColor);
 					m_TerrainText.SetNormalColor(m_ActiveColor);
 				}
+
+				if (m_ResourceBar != null)
+					m_ResourceBar.SetActive(false);
+			}
+			else if (over.DrawResource)
+			{
+				if (m_ResourceBar != null)
+					m_ResourceBar.SetActive(true);
+
+				SetResourceLegend();
 			}
 
 			if (m_RefreshButton != null)
@@ -297,9 +318,23 @@ namespace SCANsat.Unity.Unity
 
 			res.transform.SetParent(m_ResourceTransform, false);
 
-			res.SetResource(resource, this, overInterface.CurrentResource == resource);
+			res.SetResource(resource, this, overInterface.DrawResource && overInterface.CurrentResource == resource);
 
 			resources.Add(res);
+		}
+
+		public void SetResourceLegend()
+		{
+			if (m_ResourceLegendImage != null)
+				m_ResourceLegendImage.texture = overInterface.ResourceLegendImage;
+
+			Vector2 res = overInterface.ResourceLegendLabels;
+
+			if (m_ResourceLegendLabelOne != null)
+				m_ResourceLegendLabelOne.OnTextUpdate.Invoke(res.x.ToString(res.x < 0.1 ? "P1" : "P0"));
+
+			if (m_ResourceLegendLabelTwo != null)
+				m_ResourceLegendLabelTwo.OnTextUpdate.Invoke(res.y.ToString(res.y < 0.1 ? "P1" : "P0"));
 		}
 
 		public void SetResource(string resource, bool isOn)
@@ -320,6 +355,11 @@ namespace SCANsat.Unity.Unity
 					m_OverlayToggle.isOn = true;
 
 				loaded = true;
+
+				if (m_ResourceBar != null)
+					m_ResourceBar.SetActive(true);
+
+				SetResourceLegend();
 			}
 			else
 			{
@@ -334,6 +374,9 @@ namespace SCANsat.Unity.Unity
 						m_OverlayToggle.isOn = false;
 
 					loaded = true;
+
+					if (m_ResourceBar != null)
+						m_ResourceBar.SetActive(false);
 				}
 			}
 
@@ -348,7 +391,10 @@ namespace SCANsat.Unity.Unity
 			overInterface.DrawBiome = overInterface.DrawBiome ? !overInterface.DrawOverlay : true;
 
 			if (m_BiomeText != null)
+			{
+				m_BiomeText.OnColorUpdate.Invoke(m_ActiveColor);
 				m_BiomeText.SetNormalColor(m_ActiveColor);
+			}
 
 			if (m_RefreshButton != null)
 				m_RefreshButton.SetActive(overInterface.DrawOverlay);
@@ -359,6 +405,9 @@ namespace SCANsat.Unity.Unity
 				m_OverlayToggle.isOn = overInterface.DrawOverlay;
 				loaded = true;
 			}
+
+			if (m_ResourceBar != null)
+				m_ResourceBar.SetActive(false);
 
 			InactivateOthers();
 		}
@@ -371,18 +420,24 @@ namespace SCANsat.Unity.Unity
 			overInterface.DrawTerrain = overInterface.DrawTerrain ? !overInterface.DrawOverlay : true;
 
 			if (m_TerrainText != null)
+			{
+				m_TerrainText.OnColorUpdate.Invoke(m_ActiveColor);
 				m_TerrainText.SetNormalColor(m_ActiveColor);
+			}
 
 			if (m_RefreshButton != null)
 				m_RefreshButton.SetActive(overInterface.DrawOverlay);
-			
+
 			if (m_OverlayToggle != null)
 			{
 				loaded = false;
 				m_OverlayToggle.isOn = overInterface.DrawOverlay;
 				loaded = true;
 			}
-						
+
+			if (m_ResourceBar != null)
+				m_ResourceBar.SetActive(false);
+
 			InactivateOthers();
 		}
 
@@ -434,6 +489,34 @@ namespace SCANsat.Unity.Unity
 				return;
 
 			overInterface.Refresh();
+		}
+
+		public void IncreaseCutoff()
+        {
+			if (overInterface == null)
+				return;
+
+			overInterface.IncreaseResourceCutoff();
+
+			SetResourceLegend();
+		}
+
+		public void DecreaseCutoff()
+        {
+			if (overInterface == null)
+				return;
+
+			overInterface.DecreaseResourceCutoff();
+
+			SetResourceLegend();
+		}
+
+		public void ColorSettings()
+		{
+			if (overInterface == null)
+				return;
+
+			overInterface.OpenResourceSettings();
 		}
 
 		public void Settings()

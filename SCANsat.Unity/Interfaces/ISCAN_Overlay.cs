@@ -47,6 +47,10 @@ namespace SCANsat.Unity.Interfaces
 
 		Vector2 Position { get; set; }
 
+		Texture2D ResourceLegendImage { get; }
+
+		Vector2 ResourceLegendLabels { get; }
+
 		void ClampToScreen(RectTransform rect);
 
 		void SetResource(string resource, bool isOn);
@@ -54,6 +58,12 @@ namespace SCANsat.Unity.Interfaces
 		void Refresh();
 
 		void OpenSettings();
+
+		void IncreaseResourceCutoff();
+
+		void DecreaseResourceCutoff();
+
+		void OpenResourceSettings();
 
 		void Update();
 	}
