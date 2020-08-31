@@ -380,8 +380,7 @@ namespace SCANsat.SCAN_Unity
 
         protected void calcTerrainLimits()
         {
-            if (spotmap.MType == mapType.Slope || spotmap.MType == mapType.Visual)
-                return;
+            bool terrainCalc = spotmap.MType == mapType.Altimetry || spotmap.MType == mapType.Biome;
 
             int w = spotmap.MapWidth / 4;
             int h = spotmap.MapHeight / 4;
@@ -405,7 +404,15 @@ namespace SCANsat.SCAN_Unity
                     if (double.IsNaN(lon) || double.IsNaN(lat) || lon < -180 || lon >= 180 || lat < -90 && lat >= 90)
                         continue;
 
-                    float terrain = (float)SCANUtil.getElevation(body, lon, lat);
+                    if (terrainCalc)
+                    {
+                        float terrain = (float)SCANUtil.getElevation(body, lon, lat);
+
+                        if (terrain < terrainMin)
+                            terrainMin = terrain;
+                        if (terrain > terrainMax)
+                            terrainMax = terrain;
+                    }
 
                     if (currentResource != null)
                     {
@@ -421,11 +428,6 @@ namespace SCANsat.SCAN_Unity
                         resourceMax = 100;
                         resourceMin = 0;
                     }
-
-                    if (terrain < terrainMin)
-                        terrainMin = terrain;
-                    if (terrain > terrainMax)
-                        terrainMax = terrain;
                 }
             }
 
