@@ -1,4 +1,4 @@
-Version 20.3 - 2020-8-30
+Version 20.3 - 2020-9-4
 -----------------------
 
 - New resource overlay quick setting controls
@@ -14,6 +14,9 @@ Version 20.3 - 2020-8-30
 - Fix bug causing big map data source to not update properly
 
 - Adjust part masses
+
+- Option to disable visual maps for troubleshooting
+	- GameData/SCANsat/PluginData/Settings.cfg set VisibleMapsActive = False
 
 - Fix visual maps for new gas giants (KSP 1.10 and up)
 - Fix bug when trying to draw biome map for planets with no biomes
