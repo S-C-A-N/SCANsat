@@ -148,6 +148,8 @@ namespace SCANsat
 		public Vector2 InstrumentsPosition = new Vector2(100, -500);
 		[Persistent]
 		public Vector2 OverlayPosition = new Vector2(600, -200);
+		[Persistent]
+		public bool VisibleMapsActive = true;
 
 		private const string filePath = "GameData/SCANsat/PluginData/Settings.cfg";
 		private const string directoryPath = "GameData/SCANsat/PluginData";

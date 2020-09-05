@@ -226,6 +226,9 @@ namespace SCANsat
 
         public Texture2D getVisualMapTexture(CelestialBody b)
         {
+            if (!SCAN_Settings_Config.Instance.VisibleMapsActive)
+                return null;
+
             if (readableScaledSpaceMaps.ContainsKey(b))
                 return readableScaledSpaceMaps[b];
 
@@ -1245,6 +1248,9 @@ namespace SCANsat
             if (!SCANmainMenuLoader.KopernicusLoaded)
                 return;
 
+            if (!SCAN_Settings_Config.Instance.VisibleMapsActive)
+                return;
+
             if (b == null)
                 return;
 
@@ -1289,6 +1295,9 @@ namespace SCANsat
         internal void unloadOnDemandScaledSpace(CelestialBody b, mapSource s)
         {
             if (!SCANmainMenuLoader.KopernicusLoaded)
+                return;
+
+            if (!SCAN_Settings_Config.Instance.VisibleMapsActive)
                 return;
 
             if (b == null)
@@ -1391,6 +1400,9 @@ namespace SCANsat
 
         internal void LoadVisualMapTexture(CelestialBody b, mapSource s)
         {
+            if (!SCAN_Settings_Config.Instance.VisibleMapsActive)
+                return;
+
             if (b == null)
                 return;
 
@@ -1448,6 +1460,9 @@ namespace SCANsat
 
         internal void UnloadVisualMapTexture(CelestialBody b, mapSource s)
         {
+            if (!SCAN_Settings_Config.Instance.VisibleMapsActive)
+                return;
+
             if (b == null)
                 return;
 
