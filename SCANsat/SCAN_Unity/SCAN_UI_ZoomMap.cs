@@ -416,12 +416,14 @@ namespace SCANsat.SCAN_Unity
 
                     if (currentResource != null)
                     {
-                        float resource = SCANUtil.ResourceOverlay(lat, lon, currentResource.Name, body, false) * 100f;
+                        float resource = SCANUtil.ResourceOverlay(lat, lon, currentResource.Name, body, SCAN_Settings_Config.Instance.BiomeLock) * 100f;
 
                         if (resource < resourceMin)
                             resourceMin = resource;
                         if (resource > resourceMax)
                             resourceMax = resource;
+                        //SCANUtil.SCANlog("Check Location: Lat: {3} x Long: {4}\nResource: {0} - Min: {1} - Max: {2}"
+                        //    , resource.ToString("F2"), resourceMin.ToString("F2"), resourceMax.ToString("F2"), lat.ToString("F2"), lon.ToString("F2") );
                     }
                     else
                     {
