@@ -686,8 +686,11 @@ namespace SCANsat.SCAN_Unity
 			double eqDistancePerDegree = circum / 360;
 			degreeOffset = 5 / eqDistancePerDegree;
 
-			Close();
-			Open();
+			if (_isVisible)
+			{
+				Close();
+				Open();
+			}
 		}
 
 		private void removeOverlay(bool immediate = false)
