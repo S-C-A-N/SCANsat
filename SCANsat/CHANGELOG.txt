@@ -1,3 +1,8 @@
+Version 20.4 - 2020-9-9
+-----------------------
+
+- Hotfix to prevent planetary overlay window from opening when it shouldn't
+
 Version 20.3 - 2020-9-4
 -----------------------
 
